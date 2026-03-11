@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading && seatingPlan" class="st-view webshop-seating-view">
-            <STNavigationBar :title="$t(`5b280bad-2167-42e6-8c4f-177ab1d76c67`)">
+            <STNavigationBar :title="$t(`%uA`)">
                 <template v-if="hasFullPermissions" #right>
                     <button class="icon edit button" type="button" @click="editSeatingPlan" />
                 </template>
@@ -9,7 +9,7 @@
 
             <main>
                 <h1 class="style-navigation-title">
-                    {{ $t('5b280bad-2167-42e6-8c4f-177ab1d76c67') }}
+                    {{ $t('%uA') }}
                 </h1>
 
                 <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">
@@ -18,7 +18,7 @@
                 </button>
 
                 <p v-if="webshop !== null && selectedProduct && duplicateSeats.length" class="error-box">
-                    {{ $t('d6972a60-97a1-4065-83f2-95638c866efd') }}: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
+                    {{ $t('%Vi') }}: {{ duplicateSeats.map(s => s.getNameString(webshop!, selectedProduct!)).join(', ') }}
                 </p>
 
                 <div v-for="section of sections" :key="section.id" class="container">

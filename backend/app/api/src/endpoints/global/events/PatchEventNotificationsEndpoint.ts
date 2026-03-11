@@ -69,7 +69,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid event',
-                        human: $t(`4275fbbe-9921-454e-852c-9c53a9803f1f`),
+                        human: $t(`%DU`),
                         field: 'events',
                     });
                 }
@@ -87,7 +87,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                         throw new SimpleError({
                             code: 'invalid_period',
                             message: 'No period found for this start date',
-                            human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
+                            human: Context.i18n.$t('%8F'),
                             field: 'startDate',
                         });
                     }
@@ -96,7 +96,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                         throw new SimpleError({
                             code: 'invalid_period',
                             message: 'Period is locked',
-                            human: Context.i18n.$t('97616151-90c3-4644-8854-e228c4f355f5'),
+                            human: Context.i18n.$t('%AM'),
                             field: 'startDate',
                         });
                     }
@@ -132,7 +132,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'EventNotification not found',
-                    human: Context.i18n.$t('a0c39573-d44e-4ac0-aaeb-f9062fa1b3ce'),
+                    human: Context.i18n.$t('%AN'),
                 });
             }
 
@@ -150,12 +150,12 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             if (!await Context.auth.canAccessEventNotification(notification, requiredPermissionLevel)) {
                 // Requires `OrganizationEventNotificationReviewer` access right for the organization
                 if (notification.status === EventNotificationStatus.Pending) {
-                    throw Context.auth.error(Context.i18n.$t('c5dcd14a-868e-4eba-a5dd-409932e44ce9'));
+                    throw Context.auth.error(Context.i18n.$t('%AO'));
                 }
                 if (notification.status === EventNotificationStatus.Accepted) {
-                    throw Context.auth.error(Context.i18n.$t('289e2f29-cdc9-4f44-92de-d7188d6563d7'));
+                    throw Context.auth.error(Context.i18n.$t('%AP'));
                 }
-                throw Context.auth.error(Context.i18n.$t('b47ce42b-ac72-451e-b871-deb07d93b5fa'));
+                throw Context.auth.error(Context.i18n.$t('%AQ'));
             }
 
             const period = await RegistrationPeriod.getByID(notification.periodId);
@@ -163,7 +163,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
-                    human: Context.i18n.$t('16a3b696-f8da-4b2b-94b7-49c85ee1c38c'),
+                    human: Context.i18n.$t('%AR'),
                 });
             }
 
@@ -171,7 +171,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'invalid_period',
                     message: 'Period is locked',
-                    human: Context.i18n.$t('43cc054d-cf2f-432b-9259-e7764dc929e3'),
+                    human: Context.i18n.$t('%AS'),
                 });
             }
 
@@ -234,7 +234,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'EventNotification not found',
-                    human: Context.i18n.$t('a0c39573-d44e-4ac0-aaeb-f9062fa1b3ce'),
+                    human: Context.i18n.$t('%AN'),
                 });
             }
 
@@ -259,7 +259,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid type',
-                human: Context.i18n.$t('4d8be2b1-559a-4c16-a76f-67a8ba85de7f'),
+                human: Context.i18n.$t('%AT'),
                 field: 'typeId',
             });
         }
@@ -287,7 +287,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid start date',
-                human: Context.i18n.$t('daa3726b-9b63-4f36-b41b-8f25d1b89cf4'),
+                human: Context.i18n.$t('%AU'),
                 field: 'startDate',
             });
         }
@@ -296,7 +296,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid end date',
-                human: Context.i18n.$t('d326210d-ecc0-421c-b38b-d12ae0209420'),
+                human: Context.i18n.$t('%AV'),
                 field: 'endDate',
             });
         }

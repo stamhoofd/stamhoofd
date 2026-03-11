@@ -31,7 +31,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             const all: UIFilterBuilder[] = [];
             all.push(
                 new StringFilterBuilder({
-                    name: $t('9c92d16b-947d-4a06-bed4-054d8223d5cb'),
+                    name: $t('%1CF'),
                     key: 'organizationId',
                     allowCreation: false,
                     wrapper: FilterWrapperMarker,
@@ -40,7 +40,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('322dd34f-a4ec-4065-be53-040725915e20'),
+                    name: $t('%7Z'),
                     options: (platform.periods ?? []).map((period) => {
                         return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
                     }),
@@ -58,7 +58,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
+                    name: $t('%7C'),
                     key: 'uri',
                     allowCreation: hasPlatformPermissions,
                     wrapper: {
@@ -69,7 +69,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('3eefa3b1-525b-464b-adef-e3b9efd9257f'),
+                    name: $t('%CX'),
                     key: 'name',
                     allowCreation: hasPlatformPermissions,
                     wrapper: {
@@ -80,7 +80,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93'),
+                    name: $t('%3G'),
                     multipleChoiceConfiguration: {
                         isSubjectPlural: true,
                     },
@@ -100,7 +100,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('0ef2bbb3-0b3c-411a-8901-a454cff1f839'),
+                    name: $t('%wI'),
                     options: platform.config.defaultAgeGroups.map((group) => {
                         return new MultipleChoiceUIFilterOption(group.name, group.id);
                     }),
@@ -116,7 +116,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('446b88a9-50f5-4c2b-a9e8-742f12034863'),
+                    name: $t('%7a'),
                     key: 'name',
                     wrapper: {
                         group: FilterWrapperMarker,

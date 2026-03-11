@@ -57,7 +57,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This version is no longer supported',
-                    human: $t(`47f56c92-fcfb-4ef4-8d0b-fb0c959fb624`),
+                    human: $t(`%vd`),
                 });
             }
             return [true, params as Params];
@@ -78,7 +78,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register members manually',
-                    human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
+                    human: $t(`%ve`),
                     statusCode: 403,
                 });
             }
@@ -93,7 +93,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to checkout as this organization for a different organization',
-                    human: $t(`eff21f4c-2d50-4553-9eb9-8a9e399f4124`),
+                    human: $t(`%1HR`),
                     statusCode: 403,
                 });
             }
@@ -118,7 +118,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'too_many_emails_period',
                     message: 'Too many e-mails limited',
-                    human: $t(`28fb7a27-9b8e-44e0-833b-44c72ab61306`),
+                    human: $t(`%vf`),
                     field: 'recipients',
                 });
             }
@@ -139,7 +139,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`3e10f812-8871-458c-ae03-c508abfd3ca5`),
+                    message: $t(`%vg`),
                 });
             }
             memberBalanceItemsStructs = balanceItemsModels.map(i => i.getStructure());
@@ -163,7 +163,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (group.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`57d57c76-4e76-4b0e-93b5-57ef8025f5ec`),
+                    message: $t(`%vh`),
                 });
             }
         }
@@ -178,7 +178,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register this member',
-                    human: $t(`7b7c4b2b-f30c-4cad-ba13-caad591bafde`),
+                    human: $t(`%vi`),
                     statusCode: 403,
                 });
             }
@@ -242,7 +242,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     throw new SimpleError({
                         code: 'forbidden',
                         message: 'No permission to register as this organization for a different organization',
-                        human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
+                        human: $t(`%ve`),
                         statusCode: 403,
                     });
                 }
@@ -278,7 +278,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (checkout.cart.isEmpty) {
             throw new SimpleError({
                 code: 'empty_data',
-                message: $t(`29d8bd5c-da83-49b9-a822-c44db58edd1a`),
+                message: $t(`%vj`),
             });
         }
 
@@ -298,7 +298,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // This never leaks information because in this case the user already has full access to the organization (asOrganizationId) or the member
                 throw new SimpleError({
                     code: 'changed_price',
-                    message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
+                    message: $t(`%vk`, { total: Formatter.price(totalPrice) }),
                 });
             }
         }
@@ -318,7 +318,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!member) {
                 throw new SimpleError({
                     code: 'invalid_member',
-                    message: $t(`bded79ec-0c69-47b1-9944-b9f3821b566e`),
+                    message: $t(`%vm`),
                 });
             }
 
@@ -326,7 +326,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!group) {
                 throw new SimpleError({
                     code: 'invalid_member',
-                    message: $t(`c4896202-dd3b-4445-a530-3fed231259c2`),
+                    message: $t(`%vn`),
                 });
             }
 
@@ -336,7 +336,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     throw new SimpleError({
                         code: 'forbidden',
                         message: 'No permission to register in this group',
-                        human: $t('36e8f895-91df-4c88-88e7-d4f0e9d1b5bf', { group: group.settings.name.toString() }),
+                        human: $t('%C9', { group: group.settings.name.toString() }),
                         statusCode: 403,
                     });
                 }
@@ -359,7 +359,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if (existingRegistration.registeredAt !== null && existingRegistration.deactivatedAt === null) {
                     throw new SimpleError({
                         code: 'already_registered',
-                        message: $t(`04d77a26-25c2-4a3e-a268-98bea9df45a2`, { member: member.firstName, group: group.settings.name }),
+                        message: $t(`%vo`, { member: member.firstName, group: group.settings.name }),
                     });
                 }
             }
@@ -469,7 +469,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'Permission denied: you are not allowed to delete registrations',
-                    human: $t(`d47bdfdd-5940-4818-a664-1cd072294a26`),
+                    human: $t(`%vr`),
                     statusCode: 403,
                 });
             }
@@ -478,7 +478,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`282a7491-d129-4e43-9a14-e55c72ef5c5d`),
+                    message: $t(`%vs`),
                 });
             }
 
@@ -486,7 +486,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to delete this registration',
-                    human: $t(`9b772fd5-a36e-4997-85fa-251bb3a97a0a`),
+                    human: $t(`%vt`),
                     statusCode: 403,
                 });
             }
@@ -495,7 +495,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Cannot delete inactive registration',
-                    human: $t(`a0f43131-c880-4a8e-98e3-bf78df27336c`),
+                    human: $t(`%vu`),
                 });
             }
 

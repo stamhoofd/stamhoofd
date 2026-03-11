@@ -444,22 +444,22 @@ export class Product extends AutoEncoder {
     getRemainingStockText(stock: number): string {
         if (stock === 1) {
             if (this.type === ProductType.Ticket) {
-                return $t(`ebdf6e40-7fb8-4936-b5cf-34019be1181f`);
+                return $t(`%t9`);
             }
             if (this.type === ProductType.Person) {
-                return $t(`c7f082b3-5d38-4c53-88d3-a8d0fd1eaa39`);
+                return $t(`%tA`);
             }
-            return $t(`8045db66-859a-4b4c-899f-d2a0d26b15dc`);
+            return $t(`%tB`);
         }
 
         if (this.type === ProductType.Ticket) {
-            return stock + ' ' + $t(`390d335e-98c4-4c60-92fc-f1616096c875`);
+            return stock + ' ' + $t(`%m`);
         }
 
         if (this.type === ProductType.Person) {
-            return stock + ' ' + $t(`414f837c-b446-41c4-b522-3e6b473d5b5d`);
+            return stock + ' ' + $t(`%12R`);
         }
-        return stock + ' ' + $t(`3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a`);
+        return stock + ' ' + $t(`%12S`);
     }
 
     get stockText(): string | null {
@@ -468,34 +468,34 @@ export class Product extends AutoEncoder {
         }
 
         if (this.remainingStockWithOptions === 0) {
-            return $t(`0100521c-b38e-4925-9484-44d44f3dfa09`);
+            return $t(`%12p`);
         }
 
-        return $t(`07f945bf-649b-4138-a91e-9306a9a96955`) + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
+        return $t(`%Un`) + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
     }
 
     get isEnabledTextLong() {
         if (this.hidden) {
-            return $t(`6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5`);
+            return $t(`%UC`);
         }
 
         if (!this.enabled) {
-            return $t(`11b3bb72-0edb-401e-9c60-47fbb2d132fc`);
+            return $t(`%Tk`);
         }
 
         if (this.enableInFuture && this.enableAfter) {
             if (this.disableAfter) {
-                return $t(`84df66e6-0c41-4116-bdca-ebfe6c052f2c`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.dateTime(this.disableAfter);
+                return $t(`%tC`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`%10C`) + ' ' + Formatter.dateTime(this.disableAfter);
             }
-            return $t(`84df66e6-0c41-4116-bdca-ebfe6c052f2c`) + ' ' + Formatter.dateTime(this.enableAfter);
+            return $t(`%tC`) + ' ' + Formatter.dateTime(this.enableAfter);
         }
 
         if (!this.isEnabled) {
-            return $t(`11b3bb72-0edb-401e-9c60-47fbb2d132fc`);
+            return $t(`%Tk`);
         }
 
         if (this.disableAfter) {
-            return $t(`e7fb630e-23d6-4947-baee-dfb6434f1132`) + ' ' + Formatter.dateTime(this.disableAfter);
+            return $t(`%tD`) + ' ' + Formatter.dateTime(this.disableAfter);
         }
     }
 
@@ -507,7 +507,7 @@ export class Product extends AutoEncoder {
         if (this.disableAfter) {
             const diff = this.disableAfter.getTime() - new Date().getTime();
             if (diff < 24 * 60 * 60 * 1000) {
-                return $t(`e7fb630e-23d6-4947-baee-dfb6434f1132`) + ' ' + Formatter.time(this.disableAfter);
+                return $t(`%tD`) + ' ' + Formatter.time(this.disableAfter);
             }
         }
         return null;

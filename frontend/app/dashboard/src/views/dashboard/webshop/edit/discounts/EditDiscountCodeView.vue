@@ -1,31 +1,31 @@
 <template>
-    <SaveView :title="isNew ? $t(`cc20edc8-b323-4627-9940-a9cc23b5fd8d`) : $t(`22797257-f650-4609-96f8-3a10f7e687c7`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%u2`) : $t(`%u3`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('cc20edc8-b323-4627-9940-a9cc23b5fd8d') }}
+            {{ $t('%u2') }}
         </h1>
         <h1 v-else>
-            {{ $t('22797257-f650-4609-96f8-3a10f7e687c7') }}
+            {{ $t('%u3') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="code" :error-box="errors.errorBox" :title="$t(`55a6f957-af81-40b3-8c83-2096f22044c8`)">
-            <input v-model="code" class="input" type="text" autocomplete="off" :placeholder="$t(`93258b4f-4bbd-40bb-a0d4-7e1112f7aeaf`)" @blur="cleanCode">
+        <STInputBox error-fields="code" :error-box="errors.errorBox" :title="$t(`%11`)">
+            <input v-model="code" class="input" type="text" autocomplete="off" :placeholder="$t(`%S7`)" @blur="cleanCode">
         </STInputBox>
         <p v-if="!code" class="style-description-small">
-            {{ $t('fe53474b-5d28-4a53-8478-0d32bc415102') }} <button type="button" class="inline-link" @click="generateCode()">
-                {{ $t('88f0ad0c-254c-4496-829a-92c2ef9d7272') }}
+            {{ $t('%Rz') }} <button type="button" class="inline-link" @click="generateCode()">
+                {{ $t('%S0') }}
             </button>
         </p>
         <p v-else class="style-description-small">
-            {{ $t('072a6888-a4a5-452a-9544-7e376db90540') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
+            {{ $t('%S1') }} <span v-copyable="'https://'+link" class="style-copyable style-inline-code">{{ link }}</span>
         </p>
 
-        <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-            <textarea v-model="description" class="input" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
+        <STInputBox class="max" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)">
+            <textarea v-model="description" class="input" autocomplete="off" :placeholder="$t(`%14p`)" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('9d9a920b-4ab2-4ba2-9c17-58dc2d7fff2b') }}
+            {{ $t('%S2') }}
         </p>
 
         <STList>
@@ -35,7 +35,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('f884e374-a539-4c27-ad5f-18b890e97141', {count: patchedDiscountCode.usageCount.toString()}) }}
+                    {{ $t('%S3', {count: patchedDiscountCode.usageCount.toString()}) }}
                 </h3>
 
                 <div v-if="useMaximumUsage" class="split-inputs option" @click.stop.prevent>
@@ -47,9 +47,9 @@
         </STList>
 
         <hr><h2>
-            {{ $t('2173a56e-ee80-4e8d-9551-20f061fff7b9') }}
+            {{ $t('%Pm') }}
         </h2>
-        <p>{{ $t('3995a793-8451-4e7e-a74d-9a66d8114d9c') }}</p>
+        <p>{{ $t('%S4') }}</p>
 
         <STList v-if="patchedDiscountCode.discounts.length">
             <STListItem v-for="discount of patchedDiscountCode.discounts" :key="discount.id" class="right-description right-stack" :selectable="true" @click="editDiscount(discount)">
@@ -70,18 +70,18 @@
         <p>
             <button class="button text" type="button" @click="addDiscount">
                 <span class="icon add" />
-                <span>{{ $t('46681ff6-bc40-4da6-9c3f-f8f335d72633') }}</span>
+                <span>{{ $t('%S5') }}</span>
             </button>
         </p>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('ca70e639-c7f8-40d7-9054-9c01711d3f5b') }}
+                {{ $t('%S6') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

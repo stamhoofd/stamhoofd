@@ -1,11 +1,11 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar :title="$t(`05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9`)" />
+            <STNavigationBar :title="$t(`%K5`)" />
 
             <main class="center">
-                <h1>{{ $t('05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9') }}</h1>
-                <p>{{ $t('ac3b2a14-e029-404c-9fe1-2aab4279a3ac') }}</p>
+                <h1>{{ $t('%K5') }}</h1>
+                <p>{{ $t('%30') }}</p>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Responsibilities)">
@@ -13,10 +13,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/admin-role.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('104d3831-38fb-4e1e-89f2-cbd5d538faa3') }}
+                            {{ $t('%YW') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('dcfeea1e-7841-4dbd-a187-84aed37f0790') }}
+                            {{ $t('%YX') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

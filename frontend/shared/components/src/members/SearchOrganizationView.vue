@@ -1,6 +1,6 @@
 <template>
     <div class="st-view search-organization-view">
-        <STNavigationBar :title="$t('01e2b860-7045-4a0c-84ca-2303346d14b2')" />
+        <STNavigationBar :title="$t('%KC')" />
 
         <main>
             <h1>{{ title }}</h1>
@@ -8,7 +8,7 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`89b3f7fe-d2b2-4194-a971-886b0665a0df`)" data-testid="organization-search-input">
+                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%3u`)" data-testid="organization-search-input">
             </form>
 
             <Spinner v-if="loadingResults" class="gray center" />
@@ -26,7 +26,7 @@
                 </STListItem>
             </STList>
             <p v-if="!loadingResults && results.length === 0 && query" class="info-box">
-                {{ $t('735ec53c-5b23-469a-9365-d1216e1c739b') }}
+                {{ $t('%5H') }}
             </p>
         </main>
     </div>
@@ -48,7 +48,7 @@ const props = withDefaults(
         description?: string;
         selectOrganization: (organization: Organization, navigation: NavigationActions) => Promise<void> | void;
     }>(), {
-        title: () => $t(`01e2b860-7045-4a0c-84ca-2303346d14b2`),
+        title: () => $t(`%KC`),
         description: '',
     },
 );

@@ -2,7 +2,7 @@
     <SaveView :title="title" :disabled="!hasChanges" :save-text="$saveText" @save="save">
         <h1>{{ title }}<span v-show="$selectedTags.size > 0" class="selection-count">{{ " (" + $selectedTags.size + ")" }}</span></h1>
         <form class="search-box input-icon-container icon search gray" @submit.prevent>
-            <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`8eaadab8-a8c2-4c8d-8119-e374ca0180cf`)">
+            <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%gH`)">
         </form>
         <hr><STList>
             <STListItem v-for="tag in $searchResult" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
@@ -17,12 +17,12 @@
             </STListItem>
         </STList>
         <p v-if="!$searchResult.length" class="style-description-large">
-            {{ $t('6944b7fa-f1c3-42ed-bd86-f43940baa745') }}
+            {{ $t('%gF') }}
         </p>
 
         <TransitionFade>
             <div v-if="$selectedOutsideSearch.length" class="container">
-                <hr><h2>{{ $t('8ca17e18-aaa5-46d4-8c2b-d57bf805f7d3') }}</h2>
+                <hr><h2>{{ $t('%gG') }}</h2>
                 <STList :draggable="false">
                     <STListItem v-for="tag in $selectedOutsideSearch" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                         <template #left>
@@ -66,10 +66,10 @@ const props = withDefaults(
 
 const platform = usePlatform();
 
-const title = $t(`4d08ffe7-8296-46e8-9372-e21cedcd73ff`);
+const title = $t(`%10U`);
 const $saveText = computed(() => {
-    if (!props.tagIds.length) return $t(`aaf91fd2-250b-4f2e-88a1-21af5747c760`);
-    return $t(`30ea6c91-c638-45f7-9042-13247195743d`);
+    if (!props.tagIds.length) return $t(`%10V`);
+    return $t(`%10W`);
 });
 
 const hasChanges = computed(() => {
@@ -131,13 +131,13 @@ async function save() {
     const deletedTags = initialSelection.filter(tag => !allTags.includes(tag));
 
     if (deletedTags.length) {
-        let confirmText = $t(`d3e9fd5b-9abc-4473-97e7-0c7734c2f14d`);
+        let confirmText = $t(`%10X`);
 
         if (allTags.length) {
             const deleteCount = deletedTags.length;
             const selectionCount = allTags.length;
             const deletedTagsString = deletedTags.map(t => t.name).join(', ');
-            const selectionText = selectionCount === 1 ? $t(`7b73af21-99ab-4b47-8e50-e3930ebc3058`) : `Er zijn ${selectionCount} tags geselecteerd.`;
+            const selectionText = selectionCount === 1 ? $t(`%10Y`) : `Er zijn ${selectionCount} tags geselecteerd.`;
 
             if (deletedTagsString.length > 100) {
                 confirmText = `${selectionText} Ben je zeker dat je ${deleteCount} tags wilt verwijderen?`;
@@ -147,7 +147,7 @@ async function save() {
             }
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, $t(`1ae8cbc7-9ef5-43db-b9a3-0117dfa43be1`));
+        const isConfirm = await CenteredMessage.confirm(confirmText, $t(`%wo`));
         if (!isConfirm) return false;
     }
 

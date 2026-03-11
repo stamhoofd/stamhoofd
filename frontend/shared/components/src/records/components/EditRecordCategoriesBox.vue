@@ -9,7 +9,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>{{ $t('51f9909d-c91f-455d-8cd4-ee0a1897e59d') }}</span>
+                <span>{{ $t('%10l') }}</span>
             </button>
         </p>
     </div>

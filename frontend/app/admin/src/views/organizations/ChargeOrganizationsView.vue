@@ -18,13 +18,13 @@ defineProps<{
 
 function getDescription({ count }: { count: number }) {
     if (count === 1) {
-        return $t('51c27c5e-c2be-441b-a571-7bf573ee6848');
+        return $t('%6l');
     }
 
-    return $t('88119ffc-b692-4222-8217-75a9fa64f675', { count: count.toString() });
+    return $t('%6k', { count: count.toString() });
 }
 
 function getConfirmationText({ total, count }: { total: string; count: number | null }) {
-    return $t('9305016a-babf-4606-af6c-e8ef9f2ba91e', { total, count: count === null ? '?' : count.toString() });
+    return $t('%2h', { total, count: count === null ? '?' : count.toString() });
 }
 </script>

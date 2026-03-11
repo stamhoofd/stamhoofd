@@ -48,7 +48,7 @@ const props = defineProps<{
 const organization = useOrganization();
 
 const title = computed(() => {
-    return props.email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
+    return props.email.replacedSubject || $t('%1D1');
 });
 
 const selectedRecipientId = ref<string | null>(null);

@@ -2,13 +2,13 @@
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
             <p v-if="isLimitedGroup" class="style-description-block">
-                {{ $t('b91c82a6-67c0-451f-867c-8a3468d6381c') }}
+                {{ $t('%1HO') }}
             </p>
             <p v-if="app === 'admin' && !group" class="style-description-block">
-                {{ $t('b652957b-2037-4f9e-8b77-169b3e1b9506') }}
+                {{ $t('%1GG') }}
             </p>
             <template #empty>
-                {{ $t('6b029bcd-5605-42c5-a5db-38f40ab70214') }}
+                {{ $t('%173') }}
             </template>
         </ModernTableView>
     </LoadingViewTransition>
@@ -63,7 +63,7 @@ const title = computed(() => {
         return props.group.settings.name.toString();
     }
 
-    return $t(`3f4c9896-7f02-4b49-ad29-2d363a8af71f`);
+    return $t(`%1EI`);
 });
 
 const estimatedRows = computed(() => {
@@ -326,7 +326,7 @@ const isLimitedGroup = computed(() => {
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
-        name: $t(`162644a1-aee8-497b-b837-04abb995047f`),
+        name: $t(`%zh`),
         icon: 'add',
         priority: 0,
         groupIndex: 1,

@@ -53,15 +53,15 @@ export function minimumPermissionLevel(...levels: PermissionLevel[]): Permission
 export function getPermissionLevelName(level: PermissionLevel, resourceType: PermissionsResourceType | null = null): string {
     if (resourceType === PermissionsResourceType.Senders) {
         switch (level) {
-            case PermissionLevel.Read: return $t(`1b2bf97a-f263-40f6-9246-4f0cb326f5ff`);
-            case PermissionLevel.Write: return $t(`c77d1dfb-a556-4373-9643-5ebe22dc7c21`);
+            case PermissionLevel.Read: return $t(`%1DG`);
+            case PermissionLevel.Write: return $t(`%1DH`);
         }
     }
     switch (level) {
-        case PermissionLevel.None: return $t(`e7aebbf1-8a3a-4288-932f-1678c7bb16ca`);
-        case PermissionLevel.Read: return $t(`7afc105f-d34d-4b93-9b33-a6cc08c818ee`);
-        case PermissionLevel.Write: return $t(`ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad`);
-        case PermissionLevel.Full: return $t(`c2296305-99a9-497a-aed3-7bb3d2293ce8`);
+        case PermissionLevel.None: return $t(`%n0`);
+        case PermissionLevel.Read: return $t(`%jO`);
+        case PermissionLevel.Write: return $t(`%f9`);
+        case PermissionLevel.Full: return $t(`%Z1`);
         default: {
             const l: never = level; // will throw compile error if new levels are added without editing this method
             throw new Error('Unknown permission level ' + l);

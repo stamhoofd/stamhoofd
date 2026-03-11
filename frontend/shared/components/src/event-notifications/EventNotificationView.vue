@@ -17,13 +17,13 @@
             <STList class="info">
                 <STListItem :selectable="notification.events.length === 1" @click="isReviewer && notification.events.length === 1 && openEvent(null)">
                     <h3 class="style-definition-label">
-                        {{ notification.events.length === 1 ? $t('a7db7ad2-4106-4cf0-a8fc-1e68b0a5bf24') : $t('60231186-b00f-4d07-a5c7-4a905467e254') }}
+                        {{ notification.events.length === 1 ? $t('%B9') : $t('%uB') }}
                     </h3>
                     <p v-for="event of notification.events" :key="event.id" class="style-definition-text" @click="isReviewer && notification.events.length !== 1 && openEvent(event)">
                         <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
                     </p>
                     <p v-if="notification.events.length === 0" class="style-definition-text style-em">
-                        {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
+                        {{ $t('%1FW') }}
                     </p>
 
                     <template v-if="isReviewer && notification.events.length === 1" #right>
@@ -33,7 +33,7 @@
 
                 <STListItem v-if="app === 'admin'">
                     <h3 class="style-definition-label">
-                        {{ $t('55e86a73-d637-4ca0-82ac-abd27d60705f') }}
+                        {{ $t('%cL') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ notification.organization.name }} ({{ notification.organization.uri }})</span>
@@ -42,7 +42,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('0ca73738-0649-4dbd-b5d7-b54f03140372') }}
+                        {{ $t('%ag') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(formatDateRange(notification.startDate, notification.endDate, undefined, false)) }}</span>
@@ -51,7 +51,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
+                        {{ $t('%1A') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
@@ -62,13 +62,13 @@
                     </p>
 
                     <p v-if="notification.submittedBy && notification.submittedAt" class="style-description-small">
-                        {{ $t('46e61090-1188-4085-8995-69aef85af678', {name: notification.submittedBy.name, date: formatDate(notification.submittedAt)}) }}
+                        {{ $t('%Ax', {name: notification.submittedBy.name, date: formatDate(notification.submittedAt)}) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="notification.feedbackText && notification.status !== EventNotificationStatus.Accepted" :selectable="isReviewer" @click="isReviewer && editFeedbackText()">
                     <h3 class="style-definition-label">
-                        {{ $t('12b2ce84-6297-49a2-a9c4-d5619b764313') }}
+                        {{ $t('%YT') }}
                     </h3>
                     <p class="style-definition-text pre-wrap style-em" v-text="notification.feedbackText" />
 
@@ -79,19 +79,19 @@
 
                 <STListItem v-if="isReviewer && notification.status !== EventNotificationStatus.Accepted && notification.acceptedRecordAnswers.size > 0 && diffList.length">
                     <h3 class="style-definition-label">
-                        {{ $t('355512bd-902c-4193-8aa0-81e5cb81284b') }}
+                        {{ $t('%Ca') }}
                     </h3>
                     <PatchListText :items="diffList" />
 
                     <template #right>
-                        <button class="button icon eye gray" type="button" :v-tooltip="$t('4f634d27-7fa3-4e91-9ae1-dbfdafd2baa4')" @click="showOriginalAnswers" />
+                        <button class="button icon eye gray" type="button" :v-tooltip="$t('%ah')" @click="showOriginalAnswers" />
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="notification.status === EventNotificationStatus.Draft">
-                <hr><h2>{{ $t('120012bf-f877-46de-b6d9-55ea46f3f2ce') }}</h2>
-                <p>{{ $t('025be814-a557-46be-be79-a1cc5406a5ed') }}</p>
+                <hr><h2>{{ $t('%zM') }}</h2>
+                <p>{{ $t('%ai') }}</p>
 
                 <STList>
                     <STListItem v-for="category of recordCategories" :key="category.id" :selectable="isEnabled(category)" :disabled="!isEnabled(category)" @click="editRecordCategory(category)">
@@ -106,13 +106,13 @@
                             {{ category.name }}
                         </h3>
                         <p v-if="getRecordCategoryProgress(category) === 0" class="style-description">
-                            {{ $t('212cf5a4-424b-477e-9007-9a9d789f8c08') }}
+                            {{ $t('%aj') }}
                         </p>
                         <p v-else-if="getRecordCategoryProgress(category) === 1" class="style-description">
-                            {{ $t('7418aed7-61ec-4553-ba8c-301573d32a72') }}
+                            {{ $t('%ak') }}
                         </p>
                         <p v-else class="style-description">
-                            {{ $t('21b3891d-7c0e-49ca-ae35-d77d54e9f0c3') }}
+                            {{ $t('%Ni') }}
                         </p>
 
                         <template #right>
@@ -131,7 +131,7 @@
             </template>
 
             <div v-if="notification.status === EventNotificationStatus.Pending && isComplete && isReviewer" class="container">
-                <hr><h2>{{ $t('00b790ad-2238-4a6a-b7cb-36a60fac1e9f') }}</h2>
+                <hr><h2>{{ $t('%al') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" element-name="button" @click="doAccept">
@@ -143,10 +143,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('b0657304-772f-4334-be01-da82a190167a') }}
+                            {{ $t('%am') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('4a3e388c-32f3-4f76-be22-9eb435ebb9f9') }}
+                            {{ $t('%an') }}
                         </p>
 
                         <template #right>
@@ -163,10 +163,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('1b19fc16-6146-42c9-b42e-471f1f18a452') }}
+                            {{ $t('%ao') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('a7ed4fc3-5f80-4621-afcb-89002b686cef') }}
+                            {{ $t('%ap') }}
                         </p>
 
                         <template #right>
@@ -184,10 +184,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('7c422572-6970-460c-8055-af2935f9a76b') }}
+                            {{ $t('%aq') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('435950cd-0c43-4f39-9547-c31189725873') }}
+                            {{ $t('%ar') }}
                         </p>
 
                         <template #right>
@@ -205,8 +205,8 @@
                         <span v-if="notification.status === EventNotificationStatus.Rejected || notification.status === EventNotificationStatus.PartiallyAccepted" class="icon retry" />
                         <span v-else class="icon success" />
 
-                        <span v-if="notification.status === EventNotificationStatus.Rejected || notification.status === EventNotificationStatus.PartiallyAccepted">{{ $t('b72d05c4-9e64-4254-9580-7123bf7479c3') }}</span>
-                        <span v-else>{{ $t('0b8d1425-4240-4fa8-8150-9a7824ef1c7d') }}</span>
+                        <span v-if="notification.status === EventNotificationStatus.Rejected || notification.status === EventNotificationStatus.PartiallyAccepted">{{ $t('%as') }}</span>
+                        <span v-else>{{ $t('%at') }}</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -346,7 +346,7 @@ async function openEvent(event: Event | null) {
 }
 
 async function doSubmit() {
-    if (!await CenteredMessage.confirm($t('ec0978f8-95bc-44c9-a906-ceaf6fd55baf'), $t('6b0ddff7-226f-4616-a0da-a280d0ccc2ff'), $t('754f6578-9fee-44f3-931c-dc00a34d7871'), undefined, false)) {
+    if (!await CenteredMessage.confirm($t('%BA'), $t('%BB'), $t('%BC'), undefined, false)) {
         return;
     }
     try {
@@ -362,17 +362,17 @@ async function doAcceptPartially() {
     await present({
         components: [
             new ComponentWithProperties(InputSheet, {
-                title: $t('15407414-de94-40bf-8a62-c5f37613ed39'),
-                description: $t('153fcd92-0ce3-4465-b9ce-b2e68c496a9a'),
-                saveText: $t('15407414-de94-40bf-8a62-c5f37613ed39'),
-                placeholder: $t('12b2ce84-6297-49a2-a9c4-d5619b764313'),
+                title: $t('%Cb'),
+                description: $t('%Cc'),
+                saveText: $t('%Cb'),
+                placeholder: $t('%YT'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,
                 saveHandler: async (value: string) => {
                     if (!value) {
                         throw new SimpleError({
                             code: 'invalid_field',
-                            message: $t('63e45277-76d4-4971-909b-1c86326b609f'),
+                            message: $t('%BH'),
                         });
                     }
                     await save(EventNotification.patch({
@@ -387,7 +387,7 @@ async function doAcceptPartially() {
 }
 
 async function doAccept() {
-    if (!await CenteredMessage.confirm($t('f48e7518-0f1d-4610-a967-82d146a47f5b'), $t('eacd1cfa-a04b-485b-bd8d-41c1518e5306'), $t('754f6578-9fee-44f3-931c-dc00a34d7871'), undefined, false)) {
+    if (!await CenteredMessage.confirm($t('%BD'), $t('%BE'), $t('%BC'), undefined, false)) {
         return;
     }
     try {
@@ -404,17 +404,17 @@ async function doReject() {
     await present({
         components: [
             new ComponentWithProperties(InputSheet, {
-                title: $t('f1bebbb8-20dc-4e6c-886d-68f080f71a1e'),
-                description: $t('2d9128d3-a428-4ba6-9b12-6c2f00ca7c31'),
-                saveText: $t('7c422572-6970-460c-8055-af2935f9a76b'),
-                placeholder: $t('f1bebbb8-20dc-4e6c-886d-68f080f71a1e'),
+                title: $t('%BF'),
+                description: $t('%BG'),
+                saveText: $t('%aq'),
+                placeholder: $t('%BF'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,
                 saveHandler: async (value: string) => {
                     if (!value) {
                         throw new SimpleError({
                             code: 'invalid_field',
-                            message: $t('63e45277-76d4-4971-909b-1c86326b609f'),
+                            message: $t('%BH'),
                         });
                     }
                     await save(EventNotification.patch({
@@ -432,10 +432,10 @@ async function editFeedbackText() {
     await present({
         components: [
             new ComponentWithProperties(InputSheet, {
-                title: $t('938b1f40-9563-4a26-8d87-05774839b5a7'),
-                description: $t('2d9128d3-a428-4ba6-9b12-6c2f00ca7c31'),
-                saveText: $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d'),
-                placeholder: $t('12b2ce84-6297-49a2-a9c4-d5619b764313'),
+                title: $t('%BI'),
+                description: $t('%BG'),
+                saveText: $t('%v7'),
+                placeholder: $t('%YT'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,
                 saveHandler: async (value: string) => {
@@ -461,7 +461,7 @@ async function showOriginalAnswers() {
 }
 
 async function doDelete() {
-    if (!await CenteredMessage.confirm($t(`663a1f20-3b21-4e8d-bb21-530918648af1`), $t(`201437e3-f779-47b6-b4de-a0fa00f3863e`), $t(`988f9fce-a36a-44b5-8df6-5d9ff9eaa694`))) {
+    if (!await CenteredMessage.confirm($t(`%vS`), $t(`%55`), $t(`%vT`))) {
         return;
     }
     try {
@@ -474,7 +474,7 @@ async function doDelete() {
 }
 
 async function doDraft() {
-    if (!await CenteredMessage.confirm($t(`3074ee0a-4531-47d5-a167-d058d8fc2c96`), $t(`21e75f22-0079-4a82-bc0e-b8ecf877d39c`))) {
+    if (!await CenteredMessage.confirm($t(`%vU`), $t(`%vV`))) {
         return;
     }
     try {
@@ -491,7 +491,7 @@ async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`13daa284-503c-4841-a2ec-16d89ab38cdc`),
+                name: $t(`%vW`),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
@@ -532,7 +532,7 @@ async function showContextMenu(event: MouseEvent) {
                 ]),
             }),
             new ContextMenuItem({
-                name: $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`),
+                name: $t(`%CJ`),
                 icon: 'trash',
                 action: async () => {
                     await doDelete();

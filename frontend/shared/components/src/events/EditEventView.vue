@@ -10,11 +10,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" error-fields="name" :error-box="errors.errorBox">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" autocomplete="off" enterkeyhint="next">
+            <STInputBox :title="$t('%Gq')" error-fields="name" :error-box="errors.errorBox">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%Gq')" autocomplete="off" enterkeyhint="next">
             </STInputBox>
 
-            <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+            <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="typeId">
                     <option v-for="t of platform.config.eventTypes" :key="t.id" :value="t.id">
                         {{ t.name }}
@@ -26,32 +26,32 @@
             {{ type.description }}
         </p>
 
-        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="meta.description" :error-box="errors.errorBox" class="max">
-            <WYSIWYGTextInput v-model="description" :placeholder="$t('2cb56415-5e16-4a75-9012-8971be8dbc6a')" />
+        <STInputBox :title="$t('%6o')" error-fields="meta.description" :error-box="errors.errorBox" class="max">
+            <WYSIWYGTextInput v-model="description" :placeholder="$t('%7Q')" />
         </STInputBox>
 
-        <hr><h2>{{ $t('112b7686-dffc-4ae9-9706-e3efcd34898f') }}</h2>
+        <hr><h2>{{ $t('%7R') }}</h2>
 
         <Checkbox v-if="!type || (type.maximumDays !== 1 && (type.minimumDays ?? 1) <= 1)" v-model="multipleDays">
-            {{ $t('f001f5c4-f3ea-46c0-bd0c-0b30ad8098f5') }}
+            {{ $t('%7S') }}
         </Checkbox>
 
         <div class="split-inputs">
-            <STInputBox :title="multipleDays ? $t(`300d2935-b578-48cc-b58e-1c0446a68d59`) : $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`)" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="multipleDays ? $t(`%7e`) : $t(`%7R`)" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
-            <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" />
+            <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('%5M')" :validator="errors.validator" />
         </div>
 
         <div class="split-inputs">
-            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`3c90169c-9776-4d40-bda0-dba27a5bad69`)">
+            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%wB`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
-            <TimeInput v-else v-model="startDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" />
-            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`68860bdb-dad1-40d5-9130-6219c83fe977`)" />
+            <TimeInput v-else v-model="startDate" :title="$t('%5M')" :validator="errors.validator" />
+            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`%ze`)" />
         </div>
 
-        <hr><h2>{{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}</h2>
+        <hr><h2>{{ $t('%1CP') }}</h2>
 
         <STList>
             <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
@@ -60,7 +60,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('d756277c-4655-4e92-afcc-ae3c9f615190') }}
+                    {{ $t('%7T') }}
                 </h3>
             </STListItem>
 
@@ -70,17 +70,17 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('987c7ee6-8ee2-41d7-823e-db0ff590ea7d') }}
+                    {{ $t('%7U') }}
                 </h3>
             </STListItem>
         </STList>
 
         <template v-if="canSetNationalActivity && externalOrganization">
-            <hr><h2>{{ $t('e4d49374-df2a-4fd7-863e-4a577e285cdc') }}</h2>
-            <p>{{ $t('f675d723-b1b9-4abd-9e7c-0459c24e474b') }}</p>
+            <hr><h2>{{ $t('%16T') }}</h2>
+            <p>{{ $t('%16U') }}</p>
 
             <STList>
-                <STListItem v-if="externalOrganization" :selectable="!organization" @click="organization ? undefined : chooseOrganizer($t('ab00e79e-c7cb-4595-9119-4fb5ca366dd1'), canSelectOrganization)">
+                <STListItem v-if="externalOrganization" :selectable="!organization" @click="organization ? undefined : chooseOrganizer($t('%16V'), canSelectOrganization)">
                     <template #left>
                         <OrganizationAvatar :organization="externalOrganization" />
                     </template>
@@ -98,69 +98,69 @@
 
         <JumpToContainer :visible="isNationalActivity && organizationTagIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('2faa00db-5af7-4556-ac49-5b15abf2182f') }}</div>
+                <div>{{ $t('%ae') }}</div>
                 <div>
                     <button v-if="!hasTagRestrictions" type="button" class="button icon trash" @click="deleteTagRestriction" />
                 </div>
             </h2>
-            <p>{{ $t('7335fc4d-f993-415c-976b-f32af724907e') }}</p>
+            <p>{{ $t('%af') }}</p>
 
             <TagIdsInput v-model="organizationTagIds" :is-tag-enabled-predicate="isTagEnabledPredicate" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('24682ea8-b3c6-4372-9a63-5385520888ff') }}</div>
+                <div>{{ $t('%3M') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteDefaultAgeGroupRestriction" />
                 </div>
             </h2>
 
-            <p>{{ $t('712c3597-d7c9-459c-9e92-ff32de445642') }}</p>
+            <p>{{ $t('%7I') }}</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="groups !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('5271f407-ec58-4802-ac69-7f357bc3cfc7') }}</div>
+                <div>{{ $t('%P4') }}</div>
                 <div>
                     <button v-if="!hasGroupRestrictions" type="button" class="button icon trash" @click="deleteGroupsRestriction" />
                 </div>
             </h2>
 
-            <p>{{ $t('248d7837-f7f1-48f9-a151-96e936cda4fc') }}</p>
+            <p>{{ $t('%7J') }}</p>
 
             <p v-if="!organization || !externalOrganization || externalOrganization?.id !== organization.id" class="info-box">
-                {{ $t('fb25250b-2b50-4fb4-babc-020b9fe80dfc') }}
+                {{ $t('%7K') }}
             </p>
             <GroupsInput v-else v-model="groups" :date="startDate" :is-group-enabled-operator="isGroupEnabledOperator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="!!location">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}</div>
+                <div>{{ $t('%TW') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteLocation" />
                 </div>
             </h2>
 
-            <STInputBox :title="$t('3db5bf3f-3eb5-4cfc-ba9b-429fab43c540')" error-fields="location.name" :error-box="errors.errorBox">
-                <input ref="firstInput" v-model="locationName" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`e32f1f4e-e834-47a1-a7cb-a807170b6871`)">
+            <STInputBox :title="$t('%7L')" error-fields="location.name" :error-box="errors.errorBox">
+                <input ref="firstInput" v-model="locationName" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%U5`)">
             </STInputBox>
 
-            <AddressInput v-model="locationAddress" :nullable="true" :required="isLocationRequired" :validator="errors.validator" :title="$t(`5e85d1ac-98a4-4cfb-a0ce-f06e427d73b3`)" />
+            <AddressInput v-model="locationAddress" :nullable="true" :required="isLocationRequired" :validator="errors.validator" :title="$t(`%U6`)" />
         </JumpToContainer>
 
         <JumpToContainer :visible="!!coverPhoto">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('17d579e1-518b-4dd4-98d8-f8184b7287be') }}</div>
+                <div>{{ $t('%7M') }}</div>
                 <div>
                     <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
                         <span class="icon trash" />
-                        <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                        <span>{{ $t('%CJ') }}</span>
                     </button>
-                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
+                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`%He`) : $t(`%Hf`)" :resolutions="resolutions" />
                 </div>
             </h2>
 
@@ -169,20 +169,20 @@
 
         <JumpToContainer :visible="forceShowAge || minAge !== null || maxAge !== null">
             <hr>
-            <h2>{{ $t('3bd7031d-eb6b-4efc-97f7-53adfcff054a') }}</h2>
+            <h2>{{ $t('%1Fv') }}</h2>
 
             <div class="split-inputs">
-                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
-                    <AgeInput v-model="minAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
+                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%Hm`)">
+                    <AgeInput v-model="minAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`%4a`)" />
                 </STInputBox>
 
-                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`c0cab705-c129-4a72-8860-c33ef91ec630`)">
-                    <AgeInput v-model="maxAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
+                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%Hn`)">
+                    <AgeInput v-model="maxAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`%4a`)" />
                 </STInputBox>
             </div>
             <p class="style-description-small">
-                *{{ $t('912639c7-e301-463e-b2d3-16b912848330') }}{{ event.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
-                    {{ $t('49030aa4-f77c-4db5-b976-2125675aae66') }}
+                *{{ $t('%cX') }}{{ event.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                    {{ $t('%cY') }}
                 </template>
             </p>
         </JumpToContainer>
@@ -194,7 +194,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('5283efe2-f4a8-4c3b-8cbc-7cf2acf16da0') }}
+                    {{ $t('%7N') }}
                 </h3>
             </STListItem>
 
@@ -204,7 +204,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('97bfc084-7f4f-4e4f-a187-48703d42c7be') }}
+                    {{ $t('%7O') }}
                 </h3>
             </STListItem>
 
@@ -214,7 +214,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('5ba7cf31-0cee-4599-9086-ae864b09f441') }}
+                    {{ $t('%7P') }}
                 </h3>
             </STListItem>
 
@@ -224,7 +224,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('b735b655-5037-4b7c-90d2-711ac066c194') }}
+                    {{ $t('%4S') }}
                 </h3>
             </STListItem>
 
@@ -235,7 +235,7 @@
 
                 <UploadButton v-model="coverPhoto" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
-                        {{ $t('9448b5c3-579e-48c4-a4a4-2d8d0e6210b8') }}
+                        {{ $t('%4Z') }}
                     </h3>
                 </UploadButton>
             </STListItem>
@@ -246,7 +246,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('a0391aa7-d4f3-4ee7-af13-61e83124a6da') }}
+                    {{ $t('%1Fw') }}
                 </h3>
             </STListItem>
         </STList>
@@ -282,7 +282,7 @@ const props = withDefaults(
 
 const errors = useErrors();
 const { hasChanges, patched, addPatch, patch } = usePatch(props.event);
-const title = computed(() => props.isNew ? $t(`008c80e4-a46f-4e1c-8f45-d383008b2e10`) : $t(`e4bff2f3-d273-4755-b617-f792a01f8325`));
+const title = computed(() => props.isNew ? $t(`%vO`) : $t(`%vP`));
 const saving = ref(false);
 const deleting = ref(false);
 const forceShowAge = ref(props.event.meta.minAge !== null || props.event.meta.maxAge !== null);
@@ -508,7 +508,7 @@ const isNationalActivity = computed({
             const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
-                chooseOrganizer($t(`271299b8-7b44-40b8-a4ce-e345abf164cb`), canSelectOrganization).catch(console.error);
+                chooseOrganizer($t(`%16W`), canSelectOrganization).catch(console.error);
                 return;
             }
             addPatch({
@@ -575,13 +575,13 @@ const isTagEnabledPredicate = computed(() => {
 const canSelectOrganization = (o: Organization) => {
     const result = eventPermissions.canAdminEventForExternalOrganization(o);
     if (!result) {
-        Toast.error($t('43ff8e32-1a0b-41cf-b9a6-8e4c85d12739'))
+        Toast.error($t('%CM'))
             .show();
         return false;
     }
 
     if (organization.value && o.id !== organization.value.id) {
-        Toast.error($t('13a4b7fa-7de6-497e-9e7c-6aee4f783260'))
+        Toast.error($t('%CN'))
             .show();
         return false;
     }
@@ -660,7 +660,7 @@ async function save() {
             if (!location.value) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`382fab7a-2276-4aac-a785-7dac7dcc2b20`),
+                    message: $t(`%vQ`),
                     field: 'event_required',
                 });
             }
@@ -669,7 +669,7 @@ async function save() {
         if (patched.value.meta.groups !== null && patched.value.meta.groups?.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`222eb3ab-1e8d-4530-9636-0bf5525a9159`),
+                message: $t(`%vR`),
             });
         }
         // #endregion
@@ -690,7 +690,7 @@ async function save() {
             decoder: new ArrayDecoder(Event as Decoder<Event>),
         });
 
-        Toast.success($t('dced31f7-3554-425d-bae9-85416e3742d6')).show();
+        Toast.success($t('%5F')).show();
 
         // Make sure original event is patched
         deepSetArray([props.event], response.data);
@@ -716,12 +716,12 @@ async function deleteMe() {
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: $t('14a63393-32e4-448b-8cb5-aa0e0629667b'),
-                description: $t('52312517-de77-4dd5-8c77-cef97c573578'),
-                confirmationTitle: $t('b584fc1c-6b13-442b-b2cc-f59e39fea6e7'),
-                confirmationPlaceholder: $t('deb2a251-2eab-4132-849e-6b1a8bc87300'),
+                title: $t('%6L'),
+                description: $t('%6M'),
+                confirmationTitle: $t('%6N'),
+                confirmationPlaceholder: $t('%6O'),
                 confirmationCode,
-                checkboxText: $t('4a1ad6f2-d061-4fe0-8206-8540442ad038'),
+                checkboxText: $t('%6P'),
                 onDelete: async () => {
                     deleting.value = true;
 
@@ -738,7 +738,7 @@ async function deleteMe() {
 
                         GlobalEventBus.sendEvent('event-deleted', props.event).catch(console.error);
 
-                        Toast.success($t('50df35d9-992f-4697-9150-aa8643ee4f18')).show();
+                        Toast.success($t('%4G')).show();
                         props.callback?.();
                         await pop({ force: true });
                     }
@@ -758,7 +758,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

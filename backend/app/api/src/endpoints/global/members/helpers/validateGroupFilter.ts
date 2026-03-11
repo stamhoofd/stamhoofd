@@ -32,7 +32,7 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
             code: 'invalid_field',
             field: 'filter',
             message: 'You must filter on a group of the organization you are trying to access',
-            human: $t(`5efbaed8-004e-40b9-a822-bdb31e35fbb7`),
+            human: $t(`%15e`),
         });
     }
 
@@ -63,7 +63,7 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
             if (permissionLevel !== PermissionLevel.Read || !group.settings.implicitlyAllowViewRegistrations) {
                 throw Context.auth.error({
                     message: 'You do not have access to this group',
-                    human: $t(`45eedf49-0f0a-442c-a0bd-7881c2682698`, { groupName: group.settings.name }),
+                    human: $t(`%15f`, { groupName: group.settings.name }),
                 });
             }
             else {

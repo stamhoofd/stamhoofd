@@ -2,12 +2,12 @@
     <div class="container">
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <TInput v-if="!isSingle" v-model="name" error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" :placeholder="$t(`8435ecfa-0baa-486d-a3fd-b9dafded1cab`)" />
+        <TInput v-if="!isSingle" v-model="name" error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)" :placeholder="$t(`%dP`)" />
 
         <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" :start-date="startDate ?? undefined" :external-organization="externalOrganization" />
 
         <template v-if="!isSingle">
-            <hr><h2>{{ $t("6ada0ff0-3976-41f7-aa65-7af870964ebc") }}</h2>
+            <hr><h2>{{ $t("%1CP") }}</h2>
         </template>
 
         <STList>
@@ -17,10 +17,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5') }}
+                    {{ $t('%UC') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('9562217e-b18e-480e-ad7f-7fd6596dddd6') }}
+                    {{ $t('%dI') }}
                 </p>
             </STListItem>
 
@@ -30,7 +30,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('1fab526d-79d9-4b49-8717-aac1c8a3010a', {stock: usedStock.toString()}) }}
+                    {{ $t('%dO', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -46,7 +46,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('9128e6d1-9772-4258-b1e6-5d271b71727f') }}
+                    {{ $t('%1CN') }}
                 </h3>
 
                 <div v-if="hasStartDate" class="split-inputs option" @click.stop.prevent>
@@ -63,7 +63,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('163c78b9-f0dd-4ec5-bdfe-32b389aeda7d') }}
+                    {{ $t('%1CO') }}
                 </h3>
 
                 <div v-if="hasEndDate" class="split-inputs option" @click.stop.prevent>
@@ -77,8 +77,8 @@
 
         <div class="container">
             <hr>
-            <h2>{{ $t('98237c41-e107-4997-a645-cc4c16bb5b9a') }}</h2>
-            <p>{{ $t('3ca1233b-86ba-4291-b0a2-68b0d96031dd') }}</p>
+            <h2>{{ $t('%15q') }}</h2>
+            <p>{{ $t('%16f') }}</p>
 
             <STList>
                 <STListItem v-for="bundleDiscount of period.settings.bundleDiscounts" :key="bundleDiscount.id" class="right-top" :selectable="true" element-name="label">
@@ -86,7 +86,7 @@
                         <Checkbox :model-value="getBundleDiscountSelected(bundleDiscount)" @update:model-value="setBundleDiscountSelected(bundleDiscount, $event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ bundleDiscount.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
+                        {{ bundleDiscount.name || $t('%CL') }}
                     </h3>
                     <p class="style-description-small">
                         {{ bundleDiscount.humanDescription }}
@@ -102,11 +102,11 @@
                     </div>
 
                     <template v-if="getBundleDiscountSelected(bundleDiscount)" #right>
-                        <button v-if="getOverrideBundleDiscountSelected(bundleDiscount)" v-tooltip="$t('8545df6d-c416-42dc-88e6-df1eab5c41f9')" type="button" class="button text enabled" @click.prevent="() => setOverrideBundleDiscountSelected(bundleDiscount, false)">
+                        <button v-if="getOverrideBundleDiscountSelected(bundleDiscount)" v-tooltip="$t('%16g')" type="button" class="button text enabled" @click.prevent="() => setOverrideBundleDiscountSelected(bundleDiscount, false)">
                             <span class="icon sliders" />
-                            <span>{{ $t('eab2f8ba-1f62-4328-a0b6-9593d3b6ca15') }}</span>
+                            <span>{{ $t('%16h') }}</span>
                         </button>
-                        <button v-else v-tooltip="$t('534fe662-2b92-479c-bb69-2155478673ed')" type="button" class="button icon sliders" @click.prevent="() => setOverrideBundleDiscountSelected(bundleDiscount, true)" />
+                        <button v-else v-tooltip="$t('%16i')" type="button" class="button icon sliders" @click.prevent="() => setOverrideBundleDiscountSelected(bundleDiscount, true)" />
                     </template>
                 </STListItem>
             </STList>
@@ -114,7 +114,7 @@
             <p>
                 <button class="button text" type="button" @click="editBundleDiscounts">
                     <span class="icon edit" />
-                    <span>{{ $t('1adf61de-d2d5-45bd-a322-304107173992') }}</span>
+                    <span>{{ $t('%16j') }}</span>
                 </button>
             </p>
         </div>
@@ -159,7 +159,7 @@ useValidation(errors.validator, () => {
     if (startDate.value && endDate.value && startDate.value >= endDate.value) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'start_date_after_end_date',
-            message: $t(`5e3928ce-0e62-402f-bf9a-5151a63cc759`),
+            message: $t(`%1CQ`),
         }));
 
         return false;

@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <Title :title="title ?? (member.patchedMember.firstName + ' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`))" :level="level" />
+        <Title :title="title ?? (member.patchedMember.firstName + ' ' + $t(`%Rw`))" :level="level" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <EditMemberGeneralBox v-bind="$attrs" :member="member" :validator="validator" />

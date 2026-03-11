@@ -1,30 +1,30 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar :title="$t(`8b1933de-fb99-4a61-91c0-a80e5d09cef5`)" />
+        <STNavigationBar :title="$t(`%WQ`)" />
 
         <main>
             <h1>
-                {{ $t('8b1933de-fb99-4a61-91c0-a80e5d09cef5') }}
+                {{ $t('%WQ') }}
             </h1>
             <p>
-                {{ $t('0b78041e-b438-46c5-a7f3-62915022c294') }}
+                {{ $t('%WR') }}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" data-testid="email-input" name="username" :validator="validator" autocomplete="username" :title="$t(`26cb7015-6d17-4c3b-8b94-f44f38576854`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+                    <EmailInput v-model="email" data-testid="email-input" name="username" :validator="validator" autocomplete="username" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
                 </div>
 
                 <div>
-                    <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
+                    <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`%Uy`)">
                         <div class="input-group">
                             <div>
-                                <input v-model="firstName" data-testid="first-name-input" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
+                                <input v-model="firstName" data-testid="first-name-input" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
                             </div>
                             <div>
-                                <input v-model="lastName" data-testid="last-name-input" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
+                                <input v-model="lastName" data-testid="last-name-input" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`%1MU`)">
                             </div>
                         </div>
                     </STInputBox>
@@ -33,11 +33,11 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox error-fields="password" :error-box="errorBox" :title="$t(`d220bb47-196f-4ffb-9f0a-367234ced464`)">
-                        <input v-model="password" data-testid="password-input" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
+                    <STInputBox error-fields="password" :error-box="errorBox" :title="$t(`%WU`)">
+                        <input v-model="password" data-testid="password-input" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%WV`)">
                     </STInputBox>
-                    <STInputBox error-fields="passwordRepeat" :error-box="errorBox" :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
-                        <input v-model="passwordRepeat" data-testid="password-repeat-input" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`79537e4c-5363-4f06-9d82-9b1b007add73`)">
+                    <STInputBox error-fields="passwordRepeat" :error-box="errorBox" :title="$t(`%WW`)">
+                        <input v-model="passwordRepeat" data-testid="password-repeat-input" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%WX`)">
                     </STInputBox>
                 </div>
 
@@ -48,15 +48,15 @@
 
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text" data-testid="accept-privacy-input">
-                    {{ $t('df2f7ae1-ad07-4ec4-94c0-939dd3f6bc8d') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('005c5e2d-8185-46e7-b1a0-4e4eaaf60d41') }}</a>.
+                    {{ $t('%Jg') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('%Jh') }}</a>.
                 </Checkbox>
 
                 <Checkbox v-model="acceptTerms" class="long-text" data-testid="accept-terms-input">
-                    {{ $t('b22d5516-2644-4f4a-bcb5-ad93b82a0d61') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('1943d3e6-4550-4240-b2f7-5aaa74e55f5d') }}</a> {{ $t('da2d2d9e-07cc-471e-963a-7915c7698ba9') }}
+                    {{ $t('%Ji') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('%Jj') }}</a> {{ $t('%Jk') }}
                 </Checkbox>
 
                 <Checkbox v-model="acceptDataAgreement" class="long-text" data-testid="accept-data-agreement-input">
-                    {{ $t('b22d5516-2644-4f4a-bcb5-ad93b82a0d61') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('2b08e5d7-6acc-4d7f-ad1a-30f349a79fe9') }}</a> {{ $t('da2d2d9e-07cc-471e-963a-7915c7698ba9') }}
+                    {{ $t('%Ji') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('%Jl') }}</a> {{ $t('%Jk') }}
                 </Checkbox>
             </div>
         </main>
@@ -65,7 +65,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" data-testid="signup-account-button" @click.prevent="goNext">
-                        {{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}
+                        {{ $t('%ur') }}
                     </button>
                 </LoadingButton>
             </template>

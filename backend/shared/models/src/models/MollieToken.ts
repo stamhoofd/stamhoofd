@@ -366,7 +366,7 @@ export class MollieToken extends QueryableModel {
                 profile: {
                     name: organization.name + ' - Stamhoofd',
                     // url: "https://"+organization.getHost(),
-                    description: $t(`62246c37-15c7-4f7d-94e2-7476f971c8da`),
+                    description: $t(`%x1`),
                     categoryCode: 8398,
                 },
             });

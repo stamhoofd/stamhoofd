@@ -1,11 +1,11 @@
 <template>
     <div class="st-view payconiq-button-view">
-        <STNavigationBar :title="$t(`a4dde8e6-d0f7-4ad6-b880-cf5467771770`)" />
+        <STNavigationBar :title="$t(`%1k`)" />
 
         <main>
-            <h1>{{ $t('7e35e52f-d862-4775-b24e-394e20470880') }}</h1>
+            <h1>{{ $t('%kG') }}</h1>
             <p class="style-description">
-                {{ $t('b3bdadbd-5c9c-461d-8607-6f9cd5c2640d') }}
+                {{ $t('%kH') }}
             </p>
         </main>
 
@@ -13,11 +13,11 @@
             <template #right>
                 <button class="button secundary" type="button" @click="helpMe">
                     <span class="icon help" />
-                    <span>{{ $t('809b7c07-e6fb-4d65-806d-7ec52cc8b3b8') }}</span>
+                    <span>{{ $t('%kI') }}</span>
                 </button>
                 <LoadingButton :loading="payment && payment.status === 'Pending'">
                     <a :href="paymentUrl" class="button primary open-app">
-                        <span class="icon external" /><span>{{ $t('ab4cda2d-03fa-4e19-a4a5-5ec2fe0d7187') }}</span>
+                        <span class="icon external" /><span>{{ $t('%kJ') }}</span>
                     </a>
                 </LoadingButton>
             </template>
@@ -91,12 +91,12 @@ export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
 
     helpMe() {
         if (this.getOS() === 'iOS') {
-            new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`6f196b46-8ac6-4565-a954-5f68cb6c56f5`))
+            new CenteredMessage($t(`%kI`), $t(`%12g`))
                 .addCloseButton()
                 .show();
         }
         else {
-            new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`cbc17197-a98b-4017-aab8-adab5ab38cff`)).addCloseButton().show();
+            new CenteredMessage($t(`%kI`), $t(`%12h`)).addCloseButton().show();
         }
     }
 }

@@ -81,7 +81,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_fields',
                     message: 'Invalid token or id',
-                    human: $t(`ceacb5a8-7777-4366-abcb-9dd90ffb832e`),
+                    human: $t(`%DQ`),
                 });
             }
 
@@ -120,7 +120,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
+                    human: $t(`%DR`),
                     statusCode: 404,
                 });
             }
@@ -155,7 +155,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                         throw new SimpleError({
                             code: 'too_many_unblocks',
                             message: 'Too many unblocks',
-                            human: $t(`ed5bd32c-7d9a-42d8-b9d0-da74d82ef3a9`),
+                            human: $t(`%1L5`),
                         });
                     }
                 }

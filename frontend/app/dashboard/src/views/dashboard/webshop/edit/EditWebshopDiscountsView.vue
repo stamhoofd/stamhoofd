@@ -3,8 +3,8 @@
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr><h2>{{ $t('9bbdb9e4-fc41-4135-8ad1-f55f61a7aa63') }}</h2>
-        <p>{{ $t('180981ba-a251-4d5f-bcfa-6256b238b5c5') }}</p>
+        <hr><h2>{{ $t('%QJ') }}</h2>
+        <p>{{ $t('%QK') }}</p>
 
         <STList v-if="defaultDiscounts.length">
             <STListItem v-for="discount of defaultDiscounts" :key="discount.id" class="right-description right-stack" :selectable="true" @click="editDiscount(discount)">
@@ -25,12 +25,12 @@
         <p>
             <button class="button text" type="button" @click="addDiscount">
                 <span class="icon add" />
-                <span>{{ $t('6a35dc73-d0b6-4785-acb8-0a49460abbf0') }}</span>
+                <span>{{ $t('%QL') }}</span>
             </button>
         </p>
 
-        <hr><h2>{{ $t('8b322fca-7359-434a-9813-0ab2565cc2a6') }}</h2>
-        <p>{{ $t('29f1eed1-3fc5-4714-98f4-4c71d63d0d65') }}</p>
+        <hr><h2>{{ $t('%QM') }}</h2>
+        <p>{{ $t('%QN') }}</p>
 
         <Spinner v-if="fetchingDiscountCodes" />
         <div v-else>
@@ -41,10 +41,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('7bae6892-1011-4c14-8708-2d7d016831e1') }}
+                        {{ $t('%QO') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('7e21be30-cf02-497c-9157-2fea6aefc26f') }}
+                        {{ $t('%QP') }}
                     </p>
                 </STListItem>
 
@@ -60,7 +60,7 @@
                         {{ discountCode.description }}
                     </p>
                     <p class="style-description-small">
-                        {{ discountCode.usageCount }} {{ $t('cf404a1c-892b-42f5-b0e6-9dc88f0917fa') }}
+                        {{ discountCode.usageCount }} {{ $t('%QQ') }}
                     </p>
 
                     <template #right>
@@ -69,14 +69,14 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                {{ $t('1ec72626-a767-4f6d-b864-64443633ec98') }}
+                {{ $t('%QR') }}
             </p>
         </div>
 
         <p>
             <button class="button text" type="button" @click="addDiscountCode">
                 <span class="icon add" />
-                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }}</span>
+                <span>{{ $t('%1MX') }}</span>
             </button>
         </p>
     </SaveView>

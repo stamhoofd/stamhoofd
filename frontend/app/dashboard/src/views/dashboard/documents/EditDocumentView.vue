@@ -5,13 +5,13 @@
         </h1>
 
         <p class="warning-box">
-            {{ $t('72b7fa7d-5f0f-4cca-b62e-c86495610edf') }}
+            {{ $t('%L5') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-            <input v-model="description" class="input" type="text" :placeholder="$t(`fe417724-5dbd-4310-b7a1-232ab6fb63e6`)">
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)">
+            <input v-model="description" class="input" type="text" :placeholder="$t(`%L6`)">
         </STInputBox>
 
         <div v-for="category of fieldCategories" :key="category.id" class="container">

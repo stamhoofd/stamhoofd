@@ -9,11 +9,11 @@ export enum UitpasClientCredentialsStatus {
 export class UitpasClientCredentialsStatusHelper {
     static getName(status: UitpasClientCredentialsStatus): string {
         switch (status) {
-            case UitpasClientCredentialsStatus.NotChecked: return $t('22487e0a-3bb0-4cb2-80c0-18fea6f3f016');
-            case UitpasClientCredentialsStatus.NotConfigured: return $t('8b9c3203-aaea-4699-b274-2ac2eff7ec1d');
-            case UitpasClientCredentialsStatus.NoPermissions: return $t('a24c0731-1c0f-46e2-8aaa-4569f6e0cc91');
-            case UitpasClientCredentialsStatus.MissingPermissions: return $t('f3a5ff8c-f79e-474e-9e3e-5e85467f5770');
-            case UitpasClientCredentialsStatus.Ok: return $t('c2e9194d-82b6-441a-ad47-bbac687667dd');
+            case UitpasClientCredentialsStatus.NotChecked: return $t('%1Co');
+            case UitpasClientCredentialsStatus.NotConfigured: return $t('%1Cp');
+            case UitpasClientCredentialsStatus.NoPermissions: return $t('%1Cq');
+            case UitpasClientCredentialsStatus.MissingPermissions: return $t('%1Cr');
+            case UitpasClientCredentialsStatus.Ok: return $t('%1Cs');
         }
     }
 

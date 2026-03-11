@@ -20,7 +20,7 @@ export function useShowPayment() {
                         limit: 1,
                     }));
                     if (payments.results.length === 0) {
-                        Toast.error($t(`5e6f043a-6ed5-41eb-b670-d9ac6b63e598`)).show();
+                        Toast.error($t(`%yW`)).show();
                         throw new Error('Payment not found');
                     }
                     return new ComponentWithProperties(PaymentView, {

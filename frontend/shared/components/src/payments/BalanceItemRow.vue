@@ -25,19 +25,19 @@
             </p>
 
             <p v-if="item.pricePaid < 0" class="style-price-base negative small">
-                {{ $t('3cc87847-7c8c-4b8d-aa14-eaa7d18350be', {price: formatPrice(-item.pricePaid )}) }}
+                {{ $t('%1Kc', {price: formatPrice(-item.pricePaid )}) }}
             </p>
 
             <p v-if="item.pricePaid > 0" class="style-price-base negative small">
-                {{ $t('72cf6e0c-87b5-47ae-af91-4112e24c13e1', {price: formatPrice(-item.pricePaid )}) }}
+                {{ $t('%gi', {price: formatPrice(-item.pricePaid )}) }}
             </p>
 
             <p v-if="item.pricePending < 0" class="style-price-base disabled negative small">
-                {{ $t('681471a7-98f5-4149-a431-28b1cd0cebaa', {price: formatPrice(-item.pricePending)}) }}
+                {{ $t('%1Kd', {price: formatPrice(-item.pricePending)}) }}
             </p>
 
             <p v-if="item.pricePending > 0" class="style-price-base disabled negative small">
-                {{ $t('b9a73b33-2a3d-44fa-a326-66cb8b8e1184', {price: formatPrice(-item.pricePending)}) }}
+                {{ $t('%gj', {price: formatPrice(-item.pricePending)}) }}
             </p>
         </template>
     </STGridItem>

@@ -5,20 +5,20 @@
                 <LoadingButton :loading="retrying">
                     <button class="button text" type="button" @click="retry">
                         <span class="icon retry" />
-                        <span>{{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}</span>
+                        <span>{{ $t('%Y9') }}</span>
                     </button>
                 </LoadingButton>
             </template>
         </STNavigationBar>
         <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration"><main class="center">
             <h1 v-if="!login">
-                {{ $t('5cb65126-68af-4cdc-8ecf-836471dbd536') }}
+                {{ $t('%ZS') }}
             </h1>
             <h1 v-else>
-                {{ $t('0169b51e-08fb-43b0-a161-01d65335a297') }}
+                {{ $t('%ZT') }}
             </h1>
 
-            <p>{{ $t("58c24560-069c-4c85-a879-fe00c534bf14", {email}) }}</p>
+            <p>{{ $t("%ZU", {email}) }}</p>
 
             <div><CodeInput v-model="code" @complete="submit" /></div>
 
@@ -29,7 +29,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary full" type="button">
-                        <span>{{ $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') }}</span>
+                        <span>{{ $t('%16p') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
@@ -103,11 +103,11 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
         }
 
         if (new Date().getTime() - this.startTime.getTime() < 5 * 60 * 1000 && STAMHOOFD.environment !== 'development') {
-            new Toast($t(`73466f92-bfc1-4fd8-9de7-363738ac6dd7`), 'error red').show();
+            new Toast($t(`%uj`), 'error red').show();
             return;
         }
         // TODO
-        if (!await CenteredMessage.confirm($t(`6e55c6ff-8487-4376-8804-1b3934623146`), $t(`776a9bda-a078-4fe8-afa8-3285b5f5c794`), $t(`f8a74bb1-0df6-4313-875d-ac4b0ba3b36c`))) {
+        if (!await CenteredMessage.confirm($t(`%uk`), $t(`%ul`), $t(`%um`))) {
             return;
         }
 
@@ -120,7 +120,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
                 this.dismiss({ force: true });
                 return;
             }
-            new Toast($t(`cc0f2b34-b2c3-4df1-871d-17ad969205c5`), $t(`6285b165-8d32-4a00-bb3f-0f95abcda58f`)).show();
+            new Toast($t(`%un`), $t(`%16`)).show();
         }
         catch (error) {
             this.errorBox = new ErrorBox(error);
@@ -172,7 +172,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
 
         try {
             await LoginHelper.verifyEmail(this.$context, this.code, this.token);
-            new Toast($t(`a66456db-d4d8-4f4e-895e-e66aa873604a`), 'success green').setHide(3000).show();
+            new Toast($t(`%uo`), 'success green').setHide(3000).show();
 
             // Yay!
             // we could be sign in, or couldn't.
@@ -189,7 +189,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        return await CenteredMessage.confirm($t(`91ac3f67-da37-4366-9392-d07148e5557f`), $t(`078baf81-049b-4f3f-9ccb-8ab39b8ddaf8`));
+        return await CenteredMessage.confirm($t(`%up`), $t(`%uq`));
     }
 }
 </script>

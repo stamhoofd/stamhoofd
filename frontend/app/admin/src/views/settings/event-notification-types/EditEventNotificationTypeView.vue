@@ -7,28 +7,28 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') " error-fields="title" :error-box="errors.errorBox">
-                <input v-model="title" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
+            <STInputBox :title="$t('%Gq') " error-fields="title" :error-box="errors.errorBox">
+                <input v-model="title" class="input" type="text" :placeholder="$t('%Gq') ">
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('68bd7b1d-9492-40ca-89f5-917143932218')" autocomplete="off" />
+        <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox" class="max">
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('%8g')" autocomplete="off" />
         </STInputBox>
 
-        <STInputBox :title="$t('51850490-5d94-4e0b-a415-9b84e07d86f2')" error-fields="eventTypeIds" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('%8h')" error-fields="eventTypeIds" :error-box="errors.errorBox" class="max">
             <EventTypeIdsInput v-model="eventTypeIds" />
         </STInputBox>
 
-        <hr><h2>{{ $t('1a559b46-1863-4782-8cb5-ee6517a2e91d') }}</h2>
+        <hr><h2>{{ $t('%8i') }}</h2>
         <p>
-            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
+            {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addPatch({recordCategories: $event})" />
 
-        <hr><h2>{{ $t('49dd6919-a853-4004-b817-ae811de527ab') }}</h2>
-        <p>{{ $t('2562f83d-522d-47a5-b8ad-b918d14c3cb2') }}</p>
+        <hr><h2>{{ $t('%v') }}</h2>
+        <p>{{ $t('%Hy') }}</p>
 
         <STList v-if="patched.deadlines.length">
             <EventNotificationDeadlineRow v-for="deadline in patched.deadlines" :key="deadline.id" :deadline="deadline" @click="editDeadline(deadline)" />
@@ -37,20 +37,20 @@
         <p>
             <button class="button text" type="button" @click="addDeadline">
                 <span class="icon add" />
-                <span>{{ $t('59eba98e-b382-4075-af33-f8bf30b1042c') }}</span>
+                <span>{{ $t('%8d') }}</span>
             </button>
         </p>
 
         <div class="container">
-            <hr><h2>{{ $t('35c08279-a7ce-4536-a201-985bb882a6cf') }}</h2>
-            <p>{{ $t('8b9ef669-554d-4ee2-b3bd-2ea12f85fa26') }}</p>
+            <hr><h2>{{ $t('%AY') }}</h2>
+            <p>{{ $t('%AZ') }}</p>
 
             <MultipleChoiceInput v-model="contactResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
         </div>
 
         <div class="container">
-            <hr><h2>{{ $t('95e5b391-4399-40ae-8e58-aed3b822e65a') }}</h2>
-            <p>{{ $t('f4b0aed8-5223-471c-81e3-1b580d359f66') }}</p>
+            <hr><h2>{{ $t('%Aa') }}</h2>
+            <p>{{ $t('%Ab') }}</p>
         </div>
     </SaveView>
 </template>
@@ -75,7 +75,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<EventNotificationType>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const viewTitle = computed(() => props.isNew ? $t('4f83e88b-bf47-43fe-96ca-b24d136deaa8') : $t('d76e80a1-b717-4002-b40c-1e890e87bf1c'));
+const viewTitle = computed(() => props.isNew ? $t('%8j') : $t('%8k'));
 const pop = usePop();
 const platform = usePlatform();
 const present = usePresent();
@@ -110,7 +110,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('24cdd0db-df35-4ef2-8230-7cade040fcfc'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('dc8871b4-8d65-4247-9c2b-56e183cdf052'))) {
+    if (!await CenteredMessage.confirm($t('%5p'), $t('%CJ'), $t('%5q'))) {
         return;
     }
 
@@ -151,7 +151,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 const getFilterBuilders = useEventNotificationInMemoryFilterBuilders();

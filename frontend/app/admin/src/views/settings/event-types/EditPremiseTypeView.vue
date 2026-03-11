@@ -7,28 +7,28 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') " error-fields="name" :error-box="errors.errorBox">
-                <input v-model="name" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
+            <STInputBox :title="$t('%Gq') " error-fields="name" :error-box="errors.errorBox">
+                <input v-model="name" class="input" type="text" :placeholder="$t('%Gq') ">
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('37739daf-2424-4f6e-a316-d4ac6bdaef85')" autocomplete="off" />
+        <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox" class="max">
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('%5r')" autocomplete="off" />
         </STInputBox>
 
-        <hr><h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
+        <hr><h2>{{ $t('%4R') }}</h2>
 
         <p class="style-description-small">
-            {{ $t('b82a5b97-5abe-4f63-97fe-a738d9698039') }}
+            {{ $t('%I0') }}
         </p>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('87bd59dd-77fa-4519-9fab-abf46707e51f')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="min" :placeholder="$t('3ef9e622-426f-4913-89a0-0ce08f4542d4')" :required="false" />
+            <STInputBox :title="$t('%5s')" error-fields="minimumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="min" :placeholder="$t('%1FW')" :required="false" />
             </STInputBox>
 
-            <STInputBox :title="$t('701fc423-4bf4-4de7-917b-eed7923b2164')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="max" :placeholder="$t('104dca1f-f6eb-4193-ae27-5e5f96e4e481')" :required="false" />
+            <STInputBox :title="$t('%dN')" error-fields="maximumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="max" :placeholder="$t('%4a')" :required="false" />
             </STInputBox>
         </div>
     </SaveView>
@@ -52,7 +52,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformPremiseType>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => props.isNew ? $t('58949c21-cefa-4818-b643-72b41b6e0449') : $t('595705ee-d41e-474a-8180-17b94cd0a3cc'));
+const title = computed(() => props.isNew ? $t('%5t') : $t('%5u'));
 const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.type);
@@ -81,7 +81,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('0388e538-52e1-421e-baac-6d788adf44d3'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('78cf134f-d4fb-4da4-b077-0419f29e4268'))) {
+    if (!await CenteredMessage.confirm($t('%5v'), $t('%CJ'), $t('%5w'))) {
         return;
     }
 
@@ -122,7 +122,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

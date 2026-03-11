@@ -1,54 +1,54 @@
 <template>
-    <SaveView :loading="saving" :title="$t('15e411ef-7a28-41e0-ad90-8c6ffae730f1')" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="$t('%Or')" :disabled="!hasChanges" @save="save">
         <h1>
-            {{ $t('15e411ef-7a28-41e0-ad90-8c6ffae730f1') }}
+            {{ $t('%Or') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr><h2 v-if="app === 'admin'">
-            {{ $t('0581e6ae-5695-4132-89d3-7f1c542d44f4') }}
+            {{ $t('%9r') }}
         </h2>
         <h2 v-else>
-            {{ $t('34b986e3-111d-493c-ba71-7dbcf403a9ba') }}
+            {{ $t('%9s') }}
         </h2>
 
         <p v-if="app === 'admin'">
-            {{ $t('44bb1bad-d516-4694-939b-748bf534352b') }}
+            {{ $t('%9t') }}
         </p>
         <p v-if="app === 'admin'" class="style-description-block">
-            {{ $t(`b422c6f2-be24-4edd-aa99-a2d72d59c496`) }}
+            {{ $t(`%AF`) }}
         </p>
 
         <p v-if="app === 'dashboard'">
-            {{ $t('b291402c-fd6a-4a9f-bfa6-78bca95ff48f') }}
+            {{ $t('%9u') }}
         </p>
 
         <p v-if="!getFilterConfiguration('emailAddress') && !getFilterConfiguration('parents')" class="error-box">
-            {{ $t('0ad0ab12-37bf-425e-871c-b91161ee45f8') }}
+            {{ $t('%9v') }}
         </p>
 
         <InheritedRecordsConfigurationBox :inherited-records-configuration="props.inheritedRecordsConfiguration" :records-configuration="patched" @patch:records-configuration="addPatch" />
 
         <hr><h2 v-if="app === 'admin'">
-            {{ $t('4e842082-57fa-49ed-a806-6861cc913d12') }}
+            {{ $t('%9w') }}
         </h2>
         <h2 v-else>
-            {{ $t('09eb3057-c765-4909-b821-e75877b44135') }}
+            {{ $t('%9x') }}
         </h2>
 
         <p v-if="app === 'dashboard'">
-            {{ $t('a72d08ad-b23c-4079-b375-1dd569da140a') }}
+            {{ $t('%9y') }}
         </p>
         <p v-if="app === 'admin'">
-            {{ $t('07d18e1b-2935-4945-9595-50e16a929b19') }}
+            {{ $t('%9z') }}
         </p>
         <p class="style-description-block">
-            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
+            {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
 
         <p class="info-box">
-            {{ $t(`b4cd468d-e3fd-47d2-b59c-cf19b1d3aee0`) }}
+            {{ $t(`%AG`) }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="settings" @patch:categories="addCategoriesPatch" />
@@ -108,8 +108,8 @@ const settings = computed(() => {
         exampleValue: new PlatformMember({
             member: MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
-                    firstName: $t('38e2c1aa-13f6-4339-8cfd-68c2603beb51'),
-                    lastName: $t('946f5e2e-d92c-4bbd-b64f-115958a04d01'),
+                    firstName: $t('%ID'),
+                    lastName: $t('%ym'),
                     dataPermissions: BooleanStatus.create({ value: true }),
                     birthDay: new Date('2020-01-01'),
                 }),
@@ -154,7 +154,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

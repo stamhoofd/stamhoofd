@@ -1,15 +1,15 @@
 <template>
-    <SaveView :title="title" :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" :prefer-large-button="true" @save="goNext">
         <h1>
             {{ title }}
         </h1>
 
         <p v-if="checkoutMethod.type === 'Takeout'">
-            {{ $t('1c789f22-cc29-4951-849b-90abcbec9a3d') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
+            {{ $t('%Xy') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
 
         <p v-if="checkoutMethod.type === 'OnSite'">
-            {{ $t('af4a5122-ce11-4553-b589-490d6d4960cc') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
+            {{ $t('%Xz') }} {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ (checkoutMethod as any).address }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -23,12 +23,12 @@
                     {{ formatDateWithDay(slot.date) }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('ffea69c7-7eff-4018-afa2-d054438d04eb') }} {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
+                    {{ $t('%Ur') }} {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                 </p>
 
                 <template #right>
-                    <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('53575cae-ac22-4ac5-96d5-b67464992e4f') }}</span>
-                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">{{ $t('07f945bf-649b-4138-a91e-9306a9a96955') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                    <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('%Um') }}</span>
+                    <span v-else-if="slot.listedRemainingStock !== null" class="style-tag">{{ $t('%Un') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>

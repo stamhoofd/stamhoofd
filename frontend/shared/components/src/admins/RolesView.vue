@@ -1,14 +1,14 @@
 <template>
-    <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" :loading="saving" :disabled="!hasChanges" :title="$t(`83ce9418-2abf-4d9b-a6b4-312df7ac4837`)" @save="save">
+    <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" :loading="saving" :disabled="!hasChanges" :title="$t(`%ZI`)" @save="save">
         <template #buttons>
             <button class="button icon add" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
 
-        <h1>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h1>
-        <p>{{ $t('9021f6b0-d1ae-422b-9651-48c7f5383b0b') }}</p>
+        <h1>{{ $t('%Jm') }}</h1>
+        <p>{{ $t('%3I') }}</p>
 
         <p class="info-box">
-            {{ $t('49da8533-b5b6-4ca1-9cd5-1ff8dc6486eb') }}
+            {{ $t('%ZG') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -23,10 +23,10 @@
                 </template>
 
                 <h2 class="style-title-list">
-                    {{ $t('06e0f25f-f601-4359-a95d-b72fd79ecbdd') }}
+                    {{ $t('%Yb') }}
                 </h2>
                 <p class="style-description-small">
-                    {{ $t('c2296305-99a9-497a-aed3-7bb3d2293ce8') }}
+                    {{ $t('%Z1') }}
                 </p>
 
                 <template #right>
@@ -55,7 +55,7 @@
                                 {{ getAdminsForRole(role) }}
                             </span>
                             <span v-else class="style-tag warn">
-                                {{ $t('2f5d5e2d-cc3b-4cf6-8f4e-97b72a106163') }}
+                                {{ $t('%ZH') }}
                             </span>
                             <span class="button icon drag gray" @click.stop @contextmenu.stop />
                             <span class="icon arrow-right-small gray" />
@@ -178,7 +178,7 @@ const editRole = async (role: PermissionRoleDetailed | PermissionRoleForResponsi
 
 const save = async () => {
     await rawSave(() => {
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         void pop({ force: true });
     });
 };
@@ -187,7 +187,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({

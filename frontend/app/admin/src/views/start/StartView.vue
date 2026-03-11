@@ -1,16 +1,16 @@
 <template>
     <section class="st-view">
-        <STNavigationBar :title="$t(`6bdca00a-b7ec-413e-b57a-3e192a53564f`)" />
+        <STNavigationBar :title="$t(`%IW`)" />
         <main class="center">
             <h1>
-                {{ $t('6bdca00a-b7ec-413e-b57a-3e192a53564f') }}
+                {{ $t('%IW') }}
             </h1>
 
             <p v-if="auth.hasPlatformFullAccess()">
-                {{ $t('315fdb48-3f61-4795-9a40-c08c61fcd926') }}
+                {{ $t('%IX') }}
             </p>
             <p v-else>
-                {{ $t('607105b3-ba57-4818-9523-72923e3cdc8b') }}
+                {{ $t('%IY') }}
             </p>
         </main>
     </section>

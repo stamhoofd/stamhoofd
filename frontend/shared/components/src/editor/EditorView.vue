@@ -55,15 +55,15 @@
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>{{ $t('10b83895-551f-4892-9b58-b7b62db58726') }}</span>
+                            <span>{{ $t('%T') }}</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`780fa99d-7109-4f57-934b-1f4c5643a794`)">
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`%1J`)">
                         </div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('025d14dd-57d4-4ec4-aa85-ddf9ddf98b6f')" @mousedown.stop @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('%a8')" @mousedown.stop @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
@@ -72,12 +72,12 @@
         <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
-                    <button class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" :v-tooltip="$t('24c13e07-66e8-421d-9dde-c69758395be8')" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('52395130-fb1f-4508-951a-067dd6324575')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
-                    <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-                    <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click.prevent="openLinkEditor()" @mousedown.stop />
+                    <button class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" :v-tooltip="$t('%a9')" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
+                    <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('%aA')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
+                    <button class="button icon hr" type="button" :v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+                    <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('%aC')" @click.prevent="openLinkEditor()" @mousedown.stop />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.stop>
-                        <div class="button icon image" type="button" :v-tooltip="$t('91b1faf7-de10-46f3-9338-5930134da354')" />
+                        <div class="button icon image" type="button" :v-tooltip="$t('%aD')" />
                     </UploadButton>
                     <slot name="buttons" />
                 </div>
@@ -91,12 +91,12 @@
             </template>
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.stop>
-            <button class="button icon text-style" type="button" :v-tooltip="$t('24c13e07-66e8-421d-9dde-c69758395be8')" @click.prevent="openTextStyles($event)" @mousedown.stop />
-            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('130a074e-ce12-4bf1-9898-c49a3c00006e')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
-            <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-            <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click="openLinkEditor()" @mousedown.stop />
+            <button class="button icon text-style" type="button" :v-tooltip="$t('%a9')" @click.prevent="openTextStyles($event)" @mousedown.stop />
+            <button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('%aE')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
+            <button class="button icon hr" type="button" :v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+            <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('%aC')" @click="openLinkEditor()" @mousedown.stop />
             <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
-                <div class="button icon image" type="button" :v-tooltip="$t('91b1faf7-de10-46f3-9338-5930134da354')" />
+                <div class="button icon image" type="button" :v-tooltip="$t('%aD')" />
             </UploadButton>
             <slot name="buttons" />
         </STButtonToolbar>
@@ -172,10 +172,10 @@ const props = withDefaults(
         loading: false,
         disabled: false,
         title: '',
-        saveText: () => $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
+        saveText: () => $t(`%v7`),
         saveIcon: null,
         saveIconMobile: null,
-        cancelText: () => $t(`11d2e292-fd08-4477-bd2a-dac599a9754c`),
+        cancelText: () => $t(`%1Lh`),
         replacements: () => [],
         emailBlock: false,
     },
@@ -268,7 +268,7 @@ async function openLinkEditor() {
         return;
     }
     if (!editor.value.isActive('link') && editor.value.state.selection.empty) {
-        new Toast($t(`1a4e5a36-80ae-4858-a16b-a430c806ee8f`), 'info').show();
+        new Toast($t(`%v8`), 'info').show();
         return;
     }
     editLink.value = editor.value.getAttributes('link')?.href ?? '';
@@ -318,7 +318,7 @@ async function saveLink() {
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {
-        Toast.error($t(`375a57e9-815f-42d0-88e0-1ce09df72c1b`)).show();
+        Toast.error($t(`%zK`)).show();
         return;
     }
 
@@ -355,14 +355,14 @@ function insertImage(image: Image | null) {
         return;
     }
     editor.value.chain().focus().setImage({ src: resolution.file.getPublicPath(), alt: image.source.name ?? undefined, width: resolution.width, height: resolution.height }).run();
-    new Toast($t('5d8131bf-38a0-4c8c-b266-e30caa7aa270'), 'info').show();
+    new Toast($t('%aF'), 'info').show();
 }
 //
 async function openTextStyles(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`8f419200-148a-4f76-8292-def02fffb0be`),
+                name: $t(`%v9`),
                 icon: 'bold',
                 selected: editor.value.isActive('bold'),
                 action: () => {
@@ -371,7 +371,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`20a9c3b3-a4df-431e-a4e0-dd22a2ddf51f`),
+                name: $t(`%vA`),
                 icon: 'italic',
                 selected: editor.value.isActive('italic'),
                 action: () => {
@@ -380,7 +380,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`fd97c699-c6c7-4861-a22e-317a51f87ed0`),
+                name: $t(`%vB`),
                 icon: 'underline',
                 selected: editor.value.isActive('underline'),
                 action: () => {
@@ -391,7 +391,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`),
+                name: $t(`%vC`),
                 icon: 'h1',
                 selected: editor.value.isActive('heading', { level: 1 }),
                 action: () => {
@@ -400,7 +400,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`5d0d84fe-2ddb-4962-b104-337abbeeaa1f`),
+                name: $t(`%aJ`),
                 icon: 'h2',
                 selected: editor.value.isActive('heading', { level: 2 }),
                 action: () => {
@@ -409,7 +409,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`002d6c62-a1d1-4efa-a230-b03456b2d872`),
+                name: $t(`%vD`),
                 icon: 'h3',
                 selected: editor.value.isActive('heading', { level: 3 }),
                 action: () => {
@@ -418,7 +418,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`2a2b03b6-f858-48c0-963e-b1dfdb107f25`),
+                name: $t(`%vE`),
                 icon: 'info-circle',
                 selected: editor.value.isActive('descriptiveText'),
                 action: () => {
@@ -429,7 +429,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`277573b6-5edd-46bc-bd1b-c40f6935dd38`),
+                name: $t(`%aL`),
                 icon: 'ul',
                 selected: editor.value.isActive('bulletList'),
                 action: () => {
@@ -438,7 +438,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`8d17be46-de96-4e84-af15-6bd18e8b4b17`),
+                name: $t(`%vF`),
                 icon: 'ol',
                 selected: editor.value.isActive('orderedList'),
                 action: () => {
@@ -559,8 +559,8 @@ async function showSmartVariableMenu(event: MouseEvent) {
             ? [
                     [new ContextMenuItem({
                         icon: 'email',
-                        name: $t('a13326af-afab-4159-a730-d41f9bcbaff3'),
-                        description: $t('e3cca88f-3001-49fa-af16-2a7144b07216'),
+                        name: $t('%1GX'),
+                        description: $t('%1GY'),
                         action: () => {
                             editor.value.chain().focus().toggleEmailBlock().run();
 

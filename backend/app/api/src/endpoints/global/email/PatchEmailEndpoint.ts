@@ -41,7 +41,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email not found',
-                human: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
+                human: $t(`%DR`),
                 statusCode: 404,
             });
         }
@@ -63,7 +63,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
                     throw Context.auth.error({
                         message: 'Cannot send emails from this sender',
-                        human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
+                        human: $t('%1Cw'),
                     });
                 }
                 model.senderId = sender.id;
@@ -79,7 +79,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',
-                    human: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
+                    human: $t(`%1Cx`),
                     statusCode: 400,
                 });
             }
@@ -96,7 +96,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',
-                    human: $t(`f08cccb3-faf9-473f-b729-16120fadec9c`),
+                    human: $t(`%1Cy`),
                     statusCode: 400,
                 });
             }
@@ -119,7 +119,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_draft',
                     message: 'Email is not a draft',
-                    human: $t(`ace4d2e8-88d6-479f-bd8b-d576cc0ed1f2`),
+                    human: $t(`%1Dy`),
                     statusCode: 400,
                 });
             }
@@ -128,7 +128,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'already_created',
                     message: 'Recipients already created',
-                    human: $t(`457ecdaf-d1de-4136-9e82-682c18c5fa76`),
+                    human: $t(`%1Ko`),
                     statusCode: 400,
                 });
             }
@@ -142,7 +142,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_draft',
                     message: 'Email is not a draft',
-                    human: $t(`02b05c0d-908b-4200-8fb8-5fc01f539514`),
+                    human: $t(`%1Dz`),
                     statusCode: 400,
                 });
             }
@@ -184,7 +184,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (!await Context.auth.canSendEmail(model)) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
-                    human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
+                    human: $t('%1Cw'),
                 });
             }
 

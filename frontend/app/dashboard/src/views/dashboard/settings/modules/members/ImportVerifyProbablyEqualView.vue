@@ -1,15 +1,15 @@
 <template>
-    <SaveView :title="$t('d3cab6d1-af72-4d4c-b70b-6862d9843b37')" :save-text="$t('a3ea7b14-204b-44b9-abb5-8ced5fc847d1')" @save="goNext">
+    <SaveView :title="$t('%1A4')" :save-text="$t('%19q')" @save="goNext">
         <h1>
-            {{ $t('860735a0-eb27-44ba-9364-4d52f0ce6698') }}
+            {{ $t('%1A5') }}
         </h1>
-        <p>{{ $t('83877c6a-5330-4299-af39-fdbac4501dff') }}</p>
+        <p>{{ $t('%1A6') }}</p>
 
         <button v-if="!isCheckedAll" class="button text" type="button" @click="checkAll">
-            {{ $t('6efc88ed-1512-4e17-91cd-b974ac298ddd') }}
+            {{ $t('%1A7') }}
         </button>
         <button v-else class="button text" type="button" @click="uncheckAll">
-            {{ $t('38443a1a-edf6-4edd-b736-301bcb70cd9f') }}
+            {{ $t('%1A8') }}
         </button>
 
         <STList>

@@ -42,7 +42,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'only_platform',
                 message: 'Period id should only be used if userMode is platform',
-                human: $t(`8a50ee7d-f37e-46cc-9ce7-30c7b37cefe8`),
+                human: $t(`%1AD`),
             });
         }
 
@@ -80,7 +80,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             if (put.endDate < put.startDate) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t('186723cd-2cd4-45fd-aa9c-020c9d92b225'),
+                    message: $t('%1Gv'),
                     field: 'endDate',
                 });
             }
@@ -102,7 +102,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'cannot_lock_current_period',
                         message: 'Current registration period cannot be locked',
-                        human: $t(`1401fb57-4172-4211-acdb-0afbc87af86e`),
+                        human: $t(`%EJ`),
                     });
                 }
             }
@@ -131,7 +131,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'cannot_lock_current_period',
                         message: 'Current registration period cannot be locked',
-                        human: $t(`1401fb57-4172-4211-acdb-0afbc87af86e`),
+                        human: $t(`%EJ`),
                     });
                 }
             }
@@ -148,7 +148,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             if ((patch.startDate || patch.endDate) && model.endDate < model.startDate) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t('186723cd-2cd4-45fd-aa9c-020c9d92b225'),
+                    message: $t('%1Gv'),
                     field: 'endDate',
                 });
             }

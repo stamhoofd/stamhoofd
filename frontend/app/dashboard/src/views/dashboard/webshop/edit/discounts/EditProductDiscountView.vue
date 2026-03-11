@@ -1,22 +1,22 @@
 <template>
-    <SaveView :title="isNew ? $t(`72b723a2-72c5-4d56-8129-519ea281c6b7`) : $t(`0b100742-cfe5-4a3a-b0ee-18c278c5d617`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? $t(`%SL`) : $t(`%u5`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            {{ $t('72b723a2-72c5-4d56-8129-519ea281c6b7') }}
+            {{ $t('%SL') }}
         </h1>
         <h1 v-else>
-            {{ $t('0b100742-cfe5-4a3a-b0ee-18c278c5d617') }}
+            {{ $t('%u5') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
-        <hr><h2>{{ $t('40939025-cebb-4afb-90e9-847233cb256f') }}</h2>
+        <hr><h2>{{ $t('%176') }}</h2>
         <p v-if="discounts.length > 1">
-            {{ $t("91c71d21-b5bc-4b91-bc08-5ac39db87b95") }}
+            {{ $t("%SW") }}
         </p>
 
         <div v-for="(d, index) in discounts" :key="d.id">
-            <STInputBox :title="discounts.length === 1 ? $t(`40939025-cebb-4afb-90e9-847233cb256f`) : $t(`bffce456-034e-4768-bd64-e0c1061e685a`) + ' '+(index+1)+$t(`9e90b5f1-bac8-4e6e-b171-d679b3959197`) + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' ' + $t(`049a16f3-a8dd-485e-9696-afa9fdb511b8`) : '')" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="discounts.length === 1 ? $t(`%176`) : $t(`%SY`) + ' '+(index+1)+$t(`%SZ`) + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' ' + $t(`%Sa`) : '')" :error-box="errors.errorBox" class="max">
                 <template v-if="discounts.length > 1" #right>
                     <button class="button icon trash gray" type="button" @click="removeDiscount(d)" />
                 </template>
@@ -29,10 +29,10 @@
                     <div>
                         <Dropdown :model-value="getDiscountType(d)" @update:model-value="setDiscountType(d, $event)">
                             <option value="percentageDiscount">
-                                {{ $t('dd61d33b-367e-4e40-8ac6-84c286b931bc') }}
+                                {{ $t('%2I') }}
                             </option>
                             <option value="discountPerPiece">
-                                {{ $t('43ca079c-2af8-4bde-9f68-abeca3c3a7d0') }}
+                                {{ $t('%1JL') }}
                             </option>
                         </Dropdown>
                     </div>
@@ -43,12 +43,12 @@
         <p>
             <button class="button text" type="button" @click="addDiscount">
                 <span class="icon add" />
-                <span v-if="discounts.length === 1">{{ $t('02ff0e29-3e68-45a3-99af-da52a3f74ed8') }}</span>
-                <span v-else>{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
+                <span v-if="discounts.length === 1">{{ $t('%SM') }}</span>
+                <span v-else>{{ $t('%SN') }}</span>
             </button>
         </p>
 
-        <hr><h2>{{ $t('1c61441b-b85a-4200-8a87-500150bcd482') }}</h2>
+        <hr><h2>{{ $t('%SO') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -56,10 +56,10 @@
                     <Radio v-model="repeatBehaviour" value="Once" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('9229847f-1eab-478c-bd4f-2af64b19fbcb') }}
+                    {{ $t('%SP') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('dd051de6-5748-403b-aeff-d09f0dc6c588') }}
+                    {{ $t('%SQ') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -67,13 +67,13 @@
                     <Radio v-model="repeatBehaviour" value="RepeatLast" />
                 </template>
                 <h3 v-if="discounts.length > 1 || repeatBehaviour === 'RepeatPattern'" class="style-title-list">
-                    {{ $t('0dd837cf-6c0d-47eb-8e03-c0fc33fed753') }}
+                    {{ $t('%SR') }}
                 </h3>
                 <h3 v-else>
-                    {{ $t('1c61441b-b85a-4200-8a87-500150bcd482') }}
+                    {{ $t('%SO') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('ce9b3654-64cc-489d-bad7-9e390083fac1') }}
+                    {{ $t('%SS') }}
                 </p>
             </STListItem>
 
@@ -82,37 +82,37 @@
                     <Radio v-model="repeatBehaviour" value="RepeatPattern" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('ebc96c58-0295-43a1-b7a0-3e44d138b880') }}
+                    {{ $t('%ST') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('e67f5cbb-c958-48c0-a832-393be5cdcba6') }}
+                    {{ $t('%SU') }}
                 </p>
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('7656725b-2032-4944-b0ca-d5209f8eaa78') }}</h2>
-        <p>{{ $t("8914f29c-dd1f-4750-8ae5-3ce6ea28e1b5") }}</p>
+        <hr><h2>{{ $t('%SV') }}</h2>
+        <p>{{ $t("%SX") }}</p>
 
-        <STInputBox error-fields="cartLabel" :error-box="errors.errorBox" :title="$t(`f64ba2c0-b20e-4aa5-94d2-ff2a3173ee51`)">
-            <input v-model="cartLabel" class="input" type="text" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)">
+        <STInputBox error-fields="cartLabel" :error-box="errors.errorBox" :title="$t(`%2R`)">
+            <input v-model="cartLabel" class="input" type="text" autocomplete="off" :placeholder="$t(`%14p`)">
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('64cc9c20-5d86-465b-921d-beacc26036df') }}</h2>
-        <p>{{ $t('db9f28bd-d199-4a25-aa06-b6435f092f20') }}</p>
+        <h2>{{ $t('%1EP') }}</h2>
+        <p>{{ $t('%1EQ') }}</p>
 
         <Checkbox v-model="allowMultipleDiscountsToSameItem">
-            {{ $t('877afa7e-d709-4d7b-bc4f-5384a2da8495') }}
+            {{ $t('%1ER') }}
         </Checkbox>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('f86309f9-1830-4aff-858c-a8b9d52053b4') }}
+                {{ $t('%SJ') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

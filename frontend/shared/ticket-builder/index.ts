@@ -288,9 +288,9 @@ export class TicketBuilder {
         }
         else {
             if (!dryRun) {
-                this.document.text($t(`12be5ac0-8353-43a2-badb-ab3b27d156b3`) + this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
+                this.document.text($t(`%x3`) + this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
             }
-            height += this.document.heightOfString($t(`12be5ac0-8353-43a2-badb-ab3b27d156b3`) + this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
+            height += this.document.heightOfString($t(`%x3`) + this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
 
             if (!dryRun) {
                 this.document.text(this.order.data.customer.name, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
@@ -501,12 +501,12 @@ export class TicketBuilder {
         this.document.font('Metropolis-Medium');
         this.document.fillColor(COLOR_GRAY);
 
-        const shareText = I18nController.i18n.$t('cd6e3548-aea1-4f74-9c66-b1fa43de6438');
+        const shareText = I18nController.i18n.$t('%6Y');
         const expectedHeight = this.document.heightOfString(shareText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2 }) - 2;
         height = Math.max(height, qrHeight - expectedHeight);
 
         if (!dryRun) {
-            this.document.text($t(`b8130c70-0aa0-4156-b5e0-6125668b21f8`) + ' ', PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2, continued: true });
+            this.document.text($t(`%131`) + ' ', PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2, continued: true });
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
             this.document.text('Stamhoofd', { continued: false, link: I18nController.shared.countryCode === Country.Netherlands ? 'https://www.stamhoofd.nl' : 'https://www.stamhoofd.be' });

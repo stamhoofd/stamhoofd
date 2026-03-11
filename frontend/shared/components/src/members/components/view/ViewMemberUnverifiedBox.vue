@@ -2,16 +2,16 @@
     <div v-if="shouldShow">
         <div class="hover-box container">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('94823cfc-f583-4288-bf44-0a7cfec9e61f') }}</div>
+                <div>{{ $t('%f0') }}</div>
             </h2>
-            <p>{{ $t('47e082e2-def8-4c2a-909e-5f8d3b17f92c') }}</p>
+            <p>{{ $t('%g4') }}</p>
             <dl class="details-grid hover">
                 <template v-for="(email, index) of unverifiedEmails">
                     <MemberDetailWithButton :label="formatWithIndex('E-mailadres', index, unverifiedEmails)" :value="email" icon="trash" color="gray" :on-click="() => deleteEmail(email)" />
                 </template>
 
                 <template v-for="(phone, index) of unverifiedPhones">
-                    <MemberDetailWithButton :label="formatWithIndex($t('90d84282-3274-4d85-81cd-b2ae95429c34'), index, unverifiedPhones)" :value="phone" icon="trash" color="gray" :on-click="() => deletePhone(phone)" />
+                    <MemberDetailWithButton :label="formatWithIndex($t('%2k'), index, unverifiedPhones)" :value="phone" icon="trash" color="gray" :on-click="() => deletePhone(phone)" />
                 </template>
 
                 <template v-for="(address, index) of unverifiedAddresses">
@@ -67,7 +67,7 @@ function addressToLines(address: Address): string[] {
 async function deletePhone(phone: string) {
     deleteFromMemberDetails({
         valueToDelete: phone,
-        confirmMessage: $t(`b1fdf269-a84e-44e8-9d2d-ef57919e3698`, { phone }),
+        confirmMessage: $t(`%10L`, { phone }),
         key: 'unverifiedPhones',
     });
 }
@@ -75,7 +75,7 @@ async function deletePhone(phone: string) {
 async function deleteEmail(email: string) {
     deleteFromMemberDetails({
         valueToDelete: email,
-        confirmMessage: $t(`9860af1d-e902-4f21-b8bb-98e1e401f87f`, { email }),
+        confirmMessage: $t(`%10M`, { email }),
         key: 'unverifiedEmails',
     });
 }
@@ -83,13 +83,13 @@ async function deleteEmail(email: string) {
 async function deleteAddress(address: Address) {
     deleteFromMemberDetails({
         valueToDelete: address,
-        confirmMessage: $t(`d233219f-cbc2-4b54-82df-494e068d754b`, { address: address.toString() }),
+        confirmMessage: $t(`%10N`, { address: address.toString() }),
         key: 'unverifiedAddresses',
     });
 }
 
 async function deleteFromMemberDetails<T extends string | number | (AutoEncoder & { id: string })>({ valueToDelete, key, confirmMessage, confirmButtonText }: { valueToDelete: T; confirmMessage: string; confirmButtonText?: string; key: keyof MemberDetails }) {
-    const isConfirm = await CenteredMessage.confirm(confirmMessage, confirmButtonText ?? $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`));
+    const isConfirm = await CenteredMessage.confirm(confirmMessage, confirmButtonText ?? $t(`%CJ`));
     if (isConfirm) {
         const member = props.member;
         const membersPatch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;

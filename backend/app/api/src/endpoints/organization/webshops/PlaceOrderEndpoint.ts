@@ -66,7 +66,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Webshop not found',
-                    human: $t(`45c039cd-e937-42cd-934b-a2bb4ee0abdd`),
+                    human: $t(`%FX`),
                 });
             }
 
@@ -77,7 +77,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_authenticated',
                     message: 'Not authenticated',
-                    human: $t(`2d5e0e5a-3fbe-4c75-ac6e-0fe8fb534716`),
+                    human: $t(`%w5`),
                     statusCode: 401,
                 });
             }
@@ -98,7 +98,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'too_many_emails_period',
                         message: 'Too many e-mails limited',
-                        human: $t(`a0e947ed-42d6-4cb8-98de-e38c27afc4db`),
+                        human: $t(`%w6`),
                         field: 'recipients',
                     });
                 }
@@ -113,7 +113,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'duplicate_codes',
                     message: 'Duplicate usage of discount codes',
-                    human: $t(`3de5ff97-4f7c-4eb3-8ead-21563ae8fbe1`),
+                    human: $t(`%w7`),
                     field: 'cart.discountCodes',
                 });
             }
@@ -125,7 +125,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'invalid_code',
                         message: 'Invalid discount code',
-                        human: $t(`c119c353-14ad-4a9e-958f-44189725f105`),
+                        human: $t(`%w8`),
                         field: 'cart.discountCodes',
                     });
                 }
@@ -301,14 +301,14 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if (!token) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(webshop.getHost());
                         if (!profileId) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t(`5574469f-8eee-47fe-9fb6-1b097142ac75`, { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t(`%w4`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -356,7 +356,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if ((payment.status as any) === PaymentStatus.Failed) {
                             throw new SimpleError({
                                 code: 'payment_failed',
-                                message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, {
+                                message: $t(`%w3`, {
                                     method: PaymentMethodHelper.getName(payment.method),
                                 }),
                             });

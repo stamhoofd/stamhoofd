@@ -446,16 +446,16 @@ export class CartItem extends AutoEncoder {
 
             if (price === 0) {
                 if (sorted.length === 1) {
-                    parts.push($t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`));
+                    parts.push($t(`%1Mn`));
                 }
                 else {
-                    parts.push(amount + ' ' + $t(`50af1227-4f3d-46bb-a832-b62c4e3bc6ab`));
+                    parts.push(amount + ' ' + $t(`%s8`));
                 }
             }
             else {
                 if (sorted.length === 1 || amount === 1) {
                     if (amount > 1) {
-                        parts.push(Formatter.price(Math.abs(price)) + ' ' + $t(`4edf400a-ac16-4442-8561-e66ed2f785b5`));
+                        parts.push(Formatter.price(Math.abs(price)) + ' ' + $t(`%s9`));
                     }
                     else {
                         parts.push(Formatter.price(Math.abs(price)));
@@ -518,17 +518,17 @@ export class CartItem extends AutoEncoder {
 
         if (this.seats.length) {
             descriptions.push(
-                (this.seats.length === 1 ? $t(`8435edb8-619e-4ddf-b5c8-4d1a2bc44acc`) : $t(`2a3d1996-17cd-4ef7-827b-63f2f9b5b84a`)) + ': '
+                (this.seats.length === 1 ? $t(`%sA`) : $t(`%sB`)) + ': '
                 + this.seats.slice().sort(ReservedSeat.sort).map(s => s.getShortName(this.product)).join(', '),
             );
         }
 
         if (this.uitpasNumbers.length) {
             if (this.uitpasNumbers.length === 1) {
-                descriptions.push($t('87c1a48c-fef5-44c3-ae56-c83463fcfb84') + ': ' + DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber));
+                descriptions.push($t('%wF') + ': ' + DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber));
             }
             else {
-                descriptions.push($t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') + ': ' + this.uitpasNumbers.map(item => DataValidator.formatUitpasNumber(item.uitpasNumber)).join(', '));
+                descriptions.push($t('%1B4') + ': ' + this.uitpasNumbers.map(item => DataValidator.formatUitpasNumber(item.uitpasNumber)).join(', '));
             }
         }
         return descriptions.filter(d => !!d).join('\n');
@@ -571,7 +571,7 @@ export class CartItem extends AutoEncoder {
             errors.addError(new SimpleError({
                 code: 'product_unavailable',
                 message: 'Product unavailable',
-                human: $t(`b3468d2d-269d-4330-9bb7-580920d2d080`, { product: this.product.name }),
+                human: $t(`%sC`, { product: this.product.name }),
             }));
         }
         else {
@@ -582,14 +582,14 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: $t(`349ac252-348b-42ae-aa9c-708a25db03f6`, { product: this.product.name }),
+                        human: $t(`%sD`, { product: this.product.name }),
                     }));
                 }
                 else {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: $t(`c3862722-84b2-4eca-b8cd-dd3f2a9f95c7`, { price: this.productPrice.name, product: this.product.name }),
+                        human: $t(`%sE`, { price: this.productPrice.name, product: this.product.name }),
                     }));
                 }
             }
@@ -608,7 +608,7 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'option_menu_unavailable',
                         message: 'Option menu unavailable',
-                        human: $t(`609af825-3468-407d-a033-170d75b51075`, { product: this.product.name }),
+                        human: $t(`%sF`, { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -625,7 +625,7 @@ export class CartItem extends AutoEncoder {
                     errors.addError(new SimpleError({
                         code: 'option_unavailable',
                         message: 'Option unavailable',
-                        human: $t(`609af825-3468-407d-a033-170d75b51075`, { product: this.product.name }),
+                        human: $t(`%sF`, { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -641,7 +641,7 @@ export class CartItem extends AutoEncoder {
                         new SimpleError({
                             code: 'missing_menu',
                             message: 'Missing menu',
-                            human: $t(`60021a05-e01f-4fda-b12e-8aa8046a2f07`, { option_menu_name: remaining.name }),
+                            human: $t(`%1B8`, { option_menu_name: remaining.name }),
                             field: 'optionMenus.' + remaining.id,
                             meta: { recoverable: true },
                         }),
@@ -687,7 +687,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'uitpas_numbers_not_allowed',
                     message: 'UiTPAS numbers not allowed for this product',
-                    human: $t('43c308e7-301b-46f0-abed-ae855fa49bed'),
+                    human: $t('%1DV'),
                     field: 'cart.items.uitpasNumbers',
                 });
             }
@@ -700,7 +700,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'empty_uitpas_number',
                     message: 'Empty uitpas number',
-                    human: $t('37ba6753-ea29-4166-94dc-43538a5e7356'),
+                    human: $t('%1DW'),
                     field: 'uitpasNumbers.' + i.toString(),
                 });
             }
@@ -709,7 +709,7 @@ export class CartItem extends AutoEncoder {
         const errors = uitpasNumbers.filter(num => !DataValidator.isUitpasNumberValid(num)).map((value, i) => new SimpleError({
             code: 'invalid_uitpas_number',
             message: 'Invalid uitpas number',
-            human: $t('13e018ab-25db-4743-9267-f0724862dac9'),
+            human: $t('%1DX'),
             field: 'uitpasNumbers.' + i.toString(),
         }));
         if (errors.length > 0) {
@@ -721,7 +721,7 @@ export class CartItem extends AutoEncoder {
             throw new SimpleError({
                 code: 'amount_of_uitpas_numbers_mismatch',
                 message: 'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
-                human: $t('6140c642-69b2-43d6-80ba-2af4915c5837'),
+                human: $t('%186'),
                 field: 'cart.items.uitpasNumbers',
             });
         }
@@ -731,7 +731,7 @@ export class CartItem extends AutoEncoder {
             throw new SimpleError({
                 code: 'duplicate_uitpas_numbers',
                 message: 'Duplicate uitpas numbers used',
-                human: $t('d9ec27f3-dafa-41e8-bcfb-9da564a4a675'),
+                human: $t('%187'),
                 field: 'cart.items.uitpasNumbers',
             });
         }
@@ -768,7 +768,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`b3468d2d-269d-4330-9bb7-580920d2d080`, { product: this.product.name }),
+                    human: $t(`%sC`, { product: this.product.name }),
                 });
             }
 
@@ -776,7 +776,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_price_unavailable',
                     message: 'Product price unavailable',
-                    human: $t(`325ccc3a-41a6-462e-81db-2efb0235e3eb`, { price: this.productPrice.name }),
+                    human: $t(`%sG`, { price: this.productPrice.name }),
                 });
             }
 
@@ -784,7 +784,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`7701d42d-eef3-419b-b1fb-85443d117554`, { product: this.product.name }),
+                    human: $t(`%sH`, { product: this.product.name }),
                 });
             }
 
@@ -796,7 +796,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: stockDefinition?.text || $t(`ade1f338-f45e-4384-9520-9d20cfe5311e`, { count: minimumRemaining.toString(), product: this.product.name }),
+                    human: stockDefinition?.text || $t(`%sI`, { count: minimumRemaining.toString(), product: this.product.name }),
                     meta: { recoverable: minimumRemaining > 0 },
                 });
             }
@@ -808,7 +808,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'seating_plan_unavailable',
                     message: 'Invalid seating plan',
-                    human: $t(`6f4d58c7-25d2-407e-901a-f3c03a7e0ab3`, { product: this.product.name }),
+                    human: $t(`%sJ`, { product: this.product.name }),
                 });
             }
 
@@ -834,7 +834,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'seats_unavailable',
                     message: 'Seats unavailable',
-                    human: $t(`2fd43e7b-2c16-4695-bdb4-f3095952d36d`) + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
+                    human: $t(`%sK`) + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
                     meta: { recoverable: true },
                 });
             }
@@ -846,14 +846,14 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: 'invalid_seats',
                         message: 'Invalid seats',
-                        human: $t(`5d8d7f45-85ae-44d0-b8ac-b7db850003ba`, { seats: Formatter.pluralText(this.amount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
+                        human: $t(`%sL`, { seats: Formatter.pluralText(this.amount, $t(`%12Y`), $t(`%UL`)) }),
                         meta: { recoverable: true },
                     });
                 }
                 throw new SimpleError({
                     code: 'invalid_seats',
                     message: 'Invalid seats',
-                    human: $t(`2858b401-42b8-4a95-8bd1-d67addbda5e1`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
+                    human: $t(`%sM`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`%12Y`), $t(`%UL`)) }),
                     meta: { recoverable: true },
                 });
             }
@@ -866,7 +866,7 @@ export class CartItem extends AutoEncoder {
                         throw new SimpleError({
                             code: 'seats_unavailable',
                             message: 'Seats unavailable',
-                            human: $t(`794b3f34-9dd2-4097-af25-af094431fba0`) + ' ' + seat.getNameString(webshop, this.product),
+                            human: $t(`%sN`) + ' ' + seat.getNameString(webshop, this.product),
                         });
                     }
                 }
@@ -887,7 +887,7 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: 'select_connected_seats',
                         message: 'Select connected seats',
-                        human: $t(`a751a023-570b-46ad-8aaa-7b0c4412cbe8`),
+                        human: $t(`%sO`),
                         meta: { recoverable: true },
                     });
                 }

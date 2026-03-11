@@ -54,7 +54,7 @@ export class MemberImporter {
         if (importMemberResults.find(m => !m.isExisting && (m.importRegistrationResult.group === null && m.importRegistrationResult.autoAssignedGroup === null))) {
             throw new SimpleError({
                 code: 'no_group',
-                message: $t(`dfbb830d-922c-42e7-a77a-f37e86e86998`),
+                message: $t(`%1AE`),
             });
         }
 
@@ -75,13 +75,13 @@ export class MemberImporter {
                 let base: string;
 
                 if (importResult.isRegistrationImported) {
-                    base = $t('e2057717-8967-4f81-a717-6bdf9caebc01');
+                    base = $t('%1AA');
                 }
                 else if (importResult.isMemberImported) {
-                    base = $t('c51416d6-e3b2-4666-83ad-dcf8fc5f40e6');
+                    base = $t('%1AB');
                 }
                 else {
-                    base = $t('bd42c95e-8f61-4c5a-a66b-b86b6b7130ba');
+                    base = $t('%1AC');
                 }
 
                 report.setErrorMessage(`${base} ${this.getErrorMessage(e)}`);
@@ -220,7 +220,7 @@ export class MemberImporter {
             return error.message;
         }
 
-        return $t('8a50ee7d-f37e-46cc-9ce7-30c7b37cefe8');
+        return $t('%1AD');
     }
 
     private async importMember(importResult: ImportMemberResult, importMemberResults: ImportMemberResult[]) {
@@ -443,7 +443,7 @@ export class MemberImporter {
             return matchedOnPrice[0];
         }
 
-        return prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('83c99392-7efa-44d3-8531-1843c5fa7c4d')), id: '' });
+        return prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('%15L')), id: '' });
     }
 
     private async getBalanceItems(platformMember: PlatformMember, group: Group): Promise<BalanceItem[]> {
@@ -471,7 +471,7 @@ export class MemberImporter {
 
         throw new SimpleError({
             code: 'no_registration',
-            message: $t(`97f24d1b-9730-45bb-9ebc-33d50bc3ddc1`, { name: platformMember.member.name }),
+            message: $t(`%1AF`, { name: platformMember.member.name }),
         });
     }
 }

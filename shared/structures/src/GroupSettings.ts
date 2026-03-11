@@ -22,7 +22,7 @@ export class GroupPrice extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    name = new TranslatedString($t(`e3ef8c27-f909-4725-b97b-2cbbd9f24bb5`));
+    name = new TranslatedString($t(`%132`));
 
     @field({ decoder: ReduceablePrice })
     price = ReduceablePrice.create({});
@@ -693,22 +693,22 @@ export class GroupSettings extends AutoEncoder {
         if (includeAge && this.minYear && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`8e4c1895-286b-47e7-94c6-fceb63947706`);
+                    who += $t(`%133`);
                 }
                 else {
-                    who += $t(`901e5ba0-d0f3-41f8-a611-0a93f469cecd`);
+                    who += $t(`%134`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`48f7fb2e-28fc-433d-8834-37c9fcfbe862`);
+                    who += $t(`%135`);
                 }
                 else {
-                    who += $t(`d3a6a788-8354-46f1-911e-a452763a5ae8`);
+                    who += $t(`%136`);
                 }
             }
             else {
-                who += $t(`77019f85-9898-4fda-8ae3-d6ac3bc9ad3b`);
+                who += $t(`%137`);
             }
 
             if (this.minYear === this.maxYear) {
@@ -721,62 +721,62 @@ export class GroupSettings extends AutoEncoder {
         else if (includeAge && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`2d09d9be-60e7-4872-8f01-aabd51be4f1a`);
+                    who += $t(`%138`);
                 }
                 else {
-                    who += $t(`b9f4f3d8-8f34-4a20-9361-071079b64cf5`);
+                    who += $t(`%139`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`6c4c2f13-07ce-4ac6-950b-5d28971a753d`);
+                    who += $t(`%13A`);
                 }
                 else {
-                    who += $t(`3447343b-372f-4b3c-88ed-8263a8a34557`);
+                    who += $t(`%13B`);
                 }
             }
             else {
-                who += $t(`e3d49378-ea73-4fcd-9113-7c5bc0cc7591`);
+                who += $t(`%13C`);
             }
             who += ' ' + (this.maxYear);
         }
         else if (includeAge && this.minYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`521b46d2-0e9b-43e8-9a1a-a5e5cb84934a`);
+                    who += $t(`%13D`);
                 }
                 else {
-                    who += $t(`e00ec6db-06f6-4a11-affe-d79c30fdd17a`);
+                    who += $t(`%13E`);
                 }
             }
             else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`441ecbc8-3e95-4820-ac06-253de87162e1`);
+                    who += $t(`%13F`);
                 }
                 else {
-                    who += $t(`8d49f3be-7c08-4526-af54-783466d3d40d`);
+                    who += $t(`%13G`);
                 }
             }
             else {
-                who += $t(`6e4da2b1-9694-49f1-9238-94e784044897`);
+                who += $t(`%13H`);
             }
             who += ' ' + (this.minYear);
         }
         else if (includeGender) {
             if (this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`da7c4439-18f9-4f20-a1f0-f5f1815d1bb9`);
+                    who += $t(`%13I`);
                 }
                 else {
-                    who += $t(`06ab1d42-107d-46d8-8eba-cb62d12068b9`);
+                    who += $t(`%13J`);
                 }
             }
             else if (this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`128eb9e9-d470-49b0-8342-012e484c4daa`);
+                    who += $t(`%13K`);
                 }
                 else {
-                    who += $t(`43e158dd-aab2-4f5c-9e35-f56ff556cc51`);
+                    who += $t(`%13L`);
                 }
             }
         }
@@ -833,7 +833,7 @@ export class GroupSettings extends AutoEncoder {
             throw new SimpleError({
                 code: 'prices_period_gap',
                 message: 'Not every date has a price.',
-                human: $t('17b0fd6e-71a8-41fc-98e2-af859370aac8'),
+                human: $t('%1Cn'),
             });
         }
     }

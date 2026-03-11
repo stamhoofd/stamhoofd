@@ -20,7 +20,7 @@ export function useShowEvent() {
                         limit: 1,
                     }));
                     if (events.results.length === 0) {
-                        Toast.error($t(`6f8446d7-f625-4134-bf05-553ba577619f`)).show();
+                        Toast.error($t(`%yY`)).show();
                         throw new Error('Event not found');
                     }
                     return new ComponentWithProperties(EventOverview, {

@@ -3,15 +3,15 @@
         <p v-if="!isEnteringDiscountCode">
             <button type="button" class="button text" @click="addDiscountCode">
                 <span class="icon label" />
-                <span>{{ $t('60c60897-68d9-4295-a260-295bd9574ff3') }}</span>
+                <span>{{ $t('%jy') }}</span>
             </button>
         </p>
         <hr v-if="isEnteringDiscountCode"><form v-if="isEnteringDiscountCode" data-submit-last-field @submit.prevent="addEnteredCode">
-            <STInputBox error-fields="code" :error-box="errorBox" class="max" :title="$t(`3697babf-4463-460f-95ee-683a40e5d46d`)">
+            <STInputBox error-fields="code" :error-box="errorBox" class="max" :title="$t(`%1MX`)">
                 <div class="split-inputs">
-                    <input v-model="code" autofocus enterkeyhint="go" class="input" type="text" autocomplete="off" :placeholder="$t(`1bc69456-3b92-4744-905d-8dd06a219f0e`)" @blur="cleanCode"><LoadingButton :loading="loading">
+                    <input v-model="code" autofocus enterkeyhint="go" class="input" type="text" autocomplete="off" :placeholder="$t(`%k0`)" @blur="cleanCode"><LoadingButton :loading="loading">
                         <button class="button primary" type="submit">
-                            {{ $t('70ab2aeb-5db1-45db-bf66-4f21441a8b12') }}
+                            {{ $t('%jz') }}
                         </button>
                     </LoadingButton>
                 </div>
@@ -66,7 +66,7 @@ export default class AddDiscountCodeBox extends VueComponent {
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_code',
                     field: 'code',
-                    message: $t(`805f19ef-32b7-4029-8efc-9ffdb1730add`),
+                    message: $t(`%12O`),
                 }));
             }
         }

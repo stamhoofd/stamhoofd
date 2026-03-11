@@ -11,7 +11,7 @@ export class StripeHelper {
         return new SimpleError({
             code: 'not_configured',
             message: 'Stripe is not yet configured for this platform',
-            human: $t('4f1361c2-c860-46e7-a242-933bfe56a7ed'),
+            human: $t('%Fv'),
         });
     }
 
@@ -225,7 +225,7 @@ export class StripeHelper {
         if (!stripeAccount) {
             throw new SimpleError({
                 code: '',
-                message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
             });
         }
 
@@ -235,7 +235,7 @@ export class StripeHelper {
             throw new SimpleError({
                 code: 'minimum_amount',
                 message: 'The minimum amount for an online payment is € 0,50',
-                human: $t(`dae9058f-0aa7-4fcb-9f1d-fc918c65784b`),
+                human: $t(`%wl`),
             });
         }
 
@@ -280,7 +280,7 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact' | 'ideal',
                 billing_details: {
-                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)),
+                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`%Gr`)),
                     email: payment.customer?.dynamicEmail || customer.email,
                     address: payment.customer?.company?.address
                         ? {
@@ -319,7 +319,7 @@ export class StripeHelper {
                 console.error('Stripe payment intent status is not requires_action', paymentIntent);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t(`55d699ae-3da4-45ca-a30e-0f194b08edf7`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`277dc49e-922a-444f-ba2b-b3442d855358`),
+                    message: $t(`%wm`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`%wn`),
                 });
             }
 
@@ -387,7 +387,7 @@ export class StripeHelper {
                 console.error('Stripe session has no url', session);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t(`55d699ae-3da4-45ca-a30e-0f194b08edf7`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`277dc49e-922a-444f-ba2b-b3442d855358`),
+                    message: $t(`%wm`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`%wn`),
                 });
             }
             paymentUrl = session.url;

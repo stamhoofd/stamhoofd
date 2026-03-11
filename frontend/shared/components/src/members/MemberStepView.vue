@@ -1,16 +1,16 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') : saveText" data-testid="member-step" @save="save">
+    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('%16p') : saveText" data-testid="member-step" @save="save">
         <template v-if="isDuplicate">
-            <h1>{{ $t('f59ba68b-d007-40f2-9b87-fc5605ec55ea', {member: cloned.patchedMember.details.firstName}) }}</h1>
-            <p>{{ $t('9474f01d-e447-4a95-986e-247917765ecb', {member: cloned.patchedMember.details.firstName}) }}</p>
+            <h1>{{ $t('%dx', {member: cloned.patchedMember.details.firstName}) }}</h1>
+            <p>{{ $t('%dy', {member: cloned.patchedMember.details.firstName}) }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`0fa4253f-1cfd-4394-93b4-dfba8da04738`)">
+            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`%wE`)">
                 <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
             </STInputBox>
 
-            <hr><h2>{{ $t('61b95651-a851-4a09-9850-9be0542b4c79') }}</h2>
+            <hr><h2>{{ $t('%dz') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem class="left-center">
@@ -18,10 +18,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/communication.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('3292499d-c4db-4429-9f90-c6ce25713d2d') }}
+                        {{ $t('%e0') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('f5229cc1-c908-4409-855a-1dba40371815') }}
+                        {{ $t('%7h') }}
                     </p>
                 </STListItem>
 
@@ -30,10 +30,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('0de51cb5-c474-4ec9-9218-4d6709628675') }}
+                        {{ $t('%e1') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('52161405-1c8f-4abc-adc3-969bcb0f607f') }}
+                        {{ $t('%e2') }}
                     </p>
                 </STListItem>
             </STList>
@@ -73,7 +73,7 @@ const props = withDefaults(
         markReviewed?: string[];
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
-        saveText: () => $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
+        saveText: () => $t(`%v7`),
         saveHandler: null,
         markReviewed: () => [],
     },
@@ -136,7 +136,7 @@ async function save() {
             if (code.value.length !== 16) {
                 errors.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`aadde496-77b6-4281-893e-3215ae73a183`),
+                    message: $t(`%zO`),
                     field: 'code',
                 }));
                 loading.value = false;
@@ -165,7 +165,7 @@ async function save() {
         // Note: we don't yet update our local 'cloned' value. We'll do so if we ever return to this view (onActivated will update it).
 
         if (isDuplicate.value) {
-            Toast.success($t('c113898b-d8ce-47ca-915d-2d069496aa88', { name: cloned.value.patchedMember.details.firstName })).show();
+            Toast.success($t('%Bl', { name: cloned.value.patchedMember.details.firstName })).show();
             isDuplicate.value = false;
         }
 
@@ -198,7 +198,7 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`), $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`), from.shortString() + ' ' + $t(`acebb7f5-73f6-448c-842b-361da931462f`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + $t(`f5962c80-7c80-4d05-a4fe-8a842270d280`) + ' ' + to.shortString() + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
+    if (!await CenteredMessage.confirm($t(`%zP`), $t(`%zQ`), from.shortString() + ' ' + $t(`%zR`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`%M1`) + ' ') + $t(`%zS`) + ' ' + to.shortString() + '.', $t(`%zT`), false)) {
         return;
     }
 
@@ -213,7 +213,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 }
 
 defineExpose({

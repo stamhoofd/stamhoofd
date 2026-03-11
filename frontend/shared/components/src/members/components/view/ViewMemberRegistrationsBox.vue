@@ -11,15 +11,15 @@
         </h2>
 
         <button v-if="!member.family.checkout.cart.isEmpty && app === 'registration'" class="info-box selectable icon" type="button" @click="openCart">
-            <span>{{ $t('8b7dab90-8fea-4a23-8766-431ce27edaec') }}</span>
+            <span>{{ $t('%fw') }}</span>
             <span class="button icon arrow-right-small" />
         </button>
         <template v-else>
             <p v-if="visibleRegistrations.length === 0 && period.id === defaultPeriod.id" class="info-box">
-                {{ $t('74f14f24-6c35-4c61-a857-134408b0a2b4', {member: member.patchedMember.firstName}) }}
+                {{ $t('%fx', {member: member.patchedMember.firstName}) }}
             </p>
             <p v-else-if="visibleRegistrations.length === 0" class="info-box">
-                {{ $t('0985547b-d5fb-4ae7-9e09-1773e7918960', {member: member.patchedMember.firstName}) }}
+                {{ $t('%fy', {member: member.patchedMember.firstName}) }}
             </p>
         </template>
 
@@ -32,7 +32,7 @@
 
         <footer v-if="hasDeleted && !showDeleted" class="style-button-bar">
             <button class="button text" type="button" @click="showDeleted = true;">
-                {{ $t('b0a3b188-34ec-4046-a6eb-24ddb2f816cf') }}
+                {{ $t('%fz') }}
             </button>
         </footer>
     </article>
@@ -144,7 +144,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
     const actions = builder.getActions({ selectedOrganizationRegistrationPeriod });
 
     if (actions.filter(a => a.enabled).length === 0) {
-        Toast.warning($t(`1769b160-721b-41cc-98fa-869045abba79`)).show();
+        Toast.warning($t(`%10J`)).show();
         return;
     }
 

@@ -10,7 +10,7 @@
     <p>
         <button class="button text" type="button" @click="addType">
             <span class="icon add" />
-            <span>{{ $t('8daed6fc-e3dd-4b6b-bd78-c79add8edfb9') }}</span>
+            <span>{{ $t('%5x') }}</span>
         </button>
     </p>
 </template>

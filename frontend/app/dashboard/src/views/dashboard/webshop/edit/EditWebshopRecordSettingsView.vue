@@ -1,16 +1,16 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`d0f49d2a-6b83-4e03-9480-4d0995bbb0a1`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`%u1`)" @save="save">
         <h1>
-            {{ $t('d0f49d2a-6b83-4e03-9480-4d0995bbb0a1') }}
+            {{ $t('%u1') }}
         </h1>
-        <p>{{ $t('422c4fca-4c1d-44f4-8e08-b8044c869b7f') }}</p>
+        <p>{{ $t('%Rk') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
-        <h2>{{ $t('98d06da4-164b-4b8f-a373-3873fa99e1ab') }}</h2>
+        <h2>{{ $t('%Rl') }}</h2>
 
-        <p>{{ $t('fd68e1a7-6059-47fc-b7ad-fdfe4924a67d') }}</p>
+        <p>{{ $t('%48') }}</p>
 
         <STList>
             <STListItem element-name="label" :selectable="true">
@@ -18,16 +18,16 @@
                     <Checkbox v-model="phoneEnabled" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('90d84282-3274-4d85-81cd-b2ae95429c34') }}
+                    {{ $t('%2k') }}
                 </p>
             </STListItem>
         </STList>
 
         <hr>
-        <h2>{{ $t('ec8efff4-e2cf-4755-b8fb-a47f686be173') }}</h2>
+        <h2>{{ $t('%Rm') }}</h2>
 
         <p>
-            {{ $t('86161523-8879-4092-a332-567bf55e0f52') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
+            {{ $t('%Rn') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
         </p>
 
         <EditRecordCategoriesBox :categories="categories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />

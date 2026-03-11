@@ -1,78 +1,78 @@
 <template>
-    <SaveView :title="isNew ? typeName+' ' + $t(`06da1310-e17c-475e-bcd3-bb47844c24c1`) : name+' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? typeName+' ' + $t(`%14c`) : name+' ' + $t(`%Rw`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            {{ typeName }} {{ $t('06da1310-e17c-475e-bcd3-bb47844c24c1') }}
+            {{ typeName }} {{ $t('%14c') }}
         </h1>
         <h1 v-else>
-            {{ name || typeName }} {{ $t('8455850d-829f-412f-bf1f-eedb2caa9f57') }}
+            {{ name || typeName }} {{ $t('%Rw') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <button v-if="!patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" type="button" class="warning-box with-button selectable" @click="openUitpasEventSearch()">
-            {{ $t('c43f7c56-b6f3-4de5-a543-c4c0c2b8cb6e') }}
+            {{ $t('%1Bx') }}
 
             <span class="button text" type="button">
-                {{ $t('489734b2-e7e2-4c5e-a9ad-d00c29dc4f8e') }}
+                {{ $t('%1By') }}
             </span>
         </button>
         <button v-else-if="patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus !== UitpasClientCredentialsStatus.Ok" type="button" class="error-box with-button selectable" @click="openUitpasSettings()">
             {{ UitpasClientCredentialsStatusHelper.getName(organization.meta.uitpasClientCredentialsStatus) }}
 
             <span class="button text" type="button">
-                {{ $t('8b74f225-07a7-4b5e-b937-4d479c888789') }}
+                {{ $t('%1Bz') }}
             </span>
         </button>
 
         <div class="split-inputs">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`%Gq`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
             </STInputBox>
-            <STInputBox v-if="isTicket" error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+            <STInputBox v-if="isTicket" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="type">
                     <option value="Ticket">
-                        {{ $t('de971042-551d-43d2-ab47-e76132156887') }}
+                        {{ $t('%2K') }}
                     </option>
                     <option value="Voucher">
-                        {{ $t('325f85b1-ff89-4bde-a2df-1328c8ea4a3a') }}
+                        {{ $t('%g') }}
                     </option>
                 </Dropdown>
             </STInputBox>
 
-            <STInputBox v-else error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+            <STInputBox v-else error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="type">
                     <option value="Product">
-                        {{ $t('e1f32f18-acac-4339-883c-09897ffbd691') }}
+                        {{ $t('%TU') }}
                     </option>
                     <option value="Person">
-                        {{ $t('9b451e56-b7ae-48ff-811a-a0b4a0175b12') }}
+                        {{ $t('%TV') }}
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`8b049701-1a5f-4b35-bac8-e2b28309ac5f`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%U1`)" />
         </STInputBox>
 
         <template v-if="isTicket">
-            <hr><h2>{{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}</h2>
+            <hr><h2>{{ $t('%TW') }}</h2>
             <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="errors.validator" @modify="modifyLocation" />
 
-            <hr><h2>{{ $t('436890b3-9e42-4886-98fa-c42c2ac8420a') }}</h2>
+            <hr><h2>{{ $t('%TX') }}</h2>
             <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange" />
         </template>
 
         <template v-if="patchedProduct.uitpasEvent">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('1e92a151-6161-4941-aa3f-fa69e14f75ee') }}</div>
+                <div>{{ $t('%1Bp') }}</div>
                 `<button class="button text only-icon-smartphone" type="button" @click="clearUitpasEvent">
                     <span class="icon unlink" />
-                    <span>{{ $t('7ec9bfd6-8d4c-4f45-a5e8-7979c747de64') }}</span>
+                    <span>{{ $t('%1C0') }}</span>
                 </button>`
             </h2>
             <p class="style-description-small">
-                {{ $t('d0c76989-c11b-4eef-ac8f-3c76e9ad315e') }}
+                {{ $t('%1C1') }}
             </p>
 
             <STList>
@@ -94,7 +94,7 @@
 
                     <template #right>
                         <span class="button text">
-                            {{ $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}
+                            {{ $t('%1Bm') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -103,15 +103,15 @@
         </template>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('2b96c0b9-6c20-4962-8e99-ff898d893a0d') }}</div>
+            <div>{{ $t('%TY') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addProductPrice()">
                     <span class="icon add" />
-                    <span>{{ $t('1205deb9-498d-435d-a6e1-91ea98371523') }}</span>
+                    <span>{{ $t('%1IP') }}</span>
                 </button>
             </div>
         </h2>
-        <p>{{ $t("b81de0d8-04af-48b7-8df4-a5fa51fa60ce") }}</p>
+        <p>{{ $t("%Tx") }}</p>
 
         <ProductPriceBox v-if="patchedProduct.prices.length === 1" :is-new="isNew" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
 
@@ -125,13 +125,13 @@
 
         <template v-if="fields.length">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('b8f96d3c-0bd8-493f-834c-aa783bf064ff') }}</div>
+                <div>{{ $t('%TZ') }}</div>
                 <div>
                     <button class="button icon add" type="button" @click="addField" />
                 </div>
             </h2>
 
-            <p>{{ $t("2e53d1ef-56be-45f0-a71b-9cf0fddc481d") }}</p>
+            <p>{{ $t("%Ty") }}</p>
 
             <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
         </template>
@@ -143,7 +143,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('29159e0f-2709-48e7-870c-27fb8c002465') }}
+                    {{ $t('%1AJ') }}
                 </h3>
             </STListItem>
 
@@ -152,7 +152,7 @@
                     <span class="icon seat gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('9a9c02aa-ea5a-4882-be31-e650e80f56ec') }}
+                    {{ $t('%Ta') }}
                 </h3>
 
                 <p class="style-description-small">
@@ -171,10 +171,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('792ebf47-4ad3-4d9c-a4ab-f315b715e70e') }}
+                    {{ $t('%Tb') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t(`62d2a48e-46eb-4b9a-8546-66ec8c482cc9`) }}
+                    {{ $t(`%U2`) }}
                 </p>
             </STListItem>
 
@@ -184,10 +184,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('04886108-0006-454b-909e-1703681ea5d2') }}
+                    {{ $t('%Tc') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t("bd8e47cd-5d0a-4ca3-b5d2-947e6f7a8299") }}
+                    {{ $t("%Tz") }}
                 </p>
             </STListItem>
 
@@ -196,10 +196,10 @@
                     <span class="icon seat gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('6e9e9551-10d9-4a06-a850-759c85259c3b') }}
+                    {{ $t('%Td') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('6aadf67e-a488-4b32-a838-10a0bf1eb78a') }}
+                    {{ $t('%Te') }}
                 </p>
             </STListItem>
 
@@ -210,10 +210,10 @@
 
                 <UploadButton v-model="image" :resolutions="resolutions" element-name="div">
                     <h3 class="style-title-list">
-                        {{ $t('acae105a-788b-434a-b476-36764427b635') }}
+                        {{ $t('%Tf') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t("3e03282d-99d2-4505-b74f-0d5a6d57a8a8") }}
+                        {{ $t("%U0") }}
                     </p>
                 </UploadButton>
             </STListItem>
@@ -221,13 +221,13 @@
 
         <template v-if="image">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('1e7d9358-7f2a-455b-b676-8fb09e26cb3c') }}</div>
+                <div>{{ $t('%Tg') }}</div>
                 <div>
                     <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
                         <span class="icon trash" />
-                        <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                        <span>{{ $t('%CJ') }}</span>
                     </button>
-                    <UploadButton v-model="image" :text="image ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
+                    <UploadButton v-model="image" :text="image ? $t(`%He`) : $t(`%Hf`)" :resolutions="resolutions" />
                 </div>
             </h2>
 
@@ -237,8 +237,8 @@
         </template>
 
         <hr><h2>
-            {{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}
-            <span v-if="remainingStock !== null" class="title-suffix">{{ $t('949b7f3f-3aac-4e9c-9b54-d109486eb28a') }} {{ remainingStock }} {{ $t('0467006a-7ded-4e4f-acec-986d013bea6b') }}</span>
+            {{ $t('%1CP') }}
+            <span v-if="remainingStock !== null" class="title-suffix">{{ $t('%Th') }} {{ remainingStock }} {{ $t('%14b') }}</span>
         </h2>
 
         <STList>
@@ -248,10 +248,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('9b385bc1-0c3b-4476-b31d-a8598e381ca4') }}
+                    {{ $t('%Ti') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('2aa82e9f-9d78-420d-8606-88dca2bb4bef') }}
+                    {{ $t('%Tj') }}
                 </p>
             </STListItem>
 
@@ -262,10 +262,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('11b3bb72-0edb-401e-9c60-47fbb2d132fc') }}
+                        {{ $t('%Tk') }}
                     </h3>
                     <p v-if="disabled" class="style-description-small">
-                        {{ $t('3cd822c4-329e-4e07-97b0-cdb04239b851') }}
+                        {{ $t('%Tl') }}
                     </p>
                 </STListItem>
 
@@ -276,10 +276,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('9128e6d1-9772-4258-b1e6-5d271b71727f') }}
+                            {{ $t('%1CN') }}
                         </h3>
                         <p v-if="useEnableAfter" class="style-description-small">
-                            {{ $t('1631299a-246c-4923-bc48-a09c6ead77b5') }}
+                            {{ $t('%Tm') }}
                         </p>
 
                         <div v-if="useEnableAfter" class="split-inputs option">
@@ -296,10 +296,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('163c78b9-f0dd-4ec5-bdfe-32b389aeda7d') }}
+                            {{ $t('%1CO') }}
                         </h3>
                         <p v-if="useDisableAfter" class="style-description-small">
-                            {{ $t('53b8e515-daa7-40ee-8140-c5a6e851a829') }}
+                            {{ $t('%Tn') }}
                         </p>
 
                         <div v-if="useDisableAfter" class="split-inputs option">
@@ -316,16 +316,16 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('838d249e-8efd-43d7-8026-6e48e9525117') }} {{ usedStock }} {{ $t('aa112df2-654a-4c87-840c-d63823adcca4') }}
+                            {{ $t('%To') }} {{ usedStock }} {{ $t('%Tp') }}
                         </h3>
 
                         <p v-if="useStock" class="style-description-small">
-                            {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
+                            {{ $t('%TO') }}
                         </p>
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                                <NumberInput v-model="stock" :suffix="$t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a')" :suffix-singular="$t('599ce864-4059-48eb-82f8-9191e9507050')" />
+                                <NumberInput v-model="stock" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -336,16 +336,16 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('75b1afbb-3595-40da-a97f-fef5172fe58e') }}
+                            {{ $t('%1H2') }}
                         </h3>
 
                         <p v-if="useShowStockBelow" class="style-description-small">
-                            {{ $t('c6dc2ed9-f90a-425d-970b-dde1ab00d564', { showStockBelow: showStockBelow! }) }}
+                            {{ $t('%1H3', { showStockBelow: showStockBelow! }) }}
                         </p>
 
                         <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="showStockBelow" :error-box="showStockBelow">
-                                <NumberInput v-model="showStockBelow" :suffix="$t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a')" :suffix-singular="$t('599ce864-4059-48eb-82f8-9191e9507050')" />
+                                <NumberInput v-model="showStockBelow" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -356,7 +356,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('bf1d7fcd-4f47-4263-8d0b-f7f6dc69e485') }} {{ usedStock }} {{ $t('5625d838-6f25-4e2d-9730-e1fbf3b29a8f') }}
+                            {{ $t('%Tq') }} {{ usedStock }} {{ $t('%Tr') }}
                         </h3>
 
                         <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
@@ -366,7 +366,7 @@
                         </div>
 
                         <p class="style-description">
-                            {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
+                            {{ $t('%TO') }}
                         </p>
                     </STListItem>
 
@@ -376,11 +376,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('1b0436fb-8c06-4bfc-95c0-391563172a39') }}
+                            {{ $t('%Ts') }}
                         </h3>
 
                         <p v-if="useMaxPerOrder" class="style-description-small">
-                            {{ $t('e4f5dc91-fb2a-4490-982f-8f8df2d70b3d') }}
+                            {{ $t('%Tt') }}
                         </p>
 
                         <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
@@ -398,22 +398,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('3b458b67-2585-486a-96ba-80c9f5711d20') }}
+                    {{ $t('%Tu') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('5d52a9c2-e473-494a-a0e5-e087682534a6') }}
+                    {{ $t('%Tv') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('64bcb0ba-44aa-4ae0-8ab9-84062289cbb1') }}
+                {{ $t('%Tw') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>
@@ -895,7 +895,7 @@ async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
     if (enableUitpasSocialTariff) {
         if (!uitpasBaseProductPriceAvailable.value) {
             // should not be possible
-            Toast.error($t('f6291892-674b-4c66-8855-4937f4d15b86')).show();
+            Toast.error($t('%1AK')).show();
             return;
         }
         const onFixed = async (navigationActions?: NavigationActions) => {

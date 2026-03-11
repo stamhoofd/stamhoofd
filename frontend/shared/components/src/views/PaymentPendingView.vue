@@ -1,29 +1,29 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`be295439-991b-4ba6-b9d5-b4e8ae6a198d`)" />
+        <STNavigationBar :title="$t(`%kP`)" />
 
         <main v-if="payment && payment.status === 'Pending' && payment.method === 'DirectDebit'">
-            <h1>{{ $t('e8247764-d10a-4c54-97e2-acca397b8ac9') }}</h1>
-            <p>{{ $t("2929f382-929d-42c8-9091-e3496d35e184") }}</p>
+            <h1>{{ $t('%kK') }}</h1>
+            <p>{{ $t("%kO") }}</p>
         </main>
 
         <main v-else-if="!payment || payment.status !== 'Failed'">
-            <h1>{{ $t('3db0fd13-4501-432a-ada6-7f48efea9fe3') }}</h1>
-            <p>{{ $t('3c984618-93b7-491a-8324-70c61d128114') }}</p>
+            <h1>{{ $t('%kL') }}</h1>
+            <p>{{ $t('%kM') }}</p>
 
             <Spinner />
         </main>
 
         <main v-else>
-            <h1>{{ $t('5690126d-651e-475d-9503-cfe6825a9735') }}</h1>
-            <p>{{ $t('a839ffe6-e8e0-4699-91c3-64092087b380') }}</p>
+            <h1>{{ $t('%Je') }}</h1>
+            <p>{{ $t('%kN') }}</p>
         </main>
 
         <STToolbar v-if="payment && (payment.status === 'Failed' || payment.method === 'Payconiq')">
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="retry">
-                        <span>{{ $t('314810ef-ff16-4b22-b8a5-399d5d820a4a') }}</span>
+                        <span>{{ $t('%1EU') }}</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -66,7 +66,7 @@ onMounted(() => {
 });
 
 function retry() {
-    if (confirm($t(`2166f942-4fce-476f-adf2-d5803ff4ed16`))) {
+    if (confirm($t(`%12i`))) {
         if (navigationController.value!.components.length > 1) {
             navigationActions.pop()?.catch(console.error);
         }

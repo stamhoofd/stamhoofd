@@ -26,18 +26,18 @@ export enum STPackageType {
 export class STPackageTypeHelper {
     static getName(type: STPackageType): string {
         switch (type) {
-            case STPackageType.LegacyMembers: return $t(`d855727b-b760-4d38-8506-d1ba215256c9`);
+            case STPackageType.LegacyMembers: return $t(`%oF`);
             case STPackageType.Members: {
-                return $t(`64d8c751-a6c4-427e-b3db-cef827058780`);
+                return $t(`%Om`);
             }
             case STPackageType.Webshops: {
-                return $t(`3b1c092c-fdb5-4322-a34d-b8142881b3cf`);
+                return $t(`%1Hk`);
             }
             case STPackageType.SingleWebshop: {
-                return $t(`fb1cc501-93bd-45e9-9ce6-26c3f4427205`);
+                return $t(`%oG`);
             }
-            case STPackageType.TrialMembers: return $t(`752fdb9b-b159-41b3-95d1-fc3bd83bf9b4`);
-            case STPackageType.TrialWebshops: return $t(`6aeb7f4b-9a84-4738-b3ca-db96a7c92fcd`);
+            case STPackageType.TrialMembers: return $t(`%1Hl`);
+            case STPackageType.TrialWebshops: return $t(`%1Hm`);
         }
     }
 }

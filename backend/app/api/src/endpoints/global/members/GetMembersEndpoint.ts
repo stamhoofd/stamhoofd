@@ -109,7 +109,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     if (groupIds.length === 0) {
                         throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
-                            human: $t(`737f9ff3-8eca-40f5-8f03-d303d53de5d1`),
+                            human: $t(`%15d`),
                         });
                     }
 
@@ -264,7 +264,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: $t(`dce51638-6129-448b-8a15-e6d778f3a76a`),
+                    human: $t(`%Cv`),
                 });
             }
             throw error;

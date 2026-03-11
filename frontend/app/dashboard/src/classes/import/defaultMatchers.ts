@@ -69,7 +69,7 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
             if (d < period.period.startDate || d > period.period.endDate) {
                 throw new SimpleError({
                     code: 'invalid_start_date',
-                    message: $t('dbcf7fbb-376c-4712-a854-1781ca8f6c82'),
+                    message: $t('%18c'),
                 });
             }
 
@@ -89,7 +89,7 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
             if (d < period.period.startDate || d > period.period.endDate) {
                 throw new SimpleError({
                     code: 'invalid_end_date',
-                    message: $t('908caec1-3ce7-478d-aba8-e8daac08beab'),
+                    message: $t('%1IT'),
                 });
             }
 

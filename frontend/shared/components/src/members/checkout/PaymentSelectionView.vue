@@ -1,8 +1,8 @@
 <template>
     <div class="st-view" data-testid="payment-selection-view">
-        <STNavigationBar :title="needsPay ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`7de2e636-dcec-44b1-a681-daeb9cd85316`)" />
+        <STNavigationBar :title="needsPay ? $t(`%M7`) : $t(`%X9`)" />
         <main v-if="needsPay" class="center">
-            <h1>{{ $t('6f2975aa-d60f-4abb-b597-c30e2382da12') }}</h1>
+            <h1>{{ $t('%eU') }}</h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -11,22 +11,22 @@
             <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
         </main>
         <main v-else class="center">
-            <h1>{{ $t('3127d046-5f3e-45fa-bf28-bc5e3a227773') }}</h1>
-            <p>{{ $t('2e8bad7e-ff47-4ea1-b38d-4f4e24153146') }}</p>
+            <h1>{{ $t('%eV') }}</h1>
+            <p>{{ $t('%eW') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
         </main>
 
         <STToolbar>
             <template #left>
-                <span data-testid="total-text">{{ $t('341172ee-281e-4458-aeb1-64ed5b2cc8bb') }}: {{ formatPrice(checkout.totalPrice) }}</span>
+                <span data-testid="total-text">{{ $t('%xL') }}: {{ formatPrice(checkout.totalPrice) }}</span>
             </template>
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
-                        <span v-if="needsPay && (selectedPaymentMethod === 'Transfer' || selectedPaymentMethod === 'PointOfSale')">{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>
-                        <span v-else-if="needsPay">{{ $t('e3f37ccd-a27c-4455-96f4-e33b74ae879e') }}</span>
-                        <span v-else>{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>
+                        <span v-if="needsPay && (selectedPaymentMethod === 'Transfer' || selectedPaymentMethod === 'PointOfSale')">{{ $t('%X9') }}</span>
+                        <span v-else-if="needsPay">{{ $t('%eX') }}</span>
+                        <span v-else>{{ $t('%X9') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>

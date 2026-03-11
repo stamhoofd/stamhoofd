@@ -1,13 +1,13 @@
 <template>
     <form class="st-view" @submit.prevent="goNext">
-        <STNavigationBar :title="$t(`69ea4d40-e84c-4c40-b344-0d1c82e4af42`)" />
+        <STNavigationBar :title="$t(`%Wp`)" />
 
         <main>
             <h1>
-                {{ $t('deb8b290-d12c-4fa5-827c-fc24decabbba') }}
+                {{ $t('%Wl') }}
             </h1>
             <p>
-                {{ $t('167706de-e695-4695-95d6-662dd10c2a46') }}
+                {{ $t('%Wm') }}
             </p>
 
             (todo)
@@ -15,11 +15,11 @@
 
         <STToolbar>
             <template #left>
-                {{ $t('d11410bc-d04e-4145-a59e-75c0db0fc04f') }}
+                {{ $t('%Wn') }}
             </template>
             <template #right>
                 <button class="button primary" type="submit">
-                    {{ $t('e859a41b-e10b-4eac-a594-83decf3927c2') }}
+                    {{ $t('%Wo') }}
                 </button>
             </template>
         </STToolbar>

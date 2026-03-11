@@ -1,8 +1,8 @@
 <template>
     <div class="st-view show-seats-view shade">
-        <STNavigationBar :disable-dismiss="!allowDismiss" :title="$t(`5d783407-0f24-4cf7-aa1d-aecb6b759d3e`)" />
+        <STNavigationBar :disable-dismiss="!allowDismiss" :title="$t(`%kS`)" />
         <main>
-            <h1>{{ $t('5d783407-0f24-4cf7-aa1d-aecb6b759d3e') }}</h1>
+            <h1>{{ $t('%kS') }}</h1>
 
             <STList>
                 <STListItem v-if="seatDescription.length">

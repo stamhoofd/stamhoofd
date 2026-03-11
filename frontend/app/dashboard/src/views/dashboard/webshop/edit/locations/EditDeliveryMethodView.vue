@@ -1,38 +1,38 @@
 <template>
-    <SaveView :disabled="!hasChanges" :title="$t(`4662441a-09eb-4344-8f94-3c53035b81c1`)" @save="save">
+    <SaveView :disabled="!hasChanges" :title="$t(`%Su`)" @save="save">
         <h1 v-if="isNew">
-            {{ $t('fe3e7e2f-0fd3-440a-a904-5fa99943371b') }}
+            {{ $t('%QI') }}
         </h1>
         <h1 v-else>
-            {{ $t('092e12ff-7c47-490a-908f-59a7eb28eaa0') }}
+            {{ $t('%Sr') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`cab8babf-3193-4087-8498-123cd6551134`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('0d4b25fe-6a3d-480b-86e8-e21c664a15ee')" autocomplete="off">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Sv`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%2w')" autocomplete="off">
         </STInputBox>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`8e80e892-591c-4f45-85f2-450348e969d6`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sw`)" />
         </STInputBox>
         <EditDeliveryRegionsSection :delivery-method="patchedDeliveryMethod" @patch="addPatch" />
 
-        <EditTimeSlotsSection :webshop="webshop" :time-slots="patchedDeliveryMethod.timeSlots" :title="$t(`1a3a8678-28e3-4f6a-b968-c4a8844d79ff`)" @patch="patchTimeSlots">
-            <p>{{ $t('e4f5a933-4bdf-4f2b-818a-db14e6be6ce0') }}</p>
+        <EditTimeSlotsSection :webshop="webshop" :time-slots="patchedDeliveryMethod.timeSlots" :title="$t(`%Sx`)" @patch="patchTimeSlots">
+            <p>{{ $t('%Ss') }}</p>
         </EditTimeSlotsSection>
 
-        <hr><h2>{{ $t('482bd766-39fa-4340-91b4-ae22a23d5fa5') }}</h2>
+        <hr><h2>{{ $t('%Sn') }}</h2>
         <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errors.errorBox" @patch="patchPrice" />
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('a79aa774-00b4-46b6-8b99-b1ab1d8bf24e') }}
+                {{ $t('%St') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

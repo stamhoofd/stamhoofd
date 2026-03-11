@@ -1,9 +1,9 @@
 <template>
     <div class="st-view add-item-view">
-        <STNavigationBar :title="$t(`19bd9ed4-585f-4cc5-a4ea-643f00481b77`)" />
+        <STNavigationBar :title="$t(`%u9`)" />
         <main>
             <h1>
-                {{ $t('19bd9ed4-585f-4cc5-a4ea-643f00481b77') }}
+                {{ $t('%u9') }}
             </h1>
 
             <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" :admin="true" />

@@ -1,16 +1,16 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="$t(`36756394-4c8d-4b0d-bc88-9fe1d58caf1d`)" />
+        <Title v-bind="$attrs" :title="$t(`%f1`)" />
 
         <p v-if="member.isPropertyEnabled('parents')" class="style-description-block">
-            {{ $t('84d9b7f0-3493-401b-a9ab-04b530373971') }}
+            {{ $t('%f7') }}
         </p>
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="visibleContacts.length === 0" class="info-box">
-            {{ $t('4220243d-1c75-4eae-a5fa-08e77399376e', {member: member.patchedMember.details.firstName}) }}
+            {{ $t('%f8', {member: member.patchedMember.details.firstName}) }}
         </p>
 
         <STList v-if="visibleContacts.length > 0" :with-animation="true">
@@ -29,12 +29,12 @@
                 <template #right>
                     <span v-if="!isContactSelected(contact)" class="button text limit-space">
                         <span class="icon add" />
-                        <span>{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
+                        <span>{{ $t('%SN') }}</span>
                     </span>
 
                     <button v-else class="button text limit-space" type="button" @click.stop="editContact(contact)">
                         <span class="icon edit" />
-                        <span>{{ $t('ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad') }}</span>
+                        <span>{{ $t('%f9') }}</span>
                     </button>
                 </template>
             </STListItem>
@@ -43,7 +43,7 @@
         <div class="style-button-bar">
             <button type="button" class="button text" :class="{selected: visibleContacts.length <= 0}" @click="addContact()">
                 <span class="icon add" />
-                <span>{{ $t('fc4c1e2a-e375-4f25-9953-f8c6b2a86a09') }}</span>
+                <span>{{ $t('%fA') }}</span>
             </button>
         </div>
     </div>
@@ -83,7 +83,7 @@ useValidation(errors.validator, () => {
     if (isPropertyRequired('emergencyContacts') && emergencyContacts.value.length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`995345ff-f802-4485-860e-5346973cd5f9`),
+            message: $t(`%102`),
             field: 'emergencyContacts',
         }));
     }

@@ -2,9 +2,9 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasWrite" class="button icon edit" type="button" :v-tooltip="$t(`d327935e-c900-4231-a572-1a7f7821654f`)" @click="editOrganization" />
-                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('bdd3230e-7a76-4b7a-b9a8-60bdf200d464')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('88b87e7b-add1-4551-8135-a1d3dc96da9c')" @click="goForward" />
+                <button v-if="hasWrite" class="button icon edit" type="button" :v-tooltip="$t(`%Go`)" @click="editOrganization" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%Gk')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%Gl')" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -17,13 +17,13 @@
             </h1>
 
             <p v-if="!organization.active" class="error-box">
-                {{ $t('8ccdb08d-3127-4fc7-ba15-5a0af262bcc8') }}
+                {{ $t('%Gm') }}
             </p>
 
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
+                        {{ $t('%Cn') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ organization.address }}
@@ -32,19 +32,19 @@
 
                 <STListItem v-for="company of organization.meta.companies" :key="company.id">
                     <h3 class="style-definition-label">
-                        {{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}
+                        {{ $t('%1Ke') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ company.name }}
                     </p>
                     <p v-if="company.VATNumber" v-copyable class="style-description-small style-copyable">
-                        {{ company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
+                        {{ company.VATNumber }} {{ $t('%Gn') }}
                     </p>
                     <p v-else-if="company.companyNumber" v-copyable class="style-description-small style-copyable">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
+                        {{ $t('%1CH') }}
                     </p>
 
                     <p v-if="company.address" v-copyable class="style-description-small style-copyable">
@@ -54,7 +54,7 @@
 
                 <STListItem v-if="organization.website" element-name="a" :href="organization.website" :selectable="true" target="_blank">
                     <h3 class="style-definition-label">
-                        {{ $t('00c90aa3-2d42-45bc-a3e7-56565b7a4e0e') }}
+                        {{ $t('%G') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ organization.website }}
@@ -67,7 +67,7 @@
 
                 <STListItem v-if="!isPlatform">
                     <h3 class="style-definition-label">
-                        {{ $t('8565df22-3559-44b1-be1f-de9d1c3a7837') }}
+                        {{ $t('%6t') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(organization.createdAt) }}
@@ -76,7 +76,7 @@
 
                 <STListItem v-if="!isPlatform && organization.privateMeta">
                     <h3 class="style-definition-label">
-                        {{ $t('bf20a769-772d-46b2-9b48-2ea29c96f113') }}
+                        {{ $t('%1z') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ organization.privateMeta?.acquisitionTypes.join(', ') }}
@@ -85,7 +85,7 @@
 
                 <STListItem :selectable="hasWrite" @click="hasWrite ? editOrganization() : undefined">
                     <h3 class="style-definition-label">
-                        {{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}
+                        {{ $t('%3G') }}
                     </h3>
                     <p class="style-definition-text" :class="{placeholder: tagStringList.length === 0}">
                         {{ tagStringList || 'Geen' }}
@@ -108,7 +108,7 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('f18beb62-a9e8-4881-865c-28ad534b6f24') }}</h2>
+            <hr><h2>{{ $t('%6u') }}</h2>
 
             <p>{{ $t('Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.' ) }}</p>
 
@@ -118,10 +118,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
+                        {{ $t('%xU') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('a5b61d4d-207f-485c-8748-cbb04fcb2d23') }}
+                        {{ $t('%3F') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -133,10 +133,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}
+                        {{ $t('%1EH') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('eb91fb5c-72fc-44d4-9b84-4c9f7791e27a') }}
+                        {{ $t('%32') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -148,10 +148,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/laptop-key.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('bda3721a-3b39-4409-9407-e0b3abde0009') }}
+                        {{ $t('%6v') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('2300284a-a015-4c97-8ad1-6c9f2bbde174') }}
+                        {{ $t('%3B') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -162,18 +162,18 @@
             <ViewOrganizationRecordCategoriesBox :organization="organization" />
 
             <div v-if="setupSteps.steps.size" class="container">
-                <hr><h2>{{ $t('6355a1b9-7b98-48c4-9aca-91df9a22d66e') }}</h2>
+                <hr><h2>{{ $t('%6Z') }}</h2>
                 <SetupStepRows :steps="setupSteps" list-type="review" />
             </div>
 
             <hr><h2>
-                {{ $t('f477755c-2d6e-473c-b9b9-2ebe0af173f3') }}
+                {{ $t('%31') }}
             </h2>
 
             <LoadingButton :loading="deleting">
                 <button class="button secundary danger" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                    <span>{{ $t('%CJ') }}</span>
                 </button>
             </LoadingButton>
         </main>
@@ -219,7 +219,7 @@ const title = computed(() => {
 });
 
 const tagStringList = computed(() => {
-    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`0e21480d-5597-4337-bcee-5f4eba73fb7e`)).join(', ');
+    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`%15v`)).join(', ');
 });
 
 const setupSteps = computed(() => props.organization.period.setupSteps);
@@ -258,7 +258,7 @@ async function deleteMe() {
     }
     deleting.value = true;
 
-    if (!await CenteredMessage.confirm($t('92c19888-7ac0-46b5-b691-05b29e52e110'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('988f9fce-a36a-44b5-8df6-5d9ff9eaa694'))) {
+    if (!await CenteredMessage.confirm($t('%35'), $t('%55'), $t('%vT'))) {
         deleting.value = false;
         return;
     }
@@ -268,7 +268,7 @@ async function deleteMe() {
 
     // Second confirmation window
 
-    if (!await CenteredMessage.confirm($t('2be85b13-52d6-4322-adcc-b491b5749422'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('988f9fce-a36a-44b5-8df6-5d9ff9eaa694'))) {
+    if (!await CenteredMessage.confirm($t('%36'), $t('%55'), $t('%vT'))) {
         deleting.value = false;
         return;
     }
@@ -276,7 +276,7 @@ async function deleteMe() {
     // Wait 3 seconds
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    if (!await CenteredMessage.confirm($t('6435b870-2298-49bb-bd28-904e864178d3'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('988f9fce-a36a-44b5-8df6-5d9ff9eaa694'))) {
+    if (!await CenteredMessage.confirm($t('%37'), $t('%55'), $t('%vT'))) {
         deleting.value = false;
         return;
     }
@@ -296,7 +296,7 @@ async function deleteMe() {
         });
 
         GlobalEventBus.sendEvent('organizations-deleted', [props.organization]).catch(console.error);
-        Toast.success($t('111bb645-f8f6-4788-b98a-f1a3d2d72fce')).show();
+        Toast.success($t('%1LO')).show();
         await pop({ force: true });
     }
     catch (e) {

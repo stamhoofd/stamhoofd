@@ -2,13 +2,13 @@
     <LoadingBoxTransition :loading="loadingStripeAccounts">
         <div class="container">
             <STErrorsDefault :error-box="errors.errorBox" />
-            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" error-fields="stripeAccountId" :title="$t(`217f3390-3eef-4f35-bd23-ab3c155f2622`)">
+            <STInputBox v-if="(stripeAccountObject === null && stripeAccounts.length > 0) || stripeAccounts.length > 1 || (stripeAccounts.length > 0 && hasMollieOrBuckaroo)" error-fields="stripeAccountId" :title="$t(`%JM`)">
                 <Dropdown v-model="stripeAccountId">
                     <option v-if="hasMollieOrBuckaroo" :value="null">
                         {{ mollieOrBuckarooName }}
                     </option>
                     <option v-else :value="null">
-                        {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
+                        {{ $t('%1FW') }}
                     </option>
                     <option v-for="account in stripeAccounts" :key="account.id" :value="account.id">
                         {{ account.meta.settings.dashboard.display_name }} - {{ account.meta.business_profile.name }}, xxxx {{ account.meta.bank_account_last4 }} - {{ account.accountId }}
@@ -18,7 +18,7 @@
             <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
                 {{ stripeAccountObject.warning.text }}
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}
+                    {{ $t('%19t') }}
                 </a>
             </p>
 
@@ -40,25 +40,25 @@
             </STList>
 
             <template v-if="showAdministrationFee">
-                <hr><h2>{{ $t('a0d99100-f225-416f-bcec-e25df9d651ac') }}</h2>
-                <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
+                <hr><h2>{{ $t('%xK') }}</h2>
+                <p>{{ $t('%1') }}</p>
 
                 <div class="split-inputs">
-                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`f67ccf42-d4a8-4fe6-b7dc-91f43726646e`)">
-                        <PriceInput v-model="fixed" :min="0" :required="true" :placeholder="$t(`f67ccf42-d4a8-4fe6-b7dc-91f43726646e`)" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%JN`)">
+                        <PriceInput v-model="fixed" :min="0" :required="true" :placeholder="$t(`%JN`)" />
                     </STInputBox>
 
-                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)">
-                        <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)" />
+                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)">
+                        <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`%2I`)" />
                     </STInputBox>
                 </div>
 
                 <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
-                    {{ $t('29c16366-9962-4b22-a8bb-55c5a8467315') }}
+                    {{ $t('%JL') }}
                 </Checkbox>
 
                 <p v-if="percentage && exampleAdministrationFee1" class="style-description-small">
-                    {{ $t('76a41c36-99d1-467c-a243-3a30a56c272e', {
+                    {{ $t('%14F', {
                         exampleAdministrationFee1: formatPrice(exampleAdministrationFee1),
                         exampleAdministrationFeeValue1: formatPrice(exampleAdministrationFeeValue1),
                         exampleAdministrationFee2: formatPrice(exampleAdministrationFee2),
@@ -117,7 +117,7 @@ if (props.validator) {
         if (loadingStripeAccounts.value) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'loading',
-                message: $t(`45285899-60e2-42c6-bb51-fdd16fe651e4`),
+                message: $t(`%JO`),
             }));
             return false;
         }
@@ -125,7 +125,7 @@ if (props.validator) {
         if (props.config.paymentMethods.length === 0) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'no_payment_methods',
-                message: $t(`740c41c3-7f19-4a5b-bd49-7e7d228e2187`),
+                message: $t(`%JP`),
             }));
             return false;
         }
@@ -179,7 +179,7 @@ async function loadStripeAccounts() {
     }
     catch (e) {
         console.error(e);
-        new Toast($t(`2384baa0-50ca-4003-8d3a-af0beb18fec2`), 'error red').show();
+        new Toast($t(`%JQ`), 'error red').show();
     }
     loadingStripeAccounts.value = false;
 }
@@ -288,34 +288,34 @@ function getDescription(paymentMethod: PaymentMethod): string {
     const provider = organization.value.privateMeta?.getPaymentProviderFor(paymentMethod, stripeAccountObject.value?.meta) ?? PaymentProvider.Stripe;
 
     switch (paymentMethod) {
-        case PaymentMethod.Transfer: return $t('d2749916-b99a-47af-9bc4-300648fe77a7');
+        case PaymentMethod.Transfer: return $t('%5O');
         case PaymentMethod.Payconiq:
             return providerText(provider, {
                 [PaymentProvider.Payconiq]: '',
-                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
+                [PaymentProvider.Buckaroo]: $t(`%1F`),
             });
         case PaymentMethod.Bancontact:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
-                [PaymentProvider.Mollie]: $t(`4db6cde7-274f-4202-9351-3e9ce82794c1`),
+                [PaymentProvider.Buckaroo]: $t(`%1F`),
+                [PaymentProvider.Mollie]: $t(`%w`),
                 [PaymentProvider.Stripe]: '',
             });
 
         case PaymentMethod.iDEAL:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
-                [PaymentProvider.Mollie]: $t(`4db6cde7-274f-4202-9351-3e9ce82794c1`),
+                [PaymentProvider.Buckaroo]: $t(`%1F`),
+                [PaymentProvider.Mollie]: $t(`%w`),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.CreditCard:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`70ee9a44-6cd7-49a1-9852-8519c23ec13a`),
-                [PaymentProvider.Mollie]: $t(`4db6cde7-274f-4202-9351-3e9ce82794c1`),
+                [PaymentProvider.Buckaroo]: $t(`%1F`),
+                [PaymentProvider.Mollie]: $t(`%w`),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.Unknown: return '';
-        case PaymentMethod.DirectDebit: return $t('f86a093f-c6ae-42d0-b5c4-4035a4d32f74');
-        case PaymentMethod.PointOfSale: return $t('f511ce18-7a60-4fe8-8695-16216ffb7bdc');
+        case PaymentMethod.DirectDebit: return $t('%74');
+        case PaymentMethod.PointOfSale: return $t('%5Z');
     }
 }
 
@@ -325,36 +325,36 @@ function getSettingsDescription(paymentMethod: PaymentMethod): string {
 
     if (settings) {
         if (settings.minimumAmount !== 0) {
-            texts.push($t(`84e54416-464f-4ca6-a685-def2a0a9c135`) + ' ' + Formatter.price(settings.minimumAmount));
+            texts.push($t(`%JR`) + ' ' + Formatter.price(settings.minimumAmount));
         }
 
         if (settings.warningText) {
             if (settings.warningAmount !== null) {
-                texts.push($t(`7972bd35-3bb5-4dae-9771-8d4765646f61`) + ' ' + Formatter.price(settings.warningAmount));
+                texts.push($t(`%JS`) + ' ' + Formatter.price(settings.warningAmount));
             }
             else {
-                texts.push($t(`88edcbb7-c3b2-4531-8796-f0c6782fa76e`));
+                texts.push($t(`%JT`));
             }
         }
 
         if (settings.companiesOnly) {
-            texts.push($t(`8bec9f71-c41d-485f-b0f5-95a40b695884`));
+            texts.push($t(`%JU`));
         }
     }
 
     if (paymentMethod === PaymentMethod.Transfer) {
         if (!props.config.transferSettings.iban) {
-            texts.push($t(`8e243505-26f6-4505-9317-c871fa1df324`));
+            texts.push($t(`%JV`));
         }
         else {
-            texts.push($t(`475a6b09-e71d-4160-a87e-d4a3844116c3`) + ' ' + props.config.transferSettings.iban);
+            texts.push($t(`%JW`) + ' ' + props.config.transferSettings.iban);
         }
 
         if (props.config.transferSettings.creditor) {
-            texts.push($t(`0cfac4d3-1840-4b12-b9d7-b9f40e49d664`) + ' ' + props.config.transferSettings.creditor);
+            texts.push($t(`%JX`) + ' ' + props.config.transferSettings.creditor);
         }
 
-        texts.push($t(`e54dd641-9788-4514-b866-86f602892fb2`) + ' ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
+        texts.push($t(`%JY`) + ' ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
     }
 
     return texts.join('\n');
@@ -380,7 +380,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
     }
     else {
         if (!force && props.choices === null && props.config.paymentMethods.length === 1) {
-            new Toast($t(`4df013df-328f-47b6-b90a-fc40813d3c0a`), 'error red').show();
+            new Toast($t(`%JZ`), 'error red').show();
             return;
         }
 
@@ -408,9 +408,9 @@ const hasMollieOrBuckaroo = computed(() => {
 
 const mollieOrBuckarooName = computed(() => {
     if (organization.value.privateMeta?.buckarooSettings !== null) {
-        return $t(`f5fc5d6b-49ef-4b3d-80b7-90e1f81220fa`);
+        return $t(`%2Q`);
     }
-    return $t(`b8cf0b1f-04c4-4a85-9a19-027a5326fd11`);
+    return $t(`%1x`);
 });
 
 function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined {
@@ -429,7 +429,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: {
             if ((organization.value.privateMeta?.payconiqApiKey ?? '').length === 0) {
-                return $t(`60bbe710-43e0-4a19-996c-ded3f25c1c39`);
+                return $t(`%Ja`);
             }
             break;
         }
@@ -439,13 +439,13 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
         case PaymentMethod.DirectDebit:
         case PaymentMethod.Bancontact: {
             if (stripeAccountObject.value) {
-                return $t(`3642da6c-adad-4e20-aa5a-c6553b276770`, {paymentMethod: PaymentMethodHelper.getNameCapitalized(paymentMethod)});
+                return $t(`%14e`, {paymentMethod: PaymentMethodHelper.getNameCapitalized(paymentMethod)});
             }
             break;
         }
     }
 
-    return $t('253a60ce-cba7-4679-863c-494609d03e8f', { paymentMethod: PaymentMethodHelper.getName(paymentMethod) });
+    return $t('%3s', { paymentMethod: PaymentMethodHelper.getName(paymentMethod) });
 }
 
 // Administration cost
@@ -508,15 +508,15 @@ const transferTypes = computed(() => {
     return [
         {
             value: TransferDescriptionType.Structured,
-            name: $t('f22ff741-6a05-4b15-aa6a-16e3a197ac99'),
+            name: $t('%2z'),
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? $t(`1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07`) : $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
+            name: props.type === 'registration' ? $t(`%JG`) : $t(`%xA`),
         },
         {
             value: TransferDescriptionType.Fixed,
-            name: $t(`610a54d0-5ae5-4e4c-bac3-205fd56b65c8`),
+            name: $t(`%JI`),
         },
     ];
 });

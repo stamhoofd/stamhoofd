@@ -167,19 +167,19 @@ export class AuditLogReplacement extends AutoEncoder {
         }
 
         if (this.type === AuditLogReplacementType.Html) {
-            return this.description || $t(`7495a021-71f6-464f-b742-4e79206f4d7f`);
+            return this.description || $t(`%lZ`);
         }
 
         if (this.type === AuditLogReplacementType.LongText) {
-            return this.description || $t(`7495a021-71f6-464f-b742-4e79206f4d7f`);
+            return this.description || $t(`%lZ`);
         }
 
         if (this.type === AuditLogReplacementType.Image) {
-            return $t(`31a0612a-b8a3-481d-9738-80be685a8680`);
+            return $t(`%la`);
         }
 
         if (this.type === AuditLogReplacementType.File) {
-            return $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`);
+            return $t(`%yU`);
         }
         return this.value;
     }

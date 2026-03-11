@@ -15,7 +15,7 @@
         <p>
             <button class="button text" type="button" @click="addType">
                 <span class="icon add" />
-                <span>{{ $t('105eefd4-2e16-4b4e-b964-ec51feb11955') }}</span>
+                <span>{{ $t('%3U') }}</span>
             </button>
         </p>
     </SaveView>
@@ -43,7 +43,7 @@ const { patched: types, patch, addArrayPatch, hasChanges } = usePatchArray(origi
 const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);
 const saving = ref(false);
 
-const title = $t('429e2447-3506-4828-bb08-a4cde355c78d');
+const title = $t('%3a');
 
 async function addType() {
     const arr: PatchableArrayAutoEncoder<PlatformMembershipType> = new PatchableArray();
@@ -105,7 +105,7 @@ async function save() {
                 membershipTypes: patch.value,
             }),
         }));
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -119,7 +119,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

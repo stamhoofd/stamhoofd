@@ -19,10 +19,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('aed41648-b8ad-476d-b98a-0221d387f96a') }}
+                        {{ $t('%1JX') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('30a87df1-5f18-4639-8f00-6b333f84d87f') }}
+                        {{ $t('%PX') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -34,10 +34,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/seating-plan.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('5b280bad-2167-42e6-8c4f-177ab1d76c67') }}
+                        {{ $t('%uA') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('558631c2-ee72-4b1e-a8d8-b58a3f863f3f') }}
+                        {{ $t('%PY') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -49,10 +49,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/scanner.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('a4919b04-c7de-4c7b-96ac-e18acc476ad7') }}
+                        {{ $t('%1j') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('b0b16292-fad7-4cc2-82ee-46155a484192') }}
+                        {{ $t('%PZ') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -64,10 +64,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/diagram.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('121c350e-012c-4bf7-a2bc-2c07b7c433c8') }}
+                        {{ $t('%Pa') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('9351f351-ef7a-4d6b-bfb4-ed0366ab8938') }}
+                        {{ $t('%Pb') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -79,10 +79,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/earth.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('c176d890-8c08-4db1-9ce7-592c1e21818e') }}
+                        {{ $t('%Pc') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('1add9f17-2138-461d-8198-2b7bfde90407') }} {{ webshopUrl }}
+                        {{ $t('%Pd') }} {{ webshopUrl }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -92,7 +92,7 @@
 
             <template v-if="hasFullPermissions">
                 <hr>
-                <h2>{{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}</h2>
+                <h2>{{ $t('%xU') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -100,10 +100,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('35757756-d817-419d-82dd-1ba14128af30') }}
+                            {{ $t('%Lb') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('7a8c848b-8ffe-488f-9635-43a2c2b10a9f') }}
+                            {{ $t('%Pe') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -115,10 +115,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-package.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('14875409-7141-445f-b172-05762077d1dc') }}
+                            {{ $t('%Pf') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('bc25fc1d-ee53-4200-a41e-2ec52bd9292b') }}
+                            {{ $t('%Pg') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -130,10 +130,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/tickets.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('778d329e-b646-4cb4-87ac-f6ab1661c359') }}
+                            {{ $t('%Ph') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('636f72d4-77f9-423d-b0f8-82a4fb594e11') }}
+                            {{ $t('%Pi') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -145,10 +145,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/bike.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('0474147e-6756-45a7-a687-04812bcef086') }}
+                            {{ $t('%Pj') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('03142327-65eb-4694-986f-ee6ff25c2998') }}
+                            {{ $t('%Pk') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -160,10 +160,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('12b644c9-c1a7-4930-afb2-79f62648d243') }}
+                            {{ $t('%O7') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('95aafd31-ffd2-44c1-b90c-58a5281af1f0') }}
+                            {{ $t('%Pl') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -175,10 +175,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('2173a56e-ee80-4e8d-9551-20f061fff7b9') }}
+                            {{ $t('%Pm') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('4881e4b6-2160-4f29-8e09-1fde96d8240a') }}
+                            {{ $t('%Pn') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -190,14 +190,14 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('e98f3227-23ff-4db5-9326-10bc43548738') }}
+                            {{ $t('%Po') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('baad0752-43d1-4bea-9e39-3a9f4b518723') }}
+                            {{ $t('%Pp') }}
                         </p>
 
                         <template #right>
-                            <span class="icon error " :v-tooltip="$t('75c82427-9666-4de0-8a79-2a8851b44a88')" />
+                            <span class="icon error " :v-tooltip="$t('%Pq')" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -207,10 +207,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('d0f49d2a-6b83-4e03-9480-4d0995bbb0a1') }}
+                            {{ $t('%u1') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('baad0752-43d1-4bea-9e39-3a9f4b518723') }}
+                            {{ $t('%Pp') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -222,10 +222,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('70c5edd2-3550-447e-8a36-b43d7833fe1c') }}
+                            {{ $t('%Ld') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('c653d048-3431-417a-b333-dc0af28113a3') }}
+                            {{ $t('%Pr') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -237,10 +237,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('1eafb06a-5385-42fd-8f1a-2bbaaf735e53') }}
+                            {{ $t('%1FR') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('74c25692-65bf-4e25-ae9c-0e8363c0e738') }}
+                            {{ $t('%Ps') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -248,7 +248,7 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('4a7e3838-f75a-4610-9caa-0f75849ea142') }}</h2>
+                <hr><h2>{{ $t('%ty') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
@@ -256,10 +256,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('a67ca3cc-ed24-43a4-91d6-ef9c8324b30e') }}
+                            {{ $t('%Pt') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('6d8e8e50-5e72-4e00-b074-c046f4069dd6') }}
+                            {{ $t('%Pu') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -271,10 +271,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/compass.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('d703d8bc-b08f-4b4d-9c26-f255edd70f56') }}
+                            {{ $t('%2H') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('c3c001fa-1c57-4aed-aa19-4bfa48736bac') }}
+                            {{ $t('%Pv') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -286,10 +286,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
+                            {{ $t('%1DD') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('d2387560-b2ae-4e44-931b-d3fb20c63563') }}
+                            {{ $t('%Pw') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -297,20 +297,20 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+                <hr><h2>{{ $t('%16X') }}</h2>
 
                 <STList>
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('8514f479-c987-46c1-aa4b-8abc14164538') }}
+                            {{ $t('%Px') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('445bf25f-4661-4155-a255-4f15cbf13f34') }}
+                            {{ $t('%Py') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}</span>
+                                <span>{{ $t('%9b') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -318,15 +318,15 @@
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('333b4c3f-a575-43e8-acad-754453b253e1') }}
+                            {{ $t('%Pz') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('07956e16-efc0-4ce6-b5ba-57342ef567b9') }}
+                            {{ $t('%Q0') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary green hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('9e85b407-6e12-4003-9847-5b7d277b87ff') }}</span>
+                                <span>{{ $t('%Ob') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -334,15 +334,15 @@
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('1a3767f2-5b48-4d33-959f-08b114d1559b') }}
+                            {{ $t('%Q1') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('944f3bbb-b537-48ba-b27f-227e152c658c') }}
+                            {{ $t('%Q2') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon archive" />
-                                <span>{{ $t('fbeb1597-d56c-4f8b-8220-d2005a6f4310') }}</span>
+                                <span>{{ $t('%Q3') }}</span>
                             </button>
                             <button type="button" class="button icon archive only-smartphone" />
                         </template>
@@ -350,15 +350,15 @@
 
                     <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('5c7e1652-c21d-4746-84a3-3d09c7e0c8d9') }}
+                            {{ $t('%Q4') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('2cb036c9-52fd-4044-b1e2-91d4b22d580e') }}
+                            {{ $t('%Q5') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
-                                <span>{{ $t('574829bb-6ffc-489b-bc83-f3439dc62ffa') }}</span>
+                                <span>{{ $t('%KL') }}</span>
                             </button>
                             <button type="button" class="button icon undo only-smartphone" />
                         </template>
@@ -366,15 +366,15 @@
 
                     <STListItem :selectable="true" @click="duplicateWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('cfc3fc8b-6b17-4289-b87f-c85e38002795') }}
+                            {{ $t('%Q6') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('1e3f3637-e390-44f2-9bb3-8e75ec2aa634') }}
+                            {{ $t('%Q7') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon copy" />
-                                <span>{{ $t('1c8e7100-b4ac-4c22-8e22-a19d3c039f74') }}</span>
+                                <span>{{ $t('%KK') }}</span>
                             </button>
                             <button type="button" class="button icon copy only-smartphone" />
                         </template>
@@ -382,30 +382,30 @@
 
                     <STListItem class="hoverable" :selectable="true" element-name="a" :href="webshopQrCodeUrl" target="_blank">
                         <h2 class="style-title-list">
-                            {{ $t('8ee5ee3f-abb7-4120-a817-a81ff4935a73') }}
+                            {{ $t('%1Gb') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('a45d87bc-1abd-461d-bd9a-01eed92c3073') }}
+                            {{ $t('%1Gc') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon qr-code" />
-                                <span>{{ $t('2875962d-b4fb-4542-af69-4f26472459f2') }}</span>
+                                <span>{{ $t('%1Gd') }}</span>
                             </button>
                         </template>
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
-                            {{ $t('ebd0428a-b614-4eaa-a939-69a1e1392054') }}
+                            {{ $t('%Q8') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('769c03b9-36d0-461d-afe9-10afa2402417') }}
+                            {{ $t('%Q9') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                                <span>{{ $t('%CJ') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

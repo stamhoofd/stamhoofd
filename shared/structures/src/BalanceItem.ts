@@ -40,13 +40,13 @@ export enum VATExcemptReason {
 
 export function getVATExcemptReasonName(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunity: return $t('c250f8f3-b32a-42bf-8b91-85600115e811');
+        case VATExcemptReason.IntraCommunity: return $t('%1I5');
     }
 }
 
 export function getVATExcemptInvoiceNote(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunity: return $t('ea742466-c76d-4b23-9387-b7a14284679e');
+        case VATExcemptReason.IntraCommunity: return $t('%1Km');
     }
 }
 
@@ -72,24 +72,24 @@ export enum BalanceItemType {
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
     switch (type) {
-        case BalanceItemStatus.Hidden: return $t(`6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5`);
-        case BalanceItemStatus.Due: return $t(`444e0d53-5c4b-4fae-afa6-c5e14224e6e7`);
-        case BalanceItemStatus.Canceled: return $t(`72fece9f-e932-4463-9c2b-6e8b22a98f15`);
+        case BalanceItemStatus.Hidden: return $t(`%UC`);
+        case BalanceItemStatus.Due: return $t(`%lb`);
+        case BalanceItemStatus.Canceled: return $t(`%gg`);
     }
 }
 
 export function getBalanceItemTypeName(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return $t(`1957d902-4a2a-4b9b-bc5c-83145a5731f7`);
-        case BalanceItemType.AdministrationFee: return $t(`a0d99100-f225-416f-bcec-e25df9d651ac`);
-        case BalanceItemType.FreeContribution: return $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`);
-        case BalanceItemType.Order: return $t(`41066a52-1fe1-41e9-8292-2b1f376fcc65`);
-        case BalanceItemType.Other: return $t(`26677608-996f-41a5-8a53-543d6efa7de4`);
-        case BalanceItemType.PlatformMembership: return $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`);
-        case BalanceItemType.CancellationFee: return $t(`aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689`);
-        case BalanceItemType.RegistrationBundleDiscount: return $t(`472a987d-498d-46b0-b925-3963f729492b`);
-        case BalanceItemType.Rounding: return $t('5841f72b-67d8-4add-8cfa-801bcb71cba7');
-        case BalanceItemType.STPackage: return $t('4a6dcea7-3e49-4d5e-922e-23c4f76241c2');
+        case BalanceItemType.Registration: return $t(`%lc`);
+        case BalanceItemType.AdministrationFee: return $t(`%xK`);
+        case BalanceItemType.FreeContribution: return $t(`%Ot`);
+        case BalanceItemType.Order: return $t(`%ld`);
+        case BalanceItemType.Other: return $t(`%1JG`);
+        case BalanceItemType.PlatformMembership: return $t(`%Wq`);
+        case BalanceItemType.CancellationFee: return $t(`%17G`);
+        case BalanceItemType.RegistrationBundleDiscount: return $t(`%16L`);
+        case BalanceItemType.Rounding: return $t('%1I6');
+        case BalanceItemType.STPackage: return $t('%1Ms');
     }
 }
 
@@ -123,29 +123,29 @@ export enum BalanceItemRelationType {
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t(`e38c0b49-b038-4c9c-9653-fe1e4a078226`);
-        case BalanceItemRelationType.Group: return $t(`1957d902-4a2a-4b9b-bc5c-83145a5731f7`);
-        case BalanceItemRelationType.GroupPrice: return $t(`a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc`);
-        case BalanceItemRelationType.GroupOptionMenu: return $t(`792ebf47-4ad3-4d9c-a4ab-f315b715e70e`);
-        case BalanceItemRelationType.GroupOption: return $t(`6c80efa8-5658-4728-ba95-d0536fdd25bd`);
-        case BalanceItemRelationType.Member: return $t(`946f5e2e-d92c-4bbd-b64f-115958a04d01`);
+        case BalanceItemRelationType.Webshop: return $t(`%2N`);
+        case BalanceItemRelationType.Group: return $t(`%lc`);
+        case BalanceItemRelationType.GroupPrice: return $t(`%62`);
+        case BalanceItemRelationType.GroupOptionMenu: return $t(`%Tb`);
+        case BalanceItemRelationType.GroupOption: return $t(`%TE`);
+        case BalanceItemRelationType.Member: return $t(`%ym`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
-        case BalanceItemRelationType.Discount: return $t(`40939025-cebb-4afb-90e9-847233cb256f`);
-        case BalanceItemRelationType.STPackage: return $t(`4a6dcea7-3e49-4d5e-922e-23c4f76241c2`);
+        case BalanceItemRelationType.Discount: return $t(`%176`);
+        case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
     }
 }
 
 export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t(`efe60194-1a71-45d2-9e12-f6965c266306`);
-        case BalanceItemRelationType.Group: return $t(`869faa9e-f446-4500-83e8-93684eac259d`);
-        case BalanceItemRelationType.GroupPrice: return $t(`5287b557-b8ed-4580-af63-8b69f1b8c120`);
-        case BalanceItemRelationType.GroupOptionMenu: return $t(`12f6ad95-f1e2-4065-b8fb-369186bf0f91`);
-        case BalanceItemRelationType.GroupOption: return $t(`c18b4ad6-4b29-43bf-bb6d-7e3c34ffe80a`);
-        case BalanceItemRelationType.Member: return $t(`15cd9dab-e1d5-4f02-b260-bd587ba3cf1e`);
+        case BalanceItemRelationType.Webshop: return $t(`%le`);
+        case BalanceItemRelationType.Group: return $t(`%lf`);
+        case BalanceItemRelationType.GroupPrice: return $t(`%lg`);
+        case BalanceItemRelationType.GroupOptionMenu: return $t(`%lh`);
+        case BalanceItemRelationType.GroupOption: return $t(`%li`);
+        case BalanceItemRelationType.Member: return $t(`%lj`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
-        case BalanceItemRelationType.Discount: return $t(`4d5cd18a-ad96-4b2b-aa91-80af307cb8cd`);
-        case BalanceItemRelationType.STPackage: return $t(`7ad398b9-9075-4cc6-a96e-ddb0abf158d8`);
+        case BalanceItemRelationType.Discount: return $t(`%177`);
+        case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
     }
 }
 
@@ -516,18 +516,18 @@ export class BalanceItem extends AutoEncoder {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`%lk`);
 
                 if (option) {
-                    return $t(`973d141e-441d-41b8-ad43-06f71c10126f`) + ' ' + group;
+                    return $t(`%ll`) + ' ' + group;
                 }
 
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
-                    return $t('843da918-4365-457f-abe4-200bcee1d8a8', { name: member.name, group });
+                    return $t('%1Mt', { name: member.name, group });
                 }
 
-                return $t(`7a6a379d-97fb-4874-bdcf-48be82a76087`) + ' ' + group;
+                return $t(`%lm`) + ' ' + group;
             }
 
             case BalanceItemType.RegistrationBundleDiscount: {
@@ -541,18 +541,18 @@ export class BalanceItem extends AutoEncoder {
 
                 if (group) {
                     if (option) {
-                        return $t(`bfa4c1b3-9613-49c1-ad3d-360f533a4086`) + ' ' + group;
+                        return $t(`%ln`) + ' ' + group;
                     }
 
-                    return $t(`f94551a3-b971-44d8-9c92-4686653d118b`) + ' ' + group;
+                    return $t(`%lo`) + ' ' + group;
                 }
-                return $t(`156e42fb-1e0b-4bfc-b8bf-9bcc76b2b895`);
+                return $t(`%lp`);
             }
-            case BalanceItemType.AdministrationFee: return $t(`13fbbe0e-5326-4cc8-928e-5fc50b27654a`);
-            case BalanceItemType.FreeContribution: return $t(`1a36fef2-0e2f-4dca-b661-7274ef63dbb5`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
+            case BalanceItemType.AdministrationFee: return $t(`%lq`);
+            case BalanceItemType.FreeContribution: return $t(`%lr`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%ls`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return $t(`03df4cd8-446f-4f40-8d27-90a51bb5a6ba`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`ab4ad0cf-53df-4f35-96a8-59747075417f`);
+            case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
             case BalanceItemType.Rounding: return this.description;
             case BalanceItemType.STPackage: return this.description;
         }
@@ -564,20 +564,20 @@ export class BalanceItem extends AutoEncoder {
     get category(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
-                return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? $t(`9fb913bf-ebc1-48aa-885e-73f24b8da239`);
+                return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? $t(`%lv`);
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
-            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`77828342-0662-4a7c-846b-e4fb4ae91553`);
-            case BalanceItemType.AdministrationFee: return $t(`13fbbe0e-5326-4cc8-928e-5fc50b27654a`);
-            case BalanceItemType.FreeContribution: return $t(`1a36fef2-0e2f-4dca-b661-7274ef63dbb5`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
+            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%lw`);
+            case BalanceItemType.AdministrationFee: return $t(`%lq`);
+            case BalanceItemType.FreeContribution: return $t(`%lr`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`%ls`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`07cba8c8-a135-48e8-83c4-59313ef296d8`);
-            case BalanceItemType.Rounding: return $t('097441a3-6b49-4768-87c3-8b290bb073ed');
-            case BalanceItemType.STPackage: return $t('0dedc6d7-700f-4243-8e98-cc90837fbf8f');
+            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%BV`);
+            case BalanceItemType.Rounding: return $t('%1I7');
+            case BalanceItemType.STPackage: return $t('%1Mu');
         }
     }
 
@@ -590,8 +590,8 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
-                    return $t(`ab7efbf3-6dff-4237-93ba-4ac34f75765b`) + ' ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`%lk`);
+                    return $t(`%lx`) + ' ' + group;
                 }
                 break;
             }
@@ -612,11 +612,11 @@ export class BalanceItem extends AutoEncoder {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: $t(`057ffcea-70b1-44a9-ad01-c60f6fbd7393`),
+                name: $t(`%ly`),
                 price: this.pricePaid,
             },
             {
-                name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
+                name: $t(`%wc`),
                 price: this.pricePending,
             },
         ].filter(a => a.price !== 0);
@@ -624,20 +624,20 @@ export class BalanceItem extends AutoEncoder {
         if (this.VATPercentage) {
             // Add VAT
             all.unshift({
-                name: $t(`14ad1dfb-6ab9-4945-8735-7e22526120c9`),
+                name: $t(`%1I8`),
                 price: this.priceWithoutVAT,
             }, {
-                name: $t(`31e38bb6-60be-47b7-a713-7f430b7d08c4`),
+                name: $t(`%1I9`),
                 price: this.VAT,
             },
             {
-                name: $t(`39e5d1d1-7058-4ba0-a477-df2c7707b531`),
+                name: $t(`%1IA`),
                 price: this.priceWithVAT,
             });
         }
         else if (all.length > 0) {
             all.unshift({
-                name: $t(`8dfbd01b-feb1-4b7e-a1f1-2daf19fb2775`),
+                name: $t(`%lz`),
                 price: this.priceWithVAT,
             });
         }
@@ -645,7 +645,7 @@ export class BalanceItem extends AutoEncoder {
         return [
             ...all,
             {
-                name: this.priceOpen < 0 ? $t(`38ff3cca-3877-4202-9c71-9437a12fb876`) : $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`),
+                name: this.priceOpen < 0 ? $t(`%10b`) : $t(`%m0`),
                 price: Math.abs(this.priceOpen),
             },
         ];
@@ -688,28 +688,28 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
                     const optionMenu = this.relations.get(BalanceItemRelationType.GroupOptionMenu);
-                    return (optionMenu?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)) + ': ' + option.name;
+                    return (optionMenu?.name ?? $t(`%Gr`)) + ': ' + option.name;
                 }
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`%lk`);
                 const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name.toString();
-                return $t(`d07f7f84-0d5d-43fd-a7df-f58ca0f3245d`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
+                return $t(`%m1`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
 
                 if (this.price > 0) {
                     // Undo the discount
-                    return $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + (discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)) + ')';
+                    return $t('%175') + ' (' + (discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)) + ')';
                 }
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
-            case BalanceItemType.CancellationFee: return $t(`aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689`);
-            case BalanceItemType.AdministrationFee: return $t(`a0d99100-f225-416f-bcec-e25df9d651ac`);
-            case BalanceItemType.FreeContribution: return $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`8ce0947e-8681-4abd-b8ef-27d0218fa4a1`);
+            case BalanceItemType.CancellationFee: return $t(`%17G`);
+            case BalanceItemType.AdministrationFee: return $t(`%xK`);
+            case BalanceItemType.FreeContribution: return $t(`%Ot`);
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%m2`);
             case BalanceItemType.Other: return this.description;
-            case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
-            case BalanceItemType.Rounding: return $t(`5841f72b-67d8-4add-8cfa-801bcb71cba7`);
+            case BalanceItemType.PlatformMembership: return $t(`%m3`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`%m4`);
+            case BalanceItemType.Rounding: return $t(`%1I6`);
             case BalanceItemType.STPackage: {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
@@ -726,8 +726,8 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 let prefix = '';
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`0a54d0a3-e963-447a-81ac-6982a7508649`);
-                    prefix = $t(`ab7efbf3-6dff-4237-93ba-4ac34f75765b`) + ' ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`%lk`);
+                    prefix = $t(`%lx`) + ' ' + group;
                 }
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
@@ -743,7 +743,7 @@ export class BalanceItem extends AutoEncoder {
                 }
                 const group = this.relations.get(BalanceItemRelationType.Group);
                 if (group) {
-                    descriptions.push($t(`d07f7f84-0d5d-43fd-a7df-f58ca0f3245d`) + ' ' + group.name);
+                    descriptions.push($t(`%m1`) + ' ' + group.name);
                 }
                 return descriptions.join('\n');
             }
@@ -778,7 +778,7 @@ export class BalanceItem extends AutoEncoder {
         const grouped = GroupedBalanceItems.group(BalanceItem.filterBalanceItems(items));
 
         if (grouped.length === 0) {
-            return '<p class="description">' + $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') + '</p>';
+            return '<p class="description">' + $t('%hX') + '</p>';
         }
 
         let str = '';
@@ -799,14 +799,14 @@ export class BalanceItem extends AutoEncoder {
                 }
             }
             else if (item.status === BalanceItemStatus.Canceled) {
-                prefix = $t(`72fece9f-e932-4463-9c2b-6e8b22a98f15`);
+                prefix = $t(`%gg`);
                 prefixClass = 'error';
             }
             else if (item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0) {
-                prefix = $t(`0c39a71f-be73-4404-8af0-cd9f238d2060`);
+                prefix = $t(`%gh`);
             }
             else if (item.priceOpen < 0) {
-                prefix = $t(`89bb9c20-d3f5-43ff-846c-47a23517274a`);
+                prefix = $t(`%10a`);
             }
 
             if (!item.isDue) {

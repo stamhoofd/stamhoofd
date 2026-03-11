@@ -26,10 +26,10 @@
                                 </template>
 
                                 <h2 class="style-title-list">
-                                    {{ $t('ba230e6d-38eb-4bf4-9735-4249c96a95e9') }}
+                                    {{ $t('%LX') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('8063280c-a4d1-4acf-a54d-dff02e973909') }}
+                                    {{ $t('%LY') }}
                                 </p>
                                 <template #right>
                                     <span v-if="event.group.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
@@ -47,7 +47,7 @@
                                     {{ event.group.waitingList.settings.name }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('8e8cd172-b1c4-4b9e-ad06-e99f5e40a645') }}
+                                    {{ $t('%au') }}
                                 </p>
                                 <template #right>
                                     <span v-if="event.group.waitingList.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
@@ -60,7 +60,7 @@
 
                     <div v-if="canWriteEvent" class="container">
                         <hr><h2>
-                            {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
+                            {{ $t('%xU') }}
                         </h2>
 
                         <STList class="illustration-list">
@@ -69,10 +69,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('35757756-d817-419d-82dd-1ba14128af30') }}
+                                    {{ $t('%Lb') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('b95cfa13-c42d-4d2f-892b-d2fc4c4c9bd1') }}
+                                    {{ $t('%av') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -84,10 +84,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/list.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('269b5fdf-7cfc-46ed-84c9-40836ff5da9c') }}
+                                    {{ $t('%aw') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('af4c5417-03ad-4997-b8e2-5ff3b47ac045') }}
+                                    {{ $t('%ax') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -99,10 +99,10 @@
                                     <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
+                                    {{ $t('%1DD') }}
                                 </h2>
                                 <p class="style-description">
-                                    {{ $t('7c32440d-6a06-4a53-8522-b84c0227fbfe') }}
+                                    {{ $t('%ay') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
@@ -114,22 +114,22 @@
                                     <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                                 </template>
                                 <h2 v-if="!webshop || webshop.meta.name === event.name" class="style-title-list">
-                                    {{ $t('9d7bf734-ef1e-421b-ae0f-3dec3040a360') }}
+                                    {{ $t('%1Ag') }}
                                 </h2>
                                 <h2 v-else class="style-title-list">
-                                    {{ webshop.meta.name ?? $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b') }}
+                                    {{ webshop.meta.name ?? $t('%Gr') }}
                                 </h2>
                                 <p v-if="canEditWebshopHere" class="style-description-small">
-                                    {{ $t('485a1995-f06e-4c04-a9cb-8f38a043cf98') }}
+                                    {{ $t('%1Ah') }}
                                 </p>
                                 <p v-else-if="webshop" class="style-description-small">
-                                    {{ $t('198e7383-2512-4f6f-b919-2b4225b8e2a9') }}
+                                    {{ $t('%1CC') }}
                                 </p>
                                 <p v-else class="style-description-small">
-                                    {{ $t('dd4ec83e-2d84-406b-9f3b-4fb1ba3e6fc7') }}
+                                    {{ $t('%1CD') }}
                                 </p>
                                 <template #right>
-                                    <button v-if="canWriteEvent" v-tooltip="$t('5ac02b3f-f412-43de-bd15-45b9679635b4')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
+                                    <button v-if="canWriteEvent" v-tooltip="$t('%1Ai')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
                                     <span v-if="canEditWebshopHere" class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
@@ -141,7 +141,7 @@
                     </div>
 
                     <hr>
-                    <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+                    <h2>{{ $t('%16X') }}</h2>
                     <STList>
                         <STListItem v-if="!event.group && !event.webshopId && canWriteEvent" :selectable="true" class="left-center" @click="createGroup">
                             <template #left>
@@ -152,10 +152,10 @@
                                 </IconContainer>
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('0c4eaa6c-d6c6-411f-af6d-aa73233cf2c0') }}
+                                {{ $t('%1Aj') }}
                             </h2>
                             <p class="style-description-small">
-                                {{ $t('004bab40-945f-4f6d-8316-b0a8f2748f7a') }}
+                                {{ $t('%16Z') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -171,10 +171,10 @@
                                 </IconContainer>
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('dac9e7f1-a040-4eb3-8a2b-95d10815814d') }}
+                                {{ $t('%1Ak') }}
                             </h2>
                             <p class="style-description-small">
-                                {{ $t('d24fec9e-48d1-46ad-a02b-27d81f2eee6e') }}
+                                {{ $t('%1Al') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -190,16 +190,16 @@
                                 </IconContainer>
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('f4186487-551f-4268-b811-c2b31ace72d1') }}
+                                {{ $t('%b0') }}
                             </h2>
                             <p v-if="organization && event.organizationId === organization.id" class="style-description-small">
-                                {{ $t('3f4666f9-59b5-4a24-b1a7-9f820275c042') }}
+                                {{ $t('%BJ') }}
                             </p>
                             <p v-else-if="!event.group.settings.isFree" class="style-description-small">
-                                {{ $t('3ab07939-121b-47f9-956f-a573c57ec008') }}
+                                {{ $t('%BK') }}
                             </p>
                             <p v-else class="style-description-small">
-                                {{ $t('7cac9136-10b5-4f1c-b9a4-0fb3f8410a9b') }}
+                                {{ $t('%BL') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -211,10 +211,10 @@
                                 <IconContainer icon="copy" />
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('9c6bda95-5b75-46a6-960e-5685037f32ed') }}
+                                {{ $t('%1Ka') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('cb6ccc98-808a-48df-99b6-d8aef5c1e4a4') }}
+                                {{ $t('%1Kb') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -226,10 +226,10 @@
                                 <IconContainer icon="link" />
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('cd9912f4-89a4-44ea-b8a0-40371a53b90a') }}
+                                {{ $t('%az') }}
                             </h2>
                             <p class="style-description-small">
-                                {{ $t("40b31f32-5a02-488d-beb3-d987ea5c9315") }}
+                                {{ $t("%7l") }}
                             </p>
                             <div class="split-inputs option">
                                 <input class="input" :value="link" readonly>
@@ -378,7 +378,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`33c4f792-005f-4fb1-ad98-397dd92038aa`));
+            prefixes.push($t(`%XF`));
         }
     }
     else {
@@ -391,7 +391,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
 
     if (groupOrganization.value && props.event.organizationId === null) {
         return `${base} (via ${groupOrganization.value.name})`;
@@ -546,7 +546,7 @@ const prepareOrganizationPeriod = useFetchOrganizationPeriodForGroup();
 const present = usePresent();
 async function createWebshop() {
     if (!auth.hasAccessRight(AccessRight.OrganizationCreateWebshops)) {
-        Toast.warning($t('59920662-aed6-44f6-92f5-d7a72806f405')).show();
+        Toast.warning($t('%1Am')).show();
         return;
     }
 
@@ -569,7 +569,7 @@ async function createWebshop() {
                                 webshopId: webshop.id,
                             }),
                         );
-                        Toast.success($t('e42ea38b-dfc2-4af2-bd91-be24934b7a75')).show();
+                        Toast.success($t('%1An')).show();
                         await nextTick();
                         await $navigate(
                             Routes.Webshop,
@@ -584,9 +584,9 @@ async function createWebshop() {
 
 async function unlinkWebshop() {
     if (!await CenteredMessage.confirm(
-        $t('0062b0f9-02e8-4c27-a0bd-addf7823ee8b'),
-        $t('be506b1b-2d5e-45fc-990b-f833e2d3ee24'),
-        $t('524263ab-0ec7-41da-84cd-d5ca9da243bd'),
+        $t('%1Ao'),
+        $t('%1Ap'),
+        $t('%1Aq'),
     )) {
         return;
     }
@@ -607,7 +607,7 @@ async function unlinkWebshop() {
 async function linkWebshop(event: MouseEvent) {
     const org = eventOrganization.value ?? organization.value;
     if (!org) {
-        Toast.warning($t(`449df98c-76b7-49b5-b807-9a431336fa86`)).show();
+        Toast.warning($t(`%1CE`)).show();
         return;
     }
 
@@ -634,7 +634,7 @@ async function linkWebshop(event: MouseEvent) {
                                         webshopId: webshop.id,
                                     }),
                                 );
-                                Toast.success($t('9be3a9ea-451a-4d71-b32e-ac7aa2bee4e6')).show();
+                                Toast.success($t('%1Ar')).show();
                             }
                             catch (e) {
                                 Toast.fromError(e).show();
@@ -651,7 +651,7 @@ async function linkWebshop(event: MouseEvent) {
                                         webshopId: webshop.id,
                                     }),
                                 );
-                                Toast.success($t('9be3a9ea-451a-4d71-b32e-ac7aa2bee4e6')).show();
+                                Toast.success($t('%1Ar')).show();
                             }
                             catch (e) {
                                 Toast.fromError(e).show();
@@ -687,9 +687,9 @@ async function directPatch(patch: AutoEncoderPatchType<Event>, event: Event = pr
 
 async function createGroup() {
     if (!await CenteredMessage.confirm(
-        $t('e8050ed2-af7e-4ffd-a9c9-e2fda7ef9bf5'),
-        $t('26667b28-4e39-4218-9f9b-131bf3bae6ab'),
-        $t('3fa34288-9872-4c2b-af11-2d112b905eef'),
+        $t('%16b'),
+        $t('%16Y'),
+        $t('%16c'),
         undefined,
         false,
     )) {
@@ -721,7 +721,7 @@ async function addMembers() {
     }
 
     if (!organization.value) {
-        Toast.warning($t(`853fe2cb-6cf6-48a3-8ee8-a0cf30b1a823`)).show();
+        Toast.warning($t(`%ya`)).show();
         return;
     }
 
@@ -748,7 +748,7 @@ async function loadEvent(event: Event): Promise<Event> {
     if (events.results.length === 1) {
         return events.results[0];
     }
-    Toast.error($t(`42e0e0d5-b4f9-4774-ad91-bfae7121a29e`)).show();
+    Toast.error($t(`%yc`)).show();
     throw new Error('Event not found');
 }
 function duplicateEvent() {

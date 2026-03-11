@@ -132,7 +132,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         member.family.pendingRegisterItems = [];
 
         if (!member.family.checkout.cart.contains(item)) {
-            Toast.error($t(`444bd147-6a22-4fd5-b1e7-94eab9de9eb3`)).show();
+            Toast.error($t(`%ec`)).show();
             return;
         }
 
@@ -154,10 +154,10 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         else {
             if (!admin) {
                 if (item.group.type === GroupType.WaitingList) {
-                    Toast.warning($t(`ead74946-05e3-4a81-ba41-5f6cddbc8292`)).setIcon('clock').show();
+                    Toast.warning($t(`%ed`)).setIcon('clock').show();
                 }
                 else {
-                    Toast.success($t(`fa2ecc9e-94d0-49fb-9968-2227528ef22f`)).setIcon('basket').show();
+                    Toast.success($t(`%ee`)).setIcon('basket').show();
                 }
                 await GlobalEventBus.sendEvent('selectTabById', 'cart');
             }

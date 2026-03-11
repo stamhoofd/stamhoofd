@@ -16,7 +16,7 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
         throw new SimpleError({
             code: 'invalid_permissions_response',
             message: 'Invalid response format for permissions',
-            human: $t('7d3a6b57-f81a-4d58-bc2b-babb2261c40b'),
+            human: $t('%1BL'),
         });
     }
 
@@ -35,7 +35,7 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
             throw new SimpleError({
                 code: 'invalid_permissions_response',
                 message: 'Invalid response format for permissions',
-                human: $t('7d3a6b57-f81a-4d58-bc2b-babb2261c40b'),
+                human: $t('%1BL'),
             });
         }
     }
@@ -54,7 +54,7 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         throw new SimpleError({
             code: 'uitpas_unreachable_checking_permissions',
             message: `Network issue when checking UiTPAS permissions`,
-            human: $t(`542b793c-3edf-4505-b33d-199ea409bbda`),
+            human: $t(`%1BP`),
         });
     });
     if (!response.ok) {
@@ -62,7 +62,7 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         throw new SimpleError({
             code: 'unsuccessful_response_checking_permissions',
             message: `Unsuccesful response when checking UiTPAS permissions`,
-            human: $t(`dd9b30ca-860f-47aa-8cb1-527fd156d9ca`),
+            human: $t(`%18C`),
         });
     }
     const json = await response.json().catch(() => {
@@ -70,7 +70,7 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         throw new SimpleError({
             code: 'invalid_json_checking_permissions',
             message: `Invalid json when checking UiTPAS permissions`,
-            human: $t(`8f217db0-c672-46f0-a8f7-6eba6f080947`),
+            human: $t(`%18A`),
         });
     });
     assertIsPermissionsResponse(json);
@@ -91,18 +91,18 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
             }];
     const item = json.find(item => item.organizer.id === uitpasOrganizerId);
     if (!item) {
-        const organizers = Formatter.joinLast(json.map(i => i.organizer.name), ', ', ' ' + $t('6d35156d-e452-4b0f-80f4-b1e9024d08ee') + ' ');
+        const organizers = Formatter.joinLast(json.map(i => i.organizer.name), ', ', ' ' + $t('%1BM') + ' ');
         return {
             status: UitpasClientCredentialsStatus.NoPermissions,
-            human: $t('96c8a719-dba5-47ce-bb61-ee0754a5f776') + organizers,
+            human: $t('%1BN') + organizers,
         };
     }
     const missingPermissions = neededPermissions.filter(needed => !item.permissions.includes(needed.permission));
     if (missingPermissions.length > 0) {
-        const missingPermissionsHuman = Formatter.joinLast(missingPermissions.map(p => p.human), ', ', ' ' + $t('6d35156d-e452-4b0f-80f4-b1e9024d08ee') + ' ');
+        const missingPermissionsHuman = Formatter.joinLast(missingPermissions.map(p => p.human), ', ', ' ' + $t('%1BM') + ' ');
         return {
             status: UitpasClientCredentialsStatus.MissingPermissions,
-            human: $t('040fa935-5cbc-4a85-b578-354bf9d7fc04') + missingPermissionsHuman,
+            human: $t('%1BO') + missingPermissionsHuman,
         };
     }
     return {

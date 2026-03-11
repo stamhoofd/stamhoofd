@@ -67,7 +67,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
         for (const patch of request.body.getPatches()) {
             const template = await DocumentTemplate.getByID(patch.id);
             if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
-                throw Context.auth.notFoundOrNoAccess($t(`148bfab7-ca0e-4fac-8a0a-302ca7855fc8`));
+                throw Context.auth.notFoundOrNoAccess($t(`%EP`));
             }
 
             let shouldCheckIfAlreadyHasFiscalDocument = false;
@@ -124,7 +124,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Template not found',
-                    human: $t(`10aa55e6-5ad6-4ac1-8e7f-3a414e26e22e`),
+                    human: $t(`%EQ`),
                 });
             }
 
@@ -158,7 +158,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                 code: 'double_fiscal_document',
                 field: 'year',
                 message: 'This year already has a fiscal document',
-                human: $t('475f5f96-86bf-4124-a005-9904aaf72b37'),
+                human: $t('%1IS'),
             });
         }
     }

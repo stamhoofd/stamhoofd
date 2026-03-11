@@ -6,59 +6,59 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
-            <input v-model="name" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
+        <STInputBox :title="$t('%Gq') ">
+            <input v-model="name" class="input" type="text" :placeholder="$t('%Gq') ">
         </STInputBox>
 
-        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f')" autocomplete="off" />
+        <STInputBox :title="$t('%6o')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('%14p')" autocomplete="off" />
         </STInputBox>
 
         <Checkbox v-if="app === 'admin'" v-model="notOrganizationBased">
-            {{ $t('e1c5c8b7-0ae4-46d5-b7e9-1d97f388f080') }}
+            {{ $t('%jK') }}
         </Checkbox>
 
         <template v-if="organizationBased && app === 'admin'">
-            <hr><h2>{{ $t('c6c8e406-3d1f-41c4-b3df-d0b1e8661040') }}</h2>
+            <hr><h2>{{ $t('%9V') }}</h2>
 
             <div class="split-inputs">
-                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`17dc0c45-14fb-4296-9b1d-1dddccf3970e`)">
-                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`)" />
+                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)">
+                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" />
                 </STInputBox>
 
-                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`74797680-f43e-49dc-ba7e-c60990a76946`)">
-                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
+                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%jY`)">
+                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" />
                 </STInputBox>
             </div>
         </template>
 
         <JumpToContainer :visible="organizationTagIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('2a033cd8-b9e4-4a92-a8a6-b4a687d87e79') }}</div>
+                <div>{{ $t('%wP') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="organizationTagIds = null" />
                 </div>
             </h2>
-            <p>{{ $t('c2f17e85-ff68-46fc-9410-6fb6c8a6843f') }}</p>
+            <p>{{ $t('%jL') }}</p>
 
             <TagIdsInput v-model="organizationTagIds" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('5271f407-ec58-4802-ac69-7f357bc3cfc7') }}</div>
+                <div>{{ $t('%P4') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="defaultAgeGroupIds = null" />
                 </div>
             </h2>
 
-            <p>{{ $t('9b1dac9d-57f9-4589-aa9c-6d97be960bef') }}</p>
+            <p>{{ $t('%jM') }}</p>
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
 
-            <hr><h2>{{ $t('39fa6554-b6bd-4885-adcc-33b6a037b2c3') }}</h2>
+            <hr><h2>{{ $t('%jN') }}</h2>
 
-            <p>{{ $t('022aad3d-6250-4000-9336-4ae7e8e75c23') }}</p>
+            <p>{{ $t('%8Z') }}</p>
 
             <STList>
                 <STListItem element-name="label" :selectable="true">
@@ -66,7 +66,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.None" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
+                        {{ $t('%1FW') }}
                     </h3>
                 </STListItem>
 
@@ -75,7 +75,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Read" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('7afc105f-d34d-4b93-9b33-a6cc08c818ee') }}
+                        {{ $t('%jO') }}
                     </h3>
                 </STListItem>
 
@@ -84,7 +84,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Write" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('d70ee185-cd15-4800-97a0-3de05d6db151') }}
+                        {{ $t('%jP') }}
                     </h3>
                 </STListItem>
 
@@ -93,7 +93,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.Full" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('c2296305-99a9-497a-aed3-7bb3d2293ce8') }}
+                        {{ $t('%Z1') }}
                     </h3>
                 </STListItem>
             </STList>
@@ -108,7 +108,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('4b7c05e2-de83-4cb4-9438-3fd74181ee6f') }}
+                            {{ $t('%jQ') }}
                         </h3>
                     </STListItem>
 
@@ -118,11 +118,11 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('789d73f7-1db6-4f78-8042-93344495f9b2') }}
+                            {{ $t('%jR') }}
                         </h3>
 
                         <p class="style-description-small">
-                            {{ $t('671cfb26-2018-4186-aa06-f167102db2b1') }}
+                            {{ $t('%jS') }}
                         </p>
                     </STListItem>
                 </template>
@@ -133,17 +133,17 @@
                     </template>
 
                     <h3 v-if="!permissions" class="style-title-list">
-                        {{ $t('1403efde-6581-4447-b77d-95bf1307b6e2') }}
+                        {{ $t('%jT') }}
                     </h3>
                     <h3 v-else class="style-title-list">
-                        {{ $t('4524e0f6-e1a7-4130-b5aa-d6b08a4ae517') }}
+                        {{ $t('%jU') }}
                     </h3>
 
                     <p v-if="organizationBased" class="style-description-small">
-                        {{ $t('b1d424aa-4d55-48f7-80c1-d6d4b5708f07') }}
+                        {{ $t('%jV') }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('9f5646d9-5526-4c3c-9a47-858374749d8e') }}
+                        {{ $t('%jW') }}
                     </p>
                 </STListItem>
             </STList>
@@ -151,12 +151,12 @@
 
         <div v-if="!isNew && deleteHandler" class="container">
             <hr><h2>
-                {{ $t('1e83f389-222b-48c7-ab9f-c77f82ea05af') }}
+                {{ $t('%3l') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>
@@ -182,7 +182,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<MemberResponsibility>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => props.isNew ? $t('7540c9f1-2164-4865-a6c5-ad72e0abd4e5') : $t('2e9f8eb3-806a-4037-bd01-f381a725956b'));
+const title = computed(() => props.isNew ? $t('%3o') : $t('%3m'));
 const pop = usePop();
 const app = useAppContext();
 
@@ -205,7 +205,7 @@ const save = async () => {
         if (name.value.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('9aa8ff59-33ae-4ac4-93b6-97e071b13012'),
+                message: $t('%56'),
                 field: 'name',
             });
         }
@@ -228,7 +228,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('8f155af7-52ce-441f-bd3c-669bda1450eb'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('78085d8c-9987-4eda-a747-7f7847d86dc4'))) {
+    if (!await CenteredMessage.confirm($t('%3k'), $t('%CJ'), $t('%3j'))) {
         return;
     }
 
@@ -345,7 +345,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

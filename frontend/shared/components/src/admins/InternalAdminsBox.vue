@@ -1,30 +1,30 @@
 <template>
     <hr>
-    <h2>{{ $t('8f75871d-17d9-49b1-aaf2-c7054e058372') }}</h2>
-    <p>{{ $t('ee16437e-ecc8-42c5-91ef-e2546c71ba12') }}</p>
+    <h2>{{ $t('%YY') }}</h2>
+    <p>{{ $t('%YZ') }}</p>
 
     <div v-if="shouldShowSearch" class="input-with-buttons">
         <div>
             <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
             </form>
         </div>
     </div>
 
     <p v-if="sortedMembers.length === 0" class="info-box">
-        {{ $t('4d9168af-27ed-438e-acd9-756474dd6f5e') }}
+        {{ $t('%Ya') }}
     </p>
     <p v-if="filteredMembers.length === 0" class="info-box">
-        {{ $t('34416687-b59a-4637-92a0-fac711d7d231') }}
+        {{ $t('%1AX') }}
     </p>
     <STList v-else>
         <STListItem v-for="member in filteredLimitedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
             <template #left>
-                <span v-if="memberHasFullAccess(member)" class="icon layered" :v-tooltip="$t('06e0f25f-f601-4359-a95d-b72fd79ecbdd')">
+                <span v-if="memberHasFullAccess(member)" class="icon layered" :v-tooltip="$t('%Yb')">
                     <span class="icon user-admin-layer-1" />
                     <span class="icon user-admin-layer-2 yellow" />
                 </span>
-                <span v-else-if="memberHasNoRoles(member)" class="icon layered" :v-tooltip="$t('3bb4e938-ca4e-4318-a86d-002ba6035fd0')">
+                <span v-else-if="memberHasNoRoles(member)" class="icon layered" :v-tooltip="$t('%Yc')">
                     <span class="icon user-blocked-layer-1" />
                     <span class="icon user-blocked-layer-2 red" />
                 </span>
@@ -43,9 +43,9 @@
 
             <template #right>
                 <span v-if="member.id === me?.memberId" class="style-tag">
-                    {{ $t('50f1bd97-6ff4-44cb-a44d-45672218b7f8') }}
+                    {{ $t('%Yd') }}
                 </span>
-                <span v-else-if="!member.users.find(u => u.hasAccount)" class="icon email gray" :v-tooltip="$t('0e7858e2-873b-4d49-9b5b-d9b15ea5f97f')" />
+                <span v-else-if="!member.users.find(u => u.hasAccount)" class="icon email gray" :v-tooltip="$t('%Ye')" />
                 <span><span class="icon gray edit" /></span>
             </template>
         </STListItem>
@@ -53,7 +53,7 @@
 
     <p v-if="shouldShowMoreButton" class="style-button-bar">
         <button type="button" class="button text" @click="showAll = true">
-            {{ $t('96140ac1-d193-4ad1-9f33-f5241f00d176', {count: showMoreCount}) }}
+            {{ $t('%1AY', {count: showMoreCount}) }}
         </button>
     </p>
 </template>

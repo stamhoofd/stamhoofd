@@ -1,16 +1,16 @@
 <template>
     <template v-if="paymentStatus === null">
         <p v-if="item.status === BalanceItemStatus.Canceled && (price === null || price < 0)" class="style-title-prefix-list error">
-            <span>{{ $t('72fece9f-e932-4463-9c2b-6e8b22a98f15') }}</span>
+            <span>{{ $t('%gg') }}</span>
             <span class="icon disabled small" />
         </p>
         <p v-else-if="item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0" class="style-title-prefix-list">
-            <span>{{ $t('0c39a71f-be73-4404-8af0-cd9f238d2060') }}</span>
+            <span>{{ $t('%gh') }}</span>
             <span class="icon undo small" />
         </p>
         <p v-else-if="item.price >= 0 && item.priceOpen < 0" class="style-title-prefix-list">
-            <span v-if="isPayable">{{ $t('89bb9c20-d3f5-43ff-846c-47a23517274a') }}</span>
-            <span v-else>{{ $t('38ff3cca-3877-4202-9c71-9437a12fb876') }}</span>
+            <span v-if="isPayable">{{ $t('%10a') }}</span>
+            <span v-else>{{ $t('%10b') }}</span>
             <span class="icon undo small" />
         </p>
     </template>
@@ -19,7 +19,7 @@
         {{ item.itemTitle }}
     </h3>
     <p v-if="paymentStatus === null && item.dueAt && item.price >= 0" class="style-description-small" :class="{error: item.isOverDue}">
-        <span>{{ $t('04392571-f6a2-470d-b2a1-90004ac27dbc', {date: formatDate(item.dueAt)}) }}</span>
+        <span>{{ $t('%gf', {date: formatDate(item.dueAt)}) }}</span>
         <span v-if="item.isOverDue" class="icon error gray tiny" />
     </p>
     <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
@@ -27,7 +27,7 @@
     <template v-if="showPrices">
         <template v-if="paymentStatus === null && item.status !== BalanceItemStatus.Canceled">
             <p v-if="item.amount !== 1" class="style-description-small">
-                {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPriceWithVAT)}) }}
+                {{ $t('%1J3', {price: formatPrice(item.unitPriceWithVAT)}) }}
             </p>
         </template>
 

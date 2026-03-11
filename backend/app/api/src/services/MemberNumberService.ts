@@ -36,7 +36,7 @@ export class MemberNumberService {
                     throw new SimpleError({
                         code: 'assign_member_number',
                         message: error.message,
-                        human: $t(`3a2c3e9d-4ac8-44a1-9690-98e8e4623298`),
+                        human: $t(`%Fw`),
                     });
                 }
             }
@@ -61,7 +61,7 @@ export class MemberNumberService {
             throw new SimpleError({
                 code: 'assign_member_number',
                 message: 'Missing birthDay',
-                human: $t(`3e6429f3-1fc2-42ad-b585-4da7da164267`),
+                human: $t(`%Fx`),
             });
         }
 
@@ -123,7 +123,7 @@ export class MemberNumberService {
                     throw new SimpleError({
                         code: 'assign_member_number',
                         message: `Duplicate member numbers (last try: ${memberNumber}, tries: ${tries})`,
-                        human: $t(`49742012-1ca8-4b91-a176-9ce3e17c1fe0`),
+                        human: $t(`%Fy`),
                     });
                 }
             }

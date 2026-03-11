@@ -1,11 +1,11 @@
 <template>
     <div v-if="filteredItems.length !== 0 || !showName" class="container">
         <hr><h2>
-            {{ !showName ? $t('a44d9f94-a83a-49b9-9a89-833b7873fc74') : $t('6030bf67-f3ec-48f1-8c00-be3e3f745351', {organization: item.organization.name}) }}
+            {{ !showName ? $t('%h8') : $t('%vX', {organization: item.organization.name}) }}
         </h2>
 
         <p v-if="filteredItems.length === 0" class="info-box">
-            {{ $t('7fc1d8ac-e765-41e9-a440-c5fddb30c1af') }}
+            {{ $t('%h9') }}
         </p>
         <template v-else>
             <GroupedBalanceList :item="item" />
@@ -14,7 +14,7 @@
 
             <p class="style-button-bar right-align">
                 <button class="button primary" type="button" @click="checkout">
-                    <span>{{ $t('e3f37ccd-a27c-4455-96f4-e33b74ae879e') }}</span>
+                    <span>{{ $t('%eX') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </p>
@@ -60,7 +60,7 @@ async function checkout() {
                 new ComponentWithProperties(
                     SelectBalanceItemsView,
                     {
-                        title: $t(`9a9fcc54-b73c-4c9f-ba2e-56ae8c3f150d`),
+                        title: $t(`%10g`),
                         items: items.value,
                         isPayable: true,
                         canCustomizeItemValue: (item: BalanceItem) => {
@@ -108,7 +108,7 @@ async function checkout() {
 async function goToCheckout(checkout: RegisterCheckout) {
     if (app === 'registration') {
         checkout.defaultOrganization = props.item.organization;
-        Toast.success($t(`bd7351b4-ec09-4faf-86f8-122621812af0`)).setIcon('basket').show();
+        Toast.success($t(`%10h`)).setIcon('basket').show();
         await dismiss({ force: true });
         await GlobalEventBus.sendEvent('selectTabById', 'cart');
         return;

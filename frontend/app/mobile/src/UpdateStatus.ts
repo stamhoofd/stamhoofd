@@ -132,7 +132,7 @@ export class UpdateStatus {
         // Set the version on next reload
         await CapacitorUpdater.next(version);
 
-        new Toast($t('b4cb2ff2-bb82-417d-bf01-6af09e996357'), 'download').setButton(new ToastButton($t(`1529d78d-800f-415a-8e56-b756a8bc6449`), () => {
+        new Toast($t('%X0'), 'download').setButton(new ToastButton($t(`%X1`), () => {
             CapacitorUpdater.set(version).catch((e) => {
                 Toast.fromError(e as Error).show();
             });
@@ -208,13 +208,13 @@ export class UpdateStatus {
             }
 
             if (this.options.visibleCheck && this.status === 'checking') {
-                new Toast($t(`fd9b8517-78de-4e10-9995-d248b672ff7b`), 'error red').show();
+                new Toast($t(`%X2`), 'error red').show();
             }
             else if (this.status === 'downloading' && (this.options.visibleCheck || this.options.visibleDownload)) {
-                new Toast($t(`a5a6a243-1ce0-460d-ac8f-7957c39e5e13`), 'error red').show();
+                new Toast($t(`%X3`), 'error red').show();
             }
             else if (this.status === 'installing' && (this.options.visibleCheck || this.options.visibleDownload)) {
-                new Toast($t(`71a6c292-6ea9-41f7-bff7-740ab42842a9`), 'error red').show();
+                new Toast($t(`%X4`), 'error red').show();
             }
         }
     }

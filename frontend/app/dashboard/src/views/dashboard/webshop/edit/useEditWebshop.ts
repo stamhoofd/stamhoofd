@@ -96,8 +96,8 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 await GlobalEventBus.sendEvent('new-webshop', response.data);
                 new Toast(
                     response.data.meta.ticketType === WebshopTicketType.Tickets
-                        ? $t(`2ce11748-a9c0-439c-af8b-8115243568eb`)
-                        : $t(`878cc081-df24-46b7-a56b-fb91feb631ff`)
+                        ? $t(`%Ui`)
+                        : $t(`%Uj`)
                     , 'success green').show();
 
                 if (afterThrow) {
@@ -126,7 +126,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                     }
                 }
 
-                new Toast($t(`482f0710-b031-4d4d-90b9-41c6e6ea89a2`), 'success green').show();
+                new Toast($t(`%Uk`), 'success green').show();
 
                 // Clear the patch
                 reset();
@@ -155,7 +155,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
         if (!hasChanges.value) {
             return true;
         }
-        return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+        return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
     };
 
     return {

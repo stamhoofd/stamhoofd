@@ -1,10 +1,10 @@
 <template>
     <nav class="st-view organization-app-switcher">
-        <STNavigationBar v-if="!popup" :title="$t(`bac747ea-0977-40c5-9b42-382055a0ee84`)" />
+        <STNavigationBar v-if="!popup" :title="$t(`%a4`)" />
 
         <main>
             <h1 v-if="!popup">
-                {{ $t('34aff020-6017-4c23-85b1-44a692988ee6') }}
+                {{ $t('%4Q') }}
             </h1>
 
             <template v-if="currentOptions.length">
@@ -20,7 +20,7 @@
                             {{ getAppDescription(option.app, option.organization) }}
                         </p>
                         <p v-if="option.userDescription" class="style-description-small style-em">
-                            {{ $t('c5d8db0b-e901-436d-b292-5dbd6b1df48e', {user: option.userDescription}) }}
+                            {{ $t('%a2', {user: option.userDescription}) }}
                         </p>
 
                         <template v-if="isCurrent(option)" #right>
@@ -44,7 +44,7 @@
                         {{ getAppDescription(option.app, option.organization) }}
                     </p>
                     <p v-if="option.userDescription" class="style-description-small style-em">
-                        {{ $t('2dfdd151-6245-4f46-ba42-695a09b74607') }} {{ option.userDescription }}
+                        {{ $t('%WF') }} {{ option.userDescription }}
                     </p>
 
                     <template v-if="isCurrent(option)" #right>
@@ -56,7 +56,7 @@
             <template v-if="(STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization">
                 <hr v-if="currentOptions.length || otherOptions.length"><button class="button text" type="button" @click="searchOrganizations">
                     <span class="icon search" />
-                    <span>{{ $t('e068b5a6-18f2-4801-a518-5903b22b3c04') }}</span>
+                    <span>{{ $t('%a3') }}</span>
                 </button>
             </template>
         </main>

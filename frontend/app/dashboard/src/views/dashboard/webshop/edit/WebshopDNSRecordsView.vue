@@ -1,20 +1,20 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`593be376-e1c2-4d81-819f-6defa2df6a11`)" />
+        <STNavigationBar :title="$t(`%Rr`)" />
 
         <main>
             <h1>
-                {{ $t('7087e475-b3a9-492c-9d56-bfa3e763e713') }}
+                {{ $t('%My') }}
             </h1>
 
             <p>
-                {{ $t('1b2d46a6-22a9-485f-bb00-84facfa33d85') }}
+                {{ $t('%Mz') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <p v-if="isComplete" class="success-box">
-                {{ $t('0bf13973-2758-4481-8a21-79a50f1f9d05') }}
+                {{ $t('%Ro') }}
             </p>
 
             <div v-for="record in records" :key="record.id">
@@ -22,21 +22,21 @@
             </div>
 
             <p v-if="!isComplete" class="warning-box">
-                {{ $t('136b3eb5-4c3a-46d5-87f1-25293225a875') }}
+                {{ $t('%N0') }}
             </p>
             <p v-if="!isComplete" class="warning-box">
-                {{ $t('e1f9cde6-19dd-4c2d-93f2-1d962c823d1f') }}
+                {{ $t('%N1') }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="skip">
-                    {{ $t('58ec13c4-413f-4977-b592-82c455b515ff') }}
+                    {{ $t('%Rp') }}
                 </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
-                        {{ $t('6f3c5401-b3af-486b-a2dd-d5169edd810c') }}
+                        {{ $t('%Rq') }}
                     </button>
                 </LoadingButton>
             </template>

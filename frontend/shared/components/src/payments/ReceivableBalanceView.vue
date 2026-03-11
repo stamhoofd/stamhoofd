@@ -3,8 +3,8 @@
         <div v-if="!loadingPayingOrganization" class="st-view">
             <STNavigationBar :title="title">
                 <template #right>
-                    <button v-if="hasPrevious || hasNext" v-tooltip="$t('1dd3e934-a69f-4a24-ba03-b945162e4c38')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                    <button v-if="hasNext || hasPrevious" v-tooltip="$t('9b500fcb-d4a2-4147-8422-c474a1297b5f')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                    <button v-if="hasPrevious || hasNext" v-tooltip="$t('%hg')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                    <button v-if="hasNext || hasPrevious" v-tooltip="$t('%hh')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
                 </template>
             </STNavigationBar>
 
@@ -13,11 +13,11 @@
                     {{ title }}
                 </h1>
                 <p v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
-                    {{ $t("0d7ce596-ad47-490d-b619-0cb1f1ae84ec") }}
+                    {{ $t("%hf") }}
                 </p>
 
                 <p v-if="item.objectType === ReceivableBalanceType.userWithoutMembers" class="info-box">
-                    {{ $t("5d5aa495-fe78-45f5-93b2-4c78acdc1e9f") }}
+                    {{ $t("%1HP") }}
                 </p>
 
                 <STList class="info">
@@ -70,48 +70,48 @@
 
                     <STListItem v-if="item.amountOpen >= 0">
                         <h3 class="style-definition-label">
-                            {{ $t('28c2bc66-231f-44f3-9249-c1981b871a1f') }}
+                            {{ $t('%76') }}
                         </h3>
                         <p class="style-definition-text">
                             {{ formatPrice(item.amountOpen + Math.max(0, item.amountPending)) }}
                         </p>
                         <p v-if="item.amountPending > 0" class="style-description-small">
-                            {{ $t('e6792924-6216-455e-9bfc-a555c716311f', {amount: formatPrice(item.amountPending)}) }}
+                            {{ $t('%hi', {amount: formatPrice(item.amountPending)}) }}
                         </p>
                         <p v-if="item.amountPending < 0" class="style-description-small">
-                            {{ $t('30fe0a04-5f5a-4d0e-84a3-17a7d4bb49e0', {amount: formatPrice(-item.amountPending)}) }}
+                            {{ $t('%hj', {amount: formatPrice(-item.amountPending)}) }}
                         </p>
                     </STListItem>
 
                     <STListItem v-else>
                         <h3 class="style-definition-label">
-                            {{ $t('38ff3cca-3877-4202-9c71-9437a12fb876') }}
+                            {{ $t('%10b') }}
                         </h3>
                         <p class="style-definition-text error">
                             {{ formatPrice(-item.amountOpen + Math.max(0, -item.amountPending)) }}
                         </p>
                         <p v-if="item.amountPending > 0" class="style-description-small">
-                            {{ $t('5ba25f05-aba1-474d-83fe-3a7e25d7fa13', {amount: formatPrice(item.amountPending)}) }}
+                            {{ $t('%hk', {amount: formatPrice(item.amountPending)}) }}
                         </p><p v-if="item.amountPending < 0" class="style-description-small">
-                            {{ $t('7ce2a53b-e6ab-415a-a683-6daf1ae76897', {amount: formatPrice(-item.amountPending)}) }}
+                            {{ $t('%hl', {amount: formatPrice(-item.amountPending)}) }}
                         </p>
                     </STListItem>
 
                     <STListItem v-if="item.amountOpen > 0 && (item.objectType === ReceivableBalanceType.organization || item.objectType === ReceivableBalanceType.user)">
                         <h3 class="style-definition-label">
-                            {{ $t('a8bf2d7d-3208-4c18-bac3-2cc97b629ad1') }}
+                            {{ $t('%88') }}
                         </h3>
                         <p class="style-definition-text">
-                            {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : $t('5cfae96d-516c-4b37-9ddf-afd21cab6574') }}
+                            {{ item.lastReminderEmail && item.reminderEmailCount > 0 ? formatDateTime(item.lastReminderEmail, true) : $t('%hm') }}
                         </p>
                         <p v-if="item.lastReminderEmail && item.reminderEmailCount > 1" class="style-description-small">
-                            {{ $t('d2d006f9-8a7d-419b-9fa6-432a9e86bef7', {count: item.reminderEmailCount.toString()}) }}
+                            {{ $t('%hn', {count: item.reminderEmailCount.toString()}) }}
                         </p>
                         <p v-if="item.lastReminderEmail && item.reminderEmailCount && item.lastReminderAmountOpen !== item.amountOpen" class="style-description-small">
-                            {{ $t('dd903ff5-0b40-4393-b9d2-fc45af9b07c3', {amount: formatPrice(item.lastReminderAmountOpen)}) }}
+                            {{ $t('%ho', {amount: formatPrice(item.lastReminderAmountOpen)}) }}
                         </p>
                         <p v-if="!item.lastReminderEmail || item.reminderEmailCount === 0" class="style-description-small">
-                            {{ $t('df3121cb-c5b1-405a-a34e-fd4d92d468ac') }}
+                            {{ $t('%hp') }}
                         </p>
                     </STListItem>
                 </STList>
@@ -149,7 +149,7 @@ const payingOrganizationId = computed(() => {
 const { externalOrganization: payingOrganization, loading: loadingPayingOrganization } = useExternalOrganization(payingOrganizationId);
 
 const title = computed(() => {
-    return $t('28c2bc66-231f-44f3-9249-c1981b871a1f');
+    return $t('%76');
 });
 
 const canClick = computed(() => {
@@ -173,7 +173,7 @@ async function showMember(memberId: string) {
                     limit: 1,
                 }));
                 if (members.results.length === 0) {
-                    Toast.error($t(`22541ecc-ba4f-4a91-b8d3-8213bfaaea0b`)).show();
+                    Toast.error($t(`%yX`)).show();
                     throw new Error('Member not found');
                 }
                 return new ComponentWithProperties(MemberSegmentedView, {

@@ -9,73 +9,73 @@
 
             <main>
                 <p v-if="!webshop.meta.reduceBranding && STAMHOOFD.platformName === 'stamhoofd'" class="stamhoofd-header">
-                    <a :href="'https://'+$domains.marketing+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('e5749f83-1a33-4185-a07a-b2beea3b69ca') }} </span><span v-else>{{ $t('b76dc7cb-2b83-4f21-a601-e8f301052a67') }}</span>  <Logo /></a>
+                    <a :href="'https://'+$domains.marketing+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">{{ $t('%Y3') }} </span><span v-else>{{ $t('%Y4') }}</span>  <Logo /></a>
                 </p>
                 <div class="box">
                     <main>
                         <h1 v-if="success">
-                            {{ $t('575c2a59-2f76-467b-a03d-4b243464a85f') }}
+                            {{ $t('%Y5') }}
                         </h1>
                         <h1 v-else>
-                            {{ $t('f8d1f500-51d4-4ade-8291-51606cfb10c0') }}
+                            {{ $t('%Y6') }}
                         </h1>
 
                         <p v-if="success">
-                            {{ $t('08a0920c-e5c1-443c-80e6-5e8441248903') }}
+                            {{ $t('%Y7') }}
                         </p>
 
                         <p v-if="isFailed && !closed" class="error-box selectable with-button" @click="() => pop()">
-                            {{ $t('f20a769b-717c-411f-9b15-f0f1c767b51e') }}
+                            {{ $t('%Y8') }}
 
                             <button class="button text" type="button">
-                                {{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}
+                                {{ $t('%Y9') }}
                             </button>
                         </p>
                         <p v-else-if="isFailed" class="error-box selectable with-button" @click="() => pop()">
-                            {{ $t('3554f028-5050-44fd-80eb-da5608021a86') }}
+                            {{ $t('%YA') }}
 
                             <button class="button text" type="button">
-                                {{ $t('1b311bbf-8cc3-4b91-a019-f80a062d8d4d') }}
+                                {{ $t('%Vz') }}
                             </button>
                         </p>
                         <p v-else-if="isDeleted" class="error-box">
-                            {{ $t('7f88d4cc-ddbb-45fc-aa7e-1c6b31e26f7c') }}
+                            {{ $t('%YB') }}
                         </p>
                         <p v-else-if="isCanceled" class="error-box">
-                            {{ $t('9a6904ac-2c29-443a-9e73-7c7588c626be') }}
+                            {{ $t('%W3') }}
                         </p>
 
                         <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" id="tickets" class="container">
                             <hr><h2 class="style-with-button">
                                 <div v-if="singleTicket">
-                                    {{ $t('0c690de0-77ee-4115-bd52-c4eb70b6387c') }}
+                                    {{ $t('%YC') }}
                                 </div>
                                 <div v-else>
-                                    {{ $t('610ae813-c8e8-44f2-a0fa-dc83d38f1cee') }}
+                                    {{ $t('%YD') }}
                                 </div>
                                 <div class="hover-show">
                                     <button v-if="!loadingTickets" class="button text limit-space" type="button" @click="downloadAllTickets">
                                         <span class="icon download" />
-                                        <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
+                                        <span>{{ $t('%v7') }}</span>
                                     </button>
                                 </div>
                             </h2>
                             <p v-if="!singleTicket" class="hide-smartphone style-description">
-                                {{ $t('5933154a-b9da-45e5-bd25-d5a9304d9007') }}
+                                {{ $t('%YE') }}
                             </p>
                             <p v-if="!singleTicket" class="only-smartphone style-description">
-                                {{ $t('3674c705-d837-4c2c-b29e-5eca62703e00') }}
+                                {{ $t('%YF') }}
                             </p>
 
                             <p v-if="singleTicket" class="style-description">
-                                {{ $t('d00c85cf-5f7c-4cec-9ad7-0fe74ad116ee') }}
+                                {{ $t('%YG') }}
                             </p>
 
                             <Spinner v-if="loadingTickets" />
                             <template v-else>
                                 <button v-if="publicTickets.length === 1" class="button primary" type="button" @click="openTicket(publicTickets[0])">
                                     <span class="icon qr-code" />
-                                    <span>{{ $t('4d1056b0-250a-435b-b78f-a1e9f03e190e') }}</span>
+                                    <span>{{ $t('%YH') }}</span>
                                 </button>
 
                                 <STList v-else>
@@ -83,51 +83,51 @@
                                 </STList>
                             </template>
 
-                            <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
+                            <hr><h2>{{ $t('%YI') }}</h2>
                         </section>
 
                         <template v-else-if="hasTickets">
                             <hr><h2 v-if="singleTicket">
-                                {{ $t('0c690de0-77ee-4115-bd52-c4eb70b6387c') }}
+                                {{ $t('%YC') }}
                             </h2>
                             <h2 v-else>
-                                {{ $t('610ae813-c8e8-44f2-a0fa-dc83d38f1cee') }}
+                                {{ $t('%YD') }}
                             </h2>
 
                             <p v-if="!isPaid && isTransfer" class="warning-box">
-                                {{ $t('87c0a82e-68ff-4e53-8124-08bc2d532d47') }} <template v-if="singleTicket">
-                                    {{ $t('c6968b48-2dcc-47ea-b1b2-647ad01e62e6') }}
+                                {{ $t('%YJ') }} <template v-if="singleTicket">
+                                    {{ $t('%YK') }}
                                 </template><template v-else>
-                                    {{ $t('b96dd30e-df8d-4cef-8a8c-f73eb842f6d3') }}
-                                </template> {{ $t('8bd25077-dabe-4ccc-ae37-8aa0236636e4') }}
+                                    {{ $t('%YL') }}
+                                </template> {{ $t('%YM') }}
                             </p>
                             <p v-else>
-                                {{ $t('005e0815-0491-4097-8a08-3da585dcd24e') }} <template v-if="singleTicket">
-                                    {{ $t('c6968b48-2dcc-47ea-b1b2-647ad01e62e6') }}
+                                {{ $t('%YN') }} <template v-if="singleTicket">
+                                    {{ $t('%YK') }}
                                 </template><template v-else>
-                                    {{ $t('b96dd30e-df8d-4cef-8a8c-f73eb842f6d3') }}
-                                </template> {{ $t('b1bb4138-62b1-4b25-a495-1a892bcfa8d6') }}
+                                    {{ $t('%YL') }}
+                                </template> {{ $t('%YO') }}
                             </p>
 
                             <a v-if="isPaid" href="#tickets" class="button primary">
                                 <span class="icon arrow-down" />
-                                <span v-if="singleTicket">{{ $t('2a4bf4a3-151a-494a-85d8-2d8006fcaef9') }}</span>
-                                <span v-else>{{ $t('232adc12-6c82-4a13-a085-ce1b702acfa6') }}</span>
+                                <span v-if="singleTicket">{{ $t('%YP') }}</span>
+                                <span v-else>{{ $t('%YQ') }}</span>
                             </a>
 
-                            <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
+                            <hr><h2>{{ $t('%YI') }}</h2>
                         </template>
                         <p v-else-if="!isCanceled && !isPaid && isTransfer" class="warning-box">
-                            {{ $t('49097ad0-f257-4132-9b47-d61866e70cd1') }}
+                            {{ $t('%YR') }}
                         </p>
                         <p v-else-if="!isCanceled && !isPaid && !isTransfer" class="warning-box">
-                            {{ $t('4a2f9baa-da83-4cf9-a39c-59e7f37c1823') }} {{ getLowerCaseName(order.data.paymentMethod) }}
+                            {{ $t('%YS') }} {{ getLowerCaseName(order.data.paymentMethod) }}
                         </p>
 
                         <STList class="info">
                             <STListItem>
                                 <h3 class="style-definition-label">
-                                    {{ $t('52aadb14-e175-4efe-bdf9-b88a632b6926') }}
+                                    {{ $t('%1AV') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -136,7 +136,7 @@
                             </STListItem>
                             <STListItem v-if="order.number && !isDeleted" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('17772225-f9c0-4707-9e2a-97f94de4e9d0') }}
+                                    {{ $t('%xA') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -145,7 +145,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.name" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}
+                                    {{ $t('%Gq') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -154,7 +154,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.email" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
+                                    {{ $t('%1FK') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -189,7 +189,7 @@
                             </STListItem>
                             <STListItem v-if="order.validAt" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('d1d52570-86b9-4edd-82c4-ccc1d759c6dc') }}
+                                    {{ $t('%VR') }}
                                 </h3>
                                 <p class="style-definition-text">
                                     {{ capitalizeFirstLetter(formatDateTime(order.validAt)) }}
@@ -198,7 +198,7 @@
 
                             <STListItem class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
+                                    {{ $t('%1A') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -211,13 +211,13 @@
                                 <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                                     <h3 class="style-definition-label">
                                         <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                            {{ $t('8113733b-00ea-42ae-8829-6056774a8be0') }}
+                                            {{ $t('%Uq') }}
                                         </template>
                                         <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                            {{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}
+                                            {{ $t('%TW') }}
                                         </template>
                                         <template v-else>
-                                            {{ $t('5562135d-197d-4251-ada8-ffe747622e7b') }}
+                                            {{ $t('%Va') }}
                                         </template>
                                     </h3>
 
@@ -227,7 +227,7 @@
                                 </STListItem>
                                 <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                                     <h3 class="style-definition-label">
-                                        {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
+                                        {{ $t('%Cn') }}
                                     </h3>
 
                                     <p class="style-definition-text">
@@ -236,7 +236,7 @@
                                 </STListItem>
                                 <STListItem v-if="order.data.address" class="right-description">
                                     <h3 class="style-definition-label">
-                                        {{ $t('8a910c54-1b2d-4963-9128-2cab93b0151b') }}
+                                        {{ $t('%Us') }}
                                     </h3>
 
                                     <p class="style-definition-text">
@@ -246,13 +246,13 @@
                                 <STListItem v-if="order.data.timeSlot" class="right-description">
                                     <h3 class="style-definition-label">
                                         <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                            {{ $t('856550aa-05af-45fc-8477-51ed1f719432') }}
+                                            {{ $t('%Vb') }}
                                         </template>
                                         <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                            {{ $t('13081716-3941-44b8-87b4-398ab2288419') }}
+                                            {{ $t('%Vc') }}
                                         </template>
                                         <template v-else>
-                                            {{ $t('cf7b982a-add0-4dc7-bbf9-f0c2477fa1e0') }}
+                                            {{ $t('%Vd') }}
                                         </template>
                                     </h3>
 
@@ -263,7 +263,7 @@
                             </template>
                             <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('482bd766-39fa-4340-91b4-ae22a23d5fa5') }}
+                                    {{ $t('%Sn') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -272,7 +272,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.administrationFee > 0" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('a0d99100-f225-416f-bcec-e25df9d651ac') }}
+                                    {{ $t('%xK') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -281,7 +281,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.totalPrice || !webshop.isAllFree" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('341172ee-281e-4458-aeb1-64ed5b2cc8bb') }}
+                                    {{ $t('%xL') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -294,13 +294,13 @@
 
                         <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                             <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                {{ $t('038031a7-0942-493a-9eb5-0cea9bb487b0') }}
+                                {{ $t('%Vf') }}
                             </h2>
                             <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                {{ $t('12b2ce84-6297-49a2-a9c4-d5619b764313') }}
+                                {{ $t('%YT') }}
                             </h2>
                             <h2 v-else>
-                                {{ $t('22af7a31-3e7c-43ee-aa6f-d6638719caed') }}
+                                {{ $t('%Vg') }}
                             </h2>
 
                             <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
@@ -308,7 +308,7 @@
 
                         <template v-if="!hasTickets || hasSingleTicket || !isPaid">
                             <hr><p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }} <span class="style-discount-code">{{ code.code }}</span></span>
+                                <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
                             </p>
 
                             <STList>
@@ -322,11 +322,11 @@
                         <template #right>
                             <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
                                 <span class="icon share" />
-                                <span>{{ $t('bf43c364-65c2-4cbe-98ff-f9e6b4c7d659') }}</span>
+                                <span>{{ $t('%YU') }}</span>
                             </button>
                             <button v-if="!isPaid && isTransfer" class="button primary" type="button" @click="openTransferView(getDefaultTransferPayment())">
                                 <span class="icon card" />
-                                <span>{{ $t('ee3f6752-b47c-46c4-9746-f9832f5df4ea') }}</span>
+                                <span>{{ $t('%YV') }}</span>
                             </button>
                         </template>
                     </STToolbar>

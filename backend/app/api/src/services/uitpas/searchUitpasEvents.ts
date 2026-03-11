@@ -49,7 +49,7 @@ function assertIsEventsResponse(json: unknown): asserts json is EventsResponse {
         throw new SimpleError({
             code: 'invalid_events_response',
             message: `Invalid events response`,
-            human: $t(`0b610eb8-551f-4ef6-acdc-fb3267dfc2a8`),
+            human: $t(`%1BY`),
         });
     }
 }
@@ -61,7 +61,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         throw new SimpleError({
             code: 'no_client_id_for_uitpas_events',
             message: `No client ID configured for Uitpas events`,
-            human: $t(`0009cce2-9d13-4f03-9258-345d8f8e396e`),
+            human: $t(`%1BZ`),
         });
     }
     const baseUrl = 'https://search-test.uitdatabank.be/events';
@@ -97,7 +97,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         throw new SimpleError({
             code: 'unsuccessful_response_searching_uitpas_events',
             message: `Unsuccessful response when searching for UiTPAS events`,
-            human: $t(`dd9b30ca-860f-47aa-8cb1-527fd156d9ca`),
+            human: $t(`%18C`),
         });
     }
     const json = await response.json().catch(() => {

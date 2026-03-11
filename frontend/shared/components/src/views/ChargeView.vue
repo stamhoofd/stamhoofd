@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :save-text="$t('00bdd5bd-af3f-4f83-abe0-696d5b872ca9')" save-icon="calculator" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" :save-text="$t('%6m')" save-icon="calculator" @save="save">
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
@@ -12,33 +12,33 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox v-if="app === 'admin'" :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
+            <STInputBox v-if="app === 'admin'" :title="$t('%6n')" error-fields="organization" :error-box="errors.errorBox">
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
 
-            <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox">
-                <input v-model="description" class="input" type="text" :placeholder="$t('e4a32f97-64aa-43d7-803f-3d18f7cdf8e4')" autocomplete="given-name">
+            <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox">
+                <input v-model="description" class="input" type="text" :placeholder="$t('%6p')" autocomplete="given-name">
             </STInputBox>
         </div>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('7453643b-fdb2-4aa1-9964-ddd71762c983')" error-fields="price" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%6q')" error-fields="price" :error-box="errors.errorBox">
                 <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null" />
             </STInputBox>
-            <STInputBox :title="$t('697df3e7-fbbf-421d-81c2-9c904dce4842')" error-fields="amount" :error-box="errors.errorBox">
-                <NumberInput v-model="amount" :title="$t('697df3e7-fbbf-421d-81c2-9c904dce4842')" :validator="errors.validator" :min="1" :stepper="true" />
+            <STInputBox :title="$t('%M4')" error-fields="amount" :error-box="errors.errorBox">
+                <NumberInput v-model="amount" :title="$t('%M4')" :validator="errors.validator" :min="1" :stepper="true" />
             </STInputBox>
         </div>
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
+                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`%gq`)">
                     <DateSelection v-model="createdAt" />
                 </STInputBox>
             </div>
             <div v-if="price >= 0">
-                <STInputBox :title="$t('1402e826-1f61-498a-81b4-595dce3248d0')" error-fields="dueAt" :error-box="errors.errorBox">
-                    <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
+                <STInputBox :title="$t('%Cj')" error-fields="dueAt" :error-box="errors.errorBox">
+                    <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`%gr`)" />
                 </STInputBox>
             </div>
         </div>
@@ -98,7 +98,7 @@ const dueAt = ref(null);
 
 const priceBreakdown = computed(() => {
     return [{
-        name: $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
+        name: $t(`%xL`),
         price: total.value,
     }];
 });
@@ -113,7 +113,7 @@ const chargeViewDescription = computed(() => {
 
 const saving = ref(false);
 
-const title = $t('4273d00c-7b8b-48ec-906d-80d6feb23655');
+const title = $t('%Gu');
 
 const defaultOrganizationId = computed(() => organization.value === null ? platform.value.membershipOrganizationId : null);
 const { externalOrganization: defaultOrganization } = useExternalOrganization(defaultOrganizationId);
@@ -130,7 +130,7 @@ useValidation(errors.validator, () => {
     if (selectedOrganization.value === null) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`c2c395d9-9d50-4680-a973-7d11c5fe000c`),
+            message: $t(`%12V`),
             field: 'organization',
         }));
     }
@@ -140,7 +140,7 @@ useValidation(errors.validator, () => {
     if (descriptionNormalized.length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`2449fba5-99dc-496f-a9d6-a67263d56616`),
+            message: $t(`%Cr`),
             field: 'description',
         }));
     }
@@ -148,7 +148,7 @@ useValidation(errors.validator, () => {
     if (price.value === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`1e165aac-8a58-45c5-bdd8-c58131a7b7f5`),
+            message: $t(`%Cs`),
             field: 'price',
         }));
     }
@@ -175,7 +175,7 @@ async function save() {
     }
 
     const isConfirm = await CenteredMessage.confirm(props.getConfirmationText({ total: Formatter.price(total.value), count: selectionCount.value }),
-        $t('00bdd5bd-af3f-4f83-abe0-696d5b872ca9'),
+        $t('%6m'),
     );
 
     if (!isConfirm) {
@@ -201,7 +201,7 @@ async function save() {
             owner,
         });
 
-        new Toast($t(`6a753313-f3b7-4999-be86-37fad16ac6d3`), 'success green').show();
+        new Toast($t(`%12W`), 'success green').show();
 
         await pop({ force: true });
     }
@@ -216,7 +216,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('ddf3558e-ed2e-4217-9155-495c3984d769'), $t('f97c98d7-c64e-4cab-ac8f-fdda5b1bfb54'));
+    return await CenteredMessage.confirm($t('%6r'), $t('%6s'));
 };
 
 defineExpose({

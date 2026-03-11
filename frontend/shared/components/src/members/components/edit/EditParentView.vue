@@ -7,7 +7,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%vC`)">
                     <Dropdown v-model="type">
                         <option v-for="t in parentTypes" :key="t" :value="t">
                             {{ formatParentType(t) }}
@@ -15,25 +15,25 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Gq`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`%1MU`)">
                         </div>
                     </div>
                 </STInputBox>
 
-                <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('7f30db7e-4851-4aa6-b731-2c898054f707')" :required="app === 'registration'" />
+                <PhoneInput v-model="phone" :title="$t('%2k')" :validator="errors.validator" :placeholder="$t('%2j')" :required="app === 'registration'" />
 
-                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`) " :validator="errors.validator" :placeholder="$t(`80e0424d-40a8-4ce8-94e4-2e0394d6f39c`)">
+                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`%1FK`) " :validator="errors.validator" :placeholder="$t(`%fc`)">
                     <template #right>
-                        <button :v-tooltip="$t('2797d590-7e74-4852-84aa-076f7919a2fb')" class="button icon add gray" type="button" @click="addEmail" />
+                        <button :v-tooltip="$t('%fI')" class="button icon add gray" type="button" @click="addEmail" />
                     </template>
                 </EmailInput>
-                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`d11ec0de-3c33-46be-b5fb-09f9e3a9101e`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :validator="errors.validator" :placeholder="$t(`80e0424d-40a8-4ce8-94e4-2e0394d6f39c`)" @update:model-value="setEmail(n - 1, $event)">
+                <EmailInput v-for="n in alternativeEmails.length" :key="n" :model-value="getEmail(n - 1)" :required="true" :title="$t(`%fR`) + ' ' + (alternativeEmails.length > 1 ? n : '') " :validator="errors.validator" :placeholder="$t(`%fc`)" @update:model-value="setEmail(n - 1, $event)">
                     <template #right>
                         <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
                     </template>
@@ -41,35 +41,35 @@
 
                 <p v-if="email && member && app !== 'registration'" class="style-description-small">
                     <template v-if="alternativeEmails.length">
-                        {{ $t('8bc01345-6078-4949-91e6-c003001896ab', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('%15O', {firstName: member.patchedMember.firstName}) }}
                     </template><template v-else>
-                        {{ $t('02ed38bf-5516-4e5a-b28c-6e73d7cf1009', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('%15P', {firstName: member.patchedMember.firstName}) }}
                     </template>
                 </p>
                 <p v-else-if="firstName && email && member" class="style-description-small">
                     <template v-if="alternativeEmails.length">
-                        {{ $t('49397bef-c935-42b4-980e-a3174d8a4710', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('%15Q', {firstName: member.patchedMember.firstName}) }}
                     </template><template v-else>
-                        {{ $t('9f6b9a67-e024-4cbc-9849-769807c6fc69', {firstName: member.patchedMember.firstName}) }}
+                        {{ $t('%15R', {firstName: member.patchedMember.firstName}) }}
                     </template>
                 </p>
 
                 <p v-if="alternativeEmails.length && member" class="style-description-small">
                     <template v-if="app !== 'registration'">
-                        {{ $t('eca0a260-096c-413a-9fa0-0c91acd9c780') }}
+                        {{ $t('%fZ') }}
                     </template>
                     <template v-else>
-                        {{ $t('b2287bc2-db81-4eb8-8fa1-3b1b70860707', {firstName}) }}
+                        {{ $t('%15S', {firstName}) }}
                     </template>
                 </p>
 
                 <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`00881b27-7501-4c56-98de-55618be2bf11`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`%wK`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                        {{ $t('cb5c9f59-30ae-470a-ab94-ed33b111850c') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
-                            {{ $t('c78ae112-296b-4b37-899b-8e3f56729079') }}
+                        {{ $t('%fa') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
+                            {{ $t('%fb') }}
                         </template>
-                        <I18nComponent :t="$t('1394c960-ea6f-44e9-8278-2019623d15bc', {name: firstName || $t('6c9d1930-5ea0-4136-a463-bba118c8dd6a')})">
+                        <I18nComponent :t="$t('%15T', {name: firstName || $t('%15U')})">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = NationalRegisterNumberOptOut">
                                     {{ content }}
@@ -78,7 +78,7 @@
                         </I18nComponent>
                     </p>
                     <p v-else class="style-description-small">
-                        <I18nComponent :t="$t('00cc0002-1674-47dd-ae92-7547a678bafc')">
+                        <I18nComponent :t="$t('%15N')">
                             <template #button="{content}">
                                 <button class="inline-link" type="button" @click="nationalRegisterNumber = null">
                                     {{ content }}
@@ -131,10 +131,10 @@ const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`));
+const saveText = ref($t(`%v7`));
 const app = useAppContext();
 const parentTypes = ParentTypeHelper.getPublicTypes();
-const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`1db644a2-8fc8-4471-b7ef-544ac1a82f60`)} bewerken` : $t(`6d4c2c27-ac05-4843-b329-c8bb806bfcb0`));
+const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`%14u`)} bewerken` : $t(`%fV`));
 const navigate = useNavigationActions();
 
 const relatedMembers = computed(() => {
@@ -249,14 +249,14 @@ async function save() {
         if (firstName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`1186a60b-c59f-43d5-ba58-04ff9288c266`),
+                message: $t(`%uH`),
                 field: 'firstName',
             }));
         }
         if (lastName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`bc27bb72-c06d-4a05-8e22-e920d01cc1f4`),
+                message: $t(`%104`),
                 field: 'lastName',
             }));
         }
@@ -269,7 +269,7 @@ async function save() {
                     if (member.patchedMember.details.nationalRegisterNumber === nationalRegisterNumber.value) {
                         se.addError(new SimpleError({
                             code: 'invalid_field',
-                            message: $t(`5ef454a0-9680-4615-bae6-85fa27771010`, { firstName: member.patchedMember.firstName }),
+                            message: $t(`%156`, { firstName: member.patchedMember.firstName }),
                             field: 'nationalRegisterNumber',
                         }));
                     }
@@ -280,7 +280,7 @@ async function save() {
             if (parent) {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`dc69fb48-68a9-480b-a30d-553f8cc2e76f`, { name: parent.name }),
+                    message: $t(`%157`, { name: parent.name }),
                     field: 'nationalRegisterNumber',
                 }));
             }
@@ -312,10 +312,10 @@ async function save() {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
             if (minorMembers.length > 0 && !await CenteredMessage.confirm(
-                $t(`27091cc2-c42d-457d-8250-05abc7d4937d`),
-                $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`),
-                $t(`0e3277e8-932a-4555-9f0e-ba3340bf2465`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') }),
-                $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
+                $t(`%10D`),
+                $t(`%101`),
+                $t(`%158`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`%M1`) + ' ') }),
+                $t(`%zT`),
                 false)) {
                 props.member.addParent(patched.value);
             }
@@ -357,10 +357,10 @@ async function modifyAddress(from: Address, to: Address) {
     }
 
     if (!await CenteredMessage.confirm(
-        $t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`),
-        $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`),
-        $t(`a87d3f1e-7e08-4415-b1a9-8fd49aafcb12`, { from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') }),
-        $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
+        $t(`%zP`),
+        $t(`%zQ`),
+        $t(`%159`, { from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`%M1`) + ' ') }),
+        $t(`%zT`),
         false)
     ) {
         return;
@@ -373,7 +373,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 }
 
 defineExpose({

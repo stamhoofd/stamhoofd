@@ -150,15 +150,15 @@ export class DataPermissionsSettings extends AutoEncoder {
     }
 
     static get defaultTitle() {
-        return $t(`75398f88-8d64-47e9-8d8f-627af69052db`);
+        return $t(`%qa`);
     }
 
     static get defaultCheckboxLabel() {
-        return $t(`b3c24a8b-6dbd-43c5-927e-34d362b30bbe`);
+        return $t(`%qb`);
     }
 
     static get defaultWarningText() {
-        return $t(`197cf20f-2759-45a0-a7ea-016ab11a6f10`);
+        return $t(`%qc`);
     }
 
     static get defaultCheckboxWarning() {

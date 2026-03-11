@@ -29,7 +29,7 @@ export class RegistrationPeriodBase extends AutoEncoder {
             return this.customName;
         }
 
-        return $t(`322dd34f-a4ec-4065-be53-040725915e20`) + ' ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
+        return $t(`%7Z`) + ' ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
 
     get nameShort() {

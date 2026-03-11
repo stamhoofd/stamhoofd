@@ -2,24 +2,24 @@
     <div>
         <dl class="details-grid dns-records" :class="{ success: record.status === 'Valid' }">
             <template v-if="record.optional">
-                <dt>{{ $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f') }}</dt>
-                <dd>{{ $t('9abb03cf-d76c-4f97-afea-76982042b1ad') }}</dd>
+                <dt>{{ $t('%14p') }}</dt>
+                <dd>{{ $t('%Io') }}</dd>
             </template>
 
-            <dt>{{ $t('6c9d45e5-c9f6-49c8-9362-177653414c7e') }}</dt>
+            <dt>{{ $t('%1B') }}</dt>
             <dd>{{ record.type }}</dd>
 
-            <dt>{{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}</dt>
-            <dd v-copyable class="selectable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
+            <dt>{{ $t('%Gq') }}</dt>
+            <dd v-copyable class="selectable" :v-tooltip="$t('%Ip')">
                 {{ record.name }}
             </dd>
 
-            <dt>{{ $t('6a8b6166-a8f9-41b8-81e7-a12180de762e') }}</dt>
-            <dd v-copyable class="selectable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
+            <dt>{{ $t('%Iq') }}</dt>
+            <dd v-copyable class="selectable" :v-tooltip="$t('%Ip')">
                 {{ record.value }}
             </dd>
 
-            <dt>{{ $t('116f6ca0-c077-4468-b79b-d329f6a8db77') }}</dt>
+            <dt>{{ $t('%U') }}</dt>
             <dd v-copyable class="selectable">
                 3600
             </dd>

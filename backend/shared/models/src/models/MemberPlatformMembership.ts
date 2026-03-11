@@ -184,7 +184,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_membership_type',
                 message: 'Unknown membership type',
-                human: $t(`14e020be-1dd8-4caf-9dce-369cbe0db902`),
+                human: $t(`%GM`),
             });
         }
 
@@ -194,7 +194,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'period_unavailable',
                 message: 'Membership not available for this period',
-                human: $t(`d5795b94-23d5-4fe7-97e1-6f0fe916caca`),
+                human: $t(`%GN`),
             });
         }
 
@@ -291,7 +291,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_membership_type',
                 message: 'Unknown membership type',
-                human: $t(`14e020be-1dd8-4caf-9dce-369cbe0db902`),
+                human: $t(`%GM`),
             });
         }
 
@@ -301,7 +301,7 @@ export class MemberPlatformMembership extends QueryableModel {
             throw new SimpleError({
                 code: 'period_unavailable',
                 message: 'Membership not available for this period',
-                human: $t(`d5795b94-23d5-4fe7-97e1-6f0fe916caca`),
+                human: $t(`%GN`),
             });
         }
 
@@ -311,7 +311,7 @@ export class MemberPlatformMembership extends QueryableModel {
                 // todo
                 code: 'not_found',
                 message: 'Organization not found',
-                human: $t(`1524a6e6-aad7-4072-81c1-ce6fc196224f`),
+                human: $t(`%GO`),
             });
         }
 

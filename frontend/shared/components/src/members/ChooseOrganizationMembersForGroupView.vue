@@ -1,24 +1,24 @@
 <template>
-    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('7de2e636-dcec-44b1-a681-daeb9cd85316') : $t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`809b158a-2a1f-459f-a60c-4ae5c69fbe8e`)" @save="goToCheckout">
+    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('%X9') : $t('%16p')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`%du`)" @save="goToCheckout">
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>
         <h1 v-if="group && isOnlyDeleting">
-            {{ $t('3b62fa55-becc-4ffb-b15d-f64528033953') }} {{ group.settings.name }}
+            {{ $t('%dm') }} {{ group.settings.name }}
         </h1>
         <h1 v-else-if="group">
-            {{ $t('f640fb74-eee1-43cf-8b28-0c6ff17da4d2') }} {{ group.settings.name }}
+            {{ $t('%dn') }} {{ group.settings.name }}
         </h1>
         <h1 v-else>
-            {{ $t('1259b59f-6447-4da8-887e-848f05da346f') }}
+            {{ $t('%1DQ') }}
         </h1>
 
         <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
-            {{ $t('8fa09d5b-957e-49c0-b02f-2aca8e17eb24') }}
+            {{ $t('%do') }}
         </p>
 
         <p v-if="checkout.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization && checkout.cart.items.length" class="warning-box">
-            {{ $t('0696b0bc-d2e2-4dc5-88d3-7ee188953cdf', {organization: contextOrganization.name}) }}
+            {{ $t('%dp', {organization: contextOrganization.name}) }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -32,34 +32,34 @@
         </STList>
 
         <p v-if="checkout.cart.isEmpty" class="info-box">
-            {{ $t('7a4b32f3-2459-4dde-aad7-12a9e1349ae0') }}
+            {{ $t('%dq') }}
         </p>
 
         <p v-if="group && !isOnlyDeleting" class="style-button-bar">
             <button type="button" class="button text" @click="searchMembers">
                 <span class="icon search" />
-                <span>{{ $t('9ef4a12d-ad85-4ee4-8604-c8a07d4e37f3') }}</span>
+                <span>{{ $t('%dr') }}</span>
             </button>
 
             <button type="button" class="button text" @click="addMember">
                 <span class="icon add" />
-                <span>{{ $t('ea4f66eb-cabd-466d-80a6-a7019d8137dc') }}</span>
+                <span>{{ $t('%ds') }}</span>
             </button>
         </p>
 
         <div v-if="isOnlyDeleting && hasPaidRegistrationDelete" class="container">
-            <hr><h2>{{ $t('d37f0355-379d-4128-aafa-fefb201188bc') }}</h2>
-            <p>{{ $t('11ffdf3a-dd66-49ec-b092-c7f3063e19f3') }}</p>
+            <hr><h2>{{ $t('%8q') }}</h2>
+            <p>{{ $t('%8x') }}</p>
 
             <p v-if="hadPaidByOrganization" class="info-box">
-                {{ $t('b263fa75-5a47-43a6-94a5-95eeac94567f') }}
+                {{ $t('%8r') }}
             </p>
 
-            <STInputBox :title="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)">
-                <PermyriadInput v-model="checkout.cancellationFeePercentage" :min="0" :max="10000" :placeholder="$t(`085e5b60-8c26-49b2-bba3-04dd38b3a891`)" />
+            <STInputBox :title="$t(`%2I`)">
+                <PermyriadInput v-model="checkout.cancellationFeePercentage" :min="0" :max="10000" :placeholder="$t(`%L`)" />
             </STInputBox>
             <p v-if="checkout.cancellationFeePercentage !== 0 && checkout.cancellationFeePercentage !== 10000" class="style-description-small">
-                {{ $t('13978903-0724-4935-a004-b9dbd4fe1ab1') }}
+                {{ $t('%dt') }}
             </p>
         </div>
 
@@ -151,7 +151,7 @@ async function addMember() {
             const isExistingMember = member.patchedMember.details.oldIds.length > 0;
 
             if (isExistingMember) {
-                Toast.warning($t(`eb3037bc-a195-41a8-ad30-947dce3ed73c`, { name: member.patchedMember.name })).show();
+                Toast.warning($t(`%16q`, { name: member.patchedMember.name })).show();
             }
 
             // Make sure record questions for this item are included in the edit dialog;
@@ -159,8 +159,8 @@ async function addMember() {
 
             // First ask the user to complete or verify the member details
             await editMember(member, {
-                title: !isExistingMember ? $t('2a44031f-dfa5-45df-824e-ba107d311c13') : $t('733d4169-a86f-425e-bb4b-15ce3af5aa60'),
-                saveText: $t('2a9075bb-a743-411e-8a3d-94e5e57363f0'),
+                title: !isExistingMember ? $t('%16n') : $t('%16o'),
+                saveText: $t('%16p'),
 
                 // We'll replace the previous steps, you can't go back to the previous step
                 displayOptions: { action: 'show', replace: 100, force: true },
@@ -228,7 +228,7 @@ const shouldNavigateAway = async () => {
     if (props.checkout.cart.isEmpty) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

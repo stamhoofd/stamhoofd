@@ -1,10 +1,10 @@
 <template>
     <div v-if="member.patchedMember.users.length > 0" class="hover-box container">
         <hr><h2 class="style-with-button">
-            <span class="icon-spacer">{{ $t('9b625e82-f571-4fc6-a83b-47cb14ac1739') }}</span>
+            <span class="icon-spacer">{{ $t('%1a') }}</span>
             <a v-if="!$isTouch && app !== 'registration'" class="button icon gray help" target="_blank" :href="$domains.getDocs('leden-beheren-met-meerdere-ouders')" />
         </h2>
-        <p>{{ $t('db162d2e-be1b-4e8a-9915-b1e58ffa0aca', {member: member.patchedMember.firstName}) }}</p>
+        <p>{{ $t('%ff', {member: member.patchedMember.firstName}) }}</p>
         <STGrid>
             <MemberAccountBox v-for="user in sortedUsers" :key="user.id" :member="member" :user="user" :is-deleting="isDeletingUser(user)" :has-empty-access="hasEmptyAccess" :has-write="hasWrite" @delete-user="deleteUser" />
         </STGrid>

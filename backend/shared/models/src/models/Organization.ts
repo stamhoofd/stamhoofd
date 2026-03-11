@@ -201,7 +201,7 @@ export class Organization extends QueryableModel {
             throw new SimpleError({
                 code: 'archived',
                 message: 'This organization is archived',
-                human: $t(`8bd60208-9101-40cf-9f1d-1fd90cdafd62`),
+                human: $t(`%x4`),
             });
         }
         return organization;
@@ -467,12 +467,12 @@ export class Organization extends QueryableModel {
                 to: i18n.localizedDomains.marketing(),
             },
             {
-                from: defaultI18n.$t('59b85264-c4c3-4cf6-8923-9b43282b2787'),
-                to: i18n.$t('59b85264-c4c3-4cf6-8923-9b43282b2787'),
+                from: defaultI18n.$t('%2a'),
+                to: i18n.$t('%2a'),
             },
             {
-                from: defaultI18n.$t('6b3555a2-ace4-4f37-a1fd-18921552f2b5'),
-                to: i18n.$t('6b3555a2-ace4-4f37-a1fd-18921552f2b5'),
+                from: defaultI18n.$t('%19'),
+                to: i18n.$t('%19'),
             },
         ];
 
@@ -926,7 +926,7 @@ export class Organization extends QueryableModel {
             throw new SimpleError({
                 code: 'payment_provider_not_configured',
                 message: 'Payment provider not configured for ' + method,
-                human: $t(`9e44e007-3b35-4edf-979f-41b458d2eb39`),
+                human: $t(`%x5`),
             });
         }
 

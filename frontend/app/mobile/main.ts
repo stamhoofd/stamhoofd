@@ -255,7 +255,7 @@ function isError(e: any): e is Error {
 AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: string) => {
     const { publicStorage } = await Filesystem.checkPermissions();
     if (!publicStorage) {
-        throw new Error($t(`56958164-b35f-4b78-b286-c3c7ac9c539d`));
+        throw new Error($t(`%Ww`));
     }
 
     // TODO: automatically encode data to base64 in case of buffer

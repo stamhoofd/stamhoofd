@@ -102,7 +102,7 @@ export function uitpasApiResponseToSocialTariff(response: GetPassResponse): Uitp
             throw new SimpleError({
                 code: 'invalid_data',
                 message: 'Invalid social tariff end date',
-                human: $t('abc1a491-8038-4435-9007-c77cc00c0886'),
+                human: $t('%1Iv'),
             });
         }
     }

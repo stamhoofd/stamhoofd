@@ -1,15 +1,15 @@
 <template>
     <div>
-        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
+        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errorBox" :title="$t(`%Gq`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sk`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`1205deb9-498d-435d-a6e1-91ea98371523`)">
+        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`%1IP`)">
             <LoadingInputBox :loading="uitpasSocialTariffLoading">
-                <PriceInput v-model="price" :min="null" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" :disabled="!!product.uitpasEvent && enableUitpasSocialTariff" />
+                <PriceInput v-model="price" :min="null" :placeholder="$t(`%1Mn`)" :disabled="!!product.uitpasEvent && enableUitpasSocialTariff" />
             </LoadingInputBox>
             <p v-if="!!product.uitpasEvent" class="style-description-small">
-                {{ $t('3028ddfe-f756-4b75-b3d2-e9281dd75c63') }}
+                {{ $t('%1AL') }}
             </p>
         </STInputBox>
 
@@ -20,23 +20,23 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('3eaf07f2-4c9f-418a-b494-95b26a2352da') }}
+                    {{ $t('%U7') }}
                 </h3>
 
                 <p v-if="useDiscount" class="style-description-small" @click.stop.prevent>
-                    {{ $t("a44947d8-7021-4398-ad41-7067dac8ae64") }}
+                    {{ $t("%U9") }}
                 </p>
                 <p v-if="!discountPossible" class="style-description-small" @click.stop.prevent>
-                    {{ $t('8e328465-ed68-4f9a-92ba-8c2e172bb521') }}
+                    {{ $t('%1C2') }}
                 </p>
 
                 <div v-if="useDiscount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`a9f97aed-ed48-41b7-a2d3-9bbab28981d8`)">
-                        <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
+                    <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`%UA`)">
+                        <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`%1Mn`)" />
                     </STInputBox>
 
-                    <STInputBox error-fields="discountAmount" :error-box="errorBox" :title="$t(`f4306def-3d82-420c-98d5-795879461006`)">
-                        <NumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
+                    <STInputBox error-fields="discountAmount" :error-box="errorBox" :title="$t(`%UB`)">
+                        <NumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`%1Mn`)" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -47,10 +47,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('9b385bc1-0c3b-4476-b31d-a8598e381ca4') }}
+                    {{ $t('%Ti') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('5bd19019-212a-4c0a-9f22-4eb38b3699df') }}
+                    {{ $t('%U8') }}
                 </p>
             </STListItem>
 
@@ -60,11 +60,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('45807c1e-fb46-496f-9584-9081c56e193c', {stock: usedStock.toString()}) }}
+                    {{ $t('%TN', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <p v-if="useStock" class="style-description-small">
-                    {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
+                    {{ $t('%TO') }}
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -80,14 +80,14 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('c6cc8722-303d-4f0e-89c8-e1a0cf2630ca') }}
+                    {{ $t('%1AM') }}
                 </h3>
 
                 <p v-if="productPricesAvailableForUitpasBaseProductPrice.length === 0" class="style-description-small">
-                    {{ patchedProduct.prices.some(p => p.uitpasBaseProductPriceId === patchedProductPrice.id) ? $t('cc1c85a2-123b-43e4-ba4e-ef7dfe3b06f1') : $t('797519d9-a3f3-404f-a66d-b8e488b40547') }}
+                    {{ patchedProduct.prices.some(p => p.uitpasBaseProductPriceId === patchedProductPrice.id) ? $t('%1AN') : $t('%1AO') }}
                 </p>
 
-                <STInputBox v-if="uitpasBaseProductPriceId" error-fields="uitpasBaseProductPriceId" :error-box="errorBox" :title="$t('86c059de-74eb-44b4-90dc-a11d0d93f332')">
+                <STInputBox v-if="uitpasBaseProductPriceId" error-fields="uitpasBaseProductPriceId" :error-box="errorBox" :title="$t('%1AP')">
                     <Dropdown v-model="uitpasBaseProductPriceId">
                         <option v-for="item in productPricesAvailableForUitpasBaseProductPrice" :key="item.id" :value="item.id">
                             {{ item.name ? item.name + ' (' + formatPrice(item.price) + ')' : formatPrice(item.price) }}
@@ -95,7 +95,7 @@
                     </Dropdown>
 
                     <p class="style-description-small">
-                        {{ $t('0b6cd837-f090-4f2e-964a-2a1346c02dbf') }}
+                        {{ $t('%1AQ') }}
                     </p>
                 </STInputBox>
             </STListItem>

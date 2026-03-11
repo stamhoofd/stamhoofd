@@ -12,7 +12,7 @@
         :Route="Route"
     >
         <template #empty>
-            {{ $t('4fa242b7-c05d-44d4-ada5-fb60e91af818') }}
+            {{ $t('%39') }}
         </template>
     </ModernTableView>
 </template>
@@ -50,7 +50,7 @@ const title = computed(() => {
             return props.tag.name;
         }
     }
-    return $t('4835dfd4-10b0-4e91-b581-d1b3eefa73f7');
+    return $t('%53');
 });
 
 const estimatedRows = computed(() => {
@@ -121,7 +121,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+        name: $t(`%Gq`),
         getValue: organization => organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -130,9 +130,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, boolean>({
         id: 'status',
-        name: $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
+        name: $t(`%1A`),
         getValue: organization => organization.active,
-        format: active => active ? $t(`079afc7a-6ccb-4c7f-b739-24198b0cfec2`) : $t(`33906077-a1d8-4daa-9914-ce129538f68c`),
+        format: active => active ? $t(`%1H0`) : $t(`%7G`),
         getStyle: active => active ? 'success' : 'error',
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -143,33 +143,33 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'city',
-        name: $t(`3f4f6c6a-e2c5-4bee-83a3-77d8e55a1e60`),
+        name: $t(`%CQ`),
         getValue: organization => organization.address.city,
         minimumWidth: 100,
         recommendedWidth: 200,
     }),
     new Column<ObjectType, string[]>({
         id: 'tags',
-        name: $t(`5f8c1ac5-a650-4046-80b6-0fe37fa12439`),
+        name: $t(`%13`),
         allowSorting: false,
-        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)),
-        format: tags => tags.length === 0 ? $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`) : tags.join(', '),
+        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t(`%Gr`)),
+        format: tags => tags.length === 0 ? $t(`%1FW`) : tags.join(', '),
         getStyle: tags => tags.length === 0 ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 300,
     }),
     new Column<ObjectType, { completed: number; total: number }>({
         id: 'setupSteps',
-        name: $t(`d8b63805-2fa5-4bb8-bb01-97adf9898497`),
+        name: $t(`%Gs`),
         allowSorting: false,
         getValue: organization => organization.period.setupSteps.getProgress(),
         format: (progress) => {
             const { completed, total } = progress;
             if (total === 0) {
-                return $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`);
+                return $t(`%1FW`);
             }
             if (completed >= total) {
-                return $t(`1e1637ef-4133-4f30-973d-bd913387961e`);
+                return $t(`%Gt`);
             }
             return `${progress.completed}/${progress.total}`;
         },
@@ -270,7 +270,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
 if (auth.hasPlatformFullAccess()) {
     actions.push(
         new InMemoryTableAction({
-            name: $t('7066aee7-9e51-4767-b288-460646ceca50'),
+            name: $t('%3E'),
             icon: 'add',
             priority: 0,
             groupIndex: 1,
@@ -299,7 +299,7 @@ if (auth.hasPlatformFullAccess()) {
                             owner,
                             decoder: new ArrayDecoder(Organization as Decoder<Organization>),
                         });
-                        new Toast($t('8459189d-6f9a-4541-9fb7-7618061f1969'), 'success green').show();
+                        new Toast($t('%34'), 'success green').show();
 
                         // Reload table
                         tableObjectFetcher.reset(true, true);
@@ -315,7 +315,7 @@ if (auth.hasPlatformFullAccess()) {
     );
 
     actions.push(new AsyncTableAction({
-        name: $t(`f92ad3ab-8743-4d37-8b3f-c9d5ca756b16`),
+        name: $t(`%Gb`),
         icon: 'email',
         priority: 12,
         groupIndex: 3,
@@ -325,7 +325,7 @@ if (auth.hasPlatformFullAccess()) {
     }));
 
     actions.push(new AsyncTableAction({
-        name: $t(`4273d00c-7b8b-48ec-906d-80d6feb23655`),
+        name: $t(`%Gu`),
         icon: 'calculator',
         priority: 13,
         groupIndex: 4,
@@ -336,7 +336,7 @@ if (auth.hasPlatformFullAccess()) {
 
     actions.push(
         new AsyncTableAction({
-            name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
+            name: $t(`%Gc`),
             icon: 'download',
             priority: 11,
             groupIndex: 3,

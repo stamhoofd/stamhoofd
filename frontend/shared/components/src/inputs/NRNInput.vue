@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="nationalRegisterNumber" :error-box="errors.errorBox" :class="props.class">
-        <input v-if="value === NationalRegisterNumberOptOut" :disabled="true" :value="$t('e12f0a1a-21b4-4dcc-8efa-922342b0d6ac')" class="input"><input v-else v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="placeholder || (!required ? $t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`) : $t(`e07a232f-eb27-4599-a8d8-5ca8586088a0`))" class="input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}"><template #right>
+        <input v-if="value === NationalRegisterNumberOptOut" :disabled="true" :value="$t('%dT')" class="input"><input v-else v-model="nrrRaw" v-format-input="DataValidator.getBelgianNationalNumberInputFormatter()" :placeholder="placeholder || (!required ? $t(`%14p`) : $t(`%dU`))" class="input" type="text" :class="{placeholder: isSuggestion}" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {nrrRaw = event.currentTarget.value; onTyping();}"><template #right>
             <slot name="right" />
         </template>
     </STInputBox>
@@ -145,7 +145,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: nrrRaw.value.length === 0 ? $t(`619eee67-7e95-48a8-9f05-a2783eb52310`) : $t(`305840c7-8dc6-4f40-84c3-ca03be30f46a`),
+                message: nrrRaw.value.length === 0 ? $t(`%z4`) : $t(`%z5`),
                 field: 'nationalRegisterNumber',
             }));
         }
@@ -155,7 +155,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`b809571c-08ed-464c-9f40-3522f8dac440`),
+                message: $t(`%z6`),
                 field: 'nationalRegisterNumber',
             }));
         }

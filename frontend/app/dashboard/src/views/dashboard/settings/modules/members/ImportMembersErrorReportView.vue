@@ -1,6 +1,6 @@
 <template>
-    <SaveView :title="$t('f9fec81d-9d00-4748-b92e-bb8526106c34')" :loading="saving" :save-text="$t('486a0b94-bed0-48d6-9055-3fe3923f8054')" @save="goNext">
-        <h1>{{ $t('becf7e84-6ea6-4dc9-b6cd-f2c5c56c47ac') }}</h1>
+    <SaveView :title="$t('%18e')" :loading="saving" :save-text="$t('%18f')" @save="goNext">
+        <h1>{{ $t('%18g') }}</h1>
 
         <STList>
             <STListItem v-for="report in reports" :key="report.row">

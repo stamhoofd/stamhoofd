@@ -9,7 +9,7 @@
         </h3>
 
         <p class="style-description-small">
-            {{ $t('3b62fa55-becc-4ffb-b15d-f64528033953') }} {{ registration.registration.group.settings.name }}
+            {{ $t('%dm') }} {{ registration.registration.group.settings.name }}
         </p>
 
         <template #right>

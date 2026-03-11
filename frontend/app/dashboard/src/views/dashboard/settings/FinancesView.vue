@@ -1,15 +1,15 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="outstandingBalance" class="st-view">
-            <STNavigationBar :title="$t(`0fc72e2d-5fe5-4ed2-ba5d-1f880790c174`)" />
+            <STNavigationBar :title="$t(`%tx`)" />
 
             <main class="center">
                 <h1>
-                    {{ $t('0fc72e2d-5fe5-4ed2-ba5d-1f880790c174') }}
+                    {{ $t('%tx') }}
                 </h1>
 
                 <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
-                    {{ $t('e9616fc3-c694-42f9-b733-29a1ece071d5') }}
+                    {{ $t('%1KY') }}
                 </a>
 
                 <STList class="illustration-list">
@@ -18,10 +18,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('77e1bb0a-166c-4d37-9dd6-c5ad10a9d91b') }}
+                            {{ $t('%95') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f") }}
+                            {{ $t("%5Q") }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -33,10 +33,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/bank.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('35f1db1d-e8bd-4a0c-8141-97b8c716ec17') }}
+                            {{ $t('%96') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('143d3f17-d547-47ff-9b83-f8587bcbc16c') }}
+                            {{ $t('%97') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -48,10 +48,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('2e0554e5-f223-4618-942e-53ec88f26e19') }}
+                            {{ $t('%1Lo') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('67433a1e-efe1-48a1-9b4c-84dea499c5b9') }}
+                            {{ $t('%98') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -63,10 +63,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('231f28d7-292a-43bc-877b-751012b6ae48') }}
+                            {{ $t('%99') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('d74d7aec-8fd5-489a-b93d-89d56ca8ae34', {organization: organization!.name}) }}
+                            {{ $t('%NG', {organization: organization!.name}) }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -78,10 +78,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/box.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('1744bb59-7570-46bb-961b-90aea45df735') }}
+                            {{ $t('%1Ls') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('22127a65-6f8c-40e3-a165-6d1ea358ddf2') }}
+                            {{ $t('%1Lt') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -91,7 +91,7 @@
 
                 <div v-if="$feature('vat') && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" class="container">
                     <hr>
-                    <h2>{{ $t('54f30f31-26eb-4801-8f03-4ec17bcb9b95') }}</h2>
+                    <h2>{{ $t('%1JA') }}</h2>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Invoices)">
@@ -99,10 +99,10 @@
                                 <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('fa389e74-a5d7-43da-8ce5-805c3a6e1a53') }}
+                                {{ $t('%1JR') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('5a61bab4-4702-4c66-977c-d97fb306049e') }}
+                                {{ $t('%1JS') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -112,8 +112,8 @@
                 </div>
 
                 <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
-                    <hr><h2>{{ $t('027d88ac-a3a4-4193-bc1b-8e671bbc6637', {organization: item.organization.name}) }}</h2>
-                    <p>{{ $t('4aa391d7-2367-43fe-a4ce-c4d18b9e46d9', {organization: item.organization.name}) }}</p>
+                    <hr><h2>{{ $t('%NH', {organization: item.organization.name}) }}</h2>
+                    <p>{{ $t('%NI', {organization: item.organization.name}) }}</p>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalance, {params: {uri: item.organization.uri}})">
@@ -121,14 +121,14 @@
                                 <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('28c2bc66-231f-44f3-9249-c1981b871a1f') }}
+                                {{ $t('%76') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('ef30fb68-251e-410b-8e95-df01fa30359e') }}
+                                {{ $t('%NJ') }}
                             </p>
 
                             <p v-if="BalanceItem.getOutstandingBalance(item.balanceItems).pricePending > 0" class="style-description">
-                                {{ $t('1602ef29-3f5c-4ec6-a57a-d80361d89013', {price: formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending)}) }}
+                                {{ $t('%NK', {price: formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems).pricePending)}) }}
                             </p>
 
                             <template #right>
@@ -144,10 +144,10 @@
                                 <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('774d7eaf-dee1-4549-8531-7c6ac622e123') }}
+                                {{ $t('%NL') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('7731a1c3-1ed2-4b46-8c21-b5cd67c8c521', {organization: item.organization.name}) }}
+                                {{ $t('%NM', {organization: item.organization.name}) }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />

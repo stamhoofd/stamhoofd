@@ -1,40 +1,40 @@
 <template>
     <hr>
     <h2 class="style-with-button">
-        <div>{{ $t('f5404d3b-f49b-489d-9cb8-05ba668ca0cc') }}</div>
+        <div>{{ $t('%Yf') }}</div>
         <div>
             <button type="button" class="button icon add" @click="createAdmin" />
         </div>
     </h2>
 
-    <p>{{ $t('8ed2c90d-f77a-4d9d-aca5-64a76ed50e32') }}</p>
+    <p>{{ $t('%Yg') }}</p>
     <p class="info-box">
-        {{ $t('a9605085-cd44-454d-9386-3dd30206f3bf') }}
+        {{ $t('%Bx') }}
     </p>
 
     <div v-if="shouldShowSearch" class="input-with-buttons">
         <div>
             <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
             </form>
         </div>
     </div>
 
     <p v-if="sortedAdmins.length === 0" class="info-box">
-        {{ $t('ffc7f682-f284-4188-a6fe-fe859bb3f18d') }}
+        {{ $t('%Yh') }}
     </p>
     <p v-if="filteredAdmins.length === 0 && sortedAdmins.length > 0" class="info-box">
-        {{ $t('34416687-b59a-4637-92a0-fac711d7d231') }}
+        {{ $t('%1AX') }}
     </p>
 
     <STList v-else-if="filteredAdmins.length > 0">
         <STListItem v-for="admin of filteredLimitedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
             <template #left>
-                <span v-if="hasFullAccess(admin)" class="icon layered" :v-tooltip="$t('06e0f25f-f601-4359-a95d-b72fd79ecbdd')">
+                <span v-if="hasFullAccess(admin)" class="icon layered" :v-tooltip="$t('%Yb')">
                     <span class="icon user-admin-layer-1" />
                     <span class="icon user-admin-layer-2 yellow" />
                 </span>
-                <span v-else-if="hasEmptyAccess(admin)" class="icon layered" :v-tooltip="$t('3bb4e938-ca4e-4318-a86d-002ba6035fd0')">
+                <span v-else-if="hasEmptyAccess(admin)" class="icon layered" :v-tooltip="$t('%Yc')">
                     <span class="icon user-blocked-layer-1" />
                     <span class="icon user-blocked-layer-2 red" />
                 </span>
@@ -48,7 +48,7 @@
                 {{ admin.email }}
             </p>
             <p v-if="admin.memberId && sortedMembers.find(m => m.id === admin.memberId)" class="style-description-small">
-                {{ $t('61d55c53-d63d-49a1-ac0c-806548eb294a') }}
+                {{ $t('%Bz') }}
             </p>
             <p class="style-description-small">
                 {{ permissionList(admin) }}
@@ -56,9 +56,9 @@
 
             <template #right>
                 <span v-if="admin.id === me?.id" class="style-tag">
-                    {{ $t('50f1bd97-6ff4-44cb-a44d-45672218b7f8') }}
+                    {{ $t('%Yd') }}
                 </span>
-                <span v-else-if="!admin.hasAccount" class="icon email gray" :v-tooltip="$t('0e7858e2-873b-4d49-9b5b-d9b15ea5f97f')" />
+                <span v-else-if="!admin.hasAccount" class="icon email gray" :v-tooltip="$t('%Ye')" />
                 <span><span class="icon gray edit" /></span>
             </template>
         </STListItem>
@@ -66,7 +66,7 @@
 
     <p v-if="shouldShowMoreButton" class="style-button-bar">
         <button type="button" class="button text" @click="showAll = true">
-            {{ $t('96140ac1-d193-4ad1-9f33-f5241f00d176', {count: showMoreCount}) }}
+            {{ $t('%1AY', {count: showMoreCount}) }}
         </button>
     </p>
 </template>
@@ -201,11 +201,11 @@ const permissionList = (user: User) => {
     const list: string[] = [];
     const permissions = getPermissions(user);
     if (!permissions) {
-        return $t(`09004cd9-3fc8-4ba6-b758-5fe2348b4982`);
+        return $t(`%uF`);
     }
 
     if (permissions.hasFullAccess()) {
-        list.push($t(`6e948886-0b41-49e8-80be-0e2e3c795359`));
+        list.push($t(`%uG`));
     }
 
     for (const role of getUnloadedPermissions(user)?.roles ?? []) {
@@ -213,7 +213,7 @@ const permissionList = (user: User) => {
     }
 
     if (list.length === 0) {
-        return $t(`09004cd9-3fc8-4ba6-b758-5fe2348b4982`);
+        return $t(`%uF`);
     }
     return list.join(', ');
 };

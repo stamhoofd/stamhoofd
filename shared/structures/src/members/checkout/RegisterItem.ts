@@ -175,7 +175,7 @@ export class RegisterItem implements ObjectWithRecords {
             if (!this.groupPrice) {
                 // Probably all sold out
                 // Select the first one anyway
-                this.groupPrice = prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('83c99392-7efa-44d3-8531-1843c5fa7c4d')), id: '' });
+                this.groupPrice = prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('%15L')), id: '' });
             }
         }
         else {
@@ -404,7 +404,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         for (const { registration } of this.replaceRegistrations) {
             all.push({
-                name: this.checkout.isAdminFromSameOrganization ? $t('a87b9dfd-4acd-40c0-b430-f29dc8ec0fbf', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
+                name: this.checkout.isAdminFromSameOrganization ? $t('%vZ', { group: registration.group.settings.name }) : $t('Terugbetaling voor {group}', { group: registration.group.settings.name }),
                 price: -registration.calculatedPrice,
             });
         }
@@ -444,9 +444,9 @@ export class RegisterItem implements ObjectWithRecords {
         if (this.calculatedPriceDueLater !== 0) {
             const trialUntil = this.calculatedTrialUntil;
             all.push({
-                name: $t('3b051406-b285-4f04-a80d-b98c966cbb1c'),
+                name: $t('%10Z'),
                 price: this.calculatedPriceDueLater - discountsLater,
-                description: trialUntil ? $t('4789d323-f2da-4e87-a17c-7d29f813d68e', { date: Formatter.date(trialUntil) }) : undefined,
+                description: trialUntil ? $t('%va', { date: Formatter.date(trialUntil) }) : undefined,
             });
         }
 
@@ -454,7 +454,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (all.length > 0) {
             all.unshift({
-                name: $t('26369a8f-8080-4f00-af46-576fdf563ced'),
+                name: $t('%xJ'),
                 price: this.calculatedPrice + this.calculatedPriceDueLater,
             });
         }
@@ -463,7 +463,7 @@ export class RegisterItem implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : (this.calculatedPriceDueLater !== 0 ? $t('35337319-2bc6-41d6-9427-c1974d8a37ae') : $t('341172ee-281e-4458-aeb1-64ed5b2cc8bb')),
+                name: this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('%vb') : $t('%vc')) : (this.calculatedPriceDueLater !== 0 ? $t('%10c') : $t('%xL')),
                 price: this.checkout.isAdminFromSameOrganization ? Math.abs(correctedTotalPrice) : correctedTotalPrice,
             },
         ];
@@ -515,7 +515,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`57ac219a-4e8b-4606-bdb6-88566fdaeed0`, { group: this.group.settings.name }),
+                    human: $t(`%13o`, { group: this.group.settings.name }),
                 }),
             );
         }
@@ -526,7 +526,7 @@ export class RegisterItem implements ObjectWithRecords {
                     new SimpleError({
                         code: 'product_unavailable',
                         message: 'Product unavailable',
-                        human: $t(`e7658433-afc4-4963-8ddf-afc1bda26bef`, {
+                        human: $t(`%14J`, {
                             group: this.group.settings.name,
                         }),
                         meta: { recoverable: true },
@@ -549,7 +549,7 @@ export class RegisterItem implements ObjectWithRecords {
                 errors.addError(new SimpleError({
                     code: 'option_menu_unavailable',
                     message: 'Option menu unavailable',
-                    human: $t(`e883ae60-e858-4bcf-9e60-5d03986459c2`, {
+                    human: $t(`%14K`, {
                         group: this.group.settings.name,
                     }),
                     meta: { recoverable: true },
@@ -569,7 +569,7 @@ export class RegisterItem implements ObjectWithRecords {
                 errors.addError(new SimpleError({
                     code: 'option_unavailable',
                     message: 'Option unavailable',
-                    human: $t(`e883ae60-e858-4bcf-9e60-5d03986459c2`, {
+                    human: $t(`%14K`, {
                         group: this.group.settings.name,
                     }),
                     meta: { recoverable: true },
@@ -587,7 +587,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'missing_menu',
                     message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
-                    human: $t(`6cf5b874-4092-47e2-b21c-3a531537a661`, { group: this.group.settings.name }),
+                    human: $t(`%13p`, { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 }),
             );
@@ -669,20 +669,20 @@ export class RegisterItem implements ObjectWithRecords {
                 const requiredGroups = this.group.settings.requireGroupIds.map(id => this.organization.period.groups.find(g => g.id === id)).filter(g => !!g).map(g => g!.settings.name.toString());
 
                 if (requiredGroups.length && requiredGroups.length === this.group.settings.requireGroupIds.length) {
-                    return $t('1a537046-de7c-45ba-a990-da2fccd54325', {
+                    return $t('%1GO', {
                         firstName: this.member.patchedMember.details.firstName,
-                        aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') + ' '),
+                        aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('%GT') + ' '),
                         group: this.group.settings.name.toString(),
                     });
                 }
 
                 if (this.group.settings.requireGroupIds.length > 1) {
-                    return $t('a5754a6a-a584-448f-ae31-30262c8ab868', {
+                    return $t('%1GP', {
                         firstName: this.member.patchedMember.details.firstName,
                         group: this.group.settings.name.toString(),
                     });
                 }
-                return $t('387311b4-eeed-48f5-950d-048ac0021666', {
+                return $t('%1GQ', {
                     firstName: this.member.patchedMember.details.firstName,
                     group: this.group.settings.name.toString(),
                 });
@@ -700,9 +700,9 @@ export class RegisterItem implements ObjectWithRecords {
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
                 const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds.map(id => Platform.shared.config.defaultAgeGroups.find(d => d.id === id)).filter(d => !!d).map(d => d!.name);
-                return $t('1a537046-de7c-45ba-a990-da2fccd54325', {
+                return $t('%1GO', {
                     firstName: this.member.patchedMember.details.firstName,
-                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') + ' ') : $t('ab204a0e-c114-4c5a-8f86-95aafe9464b0'),
+                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('%GT') + ' ') : $t('%1GN'),
                     group: this.group.settings.name.toString(),
                 });
             }
@@ -777,7 +777,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (this.replaceRegistrations.length > 0) {
             for (const { registration } of this.replaceRegistrations) {
-                descriptions.push($t(`9b0ace12-de6c-43a8-aed2-e16a81a86d59`) + ' ' + registration.group.settings.name);
+                descriptions.push($t(`%13q`) + ' ' + registration.group.settings.name);
             }
         }
 
@@ -1027,8 +1027,8 @@ export class RegisterItem implements ObjectWithRecords {
                         code: 'different_period',
                         message: 'Different period',
                         human: type === 'register'
-                            ? $t('dcb9126f-72c4-42c8-990a-8ddc747c0e2b', { group: group.settings.name })
-                            : $t('7c55cb44-8149-414a-a162-ca9859014e81', { group: group.settings.name }),
+                            ? $t('%Bs', { group: group.settings.name })
+                            : $t('%Bt', { group: group.settings.name }),
                     });
                 }
             }
@@ -1040,7 +1040,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register' ? $t('f6360ada-86e7-4ec8-86fb-fe9e750c4926', { group: group.settings.name }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat dit werkjaar is afgesloten.', { group: group.settings.name }),
+                human: type === 'register' ? $t('%Bu', { group: group.settings.name }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat dit werkjaar is afgesloten.', { group: group.settings.name }),
             });
         }
 
@@ -1048,7 +1048,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register' ? $t('26b8398d-a17c-4854-ae64-99a410ddeffb', { group: group.settings.name, period: period.nameShort }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat werkjaar {period} is afgesloten.', { group: group.settings.name, period: period.nameShort }),
+                human: type === 'register' ? $t('%Bv', { group: group.settings.name, period: period.nameShort }) : $t('Je kan geen inschrijvingen wijzigen van {group} omdat werkjaar {period} is afgesloten.', { group: group.settings.name, period: period.nameShort }),
             });
         }
     }
@@ -1081,7 +1081,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`ff3fd880-a223-46f6-aa02-bcd1ae8697cc`),
+                    human: $t(`%1Il`),
                     field: 'customEndDate',
                 });
             }
@@ -1090,7 +1090,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`38d52178-351c-433d-a767-2ca2b5efbfdc`),
+                    human: $t(`%1Im`),
                     field: 'customEndDate',
                 });
             }
@@ -1099,7 +1099,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`a9a35ed9-de40-40b7-81aa-c1a6c22c17b7`),
+                    human: $t(`%1In`),
                     field: 'customEndDate',
                 });
             }
@@ -1110,7 +1110,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: $t(`3cfda9a5-3dbc-4490-9dcf-986aafc7b868`),
+                    human: $t(`%13r`),
                     field: 'customStartDate',
                 });
             }
@@ -1119,7 +1119,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: $t(`683c669d-005d-4fc3-ae27-2c6e727fca2a`),
+                    human: $t(`%13s`),
                     field: 'customStartDate',
                 });
             }
@@ -1129,7 +1129,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'multiple_organizations',
                 message: 'Cannot add items of multiple organizations to the checkout',
-                human: $t(`654675b0-0c6c-4953-9c49-d4536bc5b9f1`, { group: this.group.settings.name }),
+                human: $t(`%13t`, { group: this.group.settings.name }),
                 meta: { recoverable: true },
             });
         }
@@ -1139,7 +1139,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_waiting_list',
                 message: 'No waiting list',
-                human: $t(`a33f3d4c-30bf-4ecb-9769-31d51f2bcc8f`),
+                human: $t(`%13u`),
             });
         }
 
@@ -1147,7 +1147,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'as_organization_disabled',
                 message: 'allowRegistrationsByOrganization disabled',
-                human: $t(`b41926c9-7846-4032-814c-2bf739ca6314`) + ' ' + this.group.settings.name,
+                human: $t(`%13v`) + ' ' + this.group.settings.name,
             });
         }
 
@@ -1157,7 +1157,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid member in replaceRegistration',
-                    human: $t(`309bdb9d-4028-4bec-9e68-13814866ee94`),
+                    human: $t(`%13w`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1166,7 +1166,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid organization in replaceRegistration',
-                    human: $t(`2f3db975-8bd4-41b2-980d-ab3ca678e111`),
+                    human: $t(`%13x`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1175,7 +1175,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Not allowed to move registrations',
-                    human: $t(`e3a72c38-8d17-402e-8da8-bb4cab1b1b70`),
+                    human: $t(`%13y`),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1188,7 +1188,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'already_registered',
                 message: 'Already registered',
-                human: $t(`40b728b0-6784-47bb-9ffe-53e7c88e638b`, {
+                human: $t(`%14L`, {
                     member: this.member.member.firstName,
                     group: this.group.settings.name,
                 }),
@@ -1202,14 +1202,14 @@ export class RegisterItem implements ObjectWithRecords {
                 code: 'maximum_reached',
                 message: 'Maximum reached',
                 human: (categoryMaximum.category.settings.maximumRegistrations ?? 1) === 1
-                    ? $t(`c0887d28-ecba-47e0-a8db-dfcc00d38630`, {
-                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '),
+                    ? $t(`%1NT`, {
+                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('%M1') + ' '),
                             group: this.group.settings.name,
                             member: this.member.patchedMember.name,
                             category: categoryMaximum.category.settings.name,
                         })
-                    : $t(`3c0deffd-bc9e-4f8e-8c5e-e89d2edbd450`, {
-                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '),
+                    : $t(`%1NU`, {
+                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('%M1') + ' '),
                             'count': categoryMaximum.category.settings.maximumRegistrations ?? 2,
                             'group': this.group.settings.name,
                             'member': this.member.patchedMember.name,
@@ -1229,7 +1229,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_yet_open',
                         message: 'Not yet open',
-                        human: $t(`12d2ff48-8cb0-42a7-ad43-f5e6ef705320`, { group: this.group.settings.name }),
+                        human: $t(`%13z`, { group: this.group.settings.name }),
                     });
                 }
 
@@ -1237,7 +1237,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'closed',
                         message: 'Closed',
-                        human: $t(`b527f658-6cb6-488c-9447-61533d63db74`, { group: this.group.settings.name }),
+                        human: $t(`%140`, { group: this.group.settings.name }),
                     });
                 }
             }
@@ -1249,7 +1249,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: memberDetails',
-                        human: error?.description ?? $t(`e24f82f9-a11d-45bc-9719-3ebdfd1f28d6`, {
+                        human: error?.description ?? $t(`%14M`, {
                             member: this.member.patchedMember.name,
                         }),
                     });
@@ -1279,7 +1279,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: preventGroupIds',
-                    human: $t('a7f3e9ef-7d56-4648-91c8-280d6170617c', {
+                    human: $t('%1H1', {
                         member: this.member.patchedMember.name,
                     }),
                 });
@@ -1292,13 +1292,13 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: requireOrganizationIds',
-                        human: $t(`89d19c46-d994-49e4-b25a-ed63308590eb`, { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
+                        human: $t(`%1Kw`, { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
                     });
                 }
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: $t(`78a012a9-3caa-405f-851d-429610138852`, { member: this.member.patchedMember.firstName }),
+                    human: $t(`%141`, { member: this.member.patchedMember.firstName }),
                 });
             }
 
@@ -1306,7 +1306,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: $t(`4ea84d3f-63f5-4ab0-bab2-a5c72fa0111d`, {
+                    human: $t(`%14N`, {
                         member: this.member.patchedMember.name,
                     }),
                 });
@@ -1316,7 +1316,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOn',
-                    human: $t(`f7b1a08a-1431-45e3-83c3-8aa8bb1b18e6`, { member: this.member.patchedMember.name }),
+                    human: $t(`%142`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1324,7 +1324,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOnRegistrationDate',
-                    human: $t(`33845ee8-009e-4ad2-a3d7-183e79033c4c`, { member: this.member.patchedMember.name }),
+                    human: $t(`%143`, { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1336,9 +1336,9 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'pre_registrations',
                         message: 'Pre registrations',
-                        human: $t(`b2486175-6dbd-4aa4-a57c-dc7e322fcd31`, {
+                        human: $t(`%14O`, {
                             group: this.group.settings.name,
-                        }) + (this.group.settings.priorityForFamily ? ' ' + $t(`4837a21c-e894-45fb-873f-1b09cbebc495`) : '') + '.',
+                        }) + (this.group.settings.priorityForFamily ? ' ' + $t(`%144`) : '') + '.',
                     });
                 }
             }
@@ -1351,7 +1351,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: $t(`b9229c91-e7cf-48d7-823f-982dc27fe638`),
+                        human: $t(`%145`),
                         meta: { recoverable: true },
                     });
                 }
@@ -1360,7 +1360,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: $t(`466118b2-637f-4c46-b240-57bc9c3ee590`),
+                        human: $t(`%146`),
                         meta: { recoverable: true },
                     });
                 }
@@ -1370,7 +1370,7 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'waiting_list_required',
                             message: 'Waiting list required',
-                            human: $t(`83f622e4-0ef5-4965-8d6d-10860df30a87`, {
+                            human: $t(`%14P`, {
                                 group: this.group.settings.name,
                             }),
                             meta: { recoverable: true },
@@ -1383,7 +1383,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_price',
                     message: 'GroupPrice is not valid for this date',
-                    human: $t(`bc608e45-810c-4dd3-82f7-3eb2befc4ffc`),
+                    human: $t(`%1Ct`),
                     meta: { recoverable: true },
                 });
             }
@@ -1393,7 +1393,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'maximum_reached',
                     message: 'Maximum reached',
-                    human: $t(`1b7b7815-6454-4570-8ce8-fcff09df2efd`, { group: this.group.settings.name }),
+                    human: $t(`%147`, { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 });
             }
@@ -1405,7 +1405,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'stock_empty',
                         message: 'Stock empty',
-                        human: $t(`545a9cc4-553d-4013-a8ef-e4a9a3107a9c`, { name: this.groupPrice.name }),
+                        human: $t(`%148`, { name: this.groupPrice.name }),
                         meta: { recoverable: true },
                     });
                 }
@@ -1417,8 +1417,8 @@ export class RegisterItem implements ObjectWithRecords {
                             code: 'stock_empty',
                             message: 'Stock empty',
                             human: remaining === 0
-                                ? $t(`96b60f72-2bc6-479d-b317-616e23056e5c`, { name: option.option.name })
-                                : remaining > 1 ? $t('81dced9c-c5aa-4c49-b030-31363d3847db', { count: remaining.toString(), name: option.option.name }) : $t('Er is nog maar 1 stuk beschikbaar van {name}', { name: option.option.name }),
+                                ? $t(`%149`, { name: option.option.name })
+                                : remaining > 1 ? $t('%13n', { count: remaining.toString(), name: option.option.name }) : $t('Er is nog maar 1 stuk beschikbaar van {name}', { name: option.option.name }),
                             meta: { recoverable: true },
                         });
                     }
@@ -1428,7 +1428,7 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'option_max',
                             message: 'Option maximum exceeded',
-                            human: $t(`c006386b-0590-40c9-ae62-c4b7ade939f0`, {
+                            human: $t(`%14Q`, {
                                 name: option.option.name,
                             }),
                         });

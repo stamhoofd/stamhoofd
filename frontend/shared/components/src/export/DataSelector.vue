@@ -9,7 +9,7 @@
                 </template>
 
                 <div class="style-table-head">
-                    {{ $t('36817a3d-6e32-40ae-bec5-a3b912f1b65c') }}
+                    {{ $t('%17d') }}
                 </div>
             </STListItem>
 

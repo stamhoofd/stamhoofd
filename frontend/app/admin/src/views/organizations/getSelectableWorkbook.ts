@@ -9,35 +9,35 @@ export function getSelectableWorkbook(_platform: Platform) {
         sheets: [
             new SelectableSheet({
                 id: 'organizations',
-                name: $t(`2a033cd8-b9e4-4a92-a8a6-b4a687d87e79`),
+                name: $t(`%wP`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-                        description: $t(`22b85aa5-dd0c-4c72-9cbc-823b309a42da`),
+                        name: $t(`%1P`),
+                        description: $t(`%H0`),
                         enabled: false,
                     }),
 
                     // todo: only if platform?
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
-                        description: $t(`dd5625e0-2997-49b1-be73-21c30e42aafd`),
+                        name: $t(`%7C`),
+                        description: $t(`%H1`),
                     }),
 
                     new SelectableColumn({
                         id: 'name',
-                        name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+                        name: $t(`%Gq`),
                     }),
 
                     new SelectableColumn({
                         id: 'tags',
-                        name: $t(`0be39baa-0b8e-47a5-bd53-0feeb14a0f93`),
+                        name: $t(`%3G`),
                     }),
 
                     new SelectableColumn({
                         id: 'address',
-                        name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
+                        name: $t(`%Cn`),
                     }),
                     ...flattenedCategories.flatMap((category) => {
                         return category.getAllRecords().flatMap((record) => {
@@ -54,87 +54,87 @@ export function getSelectableWorkbook(_platform: Platform) {
 
             new SelectableSheet({
                 id: 'responsibilities',
-                name: $t(`b0cb950d-856f-4068-bf2f-9636927020f4`),
+                name: $t(`%7D`),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-                        description: $t(`22b85aa5-dd0c-4c72-9cbc-823b309a42da`),
+                        name: $t(`%1P`),
+                        description: $t(`%H0`),
                         enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
-                        description: $t(`dd5625e0-2997-49b1-be73-21c30e42aafd`),
+                        name: $t(`%7C`),
+                        description: $t(`%H1`),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: $t(`3eefa3b1-525b-464b-adef-e3b9efd9257f`),
+                        name: $t(`%CX`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.name',
-                        name: $t(`1d5eaad1-78e1-4b1f-9d06-e72a529a8e65`),
+                        name: $t(`%H2`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.firstName',
-                        name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
+                        name: $t(`%1MT`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.lastName',
-                        name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
+                        name: $t(`%1MU`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.email',
-                        name: $t(`ccb47323-6aa7-4f37-a03c-848ed47eb412`),
+                        name: $t(`%2e`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.address',
-                        name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
+                        name: $t(`%Cn`),
                     }),
                 ],
             }),
             new SelectableSheet({
                 id: 'premises',
-                name: $t(`7f531562-9609-456e-a8c3-2b373cad3f29`),
+                name: $t(`%6c`),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-                        description: $t(`22b85aa5-dd0c-4c72-9cbc-823b309a42da`),
+                        name: $t(`%1P`),
+                        description: $t(`%H0`),
                         enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
-                        description: $t(`dd5625e0-2997-49b1-be73-21c30e42aafd`),
+                        name: $t(`%7C`),
+                        description: $t(`%H1`),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: $t(`3eefa3b1-525b-464b-adef-e3b9efd9257f`),
+                        name: $t(`%CX`),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.name',
-                        name: $t(`179c8dd9-2719-41a9-ad5f-11aab6e4a1c3`),
+                        name: $t(`%H3`),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.type',
-                        name: $t(`a3765fff-0634-4ffe-a726-005fd8ba5dcd`),
+                        name: $t(`%1i`),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.address',
-                        name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
+                        name: $t(`%Cn`),
                     }),
                 ],
             }),

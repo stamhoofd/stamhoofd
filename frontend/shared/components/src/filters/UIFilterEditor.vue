@@ -17,7 +17,7 @@
         <STToolbar v-if="!live || !popup">
             <template #right>
                 <button class="button primary full" type="button" @click="applyFilter">
-                    {{ $t('8d9b6fea-7005-408f-ae89-53a3eff3fb62') }}
+                    {{ $t('%bt') }}
                 </button>
             </template>
         </STToolbar>
@@ -111,7 +111,7 @@ export default class UIFilterEditor extends Mixins(NavigationMixin) {
         if (!changed) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`c6d477b8-8ca5-4d7e-b164-21630e5057b0`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+        return await CenteredMessage.confirm($t(`%yf`), $t(`%4X`));
     }
 }
 </script>

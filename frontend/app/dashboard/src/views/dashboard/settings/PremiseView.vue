@@ -5,18 +5,18 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" error-fields="name" :error-box="errors.errorBox">
-                <input id="premise-name" v-model="name" class="input" type="text" :placeholder="$t('8505e377-cc4d-4551-98d3-60a70d8b2c7b')" autocomplete="off">
+            <STInputBox :title="$t('%Gq')" error-fields="name" :error-box="errors.errorBox">
+                <input id="premise-name" v-model="name" class="input" type="text" :placeholder="$t('%4W')" autocomplete="off">
             </STInputBox>
 
-            <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox" class="max">
-                <textarea id="premise-description" v-model="description" class="input" type="text" :placeholder="$t('13650793-84d9-407a-b477-79b40011441d')" autocomplete="off" />
+            <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox" class="max">
+                <textarea id="premise-description" v-model="description" class="input" type="text" :placeholder="$t('%3r')" autocomplete="off" />
             </STInputBox>
 
-            <AddressInput v-model="address" :title="$t('0a37de09-120b-4bea-8d13-6d7ed6823884')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
+            <AddressInput v-model="address" :title="$t('%Cn')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
 
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
-                <hr><h2>{{ $t('6c9d45e5-c9f6-49c8-9362-177653414c7e') }}</h2>
+                <hr><h2>{{ $t('%1B') }}</h2>
                 <STList>
                     <STListItem v-for="premiseType of platformPremiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
                         <template #left>
@@ -33,7 +33,7 @@
 
                         <template #right>
                             <span v-if="premiseTypeWarnings.has(premiseType.id)" v-tooltip="premiseTypeWarnings.get(premiseType.id)" class="icon warning yellow" />
-                            <span v-else-if="isPremiseTypeDisabled(premiseType)" class="icon info-circle hover-show" :v-tooltip="$t('e70a9465-ddc1-4afa-841f-e73a7e50c19c')" />
+                            <span v-else-if="isPremiseTypeDisabled(premiseType)" class="icon info-circle hover-show" :v-tooltip="$t('%OR')" />
                         </template>
                     </STListItem>
                     <STListItem v-if="hasUnknownType" :selectable="true" element-name="label">
@@ -42,10 +42,10 @@
                         </template>
                         <div class="checkbox-label">
                             <h2 class="style-title-list">
-                                {{ $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b') }}
+                                {{ $t('%Gr') }}
                             </h2>
                             <p class="style-description-small">
-                                {{ $t('22e2c93e-c93d-466c-b749-4b723f22e0eb') }}
+                                {{ $t('%OS') }}
                             </p>
                         </div>
                     </STListItem>
@@ -77,7 +77,7 @@ const props = withDefaults(
 
 
 
-const title = computed(() => props.isNew ? $t('5e40dfe9-b4ed-497c-a37d-e162191ba96a') : $t('09186fb9-2c94-4425-95e7-66cc2fd398ff'));
+const title = computed(() => props.isNew ? $t('%5z') : $t('%60'));
 const errors = useErrors();
 const platform$ = usePlatform();
 

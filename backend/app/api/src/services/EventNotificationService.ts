@@ -15,7 +15,7 @@ export class EventNotificationService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid type',
-                human: Context.i18n.$t('4d8be2b1-559a-4c16-a76f-67a8ba85de7f'),
+                human: Context.i18n.$t('%AT'),
                 field: 'typeId',
             });
         }
@@ -132,7 +132,7 @@ export class EventNotificationService {
         }
         const events = EventNotification.events.isLoaded(notification) ? notification.events : await EventNotification.events.load(notification);
         const type = await this.validateType(notification);
-        let submitterName = $t(`95c51d5c-0945-4fcf-90e9-764940e7f54d`);
+        let submitterName = $t(`%wq`);
 
         if (notification.submittedBy) {
             const user = await User.getByID(notification.submittedBy);
@@ -164,7 +164,7 @@ export class EventNotificationService {
             }),
             Replacement.create({
                 token: 'feedbackText',
-                html: notification.feedbackText ? `<p class="pre-wrap"><em>${Formatter.escapeHtml(notification.feedbackText)}</em></p>` : `<p class="pre-wrap"><em>${Formatter.escapeHtml($t('4c3149b3-e02a-4071-bf21-941711e0238d'))}</em></p>`,
+                html: notification.feedbackText ? `<p class="pre-wrap"><em>${Formatter.escapeHtml(notification.feedbackText)}</em></p>` : `<p class="pre-wrap"><em>${Formatter.escapeHtml($t('%Av'))}</em></p>`,
             }),
         ];
     }

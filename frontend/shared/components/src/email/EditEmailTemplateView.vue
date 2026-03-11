@@ -1,11 +1,11 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d')" :replacements="replacements" :title="$t(`6a972ca2-8a5f-4e9d-bb26-b59e1f7165a2`)" @save="save">
+    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('%v7')" :replacements="replacements" :title="$t(`%aP`)" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
-            {{ $t('8af02386-a68c-46c0-bb86-91b2177f1ba6') }}
+            {{ $t('%aM') }}
         </h1>
         <h1 v-else class="style-navigation-title">
-            {{ $t('6b77538c-6e3a-461c-9f97-f3aa71c8838d') }}
+            {{ $t('%aN') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -13,14 +13,14 @@
         <template #list>
             <STListItem class="no-padding">
                 <div class="list-input-box">
-                    <span>{{ $t('6c9d45e5-c9f6-49c8-9362-177653414c7e') }}:</span>
+                    <span>{{ $t('%1B') }}:</span>
                     <span class="list-input">{{ EmailTemplate.getTypeTitle(emailTemplate.type) }}</span>
                 </div>
             </STListItem>
             <STListItem class="no-padding" element-name="label">
                 <div class="list-input-box">
-                    <span>{{ $t('709a5ff3-8d79-447b-906d-2c3cdabb41cf') }}:</span>
-                    <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`13b42902-e159-4e6a-8562-e87c9c691c8b`)">
+                    <span>{{ $t('%aO') }}:</span>
+                    <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`%aQ`)">
                 </div>
             </STListItem>
         </template>
@@ -127,7 +127,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value && (await getHTML()).text === patched.value.text) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

@@ -37,7 +37,7 @@ export function useEditPopup<T extends AutoEncoder>({ errors, saveHandler, delet
             return;
         }
 
-        if (!await CenteredMessage.confirm(text, confirmText ?? $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), description)) {
+        if (!await CenteredMessage.confirm(text, confirmText ?? $t('%55'), description)) {
             return;
         }
 
@@ -59,7 +59,7 @@ export function useEditPopup<T extends AutoEncoder>({ errors, saveHandler, delet
             return true;
         }
 
-        return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+        return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
     };
 
     return {

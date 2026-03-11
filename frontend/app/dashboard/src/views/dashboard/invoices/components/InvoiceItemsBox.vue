@@ -12,16 +12,16 @@
             <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
 
             <p class="style-description-small">
-                {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice)}) }}
+                {{ $t('%1J3', {price: formatPrice(item.unitPrice)}) }}
             </p>
 
             <p v-if="STAMHOOFD.environment === 'development' && item.addedToUnitPriceToCorrectVAT !== 0" class="style-description-small">
-                <span class="style-discount-old-price">{{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice - item.addedToUnitPriceToCorrectVAT)}) }}</span>
+                <span class="style-discount-old-price">{{ $t('%1J3', {price: formatPrice(item.unitPrice - item.addedToUnitPriceToCorrectVAT)}) }}</span>
                 <span> ({{ formatPriceChange(item.addedToUnitPriceToCorrectVAT) }})</span>
             </p>
 
             <p v-if="invoice.VATTotal.length > 1" class="style-description-small">
-                {{ $t('1789152b-8677-4cc6-b4b8-e90d14501d23', {'percentage%': formatPercentage(item.VATPercentage * 100)}) }}
+                {{ $t('%1KT', {'percentage%': formatPercentage(item.VATPercentage * 100)}) }}
             </p>
 
             <template #middleRight>

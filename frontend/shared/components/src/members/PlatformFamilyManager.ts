@@ -98,7 +98,7 @@ export class PlatformFamilyManager {
                 if (member.isSaving) {
                     throw new SimpleError({
                         code: 'save_pending',
-                        message: $t('562011ab-f3c5-4269-9db0-b6119f3aca54'),
+                        message: $t('%e4'),
                     });
                 }
                 patches.addPut(member.patchedMember);

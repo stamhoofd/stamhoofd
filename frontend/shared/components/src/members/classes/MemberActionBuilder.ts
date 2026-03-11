@@ -142,7 +142,7 @@ export class MemberActionBuilder {
             }
             return this.organizations.map((org) => {
                 return new MenuTableAction({
-                    name: $t(`26a122e0-4312-4473-90c6-85f5c9f678be`) + ' ' + org.name,
+                    name: $t(`%eg`) + ' ' + org.name,
                     groupIndex: 0,
                     childActions: () => this.getRegisterActions(org),
                 });
@@ -152,7 +152,7 @@ export class MemberActionBuilder {
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
             return [
                 new MenuTableAction({
-                    name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                    name: $t(`%eh`),
                     groupIndex: 0,
                     description: addPeriodDescription ? period.period.name : undefined,
                     enabled: period.waitingLists.length > 0,
@@ -200,7 +200,7 @@ export class MemberActionBuilder {
         }
 
         return [new InMemoryTableAction({
-            name: $t('d20e1a65-6c0d-4591-9dac-1abc01b9a563'),
+            name: $t('%16r'),
             destructive: true,
             priority: 1,
             groupIndex: 100,
@@ -221,7 +221,7 @@ export class MemberActionBuilder {
 
     private getClearDataAction() {
         return [new InMemoryTableAction({
-            name: $t('ea2a400c-5229-426b-8ef9-3ebcd117bf61'),
+            name: $t('%1Ku'),
             destructive: true,
             priority: 1,
             groupIndex: 100,
@@ -248,7 +248,7 @@ export class MemberActionBuilder {
 
                 await this.platformFamilyManager.isolatedPatch(members, patch);
 
-                Toast.success($t('4d8c51bc-447f-4166-807e-87ff0f55c327')).show();
+                Toast.success($t('%1Kv')).show();
                 return;
             },
         })];
@@ -281,7 +281,7 @@ export class MemberActionBuilder {
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
             return [
                 new MenuTableAction({
-                    name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                    name: $t(`%eh`),
                     groupIndex: 1,
                     enabled: period.waitingLists.length > 0,
                     description: addPeriodDescription ? period.period.name : undefined,
@@ -309,7 +309,7 @@ export class MemberActionBuilder {
 
         return [
             new MenuTableAction({
-                name: $t(`507c48cb-35ae-4c94-bc7a-4611360409c8`),
+                name: $t(`%HB`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -361,14 +361,14 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`3763ba3a-1023-4265-b675-1c2090d4c37b`),
+                name: $t(`%1KS`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
                     if (members.length > 100) {
-                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
+                        Toast.error($t(`%ei`)).show();
                         return;
                     }
                     await this.present({
@@ -392,14 +392,14 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`82a881a0-5666-4649-961a-c8f6c48177d0`),
+                name: $t(`%1GU`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
                     if (members.length > 100) {
-                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
+                        Toast.error($t(`%ei`)).show();
                         return;
                     }
                     await this.present({
@@ -425,7 +425,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`7c6e4f2d-297d-4183-9079-ba123f481eb5`),
+                name: $t(`%zt`),
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -445,7 +445,7 @@ export class MemberActionBuilder {
         }
 
         return [new InMemoryTableAction({
-            name: $t(`5ac7a958-ec4d-4e37-b2c0-35b2ada59044`),
+            name: $t(`%zu`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -460,7 +460,7 @@ export class MemberActionBuilder {
 
     getChargeAction() {
         return new AsyncTableAction({
-            name: $t(`4273d00c-7b8b-48ec-906d-80d6feb23655`),
+            name: $t(`%Gu`),
             icon: 'calculator',
             priority: 13,
             groupIndex: 4,
@@ -488,7 +488,7 @@ export class MemberActionBuilder {
     getActions(options: { includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
-                name: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`),
+                name: $t(`%XO`),
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,
@@ -501,7 +501,7 @@ export class MemberActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`331c7c4f-7317-4ec5-b9eb-02f324129ee1`),
+                name: $t(`%ej`),
                 icon: 'star',
                 priority: 0,
                 groupIndex: 1,
@@ -514,7 +514,7 @@ export class MemberActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: $t(`208ae3f1-1720-4d79-96fd-5c05d97c9de0`),
+                name: $t(`%1GW`),
                 icon: 'email',
                 priority: 12,
                 groupIndex: 3,
@@ -525,7 +525,7 @@ export class MemberActionBuilder {
             this.getSmsAction(),
             this.getExportAction(),
             new MenuTableAction({
-                name: $t(`800d8458-da0f-464f-8b82-4e28599c8598`),
+                name: $t(`%dh`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -549,12 +549,12 @@ export class MemberActionBuilder {
 
     private getSmsAction() {
         return new InMemoryTableAction({
-            name: $t(`73d85ece-245e-4e48-a833-1e78cf810b03`),
+            name: $t(`%PI`),
             icon: 'feedback-line',
             priority: 9,
             groupIndex: 3,
             fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
-                return $t('187d5767-969d-407a-a988-c3a9a831a0a8', { count: Formatter.float(count), limit: Formatter.float(limit) });
+                return $t('%16s', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (members: PlatformMember[]) => {
                 await this.openSms(members);
@@ -581,7 +581,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'all',
-                    name: $t(`379d43fb-034f-4280-bb99-ea658eaec729`),
+                    name: $t(`%L8`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -592,12 +592,12 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`2035a033-bd26-492b-8d91-473b2a033029`),
+                    name: $t(`%el`),
                     value: [],
                 },
                 {
                     id: 'adults',
-                    name: $t(`756cf0cd-8992-452a-9eb8-46e1c7ca5650`),
+                    name: $t(`%em`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -621,7 +621,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'minors',
-                    name: $t(`f6b27311-6878-4d14-90de-7a49a7f2b8f2`),
+                    name: $t(`%en`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -639,7 +639,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`5c6c917c-c07c-4825-9f58-a8dade4e4875`),
+                    name: $t(`%eo`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -650,7 +650,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`71065f0c-5d13-4b38-ba35-9b17aca66fbf`),
+                    name: $t(`%ep`),
                     value: [],
                 },
             ],
@@ -661,12 +661,12 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'none',
-                    name: $t(`2f4a25b4-1c98-4449-9ba1-75418393f0c9`),
+                    name: $t(`%eq`),
                     value: [],
                 },
                 {
                     id: 'minors',
-                    name: $t(`62844f9d-a3d3-4b83-bafe-e8e97bc6aa3b`),
+                    name: $t(`%er`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -684,7 +684,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`09c2a259-7c8f-4a97-8eb2-05fa9d56865e`),
+                    name: $t(`%es`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -725,7 +725,7 @@ export class MemberActionBuilder {
 
     private getExportAction() {
         return new MenuTableAction({
-            name: $t('2a50d0e8-bdb9-4016-84be-b0de6e26ca14'),
+            name: $t('%17e'),
             icon: 'download',
             priority: 8,
             groupIndex: 3,
@@ -738,7 +738,7 @@ export class MemberActionBuilder {
 
     private getExportToExcelAction() {
         return new AsyncTableAction({
-            name: $t('b9f2cf39-1f26-4b7c-b949-0474fa9f2f01'),
+            name: $t('%17U'),
             priority: 0,
             groupIndex: 0,
             handler: async (selection: TableActionSelection<PlatformMember>) => {
@@ -765,11 +765,11 @@ export class MemberActionBuilder {
 
     private getExportToPdfAction() {
         return new InMemoryTableAction({
-            name: $t('3bfdcad4-7201-4b4e-9244-5ec22c6e4ce9'),
+            name: $t('%17V'),
             priority: 0,
             groupIndex: 0,
             fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
-                return $t('03903ede-4f60-4358-8709-bfc814ee5b17', { count: Formatter.float(count), limit: Formatter.float(limit) });
+                return $t('%17W', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (members: PlatformMember[]) => {
                 await this.exportToPdf(members);
@@ -898,7 +898,7 @@ export async function presentEditMember({ member, present, context }: { member: 
         components: [
             new ComponentWithProperties(MemberStepView, {
                 member,
-                title: $t(`8748130b-9551-4ad4-b80e-9fd1119651a7`, { firstName: member.member.firstName }),
+                title: $t(`%15E`, { firstName: member.member.firstName }),
                 component: markRaw(EditMemberAllBox),
                 saveHandler: async ({ dismiss }: NavigationActions) => {
                     await dismiss({ force: true });
@@ -917,7 +917,7 @@ export async function presentEditResponsibilities({ member, present }: { member:
         components: [
             new ComponentWithProperties(MemberStepView, {
                 member,
-                title: $t(`53ffa1a5-9b55-4ff9-9c97-eeaf54ce6b47`) + ' ' + member.member.firstName,
+                title: $t(`%et`) + ' ' + member.member.firstName,
                 component: markRaw(EditMemberResponsibilitiesBox),
                 saveHandler: async ({ dismiss }: NavigationActions) => {
                     await dismiss({ force: true });
@@ -933,7 +933,7 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
     if (members.length > 1) {
         throw new SimpleError({
             code: 'not-supported',
-            message: $t('2fcd7b68-2fd1-4b8c-afae-4dc60dcd96a5'),
+            message: $t('%ef'),
         });
     }
 
@@ -943,12 +943,12 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: $t('63786627-79e7-4ab7-b759-774ef3f856d9', { name }),
-                description: $t(`dfbecccd-b964-4e8b-83e4-553b49d9fcc0`, { name }),
-                confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
-                confirmationPlaceholder: $t(`3610e3ed-5df6-41d2-b6e6-a5823abcaff7`),
+                title: $t('%15Y', { name }),
+                description: $t(`%15X`, { name }),
+                confirmationTitle: $t(`%eu`),
+                confirmationPlaceholder: $t(`%10H`),
                 confirmationCode: name,
-                checkboxText: $t(`4a1ad6f2-d061-4fe0-8206-8540442ad038`),
+                checkboxText: $t(`%6P`),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     for (const member of members) {
@@ -959,7 +959,7 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
                     GlobalEventBus.sendEvent('members-deleted', members).catch(console.error);
 
                     Toast.success(
-                        members.length ? $t('cb9fd3d2-c563-4d46-a26b-4438e5a887ef') : $t('43300d52-0e3f-4189-b5b3-100ecb0f5e70', { count: members.length }),
+                        members.length ? $t('%14q') : $t('%14r', { count: members.length }),
                     ).show();
                     return true;
                 },

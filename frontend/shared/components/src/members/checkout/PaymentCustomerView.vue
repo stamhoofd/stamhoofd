@@ -1,12 +1,12 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`1db407ec-4d25-40f9-92b9-abf820faaf98`)" @save="goNext">
-        <h1>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h1>
-        <p>{{ $t('6bc5d58e-d6e4-44fd-a0b1-6f4477457915') }}</p>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`%uE`)" @save="goNext">
+        <h1>{{ $t('%1Ke') }}</h1>
+        <p>{{ $t('%eQ') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="companies.length === 0" class="info-box">
-            {{ $t('b2fbd227-40a3-495d-9826-0e199000cda9') }}
+            {{ $t('%eR') }}
         </p>
 
         <STList v-else>
@@ -19,13 +19,13 @@
                 </h3>
 
                 <p v-if="company.VATNumber" class="style-description-small">
-                    {{ company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
+                    {{ company.VATNumber }} {{ $t('%Gn') }}
                 </p>
                 <p v-else-if="company.companyNumber" class="style-description-small">
-                    {{ company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
+                    {{ company.companyNumber }} {{ $t('%eS') }}
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
+                    {{ $t('%1CH') }}
                 </p>
 
                 <p v-if="company.address" class="style-description-small">
@@ -40,15 +40,15 @@
 
         <p v-if="auth.hasFullAccess()" class="style-button-bar">
             <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
-                <span>{{ $t('1310f065-caf5-41e6-a3b8-cf9b39336483') }}</span>
+                <span>{{ $t('%9H') }}</span>
             </button>
             <button v-else type="button" class="button text" @click="editInvoiceSettings">
                 <span class="icon edit" />
-                <span>{{ $t('f31b5c28-56a6-4a21-b1de-dcb4f7f5b6c8') }}</span>
+                <span>{{ $t('%eT') }}</span>
             </button>
         </p>
         <p v-else class="warning-box">
-            {{ $t('8bc53634-08a5-4404-9455-421955e83ce4') }}
+            {{ $t('%Ac') }}
         </p>
     </SaveView>
 </template>
@@ -114,14 +114,14 @@ async function goNext() {
             if (companies.value.length === 0) {
                 throw new SimpleError({
                     code: 'missing_field',
-                    message: $t(`86ebf633-c9d5-459d-8f7b-259d0d3f2ea4`),
+                    message: $t(`%zj`),
                     field: 'company',
                 });
             }
 
             throw new SimpleError({
                 code: 'missing_field',
-                message: $t(`9ef6547b-c78a-4d2d-bd2e-75bbbc71e6c7`),
+                message: $t(`%zk`),
                 field: 'company',
             });
         }
@@ -129,7 +129,7 @@ async function goNext() {
         if (customer.company.name.length < 2 || !customer.company.address) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`a562ecf9-00ae-48b7-8568-4e762b11e1f3`),
+                message: $t(`%zl`),
                 field: 'company',
             });
         }

@@ -1,20 +1,20 @@
 <template>
     <div class="container">
-        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`482bd766-39fa-4340-91b4-ae22a23d5fa5`)">
-            <PriceInput v-model="price" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
+        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`%Sn`)">
+            <PriceInput v-model="price" :placeholder="$t(`%1Mn`)" />
         </STInputBox>
 
         <Checkbox v-model="useMinimumPrice">
-            {{ $t('f618d49c-9be0-46ca-af12-37d8bb9430eb') }}
+            {{ $t('%Sm') }}
         </Checkbox>
 
         <div v-if="useMinimumPrice" class="split-inputs">
-            <STInputBox error-fields="minimumPrice" :error-box="errorBox" :title="$t(`d567a7a8-bcb3-477b-b857-d954cc4dfce2`)">
-                <PriceInput v-model="minimumPrice" :placeholder="$t(`4c9238ec-4895-4ada-89c9-a4e2560d2f10`)" />
+            <STInputBox error-fields="minimumPrice" :error-box="errorBox" :title="$t(`%So`)">
+                <PriceInput v-model="minimumPrice" :placeholder="$t(`%Sp`)" />
             </STInputBox>
 
-            <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`e7f6f003-c131-4fc5-8060-2318e344e4f2`)">
-                <PriceInput v-model="discountPrice" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
+            <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`%Sq`)">
+                <PriceInput v-model="discountPrice" :placeholder="$t(`%1Mn`)" />
             </STInputBox>
         </div>
     </div>

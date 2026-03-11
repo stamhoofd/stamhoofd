@@ -7,30 +7,30 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
-                <input v-model="name" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
+            <STInputBox :title="$t('%Gq') ">
+                <input v-model="name" class="input" type="text" :placeholder="$t('%Gq') ">
             </STInputBox>
-            <STInputBox error-fields="behaviour" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+            <STInputBox error-fields="behaviour" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="behaviour">
                     <option :value="PlatformMembershipTypeBehaviour.Period">
-                        {{ $t('c56506a1-14a9-4179-bbab-5eac533ff730') }}
+                        {{ $t('%I5') }}
                     </option>
                     <option :value="PlatformMembershipTypeBehaviour.Days">
-                        {{ $t('a85bd4c0-52f7-4bf0-86c2-234a97c679bc') }}
+                        {{ $t('%I6') }}
                     </option>
                 </Dropdown>
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f')" autocomplete="off" />
+        <STInputBox :title="$t('%6o')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('%14p')" autocomplete="off" />
         </STInputBox>
 
-        <hr><h2>{{ $t('3754b38e-3938-4589-801a-450ba0844990') }}</h2>
-        <p>{{ $t('8004af94-7b57-4ce2-aa9b-a6658684116d') }}</p>
+        <hr><h2>{{ $t('%8I') }}</h2>
+        <p>{{ $t('%8J') }}</p>
 
         <p v-if="sortedPeriods.length === 0" class="info-box">
-            {{ $t('b19e199f-2b0e-444c-a4ee-0cdd0b3c6a35') }}
+            {{ $t('%I7') }}
         </p>
         <STList v-else>
             <PlatformMembershipTypeConfigRow v-for="{period, config} of sortedPeriods" :key="period.id" :config="config" :period="period" :type="type" @click="editPeriod(config, period)" />
@@ -39,40 +39,40 @@
         <p>
             <button class="button text" type="button" @click="addConfig">
                 <span class="icon add" />
-                <span>{{ $t('0b7c21d5-b9ed-4ddc-9370-7f58255f4eba') }}</span>
+                <span>{{ $t('%3T') }}</span>
             </button>
         </p>
 
-        <hr><h2>{{ $t("6ada0ff0-3976-41f7-aa65-7af870964ebc") }}</h2>
+        <hr><h2>{{ $t("%1CP") }}</h2>
 
         <Checkbox v-model="requiredTagIdsEnabled">
-            {{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}
+            {{ $t("%84") }}
         </Checkbox>
 
         <Checkbox v-model="requiredDefaultAgeGroupIdsEnabled">
-            {{ $t("37d201fd-287d-4957-b559-b882744ea886") }}
+            {{ $t("%85") }}
         </Checkbox>
 
         <JumpToContainer :visible="requiredTagIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t("02017e6d-47b0-4867-b590-be85a9b72008") }}</div>
+                <div>{{ $t("%86") }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="() => requiredTagIds = null" />
                 </div>
             </h2>
-            <p>{{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}</p>
+            <p>{{ $t("%84") }}</p>
 
             <TagIdsInput v-model="requiredTagIds" :validator="errors.validator" />
         </JumpToContainer>
 
         <JumpToContainer :visible="requiredDefaultAgeGroupIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t("3a75616e-f4ef-4dbd-8e35-8fe74571e442") }}</div>
+                <div>{{ $t("%87") }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="() => requiredDefaultAgeGroupIds = null" />
                 </div>
             </h2>
-            <p>{{ $t("37d201fd-287d-4957-b559-b882744ea886") }}</p>
+            <p>{{ $t("%85") }}</p>
 
             <DefaultAgeGroupIdsInput v-model="requiredDefaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
         </JumpToContainer>
@@ -109,7 +109,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformMembershipType>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => props.isNew ? $t('105eefd4-2e16-4b4e-b964-ec51feb11955') : $t('9bc2ae42-208d-475a-8496-82859f04a7be'));
+const title = computed(() => props.isNew ? $t('%3U') : $t('%3Q'));
 const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.type);
@@ -146,7 +146,7 @@ const save = async () => {
         if (name.value.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('9aa8ff59-33ae-4ac4-93b6-97e071b13012'),
+                message: $t('%56'),
                 field: 'name',
             });
         }
@@ -169,7 +169,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('866219fd-b946-4a96-b84b-3c2d26850cfa'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('b101058a-6b13-4df7-81ef-1f5c925bbf71'))) {
+    if (!await CenteredMessage.confirm($t('%3O'), $t('%CJ'), $t('%3N'))) {
         return;
     }
 
@@ -252,7 +252,7 @@ async function addConfig(event: MouseEvent) {
     const availablePeriods = originalPeriods.value.filter(p => !patched.value.periods.has(p.id));
 
     if (availablePeriods.length === 0) {
-        Toast.info($t('3b257435-9ae7-4840-8f0f-f71318013935')).show();
+        Toast.info($t('%3Y')).show();
         return;
     }
 
@@ -327,7 +327,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

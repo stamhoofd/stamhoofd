@@ -1,16 +1,16 @@
 <template>
     <form class="st-view forgot-password-view" novalidate @submit.prevent="submit">
-        <STNavigationBar :title="$t(`0eb7d18f-2fd7-4ac8-acb6-5e1c31482b3c`)" />
+        <STNavigationBar :title="$t(`%uz`)" />
         <main class="center small">
-            <h1>{{ $t('0eb7d18f-2fd7-4ac8-acb6-5e1c31482b3c') }}</h1>
-            <p>{{ $t('25514619-8e51-492b-aaad-48083b028148') }}</p>
+            <h1>{{ $t('%uz') }}</h1>
+            <p>{{ $t('%ZW') }}</p>
 
             <STErrorsDefault :error-box="errorBox" />
-            <EmailInput v-model="email" autocomplete="username" :validator="validator" class="max" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+            <EmailInput v-model="email" autocomplete="username" :validator="validator" class="max" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
 
             <LoadingButton :loading="loading" class="block">
                 <button class="button primary full" type="submit">
-                    {{ $t('03602f85-5e57-4365-b491-f6fdb66ce3bd') }}
+                    {{ $t('%ZX') }}
                 </button>
             </LoadingButton>
         </main>
@@ -64,7 +64,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin) {
             });
 
             this.dismiss({ force: true });
-            new Toast($t(`9135aae1-14b5-4a92-b379-5f53702adffc`), 'success').show();
+            new Toast($t(`%v0`), 'success').show();
         }
         catch (e) {
             this.errorBox = new ErrorBox(e);

@@ -7,34 +7,34 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('17d579e1-518b-4dd4-98d8-f8184b7287be') }}</div>
+            <div>{{ $t('%7M') }}</div>
             <div>
                 <button v-if="coverPhoto" class="button text only-icon-smartphone" type="button" @click="coverPhoto = null">
                     <span class="icon trash" />
-                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                    <span>{{ $t('%CJ') }}</span>
                 </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hs" />
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`%He`) : $t(`%Hf`)" :resolutions="hs" />
             </div>
         </h2>
 
-        <p>{{ $t('28ebd74a-fd45-4987-9578-87438fbff67d') }}</p>
+        <p>{{ $t('%Lr') }}</p>
 
         <figure v-if="coverPhotoSrc" class="cover-photo">
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
         </figure>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('fadb7758-81af-40e4-b448-fadf336595b8') }}</div>
+            <div>{{ $t('%Ls') }}</div>
             <div>
                 <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
                     <span class="icon trash" />
-                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                    <span>{{ $t('%CJ') }}</span>
                 </button>
-                <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hsSquare" />
+                <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`%He`) : $t(`%Hf`)" :resolutions="hsSquare" />
             </div>
         </h2>
 
-        <p>{{ $t('4a78fcf6-2564-4846-b828-9eb03c06e0e2') }}</p>
+        <p>{{ $t('%Lt') }}</p>
 
         <figure v-if="squarePhotoSrc" class="square-photo">
             <img :src="squarePhotoSrc">

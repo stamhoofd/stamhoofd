@@ -70,7 +70,7 @@ const deleting = ref(false);
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t('e70de836-abc7-4fba-ae39-866a3fd0f945') : $t('9470f402-a773-4907-9397-1c047fc96d7f');
+    return props.isNew ? $t('%6F') : $t('%6G');
 });
 
 async function save() {
@@ -96,7 +96,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('a4feed7d-2c8a-404a-a30d-b1035e3a9e42'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('8694b1af-38d0-46f5-a9e2-c70bf96488ec'))) {
+    if (!await CenteredMessage.confirm($t('%6H'), $t('%55'), $t('%6I'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
@@ -107,7 +107,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            Toast.success($t('94337d0a-0522-43be-b337-73ddcf7fdd45')).show();
+            Toast.success($t('%1FX')).show();
         }
         await pop({ force: true });
     }
@@ -123,7 +123,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

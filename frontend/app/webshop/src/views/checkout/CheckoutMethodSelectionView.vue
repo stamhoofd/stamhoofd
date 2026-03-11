@@ -1,6 +1,6 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" :prefer-large-button="true" :title="$t(`b799ec1f-af00-45a9-a0bf-7d02418d18b8`)" @save="goNext">
-        <h1>{{ $t('b799ec1f-af00-45a9-a0bf-7d02418d18b8') }}</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" :prefer-large-button="true" :title="$t(`%uD`)" @save="goNext">
+        <h1>{{ $t('%uD') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -20,8 +20,8 @@
                 </p>
 
                 <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1" #right>
-                    <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">{{ $t('53575cae-ac22-4ac5-96d5-b67464992e4f') }}</span>
-                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" class="style-tag">{{ $t('07f945bf-649b-4138-a91e-9306a9a96955') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                    <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">{{ $t('%Um') }}</span>
+                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" class="style-tag">{{ $t('%Un') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                 </template>
             </STListItem>
         </STList>

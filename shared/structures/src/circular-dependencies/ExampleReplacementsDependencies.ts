@@ -33,7 +33,7 @@ function fillReplacements(replacements: Replacement[]) {
             transferSettings: TransferSettings.create({
                 type: TransferDescriptionType.Structured,
                 iban: 'BE1234 1234 1234',
-                creditor: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
+                creditor: $t('%D'),
             }),
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -53,20 +53,20 @@ function fillReplacements(replacements: Replacement[]) {
                 endTime: 13 * 60,
             }),
             checkoutMethod: WebshopTakeoutMethod.create({
-                name: $t(`7214779f-7c97-49af-b7b9-b6424a1b2903`),
+                name: $t(`%13P`),
                 address: Address.create({
-                    street: $t(`424566d8-a5ec-4cf8-af8b-6ed49a4a1920`),
+                    street: $t(`%13Q`),
                     number: '12',
                     postalCode: '9000',
-                    city: $t(`863c5b6c-dbed-4b55-bbd7-2e99e15dba5e`),
+                    city: $t(`%13R`),
                     country: Country.Belgium,
                 }),
             }),
             address: ValidatedAddress.create({
-                street: $t(`424566d8-a5ec-4cf8-af8b-6ed49a4a1920`),
+                street: $t(`%13Q`),
                 number: '12',
                 postalCode: '9000',
-                city: $t(`863c5b6c-dbed-4b55-bbd7-2e99e15dba5e`),
+                city: $t(`%13R`),
                 country: Country.Belgium,
                 cityId: '',
                 parentCityId: null,
@@ -76,7 +76,7 @@ function fillReplacements(replacements: Replacement[]) {
                 items: [
                     CartItem.create({
                         product: Product.create({
-                            name: $t(`feb79403-3266-47de-9e27-55122bc0c881`),
+                            name: $t(`%13S`),
                         }),
                         productPrice: ProductPrice.create({
                             price: 550_00,
@@ -90,7 +90,7 @@ function fillReplacements(replacements: Replacement[]) {
                     }),
                     CartItem.create({
                         product: Product.create({
-                            name: $t(`d93000f0-cb13-4756-a6ac-961950efb25c`),
+                            name: $t(`%13T`),
                         }),
                         productPrice: ProductPrice.create({
                             price: 400_00,
@@ -108,7 +108,7 @@ function fillReplacements(replacements: Replacement[]) {
     });
 
     const recipient = exampleOrder.getEmailRecipient(Organization.create({
-        name: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
+        name: $t('%D'),
         uri: 'demo',
         meta: OrganizationMetaData.create({
             type: OrganizationType.Other,
@@ -118,16 +118,16 @@ function fillReplacements(replacements: Replacement[]) {
         address: Address.createDefault(Country.Belgium),
     }), WebshopPreview.create({
         meta: WebshopMetaData.create({
-            name: $t('a17cab0f-62f8-4403-8436-c649f578196f'),
+            name: $t('%Au'),
         }),
     }));
 
     const balance1 = BalanceItem.create({
-        description: $t(`260c4ef6-413c-45c9-9f59-6aee4e67a848`),
+        description: $t(`%13U`),
         unitPrice: 1234_00,
     });
     const balance2 = BalanceItem.create({
-        description: $t(`e7e960cc-94aa-42c1-b476-8a8ad67512f3`),
+        description: $t(`%13V`),
         unitPrice: 1234_00,
         amount: 2,
     });
@@ -136,12 +136,12 @@ function fillReplacements(replacements: Replacement[]) {
         method: PaymentMethod.Transfer,
         status: PaymentStatus.Pending,
         iban: 'BE1234 1234 1234',
-        ibanName: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
+        ibanName: $t(`%ID`),
         transferDescription: '+++111/111/111+++',
         transferSettings: TransferSettings.create({
             type: TransferDescriptionType.Structured,
             iban: 'BE1234 1234 1234',
-            creditor: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
+            creditor: $t('%D'),
         }),
         price: 1234_00 + 2468_00,
         balanceItemPayments: [

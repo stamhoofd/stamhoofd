@@ -28,7 +28,7 @@ export function getNoPermissionsView() {
         tabs: [
             new TabBarItem({
                 icon: 'key',
-                name: $t(`31d1b160-113c-41b8-88c1-47ff191c52f1`),
+                name: $t(`%GV`),
                 component: new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(NoPermissionsView, {}),
                 }),
@@ -55,33 +55,33 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         root: new ComponentWithProperties(OrganizationsMenu, {}),
     });
 
-    setTitleSuffix($t(`13b501d3-2ffc-460e-9cc5-9858b21ba842`));
+    setTitleSuffix($t(`%GW`));
 
     const startTab = new TabBarItem({
         id: 'start',
         icon: 'home',
-        name: $t(`04548161-abc0-4bea-bdd3-fdbacddc22f8`),
+        name: $t(`%I`),
         component: startView,
     });
 
     const membersTab = new TabBarItem({
         id: 'members',
         icon: 'group',
-        name: $t(`19da8d23-acea-43c2-bfdd-742447ca57f1`),
+        name: $t(`%1EH`),
         component: membersTableView,
     });
 
     const groupsTab = new TabBarItem({
         id: 'organizations',
         icon: 'location',
-        name: $t('6e884f27-427f-4f85-914c-d5c2780253b0'),
+        name: $t('%83'),
         component: organizationsTableView,
     });
 
     const calendarTab = new TabBarItem({
         id: 'events',
         icon: 'calendar',
-        name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
+        name: $t(`%uB`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ManageEventsView, {}),
         }),
@@ -90,7 +90,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const financesTab = new TabBarItem({
         id: 'finances',
         icon: 'calculator',
-        name: $t(`bc00376e-db0e-4ace-aecc-9bfc05ee573e`),
+        name: $t(`%GX`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ChargeMembershipsView, {}),
         }),
@@ -99,7 +99,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const eventNotificationsTab = new TabBarItem({
         id: 'event-notifications',
         icon: 'notification',
-        name: $t(`000be3fe-9354-4c2c-baf1-d0cd4d079830`),
+        name: $t(`%CV`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EventNotificationsTableView, {}),
         }),
@@ -108,7 +108,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const auditLogsTab = new TabBarItem({
         id: 'audit-logs',
         icon: 'history',
-        name: $t(`1b5413cd-5858-4a73-872b-5b6b26345039`),
+        name: $t(`%GY`),
         component: new ComponentWithProperties(SplitViewController, {
             root: new ComponentWithProperties(AuditLogsView, {}),
         }),
@@ -117,14 +117,14 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const settingsTab = new TabBarItem({
         id: 'settings',
         icon: 'settings',
-        name: $t(`5ca94078-d742-4e17-abf7-957c4721a559`),
+        name: $t(`%xU`),
         component: settingsView,
     });
 
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`7dfd0425-b8ff-4dec-8c6d-257d94eabbe7`),
+        name: $t(`%1DK`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(CommunicationView, {}),
         }),
@@ -150,7 +150,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
                         const moreTab = new TabBarItemGroup({
                             icon: 'category',
-                            name: $t(`8c84aea8-4118-4cbf-a026-f86ae6bb2ceb`),
+                            name: $t(`%GZ`),
                             items: [],
                         });
 

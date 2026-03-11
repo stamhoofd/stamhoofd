@@ -12,11 +12,11 @@
         </p>
 
         <p v-if="parentConfiguration && editingConfiguration" class="warning-box">
-            {{ $t('06c16aae-9114-4416-a09d-b48998492011') }}
+            {{ $t('%1Ir') }}
         </p>
 
         <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
-        <PropertyFilterInput v-model="editingConfiguration" :builder="builder" :required="!parentConfiguration" :disabled-text="$t('12248557-53af-4849-9798-68a82800cac4')" :disabled-description="parentConfiguration ? propertyFilterToString(parentConfiguration, builder) : ''" />
+        <PropertyFilterInput v-model="editingConfiguration" :builder="builder" :required="!parentConfiguration" :disabled-text="$t('%1Is')" :disabled-description="parentConfiguration ? propertyFilterToString(parentConfiguration, builder) : ''" />
     </SaveView>
 </template>
 
@@ -81,7 +81,7 @@ export default class PropertyFilterView extends Mixins(NavigationMixin) {
         if (!this.isChanged()) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+        return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
     }
 }
 </script>

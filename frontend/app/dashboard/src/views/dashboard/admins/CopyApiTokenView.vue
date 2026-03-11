@@ -1,17 +1,17 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`b1d528c7-1e05-48de-aadd-d30c28581bf2`)" />
+        <STNavigationBar :title="$t(`%1r`)" />
 
         <main>
             <h1>
-                {{ $t('dd939547-4b02-4ee5-a134-7901eb0dfa27') }}
+                {{ $t('%K6') }}
             </h1>
 
             <p>
-                {{ $t('21602156-65ef-4761-85e6-4d0c04b68636') }}
+                {{ $t('%K7') }}
             </p>
 
-            <STInputBox class="max" :title="$t(`da7c1f63-529d-47c6-8d2d-87e5cb98a411`)">
+            <STInputBox class="max" :title="$t(`%K9`)">
                 <div v-copyable class="input-icon-container right icon copy gray">
                     <div class="token-input input selectable">
                         <div>{{ user.token }}</div>
@@ -19,9 +19,9 @@
                 </div>
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }} {{ formatDate(user.createdAt) }}
+                {{ $t('%1JJ') }} {{ formatDate(user.createdAt) }}
                 <template v-if="user.expiresAt">
-                    {{ $t('52ab641f-5864-4fac-8c52-0df00ad7e0a9') }} {{ formatDate(user.expiresAt) }}
+                    {{ $t('%K4') }} {{ formatDate(user.expiresAt) }}
                 </template>
             </p>
         </main>
@@ -29,7 +29,7 @@
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss()">
-                    {{ $t('895b521c-da10-4fb6-9417-c8058a3cd858') }}
+                    {{ $t('%K8') }}
                 </button>
             </template>
         </STToolbar>

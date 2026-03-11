@@ -1,15 +1,15 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="status" class="st-view background">
-            <STNavigationBar :title="$t('04fe8969-a277-417d-92e8-8bd532affc19')" />
+            <STNavigationBar :title="$t('%1HV')" />
 
             <main>
                 <h1>
-                    {{ $t('04fe8969-a277-417d-92e8-8bd532affc19') }}
+                    {{ $t('%1HV') }}
                 </h1>
 
                 <p class="style-description-block">
-                    <I18nComponent :t="$t('5afbf5f5-1051-4a95-9c90-602c828094fa')">
+                    <I18nComponent :t="$t('%1HX')">
                         <template #button="{content}">
                             <a class="inline-link" :href="'https://'+LocalizedDomains.marketing+'/prijzen'" target="_blank">
                                 {{ content }}
@@ -32,15 +32,15 @@
                         </template>
 
                         <p v-if="pack.inTrial && !pack.alreadyBought" class="style-title-prefix-list theme-secundary">
-                            <span>{{ $t('6ed63ff0-296c-4151-905a-fc6fdc7832e8') }}</span>
+                            <span>{{ $t('%1HY') }}</span>
                         </p>
 
                         <p v-if="pack.alreadyBought && pack.expiresSoon" class="style-title-prefix-list">
-                            {{ $t('b69ae0b8-d957-4dde-b06d-a6f97ceea656') }}
+                            {{ $t('%1HZ') }}
                         </p>
 
                         <p v-else-if="pack.alreadyBought" class="style-title-prefix-list">
-                            {{ $t('079afc7a-6ccb-4c7f-b739-24198b0cfec2') }}
+                            {{ $t('%1H0') }}
                         </p>
 
                         <h3 class="style-title-list">
@@ -48,14 +48,14 @@
                         </h3>
 
                         <p v-if="pack.alreadyBought && pack.package.validUntil" class="style-description-small">
-                            {{ $t('e40ae4e1-abe1-418d-8662-16626c93acc2', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+                            {{ $t('%1Ha', {dateTime: formatDateTime(pack.package.validUntil)}) }}
                         </p>
 
                         <p v-else-if="pack.inTrial && pack.package.validUntil" class="style-description-small">
-                            {{ $t('2f7cdb1b-991f-4f79-9d59-1d2aa642dda3', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+                            {{ $t('%1Lv', {dateTime: formatDateTime(pack.package.validUntil)}) }}
 
                             <button type="button" class="inline-link error" @click.stop="stopTrial(pack)">
-                                <span>{{ $t('73c746e6-e984-45e5-98cd-645810c238a3') }}</span>
+                                <span>{{ $t('%1Lw') }}</span>
                             </button>
                         </p>
 
@@ -65,17 +65,17 @@
 
                         <template #right>
                             <span v-if="!pack.alreadyBought && (pack.inTrial || !pack.canStartTrial)" class="button text selected">
-                                <span>{{ $t('10216b79-6ff4-40b8-991e-58f8c5162999') }}</span>
+                                <span>{{ $t('%1Lx') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
                             <span v-if="!pack.alreadyBought && !pack.inTrial && pack.canStartTrial" class="button text selected">
-                                <span>{{ $t('8a53e9d9-aaac-4fb4-9102-ae0c05425c22') }}</span>
+                                <span>{{ $t('%1Ly') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
                             <span v-if="pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew" class="button text selected">
-                                <span>{{ $t('5c15d3f5-56e2-4dcd-afe1-feeb589b9bbc') }}</span>
+                                <span>{{ $t('%1Lz') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
@@ -221,16 +221,16 @@ async function stopTrial(pack: SelectablePackage) {
     if (!pack.inTrial) {
         return;
     }
-    if (!await CenteredMessage.confirm($t('5307823e-82d7-46b4-8632-52025690b85f'), $t('379877c9-5dc7-44b0-9681-2cca53707227'))) {
+    if (!await CenteredMessage.confirm($t('%1M0'), $t('%1M1'))) {
         return;
     }
     // Activate trial if possible (otherwise go to confirm)
-    deactivatePackage.deactivate(pack.package, $t('6901fcd0-a577-4792-8e78-bf67ba8fddc5')).catch(console.error);
+    deactivatePackage.deactivate(pack.package, $t('%1M2')).catch(console.error);
 }
 
 async function checkoutTrial(bundle: STPackageBundle, message: string) {
     if (loadingModule.value) {
-        new Toast($t('df3377e8-f484-43df-a973-75b47df42adb'), 'info').show();
+        new Toast($t('%1M3'), 'info').show();
         return;
     }
     loadingModule.value = bundle as any as STPackageType;
@@ -270,7 +270,7 @@ async function checkout(pack: SelectablePackage) {
         switch (pack.bundle) {
             case STPackageBundle.Members: {
                 if (!organization.value.meta.packages.canStartMembersTrial) {
-                    new Toast($t('dbec3332-380c-40fc-80f9-5c0c36167f54'), 'error').show();
+                    new Toast($t('%1M4'), 'error').show();
                     await openPackageDetails(pack);
                     return;
                 }
@@ -280,12 +280,12 @@ async function checkout(pack: SelectablePackage) {
             }
             case STPackageBundle.Webshops: {
                 if (!organization.value.meta.packages.canStartWebshopsTrial) {
-                    new Toast($t('dbec3332-380c-40fc-80f9-5c0c36167f54'), 'error').show();
+                    new Toast($t('%1M4'), 'error').show();
                     await openPackageDetails(pack);
                     return;
                 }
                 // Activate trial if possible (otherwise go to confirm)
-                await checkoutTrial(STPackageBundle.TrialWebshops, $t('12cb7852-c9c2-4072-af33-f71bee0fe441'));
+                await checkoutTrial(STPackageBundle.TrialWebshops, $t('%1M5'));
                 break;
             }
         }

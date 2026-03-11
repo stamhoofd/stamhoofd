@@ -8,7 +8,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="groupedResponsibilites.length === 0" class="info-box">
-            {{ $t('390f755c-b757-4a54-9bb4-d380e5869081') }}
+            {{ $t('%A3') }}
         </p>
 
         <div v-for="({title: groupTitle, responsibilities}, index) of groupedResponsibilites" :key="''+index" class="container">
@@ -24,18 +24,18 @@
 
                     <h2 class="style-title-list">
                         {{ responsibility.name }} <template v-if="group">
-                            {{ $t('9ddd7aba-9426-4718-9eb0-673b615efcf4') }} {{ group.settings.name }}
+                            {{ $t('%wR') }} {{ group.settings.name }}
                         </template>
                     </h2>
                     <p v-if="group && selectedOrganization && group.periodId === selectedOrganization?.period.period.id" class="style-description-small">
                         {{ selectedOrganization.period.period.nameShort }}
                     </p>
                     <p v-else-if="group" class="style-description-small">
-                        {{ $t('9685e11f-a4d0-4709-9f5e-875957ad269b') }}
+                        {{ $t('%8X') }}
                     </p>
 
                     <p class="style-description-small">
-                        {{ $t('52acb4e7-fb83-4406-8119-9adbda0ecc22') }}: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
+                        {{ $t('%fW') }}: {{ getResponsibilityMergedRoleDescription(responsibility, group?.id) }}
                     </p>
 
                     <p v-if="getResponsibilityEnabledDescription(responsibility, group?.id)" class="style-description-small">
@@ -53,7 +53,7 @@
         </div>
 
         <div v-if="deletedMemberResponsibilityRecords.length > 0" class="container">
-            <hr><h2>{{ $t('e81e0bdb-c15f-4b9a-abca-172a8d379993') }}</h2>
+            <hr><h2>{{ $t('%8u') }}</h2>
             <STList>
                 <STListItem v-for="record of deletedMemberResponsibilityRecords" :key="record.id" element-name="label" :selectable="true">
                     <template #left>
@@ -66,11 +66,11 @@
                         {{ selectedOrganization.period.period.nameShort }}
                     </p>
                     <p v-else-if="record.group" class="style-description-small">
-                        {{ $t('9685e11f-a4d0-4709-9f5e-875957ad269b') }}
+                        {{ $t('%8X') }}
                     </p>
 
                     <p class="style-description-small">
-                        {{ $t('52acb4e7-fb83-4406-8119-9adbda0ecc22') }}: {{ getResponsibilityRecordMergedRoleDescription(record) }}
+                        {{ $t('%fW') }}: {{ getResponsibilityRecordMergedRoleDescription(record) }}
                     </p>
 
                     <p v-if="getResponsibilityRecordEnabledDescription(record)" class="style-description-small">
@@ -171,14 +171,14 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: selectedOrganization.value === null ? '' : $t(`89b5d229-1850-4063-960a-dbacee794d72`),
+            title: selectedOrganization.value === null ? '' : $t(`%uM`),
             responsibilities: groupedPlatformResponsibilities,
         });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: $t(`20d0f420-edec-4c9f-9584-990258dcf1bf`),
+            title: $t(`%109`),
             responsibilities: groupedOrganizationResponsibilities,
         });
     }
@@ -203,11 +203,11 @@ const deletedMemberResponsibilityRecords = computed(() => {
 });
 
 const labels = computed(() => {
-    return items.value.map(o => o === null ? $t(`0234d6cf-7eac-411a-9321-d9ce81224df8`) : o.name);
+    return items.value.map(o => o === null ? $t(`%10A`) : o.name);
 });
 
 const title = computed(() => {
-    return $t(`53ffa1a5-9b55-4ff9-9c97-eeaf54ce6b47`) + ' ' + props.member.patchedMember.firstName;
+    return $t(`%et`) + ' ' + props.member.patchedMember.firstName;
 });
 
 useValidation(errors.validator, () => {
@@ -231,9 +231,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 
     if (rr) {
         if (!rr.endDate) {
-            return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
+            return $t(`%TA`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`%10B`);
         }
-        return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(rr.endDate, true);
+        return $t(`%TA`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`%10C`) + ' ' + Formatter.date(rr.endDate, true);
     }
 
     return null;
@@ -242,9 +242,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 function getResponsibilityRecordEnabledDescription(record: MemberResponsibilityRecord | undefined) {
     if (record) {
         if (!record.endDate) {
-            return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
+            return $t(`%TA`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`%10B`);
         }
-        return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(record.endDate, true);
+        return $t(`%TA`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`%10C`) + ' ' + Formatter.date(record.endDate, true);
     }
 
     return null;
@@ -385,6 +385,6 @@ function getResponsibilityRecordMergedRoleDescription(record: MemberResponsibili
         return getResponsibilityMergedRole(result.responsibility, result.groupId).getDescription();
     }
 
-    return $t('02ef437e-2166-49be-b5ae-73e5452546a0');
+    return $t('%8v');
 }
 </script>

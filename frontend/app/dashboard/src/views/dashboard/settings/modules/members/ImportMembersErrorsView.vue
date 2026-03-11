@@ -1,15 +1,15 @@
 <template>
-    <SaveView :title="$t('f9fec81d-9d00-4748-b92e-bb8526106c34')" :loading="saving" :save-text="$t('486a0b94-bed0-48d6-9055-3fe3923f8054')" @save="goNext">
-        <h1>{{ $t('f9fec81d-9d00-4748-b92e-bb8526106c34') }}</h1>
-        <p>{{ $t('a774b263-1900-4097-9b01-3b44577e9b35') }}</p>
+    <SaveView :title="$t('%18e')" :loading="saving" :save-text="$t('%18f')" @save="goNext">
+        <h1>{{ $t('%18e') }}</h1>
+        <p>{{ $t('%18h') }}</p>
 
         <table class="data-table">
             <thead>
                 <tr>
                     <th>
-                        {{ $t('9b327bf4-9928-4ad0-b9c5-71dee8631c8a') }}
+                        {{ $t('%18i') }}
                     </th>
-                    <th>{{ $t('488b30da-0ba0-4bd1-b568-19404f2def34') }}</th>
+                    <th>{{ $t('%18j') }}</th>
                 </tr>
             </thead>
             <tbody>

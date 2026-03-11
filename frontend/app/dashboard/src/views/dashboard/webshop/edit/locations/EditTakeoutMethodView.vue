@@ -1,44 +1,44 @@
 <template>
     <SaveView :title="locationTitleName" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
-            {{ locationTitleName }} {{ $t('06da1310-e17c-475e-bcd3-bb47844c24c1') }}
+            {{ locationTitleName }} {{ $t('%14c') }}
         </h1>
         <h1 v-else>
-            {{ locationTitleName }} {{ $t('8455850d-829f-412f-bf1f-eedb2caa9f57') }}
+            {{ locationTitleName }} {{ $t('%Rw') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`3c6084da-ce6f-4d03-b213-42def4eabbb7`)">
-                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`3bb5eb55-784a-41ea-8bc1-b487c6421b51`)">
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%T2`)">
+                    <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%T3`)">
                 </STInputBox>
 
-                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-                    <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`bb9c4b26-8f77-4334-a6bd-6649c2fe7a1c`)" />
+                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)">
+                    <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`%T4`)" />
                 </STInputBox>
             </div>
             <div>
-                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)" />
+                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`%Cn`)" />
             </div>
         </div>
 
-        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`a30e2714-0bef-4714-8d4b-2c4aa296df1b`)" @patch="patchTimeSlots">
-            <p>{{ $t('74d4c806-8c5b-4f12-8629-48d372b5518c') }}</p>
+        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`%T5`)" @patch="patchTimeSlots">
+            <p>{{ $t('%T0') }}</p>
         </EditTimeSlotsSection>
-        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`ce84698c-f538-462b-8d43-99feff25680f`)" @patch="patchTimeSlots">
-            <p>{{ $t('46944c50-6c15-4547-90d4-bba60421b471') }}</p>
+        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" :title="$t(`%T6`)" @patch="patchTimeSlots">
+            <p>{{ $t('%T1') }}</p>
         </EditTimeSlotsSection>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}
+                {{ $t('%CJ') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

@@ -31,25 +31,25 @@ const priceBreakdown = computed(() => {
 
     const all = [
         {
-            name: $t(`057ffcea-70b1-44a9-ad01-c60f6fbd7393`),
+            name: $t(`%ly`),
             price: balance.pricePaid + laterBalance.pricePaid,
         },
         {
-            name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
+            name: $t(`%wc`),
             price: balance.pricePending + laterBalance.pricePending,
         },
     ].filter(a => a.price !== 0);
 
     if (all.length > 0) {
         all.unshift({
-            name: $t(`8dfbd01b-feb1-4b7e-a1f1-2daf19fb2775`),
+            name: $t(`%lz`),
             price: balance.payablePriceWithVAT + laterBalance.payablePriceWithVAT,
         });
     }
 
     if (laterBalance.priceOpen > 0) {
         all.push({
-            name: $t(`3b051406-b285-4f04-a80d-b98c966cbb1c`),
+            name: $t(`%10Z`),
             price: laterBalance.priceOpen,
         });
     }
@@ -57,7 +57,7 @@ const priceBreakdown = computed(() => {
     return [
         ...all,
         {
-            name: balance.priceOpen < 0 ? (isPayable ? $t(`89bb9c20-d3f5-43ff-846c-47a23517274a`) : $t(`38ff3cca-3877-4202-9c71-9437a12fb876`)) : (laterBalance.priceOpen !== 0 ? $t(`35337319-2bc6-41d6-9427-c1974d8a37ae`) : $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`)),
+            name: balance.priceOpen < 0 ? (isPayable ? $t(`%10a`) : $t(`%10b`)) : (laterBalance.priceOpen !== 0 ? $t(`%10c`) : $t(`%m0`)),
             price: Math.abs(balance.priceOpen),
         },
     ];

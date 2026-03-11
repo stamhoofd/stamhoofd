@@ -42,7 +42,7 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
 
         const webshop = await Webshop.getByID(request.params.id);
         if (!webshop || !await Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Write)) {
-            throw Context.auth.notFoundOrNoAccess($t(`b4969b2f-c128-44ed-a8de-279c1dd55382`));
+            throw Context.auth.notFoundOrNoAccess($t(`%FU`));
         }
 
         const tickets: Ticket[] = [];

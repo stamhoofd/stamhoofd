@@ -95,7 +95,7 @@ export class Payment extends AutoEncoder {
     get title() {
         if (this.method !== PaymentMethod.Unknown) {
             if (this.type !== PaymentType.Payment) {
-                return $t(`bf20a769-772d-46b2-9b48-2ea29c96f113`) + ' ' + PaymentMethodHelper.getName(this.method);
+                return $t(`%1z`) + ' ' + PaymentMethodHelper.getName(this.method);
             }
             return PaymentMethodHelper.getNameCapitalized(this.method);
         }
@@ -139,26 +139,26 @@ export class Payment extends AutoEncoder {
          */
         const data = [
             {
-                title: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
+                title: $t(`%M7`),
                 value: this.method ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method)) : '',
             },
             {
-                title: $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`),
+                title: $t(`%m0`),
                 value: this.status !== PaymentStatus.Succeeded ? Formatter.price(this?.price ?? 0) : Formatter.price(0),
             },
             ...(
                 this.method === PaymentMethod.Transfer
                     ? [
                             {
-                                title: $t(`136b7ba4-7611-4ee4-a46d-60758869210f`),
+                                title: $t(`%J8`),
                                 value: this.transferDescription ?? '',
                             },
                             {
-                                title: $t(`1fbed7d4-9e6e-4c87-b7fe-a9059aef2492`),
+                                title: $t(`%kc`),
                                 value: this.transferSettings?.iban ?? '',
                             },
                             {
-                                title: $t(`31c28f13-d3b8-42ee-8979-c8224633237e`),
+                                title: $t(`%J5`),
                                 value: this.transferSettings?.creditor ?? '',
                             },
                         ]

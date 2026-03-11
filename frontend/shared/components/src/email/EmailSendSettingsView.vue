@@ -5,7 +5,7 @@
         :loading="saving"
         :save-icon-mobile="willSend ? 'send' : undefined"
         :save-icon="willSend ? 'send' : undefined"
-        :save-text="willSend ? (sendAsEmail ? $t('618f51bc-cad2-453f-bece-70ba56b7d1a9') : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3')) : $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d')"
+        :save-text="willSend ? (sendAsEmail ? $t('%1DC') : $t('%1Fe')) : $t('%v7')"
         :prefer-large-button="false"
         :disabled="willSend && (!showInMemberPortal && !sendAsEmail)"
         @save="save"
@@ -23,10 +23,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('6804cf8f-b057-41ce-a1b6-9b4f314dcab8') }}
+                    {{ $t('%1Ff') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('3cdf36a0-362b-416c-a6ed-c971fcc5cbd3') }}
+                    {{ $t('%1Fg') }}
                 </p>
             </STListItem>
 
@@ -36,10 +36,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('13e9b4f6-f1de-4af7-be7d-7d90f8a400d0') }}
+                    {{ $t('%1Fh') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('d4ce8bf8-3868-4e41-8152-9a2d9bc05fac') }}
+                    {{ $t('%1Fi') }}
                 </p>
 
                 <template #right>
@@ -74,7 +74,7 @@ const props = withDefaults(defineProps<{
 
 const { patch, hasChanges, patched: patchedEmail, addPatch } = usePatch(props.editEmail);
 
-const title = props.willSend ? $t('ce6d1409-7683-406e-836b-d1a48981c060') : $t('1dae9aca-798f-4dde-b420-8fcd4936a3fc');
+const title = props.willSend ? $t('%1Fj') : $t('%1Fk');
 const saving = ref(false);
 const errors = useErrors();
 const dismiss = useDismiss();
@@ -102,17 +102,17 @@ async function save() {
 
     if (props.willSend) {
         const emailRecipientsCount = patchedEmail.value.emailRecipientsCount;
-        let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
+        let confirmText = $t(`%vI`);
 
         if (emailRecipientsCount) {
-            confirmText = emailRecipientsCount === 1 ? $t('62beee9f-1bbc-4d3c-9cec-58981122c5a6') : $t('3a666229-22b8-41b8-b2f8-17b70c32feb8', { count: Formatter.integer(emailRecipientsCount) });
+            confirmText = emailRecipientsCount === 1 ? $t('%1Fl') : $t('%1Fm', { count: Formatter.integer(emailRecipientsCount) });
         }
 
         if (!sendAsEmail.value) {
-            confirmText = $t(`98603c16-adf9-4aa9-9685-4a1199dd04d4`);
+            confirmText = $t(`%1Fo`);
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`618f51bc-cad2-453f-bece-70ba56b7d1a9`) : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3'));
+        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`%1DC`) : $t('%1Fe'));
         if (!isConfirm) {
             return;
         }
@@ -140,10 +140,10 @@ async function save() {
 
         if (props.willSend) {
             if (props.editEmail.sendAsEmail) {
-                Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
+                Toast.success($t(`%vJ`)).show();
             }
             else {
-                Toast.success($t('730f955b-964e-4bb3-8caf-df6c7961c1ae')).show();
+                Toast.success($t('%1Fn')).show();
             }
             await GlobalEventBus.sendEvent('selectTabById', 'communication');
 
@@ -165,7 +165,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

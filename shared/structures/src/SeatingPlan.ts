@@ -539,17 +539,17 @@ export class ReservedSeat extends AutoEncoder {
 
         const section = seatingPlan.sections.find(s => s.id === this.section);
         const categoryName = seatingPlan.getCategoryName(this);
-        const suffix = categoryName ? [{ title: $t(`502dc65d-e8d3-4b20-a478-a76ca9084e60`), value: categoryName }] : [];
+        const suffix = categoryName ? [{ title: $t(`%M2`), value: categoryName }] : [];
 
         if (seatingPlan.sections.length === 1 || !section || section.name.length === 0) {
             // Don't mention the section
             return [
                 {
-                    title: $t(`c803096c-c719-4dd8-bebd-a108c514bb5d`),
+                    title: $t(`%UT`),
                     value: this.row,
                 },
                 {
-                    title: $t(`78812fb1-dbbb-4115-a513-2b4841fc086f`),
+                    title: $t(`%nH`),
                     value: this.seat,
                 },
                 ...suffix,
@@ -558,15 +558,15 @@ export class ReservedSeat extends AutoEncoder {
 
         return [
             {
-                title: $t(`95708a22-4743-4f04-aa24-fee0220da923`),
+                title: $t(`%1V`),
                 value: section.name,
             },
             {
-                title: $t(`c803096c-c719-4dd8-bebd-a108c514bb5d`),
+                title: $t(`%UT`),
                 value: this.row,
             },
             {
-                title: $t(`78812fb1-dbbb-4115-a513-2b4841fc086f`),
+                title: $t(`%nH`),
                 value: this.seat,
             },
             ...suffix,

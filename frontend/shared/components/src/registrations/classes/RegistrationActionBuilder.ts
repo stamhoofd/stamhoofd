@@ -108,7 +108,7 @@ export class RegistrationActionBuilder {
     private getMemberActions() {
         const actions: TableAction<PlatformRegistration>[] = [
             new InMemoryTableAction({
-                name: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`),
+                name: $t(`%XO`),
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,
@@ -123,7 +123,7 @@ export class RegistrationActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`331c7c4f-7317-4ec5-b9eb-02f324129ee1`),
+                name: $t(`%ej`),
                 icon: 'star',
                 priority: 0,
                 groupIndex: 1,
@@ -138,7 +138,7 @@ export class RegistrationActionBuilder {
             }),
 
             new MenuTableAction<PlatformRegistration>({
-                name: $t(`800d8458-da0f-464f-8b82-4e28599c8598`),
+                name: $t(`%dh`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -159,7 +159,7 @@ export class RegistrationActionBuilder {
             }
             return this.organizations.map((org) => {
                 return new MenuTableAction({
-                    name: $t(`26a122e0-4312-4473-90c6-85f5c9f678be`) + ' ' + org.name,
+                    name: $t(`%eg`) + ' ' + org.name,
                     groupIndex: 0,
                     childActions: () => this.getRegisterActions(org),
                 });
@@ -168,7 +168,7 @@ export class RegistrationActionBuilder {
 
         return [
             new MenuTableAction({
-                name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                name: $t(`%eh`),
                 groupIndex: 0,
                 enabled: organization.period.waitingLists.length > 0,
                 childActions: () => [
@@ -232,7 +232,7 @@ export class RegistrationActionBuilder {
 
     private getUnsubscribeAction(): InMemoryTableAction<PlatformRegistration> | null {
         return new InMemoryTableAction({
-            name: $t(`5ac7a958-ec4d-4e37-b2c0-35b2ada59044`),
+            name: $t(`%zu`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -247,7 +247,7 @@ export class RegistrationActionBuilder {
 
     getChargeAction() {
         return new AsyncTableAction({
-            name: $t(`4273d00c-7b8b-48ec-906d-80d6feb23655`),
+            name: $t(`%Gu`),
             icon: 'calculator',
             priority: 13,
             groupIndex: 4,
@@ -275,7 +275,7 @@ export class RegistrationActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`3763ba3a-1023-4265-b675-1c2090d4c37b`),
+                name: $t(`%1KS`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -283,7 +283,7 @@ export class RegistrationActionBuilder {
                 handler: async (registations: PlatformRegistration[]) => {
                     const members = getUniqueMembersFromRegistrations(registations);
                     if (members.length > 100) {
-                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
+                        Toast.error($t(`%ei`)).show();
                         return;
                     }
                     await this.present({
@@ -307,7 +307,7 @@ export class RegistrationActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`82a881a0-5666-4649-961a-c8f6c48177d0`),
+                name: $t(`%1GU`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -315,7 +315,7 @@ export class RegistrationActionBuilder {
                 handler: async (registations: PlatformRegistration[]) => {
                     const members = getUniqueMembersFromRegistrations(registations);
                     if (members.length > 100) {
-                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
+                        Toast.error($t(`%ei`)).show();
                         return;
                     }
                     await this.present({
@@ -340,7 +340,7 @@ export class RegistrationActionBuilder {
             return null;
         }
         return new InMemoryTableAction({
-            name: $t('d20e1a65-6c0d-4591-9dac-1abc01b9a563'),
+            name: $t('%16r'),
             destructive: true,
             priority: 1,
             groupIndex: 100,
@@ -384,7 +384,7 @@ export class RegistrationActionBuilder {
         suggestedGroups = suggestedGroups.filter(g => this.groups.find(gg => gg.id === g.id) === undefined); // Remove groups that are already selected
 
         return new MenuTableAction({
-            name: $t(`507c48cb-35ae-4c94-bc7a-4611360409c8`),
+            name: $t(`%HB`),
             priority: 1,
             groupIndex: 5,
             needsSelection: true,
@@ -403,7 +403,7 @@ export class RegistrationActionBuilder {
                     });
                 }),
                 new MenuTableAction({
-                    name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                    name: $t(`%eh`),
                     groupIndex: 0,
                     enabled: organization.period.waitingLists.length > 0,
                     childActions: () => [
@@ -433,7 +433,7 @@ export class RegistrationActionBuilder {
         }
 
         return new InMemoryTableAction({
-            name: $t(`7c6e4f2d-297d-4183-9079-ba123f481eb5`),
+            name: $t(`%zt`),
             priority: 1,
             groupIndex: 1,
             needsSelection: true,
@@ -448,7 +448,7 @@ export class RegistrationActionBuilder {
 
     private getExportAction() {
         return new MenuTableAction({
-            name: $t('2a50d0e8-bdb9-4016-84be-b0de6e26ca14'),
+            name: $t('%17e'),
             icon: 'download',
             priority: 8,
             groupIndex: 3,
@@ -461,7 +461,7 @@ export class RegistrationActionBuilder {
 
     private getExportToExcelAction() {
         return new AsyncTableAction({
-            name: $t('b9f2cf39-1f26-4b7c-b949-0474fa9f2f01'),
+            name: $t('%17U'),
             priority: 0,
             groupIndex: 0,
             handler: async (selection: TableActionSelection<PlatformRegistration>) => {
@@ -472,11 +472,11 @@ export class RegistrationActionBuilder {
 
     private getExportToPdfAction() {
         return new InMemoryTableAction({
-            name: $t('3bfdcad4-7201-4b4e-9244-5ec22c6e4ce9'),
+            name: $t('%17V'),
             priority: 0,
             groupIndex: 0,
             fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
-                return $t('03903ede-4f60-4358-8709-bfc814ee5b17', { count: Formatter.float(count), limit: Formatter.float(limit) });
+                return $t('%17W', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (registrations: PlatformRegistration[]) => {
                 await this.exportToPdf(registrations.map(r => r.member));
@@ -486,7 +486,7 @@ export class RegistrationActionBuilder {
 
     private getEmailAction() {
         return new AsyncTableAction({
-            name: $t(`208ae3f1-1720-4d79-96fd-5c05d97c9de0`),
+            name: $t(`%1GW`),
             icon: 'email',
             priority: 12,
             groupIndex: 3,
@@ -498,12 +498,12 @@ export class RegistrationActionBuilder {
 
     private getSmsAction() {
         return new InMemoryTableAction({
-            name: $t(`73d85ece-245e-4e48-a833-1e78cf810b03`),
+            name: $t(`%PI`),
             icon: 'feedback-line',
             priority: 9,
             groupIndex: 3,
             fetchLimitSettings: { limit: 200, createErrorMessage: (count, limit) => {
-                return $t('187d5767-969d-407a-a988-c3a9a831a0a8', { count: Formatter.float(count), limit: Formatter.float(limit) });
+                return $t('%16s', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (registrations: PlatformRegistration[]) => {
                 await this.openSms(registrations);
@@ -529,7 +529,7 @@ export class RegistrationActionBuilder {
             options: [
                 {
                     id: 'all',
-                    name: $t(`379d43fb-034f-4280-bb99-ea658eaec729`),
+                    name: $t(`%L8`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationMembers,
@@ -540,12 +540,12 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`2035a033-bd26-492b-8d91-473b2a033029`),
+                    name: $t(`%el`),
                     value: [],
                 },
                 {
                     id: 'adults',
-                    name: $t(`756cf0cd-8992-452a-9eb8-46e1c7ca5650`),
+                    name: $t(`%em`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationMembers,
@@ -573,7 +573,7 @@ export class RegistrationActionBuilder {
             options: [
                 {
                     id: 'minors',
-                    name: $t(`f6b27311-6878-4d14-90de-7a49a7f2b8f2`),
+                    name: $t(`%en`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationParents,
@@ -595,7 +595,7 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`5c6c917c-c07c-4825-9f58-a8dade4e4875`),
+                    name: $t(`%eo`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationParents,
@@ -606,7 +606,7 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`71065f0c-5d13-4b38-ba35-9b17aca66fbf`),
+                    name: $t(`%ep`),
                     value: [],
                 },
             ],
@@ -617,12 +617,12 @@ export class RegistrationActionBuilder {
             options: [
                 {
                     id: 'none',
-                    name: $t(`2f4a25b4-1c98-4449-9ba1-75418393f0c9`),
+                    name: $t(`%eq`),
                     value: [],
                 },
                 {
                     id: 'minors',
-                    name: $t(`62844f9d-a3d3-4b83-bafe-e8e97bc6aa3b`),
+                    name: $t(`%er`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationUnverified,
@@ -644,7 +644,7 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`09c2a259-7c8f-4a97-8eb2-05fa9d56865e`),
+                    name: $t(`%es`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationUnverified,
@@ -709,7 +709,7 @@ export class RegistrationActionBuilder {
         }
 
         if (filteredOrganizations.length > 1) {
-            Toast.error($t(`b2dffb50-f8b1-4211-83d2-49a7b4008508`)).show();
+            Toast.error($t(`%1GV`)).show();
             return;
         }
 

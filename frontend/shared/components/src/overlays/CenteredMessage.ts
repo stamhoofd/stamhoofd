@@ -61,7 +61,7 @@ export class CenteredMessage {
         }
 
         if (simpleErrors.hasCode('network_error') || simpleErrors.hasCode('network_timeout')) {
-            return new CenteredMessage($t(`18e54ffc-b12d-4175-9128-46446334942f`), $t(`ea7a24eb-79de-40ca-8ebf-1ca4a600587e`), 'error');
+            return new CenteredMessage($t(`%gT`), $t(`%gU`), 'error');
         }
 
         return new CenteredMessage(simpleErrors.getHuman(), '', 'error');
@@ -81,7 +81,7 @@ export class CenteredMessage {
         }
     }
 
-    addCloseButton(text = $t(`83db2c73-38a3-4d13-9984-2f19f95e1329`), action?: (() => Promise<any>)) {
+    addCloseButton(text = $t(`%9b`), action?: (() => Promise<any>)) {
         this.buttons.push(new CenteredMessageButton(text, { type: 'secundary', action }));
         return this;
     }
@@ -113,10 +113,10 @@ export class CenteredMessage {
                     text: confirmText,
                     type: destructive ? 'destructive' : 'primary',
                     value: true,
-                    availabilityDelay: destructive && confirmText !== $t('106b3169-6336-48b8-8544-4512d42c4fd6') ? 1_000 : undefined,
+                    availabilityDelay: destructive && confirmText !== $t('%4X') ? 1_000 : undefined,
                 },
                 {
-                    text: cancelText ?? $t(`83db2c73-38a3-4d13-9984-2f19f95e1329`),
+                    text: cancelText ?? $t(`%9b`),
                     type: 'secundary',
                     value: false,
                 },

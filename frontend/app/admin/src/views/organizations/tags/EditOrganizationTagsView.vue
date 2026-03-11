@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>{{ $t('a8a815a2-ab66-4734-9eb5-c0d139b22029') }}</p>
+        <p>{{ $t('%H8') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -15,7 +15,7 @@
         <p>
             <button class="button text" type="button" @click="addTag">
                 <span class="icon add" />
-                <span>{{ $t('f87ed463-4821-4877-96db-03c693f46013') }}</span>
+                <span>{{ $t('%73') }}</span>
             </button>
         </p>
     </SaveView>
@@ -43,7 +43,7 @@ const originalTags = computed(() => platform.value.config.tags);
 const { patched: tags, patch, addArrayPatch, hasChanges } = usePatchArray(originalTags);
 const saving = ref(false);
 
-const title = $t(`99fe8ee0-edaa-4f80-a0e9-d2b2d1a4845a`);
+const title = $t(`%H9`);
 
 const draggableTags = useDraggableArray(() => TagHelper.getRootTags(tags.value), addArrayPatch);
 
@@ -94,7 +94,7 @@ async function save() {
                 tags: patch.value,
             }),
         }));
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -108,7 +108,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

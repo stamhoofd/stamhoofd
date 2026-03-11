@@ -1,21 +1,21 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`86f953db-fdce-4be5-abc2-bbedaf4ac63a`)" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`%1Fd`)" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 v-if="isNew">
-            {{ $t('c5602934-95a8-437d-b576-eda8d9e6565e') }}
+            {{ $t('%aR') }}
         </h1>
         <h1 v-else>
-            {{ $t('ed3e84f0-7ab3-467b-948f-0423ccbf2056') }}
+            {{ $t('%aS') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`23302106-6c68-4b4a-8d48-6a7c0debdeb8`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%aW`)">
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('9b4f3b56-e869-4442-bb5f-156c2b9271b0') }}
+            {{ $t('%1Dq') }}
         </p>
 
-        <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`70c99ed2-97be-4252-b7c4-6cd46d5c9513`)" />
+        <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`%1FK`)" :placeholder="$t(`%aX`)" />
 
         <STInputBox class="max">
             <STList>
@@ -29,10 +29,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('b3dc156b-410d-4d3f-bd5c-5aa6f9c9e355') }}
+                        {{ $t('%1Dr') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('9e99d02f-4498-4160-877d-dc14bbadc98f') }}
+                        {{ $t('%1Ds') }}
                     </p>
 
                     <template #right>
@@ -50,10 +50,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('31a32fe1-8e29-41aa-99a8-bf79ab90f93b') }}
+                        {{ $t('%1Dt') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('037e9189-33ef-44c1-bad2-ff3ea3da0629') }}
+                        {{ $t('%1Du') }}
                     </p>
                 </STListItem>
 
@@ -67,10 +67,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('4a58b661-087b-4951-9643-2b00352bba85') }}
+                        {{ $t('%1Dv') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('d040c8bd-23d1-42c3-a609-5e2febc12f07') }}
+                        {{ $t('%1Dw') }}
                     </p>
 
                     <template #right>
@@ -82,9 +82,9 @@
 
         <template v-if="enableMemberModule && groups.length">
             <hr>
-            <h2>{{ $t('c0b96584-ebf2-452b-89e2-0bea5e63eb74') }}</h2>
+            <h2>{{ $t('%aT') }}</h2>
             <p>
-                {{ $t('a481dcc6-d66e-4098-adc4-66ae9b1ed35f') }}
+                {{ $t('%aU') }}
             </p>
 
             <STList>
@@ -101,9 +101,9 @@
 
         <template v-if="enableWebshopModule && webshops.length">
             <hr>
-            <h2>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h2>
+            <h2>{{ $t('%HI') }}</h2>
             <p>
-                {{ $t('6fbddfd5-c9af-492a-819f-a22370084cb6') }}
+                {{ $t('%aV') }}
             </p>
 
             <STList>
@@ -157,7 +157,7 @@ async function editPermissions(animated = true) {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditResourceRolesView, {
-                description: $t('e01618ed-7f4f-4a80-a926-3afb7b3806fc'),
+                description: $t('%1Dx'),
                 resource: {
                     id: props.email.id,
                     name: patched.value.name || patched.value.email, description: patched.value.name ? patched.value.email : '',
@@ -251,7 +251,7 @@ async function deleteMe() {
     if (saving.value) {
         return;
     }
-    if (!await CenteredMessage.confirm($t('6c837cc0-1832-4bb4-830f-838ebf9911f6'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('2c9ef19d-3838-4e9a-bb9b-e5f9a714fe4c'))) {
+    if (!await CenteredMessage.confirm($t('%1Fb'), $t('%55'), $t('%1Fc'))) {
         return;
     }
     saving.value = true;
@@ -395,7 +395,7 @@ const shouldNavigateAway = async () => {
     if (!hasChangesFull.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

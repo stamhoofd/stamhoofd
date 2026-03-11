@@ -1,19 +1,19 @@
 <template>
-    <SaveView :title="isNew ? $t(`f4d789d3-51e6-40ca-9c10-b81ffff6e32f`) : $t('573d5fcf-0f9b-4843-9e18-a75adbfea2c8')" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%u8`) : $t('%14g')" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('f4d789d3-51e6-40ca-9c10-b81ffff6e32f') }}
+            {{ $t('%u8') }}
         </h1>
         <h1 v-else>
-            {{ $t('573d5fcf-0f9b-4843-9e18-a75adbfea2c8') }}
+            {{ $t('%14g') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sk`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`295faf23-65af-4820-80de-fa6abfe751e3`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`ef6ac7e5-de7e-4e2e-802f-de730294f05d`)" />
+        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%TQ`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`%2f`)" />
         </STInputBox>
 
         <STList>
@@ -23,11 +23,11 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('45807c1e-fb46-496f-9584-9081c56e193c', {stock: usedStock.toString()}) }}
+                    {{ $t('%TN', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <p v-if="useStock" class="style-description-small">
-                    {{ $t('31a4cf98-1e98-491e-855c-2b5a5703b254') }}
+                    {{ $t('%TO') }}
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -40,12 +40,12 @@
 
         <div v-if="!isNew && !isSingle" class="container">
             <hr><h2>
-                {{ $t('9c668242-0cd3-4d73-a238-4fea31a417b8') }}
+                {{ $t('%TP') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

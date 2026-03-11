@@ -1,42 +1,42 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`5a5c1ed2-516e-43a1-9e64-25a7f6190ed3`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`%HD`)" @save="save">
         <h1>
-            {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
+            {{ $t('%HD') }}
         </h1>
 
-        <p>{{ $t('cdd2999b-28bf-4b9b-ba31-371cd3021923') }}</p>
+        <p>{{ $t('%HE') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr><h2>
-            {{ $t('8f9e2384-e2d3-46b7-a83e-3baed2b40936') }}
+            {{ $t('%HF') }}
         </h2>
 
-        <p>{{ $t('5dca5d6a-3d9f-48ab-beab-809905b13dbc') }}</p>
+        <p>{{ $t('%HG') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox :model-value="!getFeatureFlag('disable-events')" @update:model-value="setFeatureFlag('disable-events', !$event)">
-            {{ $t('60231186-b00f-4d07-a5c7-4a905467e254') }}
+            {{ $t('%uB') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
-            {{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}
+            {{ $t('%7r') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
-            {{ $t('000be3fe-9354-4c2c-baf1-d0cd4d079830') }}
+            {{ $t('%CV') }}
         </Checkbox>
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
-            {{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}
+            {{ $t('%HI') }}
         </Checkbox>
 
         <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">
-            {{ $t('f0815834-0750-41d6-aa93-26203b2aedb6') }}
+            {{ $t('%15o') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('event-webshops')" @update:model-value="setFeatureFlag('event-webshops', !!$event)">
-            {{ $t('c22cb870-b859-4de9-9540-1d2d796a50f3') }}
+            {{ $t('%18E') }}
         </Checkbox>
 
         <template v-if="isRootAdmin">
@@ -48,24 +48,24 @@
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
-                {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
+                {{ $t('%18D') }} (beta)
             </Checkbox>
         </template>
 
-        <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>
+        <hr><h2>{{ $t('%HJ') }}</h2>
 
         <STList>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" :label="$t(`f3bcb2fd-6f56-436a-bf8d-8cde0d924d6a`)" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Password)" :label="$t(`%HK`)" @update:model-value="setLoginMethod(LoginMethod.Password, !!$event)">
                 <template #right>
                     <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Password)" />
                 </template>
             </CheckboxListItem>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" :label="$t(`af5f50da-3290-44bd-a104-896231e6ea08`)" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)">
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.Google)" :label="$t(`%1p`)" @update:model-value="setLoginMethod(LoginMethod.Google, !!$event)">
                 <template #right>
                     <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.Google)" />
                 </template>
             </CheckboxListItem>
-            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" :label="$t(`662467b7-da51-4fe2-bff4-784c8f028e58`)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)">
+            <CheckboxListItem :model-value="getLoginMethod(LoginMethod.SSO)" :label="$t(`%2b`)" @update:model-value="setLoginMethod(LoginMethod.SSO, !!$event)">
                 <template #right>
                     <button class="button icon settings" type="button" @click="editLoginMethodConfig(LoginMethod.SSO)" />
                 </template>
@@ -169,7 +169,7 @@ async function save() {
         }
 
         await platformManager.value.patch(patch.value);
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -183,7 +183,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

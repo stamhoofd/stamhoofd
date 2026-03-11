@@ -151,7 +151,7 @@ export class PayconiqPayment extends QueryableModel {
         if (!apiKey) {
             throw new SimpleError({
                 code: '',
-                message: $t('4a3b54dc-e945-4a15-8b31-b9b4bb483b2a'),
+                message: $t('%GP'),
             });
         }
 
@@ -176,7 +176,7 @@ export class PayconiqPayment extends QueryableModel {
             console.error('Unsupported Payconiq response', response);
             throw new SimpleError({
                 code: '',
-                message: $t('4a3b54dc-e945-4a15-8b31-b9b4bb483b2a'),
+                message: $t('%GP'),
             });
         }
 

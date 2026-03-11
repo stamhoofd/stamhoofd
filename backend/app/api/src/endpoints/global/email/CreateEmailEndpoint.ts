@@ -68,7 +68,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!await Context.auth.canSendEmails(organization)) {
             throw Context.auth.error({
                 message: 'Cannot send emails',
-                human: $t('f7b7ac75-f7df-49cc-8961-b2478d9683e3'),
+                human: $t('%1Cv'),
             });
         }
 
@@ -98,7 +98,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
-                    human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
+                    human: $t('%1Cw'),
                 });
             }
             model.senderId = sender.id;
@@ -110,7 +110,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',
-                    human: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
+                    human: $t(`%1Cx`),
                     statusCode: 400,
                 });
             }
@@ -134,7 +134,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (!await Context.auth.canSendEmail(model)) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
-                    human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
+                    human: $t('%1Cw'),
                 });
             }
             await model.queueForSending();

@@ -2,10 +2,10 @@
     <div class="st-view payment-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
-                <button v-if="canWrite" v-tooltip="$t('741168a8-76e8-4bcb-889e-432b1048df11')" type="button" class="button icon edit" @click="editPayment" />
-                <button v-if="auth.hasFullAccess()" v-tooltip="$t('3763ba3a-1023-4265-b675-1c2090d4c37b')" type="button" class="button icon history" @click="viewAudit" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="$t('%hA')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="$t('%hB')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="canWrite" v-tooltip="$t('%1Ki')" type="button" class="button icon edit" @click="editPayment" />
+                <button v-if="auth.hasFullAccess()" v-tooltip="$t('%1KS')" type="button" class="button icon history" @click="viewAudit" />
             </template>
         </STNavigationBar>
 
@@ -18,24 +18,24 @@
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <span v-if="payment.isPending" v-tooltip="$t('5c75e9bf-1b64-4d28-a435-6e33247d5170')" class="icon small hourglass primary" />
-                <span v-if="payment.isFailed" v-tooltip="$t('c147043d-f708-4aa8-aad6-0547f4fb425a')" class="icon small disabled error" />
+                <span v-if="payment.isPending" v-tooltip="$t('%wc')" class="icon small hourglass primary" />
+                <span v-if="payment.isFailed" v-tooltip="$t('%1D5')" class="icon small disabled error" />
             </h1>
 
             <template v-if="canWrite">
                 <p v-if="payment.type === PaymentType.Reallocation">
-                    {{ $t('1e5a1fda-ef7e-4719-ae84-907d10b31457', {platform: platform.config.name}) }}
+                    {{ $t('%hC', {platform: platform.config.name}) }}
                 </p>
                 <p v-if="payment.method === PaymentMethod.Transfer && payment.isFailed" class="error-box">
-                    {{ $t('c3ab8dd2-19f1-40b8-82cf-1e6185307605') }}
+                    {{ $t('%hD') }}
                 </p>
 
                 <p v-if="payment.isPending && payment.method === PaymentMethod.Transfer && payment.isOverDue && payment.type == PaymentType.Payment" class="warning-box">
-                    {{ $t('a5474f96-5271-4257-92ab-c6d8ccb7f7e9') }}
+                    {{ $t('%hE') }}
                 </p>
 
                 <p v-if="payment.isPending && payment.type == PaymentType.Refund" class="warning-box">
-                    {{ $t("2f003407-e359-4e94-af1c-90b207464090") }}
+                    {{ $t("%hV") }}
                 </p>
             </template>
 
@@ -44,7 +44,7 @@
             <STList class="info">
                 <STListItem v-if="payment.price">
                     <h3 class="style-definition-label">
-                        {{ $t('8694e53a-8dc4-42dd-9fbb-c38057ed8403') }}
+                        {{ $t('%hF') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(payment.price) }}
@@ -53,7 +53,7 @@
 
                 <STListItem v-if="payment.method === 'Transfer'">
                     <h3 class="style-definition-label">
-                        {{ $t('136b7ba4-7611-4ee4-a46d-60758869210f') }}
+                        {{ $t('%J8') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ payment.transferDescription }}
@@ -62,10 +62,10 @@
 
                 <STListItem v-if="payment.method === 'Transfer' && payment.transferSettings">
                     <h3 v-if="payment.price >= 0" class="style-definition-label">
-                        {{ $t('6da2935e-b763-415f-b4ff-1923623c766c') }}
+                        {{ $t('%hG') }}
                     </h3>
                     <h3 v-else class="style-definition-label">
-                        {{ $t('8bf7e685-075f-4d67-887b-d01070df9b6f') }}
+                        {{ $t('%hH') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ payment.transferSettings }}
@@ -74,50 +74,50 @@
 
                 <STListItem v-if="isManualMethod">
                     <h3 class="style-definition-label">
-                        {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }}
+                        {{ $t('%1JJ') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(payment.createdAt) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('c6a1f96a-0e71-44c1-89a2-20bfd206d9c6', {time: formatTime(payment.createdAt)}) }}
+                        {{ $t('%hI', {time: formatTime(payment.createdAt)}) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.paidAt && (payment.type === PaymentType.Payment || payment.type === PaymentType.Refund)">
                     <h3 v-if="payment.price == 0" class="style-definition-label">
-                        {{ $t('7fb9593e-9937-4c47-ba0f-fb79a5ba3d87') }}
+                        {{ $t('%16v') }}
                     </h3>
                     <h3 v-else-if="payment.price >= 0" class="style-definition-label">
-                        {{ $t('297af5d5-1cb0-4862-b8d4-13416bdefa9f') }}
+                        {{ $t('%wY') }}
                     </h3>
                     <h3 v-else class="style-definition-label">
-                        {{ $t('7cea4ccc-16d1-42ae-87af-34a603013577') }}
+                        {{ $t('%h1') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(payment.paidAt) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('c6a1f96a-0e71-44c1-89a2-20bfd206d9c6', {time: formatTime(payment.paidAt)}) }}
+                        {{ $t('%hI', {time: formatTime(payment.paidAt)}) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.iban">
                     <h3 class="style-definition-label">
-                        {{ $t('8c09c44f-8cf2-4efa-8f67-fd845a747d4a') }}
+                        {{ $t('%hJ') }}
                     </h3>
 
                     <p class="style-definition-text">
                         {{ payment.iban }}
                     </p>
                     <p v-if="payment.ibanName" class="style-description-small">
-                        {{ $t('1663859d-2802-4317-9bd9-c8fc61d2baca', {name: payment.ibanName}) }}
+                        {{ $t('%hK', {name: payment.ibanName}) }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.settlement" class="right-description right-stack">
                     <h3 class="style-definition-label">
-                        {{ $t('8dead18a-892c-458e-9ef1-39f49a9b5807') }}
+                        {{ $t('%hL') }}
                     </h3>
 
                     <p class="style-definition-text">
@@ -127,7 +127,7 @@
 
                 <STListItem v-if="payment.transferFee">
                     <h3 class="style-definition-label">
-                        {{ $t('a483f935-9647-4904-b71e-8918ef3ad222') }}
+                        {{ $t('%hM') }}
                     </h3>
 
                     <p class="style-definition-text">
@@ -135,17 +135,17 @@
                     </p>
                     <p class="style-description-small">
                         <template v-if="VATPercentage > 0">
-                            {{ $t('a95a8551-7686-4df2-92aa-2c453bba6bf6', {percentage: VATPercentage.toString()}) }}
-                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
+                            {{ $t('%hN', {percentage: VATPercentage.toString()}) }}
+                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
                     </p>
                 </STListItem>
 
                 <STListItem v-if="payment.invoiceId" :selectable="true">
                     <h3 class="style-definition-label">
-                        {{ $t('68fd5834-9b48-4d42-928d-1815e608467a') }}
+                        {{ $t('%1Mm') }}
                     </h3>
                     <p class="style-definition-text with-icons">
-                        <span>{{ $t('b5d89272-7ee8-4bd3-80fb-5b99398a4c0b') }}</span>
+                        <span>{{ $t('%1JO') }}</span>
                         <span class="icon success small primary" />
                     </p>
 
@@ -155,15 +155,15 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h2>
+            <hr><h2>{{ $t('%1Ke') }}</h2>
 
             <p v-if="!payment.customer" class="info-box">
-                {{ $t('cc6a87de-8228-4a0b-8d31-b9805556c6b8') }}
+                {{ $t('%hO') }}
             </p>
             <STList v-else class="info">
                 <STListItem v-if="payment.payingOrganization">
                     <h3 class="style-definition-label">
-                        {{ $t('a0602ebf-8ac8-4c27-bb2e-609f1c087e83') }}
+                        {{ $t('%1Kj') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.payingOrganization.name }}
@@ -180,19 +180,19 @@
                 <template v-if="payment.customer.company">
                     <STListItem>
                         <h3 class="style-definition-label">
-                            {{ $t('67928a02-b3f1-465a-9dd7-569d061599a9') }}
+                            {{ $t('%1JI') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.name }}
                         </p>
                         <p v-if="!payment.customer.company.VATNumber && !payment.customer.company.companyNumber" class="style-description">
-                            {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
+                            {{ $t('%1CH') }}
                         </p>
                     </STListItem>
 
                     <STListItem v-if="payment.customer.company.VATNumber">
                         <h3 class="style-definition-label">
-                            {{ $t('263b7054-d38f-4bb9-be63-84b4e614613d') }}
+                            {{ $t('%1CK') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.VATNumber || 'Niet BTW-plichtig' }}
@@ -201,7 +201,7 @@
 
                     <STListItem v-if="payment.customer.company.companyNumber && (!payment.customer.company.VATNumber || (payment.customer.company.companyNumber !== payment.customer.company.VATNumber && payment.customer.company.companyNumber !== payment.customer.company.VATNumber.slice(2)))">
                         <h3 class="style-definition-label">
-                            {{ $t('12f64ea7-fb54-4178-8267-9de12bdf70d7') }}
+                            {{ $t('%wa') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.companyNumber || 'Niet BTW-plichtig' }}
@@ -210,7 +210,7 @@
 
                     <STListItem v-if="payment.customer.company.address">
                         <h3 class="style-definition-label">
-                            {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
+                            {{ $t('%Cn') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.address.toString() }}
@@ -219,7 +219,7 @@
 
                     <STListItem v-if="payment.customer.company.administrationEmail">
                         <h3 class="style-definition-label">
-                            {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
+                            {{ $t('%1FK') }}
                         </h3>
                         <p class="style-definition-text">
                             <EmailAddress :email="payment.customer.company.administrationEmail" />
@@ -229,10 +229,10 @@
 
                 <STListItem v-if="!payment.customer.company || payment.customer.name">
                     <h3 class="style-definition-label">
-                        {{ $t('2a10aac1-e404-4de4-865d-75593b2b5e8d') }}
+                        {{ $t('%1Kl') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
+                        {{ payment.customer.name || $t('%CL') }}
                     </p>
                     <p v-if="payment.customer.email" v-copyable class="style-description">
                         <EmailAddress :email="payment.customer.email" />
@@ -244,7 +244,7 @@
             </STList>
 
             <template v-if="(isManualMethod || $feature('vat')) && canWrite">
-                <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+                <hr><h2>{{ $t('%16X') }}</h2>
 
                 <STList>
                     <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
@@ -257,10 +257,10 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}
+                            {{ $t('%hP') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t("e93f8565-8fc6-4073-94f3-95d42c19d9a0") }}
+                            {{ $t("%hW") }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -277,10 +277,10 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('03bd6cff-83c4-44ec-8b0d-7826bf5b4166') }}
+                            {{ $t('%1JQ') }}
                         </h2>
                         <p v-if="payment.webshopIds.length" class="style-description-small">
-                            {{ $t('9e211b50-4422-411f-9c77-8e036e2a2416') }}
+                            {{ $t('%hQ') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -297,13 +297,13 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('3a66a01a-b0be-4696-b8ac-47c2e5532571') }}
+                            {{ $t('%hR') }}
                         </h2>
                         <p v-if="payment.method === 'Transfer'" class="style-description-small">
-                            {{ $t('c3e75c59-a5a9-494a-aa75-d8528dcb6158') }}
+                            {{ $t('%hS') }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ $t('4ac815c1-b06d-4fdb-a88a-2e4222ca535b') }}
+                            {{ $t('%hT') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -320,16 +320,16 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('11d2e292-fd08-4477-bd2a-dac599a9754c') }}
+                            {{ $t('%1Lh') }}
                         </h2>
                         <p v-if="payment.type !== PaymentType.Payment" class="style-description-small">
-                            {{ $t('5c940c27-7609-443e-941c-52cd29067f9b') }}
+                            {{ $t('%hU') }}
                         </p>
                         <p v-else-if="payment.method === 'Transfer'" class="style-description-small">
-                            {{ $t('4a79216b-66d8-4849-b837-f42a6438e208') }}
+                            {{ $t('%1K0') }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ $t('4aa6f148-bb6b-4673-91da-46087ce5c400') }}
+                            {{ $t('%1K1') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -346,10 +346,10 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('393ffd19-c415-4a6c-ac23-63303b3ea64e') }}
+                            {{ $t('%1K2') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('a03de85d-dd34-4cec-a276-fffa3b910960') }}
+                            {{ $t('%1K3') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -359,9 +359,9 @@
             </template>
 
             <template v-if="payment.balanceItemPayments.length">
-                <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
+                <hr><h2>{{ $t('%YI') }}</h2>
                 <p v-if="$feature('vat')">
-                    {{ $t('f5d2f75b-15c6-4311-8a44-759703535237') }}
+                    {{ $t('%1K4') }}
                 </p>
 
                 <STGrid>
@@ -373,7 +373,7 @@
                         <BalanceItemTitleBox :item="item.balanceItem" :is-payable="false" :price="item.price" :payment-status="payment.status" />
 
                         <p v-if="item.quantity !== 1" class="style-description-small">
-                            {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice)}) }}
+                            {{ $t('%1J3', {price: formatPrice(item.unitPrice)}) }}
                         </p>
 
                         <template #middleRight>
@@ -381,12 +381,12 @@
                         </template>
 
                         <template #right>
-                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('02f28dc5-b75f-4bfb-9e07-90dfb56b66b4') : formatPrice(item.price) }}</span>
+                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('%1Mn') : formatPrice(item.price) }}</span>
                         </template>
                     </STGridItem>
                 </STGrid>
 
-                <PriceBreakdownBox :price-breakdown="[{name: $t('43cf58c2-2263-4c99-87d2-71d61e8b95fe'), price: payment.price}]" />
+                <PriceBreakdownBox :price-breakdown="[{name: $t('%2U'), price: payment.price}]" />
             </template>
         </main>
     </div>
@@ -493,7 +493,7 @@ async function editPayment() {
 }
 
 async function markPaid() {
-    if (!await CenteredMessage.confirm($t('f742fe3f-de80-446f-a9b5-d7a55858417f'), $t('f59ee71d-abf3-42c4-a8b9-e6c88a17a6b3'), undefined, undefined, false)) {
+    if (!await CenteredMessage.confirm($t('%1K5'), $t('%1K6'), undefined, undefined, false)) {
         return;
     }
     await mark(PaymentStatus.Succeeded);
@@ -501,12 +501,12 @@ async function markPaid() {
 
 async function markPending() {
     if (props.payment.status === PaymentStatus.Succeeded) {
-        if (!await CenteredMessage.confirm($t('3dd18283-b7d9-4cd9-8eee-c65cb89b9d69'), $t('3a21f69a-dda9-4ea2-87a2-b1e57e2452df'), $t('7dd54003-9a52-498a-acb2-3467e3b88017'), undefined, false)) {
+        if (!await CenteredMessage.confirm($t('%1K7'), $t('%1K8'), $t('%1K9'), undefined, false)) {
             return;
         }
     }
     else {
-        if (!await CenteredMessage.confirm($t('767cec61-f0b4-4a55-9568-556ebb6a3a49'), $t('59b28370-3af7-48f9-9664-a66fe57e72b7'), $t('9172b0e0-f292-4710-a0a0-486b2e911847'), undefined, false)) {
+        if (!await CenteredMessage.confirm($t('%1KA'), $t('%1KB'), $t('%1KC'), undefined, false)) {
             return;
         }
     }
@@ -514,7 +514,7 @@ async function markPending() {
 }
 
 async function markFailed() {
-    if (!await CenteredMessage.confirm($t('99810042-aa71-49a4-9cb4-c4fb23b7bc62'), $t('cdf0fafe-b364-4dbb-ae31-b593cf447298'), $t('4d83cf39-66a5-4759-a95a-3245cd17d8b3'))) {
+    if (!await CenteredMessage.confirm($t('%1KD'), $t('%1Jy'), $t('%1KE'))) {
         return;
     }
     await mark(PaymentStatus.Failed);
@@ -544,7 +544,7 @@ async function mark(status: PaymentStatus) {
         });
         props.payment.deepSet(response.data[0]);
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
-        Toast.success($t(`8076e99d-cac2-4fb6-84e0-d893d9b3c205`)).setHide(1000).show();
+        Toast.success($t(`%Mb`)).setHide(1000).show();
     }
     catch (e) {
         Toast.fromError(e).show();

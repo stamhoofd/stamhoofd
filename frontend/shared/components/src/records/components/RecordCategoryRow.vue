@@ -5,28 +5,28 @@
         </template>
 
         <h3 class="style-title-list">
-            {{ category.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
+            {{ category.name || $t('%CL') }}
         </h3>
         <p v-if="filterDescription" class="style-description-small">
             {{ filterDescription }}
         </p>
         <p v-if="!category.childCategories.length && !category.records.length" class="style-description-small">
-            {{ $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598') }}
+            {{ $t('%Rs') }}
         </p>
         <p v-else class="style-description-small">
             <template v-if="category.records.length">
-                {{ category.records.length }} {{ category.records.length === 1 ? $t("92aaacf4-9d90-4874-b80f-eb1f451d4a79") : $t("ca02d25d-e6cb-459a-96f5-1006c046b647") }}
+                {{ category.records.length }} {{ category.records.length === 1 ? $t("%15F") : $t("%15G") }}
             </template>
-            <span v-if="category.childCategories.length && category.records.length" v-text="' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '" />
+            <span v-if="category.childCategories.length && category.records.length" v-text="' ' + $t('%M1') + ' '" />
             <template v-if="category.childCategories.length">
-                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? $t("079d3877-b607-4f3b-8139-7f5f4463bd19") : $t("85d7fbc5-c3e4-4e63-ae61-a5812e3af382") }}
+                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? $t("%n2") : $t("%15H") }}
             </template>
         </p>
 
         <template #right>
-            <span v-if="category.containsSensitiveData" class="icon privacy gray" :v-tooltip="$t('007c7ed0-9cac-4697-8ad7-d18684608013')" />
-            <span v-if="category.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('4bd1a990-6f9b-4949-90be-3f0898c4e298')" class="button icon eye-off gray" />
-            <span v-if="category.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('c393d4d3-9cc2-4da8-a8ae-569f48412e12')" class="button icon no-edit gray" />
+            <span v-if="category.containsSensitiveData" class="icon privacy gray" :v-tooltip="$t('%jJ')" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.None" v-tooltip="$t('%170')" class="button icon eye-off gray" />
+            <span v-if="category.externalPermissionLevel === PermissionLevel.Read" v-tooltip="$t('%171')" class="button icon no-edit gray" />
 
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
@@ -69,24 +69,24 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`d76e80a1-b717-4002-b40c-1e890e87bf1c`),
+                name: $t(`%8k`),
                 icon: 'settings',
                 action: () => editCategory(),
             }),
             new ContextMenuItem({
-                name: $t(`d4ac382c-5394-4451-a25b-3b97f6d60168`),
+                name: $t(`%10n`),
                 icon: 'copy',
                 action: () => addCategory(props.category.duplicate()),
             }),
             new ContextMenuItem({
-                name: $t(`4b50022e-7937-4b21-b97f-35af4430ed9a`),
+                name: $t(`%11e`),
                 icon: 'trash',
                 action: () => deleteCategory(),
             }),
         ],
         [
             new ContextMenuItem({
-                name: $t(`fa96b3e2-08bc-4ce1-9562-e09eb26bcd5b`),
+                name: $t(`%11f`),
                 icon: 'arrow-up',
                 action: () => {
                     up();
@@ -94,7 +94,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`dd2032e6-7a34-4027-a678-dbda939782c1`),
+                name: $t(`%11g`),
                 icon: 'arrow-down',
                 action: () => {
                     down();
@@ -104,12 +104,12 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`58351618-cc4a-4785-a8c7-dfd741aa9985`),
+                name: $t(`%10q`),
                 disabled: props.category.childCategories.length !== 0,
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: $t(`ba261762-9151-487c-a3a1-deb1c59e2a14`),
+                            name: $t(`%10r`),
                             disabled: true,
                         }),
                     ],
@@ -119,7 +119,7 @@ function showContextMenu(event: MouseEvent) {
                             disabled: c.id === props.category.id,
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm($t(`e48fd329-0701-47d6-998e-7598691b0200`), $t(`9a384a73-d222-49f8-9203-76b8e525f1ab`), $t(`34760087-cbb3-416b-b4ef-212f15fc07a8`) + c.name + ').')) {
+                                if (!await CenteredMessage.confirm($t(`%11h`), $t(`%10t`), $t(`%11i`) + c.name + ').')) {
                                     return;
                                 }
 
@@ -145,7 +145,7 @@ function showContextMenu(event: MouseEvent) {
 }
 
 async function deleteCategory() {
-    if (!await CenteredMessage.confirm($t(`95557c11-2b92-4a70-8945-99f6c6f7051c`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`e955be72-7a4e-4a0d-9872-043cf75f1134`))) {
+    if (!await CenteredMessage.confirm($t(`%10w`), $t(`%CJ`), $t(`%11j`))) {
         return;
     }
 

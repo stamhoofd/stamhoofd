@@ -7,14 +7,14 @@
                 {{ props.period.period.nameShort }}
             </span>
         </h1>
-        <p>{{ $t('9c775d8c-1e2c-40c4-9f61-6be6cb6bd5bb') }}</p>
+        <p>{{ $t('%15w') }}</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STList v-model="draggableBundles" :draggable="true">
             <template #item="{item: bundleDiscount}">
                 <STListItem :selectable="true" class="right-description right-stack" @click="() => $navigate(Routes.BundleDiscount, { params: { id: bundleDiscount.id } })">
                     <h3 class="style-title-list">
-                        {{ bundleDiscount.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
+                        {{ bundleDiscount.name || $t('%CL') }}
                     </h3>
                     <p class="style-description-small">
                         {{ bundleDiscount.humanDescription }}
@@ -34,7 +34,7 @@
         <p>
             <button class="button text" type="button" @click="$navigate(Routes.CreateBundleDiscount)">
                 <span class="icon add" />
-                <span>{{ $t('9a7749d3-dac4-4baa-99e7-8048fe9ff743') }}</span>
+                <span>{{ $t('%15x') }}</span>
             </button>
         </p>
     </SaveView>
@@ -56,7 +56,7 @@ const props = withDefaults(
     },
 );
 
-const title = $t('98237c41-e107-4997-a645-cc4c16bb5b9a');
+const title = $t('%15q');
 const pop = usePop();
 
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
@@ -128,7 +128,7 @@ defineRoutes([
                     },
                 };
             }
-            Toast.error($t(`1e050d5b-9e14-41ea-9334-9b11a10eedde`)).show();
+            Toast.error($t(`%15y`)).show();
             throw new Error('Discount not found');
         },
 
@@ -167,7 +167,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

@@ -1,27 +1,27 @@
 <template>
-    <SaveView :title="isNew ? $t(`0569800c-393c-486e-8d97-9c2b7689624a`) : $t(`8e2090b0-e2e4-4553-b41a-2cd1b4e44f61`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? $t(`%u4`) : $t(`%S8`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
-            {{ $t('0569800c-393c-486e-8d97-9c2b7689624a') }}
+            {{ $t('%u4') }}
         </h1>
         <h1 v-else>
-            {{ $t('8e2090b0-e2e4-4553-b41a-2cd1b4e44f61') }}
+            {{ $t('%S8') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
-        <STInputBox error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`697df3e7-fbbf-421d-81c2-9c904dce4842`)">
+        <STInputBox error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`%M4`)">
             <NumberInput v-model="amount" :min="1" :stepper="true" />
         </STInputBox>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('4fc6f5f9-be3e-4e52-84d1-7f68f6a02468') }}
+                {{ $t('%S9') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

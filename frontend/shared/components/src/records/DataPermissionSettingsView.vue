@@ -1,47 +1,47 @@
 <template>
-    <SaveView :disabled="!hasChanges" :loading="saving" :title="$t(`27bc7f00-1839-4f47-b8e5-7f4c6996fa53`)" @save="save">
+    <SaveView :disabled="!hasChanges" :loading="saving" :title="$t(`%vY`)" @save="save">
         <h1>
-            {{ $t('27bc7f00-1839-4f47-b8e5-7f4c6996fa53') }}
+            {{ $t('%vY') }}
         </h1>
         <p>
-            {{ $t('30fe36de-4e4e-42e3-a2f9-7740b028b415') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
-                {{ $t('d6386cef-8e84-4107-920a-03db17372613') }}
+            {{ $t('%i1') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
+                {{ $t('%i2') }}
             </a>
         </p>
 
         <p class="info-box">
-            {{ $t('ca8ee961-5e7e-4d1f-9516-87879c277e14') }}
+            {{ $t('%i3') }}
         </p>
 
-        <hr><h2>{{ $t('b2a56f24-fea4-4874-90be-f2d15e93e862') }}</h2>
-        <p>{{ $t('c7dc695c-d0d0-4a3e-9945-51696a8850be') }}</p>
+        <hr><h2>{{ $t('%i4') }}</h2>
+        <p>{{ $t('%i5') }}</p>
 
-        <STInputBox class="max" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
+        <STInputBox class="max" :title="$t(`%vC`)">
             <input v-model="title" class="input" :placeholder="inheritedDataPermission?.title || DataPermissionsSettings.defaultTitle">
         </STInputBox>
 
-        <STInputBox class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-            <textarea v-model="description" class="input" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
+        <STInputBox class="max" :title="$t(`%6o`)">
+            <textarea v-model="description" class="input" :placeholder="$t(`%14p`)" />
         </STInputBox>
 
-        <STInputBox class="max" :title="$t(`5886d034-5962-4d4c-99f3-35733367a20b`)">
+        <STInputBox class="max" :title="$t(`%iB`)">
             <input v-model="checkboxLabel" class="input" :placeholder="inheritedDataPermission?.checkboxLabel || DataPermissionsSettings.defaultCheckboxLabel">
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('929bd872-8953-4a6e-a277-a75f9e14e5e4') }}
+            {{ $t('%i6') }}
         </p>
 
-        <hr><h2>{{ $t('00ca2877-3df2-4a3e-a749-c3313045d1f9') }}</h2>
-        <p>{{ $t('d4433860-9f94-4e9f-96c1-3a81ca7064fc') }}</p>
+        <hr><h2>{{ $t('%i7') }}</h2>
+        <p>{{ $t('%i8') }}</p>
 
-        <STInputBox class="max" :title="$t(`3ea9a45c-0b2c-4ed5-9307-d05cbabe8e0d`)">
+        <STInputBox class="max" :title="$t(`%iC`)">
             <input v-model="warningText" class="input" :placeholder="inheritedDataPermission?.warningText || DataPermissionsSettings.defaultWarningText">
         </STInputBox>
 
-        <hr><h2>{{ $t('de540668-74ff-46a3-a6f6-0b82f4c6cd36') }}</h2>
-        <p>{{ $t('269c6b82-ddc0-4530-9ac6-5057127d2426') }}</p>
+        <hr><h2>{{ $t('%i9') }}</h2>
+        <p>{{ $t('%iA') }}</p>
 
-        <STInputBox class="max" :title="$t(`a226a0aa-0706-4312-b51a-3712299c8b00`)">
+        <STInputBox class="max" :title="$t(`%iD`)">
             <input v-model="checkboxWarning" class="input" :placeholder="checkboxWarningPlaceholder">
         </STInputBox>
     </SaveView>
@@ -120,8 +120,8 @@ const checkboxWarning = computed({
 
 const checkboxWarningPlaceholder = computed(() => {
     const base = props.inheritedDataPermission?.checkboxWarning || DataPermissionsSettings.defaultCheckboxWarning;
-    if (!base) return $t(`9ce75cee-1539-467c-a9de-ce3b9e870df3`);
-    return base + ' ' + $t(`49b1c5d0-0511-42f0-a9fe-791572ba96f9`);
+    if (!base) return $t(`%10k`);
+    return base + ' ' + $t(`%br`);
 });
 
 async function save() {
@@ -143,7 +143,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({

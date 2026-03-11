@@ -3,13 +3,13 @@
         <div v-if="periods" class="member-payments-view">
             <main class="container">
                 <p v-if="hasFull" class="style-description-block">
-                    {{ $t('237be7e0-4534-4008-b7bc-3e6db776a72a') }}
+                    {{ $t('%7j') }}
                 </p>
 
                 <div v-for="period of filteredPeriods" :key="period.id" class="container">
                     <hr><h2>{{ period.name }}</h2>
                     <p v-if="getMembershipsForPeriod(period.id).length === 0" class="warning-box">
-                        {{ $t('65cbb5ad-4a6b-4800-a7db-59627fb576ef', {werkjaar: period.name}) }}
+                        {{ $t('%80', {werkjaar: period.name}) }}
                     </p>
 
                     <STList v-else>
@@ -29,49 +29,49 @@
                             </template>
 
                             <p v-if="membership.isTrial" class="style-title-prefix-list theme-secundary">
-                                <span>{{ $t('1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0') }}</span>
+                                <span>{{ $t('%1IH') }}</span>
                             </p>
                             <h3 class="style-title-list">
                                 <span>{{ getMembershipType(membership).name }}</span>
 
                                 <span v-if="membership.freeAmount" class="style-tag discount inline-first">
-                                    {{ $t('577e6929-3751-47ae-9653-e43e10978119', {days: Formatter.pluralText(membership.freeAmount, $t('1ea8c630-af92-4cba-bfdc-acc0b0f67fae'), $t('6cb97c70-db56-4883-a2b3-87b65506d4f9'))}) }}
+                                    {{ $t('%g6', {days: Formatter.pluralText(membership.freeAmount, $t('%1N7'), $t('%1N6'))}) }}
                                 </span>
                             </h3>
-                            <p v-tooltip="$t('af4f2898-e5a5-4f08-a6c3-62c389e793e9', {date: formatDate(membership.createdAt, true)})" class="style-description-small style-tooltip">
+                            <p v-tooltip="$t('%g7', {date: formatDate(membership.createdAt, true)})" class="style-description-small style-tooltip">
                                 {{ capitalizeFirstLetter(formatDateRange(membership.startDate, membership.expireDate ?? membership.endDate)) }}
                             </p>
                             <p v-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
-                                {{ $t('c38818cb-2337-451b-afac-69f22b700d43', {date: formatDate(membership.trialUntil, true)}) }}
+                                {{ $t('%g8', {date: formatDate(membership.trialUntil, true)}) }}
                             </p>
                             <p v-else-if="membership.trialUntil" class="style-description-small">
-                                {{ $t('892b70a8-6bba-4c41-9d82-b7db955f3aa2', {date: formatDate(membership.trialUntil, true)}) }}
+                                {{ $t('%16u', {date: formatDate(membership.trialUntil, true)}) }}
                             </p>
 
                             <p v-if="membership.organizationId === platform.membershipOrganizationId" class="style-description-small">
-                                {{ $t('4a39e12b-efa2-46fe-aa30-83bc576548a3') }}
+                                {{ $t('%Bm') }}
                             </p>
                             <template v-else>
                                 <p v-if="membership.price === 0" class="style-description-small">
-                                    {{ $t('c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('%23', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else-if="membership.balanceItemId" class="style-description-small">
-                                    {{ $t('f1582fe7-3168-4579-bcc5-9db17568dac0', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('%Bp', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else-if="membership.trialUntil && membership.trialUntil > now" class="style-description-small">
-                                    {{ $t('b0a70381-66b1-4bff-a613-8332a35bec7a', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('%Bq', {organization: getOrganizationName(membership)}) }}
                                 </p>
                                 <p v-else class="style-description-small">
-                                    {{ $t('a2f6d632-9e20-4366-9393-b52431525596', {organization: getOrganizationName(membership)}) }}
+                                    {{ $t('%Br', {organization: getOrganizationName(membership)}) }}
                                 </p>
                             </template>
 
                             <p v-if="membership.expireDate && membership.expireDate < now && membership.endDate > now" class="style-description-small">
-                                {{ $t('a74f6f39-1eb6-45c4-96e2-6719d9a4401d') }}
+                                {{ $t('%g9') }}
                             </p>
 
                             <p v-if="membership.generated && auth.hasPlatformFullAccess()" class="style-description-small">
-                                {{ $t('41464f90-088a-4c6a-827b-cd5907ad1fac') }}
+                                {{ $t('%81') }}
                             </p>
                             <template v-if="hasFull && (!organization || membership.organizationId === organization.id)" #right>
                                 <span v-if="membership.price === 0 && (membership.organizationId === platform.membershipOrganizationId || period.locked)" />
@@ -85,7 +85,7 @@
                                     <button class="button icon trash" type="button" @click="deleteMembership(membership)" />
                                 </LoadingButton>
 
-                                <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('b1c11fd1-81dc-46f2-8cfb-0ba02d260f19')" class="button icon lock" type="button" @click="unlockMembership(membership)" />
+                                <button v-if="membership.locked && (auth.hasPlatformFullAccess())" v-tooltip="$t('%AJ')" class="button icon lock" type="button" @click="unlockMembership(membership)" />
                             </template>
                         </STListItem>
                     </STList>
@@ -93,7 +93,7 @@
                     <p v-if="hasFull && !period.locked">
                         <button type="button" class="button text" @click="addMembership(period)">
                             <span class="icon add" />
-                            <span>{{ $t('9a60989a-61d2-4596-adac-d9ec6befe218', {period: period.name}) }}</span>
+                            <span>{{ $t('%gA', {period: period.name}) }}</span>
                         </button>
                     </p>
                 </div>
@@ -164,7 +164,7 @@ function getMembershipsForPeriod(periodId: string) {
 }
 
 function getOrganizationName(membership: MemberPlatformMembership) {
-    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? $t(`eb6d556a-bcda-4ab4-ad39-3215b4734569`);
+    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? $t(`%wS`);
 }
 
 async function addMembership(period: RegistrationPeriod) {
@@ -184,7 +184,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`4ab30ed5-3e8e-43ca-b87e-dddf8dd8b5fe`), $t(`201437e3-f779-47b6-b4de-a0fa00f3863e`))) {
+    if (!await CenteredMessage.confirm($t(`%10O`), $t(`%55`))) {
         return;
     }
 
@@ -203,7 +203,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t(`63b9a0c4-ee88-49b4-8609-dc014bc3e3a3`)).show();
+        Toast.success($t(`%10P`)).show();
     }
     catch (e) {
         Toast.fromError(e).show();
@@ -216,7 +216,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('6468d392-6711-48cd-9602-a5a26afe6f22'), $t('ac1d3647-1c2f-48a1-a08a-ce4821103fb1'))) {
+    if (!await CenteredMessage.confirm($t('%Be'), $t('%Bf'))) {
         return;
     }
 
@@ -238,7 +238,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t('04cac345-ed28-484c-8a50-96ac4db89911')).show();
+        Toast.success($t('%Bg')).show();
     }
     catch (e) {
         Toast.fromError(e).show();
@@ -249,7 +249,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
 function getMembershipType(membership: MemberPlatformMembership) {
     return platform.value.config.membershipTypes.find(t => t.id === membership.membershipTypeId) ?? PlatformMembershipType.create({
         id: membership.membershipTypeId,
-        name: $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
+        name: $t(`%Gr`),
     });
 }
 </script>

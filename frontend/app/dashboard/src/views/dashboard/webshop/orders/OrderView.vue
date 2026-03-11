@@ -1,15 +1,15 @@
 <template>
     <div class="st-view order-view">
-        <STNavigationBar :title="$t(`12be5ac0-8353-43a2-badb-ab3b27d156b3`) + order.number">
+        <STNavigationBar :title="$t(`%x3`) + order.number">
             <template #right>
-                <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('bd66e295-2748-40da-a8e9-0e6e48584033')" @click="goBack" />
-                <button v-if="hasNextOrder || hasPreviousOrder" type="button" class="button icon arrow-down" :disabled="!hasNextOrder" :v-tooltip="$t('4428ee36-a994-468c-b8a1-22ed6e8bde58')" @click="goNext" />
+                <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('%VO')" @click="goBack" />
+                <button v-if="hasNextOrder || hasPreviousOrder" type="button" class="button icon arrow-down" :disabled="!hasNextOrder" :v-tooltip="$t('%VP')" @click="goNext" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
         <main>
             <h1>
-                {{ $t('12be5ac0-8353-43a2-badb-ab3b27d156b3') }}{{ order.number }}
+                {{ $t('%x3') }}{{ order.number }}
             </h1>
 
             <div v-if="hasWarnings" class="hover-box container">
@@ -25,7 +25,7 @@
             <STList v-if="webshop" class="info">
                 <STListItem v-if="order.totalToPay || !webshop.isAllFree">
                     <h3 class="style-definition-label">
-                        {{ $t('6880cc0a-c1a2-4c94-8e2f-ab6fd096d309') }}
+                        {{ $t('%VQ') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(order.totalToPay) }}
@@ -34,7 +34,7 @@
 
                 <STListItem v-if="(order.totalToPay || !webshop.isAllFree) && (isMissingPayments || (order.pricePaid > 0 && order.pricePaid !== order.totalToPay))">
                     <h3 class="style-definition-label">
-                        {{ $t('25c803f0-6b45-42aa-9b88-573e3706b8bb') }}
+                        {{ $t('%Ml') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(order.pricePaid) }}
@@ -43,7 +43,7 @@
 
                 <STListItem v-if="order.validAt">
                     <h3 class="style-definition-label">
-                        {{ $t('d1d52570-86b9-4edd-82c4-ccc1d759c6dc') }}
+                        {{ $t('%VR') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ capitalizeFirstLetter(formatDateTime(order.validAt)) }}
@@ -52,7 +52,7 @@
 
                 <STListItem v-long-press="(e: MouseEvent) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     <h3 :class="'style-definition-label '+statusColor">
-                        {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
+                        {{ $t('%1A') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>
@@ -81,10 +81,10 @@
 
                 <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" @click="tickets.length > 0 ? openTickets() : null">
                     <h3 v-if="tickets.length > 1 || (!hasSingleTickets && tickets.length === 0)" class="style-definition-label">
-                        {{ $t('b40d200c-4265-4d58-a7f4-7c2498b062b9') }}
+                        {{ $t('%1t') }}
                     </h3>
                     <h3 v-else class="style-definition-label">
-                        {{ $t('de971042-551d-43d2-ab47-e76132156887') }}
+                        {{ $t('%2K') }}
                     </h3>
 
                     <p class="style-definition-text">
@@ -92,19 +92,19 @@
                             -
                         </template>
                         <span v-else-if="hasSingleTickets && tickets.length === 0" class="gray">
-                            {{ $t('0c609cc0-e0da-43b0-9390-3e70e1407475') }}
+                            {{ $t('%VS') }}
                         </span>
                         <span v-else-if="tickets.length === 0" class="gray">
-                            {{ $t('57bbb3fe-8c53-4aab-b103-38d86df4de84') }}
+                            {{ $t('%QS') }}
                         </span>
                         <span v-else-if="hasSingleTickets && tickets.length === 1 && scannedCount === 1">
-                            {{ $t('044f91f3-91b5-4109-ad8d-3fea6c0c92e2') }}
+                            {{ $t('%V1') }}
                         </span>
                         <span v-else-if="hasSingleTickets && tickets.length === 1 && scannedCount === 0">
-                            {{ $t('aa934a39-f0dd-4e8b-9db8-a7686684a411') }}
+                            {{ $t('%1MZ') }}
                         </span>
                         <span v-else>
-                            {{ scannedCount }} / {{ tickets.length }} {{ $t('c22c23f8-54d9-4116-8ad0-8766aeb46bea') }}
+                            {{ scannedCount }} / {{ tickets.length }} {{ $t('%VT') }}
                         </span>
                     </p>
 
@@ -115,43 +115,43 @@
             </STList>
 
             <p v-if="didChangePrice" class="warning-box">
-                {{ $t('c1ebdccb-6610-4947-a14d-0731c9cb2dc6') }}
+                {{ $t('%VU') }}
             </p>
 
             <p v-if="hasPaymentsWrite && isMissingPayments" class="warning-box">
-                {{ $t('6cc7c2e8-bb92-4495-9915-c0fe83631379') }}
+                {{ $t('%VV') }}
             </p>
 
             <button v-if="hasPaymentsWrite && isMissingPayments" class="button text" type="button" @click="createPayment">
                 <span class="icon add" />
-                <span>{{ $t('515e4985-a826-42fc-9dd0-fc168da16f46') }}</span>
+                <span>{{ $t('%VW') }}</span>
             </button>
 
             <template v-if="order.data.checkoutMethod">
                 <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    {{ $t('cca905ff-7d00-4b9d-84c6-bda2bb5ea898') }}
+                    {{ $t('%xG') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
-                    {{ $t('acde7540-a0b2-4eaf-88af-2d92851f73de') }}
+                    {{ $t('%VX') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                    {{ $t('25e67f34-649f-4743-9cdd-d2a81d252daf') }}
+                    {{ $t('%VY') }}
                 </h2>
                 <h2 v-else>
-                    {{ $t('8baa8f22-c18c-4de7-85b1-99a85509019b') }}
+                    {{ $t('%VZ') }}
                 </h2>
 
                 <STList class="info">
                     <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
                         <h3 class="style-definition-label">
                             <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                {{ $t('8113733b-00ea-42ae-8829-6056774a8be0') }}
+                                {{ $t('%Uq') }}
                             </template>
                             <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                {{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}
+                                {{ $t('%TW') }}
                             </template>
                             <template v-else>
-                                {{ $t('5562135d-197d-4251-ada8-ffe747622e7b') }}
+                                {{ $t('%Va') }}
                             </template>
                         </h3>
 
@@ -161,7 +161,7 @@
                     </STListItem>
                     <STListItem v-if="(order.data.checkoutMethod as WebshopTakeoutMethod).address" class="right-description">
                         <h3 class="style-definition-label">
-                            {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
+                            {{ $t('%Cn') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -170,7 +170,7 @@
                     </STListItem>
                     <STListItem v-if="order.data.address" class="right-description">
                         <h3 class="style-definition-label">
-                            {{ $t('8a910c54-1b2d-4963-9128-2cab93b0151b') }}
+                            {{ $t('%Us') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -180,13 +180,13 @@
                     <STListItem v-if="order.data.timeSlot" class="right-description">
                         <h3 class="style-definition-label">
                             <template v-if="order.data.checkoutMethod.type === 'Takeout'">
-                                {{ $t('856550aa-05af-45fc-8477-51ed1f719432') }}
+                                {{ $t('%Vb') }}
                             </template>
                             <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                {{ $t('13081716-3941-44b8-87b4-398ab2288419') }}
+                                {{ $t('%Vc') }}
                             </template>
                             <template v-else>
-                                {{ $t('cf7b982a-add0-4dc7-bbf9-f0c2477fa1e0') }}
+                                {{ $t('%Vd') }}
                             </template>
                         </h3>
 
@@ -196,7 +196,7 @@
                     </STListItem>
                     <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
                         <h3 class="style-definition-label">
-                            {{ $t('482bd766-39fa-4340-91b4-ae22a23d5fa5') }}
+                            {{ $t('%Sn') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -206,12 +206,12 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('120012bf-f877-46de-b6d9-55ea46f3f2ce') }}</h2>
+            <hr><h2>{{ $t('%zM') }}</h2>
 
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}
+                        {{ $t('%Gq') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.name }}
@@ -220,7 +220,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
+                        {{ $t('%1FK') }}
                     </h3>
                     <p class="style-definition-text">
                         <EmailAddress :email="order.data.customer.email" />
@@ -229,7 +229,7 @@
 
                 <STListItem v-if="order.data.customer.phone">
                     <h3 class="style-definition-label">
-                        {{ $t("90d84282-3274-4d85-81cd-b2ae95429c34") }}
+                        {{ $t("%2k") }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.phone }}
@@ -248,7 +248,7 @@
 
                 <STListItem v-if="order.data.comments" :selectable="true" @click="editComments()">
                     <h3 class="style-definition-label">
-                        {{ $t('7f3af27c-f057-4ce3-8385-36dfb99745e8') }}
+                        {{ $t('%Ve') }}
                     </h3>
 
                     <p class="style-definition-text pre-wrap" v-text="order.data.comments" />
@@ -261,7 +261,7 @@
             <div v-if="!order.data.comments && hasWrite" class="container">
                 <button class="button text" type="button" @click="editComments()">
                     <span class="icon edit" />
-                    <span>{{ $t('7f3af27c-f057-4ce3-8385-36dfb99745e8') }}</span>
+                    <span>{{ $t('%Ve') }}</span>
                 </button>
             </div>
 
@@ -269,17 +269,17 @@
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    {{ $t('038031a7-0942-493a-9eb5-0cea9bb487b0') }}
+                    {{ $t('%Vf') }}
                 </h2>
                 <h2 v-else>
-                    {{ $t('22af7a31-3e7c-43ee-aa6f-d6638719caed') }}
+                    {{ $t('%Vg') }}
                 </h2>
 
                 <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
             </div>
 
             <hr><p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }} <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
             </p>
 
             <STList>

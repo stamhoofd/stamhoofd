@@ -56,7 +56,7 @@ export class OrdersExcelExport {
         for (const product of webshop.productsInOrder) {
             // Produce prices
             if (product.prices.length > 1) {
-                const name = $t(`d34e8bed-2fd2-4a01-b88f-94deab82d26f`);
+                const name = $t(`%x8`);
 
                 if (!optionColumns.has(Formatter.slug(name))) {
                     optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -66,7 +66,7 @@ export class OrdersExcelExport {
 
             // Ticket date/time
             if ((product.type === ProductType.Ticket || product.type === ProductType.Voucher) && product.dateRange) {
-                const name = $t(`3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322`);
+                const name = $t(`%x9`);
 
                 if (!optionColumns.has(Formatter.slug(name))) {
                     optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -111,7 +111,7 @@ export class OrdersExcelExport {
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.product.prices.length > 1) {
-                    const name = $t(`d34e8bed-2fd2-4a01-b88f-94deab82d26f`);
+                    const name = $t(`%x8`);
 
                     if (!optionColumns.has(Formatter.slug(name))) {
                         optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -121,7 +121,7 @@ export class OrdersExcelExport {
 
                 // Ticket date/time
                 if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
-                    const name = $t(`3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322`);
+                    const name = $t(`%x9`);
 
                     if (!optionColumns.has(Formatter.slug(name))) {
                         optionColumns.set(Formatter.slug(name), optionColumns.size);
@@ -154,32 +154,32 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
-                $t(`5dd11b77-abf6-4449-ac3f-74ac1edb5d65`),
-                $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
-                $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
-                $t(`2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b`),
-                $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
+                $t(`%xA`),
+                $t(`%cB`),
+                $t(`%1MT`),
+                $t(`%1MU`),
+                $t(`%xB`),
+                $t(`%18Z`),
                 ...answerNames,
-                $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
-                $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
-                $t(`9c07647c-3b5b-4c93-bfd9-e7c07ae51276`),
-                $t(`0d8b9fa2-d70a-434b-817e-c5b2b3861d91`),
-                $t(`40939025-cebb-4afb-90e9-847233cb256f`),
-                $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
-                $t(`54e32267-042e-4cfc-a423-63977769a98d`),
+                $t(`%Ve`),
+                $t(`%M4`),
+                $t(`%xC`),
+                $t(`%xD`),
+                $t(`%176`),
+                $t(`%1IP`),
+                $t(`%Sc`),
                 ...optionNames,
-                $t(`2a3d1996-17cd-4ef7-827b-63f2f9b5b84a`),
+                $t(`%sB`),
 
                 // Duplicates
-                $t(`402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3`),
-                $t(`444e7f72-6435-4ae7-bb5d-3fc7e5e79dad`),
-                $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
-                $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
-                $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
-                $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
-                $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
-                $t(`3697babf-4463-460f-95ee-683a40e5d46d`),
+                $t(`%xE`),
+                $t(`%xF`),
+                $t(`%7R`),
+                $t(`%1GD`),
+                $t(`%M7`),
+                $t(`%Kw`),
+                $t(`%1A`),
+                $t(`%1MX`),
             ],
         ];
 
@@ -187,11 +187,11 @@ export class OrdersExcelExport {
             let checkoutType = '/';
             let address = '/';
             if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                checkoutType = $t(`cca905ff-7d00-4b9d-84c6-bda2bb5ea898`);
+                checkoutType = $t(`%xG`);
                 address = order.data.checkoutMethod.name;
             }
             else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
-                checkoutType = $t(`ce5b4d9a-7d2a-4e86-9362-a4ea90582053`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
+                checkoutType = $t(`%xH`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
 
@@ -218,7 +218,7 @@ export class OrdersExcelExport {
 
                 // Product price
                 if (item.product.prices.length > 1) {
-                    const columnName = $t(`d34e8bed-2fd2-4a01-b88f-94deab82d26f`);
+                    const columnName = $t(`%x8`);
                     const index = optionColumns.get(Formatter.slug(columnName));
                     if (index !== undefined) {
                         options[index] = item.productPrice.name;
@@ -226,7 +226,7 @@ export class OrdersExcelExport {
                 }
 
                 if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
-                    const columnName = $t(`3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322`);
+                    const columnName = $t(`%x9`);
                     const index = optionColumns.get(Formatter.slug(columnName));
                     if (index !== undefined) {
                         options[index] = item.product.dateRange.toString();
@@ -316,7 +316,7 @@ export class OrdersExcelExport {
                     order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : '/',
                     order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime) + ' - ' + Formatter.minutes(order.data.timeSlot.endTime) : '/',
                     PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                    order.payment?.paidAt === null ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
+                    order.payment?.paidAt === null ? $t(`%xI`) : $t(`%Kw`),
                     OrderStatusHelper.getName(order.status),
                     order.data.discountCodes.map(d => d.code).join(', '),
                 ]);
@@ -423,28 +423,28 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
-                $t(`5dd11b77-abf6-4449-ac3f-74ac1edb5d65`),
-                $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
-                $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
-                $t(`2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b`),
-                $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
+                $t(`%xA`),
+                $t(`%cB`),
+                $t(`%1MT`),
+                $t(`%1MU`),
+                $t(`%xB`),
+                $t(`%18Z`),
                 ...answerNames,
-                $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
-                $t(`402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3`),
-                $t(`444e7f72-6435-4ae7-bb5d-3fc7e5e79dad`),
-                $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
-                $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
-                $t(`26369a8f-8080-4f00-af46-576fdf563ced`),
-                $t(`40939025-cebb-4afb-90e9-847233cb256f`),
-                $t(`482bd766-39fa-4340-91b4-ae22a23d5fa5`),
-                $t(`a0d99100-f225-416f-bcec-e25df9d651ac`),
-                $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
-                $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
-                $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
-                $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
-                $t(`3697babf-4463-460f-95ee-683a40e5d46d`),
-                ...(shouldIncludeSettements ? [$t(`4ff3b4aa-8668-4287-bce3-b06cde51ddb7`), $t(`02b47907-73e2-4cb2-b398-784f6cbce23a`)] : []),
+                $t(`%Ve`),
+                $t(`%xE`),
+                $t(`%xF`),
+                $t(`%7R`),
+                $t(`%1GD`),
+                $t(`%xJ`),
+                $t(`%176`),
+                $t(`%Sn`),
+                $t(`%xK`),
+                $t(`%xL`),
+                $t(`%M7`),
+                $t(`%Kw`),
+                $t(`%1A`),
+                $t(`%1MX`),
+                ...(shouldIncludeSettements ? [$t(`%MB`), $t(`%M8`)] : []),
                 ...itemNames,
             ],
         ];
@@ -453,11 +453,11 @@ export class OrdersExcelExport {
             let checkoutType = '/';
             let address = '/';
             if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                checkoutType = $t(`cca905ff-7d00-4b9d-84c6-bda2bb5ea898`);
+                checkoutType = $t(`%xG`);
                 address = order.data.checkoutMethod.name;
             }
             else if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
-                checkoutType = $t(`ce5b4d9a-7d2a-4e86-9362-a4ea90582053`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
+                checkoutType = $t(`%xH`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
                 address = order.data.address?.toString() ?? '??';
             }
 
@@ -531,7 +531,7 @@ export class OrdersExcelExport {
                     format: '€0.00',
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                order.pricePaid < order.totalToPay ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
+                order.pricePaid < order.totalToPay ? $t(`%xI`) : $t(`%Kw`),
                 OrderStatusHelper.getName(order.status),
                 order.data.discountCodes.map(d => d.code).join(', '),
                 ...(shouldIncludeSettements
@@ -554,12 +554,12 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
-                $t(`136b7ba4-7611-4ee4-a46d-60758869210f`),
-                $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
-                $t(`7733f484-fc0e-46ff-b0a0-7b674d10015d`),
-                $t(`548f0a30-cdd6-4e9a-9a3c-bdcb3afe11e5`),
-                $t(`1e5893d7-5af8-4029-8a1c-da6294078e9d`),
+                $t(`%d`),
+                $t(`%J8`),
+                $t(`%7R`),
+                $t(`%xM`),
+                $t(`%xN`),
+                $t(`%xO`),
             ],
         ];
 
@@ -625,9 +625,9 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`54e32267-042e-4cfc-a423-63977769a98d`),
-                $t(`be748ea7-badc-48b6-ae7a-8eca6341dc08`),
-                $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
+                $t(`%Sc`),
+                $t(`%1y`),
+                $t(`%M4`),
             ],
         ];
 
@@ -692,7 +692,7 @@ export class OrdersExcelExport {
             counter.set(code, productData);
 
             for (const price of product.prices) {
-                const name = price.name || $t('e3ef8c27-f909-4725-b97b-2cbbd9f24bb5');
+                const name = price.name || $t('%132');
                 const slug = Formatter.slug(name);
                 productData.productPriceCounts.set(name, 0);
 
@@ -724,7 +724,7 @@ export class OrdersExcelExport {
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.productPrice.name) {
-                    const name = item.productPrice.name || $t('e3ef8c27-f909-4725-b97b-2cbbd9f24bb5');
+                    const name = item.productPrice.name || $t('%132');
 
                     if (!productPriceColumns.has(Formatter.slug(name))) {
                         productPriceColumns.set(Formatter.slug(name), {
@@ -822,28 +822,28 @@ export class OrdersExcelExport {
         const shouldIncludeSettements = false;
 
         /* Add the worksheet to the workbook */
-        XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), $t(`1718783a-80df-4d97-a5b5-10c785abfba1`));
-        XLSX.utils.book_append_sheet(wb, this.createOrders(webshop, orders, shouldIncludeSettements), $t(`f10a9486-34c7-46d8-950b-21fd9f41b2b4`));
+        XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), $t(`%xP`));
+        XLSX.utils.book_append_sheet(wb, this.createOrders(webshop, orders, shouldIncludeSettements), $t(`%xQ`));
         const products = this.createProducts(webshop, orders);
 
         if (products) {
-            XLSX.utils.book_append_sheet(wb, products, $t('a2066dbc-3040-4c7d-a3f9-1f3580617542'));
+            XLSX.utils.book_append_sheet(wb, products, $t('%15p'));
         }
-        XLSX.utils.book_append_sheet(wb, this.createOptions(webshop, orders), $t(`3f6039ff-e157-4762-b10d-93e2d2fe56ce`));
+        XLSX.utils.book_append_sheet(wb, this.createOptions(webshop, orders), $t(`%xR`));
 
         if (shouldIncludeSettements) {
-            XLSX.utils.book_append_sheet(wb, this.createSettlements(webshop, orders), $t(`b037949c-50c3-400e-9633-ffaca32c0b01`));
+            XLSX.utils.book_append_sheet(wb, this.createSettlements(webshop, orders), $t(`%xS`));
         }
 
         if (AppManager.shared.downloadFile) {
             const data: ArrayBuffer = XLSX.write(wb, { type: 'array' });
             const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            AppManager.shared.downloadFile(blob, $t(`b0c46199-2c76-4d8c-9737-08838097e62f`)).catch((e) => {
+            AppManager.shared.downloadFile(blob, $t(`%xT`)).catch((e) => {
                 Toast.fromError(e).show();
             });
         }
         else {
-            XLSX.writeFile(wb, $t(`b0c46199-2c76-4d8c-9737-08838097e62f`));
+            XLSX.writeFile(wb, $t(`%xT`));
         }
     }
 }

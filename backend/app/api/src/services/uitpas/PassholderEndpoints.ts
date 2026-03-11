@@ -67,7 +67,7 @@ export class PassholderEndpoints {
                     throw new SimpleError({
                         code: 'https://api.publiq.be/probs/uitpas/pass-not-found',
                         message: 'Pass not found',
-                        human: $t('02f758f9-a1b1-428b-9575-69c4963c2419'),
+                        human: $t('%1Iy'),
                         statusCode: 404,
                     });
                 }
@@ -174,7 +174,7 @@ function assertValidGetPassResponse(json: unknown): asserts json is GetPassRespo
         throw new SimpleError({
             code: 'invalid_response_retrieving_pass_by_uitpas_number',
             message: `Invalid response when retrieving pass by UiTPAS  number: ${error.message}`,
-            human: $t(`4c6482ff-e6d9-4ea1-b11d-e12d697b4b7b`),
+            human: $t(`%1BQ`),
         });
     }
 }

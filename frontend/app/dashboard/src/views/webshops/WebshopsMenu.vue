@@ -1,11 +1,11 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar :title="$t(`2a7f1944-1da2-4a55-bb1d-981aeed5d29e`)" />
+        <STNavigationBar :title="$t(`%2V`)" />
         <main>
-            <h1>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h1>
+            <h1>{{ $t('%HI') }}</h1>
 
             <p v-if="visibleWebshops.length === 0" class="info-box">
-                {{ $t('2aaf6529-b504-45f9-848e-8fe2b52738ec') }}
+                {{ $t('%Wv') }}
             </p>
 
             <button
@@ -27,7 +27,7 @@
                     <hr>
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Archive) }" @click="$navigate(Routes.Archive)">
                         <span class="icon archive" />
-                        <span>{{ $t('18337b9f-03a1-4b85-a012-1c1ba16739d0') }}</span>
+                        <span>{{ $t('%1IZ') }}</span>
                     </button>
                 </template>
 
@@ -35,7 +35,7 @@
                     <hr>
                     <button class="menu-button button" type="button" @click="addWebshop()">
                         <span class="icon add" />
-                        <span>{{ $t('e38c0b49-b038-4c9c-9653-fe1e4a078226') }}</span>
+                        <span>{{ $t('%2N') }}</span>
                     </button>
                 </template>
             </template>

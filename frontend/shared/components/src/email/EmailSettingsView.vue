@@ -1,13 +1,13 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`1363c0ee-0f4b-43f8-a9ee-a2a6091e5d96`)" />
+        <STNavigationBar :title="$t(`%vG`)" />
 
         <main>
             <h1>
-                {{ $t('369772ac-070a-4d86-a5f4-9d7b24b3dbec') }}
+                {{ $t('%1EJ') }}
             </h1>
 
-            <p>{{ $t('ecc5560e-bd85-4f2a-bbb2-d0a26f8ead45') }} <a class="inline-link" :href="$domains.getDocs('e-mailadressen-instellen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>
+            <p>{{ $t('%aY') }} <a class="inline-link" :href="$domains.getDocs('e-mailadressen-instellen')" target="_blank">{{ $t('%OH') }}</a>.</p>
 
             <STList>
                 <STListItem v-for="email in emails" :key="email.id" :selectable="true" class="right-stack" @click="editEmail(email)">
@@ -23,14 +23,14 @@
                     </p>
 
                     <template #right>
-                        <span v-if="email.default" class="style-tag">{{ $t('40c0b334-e007-4fc1-88e5-b38707175d45') }}</span>
+                        <span v-if="email.default" class="style-tag">{{ $t('%v6') }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
             </STList>
 
             <p v-if="emails.length === 0" class="info-box">
-                {{ $t('82395203-b523-4188-b304-0b07aea519cf') }}
+                {{ $t('%aZ') }}
             </p>
         </main>
 
@@ -38,7 +38,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="addEmail">
                     <span class="icon add" />
-                    <span>{{ $t('c5602934-95a8-437d-b576-eda8d9e6565e') }}</span>
+                    <span>{{ $t('%aR') }}</span>
                 </button>
             </template>
         </STToolbar>

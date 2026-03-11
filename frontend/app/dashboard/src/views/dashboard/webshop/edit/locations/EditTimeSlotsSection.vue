@@ -7,17 +7,17 @@
             <div>
                 <button class="button text" type="button" @click="addTimeSlot">
                     <span class="icon add" />
-                    <span>{{ $t('6c80efa8-5658-4728-ba95-d0536fdd25bd') }}</span>
+                    <span>{{ $t('%TE') }}</span>
                 </button>
             </div>
         </h2>
         <slot />
 
         <p v-if="timeSlots.timeSlots.length === 0" class="info-box">
-            {{ $t('20a7fe57-ccdf-4491-82b0-7c7b95a8cd14') }}
+            {{ $t('%TF') }}
         </p>
         <p v-if="timeSlots.timeSlots.length === 1" class="info-box">
-            {{ $t('d3fca5dd-1bcd-4298-b2b4-9605ed464ca7') }}
+            {{ $t('%TG') }}
         </p>
 
         <STList>

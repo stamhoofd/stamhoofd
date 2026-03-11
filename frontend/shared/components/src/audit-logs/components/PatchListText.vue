@@ -37,19 +37,19 @@ function getRenderText(item: AuditLogPatchItem): any[] {
     ];
 
     if (item.type === AuditLogPatchItemType.Added) {
-        text.push(' ' + $t(`3e6ba5d2-adb4-4413-b40f-eba2ae951c7a`));
+        text.push(' ' + $t(`%uf`));
     }
 
     if (item.type === AuditLogPatchItemType.Removed) {
-        text.push(' ' + $t(`4dccea53-5191-48bf-b227-b59b8e41d8f0`));
+        text.push(' ' + $t(`%ug`));
     }
 
     if (item.type === AuditLogPatchItemType.Changed) {
-        text.push(' ' + $t(`7654d4ed-431e-4613-a60c-aa61b066fac4`));
+        text.push(' ' + $t(`%uh`));
     }
 
     if (item.type === AuditLogPatchItemType.Reordered) {
-        text.push(' ' + $t(`a8e73745-0ef7-4c56-81dd-ad642d905431`));
+        text.push(' ' + $t(`%ui`));
     }
 
     if ((item.oldValue && (item.oldValue.toString() || item.oldValue.type !== AuditLogReplacementType.Uuid)) || (item.value && (item.value.toString() || item.value.type !== AuditLogReplacementType.Uuid))) {
@@ -72,7 +72,7 @@ function getRenderText(item: AuditLogPatchItem): any[] {
     }
     else {
         if (!item.type) {
-            text.push(' ' + $t(`7654d4ed-431e-4613-a60c-aa61b066fac4`));
+            text.push(' ' + $t(`%uh`));
         }
     }
 

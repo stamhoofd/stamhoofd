@@ -1,45 +1,45 @@
 <template>
-    <SaveView :title="isNew ? $t(`40b3b89e-4d82-4d6c-b49d-1e084802ee2e`) : $t(`18d8f60a-ec12-405e-b26a-ed9ba39fefe4`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%Se`) : $t(`%Sf`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('40b3b89e-4d82-4d6c-b49d-1e084802ee2e') }}
+            {{ $t('%Se') }}
         </h1>
         <h1 v-else>
-            {{ $t('18d8f60a-ec12-405e-b26a-ed9ba39fefe4') }}
+            {{ $t('%Sf') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%Sk`)">
         </STInputBox>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`%14p`)" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('b230e824-be5c-45a0-b9c4-fc5f7688ec50') }}
+            {{ $t('%Sg') }}
         </p>
 
         <Checkbox v-model="required">
-            {{ $t('c71e34a3-bffd-46a7-88d0-da3e95432130') }}
+            {{ $t('%Sh') }}
         </Checkbox>
 
         <template v-if="required">
-            <STInputBox error-fields="placeholder" :error-box="errors.errorBox" :title="$t(`0c35caa6-6240-4a92-9d89-78acf2c79fc0`)+'*'">
-                <input v-model="placeholder" class="input" type="text" autocomplete="off" :placeholder="$t(`caa8166a-c0cc-4579-97b9-b57fd7f0a00d`)">
+            <STInputBox error-fields="placeholder" :error-box="errors.errorBox" :title="$t(`%Q`)+'*'">
+                <input v-model="placeholder" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sl`)">
             </STInputBox>
             <p class="style-description-small">
-                * {{ $t("54855ccd-0723-4512-be9b-daf3341a3b2a") }}
+                * {{ $t("%Sj") }}
             </p>
         </template>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('7b67c672-eb69-4f0f-903e-88b34c67e860') }}
+                {{ $t('%Si') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

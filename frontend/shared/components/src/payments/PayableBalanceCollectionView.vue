@@ -1,25 +1,25 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`15589562-1e34-4197-8097-5ec5bf1636fb`)" />
+        <STNavigationBar :title="$t(`%1JH`)" />
 
         <main>
-            <h1>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h1>
+            <h1>{{ $t('%1JH') }}</h1>
 
             <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('5c75e9bf-1b64-4d28-a435-6e33247d5170') }}</h2>
-                <p>{{ $t('d0099dec-d92f-41dc-9e42-7409de459d71') }}</p>
+                <hr><h2>{{ $t('%wc') }}</h2>
+                <p>{{ $t('%h6') }}</p>
 
                 <STList>
                     <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h2>
+            <hr><h2>{{ $t('%1JH') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                {{ $t('24b3d716-8db4-49c6-991d-239d5824e34d') }}
+                {{ $t('%h7') }}
             </p>
 
             <STList v-else>

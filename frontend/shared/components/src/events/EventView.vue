@@ -16,7 +16,7 @@
                 <div v-if="event.meta.description.html" class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
 
                 <p v-if="differentOrganization" class="info-box icon basket">
-                    {{ $t('97ea7ffc-c5a0-4bb8-a2c5-ec1ae003a371') }}
+                    {{ $t('%XD') }}
                 </p>
 
                 <EventInfoTable :event="event" :family="memberManager.family" />
@@ -24,7 +24,7 @@
                 <template v-if="!$isMobile && event.group && !event.group.closed">
                     <hr><p class="style-button-bar right-align">
                         <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
-                            <span>{{ $t('eb52f3e4-1daa-41d6-8716-18785bdc8a8d') }}</span>
+                            <span>{{ $t('%XE') }}</span>
                             <span class="icon arrow-right" />
                         </button>
                     </p>
@@ -34,9 +34,9 @@
                     <hr><p class="style-button-bar right-align">
                         <a class="button primary" :href="'https://' + webshop.getUrl(webshopOrganization)" target="_blank">
                             <span v-if="webshop.hasTickets" class="icon ticket" />
-                            <span v-if="webshop.hasTickets">{{ $t('6585a0cd-eb4c-448d-802c-dfcb27e5c7b8') }}</span>
+                            <span v-if="webshop.hasTickets">{{ $t('%1AU') }}</span>
                             <template v-else>
-                                <span>{{ $t('52aadb14-e175-4efe-bdf9-b88a632b6926') }}</span>
+                                <span>{{ $t('%1AV') }}</span>
                                 <span class="icon arrow-right" />
                             </template>
                         </a>
@@ -47,7 +47,7 @@
             <STToolbar v-if="$isMobile && event.group && !event.group.closed">
                 <template #right>
                     <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
-                        <span>{{ $t('eb52f3e4-1daa-41d6-8716-18785bdc8a8d') }}</span>
+                        <span>{{ $t('%XE') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </template>
@@ -57,9 +57,9 @@
                 <template #right>
                     <a class="button primary" :href="'https://' + webshop.getUrl(webshopOrganization)" target="_blank">
                         <span v-if="webshop.hasTickets" class="icon ticket" />
-                        <span v-if="webshop.hasTickets">{{ $t('6585a0cd-eb4c-448d-802c-dfcb27e5c7b8') }}</span>
+                        <span v-if="webshop.hasTickets">{{ $t('%1AU') }}</span>
                         <template v-else>
-                            <span>{{ $t('52aadb14-e175-4efe-bdf9-b88a632b6926') }}</span>
+                            <span>{{ $t('%1AV') }}</span>
                             <span class="icon arrow-right" />
                         </template>
                     </a>
@@ -179,7 +179,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`33c4f792-005f-4fb1-ad98-397dd92038aa`));
+            prefixes.push($t(`%XF`));
         }
     }
     else {
@@ -187,7 +187,7 @@ const levelPrefix = computed(() => {
         prefixes.push(groupOrganization.value?.name ?? props.event.organizationId);
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
 });
 
 const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();

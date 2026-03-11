@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
 
-        <p>{{ $t('d305770f-19df-45bd-8ca1-787c146a54d7') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-inschrijvingen-instellen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>
+        <p>{{ $t('%Oe') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-inschrijvingen-instellen')" target="_blank">{{ $t('%OH') }}</a>.</p>
 
         <div v-if="isReview" class="container">
             <ReviewCheckbox :data="review.reviewCheckboxData" />

@@ -5,7 +5,7 @@
         </p>
 
         <p v-else-if="canPop" class="style-description-block">
-            {{ $t("bfc8aada-8c57-4789-9059-a7df4824e67b") }}
+            {{ $t("%AE") }}
         </p>
 
         <GroupUIFilterList v-if="filters.length" :filter="filter" @replace="copyFromChanged($event)" />

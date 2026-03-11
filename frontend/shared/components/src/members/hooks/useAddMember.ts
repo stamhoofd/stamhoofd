@@ -19,8 +19,8 @@ export function useAddMember() {
 
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberStepView, {
-                title: $t(`45edb9d6-53a5-430e-94a4-fe8d95e05502`),
-                saveText: $t('2a9075bb-a743-411e-8a3d-94e5e57363f0'),
+                title: $t(`%g5`),
+                saveText: $t('%16p'),
                 member,
                 component: markRaw(EditMemberGeneralBox),
                 saveHandler: async (navigate: NavigationActions) => {

@@ -1,7 +1,7 @@
 <template>
     <div class="payconiq-banner-view">
         <button class="payconiq-close button icon close white" type="button" @click="close" />
-        <h1>{{ $t('7f7be6dc-a859-4f3c-af9f-bb24221aa21c') }}</h1>
+        <h1>{{ $t('%kE') }}</h1>
 
         <div class="payconiq-logo" />
 
@@ -15,7 +15,7 @@
             </p>
         </LoadingButton>
 
-        <p>{{ $t('c9eeb8e9-61f7-4ca0-a4e4-01681fc32245') }}</p>
+        <p>{{ $t('%kF') }}</p>
     </div>
 </template>
 
@@ -93,7 +93,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if (await CenteredMessage.confirm($t(`6b7035db-1427-49ac-8a60-973b72355a8d`), $t(`4c1658ea-d89c-4634-9be5-e0a23febe2bb`))) {
+        if (await CenteredMessage.confirm($t(`%12e`), $t(`%12f`))) {
             this.cancel();
             return true;
         }

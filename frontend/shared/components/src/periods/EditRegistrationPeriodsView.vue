@@ -4,33 +4,33 @@
             {{ title }}
         </h1>
         <p v-if="!isPlatform">
-            {{ $t('a4dbfbda-407b-4519-8c91-4a4b1eb70fd5') }}
+            {{ $t('%1Gz') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="isPlatform && sortedPeriods.length && currentPeriod.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
-            <hr><h2>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</h2>
+            <hr><h2>{{ $t('%IU') }} {{ sortedPeriods[0].nameShort }}</h2>
             <p>
-                {{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}
+                {{ $t("%AD") }}
             </p>
 
             <ul class="style-list">
-                <li>{{ $t('9c916015-e69c-44b3-a568-d0af15854787') }}</li>
-                <li>{{ $t('b78d9c9e-9099-4fb6-93e1-6bf58e39165f') }}</li>
-                <li>{{ $t('c95eb07d-15e3-45da-b2c2-7754c134ae65') }}</li>
-                <li>{{ $t('865bfcae-44c2-49a5-a887-c70725d53d8b') }}</li>
-                <li>{{ $t('9de0900d-9daa-48e5-ab82-496c61dfc5db') }}</li>
+                <li>{{ $t('%AH') }}</li>
+                <li>{{ $t('%8L') }}</li>
+                <li>{{ $t('%8M') }}</li>
+                <li>{{ $t('%8N') }}</li>
+                <li>{{ $t('%8O') }}</li>
             </ul>
 
             <p class="style-button-bar">
                 <button class="button primary" type="button" @click="setCurrent(sortedPeriods[0])">
                     <span class="icon flag" />
-                    <span>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</span>
+                    <span>{{ $t('%IU') }} {{ sortedPeriods[0].nameShort }}</span>
                 </button>
             </p>
 
-            <hr><h2>{{ $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3') }}</h2>
+            <hr><h2>{{ $t('%3i') }}</h2>
         </template>
 
         <STList>
@@ -40,7 +40,7 @@
         <p>
             <button class="button text" type="button" @click="addPeriod">
                 <span class="icon add" />
-                <span>{{ $t('1929850b-e0ad-4b35-b3e5-6652dd4774e2') }}</span>
+                <span>{{ $t('%3g') }}</span>
             </button>
         </p>
     </SaveView>
@@ -90,7 +90,7 @@ const sortedPeriods = computed(() => {
 
 const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : patchedOrganization.value.period.period);
 
-const title = computed(() => $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3'));
+const title = computed(() => $t('%3i'));
 
 async function addPeriod() {
     const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
@@ -144,7 +144,7 @@ async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`5119aacc-24c1-43e6-b025-0efa7ea60ea3`),
+                name: $t(`%IV`),
                 disabled: currentPeriod.value.id === period.id,
                 action: async () => {
                     await setCurrent(period);
@@ -187,10 +187,10 @@ async function save() {
                 await platformManager.value.patch(platformPatch.value, false);
             }
 
-            new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+            new Toast($t(`%HA`), 'success green').show();
 
             if (changedPeriod) {
-                new Toast($t('671147bd-cf0e-42fc-b456-18ce7d75b867'), 'info').setHide(20 * 1000).show();
+                new Toast($t('%8P'), 'info').setHide(20 * 1000).show();
             }
         }
         else {
@@ -199,7 +199,7 @@ async function save() {
                 await organizationManager.value.patch(organizationPatch.value, { owner, shouldRetry: false });
             }
 
-            new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+            new Toast($t(`%HA`), 'success green').show();
         }
 
         await pop({ force: true });
@@ -235,7 +235,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

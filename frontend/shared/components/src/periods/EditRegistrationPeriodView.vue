@@ -6,20 +6,20 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" error-fields="notes" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('%Gq')" error-fields="notes" :error-box="errors.errorBox" class="max">
             <input v-model="customName" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="200" :placeholder="patched.name">
         </STInputBox>
 
         <p v-if="!isValidCustomName" class="warning-box">
-            {{ $t('0838734b-4388-49e9-b96b-ad15883a219b') }}
+            {{ $t('%1Gy') }}
         </p>
 
         <div class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`300d2935-b578-48cc-b58e-1c0446a68d59`)">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`%7e`)">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`3c90169c-9776-4d40-bda0-dba27a5bad69`)">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%wB`)">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :min="startDate" />
             </STInputBox>
         </div>
@@ -31,10 +31,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('6a297067-37ee-43f3-bffc-07968cf321c2') }}
+                    {{ $t('%IT') }}
                 </h3>
                 <p v-if="locked" class="style-description-small">
-                    {{ $t('cc48e00f-2c6b-4f4d-9bae-65a889364ea3') }}
+                    {{ $t('%8K') }}
                 </p>
             </STListItem>
         </STList>
@@ -62,7 +62,7 @@ const props = defineProps<{
 
 const platform = usePlatform();
 const isCurrentPeriod = computed(() => platform.value.period.id === props.period.id);
-const title = computed(() => props.isNew ? $t('c6f24e63-4735-43c4-a93a-405755ba70c2') : $t('7118def6-da94-4fce-9398-2131b31acf01'));
+const title = computed(() => props.isNew ? $t('%3h') : $t('%3f'));
 const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.period);
@@ -74,7 +74,7 @@ function validate() {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
             field: 'endDate',
-            message: $t('186723cd-2cd4-45fd-aa9c-020c9d92b225'),
+            message: $t('%1Gv'),
         }));
 
         return false;
@@ -112,7 +112,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('ca303b26-d586-4e46-ad0d-af968d252261'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('2e055510-5527-45f9-8ed7-7d8f8cd03a4f'))) {
+    if (!await CenteredMessage.confirm($t('%3d'), $t('%CJ'), $t('%3c'))) {
         return;
     }
 
@@ -183,7 +183,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

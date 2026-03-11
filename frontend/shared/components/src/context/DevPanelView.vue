@@ -1,10 +1,10 @@
 <template>
-    <SaveView :loading="saving" :title="$t(`9120db75-8638-4cab-9dca-8bd81390149e`)" @save="save">
+    <SaveView :loading="saving" :title="$t(`%1T`)" @save="save">
         <h1>
-            {{ $t('9120db75-8638-4cab-9dca-8bd81390149e') }}
+            {{ $t('%1T') }}
         </h1>
 
-        <hr><h2>{{ $t('e909e3d1-516f-4284-8923-0390c95ae290') }}</h2>
+        <hr><h2>{{ $t('%a0') }}</h2>
         <STList>
             <STListItem v-for="r in availableChannels" :key="r.url" :selectable="true" element-name="label">
                 <template #left>
@@ -22,9 +22,9 @@
                     <Radio v-model="releaseChannel" value="custom" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('0d256e87-ab44-4051-9efc-4749c8edb0c0') }}
+                    {{ $t('%S') }}
                 </h3>
-                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" class="input option" :placeholder="$t(`761c7de2-e697-4c39-9970-82d05fc886ca`)">
+                <input v-if="releaseChannel === 'custom'" v-model="customChannel" type="text" class="input option" :placeholder="$t(`%a1`)">
             </STListItem>
         </STList>
     </SaveView>
@@ -56,19 +56,19 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
     mounted() {
         this.availableChannels = [
             {
-                name: $t(`40c0b334-e007-4fc1-88e5-b38707175d45`),
+                name: $t(`%v6`),
                 url: STAMHOOFD.APP_UPDATE_SERVER_URL,
             },
             {
-                name: $t(`8bc22ee1-303e-4b40-94dc-72c5869abdbc`),
+                name: $t(`%1N`),
                 url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL,
             },
             {
-                name: $t(`cab2694d-8d0f-44d0-9819-d2d2c4148b22`),
+                name: $t(`%24`),
                 url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL,
             },
             {
-                name: $t(`d517ff0c-abad-4a23-91e2-3463279cfa65`),
+                name: $t(`%2F`),
                 url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL,
             },
         ].filter(c => c.url !== undefined) as any;
@@ -112,7 +112,7 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
 
         try {
             await this.saveChannel();
-            new Toast($t(`1e6b16bd-ca6e-49e2-9792-f8864a140d7b`), 'success').show();
+            new Toast($t(`%54`), 'success').show();
             this.dismiss({ force: true });
         }
         catch (e) {

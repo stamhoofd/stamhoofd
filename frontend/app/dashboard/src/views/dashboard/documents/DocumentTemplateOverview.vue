@@ -7,7 +7,7 @@
                 {{ template.settings.name }}
             </h1>
             <p v-if="template.privateSettings.templateDefinition.type === 'fiscal'">
-                <I18nComponent :t="$t('cb1e0749-34c0-4c06-b42c-bfe34dc9f11e')">
+                <I18nComponent :t="$t('%1Kp')">
                     <template #button="{content}">
                         <a class="inline-link" :href="LocalizedDomains.getDocs('fiscaal-attest-kinderopvang')" target="_blank">
                             {{ content }}
@@ -17,14 +17,14 @@
             </p>
 
             <p v-if="isDraft" class="warning-box">
-                {{ $t('eda9c1b1-f601-492a-b13e-cf88c5249a7b') }}
+                {{ $t('%KX') }}
             </p>
             <p v-else class="success-box">
-                {{ $t('26089c85-ad50-4c71-9013-4fadc243c12e') }}
+                {{ $t('%KY') }}
             </p>
 
             <p v-if="!isDraft && template.updatesEnabled" class="warning-box">
-                {{ $t('2c3cdda4-5e44-4c2b-bdc9-bb4c554e2894') }}
+                {{ $t('%KZ') }}
             </p>
 
             <STList class="illustration-list">
@@ -33,10 +33,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('2f140e22-4940-453f-8f49-871a69f0776e') }}
+                        {{ $t('%tw') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('7b0f4117-9e6f-4c1b-b56e-c154b5defce3') }}
+                        {{ $t('%Ka') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -48,10 +48,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
+                        {{ $t('%xU') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('eb865045-d332-47f7-bb52-0eaa58785d67') }}
+                        {{ $t('%Kb') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -61,15 +61,15 @@
 
             <template v-if="canAlterUpdates">
                 <hr>
-                <h2>{{ $t('e9d4d5fb-ec7f-4a42-acc8-8f52a9bd4e7a') }}</h2>
-                <p>{{ $t('fa988b87-6665-43e4-a177-77031826e9a8') }}</p>
+                <h2>{{ $t('%Kc') }}</h2>
+                <p>{{ $t('%4C') }}</p>
 
                 <Checkbox :model-value="template.updatesEnabled" :disabled="settingUpdatesEnabled" @update:model-value="toggleUpdatesEnabled">
-                    {{ $t('ecbe0afb-6a6c-4b67-8b11-3a75a182c344') }}
+                    {{ $t('%Kd') }}
                 </Checkbox>
             </template>
 
-            <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+            <hr><h2>{{ $t('%16X') }}</h2>
 
             <STList>
                 <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
@@ -82,7 +82,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('d6046963-19b5-4e4c-b72b-a3ebba89c1fe') }}
+                        {{ $t('%1Kq') }}
                     </h2>
                     <p class="style-description">
                         {{ xmlExportDescription }}
@@ -102,10 +102,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('38427cc3-27c9-4463-acdf-a2d073a8cdb7') }}
+                        {{ $t('%Ke') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('bd4b350e-d06a-44aa-a2d6-a5ae140373ca') }}
+                        {{ $t('%Kf') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -122,10 +122,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('28486bd5-7acc-4a49-84cf-8fbc2b2ba8b9') }}
+                        {{ $t('%Kg') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('523d8098-13ec-4ef5-9851-c1bf768efdd6') }}
+                        {{ $t('%Kh') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -142,10 +142,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('34869ab8-e70a-4d28-8805-b6afed8aacf2') }}
+                        {{ $t('%Ki') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('9db9e26b-a180-48f1-b19e-c4f468dda563') }}
+                        {{ $t('%Kj') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -292,14 +292,14 @@ async function toggleUpdatesEnabled() {
 
     if (props.template.privateSettings.templateDefinition.type === 'fiscal') {
         if (fiscalDocumentYearHelper.isAfterDeadline(props.template.year)) {
-            Toast.error($t('473aa794-9628-4ae0-93af-135404101514')).show();
+            Toast.error($t('%1LX')).show();
         }
     }
     
     if (!(await CenteredMessage.confirm(
-        updatesEnabled ? $t('8336b925-62ca-4b82-88ba-af66deefe296') : $t('ba81cced-65eb-49d7-9b3b-655198d19c82'),
-        updatesEnabled ? $t('d953090c-ba5c-4dc8-a963-7fa611c4aa74') : $t('377fe0ee-d48f-40b5-8002-48f1009c15b2'),
-        updatesEnabled ? $t('cfe404b6-bb5b-4e7f-b1e5-610cc4e5156c') : $t('6f661080-79e7-42f0-a12b-e28f9da105d9'),
+        updatesEnabled ? $t('%1LY') : $t('%1LZ'),
+        updatesEnabled ? $t('%1La') : $t('%1Lb'),
+        updatesEnabled ? $t('%1Lc') : $t('%1Ld'),
         undefined,
         updatesEnabled ? true : false, // destructive to enable updates
     ))) {
@@ -349,7 +349,7 @@ async function deleteTemplate() {
         });
 
         GlobalEventBus.sendEvent('document-template-deleted', props.template).catch(console.error);
-        Toast.success($t('c80ffc1b-bef9-47f8-905f-f8d917365d05')).show();
+        Toast.success($t('%1IW')).show();
 
         pop({ force: true })?.catch(console.error);
     }
@@ -360,7 +360,7 @@ async function deleteTemplate() {
 }
 async function exportXml() {
     if (props.template.updatesEnabled) {
-        Toast.error($t('94090582-213a-4016-8c1c-a95331a4c225')).show();
+        Toast.error($t('%1Kr')).show();
         return;
     }
 
@@ -368,23 +368,23 @@ async function exportXml() {
     if (props.template.privateSettings.templateDefinition.type === fiscal.type) {
         const canDownload = fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year);
         if (!canDownload) {
-            Toast.error($t('4988e582-50f7-4922-8ecb-5939db9de3dd')).show();
+            Toast.error($t('%1IX')).show();
             return;
         }
 
         const afterDeadline = fiscalDocumentYearHelper.isAfterDeadline(props.template.year);
         if (afterDeadline) {
             const stop = await CenteredMessage.show({
-                title: $t('1feedca9-0e84-4997-9954-eb259f8768dc'),
-                description: $t('8490c357-b786-4b74-b6e0-6bbccd843a21'),
+                title: $t('%1Le'),
+                description: $t('%1Lf'),
                 buttons: [
                     {
-                        text: $t('e1872332-a0ae-4cf1-9fdc-e02db714fc5b'),
+                        text: $t('%1Lg'),
                         value: false,
                         type: 'destructive',
                         availabilityDelay: 2_000
                     }, {
-                        text: $t('11d2e292-fd08-4477-bd2a-dac599a9754c'),
+                        text: $t('%1Lh'),
                         value: true,
                         type: 'secundary',
                     }

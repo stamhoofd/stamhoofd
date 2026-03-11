@@ -3,8 +3,8 @@
         <STNavigationBar :large="true" />
 
         <main class="center">
-            <h1>{{ $t('a7e6596c-9614-426a-a9ef-dc6e32ec2864') }}</h1>
-            <p>{{ $t('3abb6fe0-18cc-492b-9221-0a7825ecc9a2') }} {{ organization.name }}{{ $t('cf581821-fd16-416c-bdd2-be5315810373') }}</p>
+            <h1>{{ $t('%WC') }}</h1>
+            <p>{{ $t('%WD') }} {{ organization.name }}{{ $t('%WE') }}</p>
         </main>
     </div>
 </template>

@@ -30,39 +30,39 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
     const columns: SelectablePdfData<PlatformMember>[] = [
         new SelectablePdfData<PlatformMember>({
             id: 'id',
-            name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-            description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
+            name: $t(`%1P`),
+            description: $t(`%ev`),
             enabled: false,
             getValue: member => member.id,
         }),
         // todo: only if platform?
         new SelectablePdfData<PlatformMember>({
             id: 'memberNumber',
-            name: $t('123be534-a0be-4a6e-b03f-021659e1d8ba'),
+            name: $t('%19j'),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.memberNumber,
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'firstName',
-            name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
+            name: $t(`%1MT`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.firstName,
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'lastName',
-            name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
+            name: $t(`%1MU`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.lastName,
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'birthDay',
-            name: $t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`),
+            name: $t(`%17w`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.birthDay,
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'age',
-            name: $t(`8c1f264f-3b0b-49b9-8a29-9ceb2dfd7754`),
+            name: $t(`%9S`),
             enabled: false,
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.age,
@@ -70,35 +70,35 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         new SelectablePdfData<PlatformMember>({
             id: 'gender',
             enabled: false,
-            name: $t(`08ef39ff-3431-4975-8c46-8fb68c946432`),
+            name: $t(`%19i`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 getGenderName(object.details.gender),
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'phone',
-            name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
+            name: $t(`%wD`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.phone,
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'email',
             enabled: false,
-            name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
+            name: $t(`%1FK`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.email,
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'address',
-            name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
-            description: $t(`01e99208-dce7-4109-8cf2-3cc74c4df45c`),
+            name: $t(`%Cn`),
+            description: $t(`%ew`),
             // todo: check if this is correct?
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.address?.toString(),
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'securityCode',
-            name: $t(`0fa4253f-1cfd-4394-93b4-dfba8da04738`),
+            name: $t(`%wE`),
             enabled: false,
-            description: $t(`aa45000f-8cff-4cb6-99b2-3202eb64c4a8`),
+            description: $t(`%ex`),
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.securityCode,
         }),
 
@@ -110,20 +110,20 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         }), [AccessRight.MemberReadFinancialData]),
         returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
             id: 'uitpasNumber',
-            name: $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`),
+            name: $t(`%wF`),
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.uitpasNumberDetails?.uitpasNumber,
         }), [AccessRight.MemberReadFinancialData]),
 
         new SelectablePdfData<PlatformMember>({
             id: 'notes',
-            name: $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
+            name: $t(`%Ve`),
             enabled: false,
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.notes,
         }),
         returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
             id: 'nationalRegisterNumber',
             enabled: false,
-            name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
+            name: $t(`%wK`),
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.nationalRegisterNumber?.toString() ?? '',
         }), [AccessRight.MemberManageNRN]),
 
@@ -133,7 +133,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             ? [
                     new SelectablePdfData<PlatformMember>({
                         id: 'organization',
-                        name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
+                        name: $t(`%ey`),
                         enabled: false,
                         getValue: (member: PlatformMember) => {
                             const organizations = member.filterOrganizations({
@@ -144,16 +144,16 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                     = Formatter.joinLast(
                         organizations.map(o => o.name).sort(),
                         ', ',
-                        ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ',
+                        ' ' + $t(`%M1`) + ' ',
                     )
-                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+                    || $t('%5D');
 
                             return str;
                         },
                     }),
                     new SelectablePdfData<PlatformMember>({
                         id: 'uri',
-                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
+                        name: $t(`%7C`),
                         enabled: false,
                         getValue: (member: PlatformMember) => {
                             const organizations = member.filterOrganizations({
@@ -164,16 +164,16 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                     = Formatter.joinLast(
                         organizations.map(o => o.uri).sort(),
                         ', ',
-                        ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ',
+                        ' ' + $t(`%M1`) + ' ',
                     )
-                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+                    || $t('%5D');
 
                             return str;
                         },
                     }),
                     new SelectablePdfData<PlatformMember>({
                         id: 'defaultAgeGroup',
-                        name: $t(`0ef2bbb3-0b3c-411a-8901-a454cff1f839`),
+                        name: $t(`%wI`),
                         enabled: false,
                         getValue: (member: PlatformMember) => {
                             const groups = member.filterRegistrations({
@@ -189,15 +189,15 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                                 o =>
                                     Platform.shared.config.defaultAgeGroups.find(
                                         g => g.id === o.group.defaultAgeGroupId,
-                                    )?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`),
+                                    )?.name ?? $t(`%wJ`),
                             );
                             const str
                     = Formatter.joinLast(
                         Formatter.uniqueArray(defaultAgeGroups).sort(),
                         ', ',
-                        ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ',
+                        ' ' + $t(`%M1`) + ' ',
                     )
-                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+                    || $t('%5D');
 
                             return str;
                         },
@@ -209,7 +209,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             ? [
                     new SelectablePdfData<PlatformMember>({
                         id: 'group',
-                        name: $t(`0c230001-c3be-4a8e-8eab-23dc3fd96e52`),
+                        name: $t(`%wH`),
                         enabled: false,
                         getValue: (member: PlatformMember) => {
                             const groups = member.filterRegistrations({
@@ -224,9 +224,9 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                             groups.map(o => o.group.settings.name.toString()),
                         ).sort(),
                         ', ',
-                        ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ',
+                        ' ' + $t(`%M1`) + ' ',
                     )
-                    || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+                    || $t('%5D');
 
                             return str;
                         },
@@ -243,7 +243,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             return [
                 new SelectablePdfData<PlatformMember>({
                     id: getId('type'),
-                    name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
+                    name: $t(`%1B`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => {
@@ -257,35 +257,35 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                 }),
                 new SelectablePdfData<PlatformMember>({
                     id: getId('firstName'),
-                    name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
+                    name: $t(`%1MT`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => getParent(object)?.firstName,
                 }),
                 new SelectablePdfData<PlatformMember>({
                     id: getId('lastName'),
-                    name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
+                    name: $t(`%1MU`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => getParent(object)?.lastName,
                 }),
                 new SelectablePdfData<PlatformMember>({
                     id: getId('phone'),
-                    name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
+                    name: $t(`%wD`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => getParent(object)?.phone,
                 }),
                 new SelectablePdfData<PlatformMember>({
                     id: getId('email'),
-                    name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
+                    name: $t(`%1FK`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => getParent(object)?.email,
                 }),
                 new SelectablePdfData<PlatformMember>({
                     id: getId('address'),
-                    name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
+                    name: $t(`%Cn`),
                     category,
                     enabled,
                     // todo: check if this is correct?
@@ -294,7 +294,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                 }),
                 returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
                     id: getId('nationalRegisterNumber'),
-                    name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
+                    name: $t(`%wK`),
                     category,
                     enabled,
                     getValue: (object: PlatformMember) => getParent(object)?.nationalRegisterNumber?.toString(),
@@ -304,15 +304,15 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
 
         new SelectablePdfData<PlatformMember>({
             id: 'unverifiedPhones',
-            name: $t(`62ce5fa4-3ea4-4fa8-a495-ff5eef1ec5d4`),
-            category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
+            name: $t(`%ez`),
+            category: $t(`%f0`),
             enabled: false,
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.unverifiedPhones.join(', '),
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'unverifiedEmails',
-            name: $t(`1363c0ee-0f4b-43f8-a9ee-a2a6091e5d96`),
-            category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
+            name: $t(`%vG`),
+            category: $t(`%f0`),
             enabled: false,
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.unverifiedEmails.join(', '),
         }),
@@ -321,7 +321,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             return new SelectablePdfData<PlatformMember>({
                 id: `unverifiedAddresses.${index}`,
                 name: `Adres ${number}`,
-                category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
+                category: $t(`%f0`),
                 enabled: false,
                 getValue: ({ patchedMember: object }: PlatformMember) => object.details.unverifiedAddresses.map(a => a.toString()).join('; '),
             });
@@ -357,7 +357,7 @@ export function getSelectableGroupPdfData(groups: Group[] = []) {
             groupColumns.push(
                 new SelectablePdfData<PlatformMember>({
                     id: `groups.${group.id}.price`,
-                    name: $t(`a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc`),
+                    name: $t(`%62`),
                     category: group.settings.name.toString(),
                     enabled: false,
                     getValue: (object: PlatformMember) => getRegistration(object)?.groupPrice.name.toString(),
@@ -396,7 +396,7 @@ export function getSelectableGroupPdfData(groups: Group[] = []) {
                     groupColumns.push(
                         new SelectablePdfData<PlatformMember>({
                             id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
-                            name: menu.name + ' → ' + option.name + ' → ' + $t('697df3e7-fbbf-421d-81c2-9c904dce4842'),
+                            name: menu.name + ' → ' + option.name + ' → ' + $t('%M4'),
                             category: group.settings.name.toString(),
                             enabled: false,
                             getValue: (member: PlatformMember) => {
@@ -474,7 +474,7 @@ export function getAllSelectablePdfDataForSummary({ platform, organization, auth
         }), [AccessRight.MemberReadFinancialData]),
         new SelectablePdfData<PlatformMember>({
             id: 'dataPermissions',
-            name: $t('74956434-5a54-4a93-82df-08533d1a6963'),
+            name: $t('%17X'),
             enabled: false,
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.dataPermissions?.value ? null : '',
         }),
@@ -514,7 +514,7 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
                 return [
                     new SelectablePdfData<PlatformMember>({
                         id: `${baseId}.checked`,
-                        name: `${baseName}: ${$t('e81e0ffa-8ed9-4382-bc07-479728006648')}`,
+                        name: `${baseName}: ${$t('%17Y')}`,
                         enabled: !preferInverted && !!record.warning,
                         category,
                         getValue: ({ patchedMember: object }: PlatformMember) => {
@@ -526,7 +526,7 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
                         },
                     }), new SelectablePdfData<PlatformMember>({
                         id: `${baseId}.notChecked`,
-                        name: `${baseName}: ${$t('8abc595b-a705-499b-b4a2-17cb3cf99e47')}`,
+                        name: `${baseName}: ${$t('%17Z')}`,
                         enabled: preferInverted && !!record.warning,
                         category,
                         getValue: ({ patchedMember: object }: PlatformMember) => {

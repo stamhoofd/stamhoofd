@@ -6,11 +6,11 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="isNew" error-fields="type" :error-box="errors.errorBox" :title="$t(`50807c89-d15f-4a2e-b8c7-95932d5aa5c8`)">
+        <STInputBox v-if="isNew" error-fields="type" :error-box="errors.errorBox" :title="$t(`%Kz`)">
             <LoadingButton :loading="loadingHtml || loadingXml">
                 <Dropdown v-model="editingType" error-fields="type">
                     <option :value="null" disabled>
-                        {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
+                        {{ $t('%1Fq') }}
                     </option>
                     <option v-for="_type in availableTypes" :key="_type.value ?? _type.definition.name" :value="_type.value">
                         {{ _type.definition.name }}
@@ -19,19 +19,19 @@
             </LoadingButton>
         </STInputBox>
 
-        <STInputBox :title="$t('ab2e45a8-4c85-4c10-95b3-cc8da7d40e34')" error-fields="year" :error-box="errors.errorBox">
-            <NumberInput v-model="year" :title="$t('ab2e45a8-4c85-4c10-95b3-cc8da7d40e34')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
+        <STInputBox :title="$t('%1Ic')" error-fields="year" :error-box="errors.errorBox">
+            <NumberInput v-model="year" :title="$t('%1Ic')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
         </STInputBox>
         <p v-if="hasGroups" class="style-description-small">
-            {{ $t('acf43cfe-2f1c-4f9a-89cb-9b9bf6c23345') }}
+            {{ $t('%1Id') }}
         </p>
         <p v-else class="style-description-small">
-            {{ $t('fc5f6473-fd60-4986-b072-cadaa70a10b3') }}
+            {{ $t('%1Ie') }}
         </p>
 
         <template v-if="(editingType || !isNew)">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-                <input v-model="name" class="input" type="text" :placeholder="$t(`2fe38a3a-0041-4724-869e-4a5b55634380`)">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+                <input v-model="name" class="input" type="text" :placeholder="$t(`%L0`)">
             </STInputBox>
 
             <div v-for="category of fieldCategories.filter(c => c.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record)).length > 0)" :key="category.id" class="container">
@@ -42,18 +42,18 @@
             </div>
 
             <div v-for="category of documentFieldCategories" :key="category.id" class="container">
-                <hr><h2>{{ $t('0f3c0101-6c9a-43e2-8b9f-6f65585ce05e') }} {{ category.name }}</h2>
+                <hr><h2>{{ $t('%Kr') }} {{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
                 <p class="info-box">
-                    {{ $t('39d0d9ca-2f37-40b6-84a4-51fb29b4cce6') }}
+                    {{ $t('%4B') }}
                 </p>
 
-                <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" :placeholder="$t(`358e6e0b-9736-4cc8-9f96-99583880d15c`)" @update:model-value="setLinkedFields(field, $event)" />
+                <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" :placeholder="$t(`%L1`)" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
-            <hr><h2>{{ $t('3f4c9896-7f02-4b49-ad29-2d363a8af71f') }}</h2>
-            <p>{{ $t('1fd616a7-b465-480a-9777-dc036e7b2a08') }}</p>
+            <hr><h2>{{ $t('%1EI') }}</h2>
+            <p>{{ $t('%Ks') }}</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
                 <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.group.id" :selectable="true" @click="updateGroupAnswers(group)">
@@ -70,48 +70,48 @@
             <p>
                 <button type="button" class="button text" @click="addGroup">
                     <span class="icon add" />
-                    <span>{{ $t('d40bb85c-53b9-4b93-be82-9fa7e2f6a11c') }}</span>
+                    <span>{{ $t('%Kt') }}</span>
                 </button>
             </p>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
-                <hr><h2>{{ $t('260a3c1e-5e4f-464e-b380-ea6f4022bc91') }}</h2>
-                <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`8c4df8c5-1ed9-402b-aedd-f4bcd940ca34`)">
-                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`)" />
+                <hr><h2>{{ $t('%Ku') }}</h2>
+                <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`%L2`)">
+                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`%1FW`)" />
                 </STInputBox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
-                <hr><h2>{{ $t('43ca079c-2af8-4bde-9f68-abeca3c3a7d0') }}</h2>
+                <hr><h2>{{ $t('%1JL') }}</h2>
                 <Checkbox v-model="nonZeroPriceOnly">
-                    {{ $t('30c6addd-ebd7-470e-8f9b-e115d5e86820') }}
+                    {{ $t('%Kv') }}
                 </Checkbox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPricePaid">
-                <hr><h2>{{ $t('1c1933f1-fee4-4e7d-9c89-57593fd5bed3') }}</h2>
+                <hr><h2>{{ $t('%Kw') }}</h2>
                 <Checkbox v-model="paidOnly">
-                    {{ $t('a7ea9da5-e3d3-4253-b7f5-b90fbdeb83dc') }}
+                    {{ $t('%Kx') }}
                 </Checkbox>
             </template>
 
             <template v-if="auth.hasPlatformFullAccess()">
-                <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
+                <hr><h2>{{ $t('%HQ') }}</h2>
 
                 <STList>
-                    <CheckboxListItem v-model="useCustomHtml" :label="$t(`e5f05c4e-be30-4a28-85a3-939038fb12a7`)" :description="$t(`db4e01e7-911a-4b58-b242-068f887851f7`)">
+                    <CheckboxListItem v-model="useCustomHtml" :label="$t(`%L3`)" :description="$t(`%L4`)">
                         <div v-if="useCustomHtml" class="style-button-bar">
                             <button class="button text" type="button" @click="downloadHtml">
                                 <span class="icon download" />
                                 <span>
-                                    {{ $t('51190e58-cb85-4d12-b276-937d5514ccfd') }}
+                                    {{ $t('%Ky') }}
                                 </span>
                             </button>
 
                             <label class="button text">
                                 <span class="icon sync" />
                                 <span>
-                                    {{ $t('b7c71a71-9523-4748-a6cd-80b9314b05b2') }}
+                                    {{ $t('%He') }}
                                 </span>
 
                                 <input type="file" multiple="true" style="display: none;" accept=".html, text/html" @change="(event) => changedFile(event as any)"></label>
@@ -324,7 +324,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
-                message: $t('83d28308-84b3-45b6-b23a-d55199979d34'),
+                message: $t('%1If'),
             });
         }
 
@@ -332,7 +332,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
-                message: $t('eb170b9c-b071-411b-94cf-3458d5660cce'),
+                message: $t('%1Ig'),
             });
         }
 
@@ -353,7 +353,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
-                message: $t('caf2ba0e-cc34-4539-9dce-4c03adec0aaa'),
+                message: $t('%1Ih'),
             });
         }
     }
@@ -375,7 +375,7 @@ async function validateYearAsync(value: number = year.value): Promise<SimpleErro
             return new SimpleError({
                 code: 'double_fiscal_document',
                 field: 'year',
-                message: $t('44828efb-73b4-47d8-af6a-41d4857759f1'),
+                message: $t('%1Ii'),
             });
         }
     }

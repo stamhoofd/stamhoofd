@@ -3,20 +3,20 @@
         <STNavigationBar :title="title" />
 
         <main>
-            <h1>{{ $t('7f721fa4-ed71-42d7-a92d-6a11abc3cb0f') }}</h1>
+            <h1>{{ $t('%KA') }}</h1>
 
             <SegmentedControl v-if="tabs.length > 1" v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
 
             <div v-if="selectedTab === Tab.Activities" class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
+                        <span class="hide-small">{{ $t('%2J') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -53,7 +53,7 @@
                     </STList>
                 </div>
 
-                <hr><h2>{{ $t('18337b9f-03a1-4b85-a012-1c1ba16739d0') }}</h2>
+                <hr><h2>{{ $t('%1IZ') }}</h2>
                 <Spinner v-if="loadingGroups" />
                 <STList v-else-if="archivedGroups.length">
                     <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" @click="selectGroup(group)">
@@ -74,7 +74,7 @@
                     </STListItem>
                 </STList>
                 <p v-else class="info-box">
-                    {{ $t('e523c2e2-3b75-477f-957f-2392b8df82f8') }}
+                    {{ $t('%KB') }}
                 </p>
             </template>
 
@@ -82,7 +82,7 @@
                 <STList>
                     <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" :disabled="!filterGroup(event.group!)" @click="selectGroup(event.group!)" />
                 </STList>
-                <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`2a4caf43-3e88-45b6-b337-4c7036130769`)" />
+                <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`%KD`)" />
             </template>
         </main>
     </div>
@@ -142,7 +142,7 @@ const activitiesTab = {
 
 const showOnlyActivities = props.documentType === fiscal.type && STAMHOOFD.userMode === 'platform';
 const tabs = ref(showOnlyActivities ? [activitiesTab] : [groupsTab, activitiesTab]);
-const title = showOnlyActivities ? $t('614dbf30-ddf8-4e85-9da3-cc8d30f7ac77') : $t(`877284d7-31b4-4857-a963-405b4139adc2`);
+const title = showOnlyActivities ? $t('%1IR') : $t(`%1IL`);
 
 const selectedTab = ref(tabs.value[0].id);
 
@@ -179,10 +179,10 @@ function filterGroup(group: Group): boolean {
 async function selectGroup(group: Group) {
     if (!filterGroup(group)) {
         if (group.type === GroupType.EventRegistration) {
-            Toast.error($t('4aba33e2-15a7-4795-a462-1ec23b894a6b', { year: props.year })).show();
+            Toast.error($t('%1IU', { year: props.year })).show();
             return;
         }
-        Toast.error($t('f632fd38-97c3-4753-996b-5ff7edf019bf', { year: props.year })).show();
+        Toast.error($t('%1IV', { year: props.year })).show();
         return;
     }
 

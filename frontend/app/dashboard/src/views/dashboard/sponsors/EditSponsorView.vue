@@ -1,21 +1,21 @@
 <template>
-    <SaveView :title="isNew ? $t(`7230cd66-d5b3-4f3e-9cf6-27f5486b52f1`) : $t(`8f236ffd-4cf4-49e7-9056-78105932ea83`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
+    <SaveView :title="isNew ? $t(`%tz`) : $t(`%PM`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
         <h1 v-if="isNew">
-            {{ $t('7230cd66-d5b3-4f3e-9cf6-27f5486b52f1') }}
+            {{ $t('%tz') }}
         </h1>
         <h1 v-else>
-            {{ $t('8f236ffd-4cf4-49e7-9056-78105932ea83') }}
+            {{ $t('%PM') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`a67e18e6-6159-40c9-8515-4de601ff586b`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%PQ`)">
         </STInputBox>
 
-        <UrlInput v-model="url" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :validator="errors.validator" :required="false" />
+        <UrlInput v-model="url" :title="$t('%5I')" :validator="errors.validator" :required="false" />
 
         <p class="style-description-small">
-            {{ $t('aca8abb6-64f7-4554-99bb-d7b721be80af') }}
+            {{ $t('%PN') }}
         </p>
 
         <STList>
@@ -25,41 +25,41 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('a5c520a9-1351-4bca-ad1f-c71550f6c017') }}
+                    {{ $t('%PO') }}
                 </h3>
             </STListItem>
         </STList>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('d101ec4a-219f-4f23-afa0-e8dc4862c354') }}</div>
+            <div>{{ $t('%2D') }}</div>
             <div>
                 <button v-if="logo" type="button" class="button icon trash" @click="logo = null" />
-                <UploadButton v-model="logo" :text="logo ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="logoResolutions" />
+                <UploadButton v-model="logo" :text="logo ? $t(`%He`) : $t(`%Hf`)" :resolutions="logoResolutions" />
             </div>
         </h2>
-        <p>{{ $t('df8e9385-314f-4403-b0d5-e5893f68d442') }}</p>
+        <p>{{ $t('%4D') }}</p>
 
         <ImageComponent v-if="logo" :image="logo" :max-height="150" :auto-height="true" />
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('c56ee3f1-b83d-4118-a703-6f98450508cd') }}</div>
+            <div>{{ $t('%22') }}</div>
             <div>
                 <button v-if="banner" type="button" class="button icon trash" @click="logo = null" />
-                <UploadButton v-model="banner" :text="banner ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
+                <UploadButton v-model="banner" :text="banner ? $t(`%He`) : $t(`%Hf`)" :resolutions="resolutions" />
             </div>
         </h2>
-        <p>{{ $t('b375f5be-879c-4696-8ccf-0e7066e3f5f4') }}</p>
+        <p>{{ $t('%4E') }}</p>
 
         <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true" />
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('092a4a76-8fa0-4a51-b629-dfac29ec2e15') }}
+                {{ $t('%PP') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

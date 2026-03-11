@@ -35,7 +35,7 @@ export class DefaultAgeGroup extends AutoEncoder {
     organizationTagIds: string[] | null = null;
 
     get name() {
-        return Formatter.joinLast(this.names, ', ', ' ' + $t(`411cf334-eebb-4f27-beb6-d81bd544c3f5`) + ' ');
+        return Formatter.joinLast(this.names, ', ', ' ' + $t(`%GT`) + ' ');
     }
 
     @field({

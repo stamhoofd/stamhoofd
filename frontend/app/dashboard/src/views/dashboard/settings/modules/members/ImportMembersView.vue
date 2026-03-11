@@ -1,13 +1,13 @@
 <template>
-    <SaveView :title="$t('c67f13a2-08cb-4c30-a39d-d07679430672')" :loading="saving" :disabled="!file || columns.length == 0 || rowCount === 0" :save-text="$t('a3ea7b14-204b-44b9-abb5-8ced5fc847d1')" @save="goNext">
-        <h1>{{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }}</h1>
+    <SaveView :title="$t('%18D')" :loading="saving" :disabled="!file || columns.length == 0 || rowCount === 0" :save-text="$t('%19q')" @save="goNext">
+        <h1>{{ $t('%18D') }}</h1>
         <p>
-            {{ $t('3fd23349-ffba-4291-be68-2d0c844e5754') }}
+            {{ $t('%19r') }}
         </p>
 
         <p v-if="!hasMembers && $isStamhoofd" class="warning-box">
-            <span>{{ $t('7a7e4a56-9d39-42cf-b4fa-930e43330756') }}
-                <a :href="LocalizedDomains.getDocs('waarom-je-leden-beter-niet-importeert')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
+            <span>{{ $t('%19s') }}
+                <a :href="LocalizedDomains.getDocs('waarom-je-leden-beter-niet-importeert')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
             </span>
         </p>
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -17,10 +17,10 @@
             <span v-else class="icon file-excel color-excel" />
             <div v-if="!file">
                 <h2 class="style-title-list">
-                    {{ $t('2e45c772-02e9-431d-8273-79b3d10b0638') }}
+                    {{ $t('%OZ') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('f21f4f50-f541-4be6-9377-b573d641c227') }}
+                    {{ $t('%19u') }}
                 </p>
             </div>
             <div v-else>
@@ -28,7 +28,7 @@
                     {{ file }}
                 </h2>
                 <p class="style-description">
-                    {{ rowCount }} rijen, {{ columnCount }} {{ $t('dc2128b0-ec7b-463e-abbc-6039d205ec4b') }}
+                    {{ rowCount }} rijen, {{ columnCount }} {{ $t('%19v') }}
                 </p>
             </div>
             <input type="file" multiple style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
@@ -36,10 +36,10 @@
         </label>
 
         <template v-if="sheetSelectionList.length > 1">
-            <STInputBox error-fields="sheet" :error-box="errors.errorBox" :title="$t(`1716d997-8d09-4a95-8950-d9dff3b91cbb`)">
+            <STInputBox error-fields="sheet" :error-box="errors.errorBox" :title="$t(`%1A1`)">
                 <Dropdown v-model="sheetKey">
                     <option :value="null" disabled>
-                        {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
+                        {{ $t('%1Fq') }}
                     </option>
                     <option v-for="key in sheetSelectionList" :key="key" :value="key">
                         {{ key }}
@@ -54,9 +54,9 @@
                 <thead>
                     <tr>
                         <th>
-                            {{ $t('93043ff4-588f-4a1f-a9de-1142379ec2a3') }}
+                            {{ $t('%19w') }}
                         </th>
-                        <th>{{ $t('edb1ddbe-37ad-4448-b133-d4578167e780') }}</th>
+                        <th>{{ $t('%19x') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,7 +74,7 @@
                         <td>
                             <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
                                 <option :value="null" disabled>
-                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
+                                    {{ $t('%1Fq') }}
                                 </option>
                                 <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
                                     <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
@@ -87,11 +87,11 @@
                 </tbody>
             </table>
             <p v-if="file && columns.length > 0" class="warning-box">
-                {{ $t('efcf2c9f-68c9-409e-8e0f-b11f73152d6b') }}
+                {{ $t('%19y') }}
             </p>
             <STErrorsDefault :error-box="errors.errorBox" />
             <hr>
-            <STInputBox :title="$t('8b70623b-ba97-468f-90aa-b1c149393cea')" error-fields="period" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%19z')" error-fields="period" :error-box="errors.errorBox">
                 <RegistrationPeriodSelector v-model="period" :should-disable-locked-periods="true" />
             </STInputBox>
         </template>
@@ -293,7 +293,7 @@ function changedFile(event: any) {
     const reader = new FileReader();
     reader.onload = (e: any) => {
         if (!e.target || !e.target.result) {
-            new CenteredMessage($t(`efec4f91-0618-4509-88a4-a8af49f5e04f`)).addCloseButton().show();
+            new CenteredMessage($t(`%1A2`)).addCloseButton().show();
             return;
         }
 
@@ -303,7 +303,7 @@ function changedFile(event: any) {
         /* DO SOMETHING WITH workbook HERE */
         const keys = Object.keys(workbook.Sheets);
         if (keys.length === 0) {
-            new CenteredMessage($t('152a7321-7b48-448d-9ac2-70c37d3effef')).addCloseButton().show();
+            new CenteredMessage($t('%1A0')).addCloseButton().show();
             return;
         }
         sheets.value = workbook.Sheets;
@@ -494,7 +494,7 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
             }
 
             if (!column.matcher) {
-                throw new Error($t(`d298a037-1da1-4435-a78b-f56b949e9dad`, { column: column.name }));
+                throw new Error($t(`%1A3`, { column: column.name }));
             }
 
             const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject;
@@ -625,7 +625,7 @@ async function shouldNavigateAway() {
     if (!file.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 }
 
 defineExpose({

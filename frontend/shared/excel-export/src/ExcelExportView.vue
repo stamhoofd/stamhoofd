@@ -1,14 +1,14 @@
 <template>
     <SaveView :loading="exporting" save-icon="download" @save="startExport">
         <h1>
-            {{ $t('0302eaa0-ce2a-4ef0-b652-88b26b9c53e9') }}
+            {{ $t('%Gc') }}
         </h1>
 
         <ScrollableSegmentedControl v-if="workbook.sheets.length > 1" v-model="visibleSheet" :items="workbook.sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
-                <span v-if="item.enabledCount === 0" class="icon disabled small" :v-tooltip="$t('7501399f-4ff3-421b-b27a-2b56ca5f6ce9')" />
+                <span v-if="item.enabledCount === 0" class="icon disabled small" :v-tooltip="$t('%kp')" />
             </template>
         </ScrollableSegmentedControl>
 
@@ -25,10 +25,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('5bb88d15-fd82-4d5d-8efc-43e2443d912d') }}
+                    {{ $t('%kq') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('cd511a0e-71cc-44bb-8107-7de1a18dab9d') }}
+                    {{ $t('%kr') }}
                 </p>
             </STListItem>
         </STList>
@@ -127,9 +127,9 @@ async function doExport() {
         if (response.data.url) {
             const url = new URL(response.data.url);
             const filename = Formatter.fileSlug(props.type) + '.xlsx';
-            new Toast($t('306cb08e-ed29-4bbc-acba-ee7a322e58dd'), 'download')
+            new Toast($t('%1B6'), 'download')
                 .setButton(
-                    new ToastButton($t('1adf1842-a0c1-4428-92d8-a8c760e79cf1'), () => {
+                    new ToastButton($t('%1B7'), () => {
                         AppManager.shared.downloadFile(url, filename).catch((e) => {
                             Toast.fromError(e).setHide(15_000).show();
                         });

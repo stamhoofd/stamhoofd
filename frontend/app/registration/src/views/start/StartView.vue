@@ -1,32 +1,32 @@
 <template>
     <section class="st-view">
-        <STNavigationBar :title="$t('c4cc8f8b-d490-4182-ba92-7fce435945e7')" />
+        <STNavigationBar :title="$t('%7k')" />
         <main class="center">
             <h1>
-                {{ $t('c4cc8f8b-d490-4182-ba92-7fce435945e7') }}
+                {{ $t('%7k') }}
             </h1>
 
-            <p>{{ $t('369440db-a9e0-4530-a06b-3ea05cc6a2b0') }}</p>
+            <p>{{ $t('%7') }}</p>
 
             <p v-if="members.length === 0 && !isAcceptingNewMembers" class="info-box icon lock">
-                {{ $t('dd5ee237-2ae7-475c-b58d-3c5a2159f4c5') }}
+                {{ $t('%1Hb') }}
             </p>
 
             <p v-if="members.length === 0 && isAcceptingNewMembers" class="style-button-bar">
                 <button class="button primary" type="button" data-testid="register-member-button" @click="registerMembers">
                     <span class="icon edit" />
-                    <span>{{ $t('d55c9b50-2f86-4e7a-b6a5-2f03c0fad4fa') }}</span>
+                    <span>{{ $t('%XS') }}</span>
                 </button>
 
                 <a v-if="documentationUrl" :href="documentationUrl.toString()" target="_blank" class="button text selected">
                     <span class="icon book" />
-                    <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
+                    <span>{{ $t('%XT') }}</span>
                 </a>
             </p>
             <p v-else-if="documentationUrl" class="style-button-bar">
                 <a :href="documentationUrl.toString()" target="_blank" class="button text selected">
                     <span class="icon book" />
-                    <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
+                    <span>{{ $t('%XT') }}</span>
                 </a>
             </p>
 
@@ -34,7 +34,7 @@
 
             <div v-if="members.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}
+                    {{ $t('%1EH') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -51,14 +51,14 @@
                         </p>
 
                         <p v-if="getRegistrationsForMember(member).length" class="style-description-small">
-                            {{ $t('f87072d0-0c87-4b31-9068-1471a5f5b3ca', {groups: Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name.toString()), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' ')}) }}
+                            {{ $t('%XU', {groups: Formatter.joinLast(getRegistrationsForMember(member).map(r => r.group.settings.name.toString()), ', ', ' ' + $t('%M1') + ' ')}) }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ $t('eb39138f-46b9-4005-b70f-dc1e0f3938f9', {member: member.patchedMember.firstName}) }}
+                            {{ $t('%XV', {member: member.patchedMember.firstName}) }}
                         </p>
 
                         <template #right>
-                            <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('c0736ebd-de06-4d78-a009-7fc4ba5096a8') }}</span>
+                            <span v-if="user && member.id === user.memberId" v-color="member" class="style-tag">{{ $t('%XP') }}</span>
                             <span class="icon gray arrow-right-small" />
                         </template>
                     </STListItem>
@@ -67,14 +67,14 @@
                 <footer class="style-button-bar">
                     <button class="button text" type="button" @click="addNewMember">
                         <span class="icon add" />
-                        <span>{{ $t('22025c96-3f15-41c6-ab2c-0c5fcb3c5aa2') }}</span>
+                        <span>{{ $t('%XW') }}</span>
                     </button>
                 </footer>
             </div>
 
             <div v-if="members.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}
+                    {{ $t('%16X') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -84,10 +84,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('21a07c40-5565-4ad3-bf7a-ca3237c6bcb0') }}
+                            {{ $t('%XX') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('98edeedc-0a99-4fc0-904e-06dcba42f7e1') }}
+                            {{ $t('%XY') }}
                         </p>
 
                         <template #right>
@@ -101,10 +101,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('b4cba044-12c3-464d-8bc1-2873996f02fa') }}
+                            {{ $t('%uC') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('60823584-6df5-4c99-9eca-c5e64d83a730') }}
+                            {{ $t('%XZ') }}
                         </p>
 
                         <template #right>
@@ -118,10 +118,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('6b83343a-5d29-4f59-8b44-db03eb0b3b13') }}
+                            {{ $t('%Xa') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('e1ba3253-f0a0-41b0-95a0-3fc0abb44264') }}
+                            {{ $t('%Xb') }}
                         </p>
 
                         <template #right>
@@ -133,7 +133,7 @@
 
             <div v-if="documents.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('2f140e22-4940-453f-8f49-871a69f0776e') }}
+                    {{ $t('%tw') }}
                 </h2>
                 <STList>
                     <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="onDownloadDocument(document)">
@@ -146,7 +146,7 @@
                         <p class="style-description-small">
                             {{ document.data.description }}
                         </p>
-                        <span v-if="document.status === 'MissingData'" class="style-tag error">{{ $t('21b3891d-7c0e-49ca-ae35-d77d54e9f0c3') }}</span>
+                        <span v-if="document.status === 'MissingData'" class="style-tag error">{{ $t('%Ni') }}</span>
 
                         <template #right>
                             <LoadingButton :loading="isDocumentDownloading(document)">
@@ -210,7 +210,7 @@ defineRoutes([
                     member,
                 };
             }
-            Toast.error($t(`9cfa48c7-980c-4cd5-85ed-2656db040b4c`)).show();
+            Toast.error($t(`%EO`)).show();
             throw new Error('member not found');
         },
 
@@ -277,7 +277,7 @@ async function onDownloadDocument(document: Document) {
     }
     if (document.status === DocumentStatus.MissingData) {
         const member = members.value.find(m => m.id === document.memberId);
-        new Toast($t(`78a4c6c3-c0d0-457c-adfb-44122307161a`, { name: member?.member.firstName ?? $t(`9e5a8bc1-91db-44e5-9059-3312f4145525`) }), 'error red').setHide(20000).show();
+        new Toast($t(`%Xc`, { name: member?.member.firstName ?? $t(`%15V`) }), 'error red').setHide(20000).show();
         return;
     }
     downloadingDocuments.value.push(document as any); // fix for Type instantiation is excessively deep and possibly infinite

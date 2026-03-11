@@ -1,12 +1,12 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t('21127e91-a406-4a40-b9a7-af4e45c1f907')" />
+        <STNavigationBar :title="$t('%Cd')" />
 
         <main>
             <h1>
-                {{ $t('21127e91-a406-4a40-b9a7-af4e45c1f907') }}
+                {{ $t('%Cd') }}
             </h1>
-            <p>{{ $t('3a851e65-6c43-433f-a7af-808ea01f271e') }}</p>
+            <p>{{ $t('%Ce') }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 

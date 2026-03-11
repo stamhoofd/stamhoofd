@@ -1,15 +1,15 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar :title="$t(`05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9`)">
+            <STNavigationBar :title="$t(`%K5`)">
                 <template #right>
                     <button class="button icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
                 </template>
             </STNavigationBar>
 
             <main>
-                <h1>{{ $t('a5b3b5e6-70c0-4818-9548-01f810477cd2') }}</h1>
-                <p>{{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}</p>
+                <h1>{{ $t('%K0') }}</h1>
+                <p>{{ $t('%5P') }}</p>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="createUser">
@@ -17,10 +17,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/laptop-add.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('e5c619de-2d3d-470f-857b-185912b9784e') }}
+                            {{ $t('%Jy') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('af0a4e82-1872-4c61-9b80-fbfb52ef1278') }}
+                            {{ $t('%K1') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -28,10 +28,10 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('cb3e6e8b-ebff-4021-9234-74e33ae44858') }}</h2>
+                <hr><h2>{{ $t('%K2') }}</h2>
 
                 <p v-if="apiUsers.length === 0" class="info-box">
-                    {{ $t('c2dad537-31e8-412c-8002-c7210d6f33d0') }}
+                    {{ $t('%K3') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="user in apiUsers" :key="user.id" :selectable="true" class="right-stack" @click="editUser(user)">
@@ -40,16 +40,16 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            <span>{{ user.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}</span>
+                            <span>{{ user.name || $t('%CL') }}</span>
                         </h2>
                         <p class="style-description-small">
                             {{ permissionList(user) }}
                         </p>
                         <p class="style-description-small">
-                            {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }} {{ formatDate(user.createdAt) }}
+                            {{ $t('%1JJ') }} {{ formatDate(user.createdAt) }}
                         </p>
                         <p v-if="user.expiresAt" class="style-description-small">
-                            {{ $t('52ab641f-5864-4fac-8c52-0df00ad7e0a9') }} {{ formatDate(user.expiresAt) }}
+                            {{ $t('%K4') }} {{ formatDate(user.expiresAt) }}
                         </p>
 
                         <template #right>
@@ -126,7 +126,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         const list: string[] = [];
         const o = user.permissions?.organizationPermissions.get(this.organization.id);
         if (o?.level === PermissionLevel.Full) {
-            list.push($t(`6e948886-0b41-49e8-80be-0e2e3c795359`));
+            list.push($t(`%uG`));
         }
 
         for (const role of o?.roles ?? []) {

@@ -2,13 +2,13 @@
     <LoadingBoxTransition :error-box="errors.errorBox">
         <div v-if="detailedItem" class="container">
             <template v-if="detailedItem.filteredBalanceItems.length">
-                <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['grouped', 'individual']" :labels="[$t(`07929b60-3a4c-4de1-8d85-c25e836e0535`), $t(`9544ddfe-bde7-452b-8bfb-0f3ffe8cd0e8`)]" />
+                <SegmentedControl v-if="!hideSegmentedControl" v-model="selectedTab" :items="['grouped', 'individual']" :labels="[$t(`%10j`), $t(`%10i`)]" />
                 <ReceivableBalanceList v-if="selectedTab === 'individual'" :item="detailedItem" />
                 <GroupedBalanceList v-else :item="detailedItem" />
                 <BalancePriceBreakdown :item="detailedItem" />
             </template>
             <p v-else class="info-box">
-                {{ $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') }}
+                {{ $t('%hX') }}
             </p>
 
             <STList v-if="hasWrite">
@@ -21,10 +21,10 @@
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('f2babc21-ce3a-4000-acb5-c1623b7b9e43') }}
+                        {{ $t('%gx') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('b79653ad-3b9b-4586-bd26-cbca7ccb2ecf') }}
+                        {{ $t('%gy') }}
                     </p>
 
                     <template #right>
@@ -42,7 +42,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('b60dbf08-bc14-4cf0-81c4-a4bcb20e28cd') }}
+                        {{ $t('%hY') }}
                     </h3>
                     <p class="style-description-small">
                         {{ PaymentTypeHelper.getDescription(PaymentType.Payment) }}
@@ -63,7 +63,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('81f26de9-5a67-4ea2-985e-069aa4803409') }}
+                        {{ $t('%hZ') }}
                     </h3>
                     <p class="style-description-small">
                         {{ PaymentTypeHelper.getDescription(PaymentType.Refund) }}
@@ -83,7 +83,7 @@
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('f70ecedf-608c-4330-89e6-8e0a7a5ac264') }}
+                        {{ $t('%16w') }}
                     </h3>
                     <p class="style-description-small">
                         {{ PaymentTypeHelper.getDescription(PaymentType.Reallocation) }}
@@ -96,27 +96,27 @@
             </STList>
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('5c75e9bf-1b64-4d28-a435-6e33247d5170') }}</h2>
-                <p>{{ $t('f06c6769-1e42-4a15-b44d-f74a32980d26') }}</p>
+                <hr><h2>{{ $t('%wc') }}</h2>
+                <p>{{ $t('%ha') }}</p>
 
                 <STList>
                     <PaymentRow v-for="payment of pendingPayments" :key="payment.id" :payments="pendingPayments" :payment="payment" />
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h2>
+            <hr><h2>{{ $t('%1JH') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
-                {{ $t('a0b932dc-3f60-45a5-aca3-32918474e315') }}
+                {{ $t('%hb') }}
             </p>
 
             <STList v-else>
                 <PaymentRow v-for="payment of succeededPayments" :key="payment.id" :payment="payment" :payments="succeededPayments" />
             </STList>
 
-            <hr><h2>{{ $t('c4fe92c5-851c-422a-842b-da21e56e6f4c') }}</h2>
+            <hr><h2>{{ $t('%hc') }}</h2>
 
-            <p>{{ $t('18bfe74f-21d2-4eec-aced-31f6e8383cda') }}</p>
+            <p>{{ $t('%hd') }}</p>
 
             <STList v-if="detailedItem.object.contacts.length" class="info">
                 <STListItem v-for="(contact, index) of detailedItem.object.contacts" :key="index">
@@ -127,12 +127,12 @@
                         <EmailAddress :email="email" />
                     </p>
                     <p v-if="contact.emails.length === 0" class="style-definition-text">
-                        {{ $t('96de526a-0e18-43d1-88aa-9b265af6e42d') }}
+                        {{ $t('%1Mo') }}
                     </p>
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                {{ $t('6b4ac7f1-7e9f-489b-87e0-58fc493209f2') }}
+                {{ $t('%he') }}
             </p>
         </div>
     </LoadingBoxTransition>
@@ -208,7 +208,7 @@ async function reload() {
             // Show a toast when an automatic reallocation happened because of some change
             if ((newLastPayment && !lastPayment) || (newLastPayment && lastPayment && lastPayment.createdAt < newLastPayment.createdAt)) {
                 if (newLastPayment.type === PaymentType.Reallocation) {
-                    new Toast($t('68039ee8-fdfe-40ad-bee2-0670651b0e09'), 'wand ' + newLastPayment.theme).show();
+                    new Toast($t('%1I4'), 'wand ' + newLastPayment.theme).show();
                 }
             }
         }

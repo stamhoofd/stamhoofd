@@ -5,20 +5,20 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`%Gq`)">
         </STInputBox>
 
         <div class="container">
-            <hr><h2>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h2>
-            <p>{{ $t('b1cb5299-5325-4505-ba30-a7b0ae327679') }}</p>
+            <hr><h2>{{ $t('%Jm') }}</h2>
+            <p>{{ $t('%Jn') }}</p>
 
             <EditUserPermissionsBox :user="patched" @patch:user="addPatch($event)" />
         </div>
 
         <div class="container">
-            <hr><h2>{{ $t('40abbf9c-2dd3-471a-a699-f6af656feb5e') }}</h2>
-            <p>{{ $t('664063fe-6e8f-4439-bb86-07d346e803de') }}</p>
+            <hr><h2>{{ $t('%r') }}</h2>
+            <p>{{ $t('%Jo') }}</p>
 
             <STList>
                 <STListItem v-if="canAlterRateLimits || rateLimits === ApiUserRateLimits.Normal" :selectable="canAlterRateLimits" class="right-stack right-top" element-name="label">
@@ -26,17 +26,17 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.Normal" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('ab858fd6-4451-4d88-869e-be425a661169') }}
+                        {{ $t('%2W') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        {{ $t('288fd815-8771-4524-9e4d-6e90bd2eec11') }}
+                        {{ $t('%Jp') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('be918896-7e92-4ac7-9cbe-fba5afdd8120') }}
+                        {{ $t('%Jq') }}
                     </p>
 
                     <template v-if="canAlterRateLimits" #right>
-                        <span class="style-tag">{{ $t('706d4485-be6b-418c-bbf1-5fe05e34e076') }}</span>
+                        <span class="style-tag">{{ $t('%Jr') }}</span>
                     </template>
                 </STListItem>
 
@@ -45,13 +45,13 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.Medium" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('36c579f6-0c98-4946-9d6b-eec3f0db56d6') }}
+                        {{ $t('%Js') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        {{ $t('cc4f0640-cdfb-473f-9f94-cc6e11b361ae') }}
+                        {{ $t('%Jt') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('c1bfbd59-c12d-43e2-88f7-aa08798d1ea6') }}
+                        {{ $t('%Ju') }}
                     </p>
                 </STListItem>
 
@@ -60,13 +60,13 @@
                         <Radio v-model="rateLimits" :value="ApiUserRateLimits.High" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('98469c78-6bd6-4354-b7d2-07e5b48aec12') }}
+                        {{ $t('%Jv') }}
                     </h3>
                     <p v-if="canAlterRateLimits" class="style-description-small">
-                        {{ $t('a379312a-007d-46a2-9533-33c15c524504') }}
+                        {{ $t('%Jw') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('f1597fb7-dd45-4d0c-8efc-627b464e6d1b') }}
+                        {{ $t('%Jx') }}
                     </p>
                 </STListItem>
             </STList>
@@ -101,9 +101,9 @@ const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
 
 const title = computed(() => {
     if (props.isNew) {
-        return $t(`e5c619de-2d3d-470f-857b-185912b9784e`);
+        return $t(`%Jy`);
     }
-    return $t(`ce422f34-27a2-4dab-b307-d3aaecb9f5b7`);
+    return $t(`%Jz`);
 });
 
 const name = computed({
@@ -132,7 +132,7 @@ async function save() {
     if ((name.value?.length ?? 0) < 2) {
         errorGroup.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`396f75d7-e7d9-42d9-a50e-9ace51c92fe6`),
+            message: $t(`%11M`),
             field: 'name',
         }));
     }
@@ -189,7 +189,7 @@ async function save() {
             });
         }
         else {
-            Toast.success($t('d2047614-32d8-436f-9b95-dff31cfe20de', { name: user.name ?? '?' })).setHide(5000).show();
+            Toast.success($t('%CH', { name: user.name ?? '?' })).setHide(5000).show();
             await pop({ force: true });
         }
     }
@@ -209,7 +209,7 @@ async function doDelete() {
         return false;
     }
 
-    if (!await CenteredMessage.confirm($t('7b900dda-9d43-4373-ae86-34ec7f236cca'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'))) {
+    if (!await CenteredMessage.confirm($t('%CI'), $t('%CJ'))) {
         return false;
     }
 
@@ -226,7 +226,7 @@ async function doDelete() {
         await pop({ force: true });
 
         deleting.value = false;
-        Toast.success($t('5fd1f84b-ed82-4022-80d0-49caad220c88', { name: props.user.name ?? '?' })).setHide(2000).show();
+        Toast.success($t('%CK', { name: props.user.name ?? '?' })).setHide(2000).show();
     }
     catch (e) {
         console.error(e);
@@ -240,7 +240,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

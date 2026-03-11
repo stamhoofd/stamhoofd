@@ -1,7 +1,7 @@
 <template>
     <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="null" :Route="Route">
         <template #empty>
-            {{ $t('0637e394-fbd7-42ea-9a1b-5acdcc86419a') }}
+            {{ $t('%77') }}
         </template>
     </ModernTableView>
 </template>
@@ -33,7 +33,7 @@ const props = withDefaults(
 );
 
 const title = computed(() => {
-    return $t('231f28d7-292a-43bc-877b-751012b6ae48');
+    return $t('%99');
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
@@ -101,7 +101,7 @@ const allColumns: Column<ObjectType, any>[] = [
         ? [
                 new Column<ObjectType, string | null>({
                     id: 'type',
-                    name: $t('23671282-34da-4da9-8afd-503811621055'),
+                    name: $t('%1LP'),
                     getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType)),
                     format: value => value || 'Geen',
                     getStyle: value => !value ? 'gray' : '',
@@ -175,11 +175,11 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const memberOptions: RecipientChooseOneOption = {
         type: 'ChooseOne',
-        name: $t('19da8d23-acea-43c2-bfdd-742447ca57f1'),
+        name: $t('%1EH'),
         options: [
             {
                 id: 'accounts',
-                name: $t('379d43fb-034f-4280-bb99-ea658eaec729'),
+                name: $t('%L8'),
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.ReceivableBalances,
@@ -197,7 +197,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const organizationOption: RecipientMultipleChoiceOption = {
         type: 'MultipleChoice',
-        name: $t('da4e80d0-e482-4cef-80a6-c49e445b0f4e'),
+        name: $t('%1HI'),
         options: [],
         defaultSelection: organization.value?.privateMeta?.balanceNotificationSettings.getOrganizationContactsFilterResponsibilityIds() ?? [],
         build: (selectedIds: string[]) => {

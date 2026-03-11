@@ -11,7 +11,7 @@ export class InvoiceService {
                 code: 'missing_customer',
                 message: 'Missing customer',
                 field: 'customer',
-                human: $t('cb28c759-7ab7-4a07-8972-9523393993ac'),
+                human: $t('%1Iw'),
             });
         }
 
@@ -38,7 +38,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'missing_company',
                 message: 'Missing invoice settings (companies)',
-                human: $t('abd43002-de39-4d64-96c0-1c801c27e764', {
+                human: $t('%1Ix', {
                     'organization-name': organization.name,
                 }),
             });
@@ -137,7 +137,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'payableRoundingAmount cannot be more than 10 cent',
-                human: $t('69832bb4-18a2-428d-a84d-89675ae67016'),
+                human: $t('%1LG'),
                 field: 'payableRoundingAmount',
             });
         }

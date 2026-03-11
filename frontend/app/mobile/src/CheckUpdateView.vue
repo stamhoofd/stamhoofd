@@ -8,13 +8,13 @@
                     {{ status.options.customText }}
                 </h1>
                 <h1 v-else-if="status.status === 'checking'">
-                    {{ $t('fa6e6adf-da40-4f05-89c3-721cbb1d33f9') }}
+                    {{ $t('%Wx') }}
                 </h1>
                 <h1 v-else-if="status.status === 'downloading'">
-                    {{ $t('63af45b3-7fc7-4c32-b299-2fab446d4f13') }}
+                    {{ $t('%Wy') }}
                 </h1>
                 <h1 v-else-if="status.status === 'installing'">
-                    {{ $t('e83c36c6-d9fb-47fa-8351-e9b34a0a484d') }}
+                    {{ $t('%Wz') }}
                 </h1>
 
                 <div class="comment-box">

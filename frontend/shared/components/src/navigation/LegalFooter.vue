@@ -7,7 +7,7 @@
                     -
                 </template>
                 <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    {{ $t('00c90aa3-2d42-45bc-a3e7-56565b7a4e0e') }}
+                    {{ $t('%G') }}
                 </a>
 
                 <template v-for="policy in policies" :key="policy.id">
@@ -22,7 +22,7 @@
                 </template>
 
                 <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    {{ $t('9f4f2cef-7466-42e3-bca3-d3bfd9f29aa4') }}
+                    {{ $t('%Oj') }}
                 </a>
 
                 <template v-if="isLoggedIn">
@@ -30,16 +30,16 @@
                 </template>
 
                 <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
-                    {{ $t('e3398474-26b0-49d4-9f64-bae38495fb4f') }}
+                    {{ $t('%12N') }}
                 </button>
 
                 <br>
             </aside>
             <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
             <div v-else>
-                <a v-if="hasTickets" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('e5749f83-1a33-4185-a07a-b2beea3b69ca') }} <Logo /></a>
-                <a v-else-if="isWebshop" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('e38c80b5-b3be-48dd-8646-2c386477b1e5') }} <Logo /></a>
-                <a v-else :href="'https://'+$domains.marketing+'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('6a5df3c9-cb80-4f5d-9b5d-94e180bac851') }} <Logo /></a>
+                <a v-if="hasTickets" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('%Y3') }} <Logo /></a>
+                <a v-else-if="isWebshop" :href="'https://'+$domains.marketing+'?utm_medium=webshop'">{{ $t('%gB') }} <Logo /></a>
+                <a v-else :href="'https://'+$domains.marketing+'/ledenadministratie?utm_medium=ledenportaal'">{{ $t('%XC') }} <Logo /></a>
             </div>
         </div>
     </div>
@@ -70,7 +70,7 @@ const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 const company = computed(() => props.organization.meta.companies[0] as Company | undefined);
 
 async function logout() {
-    if (!(await CenteredMessage.confirm($t(`95121e0b-413e-4f98-8e0c-a74bbbdcfd6d`), $t(`3b48e8f8-5ab4-4fb0-b6db-2906de2f6869`), $t(`f38e1ff9-bd43-419e-81b5-eb26fc3c594a`)))) {
+    if (!(await CenteredMessage.confirm($t(`%10Q`), $t(`%10R`), $t(`%10S`)))) {
         return;
     }
     await context.value.logout();

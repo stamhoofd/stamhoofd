@@ -61,33 +61,33 @@ function getReplacements() {
      * Note: please also add the corresponding smart variable to shared/structures/src/email/EditorSmartVariable.ts
      * and the corresponding buttons to shared/structures/src/email/EditorSmartButton.ts
      */
-    const htmlPlaceholder = `<p class="description">${$t('2302cff3-771a-47be-9edd-146fb4b4ea88')}</p>`;
-    const textPlaceholder = $t(`734e03f9-3d03-4c4c-929f-657af725e4f0`);
+    const htmlPlaceholder = `<p class="description">${$t('%13W')}</p>`;
+    const textPlaceholder = $t(`%13X`);
 
     return {
         greeting: Replacement.create({
             token: 'greeting',
-            value: $t(`55c039f3-987d-4f42-9db4-b05dc9a6d996`),
+            value: $t(`%13Y`),
         }),
         firstName: Replacement.create({
             token: 'firstName',
-            value: $t(`b115e024-edc7-401b-8e41-2da247822e9e`),
+            value: $t(`%13Z`),
         }),
         lastName: Replacement.create({
             token: 'lastName',
-            value: $t(`7c619773-33de-451c-9f8e-695e871058bb`),
+            value: $t(`%2c`),
         }),
         email: Replacement.create({
             token: 'email',
-            value: $t(`46e8393a-144d-477e-9b9e-c79616e4b9a7`),
+            value: $t(`%13a`),
         }),
         fromAddress: Replacement.create({
             token: 'fromAddress',
-            value: $t(`c5e8403a-3d2c-46f4-b21f-03be750eacbd`),
+            value: $t(`%13b`),
         }),
         fromName: Replacement.create({
             token: 'fromName',
-            value: $t(`1e69f4ff-0496-4d23-a2f4-0a116b9c35f0`),
+            value: $t(`%13c`),
         }),
         paymentUrl: Replacement.create({
             token: 'paymentUrl',
@@ -106,11 +106,11 @@ function getReplacements() {
         }),
         objectName: Replacement.create({
             token: 'objectName',
-            value: $t(`db31945c-b255-4f37-b866-489befc61810`),
+            value: $t(`%13d`),
         }),
         resetUrl: Replacement.create({
             token: 'resetUrl',
-            value: $t(`80c2fd05-aba8-4261-bf68-2f2e07ae872b`),
+            value: $t(`%13e`),
         }),
         confirmEmailUrl: Replacement.create({
             token: 'confirmEmailUrl',
@@ -122,15 +122,15 @@ function getReplacements() {
         }),
         organizationName: Replacement.create({
             token: 'organizationName',
-            value: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
+            value: $t('%D'),
         }),
         platformOrOrganizationName: Replacement.create({
             token: 'platformOrOrganizationName',
-            value: $t('6f77926b-801a-477d-8254-78166ca8e6be'),
+            value: $t('%Aq'),
         }),
         feedbackText: Replacement.create({
             token: 'feedbackText',
-            html: '<p class="pre-wrap"><em>' + Formatter.escapeHtml($t('ac49cf9f-c0de-479c-829d-99e7a31874d2')) + '</em></p>',
+            html: '<p class="pre-wrap"><em>' + Formatter.escapeHtml($t('%B5')) + '</em></p>',
         }),
         downloadUrl: Replacement.create({
             token: 'downloadUrl',
@@ -142,19 +142,19 @@ function getReplacements() {
         }),
         submitterName: Replacement.create({
             token: 'submitterName',
-            value: $t(`7afd1f1f-f818-40c9-b872-32d93be3958b`),
+            value: $t(`%13f`),
         }),
         eventName: Replacement.create({
             token: 'eventName',
-            value: $t('aaaaf4eb-6714-42b8-bd94-aa167246cac6'),
+            value: $t('%Ar'),
         }),
         dateRange: Replacement.create({
             token: 'dateRange',
-            value: $t('b66ae14a-e02d-4c80-bec2-d7440da7643f'),
+            value: $t('%As'),
         }),
         inviterName: Replacement.create({
             token: 'inviterName',
-            value: $t(`ce00a7f3-4be9-4da8-833f-e13ff3b3fb14`),
+            value: $t(`%13g`),
         }),
         validUntil: Replacement.create({
             token: 'validUntil',
@@ -166,19 +166,19 @@ function getReplacements() {
         }),
         firstNameMember: Replacement.create({
             token: 'firstNameMember',
-            value: $t(`65c9a375-fbca-4a27-9a42-01d49f7f9588`),
+            value: $t(`%13h`),
         }),
         lastNameMember: Replacement.create({
             token: 'lastNameMember',
-            value: $t(`e028c78a-166d-4531-b03b-99a573f1661b`),
+            value: $t(`%13i`),
         }),
         registerUrl: Replacement.create({
             token: 'registerUrl',
-            value: $t(`c89a6220-9e60-4f0c-9404-d9cb0fc301f7`),
+            value: $t(`%13j`),
         }),
         groupName: Replacement.create({
             token: 'groupName',
-            value: $t('07290df8-cad5-40df-9e10-3c7eccc049bc'),
+            value: $t('%C0'),
         }),
         signInUrl: Replacement.create({
             token: 'signInUrl',
@@ -194,20 +194,20 @@ function getReplacements() {
         }),
         loginDetails: Replacement.create({
             token: 'loginDetails',
-            html: `<p class="description"><em>${$t('5403b466-98fe-48ac-beff-38acf7c9734d', {
-                email: '<strong>' + $t(`46e8393a-144d-477e-9b9e-c79616e4b9a7`) + '</strong>' },
-            )} ${$t('e2519632-c495-4629-9ddb-334a4f00e272', {
-                firstName: $t(`65c9a375-fbca-4a27-9a42-01d49f7f9588`),
+            html: `<p class="description"><em>${$t('%1EA', {
+                email: '<strong>' + $t(`%13a`) + '</strong>' },
+            )} ${$t('%1EC', {
+                firstName: $t(`%13h`),
                 securityCode: `<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>`,
             })}</em></p>`,
         }),
         mailDomain: Replacement.create({
             token: 'mailDomain',
-            value: $t(`aa5606d0-ed51-4228-938e-656da8c41cfc`),
+            value: $t(`%13k`),
         }),
         paymentMethod: Replacement.create({
             token: 'paymentMethod',
-            value: $t(`8f9575f3-9787-4fa5-9ddf-dd1fa4103996`),
+            value: $t(`%1S`),
         }),
         priceToPay: Replacement.create({
             token: 'priceToPay',
@@ -223,15 +223,15 @@ function getReplacements() {
         }),
         transferBankCreditor: Replacement.create({
             token: 'transferBankCreditor',
-            value: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
+            value: $t('%D'),
         }),
         overviewContext: Replacement.create({
             token: 'overviewContext',
-            value: $t(`967a1b0b-88cd-4b95-9008-f0610ed64b24`),
+            value: $t(`%13l`),
         }),
         memberNames: Replacement.create({
             token: 'memberNames',
-            value: $t(`990581a8-e4db-4c33-b36b-4df045f8c294`),
+            value: $t(`%13m`),
         }),
         overviewTable: Replacement.create({
             token: 'overviewTable',
@@ -291,7 +291,7 @@ function getReplacements() {
         }),
         webshopName: Replacement.create({
             token: 'webshopName',
-            value: $t(`7c04a4f3-25c5-4663-9833-87a7aecbf0b9`),
+            value: $t(`%1K`),
         }),
 
     };

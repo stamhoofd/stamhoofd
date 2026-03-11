@@ -7,20 +7,20 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
 
     const data = [
         {
-            title: $t('17772225-f9c0-4707-9e2a-97f94de4e9d0'),
+            title: $t('%xA'),
             value: '' + (order.number ?? '?'),
         },
         {
             title: ((order) => {
                 if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                    return $t(`8113733b-00ea-42ae-8829-6056774a8be0`);
+                    return $t(`%Uq`);
                 }
 
                 if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                    return $t(`7eec15d0-4d60-423f-b860-4f3824271578`);
+                    return $t(`%TW`);
                 }
 
-                return $t(`8a910c54-1b2d-4963-9128-2cab93b0151b`);
+                return $t(`%Us`);
             })(order),
             value: ((order) => {
                 if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
@@ -38,7 +38,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
             (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout || order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((order.data.checkoutMethod as any)?.address)
                 ? [
                         {
-                            title: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
+                            title: $t(`%Cn`),
                             value: ((order) => {
                                 return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
                             })(order),
@@ -47,21 +47,21 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
                 : []
         ),
         {
-            title: $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
+            title: $t(`%7R`),
             value: Formatter.capitalizeFirstLetter(order.data.timeSlot?.dateString() ?? ''),
         },
         {
-            title: $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
+            title: $t(`%1GD`),
             value: order.data.timeSlot?.timeRangeString() ?? '',
         },
         {
-            title: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+            title: $t(`%Gq`),
             value: order.data.customer.name,
         },
         ...(order.data.customer.phone
             ? [
                     {
-                        title: $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
+                        title: $t(`%18Z`),
                         value: order.data.customer.phone,
                     },
                 ]
@@ -78,7 +78,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
             (order.data.paymentMethod !== PaymentMethod.Unknown)
                 ? [
                         {
-                            title: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
+                            title: $t(`%M7`),
                             value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(order.data.paymentMethod)),
                         },
                     ]

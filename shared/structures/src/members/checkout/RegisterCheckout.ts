@@ -291,7 +291,7 @@ export class RegisterCheckout {
             throw new SimpleError({
                 code: 'forbidden',
                 message: 'Permission denied: you are not allowed to delete registrations',
-                human: $t(`9889c815-5026-4b38-b62a-bb1e438e82b0`),
+                human: $t(`%qr`),
             });
         }
 
@@ -317,7 +317,7 @@ export class RegisterCheckout {
                 throw new SimpleError({
                     code: 'negative_price',
                     message: 'Total price cannot be negative',
-                    human: $t(`e0883f65-bd4d-4faa-aba2-71d96001fe42`),
+                    human: $t(`%17E`),
                 });
             }
         }
@@ -365,7 +365,7 @@ export class RegisterCheckout {
             if (value !== 0) {
                 if (value < 0) {
                     all.push({
-                        name: $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + discount.name + ')',
+                        name: $t('%175') + ' (' + discount.name + ')',
                         price: -value,
                     });
                 }
@@ -380,26 +380,26 @@ export class RegisterCheckout {
 
         all.push(...[
             {
-                name: $t(`3a50492b-087a-4a83-a386-4d30fabbc3c2`),
+                name: $t(`%17F`),
                 price: -this.cart.refund,
             },
             {
-                name: $t(`307f8b34-7f74-4045-9335-c7f0d7649b70`),
+                name: $t(`%qs`),
                 price: this.administrationFee,
             },
             {
-                name: $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`),
+                name: $t(`%Ot`),
                 price: this.freeContribution,
             },
             {
-                name: $t(`aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689`),
+                name: $t(`%17G`),
                 price: this.cart.getCancellationFees(this.cancellationFeePercentage),
             },
         ].filter(a => a.price !== 0));
 
         if (all.length > 0 && (this.cart.price + this.cart.priceDueLater) !== 0) {
             all.unshift({
-                name: $t(`26369a8f-8080-4f00-af46-576fdf563ced`),
+                name: $t(`%xJ`),
                 price: this.cart.price + this.cart.priceDueLater,
             });
         }
@@ -409,7 +409,7 @@ export class RegisterCheckout {
         if (totalLater !== 0) {
             all.push(
                 {
-                    name: $t(`3b051406-b285-4f04-a80d-b98c966cbb1c`),
+                    name: $t(`%10Z`),
                     price: totalLater,
                 },
             );
@@ -417,13 +417,13 @@ export class RegisterCheckout {
 
         if (this.isAdminFromSameOrganization) {
             all.push({
-                name: (this.totalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')),
+                name: (this.totalPrice >= 0 ? $t('%vb') : $t('%vc')),
                 price: Math.abs(this.totalPrice),
             });
         }
         else {
             all.push({
-                name: this.cart.priceDueLater ? $t(`35337319-2bc6-41d6-9427-c1974d8a37ae`) : $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
+                name: this.cart.priceDueLater ? $t(`%10c`) : $t(`%xL`),
                 price: this.totalPrice,
             });
         }

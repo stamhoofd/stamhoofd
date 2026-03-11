@@ -13,7 +13,7 @@
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">{{ $t('a841013e-9ea0-4c17-9225-31a6a09d98c4') }}</span>
+                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">{{ $t('%kQ') }}</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}
@@ -109,20 +109,20 @@ const hasNonPayconiq = computed(() => {
 function getName(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: return 'Payconiq by Bancontact';
-        case PaymentMethod.Transfer: return $t(`cffa7f10-50e3-4da2-946c-5c60fc3fa2cf`);
-        case PaymentMethod.DirectDebit: return $t(`001d60ee-93ad-481d-a264-7ee0d2e6c906`);
+        case PaymentMethod.Transfer: return $t(`%12j`);
+        case PaymentMethod.DirectDebit: return $t(`%12k`);
     }
     return PaymentMethodHelper.getNameCapitalized(paymentMethod, props.context);
 }
 
 function getDescription(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
-        case PaymentMethod.Payconiq: return $t(`e92b72a2-177b-4a1c-9137-f2e2c6ffe724`);
-        case PaymentMethod.Transfer: return $t(`6896f79a-a7f7-423d-9907-491f90a10daa`);
+        case PaymentMethod.Payconiq: return $t(`%12l`);
+        case PaymentMethod.Transfer: return $t(`%12m`);
         case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? '' : '';
-        case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? $t(`21e54de0-fcb5-44b3-8446-f3e761e0a9b1`) : '';
+        case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? $t(`%12n`) : '';
         case PaymentMethod.Unknown: return '';
-        case PaymentMethod.DirectDebit: return $t(`933a58fa-2f3e-4eae-893c-790a3c5b771a`);
+        case PaymentMethod.DirectDebit: return $t(`%12o`);
         case PaymentMethod.CreditCard: return '';
         case PaymentMethod.PointOfSale: return '';
     }

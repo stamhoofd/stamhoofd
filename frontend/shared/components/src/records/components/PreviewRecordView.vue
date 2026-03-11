@@ -1,12 +1,12 @@
 <template>
     <div class="st-view preview-record-view">
-        <STNavigationBar :title="$t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`)" />
+        <STNavigationBar :title="$t(`%ID`)" />
 
         <main>
             <h1>
-                {{ $t('0e35cf4e-81ea-41f3-973e-d7b9421363dc') }}
+                {{ $t('%jH') }}
             </h1>
-            <p>{{ $t('8ea4aba7-c146-4935-9117-7e66a35ef6c8') }}</p>
+            <p>{{ $t('%jI') }}</p>
 
             <hr><RecordAnswerInput :record="record" :answers="recordAnswers" :validator="validator" @patch="addPatch" />
 
@@ -18,7 +18,7 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="dismiss()">
-                    {{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}
+                    {{ $t('%9b') }}
                 </button>
             </template>
         </STToolbar>

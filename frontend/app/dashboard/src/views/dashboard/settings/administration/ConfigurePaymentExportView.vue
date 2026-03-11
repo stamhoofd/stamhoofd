@@ -1,30 +1,30 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('5dc070ea-ed3e-4684-b0b4-16a9defc4ed4')" :title="$t(`5dc070ea-ed3e-4684-b0b4-16a9defc4ed4`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('%Oy')" :title="$t(`%Oy`)" @save="save">
         <h1>
-            {{ $t('48533fc2-71ed-4210-96b6-f27239ebdcc7') }}
+            {{ $t('%Oz') }}
         </h1>
 
         <STErrorsDefault :error-box="errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errorBox" :title="$t(`1e43813a-f48e-436c-bb49-e9ebb0f27f58`)">
+            <STInputBox error-fields="startDate" :error-box="errorBox" :title="$t(`%5M`)">
                 <DateSelection v-model="startDate" />
             </STInputBox>
 
-            <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t(`f3cc0597-fe12-4cb1-bd41-4c7ce5d59235`)">
+            <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t(`%3w`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
         </div>
 
         <p class="style-description-small">
-            {{ $t('ccaa7fd8-9ffc-4abe-8099-c838c80ab609') }}: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
+            {{ $t('%P0') }}: <span v-for="(suggestion, index) in dateRangeSuggestions" :key="suggestion.name">
                 <button type="button" class="inline-link" :class="isSuggestionSelected(suggestion) ? {secundary: false} : {secundary: true}" @click="selectSuggestion(suggestion)">
                     {{ suggestion.name }}
                 </button><template v-if="index < dateRangeSuggestions.length - 1">, </template>
             </span>
         </p>
 
-        <hr><h2>{{ $t('12b644c9-c1a7-4930-afb2-79f62648d243') }}</h2>
+        <hr><h2>{{ $t('%O7') }}</h2>
 
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label">
@@ -38,7 +38,7 @@
         </STList>
 
         <template v-if="allPaymentProviders.length">
-            <hr><h2>{{ $t('46c3ece9-3197-4668-9528-b1258b77e789') }}</h2>
+            <hr><h2>{{ $t('%40') }}</h2>
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">
@@ -53,17 +53,17 @@
         </template>
 
         <template v-if="getProvider('Stripe' as any) || useUTCTimezone">
-            <hr><h2>{{ $t('1f618c07-ec09-4465-b7af-59e30b0c7585') }}</h2>
+            <hr><h2>{{ $t('%P1') }}</h2>
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox v-model="useUTCTimezone" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('2b87cd84-5314-4fbd-874c-3556a6c9c033') }}
+                        {{ $t('%P2') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('b7f6b10c-cf68-44fd-a36e-3dd13aecd7f6') }}
+                        {{ $t('%P3') }}
                     </p>
                 </STListItem>
             </STList>

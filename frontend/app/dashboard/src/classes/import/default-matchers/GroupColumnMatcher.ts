@@ -36,7 +36,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`524de240-27b9-4fe3-9249-b2e49f1872bd`),
+                message: $t(`%18S`),
             });
         }
 
@@ -44,7 +44,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (cell.t !== 's' || typeof cell.v !== 'string' || !cell.v) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`060e319c-16cb-4ff6-aafe-e2beec83e2fc`),
+                message: $t(`%18T`),
             });
         }
 
@@ -63,7 +63,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!minErrorGroup) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`0ef6349f-0540-4c34-bc51-9919d38dc3ff`, { group: value }),
+                message: $t(`%18U`, { group: value }),
             });
         }
     }

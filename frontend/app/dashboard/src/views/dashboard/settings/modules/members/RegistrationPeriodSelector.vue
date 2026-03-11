@@ -1,7 +1,7 @@
 <template>
     <Dropdown :model-value="props.modelValue.id" :disabled="isSinglePeriod" @update:model-value="onUpdate($event)">
         <option v-if="isSinglePeriod" :value="periods[0].id">
-            {{ $t('82d2825a-998b-4c0d-b109-f78ccc8d376f') }}
+            {{ $t('%1AG') }}
         </option>
         <template v-else>
             <option v-for="period in periods" :key="period.id" :value="period.id" :disabled="shouldDisableLockedPeriods && period.period.locked">

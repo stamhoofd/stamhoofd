@@ -2,11 +2,11 @@
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
             <p v-if="isLimitedGroup" class="style-description-block">
-                {{ $t('b91c82a6-67c0-451f-867c-8a3468d6381c') }}
+                {{ $t('%1HO') }}
             </p>
 
             <template #empty>
-                {{ $t('22f14cbd-ccaf-41a7-a7ca-15272d6203b9') }}
+                {{ $t('%e3') }}
             </template>
         </ModernTableView>
     </LoadingViewTransition>
@@ -59,7 +59,7 @@ const title = computed(() => {
         return props.group.settings.name.toString();
     }
 
-    return $t(`19da8d23-acea-43c2-bfdd-742447ca57f1`);
+    return $t(`%1EH`);
 });
 
 const estimatedRows = computed(() => {
@@ -262,7 +262,7 @@ const excludeEdit = props.group && props.group.type === GroupType.EventRegistrat
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
-        name: $t(`162644a1-aee8-497b-b837-04abb995047f`),
+        name: $t(`%zh`),
         icon: 'add',
         priority: 0,
         groupIndex: 1,

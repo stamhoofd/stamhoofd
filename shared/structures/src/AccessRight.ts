@@ -48,22 +48,22 @@ export enum AccessRight {
 export class AccessRightHelper {
     static getName(right: AccessRight): string {
         switch (right) {
-            case AccessRight.PlatformLoginAs: return $t(`cb0fa3c3-98ea-4d10-bf33-0efc813ffe0b`);
-            case AccessRight.OrganizationFinanceDirector: return $t(`f595a8e8-fb33-4187-aa3c-99745f6f4c1b`);
-            case AccessRight.OrganizationManagePayments: return $t(`5b0b7566-408d-43d5-863b-cd4d5c36f945`);
-            case AccessRight.OrganizationCreateWebshops: return $t(`426ce9af-e807-4604-a3be-95b6359fdff3`);
-            case AccessRight.OrganizationCreateGroups: return $t(`36688810-b154-437a-b46c-39e879ce20c4`);
-            case AccessRight.WebshopScanTickets: return $t(`213bb888-16d4-4cdc-b917-6e6ec8b6fc84`);
-            case AccessRight.EventWrite: return $t(`a56e84d7-d324-4d2d-b3d2-1f890280c6ac`);
-            case AccessRight.OrganizationEventNotificationReviewer: return $t(`b1713243-3ede-4818-b67d-01f83154776f`);
+            case AccessRight.PlatformLoginAs: return $t(`%l4`);
+            case AccessRight.OrganizationFinanceDirector: return $t(`%l5`);
+            case AccessRight.OrganizationManagePayments: return $t(`%l6`);
+            case AccessRight.OrganizationCreateWebshops: return $t(`%l7`);
+            case AccessRight.OrganizationCreateGroups: return $t(`%l8`);
+            case AccessRight.WebshopScanTickets: return $t(`%Vk`);
+            case AccessRight.EventWrite: return $t(`%l9`);
+            case AccessRight.OrganizationEventNotificationReviewer: return $t(`%lA`);
 
             // Member data
-            case AccessRight.MemberReadFinancialData: return $t(`e6f62cf2-96c8-41dc-a142-d2c49a0a45f3`);
-            case AccessRight.MemberWriteFinancialData: return $t(`5043355f-40a8-4291-b1f9-9645cea7ac3b`);
+            case AccessRight.MemberReadFinancialData: return $t(`%lB`);
+            case AccessRight.MemberWriteFinancialData: return $t(`%lC`);
 
-            case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
-            case AccessRight.SendMessages: return $t(`50b99a49-6d0b-47ea-adb0-b2a7a7e9a119`);
-            case AccessRight.ManageEmailTemplates: return $t(`0d2a7261-a88a-4c60-b1f9-3785d5e22d93`);
+            case AccessRight.MemberManageNRN: return $t(`%lD`);
+            case AccessRight.SendMessages: return $t(`%1DA`);
+            case AccessRight.ManageEmailTemplates: return $t(`%1DB`);
         }
     }
 
@@ -73,55 +73,55 @@ export class AccessRightHelper {
 
     static getNameShort(right: AccessRight): string {
         switch (right) {
-            case AccessRight.PlatformLoginAs: return $t(`1627a32a-56b8-4c74-8715-b885c1795af6`);
-            case AccessRight.OrganizationFinanceDirector: return $t(`0fc72e2d-5fe5-4ed2-ba5d-1f880790c174`);
-            case AccessRight.OrganizationManagePayments: return $t(`6c58724b-afce-40a4-b11d-a6f6b86976b9`);
-            case AccessRight.OrganizationCreateWebshops: return $t(`f3de2983-5c64-4653-b2c5-62c94eb3d04f`);
-            case AccessRight.OrganizationCreateGroups: return $t(`f3de2983-5c64-4653-b2c5-62c94eb3d04f`);
-            case AccessRight.WebshopScanTickets: return $t(`ca94a7e0-afaa-4076-9340-4620fb034d8d`);
-            case AccessRight.EventWrite: return $t(`60231186-b00f-4d07-a5c7-4a905467e254`);
-            case AccessRight.OrganizationEventNotificationReviewer: return $t(`000be3fe-9354-4c2c-baf1-d0cd4d079830`);
+            case AccessRight.PlatformLoginAs: return $t(`%Qg`);
+            case AccessRight.OrganizationFinanceDirector: return $t(`%tx`);
+            case AccessRight.OrganizationManagePayments: return $t(`%MM`);
+            case AccessRight.OrganizationCreateWebshops: return $t(`%lE`);
+            case AccessRight.OrganizationCreateGroups: return $t(`%lE`);
+            case AccessRight.WebshopScanTickets: return $t(`%lF`);
+            case AccessRight.EventWrite: return $t(`%uB`);
+            case AccessRight.OrganizationEventNotificationReviewer: return $t(`%CV`);
 
             // Member data
-            case AccessRight.MemberReadFinancialData: return $t(`8d64ab67-da1d-4143-8c6c-94ade8e1823f`);
-            case AccessRight.MemberWriteFinancialData: return $t(`da4a7e62-2f98-4e87-89f5-d3643e7bb987`);
-            case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
-            case AccessRight.SendMessages: return $t(`618f51bc-cad2-453f-bece-70ba56b7d1a9`);
-            case AccessRight.ManageEmailTemplates: return $t(`dc8dddba-1aae-49ad-bdda-68d3e88a1964`);
+            case AccessRight.MemberReadFinancialData: return $t(`%lG`);
+            case AccessRight.MemberWriteFinancialData: return $t(`%lH`);
+            case AccessRight.MemberManageNRN: return $t(`%lD`);
+            case AccessRight.SendMessages: return $t(`%1DC`);
+            case AccessRight.ManageEmailTemplates: return $t(`%1DD`);
         }
     }
 
     static getDescription(right: AccessRight): string {
         switch (right) {
-            case AccessRight.PlatformLoginAs: return $t(`b90c0b36-7e1d-416a-b37a-79ef7ddb8b87`);
-            case AccessRight.OrganizationFinanceDirector: return $t(`f696b984-f946-4a68-83f9-0fa02c75873d`);
-            case AccessRight.OrganizationManagePayments: return $t(`97f33d05-54af-4568-a932-4dac4530417f`);
-            case AccessRight.OrganizationCreateWebshops: return $t(`0c38c5f1-da3a-40fe-881a-7e59841001cd`);
-            case AccessRight.OrganizationCreateGroups: return $t(`435c36bb-c708-481b-acf0-b8b271be406f`);
-            case AccessRight.WebshopScanTickets: return $t(`327cec8c-06c2-46c5-81b6-7d2e6cf8cf90`);
-            case AccessRight.EventWrite: return $t(`439560b9-68f9-437f-9297-bcb2a64fa972`);
-            case AccessRight.OrganizationEventNotificationReviewer: return $t(`a8ca5719-4e3b-4e46-a64d-f3f16a35a864`);
+            case AccessRight.PlatformLoginAs: return $t(`%lI`);
+            case AccessRight.OrganizationFinanceDirector: return $t(`%lJ`);
+            case AccessRight.OrganizationManagePayments: return $t(`%lK`);
+            case AccessRight.OrganizationCreateWebshops: return $t(`%lL`);
+            case AccessRight.OrganizationCreateGroups: return $t(`%lM`);
+            case AccessRight.WebshopScanTickets: return $t(`%lN`);
+            case AccessRight.EventWrite: return $t(`%lO`);
+            case AccessRight.OrganizationEventNotificationReviewer: return $t(`%lP`);
 
             // Member data
-            case AccessRight.MemberReadFinancialData: return $t(`bcf9d463-8536-40ae-8e7e-a4c36e793dbc`);
-            case AccessRight.MemberWriteFinancialData: return $t(`e3f2e800-1918-459d-aa79-ce6c8833bb53`);
-            case AccessRight.MemberManageNRN: return $t(`ef892736-b403-4eb5-8e59-662ffbfd1c54`);
-            case AccessRight.SendMessages: return $t(`848e4722-1eb4-4463-b772-5ceee1881c74`);
-            case AccessRight.ManageEmailTemplates: return $t(`0d2a7261-a88a-4c60-b1f9-3785d5e22d93`);
+            case AccessRight.MemberReadFinancialData: return $t(`%lQ`);
+            case AccessRight.MemberWriteFinancialData: return $t(`%lR`);
+            case AccessRight.MemberManageNRN: return $t(`%lS`);
+            case AccessRight.SendMessages: return $t(`%1DE`);
+            case AccessRight.ManageEmailTemplates: return $t(`%1DB`);
         }
     }
 
     static getLongDescription(right: AccessRight): string | null {
         switch (right) {
-            case AccessRight.OrganizationFinanceDirector: return $t(`a1f2f6e4-7f12-4fa2-abd8-40fb59e8ff9a`);
-            case AccessRight.OrganizationManagePayments: return $t(`885aa405-e8e4-4dff-a57d-ab967b6ca31e`);
+            case AccessRight.OrganizationFinanceDirector: return $t(`%lT`);
+            case AccessRight.OrganizationManagePayments: return $t(`%lU`);
 
             // Member data
-            case AccessRight.MemberReadFinancialData: return $t(`d87cd793-80a1-4e57-8086-64abdd8e88f3`);
-            case AccessRight.MemberWriteFinancialData: return $t(`a821c56c-e5de-4505-83ca-25d8a74d3c19`);
-            case AccessRight.EventWrite: return $t(`f84ae947-6023-4ddd-ae90-93422290494b`);
-            case AccessRight.MemberManageNRN: return $t(`746b82e0-dfe4-4091-89e1-d2f28659e6f9`);
-            case AccessRight.ManageEmailTemplates: return $t(`1a6eb95b-4cf7-48e8-80b9-a4eb1b6deda8`);
+            case AccessRight.MemberReadFinancialData: return $t(`%lV`);
+            case AccessRight.MemberWriteFinancialData: return $t(`%lW`);
+            case AccessRight.EventWrite: return $t(`%lX`);
+            case AccessRight.MemberManageNRN: return $t(`%lY`);
+            case AccessRight.ManageEmailTemplates: return $t(`%1DF`);
         }
         return null;
     }

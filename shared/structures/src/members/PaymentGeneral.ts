@@ -84,7 +84,7 @@ export class PaymentGeneral extends Payment {
             return id ? [id] : [];
         });
 
-        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' ' + $t(`%M1`) + ' ');
     }
 
     getBalanceItemPaymentsHtmlTable() {
@@ -103,25 +103,25 @@ export class PaymentGeneral extends Payment {
 
         if (customer) {
             replacements.push({
-                title: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+                title: $t(`%Gq`),
                 value: customer.dynamicName,
             });
 
             if (customer.phone) {
                 replacements.push({
-                    title: $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
+                    title: $t(`%18Z`),
                     value: customer.phone,
                 });
             }
         }
 
         replacements.push({
-            title: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
+            title: $t(`%M7`),
             value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method ?? PaymentMethod.Unknown)),
         });
 
         replacements.push({
-            title: $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
+            title: $t(`%xL`),
             value: Formatter.price(this.price),
         });
 
@@ -155,7 +155,7 @@ export class PaymentGeneral extends Payment {
             }
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t(`%M1`) + ' '));
     }
 }
 
@@ -185,7 +185,7 @@ export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItem
         const descriptionText = description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : '';
         const titleColumn = `<td><h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${descriptionText}</td>`;
 
-        const price = payment.price === 0 ? $t('02f28dc5-b75f-4bfb-9e07-90dfb56b66b4') : Formatter.price(payment.price);
+        const price = payment.price === 0 ? $t('%1Mn') : Formatter.price(payment.price);
         const priceColumn = `<td>${Formatter.escapeHtml(price)}</td>`;
 
         str += `<tr>${titleColumn}${priceColumn}</tr>`;

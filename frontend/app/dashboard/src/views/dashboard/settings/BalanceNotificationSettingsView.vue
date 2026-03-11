@@ -1,10 +1,10 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`7038dda8-b702-4a80-9846-e12440291620`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`%Ms`)" @save="save">
         <h1>
-            {{ $t('4539b2ba-71f8-4839-aee8-60da1189b520') }}
+            {{ $t('%HH') }}
         </h1>
 
-        <p>{{ $t('ed98b821-ac81-47ab-8149-10cb71119bbb') }}</p>
+        <p>{{ $t('%8y') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -15,19 +15,19 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('009f37ee-d43c-42d1-a336-784ea72a393b') }}
+                    {{ $t('%Mp') }}
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $feature('organization-receivable-balances') ? $t('a7585599-1c67-4de7-b552-f5b78c7385db') : $t('d75c09fb-24f4-44a0-9e8b-cb7cf1c96dd8') }}
+                    {{ $feature('organization-receivable-balances') ? $t('%8z') : $t('%90') }}
                 </p>
             </STListItem>
         </STList>
 
         <template v-if="enabled">
             <div v-if="(patched.privateMeta?.emails ?? []).length" class="container">
-                <hr><h2>{{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}</h2>
-                <p>{{ $t('fbe87ec5-37fa-46c7-9ae4-fd9b43de8e96') }}</p>
+                <hr><h2>{{ $t('%1FK') }}</h2>
+                <p>{{ $t('%Mq') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -36,7 +36,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('b1bd0cb8-0256-48e8-8b65-9a82314a49a4') }}
+                            {{ $t('%Mr') }}
                         </h3>
                     </STListItem>
                     <STListItem v-for="email in patched.privateMeta?.emails ?? []" :key="email.id" :selectable="true" element-name="label">
@@ -56,21 +56,21 @@
             </div>
 
             <div class="container">
-                <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
-                <p>{{ $t('18cbfdea-798d-4efc-aad8-f6897c9efb2c') }}</p>
+                <hr><h2>{{ $t('%HQ') }}</h2>
+                <p>{{ $t('%91') }}</p>
 
-                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`5fbb90ca-384f-4f17-b7c5-5d05511211d1`)">
-                    <NumberInput v-model="minimumDaysBetween" placeholder="" :suffix="$t('6cb97c70-db56-4883-a2b3-87b65506d4f9')" :suffix-singular="$t('1ea8c630-af92-4cba-bfdc-acc0b0f67fae')" :min="1" :stepper="true" />
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%Mt`)">
+                    <NumberInput v-model="minimumDaysBetween" placeholder="" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="1" :stepper="true" />
                 </STInputBox>
 
-                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`cd7d36a1-050e-4457-8dfd-1c81d3654189`)">
+                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%Mu`)">
                     <NumberInput v-model="maximumReminderEmails" placeholder="" suffix="e-mails" suffix-singular="e-mail" :min="1" :stepper="true" />
                 </STInputBox>
             </div>
 
             <div v-if="$feature('organization-receivable-balances')" class="container">
-                <hr><h2>{{ $t('6b39d554-a4a7-489c-84b5-3f430457dd50') }}</h2>
-                <p>{{ $t('0998a455-9ffc-4222-8432-ef7681908ad7') }}</p>
+                <hr><h2>{{ $t('%92') }}</h2>
+                <p>{{ $t('%93') }}</p>
 
                 <MultipleChoiceInput v-model="selectedResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
             </div>
@@ -214,7 +214,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

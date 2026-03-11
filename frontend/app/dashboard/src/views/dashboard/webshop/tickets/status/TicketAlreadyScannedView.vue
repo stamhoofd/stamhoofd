@@ -1,23 +1,23 @@
 <template>
     <div ref="root" class="st-view ticket-already-scanned-view">
-        <STNavigationBar :title="$t(`4ac91a6b-7e0d-4ebc-9698-2543ef654b63`)" />
+        <STNavigationBar :title="$t(`%Vv`)" />
 
         <main>
             <h1>
                 <span class="icon warning yellow" />
-                <span>{{ $t('4ac91a6b-7e0d-4ebc-9698-2543ef654b63') }}</span>
+                <span>{{ $t('%Vv') }}</span>
             </h1>
             <p class="ticket-secret">
                 {{ ticket.secret }}
             </p>
             <p class="style-description">
-                {{ $t('21c8577c-7124-41e3-8bda-3692b917fdba') }}
+                {{ $t('%Vw') }}
             </p>
 
             <STList class="info">
                 <STListItem v-if="ticket.scannedAt">
                     <h3 class="style-definition-label">
-                        {{ $t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6') }}
+                        {{ $t('%1GD') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateTime(ticket.scannedAt) }}
@@ -26,7 +26,7 @@
 
                 <STListItem v-if="ticket.scannedBy">
                     <h3 class="style-definition-label">
-                        {{ $t('dcb6acd6-9b5a-4a2e-af6e-441a8264dee0') }}
+                        {{ $t('%Vx') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ ticket.scannedBy }}
@@ -38,10 +38,10 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="viewTicket">
-                    {{ $t('90a3142d-c6a4-4e52-a4d7-db2e78fabacc') }}
+                    {{ $t('%Vy') }}
                 </button>
                 <button class="button primary" type="button" @click="() => pop()">
-                    {{ $t('1b311bbf-8cc3-4b91-a019-f80a062d8d4d') }}
+                    {{ $t('%Vz') }}
                 </button>
             </template>
         </STToolbar>

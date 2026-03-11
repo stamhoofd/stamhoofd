@@ -1,19 +1,19 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar :title="$t(`2a033cd8-b9e4-4a92-a8a6-b4a687d87e79`)">
+        <STNavigationBar :title="$t(`%wP`)">
             <template #right>
                 <button v-if="hasFullAccess" class="button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>{{ $t("6e884f27-427f-4f85-914c-d5c2780253b0") }}</h1>
+            <h1>{{ $t("%83") }}</h1>
 
             <div class="container">
                 <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.All) }" @click="navigate(Routes.All)">
                     <span class="icon group" />
                     <span>
-                        {{ $t("5a1993a8-2604-4ca5-be6e-8d6902d9f8c1") }}
+                        {{ $t("%1KQ") }}
                     </span>
                 </button>
             </div>
@@ -166,7 +166,7 @@ function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
 }
 
 function getTagById(id: string): OrganizationTag {
-    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: $t(`6748967b-c512-454f-9d30-a1a42e2814bc`) });
+    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: $t(`%Gp`) });
 }
 
 async function navigateToTag(tag: OrganizationTag) {

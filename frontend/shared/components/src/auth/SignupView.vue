@@ -1,34 +1,34 @@
 <template>
     <form class="signup-view st-view" novalidate @submit.prevent="submit">
-        <STNavigationBar :title="$t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`)" />
+        <STNavigationBar :title="$t(`%ur`)" />
 
         <main class="center">
             <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
-                {{ $t('975e20dd-d5c2-4377-ad4f-359a332b9687', {organization: $context.organization.name}) }}
+                {{ $t('%1Ac', {organization: $context.organization.name}) }}
             </h1>
             <h1 v-else>
-                {{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}
+                {{ $t('%ur') }}
             </h1>
 
             <p v-if="!lock">
-                {{ $t('24183997-792a-47c5-b43d-53ba713f80f1') }}
+                {{ $t('%Zx') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="true" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`26cb7015-6d17-4c3b-8b94-f44f38576854`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="true" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
-                        <input id="new-password" v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
+                    <STInputBox :title="$t(`%WV`)">
+                        <input id="new-password" v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%ZV`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
                     </STInputBox>
 
-                    <STInputBox :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
-                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)" @input="(event: any) => passwordRepeat = event.target.value" @change="(event: any) => passwordRepeat = event.target.value">
+                    <STInputBox :title="$t(`%WW`)">
+                        <input id="confirm-password" v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%ZV`)" @input="(event: any) => passwordRepeat = event.target.value" @change="(event: any) => passwordRepeat = event.target.value">
                     </STInputBox>
                 </div>
                 <div>
@@ -40,7 +40,7 @@
                 <LoadingButton :loading="loading" class="block input-spacing">
                     <button id="submit" class="button primary" type="submit">
                         <span class="icon lock" />
-                        <span>{{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}</span>
+                        <span>{{ $t('%ur') }}</span>
                     </button>
                 </LoadingButton>
             </SignupPoliciesBox>
@@ -92,7 +92,7 @@ async function submit() {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: 'password_mismatch',
-                message: $t(`8205ae73-2a27-4b01-a361-3a3c689726bc`),
+                message: $t(`%12T`),
             }),
         );
         return;
@@ -101,7 +101,7 @@ async function submit() {
     if (password.value.length < 8) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'password_too_short',
-            message: $t(`bac8adfa-0bd1-4180-9143-767f24efa111`),
+            message: $t(`%v2`),
         }));
         return;
     }

@@ -7,50 +7,50 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') " error-fields="name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%Gq') " error-fields="name" :error-box="errors.errorBox">
                 <input
                     v-model="name"
                     class="input"
                     type="text"
-                    :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') "
+                    :placeholder="$t('%Gq') "
                 >
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
                 type="text"
-                :placeholder="$t('930218d2-2e00-4d1f-90c9-59d77c1ed377')"
+                :placeholder="$t('%4b')"
                 autocomplete="off"
             />
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
+        <h2>{{ $t('%4R') }}</h2>
 
-        <STInputBox :title="$t('f9c5b001-dd96-4a70-82c7-505246f7be8c')" error-fields="maximum" :error-box="errors.errorBox">
-            <NumberInput v-model="maximum" :placeholder="$t('3ef9e622-426f-4913-89a0-0ce08f4542d4')" :required="false" />
+        <STInputBox :title="$t('%4T')" error-fields="maximum" :error-box="errors.errorBox">
+            <NumberInput v-model="maximum" :placeholder="$t('%1FW')" :required="false" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc') }}
+            {{ $t('%5m') }}
         </p>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('93210fca-b5c6-431c-b109-736fe32b90ac')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="minimumDays" :placeholder="$t('3ef9e622-426f-4913-89a0-0ce08f4542d4')" :required="false" />
+            <STInputBox :title="$t('%4V')" error-fields="minimumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="minimumDays" :placeholder="$t('%1FW')" :required="false" />
             </STInputBox>
 
-            <STInputBox :title="$t('08e038ea-805b-42bf-8755-6f6875aae836')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="maximumDays" :placeholder="$t('104dca1f-f6eb-4193-ae27-5e5f96e4e481')" :required="false" />
+            <STInputBox :title="$t('%4U')" error-fields="maximumDays" :error-box="errors.errorBox">
+                <NumberInput v-model="maximumDays" :placeholder="$t('%4a')" :required="false" />
             </STInputBox>
         </div>
 
         <Checkbox v-model="isLocationRequired">
-            {{ $t('7a63f22a-1f4d-4dfa-9030-47137ff52bab') }}
+            {{ $t('%6J') }}
             <p class="style-description-small">
-                {{ $t('07963171-3e53-4aa7-b5f1-bce9470a62e9') }}
+                {{ $t('%6K') }}
             </p>
         </Checkbox>
     </SaveView>
@@ -74,7 +74,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformEventType>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => props.isNew ? $t('9b76d069-ba68-4909-a084-ba74994c8b56') : $t('49a36bd7-3231-45da-a502-8f0cf83639f5'));
+const title = computed(() => props.isNew ? $t('%5n') : $t('%5o'));
 const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.type);
@@ -103,7 +103,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('24cdd0db-df35-4ef2-8230-7cade040fcfc'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('dc8871b4-8d65-4247-9c2b-56e183cdf052'))) {
+    if (!await CenteredMessage.confirm($t('%5p'), $t('%CJ'), $t('%5q'))) {
         return;
     }
 
@@ -154,7 +154,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

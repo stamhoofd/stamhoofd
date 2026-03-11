@@ -5,7 +5,7 @@
         </template>
         <template v-if="type === 'resource'">
             <h2 class="style-title-list">
-                {{ resource.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
+                {{ resource.name || $t('%CL') }}
             </h2>
             <p v-if="resource.description" class="style-description-small">
                 {{ resource.description }}
@@ -19,12 +19,12 @@
                 {{ role.name }}
             </h2>
             <p v-if="isMe" class="style-description-small">
-                {{ $t('703dec5e-fc37-4ab5-aaa8-4b7d0ed5589a') }}
+                {{ $t('%ZM') }}
             </p>
         </template>
 
         <p v-if="unlisted" class="style-description-small">
-            {{ $t('3977f1e7-abb1-4876-90b4-02ecc45c2b31') }}
+            {{ $t('%Bi') }}
         </p>
 
         <template #right>
@@ -252,7 +252,7 @@ const levelText = computed(() => {
             if (accessRights.length) {
                 return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(' + ');
             }
-            return $t(`31d1b160-113c-41b8-88c1-47ff191c52f1`); // Special translation
+            return $t(`%GV`); // Special translation
         }
         case PermissionLevel.Read: {
             const rights = [getPermissionLevelName(PermissionLevel.Read, props.resource.type)];
@@ -338,10 +338,10 @@ const choosePermissions = async (event: MouseEvent) => {
                         let description: string | undefined = undefined;
                         if (!isLocked) {
                             if (included) {
-                                description = ($t(`c3d22dca-87b6-4975-96ff-72ffe2ce99d0`) + ' ' + getPermissionLevelName(baseLevel, props.resource.type));
+                                description = ($t(`%uR`) + ' ' + getPermissionLevelName(baseLevel, props.resource.type));
                             }
                             else {
-                                description = AccessRightHelper.getDescription(accessRight) || ($t(`74dd7a35-db8b-477d-934a-2681d8d35184`) + ' ' + getPermissionLevelName(permissionLevel.value, props.resource.type));
+                                description = AccessRightHelper.getDescription(accessRight) || ($t(`%uS`) + ' ' + getPermissionLevelName(permissionLevel.value, props.resource.type));
                             }
                         }
 

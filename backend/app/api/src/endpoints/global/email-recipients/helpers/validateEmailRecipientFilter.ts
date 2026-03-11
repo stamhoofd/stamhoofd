@@ -42,7 +42,7 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
             code: 'invalid_field',
             field: 'filter',
             message: 'You must filter on an email id of the email recipients you are trying to access',
-            human: $t(`9f352fd4-5e4d-4899-81ce-b69889ebfe9d`),
+            human: $t(`%1E1`),
         });
     }
 
@@ -72,7 +72,7 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
         if (!await Context.auth.canAccessEmail(email, permissionLevel)) {
             throw Context.auth.error({
                 message: 'You do not have access to this email',
-                human: $t(`590a37ed-0f3a-4c66-8e20-08ac00ae761d`),
+                human: $t(`%1E2`),
             });
         }
     }

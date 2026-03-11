@@ -4,7 +4,7 @@
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
         </h3>
-        <p v-if="isSingle && order" class="description" v-text="$t('12be5ac0-8353-43a2-badb-ab3b27d156b3')+order.number" />
+        <p v-if="isSingle && order" class="description" v-text="$t('%x3')+order.number" />
         <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
         <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 

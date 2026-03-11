@@ -31,7 +31,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         if (!document || !(await Context.auth.canAccessDocument(document))) {
             throw new SimpleError({
                 code: 'not_found',
-                message: $t('a9860203-6a6d-4612-b4d4-7851e47d4dad'),
+                message: $t('%EK'),
             });
         }
 
@@ -48,7 +48,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         if (!html) {
             throw new SimpleError({
                 code: 'failed_generating',
-                message: $t('74ba486a-60b2-4d94-a6fd-159a3adfca8b'),
+                message: $t('%FV'),
             });
         }
 

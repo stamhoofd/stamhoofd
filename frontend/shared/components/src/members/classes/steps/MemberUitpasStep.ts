@@ -15,7 +15,7 @@ export class MemberUitpasStep implements EditMemberStep {
     }
 
     getName(_manager: MemberStepManager) {
-        return $t(`612b0f89-4a6e-4616-a50f-6e228daa86c3`);
+        return $t(`%14`);
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -50,10 +50,10 @@ export class MemberUitpasStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
-            title: $t(`612b0f89-4a6e-4616-a50f-6e228daa86c3`),
+            title: $t(`%14`),
             member: manager.member,
             component: markRaw(EditMemberUitpasBox),
-            saveText: $t(`2a9075bb-a743-411e-8a3d-94e5e57363f0`),
+            saveText: $t(`%16p`),
             markReviewed: ['uitpasNumber'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

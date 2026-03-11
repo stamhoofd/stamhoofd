@@ -20,16 +20,16 @@ export enum STPackageBundle {
 export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`64d8c751-a6c4-427e-b3db-cef827058780`);
-            case STPackageBundle.Webshops: return $t(`3b1c092c-fdb5-4322-a34d-b8142881b3cf`);
+            case STPackageBundle.Members: return $t(`%Om`);
+            case STPackageBundle.Webshops: return $t(`%1Hk`);
         }
         return '?';
     }
 
     static getDescription(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`2e76098c-b75a-4c40-ae13-03bbc1f06b3e`);
-            case STPackageBundle.Webshops: return $t(`3c731bcc-187c-437f-8d6c-f1c1b1207c86`);
+            case STPackageBundle.Members: return $t(`%1Hn`);
+            case STPackageBundle.Webshops: return $t(`%1Ho`);
         }
         return '?';
     }

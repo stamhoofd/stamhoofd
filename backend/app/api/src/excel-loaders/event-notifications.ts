@@ -8,11 +8,11 @@ import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHel
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
     id: 'event-notifications',
-    name: $t(`1eafb06a-5385-42fd-8f1a-2bbaaf735e53`),
+    name: $t(`%1FR`),
     columns: [
         {
             id: 'id',
-            name: $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
+            name: $t(`%d`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.id,
@@ -20,7 +20,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'name',
-            name: $t(`394aafa1-811b-4ed4-bfc6-c12ae59ff9b6`),
+            name: $t(`%w9`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.events.map(e => e.name).join(', '),
@@ -28,7 +28,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'organization.name',
-            name: $t(`afd7843d-f355-445b-a158-ddacf469a5b1`),
+            name: $t(`%wA`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.organization.name,
@@ -36,7 +36,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'organization.uri',
-            name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
+            name: $t(`%7C`),
             width: 30,
             getValue: (notification: EventNotification) => ({
                 value: notification.organization.uri,
@@ -44,7 +44,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'status',
-            name: $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
+            name: $t(`%1A`),
             width: 30,
             getValue: (notification: EventNotification) => ({
                 value: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)),
@@ -52,7 +52,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'feedbackText',
-            name: $t(`12b2ce84-6297-49a2-a9c4-d5619b764313`),
+            name: $t(`%YT`),
             width: 80,
             getValue: (notification: EventNotification) => ({
                 value: notification.status !== EventNotificationStatus.Accepted ? notification.feedbackText : null,
@@ -65,7 +65,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'startDate',
-            name: $t(`300d2935-b578-48cc-b58e-1c0446a68d59`),
+            name: $t(`%7e`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.startDate,
@@ -78,7 +78,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'endDate',
-            name: $t(`3c90169c-9776-4d40-bda0-dba27a5bad69`),
+            name: $t(`%wB`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.endDate,
@@ -91,7 +91,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'submittedAt',
-            name: $t(`16c87ee7-27b1-4b87-93e3-221d35038e6a`),
+            name: $t(`%Aw`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.submittedAt,
@@ -104,7 +104,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'submittedBy',
-            name: $t(`aaa24b94-c733-40e1-9a25-76d1c65d3737`),
+            name: $t(`%wC`),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.submittedBy?.name ?? '',

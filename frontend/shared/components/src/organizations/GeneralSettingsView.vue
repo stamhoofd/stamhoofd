@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasSomeChanges" :title="$t(`35757756-d817-419d-82dd-1ba14128af30`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasSomeChanges" :title="$t(`%Lb`)" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -12,31 +12,31 @@
 
         <div class="split-inputs">
             <div>
-                <STInputBox :title="$t('840ac72d-d4b3-40ea-afb4-b0109e88c640')" error-fields="name" :error-box="errors.errorBox">
-                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization">
+                <STInputBox :title="$t('%8D')" error-fields="name" :error-box="errors.errorBox">
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
                 </STInputBox>
 
-                <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="errors.validator" :link-country-to-locale="true" />
+                <AddressInput v-model="address" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" />
             </div>
 
             <div>
-                <STInputBox v-if="STAMHOOFD.userMode === 'platform'" :title="$t('05723781-9357-41b2-9fb8-cb4f80dde7f9')" error-fields="uri" :error-box="errors.errorBox">
+                <STInputBox v-if="STAMHOOFD.userMode === 'platform'" :title="$t('%7C')" error-fields="uri" :error-box="errors.errorBox">
                     <input id="organization-uri" :value="uri" class="input" type="text" disabled>
                 </STInputBox>
 
-                <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
+                <UrlInput v-model="website" :title="$t('%5I')" :placeholder="$t('%2n')" :validator="errors.validator" :required="false" />
 
                 <p class="style-description-small">
-                    {{ $t('ffdbd596-e9c8-4c67-bfdf-41a5199de133') }}
+                    {{ $t('%8b') }}
                 </p>
             </div>
         </div>
 
-        <hr><h2>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h2>
-        <p>{{ $t('ca923d49-c9c1-4c39-9e52-96b88a0223ed') }}</p>
+        <hr><h2>{{ $t('%1Ke') }}</h2>
+        <p>{{ $t('%gC') }}</p>
 
         <p v-if="draggableCompanies.length === 0" class="info-box">
-            {{ $t('c1ac06d0-6ffc-463a-a720-2e8b3d26d58e') }}
+            {{ $t('%gD') }}
         </p>
 
         <STList v-else v-model="draggableCompanies" :draggable="true">
@@ -50,20 +50,20 @@
                     </h3>
 
                     <p v-if="company.VATNumber" class="style-description-small">
-                        {{ company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
+                        {{ company.VATNumber }} {{ $t('%Gn') }}
                     </p>
                     <p v-else-if="company.companyNumber" class="style-description-small">
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
+                        {{ $t('%1CH') }}
                     </p>
 
                     <p v-if="company.address" class="style-description-small">
                         {{ company.address.shortString() }}
                     </p>
                     <p v-else class="style-description-small">
-                        <span class="style-tag error">{{ $t('aad50919-a9bc-4f59-8bf9-28c61f2bd4d7') }}</span>
+                        <span class="style-tag error">{{ $t('%gE') }}</span>
                     </p>
 
                     <p v-if="company.administrationEmail" class="style-description-small">
@@ -72,7 +72,7 @@
 
                     <template #right>
                         <span v-if="index === 0" class="style-tag">
-                            {{ $t('40c0b334-e007-4fc1-88e5-b38707175d45') }}
+                            {{ $t('%v6') }}
                         </span>
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
@@ -84,7 +84,7 @@
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addCompany">
                 <span class="icon add" />
-                <span>{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
+                <span>{{ $t('%SN') }}</span>
             </button>
         </p>
 
@@ -106,7 +106,7 @@ import EditCompanyView from './components/EditCompanyView.vue';
 
 const props = defineProps<{ isReview?: boolean }>();
 
-const title = computed(() => props.isReview ? $t('31df7737-2a25-4a6c-9766-39acc3ccdbc8') : $t(`1835623d-0a29-430a-a4ca-81a95eb8666e`));
+const title = computed(() => props.isReview ? $t('%4d') : $t(`%10T`));
 const organizationManager = useOrganizationManager();
 const platform = usePlatform();
 
@@ -266,7 +266,7 @@ const shouldNavigateAway = async () => {
     if (!hasSomeChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

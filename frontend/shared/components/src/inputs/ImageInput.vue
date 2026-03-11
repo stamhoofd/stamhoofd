@@ -108,7 +108,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         if (file.size > 5 * 1024 * 1024) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'file_too_large',
-                message: $t(`3d9d68f3-e953-46a4-b5cb-aa68aa0b1028`),
+                message: $t(`%z3`),
             }));
             return;
         }

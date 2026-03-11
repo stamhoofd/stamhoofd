@@ -1,29 +1,29 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`60231186-b00f-4d07-a5c7-4a905467e254`)">
+        <STNavigationBar :title="$t(`%uB`)">
             <template #right>
                 <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
                     <span class="icon add" />
-                    <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
+                    <span>{{ $t('%1IY') }}</span>
                 </button>
             </template>
         </STNavigationBar>
 
         <main class="center">
             <h1>
-                {{ $t('60231186-b00f-4d07-a5c7-4a905467e254') }}
+                {{ $t('%uB') }}
             </h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
+                        <span class="hide-small">{{ $t('%2J') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -33,7 +33,7 @@
 
             <template v-if="selectedYear === null && suggestionsGroup">
                 <Checkbox v-model="addSuggestions">
-                    {{ $t('66812919-eadf-4906-96a5-35677c4b6ccb') }} {{ suggestionsGroup.settings.name }}
+                    {{ $t('%b1') }} {{ suggestionsGroup.settings.name }}
                 </Checkbox>
 
                 <hr>
@@ -47,7 +47,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`2a4caf43-3e88-45b6-b337-4c7036130769`)" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`%KD`)" />
         </main>
     </div>
 </template>
@@ -95,7 +95,7 @@ const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
 const yearLabels = computed(() => {
     return years.value.map((y) => {
         if (y === null) {
-            return $t(`4cb84435-bf36-4b83-9f0d-6028181eae84`);
+            return $t(`%yb`);
         }
         return y.toString();
     });
@@ -133,7 +133,7 @@ defineRoutes([
                     onSaveDuplicate: onSaveDuplicateEvent,
                 };
             }
-            Toast.error($t(`42e0e0d5-b4f9-4774-ad91-bfae7121a29e`)).show();
+            Toast.error($t(`%yc`)).show();
             throw new Error('Event not found');
         },
 
@@ -208,7 +208,7 @@ const eventSuggestions = computed(() => {
             suggestions.push(
                 Event.create({
                     id: '',
-                    name: $t(`2506b55d-cd6e-42e5-a69d-f0d838bfaad2`),
+                    name: $t(`%yd`),
                     startDate: pointer.toJSDate(),
                     endDate: pointer.toJSDate(),
                 }),
@@ -252,7 +252,7 @@ async function addEvent(template?: Event) {
             Toast.error($t('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.')).show();
         }
         else {
-            Toast.error($t(`28b7fa87-b4b9-45de-aa95-1d7fea6aee73`)).show();
+            Toast.error($t(`%ye`)).show();
         }
         return;
     }

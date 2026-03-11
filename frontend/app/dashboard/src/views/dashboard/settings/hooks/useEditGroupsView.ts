@@ -63,7 +63,7 @@ export function useEditGroupsView() {
                 const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(organization.meta.type, organization.meta.umbrellaOrganization ?? undefined);
                 const category = defaultCategories[0] ?? GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`5271f407-ec58-4802-ac69-7f357bc3cfc7`),
+                        name: $t(`%P4`),
 
                     }),
                 });

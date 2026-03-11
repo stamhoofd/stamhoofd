@@ -13,7 +13,7 @@
         :default-filter="defaultFilter"
     >
         <template #empty>
-            {{ $t('4fa242b7-c05d-44d4-ada5-fb60e91af818') }}
+            {{ $t('%39') }}
         </template>
     </ModernTableView>
 </template>
@@ -45,7 +45,7 @@ const title = computed(() => {
     if (props.type) {
         return props.type.title;
     }
-    return $t('f86bcf9f-ffd2-429a-9b04-778e61c8288c');
+    return $t('%AX');
 });
 
 const estimatedRows = computed(() => {
@@ -89,9 +89,9 @@ const tableObjectFetcher = useTableObjectFetcher<EventNotification>(objectFetche
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, Date | null>({
         id: 'submittedAt',
-        name: $t('16c87ee7-27b1-4b87-93e3-221d35038e6a'),
+        name: $t('%Aw'),
         getValue: e => e.submittedAt,
-        format: d => d ? Formatter.date(d, true) : $t('4929b81e-6f1d-4859-889b-3fb016e97286'),
+        format: d => d ? Formatter.date(d, true) : $t('%1Io'),
         minimumWidth: 60,
         recommendedWidth: 100,
         index: 0,
@@ -99,7 +99,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'startDate',
-        name: $t('300d2935-b578-48cc-b58e-1c0446a68d59'),
+        name: $t('%7e'),
         getValue: e => e.startDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -109,7 +109,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'endDate',
-        name: $t('3c90169c-9776-4d40-bda0-dba27a5bad69'),
+        name: $t('%wB'),
         getValue: e => e.endDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -119,7 +119,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'event.name',
-        name: $t('394aafa1-811b-4ed4-bfc6-c12ae59ff9b6'),
+        name: $t('%w9'),
         getValue: e => e.events.map(e => e.name).join(', '),
         minimumWidth: 200,
         recommendedWidth: 100,
@@ -130,7 +130,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, EventNotificationStatus>({
         id: 'status',
-        name: $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8'),
+        name: $t('%1A'),
         getValue: organization => organization.status,
         format: status => Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
         getStyle: (status) => {
@@ -152,7 +152,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.name',
-        name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
+        name: $t('%5E'),
         getValue: notification => notification.organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -160,7 +160,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.uriPadded',
-        name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
+        name: $t('%7C'),
         getValue: notification => notification.organization.uri,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -187,7 +187,7 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
         throw new SimpleError({
             code: 'not_implemented',
             message: 'Not implemented',
-            human: $t(`63d685f9-57f4-4cef-bdd2-c1ec5d3af778`),
+            human: $t(`%Ga`),
         });
     }
 
@@ -221,7 +221,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
 }
 
 actions.push(new AsyncTableAction({
-    name: $t(`f92ad3ab-8743-4d37-8b3f-c9d5ca756b16`),
+    name: $t(`%Gb`),
     icon: 'email',
     priority: 12,
     groupIndex: 3,
@@ -232,7 +232,7 @@ actions.push(new AsyncTableAction({
 
 actions.push(
     new AsyncTableAction({
-        name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
+        name: $t(`%Gc`),
         icon: 'download',
         priority: 11,
         groupIndex: 3,

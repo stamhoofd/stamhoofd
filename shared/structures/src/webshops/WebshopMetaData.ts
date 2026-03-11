@@ -168,11 +168,11 @@ export class CheckoutMethodTypeHelper {
     static getName(type: CheckoutMethodType): string {
         switch (type) {
             case CheckoutMethodType.OnSite:
-                return $t(`25e67f34-649f-4743-9cdd-d2a81d252daf`);
+                return $t(`%VY`);
             case CheckoutMethodType.Takeout:
-                return $t(`cca905ff-7d00-4b9d-84c6-bda2bb5ea898`);
+                return $t(`%xG`);
             case CheckoutMethodType.Delivery:
-                return $t(`abba46da-6bb8-40cb-88f0-186c2409a0a5`);
+                return $t(`%tI`);
         }
     }
 }
@@ -682,7 +682,7 @@ export class WebshopPrivateMetaData extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_configuration',
                 message: 'Missing configuration for webshop domain',
-                human: $t(`323d9fd1-cd53-41d9-85e6-8d95c60e6240`),
+                human: $t(`%tJ`),
                 statusCode: 500,
             });
         }

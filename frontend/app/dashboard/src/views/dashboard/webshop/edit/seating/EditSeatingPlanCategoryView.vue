@@ -1,19 +1,19 @@
 <template>
-    <SaveView :title="isNew ? $t(`2e3852ef-423e-4fcc-82bb-c886a6c61050`) : $t(`770518af-b094-4fca-bc0a-641f508895ef`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%Rh`) : $t(`%17j`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('c853c26c-5f80-4605-be1d-117d38c5755c') }}
+            {{ $t('%UP') }}
         </h1>
         <h1 v-else>
-            {{ $t('770518af-b094-4fca-bc0a-641f508895ef') }}
+            {{ $t('%17j') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sk`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`295faf23-65af-4820-80de-fa6abfe751e3`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`ef6ac7e5-de7e-4e2e-802f-de730294f05d`)" />
+        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%TQ`)">
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`%2f`)" />
         </STInputBox>
 
         <STList>
@@ -23,22 +23,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('a713c111-2c65-4160-b15c-d28fbc1ea8b3') }}
+                    {{ $t('%UQ') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('03862d9a-0eb7-4ce1-a76f-94a837c4df73') }}
+                    {{ $t('%UR') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew && !isSingle" class="container">
             <hr><h2>
-                {{ $t('e3ea7df6-8ebd-4bf9-a25e-6be3bfc29e57') }}
+                {{ $t('%LS') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

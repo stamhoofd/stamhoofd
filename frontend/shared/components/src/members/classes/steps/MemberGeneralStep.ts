@@ -15,7 +15,7 @@ export class MemberGeneralStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return $t(`67254c38-5652-4daf-a412-b6e835c403bd`);
+        return $t(`%f2`);
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -62,10 +62,10 @@ export class MemberGeneralStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
-            title: $t(`67254c38-5652-4daf-a412-b6e835c403bd`),
+            title: $t(`%f2`),
             member: manager.member,
             component: markRaw(EditMemberGeneralBox),
-            saveText: $t(`2a9075bb-a743-411e-8a3d-94e5e57363f0`),
+            saveText: $t(`%16p`),
             markReviewed: ['details'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

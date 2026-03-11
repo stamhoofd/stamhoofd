@@ -67,7 +67,7 @@ export class ForwardHandler {
         let defaultEmail: EmailInterfaceRecipient[] = [Email.getWebmasterToEmail()];
         let organizationEmails: EmailInterfaceRecipient[] = [];
         const platform = await Platform.getShared();
-        const extraDescription = $t(`24bc9aad-bc92-4d27-bfcd-055113d792fa`) + ' ' + email + $t(`97b9b042-c5b6-42dc-8238-e0e8392fcf26`) + ' ' + platform.config.name + ' ' + $t(`f510fb0c-c180-455a-8f23-7e09e344e47a`);
+        const extraDescription = $t(`%Fq`) + ' ' + email + $t(`%Fr`) + ' ' + platform.config.name + ' ' + $t(`%Fs`);
 
         function doBounce() {
             if (!from) {

@@ -60,10 +60,10 @@ export class NumberUIFilter extends UIFilter {
 
     get combinationWord(): string {
         switch (this.mode) {
-            case UINumberFilterMode.GreaterThan: return $t(`224a3058-b5ca-4f18-bbab-2fd5b16eb6b9`);
-            case UINumberFilterMode.LessThan: return $t(`b6271592-9d1a-4b59-9511-47917f7c6e5b`);
-            case UINumberFilterMode.Equals: return $t(`c2dd273a-c50e-4947-88f2-1779acb34495`);
-            case UINumberFilterMode.NotEquals: return $t(`261a6232-3200-434b-b389-53fa0f19e15d`);
+            case UINumberFilterMode.GreaterThan: return $t(`%bE`);
+            case UINumberFilterMode.LessThan: return $t(`%bF`);
+            case UINumberFilterMode.Equals: return $t(`%bG`);
+            case UINumberFilterMode.NotEquals: return $t(`%bH`);
         }
     }
 

@@ -2,9 +2,9 @@
     <div class="st-view member-segmented-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
-                <button v-if="hasWrite" v-tooltip="$t('28f20fae-6270-4210-b49d-68b9890dbfaf')" class="button icon edit" type="button" @click="editThisMember" />
-                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('0b44456e-1338-4468-ba71-5aabc171555f')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('4b09d022-aac5-49da-80c2-9c2dcd2f642c')" @click="goForward" />
+                <button v-if="hasWrite" v-tooltip="$t('%XO')" class="button icon edit" type="button" @click="editThisMember" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%dv')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%dw')" @click="goForward" />
                 <button v-long-press="(e: any) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
@@ -12,8 +12,8 @@
         <main>
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ member.member.details.firstName }}</span>
-                <span v-if="member.member.details.gender === Gender.Male" v-tooltip="member.member.details.defaultAge >= 18 ? $t('b54b9706-4c0c-46a6-9027-37052eb76b28') : $t('177eba5b-b06f-49dd-8d48-578934c635bb')" class="icon male blue icon-spacer" />
-                <span v-if="member.member.details.gender === Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? $t('06466432-eca6-41d0-a3d6-f262f8d6d2ac') : $t('dba51db1-ce45-4e09-9a2f-fcea4a7fa46e')" class="icon female pink icon-spacer" />
+                <span v-if="member.member.details.gender === Gender.Male" v-tooltip="member.member.details.defaultAge >= 18 ? $t('%XK') : $t('%XL')" class="icon male blue icon-spacer" />
+                <span v-if="member.member.details.gender === Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? $t('%XM') : $t('%XN')" class="icon female pink icon-spacer" />
             </h1>
 
             <SegmentedView :initial-tab="initialTab" :tabs="tabs" :member="member" @change="currentItem = $event" />
@@ -72,20 +72,20 @@ const organization = useOrganization();
 
 const tabs = computed(() => {
     const base = [{
-        name: $t(`120012bf-f877-46de-b6d9-55ea46f3f2ce`),
+        name: $t(`%zM`),
         component: new ComponentWithProperties(MemberDetailsTab),
     }];
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
-            name: $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`),
+            name: $t(`%Wq`),
             component: new ComponentWithProperties(MemberPlatformMembershipTab),
         });
     }
 
     if (organization.value && auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         base.push({
-            name: $t(`60dd9d3a-d48f-4e58-810c-1bd69bafa467`),
+            name: $t(`%zN`),
             component: new ComponentWithProperties(MemberPaymentsTab),
         });
     }

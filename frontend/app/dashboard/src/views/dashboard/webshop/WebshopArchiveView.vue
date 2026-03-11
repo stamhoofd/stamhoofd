@@ -1,12 +1,12 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="$t(`1866a2ab-1798-45df-a619-0929258d6cd8`)" />
+        <STNavigationBar :title="$t(`%u0`)" />
 
         <main>
             <h1>
-                {{ $t('1866a2ab-1798-45df-a619-0929258d6cd8') }}
+                {{ $t('%u0') }}
             </h1>
-            <p>{{ $t('d9fc0ab0-8b03-4822-87b1-3e60c6438634') }}</p>
+            <p>{{ $t('%PT') }}</p>
 
             <STList>
                 <STListItem v-for="webshop in webshops" :key="webshop.id" :selectable="true" @click="openWebshop(webshop)">

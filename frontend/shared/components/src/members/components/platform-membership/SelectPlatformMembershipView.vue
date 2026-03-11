@@ -3,10 +3,10 @@
         <h1>{{ title }}</h1>
 
         <p v-if="availableOrganizations.length === 0" class="warning-box">
-            {{ $t('ec0c482e-0528-499f-82fa-b081bf708ded') }}
+            {{ $t('%3x') }}
         </p>
         <p v-if="availableMembershipTypes.length === 0" class="warning-box">
-            {{ $t('d3a424d0-f851-48f2-8837-340e8b60374e') }}
+            {{ $t('%8w') }}
         </p>
 
         <template v-else>
@@ -14,10 +14,10 @@
 
             <template v-if="selectedOrganization.id !== platform.membershipOrganizationId">
                 <p v-if="organization" class="style-description-block">
-                    {{ $t('7c2fee1a-0838-4346-848d-a3d984e70fdc') }}
+                    {{ $t('%3v') }}
                 </p>
                 <p v-else class="style-description-block">
-                    {{ $t('525747e4-48df-4f20-979e-3c18142e64a5', {name: selectedOrganization.name }) }}
+                    {{ $t('%7i', {name: selectedOrganization.name }) }}
                 </p>
             </template>
 
@@ -40,16 +40,16 @@
                     </p>
 
                     <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days">
-                        <STInputBox :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :error-box="errors.errorBox" error-fields="startDate">
+                        <STInputBox :title="$t('%5M')" :error-box="errors.errorBox" error-fields="startDate">
                             <DateSelection v-model="customStartDate" class="option" :min="minimumStartDateForDaysTypes" />
                         </STInputBox>
 
-                        <STInputBox :title="$t('f3cc0597-fe12-4cb1-bd41-4c7ce5d59235')" :error-box="errors.errorBox" error-fields="endDate">
+                        <STInputBox :title="$t('%3w')" :error-box="errors.errorBox" error-fields="endDate">
                             <DateSelection v-model="customEndDate" class="option" :min="minimumStartDateForDaysTypes" />
                         </STInputBox>
                     </div>
                     <div v-else-if="selectedMembershipType.id === type.id">
-                        <STInputBox :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :error-box="errors.errorBox" error-fields="startDate">
+                        <STInputBox :title="$t('%5M')" :error-box="errors.errorBox" error-fields="startDate">
                             <DateSelection
                                 v-model="customStartDate"
                                 class="option"
@@ -91,9 +91,9 @@ const props = defineProps<{
     period: RegistrationPeriod;
 }>();
 
-const title = $t('cb85826e-06fc-473c-95c2-ba338fdbab50');
+const title = $t('%3y');
 const loading = ref(false);
-const saveText = $t(`36ba68cb-2159-4179-8ded-89e73d47cd87`);
+const saveText = $t(`%SN`);
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
@@ -151,7 +151,7 @@ async function save() {
         if (!periodConfig) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('b19c1fb0-f1a7-4435-9150-01bb2bb0799c'),
+                message: $t('%8Y'),
             });
         }
 
@@ -162,7 +162,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`dd14ada3-dea6-4fc5-9791-8469320d4dcf`),
+                    message: $t(`%10E`),
                 }));
             }
 
@@ -170,7 +170,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`318924c0-7a79-4cfa-b206-ffc27c4d32b7`),
+                    message: $t(`%Dc`),
                 }));
             }
 
@@ -178,7 +178,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`b7106b5c-ac87-4024-976d-67a456a75ba7`, { date: Formatter.date(periodConfig.startDate) }),
+                    message: $t(`%15A`, { date: Formatter.date(periodConfig.startDate) }),
                 }));
             }
 
@@ -186,7 +186,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`3c534380-d395-4f40-8efd-550bb1548159`, { date: Formatter.date(periodConfig.endDate) }),
+                    message: $t(`%15B`, { date: Formatter.date(periodConfig.endDate) }),
                 }));
             }
 
@@ -194,7 +194,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`791cae45-e251-4f12-befc-1c1b44636156`, { date: Formatter.date(periodConfig.endDate) }),
+                    message: $t(`%15C`, { date: Formatter.date(periodConfig.endDate) }),
                 }));
             }
         }
@@ -204,7 +204,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`b7106b5c-ac87-4024-976d-67a456a75ba7`, { date: Formatter.date(periodConfig.startDate) }),
+                    message: $t(`%15A`, { date: Formatter.date(periodConfig.startDate) }),
                 }));
             }
 
@@ -212,7 +212,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'startDate',
-                    message: $t(`3c534380-d395-4f40-8efd-550bb1548159`, { date: Formatter.date(periodConfig.endDate) }),
+                    message: $t(`%15B`, { date: Formatter.date(periodConfig.endDate) }),
                 }));
             }
         }
@@ -241,7 +241,7 @@ async function save() {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t(`423b0299-c402-4556-9d17-4675668d114d`)).show();
+        Toast.success($t(`%10F`)).show();
         await pop({ force: true });
     }
     catch (e) {
@@ -279,7 +279,7 @@ function getTypePriceNormalPrice(type: PlatformMembershipType) {
 function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const periodConfig = type.periods.get(props.period.id);
     if (!periodConfig) {
-        return $t(`28f78c8b-c553-4cb0-88d9-d1d766eaa1dd`);
+        return $t(`%10G`);
     }
 
     if (selectedOrganization.value.id === platform.value.membershipOrganizationId) {
@@ -289,7 +289,7 @@ function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const priceConfig = periodConfig.getPriceConfigForDate(date);
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`42ac723d-9e5f-4324-a2b9-f14ceeba10d8`);
+        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`%I8`);
     }
 
     const tagIds = selectedOrganization.value?.meta.tags ?? [];

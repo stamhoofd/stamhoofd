@@ -37,7 +37,7 @@ export class ViesHelperStatic {
             throw new SimpleError({
                 code: 'invalid_company_name',
                 message: 'Company name is too short',
-                human: $t('31bd2a76-8b01-4658-a18d-b63795f4be63'),
+                human: $t('%1LF'),
                 field: 'companyName',
             });
         }

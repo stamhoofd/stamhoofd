@@ -5,7 +5,7 @@
                 {{ record.name }}
             </h3>
             <p v-if="!answer" class="style-definition-text">
-                <span>{{ $t('e420367f-7ce9-4dd3-95b7-c24d0649cb59') }}</span>
+                <span>{{ $t('%1CJ') }}</span>
             </p>
             <template v-else-if="recordCheckboxAnswer">
                 <p class="style-definition-text">
@@ -15,7 +15,7 @@
                 </p>
             </template>
             <p v-else-if="recordFileAnswer" class="style-definition-text">
-                <span v-if="!recordFileAnswer.file">{{ $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598') }}</span>
+                <span v-if="!recordFileAnswer.file">{{ $t('%Rs') }}</span>
                 <template v-else>
                     <a :href="recordFileAnswer.file?.getPublicPath()" target="_blank" class="button text">
                         <span class="icon download" />
@@ -42,7 +42,7 @@
             <p v-if="recordCheckboxAnswer?.comments" v-copyable class="style-description-small pre-wrap" v-text="recordCheckboxAnswer.comments" />
         </template>
         <p v-if="recordsWithAnswers.filter(({recordCheckboxAnswer}) => recordCheckboxAnswer?.selected).length === 0" class="style-description">
-            {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
+            {{ $t('%1FW') }}
         </p>
     </template>
 

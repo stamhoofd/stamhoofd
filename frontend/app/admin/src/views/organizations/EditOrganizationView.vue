@@ -7,41 +7,41 @@
 
         <div class="split-inputs">
             <div>
-                <STInputBox :title="$t('6793e0dc-66f0-4a70-b8ac-fb41e2063871')" error-fields="name" :error-box="errors.errorBox">
-                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('bc8578de-ee3c-4aac-bd19-3fd4040168a4')" autocomplete="organization">
+                <STInputBox :title="$t('%3C')" error-fields="name" :error-box="errors.errorBox">
+                    <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%3D')" autocomplete="organization">
                 </STInputBox>
 
-                <AddressInput v-model="address" :title="$t('74303d1c-2700-4340-816e-03cb9c3fb188')" :validator="errors.validator" />
+                <AddressInput v-model="address" :title="$t('%33')" :validator="errors.validator" />
             </div>
 
             <div>
-                <UrlInput v-model="website" :title="$t('0e17f20e-e0a6-4fa0-8ec4-378e4325bea5')" :placeholder="$t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" :validator="errors.validator" :required="false" />
+                <UrlInput v-model="website" :title="$t('%5I')" :placeholder="$t('%2n')" :validator="errors.validator" :required="false" />
 
                 <p class="style-description-small">
-                    {{ $t('5f0e24bb-10db-428b-a480-6f73d959cafa') }}
+                    {{ $t('%3H') }}
                 </p>
             </div>
         </div>
 
-        <STInputBox :title="$t('2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2')" error-fields="name" :error-box="errors.errorBox">
+        <STInputBox :title="$t('%5')" error-fields="name" :error-box="errors.errorBox">
             <OrganizationUriInput v-model="uri" :validator="errors.validator" :allow-value="props.organization.uri" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('81c91169-db1e-4819-8716-5382ffbaa43b') }}
+            {{ $t('%4') }}
         </p>
 
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="false" @patch="patchAnswers" />
         </div>
 
-        <hr><h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }}</h2>
+        <hr><h2>{{ $t('%3G') }}</h2>
         <STList>
             <SelectOrganizationTagRow v-for="tag in rootTags" :key="tag.id" :organization="patched" :tag="tag" @patch:organization="addPatch" />
         </STList>
 
         <div v-for="tag in allTagsWithChildren" :key="tag.id" class="container">
             <JumpToContainer :visible="isSelected(tag)">
-                <hr><h2>{{ $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93') }} → {{ tag.name }}</h2>
+                <hr><h2>{{ $t('%3G') }} → {{ tag.name }}</h2>
                 <STList>
                     <SelectOrganizationTagRow v-for="childTag in tagIdsToTags(tag.childTags)" :key="childTag.id" :organization="patched" :tag="childTag" @patch:organization="addPatch" />
                 </STList>
@@ -49,10 +49,10 @@
         </div>
 
         <template v-if="auth.hasFullPlatformAccess()">
-            <hr><h2>{{ $t('079afc7a-6ccb-4c7f-b739-24198b0cfec2') }}</h2>
+            <hr><h2>{{ $t('%1H0') }}</h2>
 
             <STList>
-                <CheckboxListItem v-model="active" :label="$t('079afc7a-6ccb-4c7f-b739-24198b0cfec2')" :description="$t(`3f4fbe8a-bd28-432e-a54f-04067e5f83d5`)" />
+                <CheckboxListItem v-model="active" :label="$t('%1H0')" :description="$t(`%Gj`)" />
             </STList>
         </template>
     </SaveView>
@@ -88,7 +88,7 @@ const platformManager = usePlatformManager();
 
 const saving = ref(false);
 
-const title = computed(() => props.isNew ? $t('7066aee7-9e51-4767-b288-460646ceca50') : $t('e276e384-22f1-4894-93ae-8874329c6767'));
+const title = computed(() => props.isNew ? $t('%3E') : $t('%38'));
 
 const name = computed({
     get: () => patched.value.name,
@@ -173,7 +173,7 @@ async function save() {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'name',
-                message: $t('11b55f40-f3d4-4ce7-9831-57d188367b9f'),
+                message: $t('%3A'),
             });
         }
         await props.saveHandler(patch.value);
@@ -194,7 +194,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 function tagIdsToTags(ids: string[]) {

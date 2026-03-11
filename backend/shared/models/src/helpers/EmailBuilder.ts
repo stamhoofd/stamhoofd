@@ -256,7 +256,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_skipped_hard_bounce',
                             message: 'Recipient has hard bounced',
-                            human: $t(`af49a569-ce88-48d9-ac37-81e594e16c03`),
+                            human: $t(`%ws`),
                         }),
                     );
                 }
@@ -270,7 +270,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_skipped_spam',
                             message: 'Recipient has marked as spam',
-                            human: $t(`e6523f56-397e-4127-8bf7-8396f6f25a62`),
+                            human: $t(`%wt`),
                         }),
                     );
                 }
@@ -285,7 +285,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_skipped_unsubscribed',
                             message: unsubscribe.unsubscribedAll ? 'Recipient has unsubscribed' : (unsubscribe.hardBounce ? 'Recipient has hard bounced' : (unsubscribe.markedAsSpam ? 'Recipient has marked as spam' : 'Recipient has unsubscribed from marketing')),
-                            human: $t('ffbebae7-eac3-44fe-863b-25942c5be7d0'),
+                            human: $t('%1E3'),
                         }),
                     );
                 }
@@ -540,7 +540,7 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
 
     recipient.replacements.push(Replacement.create({
         token: 'greeting',
-        value: $t('f56ad718-fda0-490e-9120-ee0bd6ebbc43'),
+        value: $t('%1E9'),
     }));
 }
 
@@ -623,7 +623,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                 if (members.length > 0) {
                     for (const member of members) {
                         suffixes.push(
-                            $t('e2519632-c495-4629-9ddb-334a4f00e272', {
+                            $t('%1EC', {
                                 firstName: Formatter.escapeHtml(member.firstName),
                                 securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
                             }),
@@ -640,8 +640,8 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                     token: 'loginDetails',
                     value: '',
                     html: recipientUser.hasAccount()
-                        ? `<p class="description"><em>${$t('5403b466-98fe-48ac-beff-38acf7c9734d', { email: emailEscaped })}${suffix}</em></p>`
-                        : `<p class="description"><em>${$t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: emailEscaped })}${suffix}</em></p>`,
+                        ? `<p class="description"><em>${$t('%1EA', { email: emailEscaped })}${suffix}</em></p>`
+                        : `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}${suffix}</em></p>`,
                 }),
             );
         }
@@ -653,7 +653,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                     Replacement.create({
                         token: 'loginDetails',
                         value: '',
-                        html: `<p class="description"><em>${$t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: emailEscaped })}</em></p>`,
+                        html: `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}</em></p>`,
                     }),
                 );
             }

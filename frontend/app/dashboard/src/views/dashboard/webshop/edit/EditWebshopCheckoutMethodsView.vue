@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>{{ $t('d2225487-b0ea-457c-a2c8-7fd2d4e1abaa') }}</p>
+        <p>{{ $t('%QF') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -20,21 +20,21 @@
         <p>
             <button class="button text" type="button" @click="addOnSiteMethod">
                 <span class="icon add" />
-                <span>{{ $t('4341cb49-017b-4b80-ad5a-415073f975d4') }}</span>
+                <span>{{ $t('%QG') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addTakeoutMethod">
                 <span class="icon add" />
-                <span>{{ $t('f8d8782a-94b1-47a7-9be9-fa49a8f5b80e') }}</span>
+                <span>{{ $t('%QH') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addDeliveryMethod">
                 <span class="icon add" />
-                <span>{{ $t('fe3e7e2f-0fd3-440a-a904-5fa99943371b') }}</span>
+                <span>{{ $t('%QI') }}</span>
             </button>
         </p>
     </SaveView>

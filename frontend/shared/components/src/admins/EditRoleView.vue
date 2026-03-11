@@ -6,12 +6,12 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`8edda6d9-057a-4740-89f3-a226b8fd4950`)">
+        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%ZF`)">
         </STInputBox>
 
-        <hr><h2>{{ $t('27778acf-5730-4c2d-8337-0a84ba47f3f1') }}</h2>
-        <p>{{ $t('bf7f8c10-b6b5-4edb-90d8-a550d061dea6') }}</p>
+        <hr><h2>{{ $t('%Yy') }}</h2>
+        <p>{{ $t('%Yz') }}</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -19,10 +19,10 @@
                     <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
+                    {{ $t('%1FW') }}
                 </h3>
                 <p v-if="basePermission === 'None'" class="style-description-small">
-                    {{ $t('1d66f70e-1a42-4479-9e27-683e3f536ccd') }}
+                    {{ $t('%Z0') }}
                 </p>
             </STListItem>
 
@@ -31,10 +31,10 @@
                     <Radio v-model="basePermission" :value="PermissionLevel.Full" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('c2296305-99a9-497a-aed3-7bb3d2293ce8') }}
+                    {{ $t('%Z1') }}
                 </h3>
                 <p v-if="basePermission === PermissionLevel.Full" class="style-description-small">
-                    {{ $t('4610ce3e-5b1e-40d6-8d62-888dc54d2bb9') }}
+                    {{ $t('%Z2') }}
                 </p>
             </STListItem>
         </STList>
@@ -42,10 +42,10 @@
         <template v-if="basePermission !== PermissionLevel.Full">
             <template v-if="app === 'admin' && (scope === null || scope === 'admin')">
                 <hr><h2>
-                    {{ $t('d431d7b4-8cdd-4307-bb73-2c570fc1a0fa') }}
+                    {{ $t('%Z3') }}
                 </h2>
 
-                <p>{{ $t('31982300-fbbf-4f5a-b7ce-26738bd2b23d') }}</p>
+                <p>{{ $t('%Z4') }}</p>
 
                 <STList>
                     <ResourcePermissionRow :role="patched" :resource="{id: '', name: 'Alle verenigingen', type: PermissionsResourceType.OrganizationTags }" :inherited-roles="inheritedRoles" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer]" type="resource" @patch:role="addPatch" />
@@ -58,9 +58,9 @@
 
             <template v-if="enableActivities && categories.length">
                 <hr><h2>
-                    {{ $t('376152ba-a238-451e-a2ce-5a9d4ff69e67') }}
+                    {{ $t('%Z5') }}
                 </h2>
-                <p>{{ $t('8ff93aca-241e-478f-8e71-f9abd17d2fa5') }}</p>
+                <p>{{ $t('%Z6') }}</p>
 
                 <STList>
                     <ResourcePermissionRow v-for="category in categories" :key="category.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: category.id, name: category.settings.name, type: PermissionsResourceType.GroupCategories }" :configurable-access-rights="[AccessRight.OrganizationCreateGroups]" type="resource" @patch:role="addPatch" />
@@ -71,11 +71,11 @@
 
             <div v-if="enableMemberModule && groups.length" class="container">
                 <hr><h2>
-                    {{ $t('1c68dc61-88b4-4adc-9059-67768a473867') }}
+                    {{ $t('%Z7') }}
                 </h2>
 
                 <STList>
-                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('379d43fb-034f-4280-bb99-ea658eaec729'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('%L8'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="group in groups" :key="group.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Groups, patched, groups)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" :unlisted="true" @patch:role="addPatch" />
@@ -85,18 +85,18 @@
             <div v-if="senders.length" class="container">
                 <hr>
                 <h2>
-                    {{ $t('7dfd0425-b8ff-4dec-8c6d-257d94eabbe7') }}
+                    {{ $t('%1DK') }}
                 </h2>
-                <p>{{ $t('78db0e8d-3b1f-4982-baf7-dba7c930db48') }}</p>
+                <p>{{ $t('%1D6') }}</p>
                 <p class="info-box">
-                    {{ $t('893c2f52-23b5-48e7-b1e8-fb3700c5e1e4') }}
+                    {{ $t('%1D7') }}
                 </p>
 
                 <STList>
                     <ResourcePermissionRow
                         :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: '', name: $t('956b7313-91b5-49af-ba77-f2fc25f3a091'), type: PermissionsResourceType.Senders }"
+                        :resource="{id: '', name: $t('%1D8'), type: PermissionsResourceType.Senders }"
                         type="resource"
                         @patch:role="addPatch"
                     />
@@ -125,12 +125,12 @@
             </div>
 
             <div v-if="enableWebshopModule" class="container">
-                <hr><h2>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h2>
-                <p>{{ $t('0b8c6bb0-a953-45b6-8a2c-088d5468f743') }}</p>
+                <hr><h2>{{ $t('%HI') }}</h2>
+                <p>{{ $t('%Z8') }}</p>
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationCreateWebshops" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
-                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('3ab7a167-91be-4ac4-af06-f7b4cd7d18f0'), type: PermissionsResourceType.Webshops }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('%1AW'), type: PermissionsResourceType.Webshops }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Webshops, patched, webshops)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.WebshopScanTickets]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
@@ -138,9 +138,9 @@
 
             <div v-if="app !== 'admin' || scope === 'organization'" class="container">
                 <hr><h2>
-                    {{ $t('3fcb229b-451c-4c81-8934-5ee65059907c') }}
+                    {{ $t('%Z9') }}
                 </h2>
-                <p>{{ $t('3ac48a57-5af2-449a-91d0-8a98ffe2284f') }}</p>
+                <p>{{ $t('%ZA') }}</p>
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.MemberReadFinancialData" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
@@ -149,14 +149,14 @@
 
                     <AccessRightPermissionRow :access-right="AccessRight.MemberManageNRN" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow v-for="{recordCategory, organization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !organization ? $t('1dfaeb07-5f01-42c7-a9a4-0096047da86e') : $t('4dea71e9-0965-4c9a-81ac-6ee7046a0d8e') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="{recordCategory, organization} in recordCategories" :key="recordCategory.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: recordCategory.id, name: recordCategory.name.toString(), type: PermissionsResourceType.RecordCategories, description: !organization ? $t('%CS') : $t('%CT') }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.RecordCategories, patched, recordCategories.map(r => r.recordCategory))" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </div>
 
             <template v-if="app !== 'admin' || scope === 'organization'">
-                <hr><h2>{{ $t('0fc72e2d-5fe5-4ed2-ba5d-1f880790c174') }}</h2>
+                <hr><h2>{{ $t('%tx') }}</h2>
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationFinanceDirector" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
@@ -168,25 +168,25 @@
 
         <div v-if="!isNew && deleteHandler" class="container">
             <hr><h2 v-if="responsibility">
-                {{ $t('ab8181ca-a193-4cb3-a476-501b4d9196d3') }}
+                {{ $t('%ZB') }}
             </h2>
             <h2 v-else>
-                {{ $t('b36cd1f7-9923-433b-93d8-605ac65a4718') }}
+                {{ $t('%ZC') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
 
         <template v-if="!isNew && !responsibility">
-            <hr><h2>{{ $t('f30d6db4-12bf-4048-a31c-3e0d8ee3e935') }}</h2>
+            <hr><h2>{{ $t('%ZD') }}</h2>
 
             <Spinner v-if="loading" />
             <template v-else>
                 <p v-if="filteredAdmins.length === 0" class="info-box">
-                    {{ $t('8edaef10-547b-4f3a-9a23-94380305b061') }}
+                    {{ $t('%ZE') }}
                 </p>
                 <STList v-else>
                     <STListItem v-for="admin in filteredAdmins" :key="admin.id">
@@ -251,9 +251,9 @@ const responsibility = computed(() => {
 
 const title = computed(() => {
     if (props.role instanceof PermissionRoleForResponsibility) {
-        return $t(`055ba4d1-abf5-4c10-9da1-29311a113568`) + ' ' + props.role.name;
+        return $t(`%uN`) + ' ' + props.role.name;
     }
-    return props.isNew ? $t(`db4cb26a-c23f-4f29-b4c3-233cd0f08f38`) : props.role.name;
+    return props.isNew ? $t(`%uO`) : props.role.name;
 });
 
 const { sortedAdmins, loading, getUnloadedPermissions } = useAdmins();
@@ -299,7 +299,7 @@ const save = async () => {
         if (!isForResponsibility && name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`0b7bedcd-0e5a-4ef3-b2d8-7ee2c23650e5`),
+                message: $t(`%uP`),
                 field: 'name',
             });
         }
@@ -321,7 +321,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`4d88b931-3fa4-497d-8a23-481f8f58a967`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
+    if (!await CenteredMessage.confirm($t(`%uQ`), $t(`%CJ`))) {
         return;
     }
 
@@ -368,7 +368,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({

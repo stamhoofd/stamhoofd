@@ -2,29 +2,29 @@
     <CategorizedView :title="title" :disabled="!hasChanges && !isNew" class="edit-payment-view" :loading="saving" @save="save">
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <CategorizedBox v-if="isNew" icon="box" :title=" $t('e8ea4460-67bb-42a3-b688-cc22987fe8af')">
+        <CategorizedBox v-if="isNew" icon="box" :title=" $t('%gu')">
             <template #summary>
                 <p class="style-description-small">
                     {{ formatPrice(patchedPayment.calculatedPrice) }}
                 </p>
 
                 <p class="style-description-small">
-                    {{ pluralText(patchedPayment.balanceItemPayments.length, $t('76eb946b-7e2d-4086-bb83-b9a9b5016ab8'), $t('5717eaac-50f5-436f-a6c7-55a372a97a35')) }}
+                    {{ pluralText(patchedPayment.balanceItemPayments.length, $t('%1Li'), $t('%1Lj')) }}
                 </p>
             </template>
 
             <p v-if="patchedPayment.type === PaymentType.Payment">
-                {{ $t('ab973473-d8d9-4126-ad71-fa26a8aa53e4') }}
+                {{ $t('%gv') }}
             </p>
             <p v-else-if="patchedPayment.type === PaymentType.Reallocation">
-                {{ $t('960cd3db-0af9-4761-906c-306598381950') }}
+                {{ $t('%gw') }}
             </p>
             <p v-else>
-                {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
+                {{ $t('%5J') }}
             </p>
 
             <p v-if="shouldVatExcempt" class="warning-box">
-                {{ $t('cc15bfe2-7db1-46c0-b16a-2a0966f24ec5') }}
+                {{ $t('%1Kh') }}
             </p>
 
             <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" :is-payable="false" @patch="addPatch({balanceItemPayments: $event})" />
@@ -39,11 +39,11 @@
                         </IconContainer>
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('f2babc21-ce3a-4000-acb5-c1623b7b9e43') }}
+                        {{ $t('%gx') }}
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('b79653ad-3b9b-4586-bd26-cbca7ccb2ecf') }}
+                        {{ $t('%gy') }}
                     </p>
 
                     <template #right>
@@ -53,7 +53,7 @@
             </STList>
         </CategorizedBox>
 
-        <CategorizedBox v-if="availableMethods.includes(payment.method)" :icon="status === 'Succeeded' ? 'success' : 'clock'" :title="$t('780eb07d-9e08-4e46-9979-d3ad1a150faa')">
+        <CategorizedBox v-if="availableMethods.includes(payment.method)" :icon="status === 'Succeeded' ? 'success' : 'clock'" :title="$t('%1Ml')">
             <template #summary>
                 <p class="style-description-small">
                     {{ PaymentMethodHelper.getNameCapitalized(method) }}
@@ -66,7 +66,7 @@
 
             <div class="split-inputs">
                 <div v-if="isNew">
-                    <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+                    <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                         <Dropdown v-model="type">
                             <option v-for="m in availableTypes" :key="m" :value="m">
                                 {{ capitalizeFirstLetter(PaymentTypeHelper.getName(m)) }}
@@ -75,7 +75,7 @@
                     </STInputBox>
                 </div>
                 <div>
-                    <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('112b7686-dffc-4ae9-9706-e3efcd34898f') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
+                    <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('%7R') : (type === PaymentType.Payment ? $t(`%h0`) : $t(`%h1`))" error-fields="paidAt" :error-box="errors.errorBox">
                         <DateSelection v-model="paidAt" />
                     </STInputBox>
                 </div>
@@ -83,7 +83,7 @@
             <p v-if="isNew" class="style-description-small" v-text="capitalizeFirstLetter(PaymentTypeHelper.getDescription(type))" />
 
             <div v-if="!isNew || type !== PaymentType.Reallocation" class="split-inputs">
-                <STInputBox v-if="type !== PaymentType.Reallocation" :title="type === PaymentType.Payment ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`1d8b2fd0-3e5c-4364-9476-b7b40ca39c50`)" error-fields="method" :error-box="errors.errorBox">
+                <STInputBox v-if="type !== PaymentType.Reallocation" :title="type === PaymentType.Payment ? $t(`%M7`) : $t(`%gz`)" error-fields="method" :error-box="errors.errorBox">
                     <Dropdown v-model="method">
                         <option v-for="m in availableMethods" :key="m" :value="m">
                             {{ PaymentMethodHelper.getNameCapitalized(m) }}
@@ -91,7 +91,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox error-fields="status" :error-box="errors.errorBox" :title="$t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`)">
+                <STInputBox error-fields="status" :error-box="errors.errorBox" :title="$t(`%1A`)">
                     <Dropdown v-model="status">
                         <option v-for="m in availableStatuses" :key="m" :value="m">
                             {{ PaymentStatusHelper.getNameCapitalized(m) }}
@@ -101,7 +101,7 @@
             </div>
         </CategorizedBox>
 
-        <CategorizedBox v-if="method === PaymentMethod.Transfer && type !== PaymentType.Reallocation" icon="bank" :title="type === PaymentType.Payment ? $t('1a34199f-e779-4947-b0d3-a41aeefa901a') : $t('12472cd2-4c67-4e54-81dc-cba8fd6c1c91') ">
+        <CategorizedBox v-if="method === PaymentMethod.Transfer && type !== PaymentType.Reallocation" icon="bank" :title="type === PaymentType.Payment ? $t('%gs') : $t('%gt') ">
             <template #summary>
                 <p class="style-description-small">
                     {{ iban || creditor }}
@@ -112,18 +112,18 @@
                 </p>
             </template>
 
-            <STInputBox :title="type === PaymentType.Payment ? $t(`31c28f13-d3b8-42ee-8979-c8224633237e`) : $t(`edfb74fb-9e81-4fbf-9591-cd9780ee977d`)" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                <input v-model="creditor" class="input" type="text" autocomplete="off" :placeholder="$t(`e57ce79c-d0f6-4d7e-a8f4-2efbf12c1433`)">
+            <STInputBox :title="type === PaymentType.Payment ? $t(`%J5`) : $t(`%h2`)" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
+                <input v-model="creditor" class="input" type="text" autocomplete="off" :placeholder="$t(`%h3`)">
             </STInputBox>
 
-            <IBANInput v-model="iban" :validator="errors.validator" :required="false" :title="$t(`b541ddfb-cce5-4194-b6a5-3de523b27fa8`)" :placeholder="$t(`95854f9f-45df-4775-9d37-524efbbbc57f`)" />
+            <IBANInput v-model="iban" :validator="errors.validator" :required="false" :title="$t(`%J6`)" :placeholder="$t(`%h4`)" />
 
-            <STInputBox error-fields="transferDescription" :error-box="errors.errorBox" :title="$t(`136b7ba4-7611-4ee4-a46d-60758869210f`)">
-                <input ref="firstInput" v-model="transferDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`dc7631e2-c6ed-4508-ada0-40eebc5fc24e`)">
+            <STInputBox error-fields="transferDescription" :error-box="errors.errorBox" :title="$t(`%J8`)">
+                <input ref="firstInput" v-model="transferDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`%h5`)">
             </STInputBox>
         </CategorizedBox>
 
-        <CategorizedBox icon="company" :title="$t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9')">
+        <CategorizedBox icon="company" :title="$t('%1Ke')">
             <template v-if="patchedPayment.customer" #summary>
                 <p v-if="patchedPayment.customer.company" class="style-description-small">
                     {{ patchedPayment.customer.company.name }}
@@ -135,12 +135,12 @@
             </template>
 
             <p v-if="patchedPayment.payingOrganization" class="info-box icon link selectable" @click="choosePayingOrganization">
-                <span>{{ $t('6b03b799-4062-4bc7-a0cd-cb22f951dbc9', {name: patchedPayment.payingOrganization.name, uri: patchedPayment.payingOrganization.uri}) }}</span>
+                <span>{{ $t('%1Kf', {name: patchedPayment.payingOrganization.name, uri: patchedPayment.payingOrganization.uri}) }}</span>
                 <span class="button icon edit" />
             </p>
 
             <p v-else-if="balanceItems.find(b => b.payingOrganizationId)" class="info-box icon link selectable" @click="choosePayingOrganization">
-                <span>{{ $t('d28dbb6c-e21b-4ded-b09b-be72a73ffdf8') }}</span>
+                <span>{{ $t('%1Kg') }}</span>
                 <span class="button icon edit" />
             </p>
 
@@ -242,17 +242,17 @@ function autoUpdateType() {
     const v = total.value;
     if (v === 0 && type.value !== PaymentType.Reallocation) {
         type.value = PaymentType.Reallocation;
-        new Toast($t('abd4da99-df2c-4672-b8f8-d133db28f406'), 'wand theme-secundary').show();
+        new Toast($t('%1I1'), 'wand theme-secundary').show();
         return true;
     }
     if (v > 0 && type.value !== PaymentType.Payment) {
         type.value = PaymentType.Payment;
-        new Toast($t('639bca94-1e40-4176-99b0-f1a3a9b62165'), 'receive').show();
+        new Toast($t('%1I2'), 'receive').show();
         return true;
     }
     if (v < 0 && type.value !== PaymentType.Refund) {
         type.value = PaymentType.Refund;
-        new Toast($t('af74b9c2-7be3-4d95-a6d7-ba36a4671be8'), 'undo theme-error').show();
+        new Toast($t('%1I3'), 'undo theme-error').show();
         return true;
     }
 }
@@ -420,7 +420,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 defineExpose({
     shouldNavigateAway,

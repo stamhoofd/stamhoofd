@@ -1,10 +1,10 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>{{ $t("25e9cef3-fd10-41bf-abf0-90bbcd6f5fd4") }}</p>
+        <p>{{ $t("%Qv") }}</p>
 
         <p class="warning-box">
-            {{ $t('bd76a4c0-1c0c-4ba7-b3be-a1cd059f3640') }}
+            {{ $t('%Qu') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />

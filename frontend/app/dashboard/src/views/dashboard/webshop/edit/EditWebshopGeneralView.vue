@@ -3,13 +3,13 @@
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="meta.name" :error-box="errors.errorBox" :title="$t(`21d2abc5-55c1-4ad2-a7ba-44061fae2fd1`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`0554f2e8-0345-43b6-9652-eff5cbfece03`)"><p v-if="name.length > 30" class="style-description-small">
-                {{ $t("5da7a306-4054-429b-a680-a9ba0d020121") }}
+        <STInputBox error-fields="meta.name" :error-box="errors.errorBox" :title="$t(`%Qo`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Qp`)"><p v-if="name.length > 30" class="style-description-small">
+                {{ $t("%Qm") }}
             </p>
         </STInputBox>
 
-        <hr><h2>{{ $t('6c9d45e5-c9f6-49c8-9362-177653414c7e') }}</h2>
+        <hr><h2>{{ $t('%1B') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -17,10 +17,10 @@
                     <Radio v-model="ticketType" :value="WebshopTicketType.None" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('57bbb3fe-8c53-4aab-b103-38d86df4de84') }}
+                    {{ $t('%QS') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('0addd055-9318-46b7-9fc9-ec534974eef3') }}
+                    {{ $t('%QT') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -28,10 +28,10 @@
                     <Radio v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('2916b5d4-0ccd-4031-b03d-53db31bf6076') }}
+                    {{ $t('%QU') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('26cce912-b9b2-49c3-8768-d98173286458') }}
+                    {{ $t('%QV') }}
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -39,50 +39,50 @@
                     <Radio v-model="ticketType" :value="WebshopTicketType.Tickets" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('638202df-48b7-49c7-b5d6-b5dca451896a') }}
+                    {{ $t('%QW') }}
                 </h3>
                 <p class="style-description">
-                    {{ $t('ade46780-b07f-48f0-9964-0a9b89403be5') }}
+                    {{ $t('%QX') }}
                 </p>
             </STListItem>
         </STList>
 
         <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
-            {{ $t("ec75e8ea-c2d5-40e2-b81a-358c20e44fe2") }}
+            {{ $t("%Qn") }}
         </p>
         <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
-            {{ $t('b56f4d0f-93c0-4f22-9597-735ee03cc9e2') }}
+            {{ $t('%QY') }}
         </p>
 
-        <hr><h2>{{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}</h2>
+        <hr><h2>{{ $t('%1CP') }}</h2>
 
         <Checkbox v-model="hasStatusClosed">
-            {{ $t('4ae26268-586e-41f7-875d-90137f9ed836') }}
+            {{ $t('%CZ') }}
         </Checkbox>
 
         <template v-if="!hasStatusClosed">
             <Checkbox v-model="useAvailableUntil">
-                {{ $t('4b6cb3f4-a5a7-40db-8e79-e7a892ae14a7') }}
+                {{ $t('%QZ') }}
             </Checkbox>
             <div v-if="useAvailableUntil" class="split-inputs">
-                <STInputBox error-fields="settings.availableUntil" :error-box="errors.errorBox" :title="$t(`bdbe9ec5-11f1-4c79-9c36-ca1f8c434fb9`)">
+                <STInputBox error-fields="settings.availableUntil" :error-box="errors.errorBox" :title="$t(`%Qq`)">
                     <DateSelection v-model="availableUntil" />
                 </STInputBox>
-                <TimeInput v-model="availableUntil" :validator="errors.validator" :title="$t(`125db847-73bc-4494-9732-fe2ef4e55f66`)" />
+                <TimeInput v-model="availableUntil" :validator="errors.validator" :title="$t(`%Qr`)" />
             </div>
             <Checkbox v-model="useOpenAt">
-                {{ $t('bd1870d2-eaaf-463a-88aa-b1ea5b916f05') }}
+                {{ $t('%Qa') }}
             </Checkbox>
             <div v-if="useOpenAt" class="split-inputs">
-                <STInputBox error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`0af19444-2686-4142-b14f-f2169033233f`)">
+                <STInputBox error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`%Qs`)">
                     <DateSelection v-model="openAt" />
                 </STInputBox>
-                <TimeInput v-model="openAt" :validator="errors.validator" :title="$t(`125db847-73bc-4494-9732-fe2ef4e55f66`)" />
+                <TimeInput v-model="openAt" :validator="errors.validator" :title="$t(`%Qr`)" />
             </div>
         </template>
 
         <div class="container">
-            <hr><h2>{{ $t('901ee313-afe3-4baa-9e79-077a32d9825f') }}</h2>
+            <hr><h2>{{ $t('%Qb') }}</h2>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -90,10 +90,10 @@
                         <Radio v-model="numberingType" :value="WebshopNumberingType.Continuous" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('be895e24-ac95-4d1b-8962-9bc23e59728a') }}
+                        {{ $t('%Qc') }}
                     </h3>
                     <p class="style-description">
-                        {{ $t('cd7dec4c-5183-4c18-b447-b4095436bb5c') }}
+                        {{ $t('%29') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -101,33 +101,33 @@
                         <Radio v-model="numberingType" :value="WebshopNumberingType.Random" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('e9d7b5ad-5938-4e96-a089-582854d0d9a8') }}
+                        {{ $t('%Qd') }}
                     </h3>
                     <p class="style-description">
-                        {{ $t('8982ff9e-7905-4b82-9e9c-cb37a6a9481e') }}
+                        {{ $t('%1L') }}
                     </p>
                 </STListItem>
             </STList>
 
-            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`acd40eea-3b58-434b-8be9-52e7a32d7b52`)">
+            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`%Qt`)">
                 <NumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
             </STInputBox>
             <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
-                {{ $t('290f637c-9313-44c1-8e4f-4e5922e9768a') }}
+                {{ $t('%Qe') }}
             </p>
         </div>
 
         <template v-if="isNew">
-            <hr><h2>{{ $t('12b644c9-c1a7-4930-afb2-79f62648d243') }}</h2>
-            <p>{{ $t('ac5ca0b0-0b1d-47bc-ab42-c23153dd7521') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>
+            <hr><h2>{{ $t('%O7') }}</h2>
+            <p>{{ $t('%Qf') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('%OH') }}</a>.</p>
 
             <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" :show-administration-fee="false" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
         </template>
 
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
-            <hr><h2>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</h2>
+            <hr><h2>{{ $t('%Qg') }}</h2>
             <p>
-                {{ $t('68fa95be-f609-4e82-9c66-496c40c95503') }}
+                {{ $t('%Qh') }}
             </p>
 
             <STList>
@@ -136,10 +136,10 @@
                         <Radio v-model="authType" :value="WebshopAuthType.Disabled" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('3729f1c6-ec66-4530-9012-48e0821c0bc1') }}
+                        {{ $t('%Qi') }}
                     </h3>
                     <p class="style-description">
-                        {{ $t('8b0dcdca-56da-4c94-b574-668d2758359d') }}
+                        {{ $t('%Qj') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -147,10 +147,10 @@
                         <Radio v-model="authType" :value="WebshopAuthType.Required" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('bbe18b42-bbd7-4c1f-9f1c-367b27e5c18d') }}
+                        {{ $t('%Qk') }}
                     </h3>
                     <p class="style-description">
-                        {{ $t('821d94ff-3d9f-4b47-b399-acc5a90771ae') }}
+                        {{ $t('%Ql') }}
                     </p>
                 </STListItem>
             </STList>

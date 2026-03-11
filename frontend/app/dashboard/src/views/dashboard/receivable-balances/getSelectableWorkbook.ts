@@ -22,51 +22,51 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
         sheets: [
             new SelectableSheet({
                 id: 'receivableBalances',
-                name: $t(`231f28d7-292a-43bc-877b-751012b6ae48`),
-                description: $t(`6025e62d-b832-47dc-93e8-ad7d5753069f`),
+                name: $t(`%99`),
+                description: $t(`%Mf`),
                 columns: [
                     ...getGeneralColumns($t, $feature),
                     new SelectableColumn({
                         id: 'amountOpen',
-                        name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
+                        name: $t(`%76`),
                     }),
                     new SelectableColumn({
                         id: 'amountPending',
-                        name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
+                        name: $t(`%wc`),
                     }),
                 ],
             }),
             new SelectableSheet({
                 id: 'balanceItems',
-                name: $t(`0d735b43-02e4-4846-8aea-a603bdc9f7a4`),
-                description: $t(`8e74fdaf-ed55-443c-b909-e0f53b02530b`),
+                name: $t(`%Mg`),
+                description: $t(`%Mh`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-                        description: $t(`15bb965e-b592-4954-a40e-3cbe5786e591`),
+                        name: $t(`%1P`),
+                        description: $t(`%Mi`),
                     }),
 
-                    ...getGeneralColumns($t, $feature, { category: $t(`d13bace8-4a8d-4fb0-9656-92260f46a194`) }).map((c) => {
+                    ...getGeneralColumns($t, $feature, { category: $t(`%Mj`) }).map((c) => {
                         c.id = `receivableBalance.${c.id}`;
                         return c;
                     }),
 
                     new SelectableColumn({
                         id: 'type',
-                        name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
-                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '),
+                        name: $t(`%1B`),
+                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`%M1`) + ' '),
                     }),
 
                     new SelectableColumn({
                         id: 'category',
-                        name: $t(`502dc65d-e8d3-4b20-a478-a76ca9084e60`),
-                        description: $t(`15e35271-f215-427c-9cef-23c04faf9337`),
+                        name: $t(`%M2`),
+                        description: $t(`%Mk`),
                     }),
 
                     new SelectableColumn({
                         id: 'description',
-                        name: $t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`),
+                        name: $t(`%6o`),
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -77,47 +77,47 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'amount',
-                        name: $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
+                        name: $t(`%M4`),
                     }),
 
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: $t(`7453643b-fdb2-4aa1-9964-ddd71762c983`),
+                        name: $t(`%6q`),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
+                        name: $t(`%1IP`),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePaid',
-                        name: $t(`25c803f0-6b45-42aa-9b88-573e3706b8bb`),
+                        name: $t(`%Ml`),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePending',
-                        name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
+                        name: $t(`%wc`),
                     }),
 
                     new SelectableColumn({
                         id: 'priceOpen',
-                        name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
+                        name: $t(`%76`),
                     }),
 
                     new SelectableColumn({
                         id: 'createdAt',
-                        name: $t(`10fd24bb-43dd-4174-9a23-db3ac54af9be`),
+                        name: $t(`%1JJ`),
                     }),
 
                     new SelectableColumn({
                         id: 'dueAt',
-                        name: $t(`3d586760-01f3-42c3-82be-44cea7ad0820`),
+                        name: $t(`%wW`),
                     }),
 
                     new SelectableColumn({
                         id: 'status',
-                        name: $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
+                        name: $t(`%1A`),
                     }),
                 ],
             }),
@@ -130,26 +130,26 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
         return [
             new SelectableColumn({
                 id: 'id',
-                name: $t(`333e8879-0e98-4233-bc51-93a5c623c75e`),
-                description: $t(`d1ccda9a-6579-4fa6-8f6c-b29997ef8d5d`),
+                name: $t(`%wd`),
+                description: $t(`%Mm`),
             }),
             new SelectableColumn({
                 id: 'name',
-                name: $t(`72b10926-c8b2-4e8b-8527-43d8286dd9e1`),
+                name: $t(`%Mn`),
                 ...options,
             }),
             ...($feature('organization-receivable-balances')
                 ? [
                         new SelectableColumn({
                             id: 'uri',
-                            name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
+                            name: $t('%7C'),
                             ...options,
                         }),
                     ]
                 : []),
             new SelectableColumn({
                 id: 'objectType',
-                name: $t(`203d72ce-fa32-46a5-b219-7ba76192d99a`),
+                name: $t(`%Mo`),
                 ...options,
             }),
         ];

@@ -11,21 +11,21 @@
                 </span>
             </h1>
             <p v-if="canCreateEvent" class="info-box">
-                {{ $t('d08634b6-dc8e-435a-94a7-077e295d1441') }}
+                {{ $t('%1NE') }}
                 <span class="button text inherit-color" @click="convertToEvent">
                     <span class="icon calendar" />
-                    <span>{{ $t('c586cc7f-f92c-4458-9a24-ff9566d99b46') }}</span>
+                    <span>{{ $t('%1NF') }}</span>
                 </span>
             </p>
             <p v-if="isLocked" class="warning-box">
-                {{ $t('7dd9a44e-8a47-4b74-9d57-d20b1efb706f') }}
+                {{ $t('%8Q') }}
             </p>
             <p v-if="!isPublic" class="info-box">
-                {{ $t('86b4a41f-1353-44c9-a2dc-7d6f5ccc371a') }}
+                {{ $t('%LU') }}
             </p>
             <p v-if="!isArchive && !isOpen" class="info-box">
-                {{ $t('fb583c62-4ebf-4a54-acbf-5be7c07e09dd') }} <template v-if="hasFullPermissions">
-                    {{ $t('600685cc-2cb6-4a99-a0e0-2ca271b89fcb') }}
+                {{ $t('%LV') }} <template v-if="hasFullPermissions">
+                    {{ $t('%LW') }}
                 </template>
             </p>
 
@@ -37,10 +37,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('ba230e6d-38eb-4bf4-9735-4249c96a95e9') }}
+                        {{ $t('%LX') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('8063280c-a4d1-4acf-a54d-dff02e973909') }}
+                        {{ $t('%LY') }}
                     </p>
                     <template #right>
                         <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
@@ -53,12 +53,12 @@
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('565a7968-e547-411e-aaff-6f936c128d5f') }}
-                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('ae8d3a27-6a56-4ae8-ada6-c843f01625b0') }}</span>
-                        <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('22703e89-376e-453d-9fc6-c449193be678') }}</span>
+                        {{ $t('%1IQ') }}
+                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('%cR') }}</span>
+                        <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('%1EN') }}</span>
                     </h2>
                     <p class="style-description">
-                        {{ $t('94832a03-67fb-4b99-ae40-d41d5601d690') }}
+                        {{ $t('%LZ') }}
                     </p>
                     <template #right>
                         <span v-if="group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.waitingList.getMemberCount()!) }}</span>
@@ -74,7 +74,7 @@
                         {{ responsibility.name }} van {{ group.settings.name }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('500b29a8-32bd-484a-9bbd-650473f6b38a') }}
+                        {{ $t('%La') }}
                     </p>
 
                     <template #right>
@@ -85,7 +85,7 @@
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr><h2>{{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}</h2>
+                <hr><h2>{{ $t('%xU') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -93,10 +93,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('35757756-d817-419d-82dd-1ba14128af30') }}
+                            {{ $t('%Lb') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('01e49485-5aa4-4667-883d-a1083dfbe3a3') }}
+                            {{ $t('%Lc') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -108,10 +108,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('70c5edd2-3550-447e-8a36-b43d7833fe1c') }}
+                            {{ $t('%Ld') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('426b8e47-ea7c-4658-a13a-eed7ac0eafc1') }}
+                            {{ $t('%Le') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -123,10 +123,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t("f1d59047-109f-45f2-8f54-a412b564d4e7") }}
+                            {{ $t("%Ln") }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('1988fd3c-c2b2-4894-8993-c15c698cba9e') }}
+                            {{ $t('%Lf') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -138,10 +138,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
+                            {{ $t('%1DD') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('dd3b8b5f-0f31-4b70-99fa-cc4ed29e70aa') }}
+                            {{ $t('%Lg') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -149,20 +149,20 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+                <hr><h2>{{ $t('%16X') }}</h2>
 
                 <STList>
                     <STListItem v-if="!isArchive && !isOpen" :selectable="true" @click="openGroup()">
                         <h2 class="style-title-list">
-                            {{ $t('37e053fe-6652-49d0-80a6-9ac4995cfa8a') }}
+                            {{ $t('%Lh') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('0a7c256d-1502-4865-97fe-91390b8f3c21') }}
+                            {{ $t('%Li') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary green hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('cd0a1bf5-5cfe-40c6-bbd1-9f40574d559b') }}</span>
+                                <span>{{ $t('%28') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -170,15 +170,15 @@
 
                     <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
                         <h2 class="style-title-list">
-                            {{ $t('01f61997-3e70-41fa-85bd-9d0311caddcd') }}
+                            {{ $t('%Lj') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('db492b1b-51de-48f1-b620-8bdc6dc5c3db') }}
+                            {{ $t('%Lk') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}</span>
+                                <span>{{ $t('%9b') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -186,15 +186,15 @@
 
                     <STListItem :selectable="true" @click="deleteGroup()">
                         <h2 class="style-title-list">
-                            {{ $t('ef4584d3-5c76-4ed4-9f4f-4451b7cd3e14') }}
+                            {{ $t('%Ll') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('34a9760e-21d2-47c7-8311-06d34c8a8561') }}
+                            {{ $t('%Lm') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                                <span>{{ $t('%CJ') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>
@@ -422,7 +422,7 @@ async function editPermissions(animated = true) {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditResourceRolesView, {
-                description: $t('e83fded1-6903-4459-9ef0-4fe9d7238bab'),
+                description: $t('%1Dp'),
                 resource: {
                     id: props.group.id,
                     name: props.group.settings.name.toString(),
@@ -701,11 +701,11 @@ async function convertToEvent() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`44f2acef-4059-4c03-a847-5c9c7adce18b`), $t('2c8da330-f73f-4caa-9b76-71946aebd9d0'), $t(`e37860f4-cba1-41ad-ba9e-5d8598b02ec1`))) {
+    if (!await CenteredMessage.confirm($t(`%1NL`), $t('%1NG'), $t(`%1NM`))) {
         return;
     }
 
-    const toast = new Toast($t('95074fe5-fd75-4d9b-b4a5-335c7c2342df'), 'spinner').show();
+    const toast = new Toast($t('%1NH'), 'spinner').show();
 
     try {
         const event = await createEventFromGroup(props.group, organization.value);
@@ -714,14 +714,14 @@ async function convertToEvent() {
     }
     catch (e) {
         console.error(e);
-        Toast.error($t('1f7f1430-470a-4250-8c77-24850d195557')).show();
+        Toast.error($t('%1NI')).show();
         return;
     }
     finally {
         toast.hide();
     }
 
-    Toast.success($t('1885534c-e2d8-453b-9e07-521a7fbf8d6d')).show();
+    Toast.success($t('%1NJ')).show();
 
     // navigate to event
     await GlobalEventBus.sendEvent('selectTabById', 'events');
@@ -857,7 +857,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         throw new SimpleError({
             code: 'group-name-too-short',
             message: 'Name should be at least 2 characters long',
-            human: $t('0dd5ca82-2086-4f97-a33d-f5eb40821002'),
+            human: $t('%1NK'),
         });
     }
 

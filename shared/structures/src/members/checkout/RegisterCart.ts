@@ -56,7 +56,7 @@ export class IDRegisterCart extends AutoEncoder {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Registration not found',
-                    human: $t(`d05d3829-a5c2-426c-ae1d-3b0c9cacd536`),
+                    human: $t(`%qn`),
                     field: 'deleteRegistrationIds',
                 });
             }
@@ -305,7 +305,7 @@ export class RegisterCart {
                     errors.addError(new SimpleError({
                         code: 'duplicate_register_item',
                         message: 'duplicate register item',
-                        human: $t(`9cddf872-df86-45d7-947d-3858d7187487`),
+                        human: $t(`%qo`),
                     }));
                 }
             }
@@ -332,7 +332,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in balanceItems',
-                    human: $t(`0e7fa0a8-7946-4f3a-b17e-a8949de7928d`),
+                    human: $t(`%qp`),
                     field: 'balanceItems',
                 }));
                 continue;
@@ -361,7 +361,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in deleteRegistrations',
-                    human: $t(`dba1b316-9058-48af-be8e-e9e9d6615bde`),
+                    human: $t(`%qq`),
                     field: 'deleteRegistrations',
                 }));
                 continue;
@@ -380,7 +380,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'locked_period',
                     message: 'Locked period',
-                    human: $t('662e1c09-b491-41a4-8e87-220fabc87eb1', { group: registration.registration.group.settings.name, period: period.nameShort }),
+                    human: $t('%ql', { group: registration.registration.group.settings.name, period: period.nameShort }),
                 }));
                 continue;
             }
@@ -389,7 +389,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'locked_period',
                     message: 'Locked period',
-                    human: $t('40670ad7-7db1-4ec9-84df-68b32642042e', { group: registration.registration.group.settings.name }),
+                    human: $t('%qm', { group: registration.registration.group.settings.name }),
                 }));
                 continue;
             }

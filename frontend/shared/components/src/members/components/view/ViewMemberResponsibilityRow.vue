@@ -13,15 +13,15 @@
         </h3>
 
         <p v-if="responsibility.startDate" class="style-description-small">
-            {{ $t('5e3c6c2c-5816-46fd-82f6-db3562c446d4', {date: formatDate(responsibility.startDate, true)}) }}
+            {{ $t('%g1', {date: formatDate(responsibility.startDate, true)}) }}
         </p>
 
         <p v-if="responsibility.endDate" class="style-description-small">
-            {{ $t('06882818-006a-4070-aa0f-c805bb2a53d4', {date: formatDateTime(responsibility.endDate) }) }}
+            {{ $t('%g2', {date: formatDateTime(responsibility.endDate) }) }}
         </p>
 
         <template #right>
-            <span v-if="!hasRegistration" v-tooltip="platformResponsibility ? $t('699edd60-afb0-4c4d-aac5-58f7a6b0ff1f', {name: member.patchedMember.firstName}) : $t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow" />
+            <span v-if="!hasRegistration" v-tooltip="platformResponsibility ? $t('%1CT', {name: member.patchedMember.firstName}) : $t('%By', {name: member.patchedMember.firstName})" class="icon warning yellow" />
         </template>
     </STListItem>
 </template>
@@ -62,8 +62,8 @@ const resp = computed(() => {
 });
 
 const name = computed(() => {
-    const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' ' + $t(`d67b2375-8426-47de-8637-74557f6ad0a4`) : '');
-    return (resp.value?.name ?? $t(`25c47121-5fa2-4b1b-b0bb-765752a81084`)) + suffix;
+    const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' ' + $t(`%10K`) : '');
+    return (resp.value?.name ?? $t(`%qZ`)) + suffix;
 });
 
 const hasRegistration = computed(() => {

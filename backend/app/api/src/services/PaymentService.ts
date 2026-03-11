@@ -403,14 +403,14 @@ export class PaymentService {
             if (price > 0 && price > Math.max(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`38ddccb2-7cf6-4b47-aa71-d11ad73386d8`),
+                    message: $t(`%vv`),
                 });
             }
 
             if (price < 0 && price < Math.min(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`dd14a1d9-c569-4d5e-bb26-569ecede4c52`),
+                    message: $t(`%vw`),
                 });
             }
 
@@ -425,7 +425,7 @@ export class PaymentService {
                 if (!member) {
                     throw new SimpleError({
                         code: 'invalid_data',
-                        message: $t(`e64b8269-1cda-434d-8d6f-35be23a9d6e9`),
+                        message: $t(`%vx`),
                     });
                 }
                 names.push({
@@ -440,7 +440,7 @@ export class PaymentService {
             // todo: try to make it non-negative by reducing some balance items
             throw new SimpleError({
                 code: 'negative_price',
-                message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
+                message: $t(`%vl`),
             });
         }
 
@@ -448,7 +448,7 @@ export class PaymentService {
             // Changed!
             throw new SimpleError({
                 code: 'changed_price',
-                message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
+                message: $t(`%vk`, { total: Formatter.price(totalPrice) }),
             });
         }
 
@@ -477,7 +477,7 @@ export class PaymentService {
                     throw new SimpleError({
                         code: 'missing_fields',
                         message: 'customer is required when paying as an organization',
-                        human: $t(`d483aa9a-289c-4c59-955f-d2f99ec533ab`),
+                        human: $t(`%vz`),
                     });
                 }
 
@@ -485,7 +485,7 @@ export class PaymentService {
                     throw new SimpleError({
                         code: 'missing_fields',
                         message: 'customer.company is required when paying as an organization',
-                        human: $t(`bc89861d-a799-4100-b06c-29d6808ba8d2`),
+                        human: $t(`%w0`),
                     });
                 }
 
@@ -497,7 +497,7 @@ export class PaymentService {
                 if (!foundCompany) {
                     throw new SimpleError({
                         code: 'invalid_data',
-                        message: $t(`0ab71307-8f4f-4701-b120-b552a1b6bdd0`),
+                        message: $t(`%w1`),
                     });
                 }
 
@@ -545,7 +545,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'missing_fields',
                 message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
-                human: $t(`ebe54b63-2de6-4f22-a5ed-d3fe65194562`),
+                human: $t(`%vq`),
             });
         }
 
@@ -558,7 +558,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'no_iban',
                     message: 'No IBAN',
-                    human: $t(`cc8b5066-a7e4-4eae-b556-f56de5d3502c`),
+                    human: $t(`%w2`),
                 });
             }
 
@@ -649,7 +649,7 @@ export class PaymentService {
                         lineItems: balanceItemPayments,
                         organization,
                         customer: {
-                            name: user.name ?? names[0]?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
+                            name: user.name ?? names[0]?.name ?? $t(`%Gr`),
                             email: user.email,
                         },
                     });
@@ -661,14 +661,14 @@ export class PaymentService {
                     if (!token) {
                         throw new SimpleError({
                             code: '',
-                            message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                            message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
                         });
                     }
                     const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(organization.getHost());
                     if (!profileId) {
                         throw new SimpleError({
                             code: '',
-                            message: $t(`5574469f-8eee-47fe-9fb6-1b097142ac75`, { method: PaymentMethodHelper.getName(payment.method) }),
+                            message: $t(`%w4`, { method: PaymentMethodHelper.getName(payment.method) }),
                         });
                     }
                     const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -712,7 +712,7 @@ export class PaymentService {
                     if ((payment.status as any) === PaymentStatus.Failed) {
                         throw new SimpleError({
                             code: 'payment_failed',
-                            message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                            message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
                         });
                     }
                 }
@@ -799,7 +799,7 @@ export class PaymentService {
         else if (payment.method === PaymentMethod.Unknown) {
             throw new SimpleError({
                 code: 'invalid_data',
-                message: $t(`86c7b6f7-3ec9-4af3-a5e6-b5de6de80d73`),
+                message: $t(`%vy`),
             });
         }
         else {
@@ -812,7 +812,7 @@ export class PaymentService {
             if (!allowedPaymentMethods.includes(payment.method)) {
                 throw new SimpleError({
                     code: 'invalid_payment_method',
-                    message: $t(`2b1ca6a0-662e-4326-ada1-10239b6ddc6f`),
+                    message: $t(`%vp`),
                 });
             }
         }
@@ -827,7 +827,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'missing_field',
                     message: 'Company address missing',
-                    human: $t('a7fbbe18-7c46-45df-b041-3c47ddd0794d'),
+                    human: $t('%1LH'),
                     field: 'customer.company.address',
                 });
             }
@@ -840,7 +840,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Intra community VAT reverse charge not supported for this purchase',
-                            human: $t('abba9d96-6089-4c49-b895-5c01cadd305a'),
+                            human: $t('%1LI'),
                         });
                     }
 
@@ -850,7 +850,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Intra community VAT reverse charge is not supported for this purchase because of missing VAT rates',
-                            human: $t('37947cd9-4661-4332-ada9-8ffde5db811d'),
+                            human: $t('%1LJ'),
                         });
                     }
                 }
@@ -862,7 +862,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Unexpected reverse charge applied',
-                            human: $t('57ac8775-7a32-4fdc-a84b-628a27f8d43d'),
+                            human: $t('%1LK'),
                         });
                     }
 
@@ -870,7 +870,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Missing VAT percentage',
-                            human: $t('495255ae-3ec5-42ec-9887-f3fc4f016d96'),
+                            human: $t('%1LL'),
                         });
                     }
                 }
@@ -885,7 +885,7 @@ export class PaymentService {
                     throw new SimpleError({
                         code: 'VAT_error',
                         message: 'Unexpected reverse charge applied',
-                        human: $t('57ac8775-7a32-4fdc-a84b-628a27f8d43d'),
+                        human: $t('%1LK'),
                     });
                 }
 
@@ -894,7 +894,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Missing VAT percentage',
-                            human: $t('495255ae-3ec5-42ec-9887-f3fc4f016d96'),
+                            human: $t('%1LL'),
                         });
                     }
                 }

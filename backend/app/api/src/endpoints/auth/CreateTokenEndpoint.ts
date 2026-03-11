@@ -74,7 +74,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'error',
                         message: 'Could not generate token',
-                        human: $t(`f40ddd3d-a986-4ec1-9db8-32ec1376c4e8`),
+                        human: $t(`%D6`),
                         statusCode: 500,
                     });
                 }
@@ -91,7 +91,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'not_supported',
                             message: 'This platform does not support password login',
-                            human: $t(`4af15b54-0bbb-4112-adf2-26dd14e8675a`),
+                            human: $t(`%D7`),
                             statusCode: 400,
                         });
                     }
@@ -100,7 +100,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'not_supported',
                             message: 'Login method not supported',
-                            human: $t(`ca4ca221-2ce9-4472-b8c7-1a5b2e2fdfa9`),
+                            human: $t(`%D8`),
                             statusCode: 400,
                         });
                     }
@@ -111,7 +111,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 const errBody = {
                     code: 'invalid_username_or_password',
                     message: 'Invalid username or password',
-                    human: $t(`ef53eb8d-b0ba-4e84-b0e3-1865729aeaa8`),
+                    human: $t(`%D9`),
                     statusCode: 400,
                 };
 
@@ -130,7 +130,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'verify_email',
                         message: 'Your email address needs verification',
-                        human: $t(`0da8cd34-d33e-4b54-94f2-531919f3cae1`),
+                        human: $t(`%DA`),
                         meta: SignupResponse.create({
                             token: code.token,
                         }).encode({ version: request.request.getVersion() }),
@@ -144,7 +144,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'error',
                         message: 'Could not generate token',
-                        human: $t(`f40ddd3d-a986-4ec1-9db8-32ec1376c4e8`),
+                        human: $t(`%D6`),
                         statusCode: 500,
                     });
                 }
@@ -159,7 +159,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
-                        human: $t(`dc03dd54-96e9-42b8-811b-3f8cf2b8534f`),
+                        human: $t(`%DB`),
                         statusCode: 400,
                     });
                 }
@@ -170,7 +170,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
-                        human: $t(`dc03dd54-96e9-42b8-811b-3f8cf2b8534f`),
+                        human: $t(`%DB`),
                         statusCode: 400,
                     });
                 }
@@ -180,7 +180,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
-                        human: $t(`dc03dd54-96e9-42b8-811b-3f8cf2b8534f`),
+                        human: $t(`%DB`),
                         statusCode: 400,
                     });
                 }
@@ -194,7 +194,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'error',
                         message: 'Could not generate token',
-                        human: $t(`b75bc5af-7711-4905-a324-3dca313bbfc2`),
+                        human: $t(`%DC`),
                         statusCode: 500,
                     });
                 }

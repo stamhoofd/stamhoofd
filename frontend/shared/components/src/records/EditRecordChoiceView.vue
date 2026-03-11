@@ -6,11 +6,11 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <TInput v-model="name" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)" error-fields="name" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
-        <TTextarea v-model="description" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" />
+        <TInput v-model="name" :placeholder="$t(`%Sk`)" error-fields="name" :error-box="errorBox" :title="$t(`%Gq`)" />
+        <TTextarea v-model="description" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`%6o`)" />
 
-        <hr><h2>{{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}</h2>
-        <p>{{ $t('8cc76242-2d6a-4354-b199-c6086e8ea03d') }}</p>
+        <hr><h2>{{ $t('%zJ') }}</h2>
+        <p>{{ $t('%iP') }}</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -18,7 +18,7 @@
                     <Radio v-model="warningInverted" :value="null" name="warningInverted" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('7042e593-92bc-4166-9eff-8379f4d80754') }}
+                    {{ $t('%iQ') }}
                 </h3>
             </STListItem>
 
@@ -27,7 +27,7 @@
                     <Radio v-model="warningInverted" :value="false" name="warningInverted" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('dba56cdb-1bbc-409f-8b9d-550f87505db3') }}
+                    {{ $t('%iR') }}
                 </h3>
             </STListItem>
 
@@ -36,23 +36,23 @@
                     <Radio v-model="warningInverted" :value="true" name="warningInverted" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('1e3c4174-138d-460c-82aa-521fb4edcd49') }}
+                    {{ $t('%iS') }}
                 </h3>
             </STListItem>
         </STList>
 
-        <TInput v-if="warningText !== null" v-model="warningText" :placeholder="$t(`fd5e3142-7a0e-4305-8a49-35f2f4d89083`)" error-fields="label" :error-box="errorBox" class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)" />
-            <STInputBox v-if="warningType" class="max" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+        <TInput v-if="warningText !== null" v-model="warningText" :placeholder="$t(`%iZ`)" error-fields="label" :error-box="errorBox" class="max" :title="$t(`%JE`)" />
+            <STInputBox v-if="warningType" class="max" :title="$t(`%1B`)">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
                             <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('fd69163a-0141-4540-af7a-ef2b45682383') }}
+                            {{ $t('%iT') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('90eed78f-7d02-4433-ba89-42da46201282') }}
+                            {{ $t('%iU') }}
                         </p>
                     </STListItem>
 
@@ -61,10 +61,10 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}
+                            {{ $t('%zJ') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('aef8493c-6d75-4270-ba4c-f9f09b65caf7') }}
+                            {{ $t('%iV') }}
                         </p>
                     </STListItem>
 
@@ -73,22 +73,22 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('b4714037-0561-4ce1-9601-9fd753fd9825') }}
+                            {{ $t('%iW') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t("e34424b4-80ff-46a2-987e-85f89cfd806c") }}
+                            {{ $t("%iY") }}
                         </p>
                     </STListItem>
                 </STList>
             </STInputBox>
             <div v-if="!isNew" class="container">
                 <hr><h2>
-                    {{ $t('a7a62bda-0ff0-4e86-b417-14eb65ad378c') }}
+                    {{ $t('%iX') }}
                 </h2>
 
                 <button class="button secundary danger" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                    <span>{{ $t('%CJ') }}</span>
                 </button>
             </div>
     </SaveView>
@@ -139,9 +139,9 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
 
     get title(): string {
         if (this.isNew) {
-            return $t(`1fc71f7e-0985-4ea7-afc7-aeb29b5d2d8d`);
+            return $t(`%10x`);
         }
-        return $t(`d35c5964-e8e9-4a42-bdd0-555ab32eda7c`);
+        return $t(`%10y`);
     }
 
     get name() {
@@ -265,7 +265,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm($t(`e817f9c6-5714-44b9-93f0-bf698a4d2723`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
+        if (!await CenteredMessage.confirm($t(`%10z`), $t(`%CJ`))) {
             return;
         }
 
@@ -294,7 +294,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+        return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
     }
 }
 </script>

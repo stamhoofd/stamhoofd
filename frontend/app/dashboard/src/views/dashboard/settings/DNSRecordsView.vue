@@ -1,14 +1,14 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar :title="$t(`5ca94078-d742-4e17-abf7-957c4721a559`)" />
+        <STNavigationBar :title="$t(`%xU`)" />
 
         <main>
             <h1>
-                {{ $t('7087e475-b3a9-492c-9d56-bfa3e763e713') }}
+                {{ $t('%My') }}
             </h1>
 
             <p>
-                {{ $t('1b2d46a6-22a9-485f-bb00-84facfa33d85') }}
+                {{ $t('%Mz') }}
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -18,10 +18,10 @@
             </div>
 
             <p class="warning-box">
-                {{ $t('136b3eb5-4c3a-46d5-87f1-25293225a875') }}
+                {{ $t('%N0') }}
             </p>
             <p class="warning-box">
-                {{ $t('e1f9cde6-19dd-4c2d-93f2-1d962c823d1f') }}
+                {{ $t('%N1') }}
             </p>
         </main>
 
@@ -29,7 +29,7 @@
             <template #right>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="validate">
-                        {{ $t('381ebb39-0c79-4919-aa9c-b68375a98ad4') }}
+                        {{ $t('%N2') }}
                     </button>
                 </LoadingButton>
             </template>

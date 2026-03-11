@@ -9,7 +9,7 @@
                     <figure>
                         <img src="~@stamhoofd/assets/images/illustrations/company.svg">
                     </figure>
-                    <h3>{{ $t('2feeeb44-07b2-460e-a664-a08e1713408e') }}</h3>
+                    <h3>{{ $t('%1KW') }}</h3>
                 </label>
 
                 <label class="illustration-radio-box">
@@ -19,26 +19,26 @@
                     <figure>
                         <img src="~@stamhoofd/assets/images/illustrations/user.svg">
                     </figure>
-                    <h3>{{ $t('1474bb78-8f01-456a-9e85-c6b1748b76d5') }}</h3>
+                    <h3>{{ $t('%1J8') }}</h3>
                 </label>
             </div>
         </STInputBox>
 
         <CompanyInputBox v-if="customer.company" :validator="validator" :company="customer.company" @patch:company="addPatch({ company: $event })" />
         <template v-else>
-            <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+            <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`%Gq`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
+                        <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
+                        <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`%1MU`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" :validator="validator" autocomplete="email" :required="false" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
-            <PhoneInput v-model="phone" :validator="validator" autocomplete="phone" :required="false" :title="$t(`3174ba16-f035-4afd-a69f-74865e64ef34`)" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
+            <EmailInput v-model="email" :validator="validator" autocomplete="email" :required="false" :title="$t(`%1FK`)" :placeholder="$t(`%14p`)" />
+            <PhoneInput v-model="phone" :validator="validator" autocomplete="phone" :required="false" :title="$t(`%18Z`)" :placeholder="$t(`%14p`)" />
         </template>
     </div>
 </template>

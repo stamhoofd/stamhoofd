@@ -7,7 +7,7 @@
         <template v-if="!hasErrors && (isLoading || socialTariffStatus !== null)">
             <p v-if="isLoading" class="loading-box">
                 <Spinner />
-                {{ $t('6c53516f-70a0-465e-8ec1-7001c33f0fd2') }}
+                {{ $t('%1Jd') }}
             </p>
 
             <p v-else-if="socialTariffStatus !== null" :class="socialTariffStatus.class" data-testid="social-tariff-status">
@@ -71,26 +71,26 @@ const socialTariffStatus = computed<null | { text: string; class: 'success-box' 
     switch (socialTariff.status) {
         case UitpasSocialTariffStatus.Active: {
             return {
-                text: $t('49f9dc3b-dd06-4f6d-9872-c59b23a94cef'),
+                text: $t('%1Je'),
                 class: 'success-box',
             };
         }
         case UitpasSocialTariffStatus.Expired: {
             return {
-                text: $t('b9e1a19f-45b4-4908-aae4-94c79ee8d23f'),
+                text: $t('%1Jf'),
                 class: 'info-box',
             };
         }
         case UitpasSocialTariffStatus.None: {
             return {
-                text: $t('bccee5af-ad58-4eb5-bb47-d1b63e3b6d20'),
+                text: $t('%1Jg'),
                 class: 'info-box',
             };
         }
         case UitpasSocialTariffStatus.Unknown: {
             if (model.value.isActive) {
                 return {
-                    text: $t('49f9dc3b-dd06-4f6d-9872-c59b23a94cef'),
+                    text: $t('%1Je'),
                     class: 'success-box',
                 };
             }

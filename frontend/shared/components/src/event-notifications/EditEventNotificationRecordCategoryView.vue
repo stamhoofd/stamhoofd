@@ -6,7 +6,7 @@
 
         <template v-if="canSaveDraft" #toolbar>
             <button class="button secundary" type="button" @click="saveDraft">
-                {{ $t('650e0758-203c-474f-8b51-da33f39de29c') }}
+                {{ $t('%bC') }}
             </button>
         </template>
     </SaveView>
@@ -105,7 +105,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

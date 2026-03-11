@@ -8,27 +8,27 @@
 
         <template v-if="mode === 'comments'">
             <STInputBox error-fields="data.comments" :error-box="errors.errorBox" class="max">
-                <textarea v-model="comments" class="input large" type="text" autocomplete="off" :placeholder="$t(`5e1d83a8-58ca-454f-8f7e-ec85880400f3`)" />
+                <textarea v-model="comments" class="input large" type="text" autocomplete="off" :placeholder="$t(`%Ux`)" />
             </STInputBox>
         </template>
         <template v-else>
-            <hr><h2>{{ $t('233fbbc9-0118-41fb-9804-631fe55ddf31') }}</h2>
+            <hr><h2>{{ $t('%Ul') }}</h2>
 
-            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
+            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" />
+            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
 
-            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" autocomplete="tel" :required="false" :placeholder="$t(`ef8c870d-6733-4d6c-a3cb-57114e91f307`)" />
+            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :required="false" :placeholder="$t(`%Uz`)" />
 
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errors.errorBox" />
 
@@ -37,7 +37,7 @@
             </div>
 
             <template v-if="checkoutMethods.length > 1">
-                <hr><h2>{{ $t('402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3') }}</h2>
+                <hr><h2>{{ $t('%xE') }}</h2>
 
                 <STList>
                     <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
@@ -55,8 +55,8 @@
                         </p>
 
                         <template v-if="checkoutMethod.timeSlots.timeSlots.length === 1 && checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" #right>
-                            <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">{{ $t('53575cae-ac22-4ac5-96d5-b67464992e4f') }}</span>
-                            <span v-else class="style-tag">{{ $t('07f945bf-649b-4138-a91e-9306a9a96955') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" class="style-tag error">{{ $t('%Um') }}</span>
+                            <span v-else class="style-tag">{{ $t('%Un') }} {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                         </template>
                     </STListItem>
                 </STList>
@@ -64,21 +64,21 @@
 
             <template v-if="selectedMethod && timeSlots.length > 0">
                 <hr><h2 v-if="selectedMethod.type === 'Takeout'">
-                    {{ $t('7144b756-9af4-4753-bd60-aee652f7dc4b') }}
+                    {{ $t('%Uo') }}
                 </h2>
                 <h2 v-else-if="selectedMethod.type === 'Delivery'">
-                    {{ $t('8976df0a-fc34-4107-85f2-23b485e2d074') }}
+                    {{ $t('%Up') }}
                 </h2>
                 <h2 v-else-if="selectedMethod.type === 'OnSite'">
-                    {{ $t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6') }}
+                    {{ $t('%1GD') }}
                 </h2>
 
                 <p v-if="selectedMethod.type === 'Takeout'">
-                    {{ $t('8113733b-00ea-42ae-8829-6056774a8be0') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopTakeoutMethod).address }}
+                    {{ $t('%Uq') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopTakeoutMethod).address }}
                 </p>
 
                 <p v-if="selectedMethod.type === 'OnSite'">
-                    {{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopOnSiteMethod).address }}
+                    {{ $t('%TW') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopOnSiteMethod).address }}
                 </p>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
@@ -93,43 +93,43 @@
                             {{ formatDateWithDay(slot.date) }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('ffea69c7-7eff-4018-afa2-d054438d04eb') }} {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
+                            {{ $t('%Ur') }} {{ formatMinutes(slot.startTime) }} - {{ formatMinutes(slot.endTime) }}
                         </p>
 
                         <template v-if="slot.listedRemainingStock !== null" #right>
-                            <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('53575cae-ac22-4ac5-96d5-b67464992e4f') }}</span>
-                            <span v-else class="style-tag">{{ $t('07f945bf-649b-4138-a91e-9306a9a96955') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
+                            <span v-if="slot.listedRemainingStock === 0" class="style-tag error">{{ $t('%Um') }}</span>
+                            <span v-else class="style-tag">{{ $t('%Un') }} {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock === 1 ? "persoon" : "personen") : (slot.listedRemainingStock === 1 ? "plaats" : "plaatsen") }}</span>
                         </template>
                     </STListItem>
                 </STList>
             </template>
 
             <template v-if="selectedMethod && selectedMethod.type === 'Delivery'">
-                <hr><h2>{{ $t('8a910c54-1b2d-4963-9128-2cab93b0151b') }}</h2>
+                <hr><h2>{{ $t('%Us') }}</h2>
                 <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== patchedOrder.data.deliveryPrice" class="info-box">
-                    {{ $t('2c0ebaf5-1a92-4b6e-b1e6-e08a8679b0aa', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}
+                    {{ $t('%Ut', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}
                 </div>
 
                 <p v-if="patchedOrder.data.deliveryPrice === 0" class="success-box">
-                    {{ $t('0c35c92b-972b-45ac-86fd-96fa571e5124') }}
+                    {{ $t('%Uu') }}
                     <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price !== 0">
-                        {{ $t('189c2064-87f1-4159-85e5-01a568e16c9d', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
+                        {{ $t('%Uv', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
                     </template>
                 </p>
                 <p v-else class="info-box">
-                    {{ $t('a6ece26a-f676-44e4-9e2b-f31177cf1db3', {price: formatPrice(patchedOrder.data.deliveryPrice)}) }}
+                    {{ $t('%Uw', {price: formatPrice(patchedOrder.data.deliveryPrice)}) }}
                     <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === patchedOrder.data.deliveryPrice">
-                        {{ $t('189c2064-87f1-4159-85e5-01a568e16c9d', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
+                        {{ $t('%Uv', {min: formatPrice(deliveryMethod.price.minimumPrice)}) }}
                     </template>
                 </p>
 
-                <AddressInput v-model="address" :required="true" :validator="errors.validator" :validate-server="server" :title="$t(`8f5f55a6-5cab-4928-a52f-2cbe34904ef0`)" />
+                <AddressInput v-model="address" :required="true" :validator="errors.validator" :validate-server="server" :title="$t(`%V0`)" />
             </template>
 
-            <hr><h2>{{ $t('1259b59f-6447-4da8-887e-848f05da346f') }}</h2>
+            <hr><h2>{{ $t('%1DQ') }}</h2>
 
             <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }} <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" type="button" @click="deleteCode(code)" />
             </p>
@@ -141,14 +141,14 @@
             <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
                 <button class="button text" type="button" @click="addProduct">
                     <span class="icon add" />
-                    <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
+                    <span>{{ $t('%1IY') }}</span>
                 </button>
             </p>
 
             <hr><PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
 
             <template v-if="isNew">
-                <hr><h2>{{ $t('07e7025c-0bfb-41be-87bc-1023d297a1a2') }}</h2>
+                <hr><h2>{{ $t('%M7') }}</h2>
 
                 <PaymentSelectionList v-model="paymentMethod" :payment-configuration="paymentConfiguration" :organization="organization!" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
             </template>

@@ -3,12 +3,12 @@
         <STNavigationBar :title="title">
             <template v-if="auth.canAccessEmail(email, PermissionLevel.Write) && email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued" #right>
                 <LoadingButton v-if="email.status === EmailStatus.Failed" :loading="isRetryingEmail">
-                    <button v-tooltip="$t('314810ef-ff16-4b22-b8a5-399d5d820a4a')" type="button" class="button icon retry" @click="retrySending" />
+                    <button v-tooltip="$t('%1EU')" type="button" class="button icon retry" @click="retrySending" />
                 </LoadingButton>
-                <button v-if="email.status === EmailStatus.Draft" v-tooltip="$t('2b799708-dc8a-4ab5-ad15-11c89bfa23da')" type="button" class="button icon send" @click="editEmail" />
-                <button v-else v-tooltip="$t('a7c3d104-58c1-41ac-8a33-febe6f474215')" type="button" class="button icon edit" @click="editEmail" />
+                <button v-if="email.status === EmailStatus.Draft" v-tooltip="$t('%1EV')" type="button" class="button icon send" @click="editEmail" />
+                <button v-else v-tooltip="$t('%1EW')" type="button" class="button icon edit" @click="editEmail" />
                 <LoadingButton v-if="email.status === EmailStatus.Draft && auth.canAccessEmail(email, PermissionLevel.Full)" :loading="isDeletingEmail">
-                    <button v-tooltip="$t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689')" type="button" class="button icon trash" @click="doDelete" />
+                    <button v-tooltip="$t('%CJ')" type="button" class="button icon trash" @click="doDelete" />
                 </LoadingButton>
             </template>
         </STNavigationBar>
@@ -34,47 +34,47 @@
             </template>
 
             <button v-if="email.spamComplaintsCount" class="error-box selectable" type="button" @click="navigate(Routes.Complaints)">
-                <span>{{ email.spamComplaintsCount > 1 ? $t('1b19e64e-c1ab-4755-bef6-a9f3f5b551d6', {count: email.spamComplaintsCount}) : $t('Eén ontvanger heeft de email als spam gemarkeerd') }}</span>
+                <span>{{ email.spamComplaintsCount > 1 ? $t('%1EX', {count: email.spamComplaintsCount}) : $t('Eén ontvanger heeft de email als spam gemarkeerd') }}</span>
                 <span class="button text">
-                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
+                    {{ $t('%1EY') }}
                 </span>
             </button>
 
             <button v-if="email.hardBouncesCount" class="error-box selectable" type="button" @click="navigate(Routes.HardBounces)">
-                <span>{{ email.hardBouncesCount > 1 ? $t('0cd6f68d-48b9-46af-a290-bee4aa0c853c', {count: email.hardBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (hard bounce)') }}</span>
+                <span>{{ email.hardBouncesCount > 1 ? $t('%1EZ', {count: email.hardBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (hard bounce)') }}</span>
                 <span class="button text">
-                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
+                    {{ $t('%1EY') }}
                 </span>
             </button>
 
             <button v-if="email.softBouncesCount" class="warning-box selectable" type="button" @click="navigate(Routes.SoftBounces)">
-                <span>{{ email.softBouncesCount > 1 ? $t('2bcd25b3-fda7-41e2-bf92-e7c1bd2780f2', {count: email.softBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (soft bounce)') }}</span>
+                <span>{{ email.softBouncesCount > 1 ? $t('%1Ea', {count: email.softBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (soft bounce)') }}</span>
                 <span class="button text">
-                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
+                    {{ $t('%1EY') }}
                 </span>
             </button>
 
             <p v-if="email.failedCount > 0" class="error-box selectable" type="button" @click="navigate(Routes.Failed)">
                 <span v-if="email.failedCount === 1">
-                    {{ $t('49e5596f-9e08-4766-b159-2678580a00c3') }}
+                    {{ $t('%1Eb') }}
                 </span>
-                <span v-else>{{ $t('faed0d06-516e-4a4e-8737-6f33f59c4af4', {
+                <span v-else>{{ $t('%1Ew', {
                     count: email.failedCount
                 }) }}</span>
                 <span class="button text">
-                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
+                    {{ $t('%1EY') }}
                 </span>
             </p>
 
             <p v-if="email.softFailedCount > 0" class="warning-box selectable" type="button" @click="navigate(Routes.Failed)">
                 <span v-if="email.softFailedCount === 1">
-                    {{ $t('de176a16-fcf1-499c-aa77-0323d18a687d') }}
+                    {{ $t('%1Ec') }}
                 </span>
-                <span v-else>{{ $t('47503212-d717-45d2-b067-da0813374113', {
+                <span v-else>{{ $t('%1Ex', {
                     count: email.softFailedCount
                 }) }}</span>
                 <span class="button text">
-                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
+                    {{ $t('%1EY') }}
                 </span>
             </p>
 
@@ -85,11 +85,11 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }}: {{ formatDateTime(email.createdAt) }}
+                        {{ $t('%1JJ') }}: {{ formatDateTime(email.createdAt) }}
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="email.fromName || email.organization?.name || email.fromAddress" v-tooltip="$t('26e90995-ce5d-48ff-96e8-21e39e489d14')">
+                <STListItem v-if="email.fromName || email.organization?.name || email.fromAddress" v-tooltip="$t('%1Ed')">
                     <template #left>
                         <span class="icon email" />
                     </template>
@@ -108,10 +108,10 @@
                     </template>
 
                     <h2 v-if="email.user.name" class="style-title-list">
-                        <span>{{ $t('9e736403-a321-4462-8c8d-c7234fa1633c') }}: {{ email.user.name }} ({{ email.user.email }})</span><span v-tooltip="$t('089accda-4b1f-4767-8e46-d7f71c24068a')" class="icon eye-off tiny" />
+                        <span>{{ $t('%1Ee') }}: {{ email.user.name }} ({{ email.user.email }})</span><span v-tooltip="$t('%1Ef')" class="icon eye-off tiny" />
                     </h2>
                     <h2 v-else class="style-title-list">
-                        <span>{{ $t('9e736403-a321-4462-8c8d-c7234fa1633c') }}: {{ email.user.email }}</span><span v-tooltip="$t('089accda-4b1f-4767-8e46-d7f71c24068a')" class="icon eye-off tiny" />
+                        <span>{{ $t('%1Ee') }}: {{ email.user.email }}</span><span v-tooltip="$t('%1Ef')" class="icon eye-off tiny" />
                     </h2>
                 </STListItem>
 
@@ -121,10 +121,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('a7685897-9158-4a82-bee1-9b74187ec599') }}
+                        {{ $t('%1Eg') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('0cc07b8f-9eaf-413a-9c2d-17363611f2d4') }}
+                        {{ $t('%1Eh') }}
                     </p>
                 </STListItem>
 
@@ -134,10 +134,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('e32d4a22-592a-4917-b115-35ee6ca50290') }}
+                        {{ $t('%1Ei') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('c07ff2d7-46c5-429d-bcff-c77c16017611') }}
+                        {{ $t('%1Ej') }}
                     </p>
                 </STListItem>
 
@@ -147,7 +147,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('221a0568-b308-4803-bd53-cb633f726f10') }}
+                        {{ $t('%1Ek') }}
                     </h2>
 
                     <template #right>
@@ -164,7 +164,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}
+                        {{ $t('%1EH') }}
                     </h2>
 
                     <template #right>
@@ -180,7 +180,7 @@
 
             <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued && auth.canAccessEmail(email, PermissionLevel.Write)">
                 <hr>
-                <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+                <h2>{{ $t('%16X') }}</h2>
 
                 <STList>
                     <STListItem v-if="email.status === EmailStatus.Failed" :selectable="true" element-name="button" @click="retrySending">
@@ -192,10 +192,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('314810ef-ff16-4b22-b8a5-399d5d820a4a') }}
+                            {{ $t('%1EU') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('02f663a0-3c65-495e-a485-71a942f06c3a') }}
+                            {{ $t('%1El') }}
                         </p>
 
                         <template #right>
@@ -214,13 +214,13 @@
                             <IconContainer v-else icon="send" class="primary" />
                         </template>
                         <h3 v-if="email.status !== EmailStatus.Draft" class="style-title-list">
-                            {{ $t('0089568d-e3cf-4dc7-b96a-2ec7fe233227') }}
+                            {{ $t('%1Em') }}
                         </h3>
                         <h3 v-else class="style-title-list">
-                            {{ $t('f547c5e3-f179-44b0-b15f-19a5813be244') }}
+                            {{ $t('%1En') }}
                         </h3>
                         <p v-if="email.status !== EmailStatus.Draft" class="style-description-small">
-                            {{ $t('890739a4-277c-4757-b6e6-c9f535d138a3') }}
+                            {{ $t('%1Eo') }}
                         </p>
 
                         <template #right>
@@ -233,10 +233,10 @@
                             <IconContainer icon="eye-off" class="primary" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('31894c35-aca4-441e-bdfb-f45ed7e125d7') }}
+                            {{ $t('%1Ep') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('8e074663-072b-4331-b6e9-e472969437a2') }}
+                            {{ $t('%1Eq') }}
                         </p>
 
                         <template #right>
@@ -253,10 +253,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}
+                            {{ $t('%CJ') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('cde18ff3-28ea-40ad-b385-37129f4091c4') }}
+                            {{ $t('%1Er') }}
                         </p>
 
                         <template #right>
@@ -288,7 +288,7 @@ const props = defineProps<{
 }>();
 
 const title = computed(() => {
-    return props.email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
+    return props.email.replacedSubject || $t('%1D1');
 });
 const auth = useAuth();
 const getEmailStatus = useEmailStatus();
@@ -323,7 +323,7 @@ defineRoutes([
                         },
                     },
                 },
-                customTitle: $t('19da8d23-acea-43c2-bfdd-742447ca57f1'),
+                customTitle: $t('%1EH'),
                 customEstimatedRows: props.email.membersCount || 0,
             };
         },
@@ -418,9 +418,9 @@ async function retrySending() {
         return;
     }
     if (!await CenteredMessage.confirm(
-        $t('9e0c8c63-6022-4742-918e-2716247d4c2f'),
-        $t('3dc84002-909a-45e2-a033-317be0a09c4e'),
-        $t('c284a7c8-69bb-4ceb-bf01-5f952c453aa9'),
+        $t('%1Es'),
+        $t('%1Et'),
+        $t('%1Eu'),
     )) {
         return;
     }
@@ -444,8 +444,8 @@ async function doDelete() {
         return;
     }
     if (!await CenteredMessage.confirm(
-        $t('c3a06b52-d25c-4ec4-afe7-208773e1332e'),
-        $t('201437e3-f779-47b6-b4de-a0fa00f3863e'),
+        $t('%1Ev'),
+        $t('%55'),
     )) {
         return;
     }

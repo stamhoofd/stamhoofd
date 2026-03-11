@@ -14,12 +14,12 @@
         </template>
 
         <template v-if="level === 1">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-                <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`722de8c9-feea-4169-8c9d-3d945fc8c9f5`)">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+                <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%dG`)">
             </STInputBox>
 
-            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-                <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`3a12fa06-088d-413d-a36d-b5a2afdfc504`)" />
+            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)">
+                <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%dH`)" />
             </STInputBox>
 
             <STList>
@@ -28,20 +28,20 @@
                         <Checkbox v-model="multipleChoice" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('d95331fe-56b0-4423-b485-5f600b6ab49c') }}
+                        {{ $t('%TI') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t("f726843e-f724-4ea4-b783-bddbf0667148") }}
+                        {{ $t("%dF") }}
                     </p>
                 </STListItem>
             </STList>
 
             <hr><h2 class="style-with-button">
-                <div>{{ $t('6c90965a-8334-43e6-8494-031e2932bc45') }}</div>
+                <div>{{ $t('%TJ') }}</div>
                 <div>
                     <button class="button text only-icon-smartphone" type="button" @click="addOption">
                         <span class="icon add" />
-                        <span>{{ $t('6c80efa8-5658-4728-ba95-d0536fdd25bd') }}</span>
+                        <span>{{ $t('%TE') }}</span>
                     </button>
                 </div>
             </h2>
@@ -68,16 +68,16 @@
                     </p>
 
                     <p v-if="option.stock !== null" class="style-description-small">
-                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(option.getRemainingStock(group)!, 'stuk', 'stuks')}) }}
+                        {{ $t('%U3', {stock: pluralText(option.getRemainingStock(group)!, 'stuk', 'stuks')}) }}
                     </p>
 
                     <p v-if="option.maximum !== null && option.allowAmount" class="style-description-small">
-                        {{ $t('b86dbc2f-9ec8-468c-9571-ca384f118c79', {max: pluralText(option.maximum, 'stuk', 'stuks')}) }}
+                        {{ $t('%dE', {max: pluralText(option.maximum, 'stuk', 'stuks')}) }}
                     </p>
 
                     <template #right>
                         <StepperInput v-if="option.allowAmount" />
-                        <span v-if="option.hidden" v-tooltip="$t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5')" class="icon gray eye-off" />
+                        <span v-if="option.hidden" v-tooltip="$t('%UC')" class="icon gray eye-off" />
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
                     </template>
@@ -153,7 +153,7 @@ const multipleChoice = computed({
 
 function addOption() {
     const price = GroupOption.create({
-        name: $t('0076d594-efee-4ec7-a00a-073a4c689a38'),
+        name: $t('%CL'),
         price: patched.value.options[0]?.price?.clone(),
     });
     addOptionPut(price);
@@ -202,7 +202,7 @@ async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`5ca94078-d742-4e17-abf7-957c4721a559`),
+                name: $t(`%xU`),
                 icon: 'settings',
                 action: async () => {
                     await editOptionMenu();
@@ -211,10 +211,10 @@ async function showContextMenu(event: MouseEvent) {
             }),
 
             new ContextMenuItem({
-                name: $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`),
+                name: $t(`%CJ`),
                 icon: 'trash',
                 action: async () => {
-                    if (!await CenteredMessage.confirm($t('f58412a9-9db9-4aa3-ad68-fa089d4f345b'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9f8c1ed0-371b-4c22-940c-57d624734c18'))) {
+                    if (!await CenteredMessage.confirm($t('%66'), $t('%55'), $t('%67'))) {
                         return;
                     }
                     emit('delete');
@@ -224,7 +224,7 @@ async function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`c8b8fb4b-3a2b-4de7-85a1-f1b963a739e7`),
+                name: $t(`%yn`),
                 icon: 'arrow-up',
                 disabled: !canMoveUp.value,
                 action: async () => {
@@ -233,7 +233,7 @@ async function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`31eb1b5d-b3d7-4a76-a5d8-f102dbeb757c`),
+                name: $t(`%yo`),
                 icon: 'arrow-down',
                 disabled: !canMoveDown.value,
                 action: async () => {

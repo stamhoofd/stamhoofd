@@ -2,20 +2,20 @@
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
         <p>
-            {{ $t('d49d422d-20c8-4f19-aaa9-f872a2169189') }} <a :href="$domains.getDocs('webshop-link-wijzigen')" target="_blank" class="inline-link">{{ $t('4c53555c-93aa-41f8-a1ae-96c25c4c9425') }}</a> {{ $t('e120b70b-86a7-444d-a6e2-92819ec1f688') }}
+            {{ $t('%Qw') }} <a :href="$domains.getDocs('webshop-link-wijzigen')" target="_blank" class="inline-link">{{ $t('%Qx') }}</a> {{ $t('%Qy') }}
         </p>
 
         <p v-if="legacyUrl && webshop.domain === null" class="info-box">
-            {{ $t('ce589897-4486-442a-b8e6-1e529de3d5bf', {legacyUrl}) }}
+            {{ $t('%Qz', {legacyUrl}) }}
         </p>
 
         <p v-if="hasOrders" class="warning-box">
-            {{ $t('7a44f6f1-bb2f-4e46-93c2-afcae9db3f80') }}
+            {{ $t('%45') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t(`30e5c996-ef97-4ad6-8503-049163cd197d`)">
+        <STInputBox :title="$t(`%NE`)">
             <Dropdown v-model="selectedDomain" @update:model-value="onChangeSelectedDomain">
                 <option :value="null">
                     {{ defaultDomain }}
@@ -24,89 +24,89 @@
                     {{ d }}
                 </option>
                 <option :value="''">
-                    {{ $t('0de25d4c-6684-4ac0-9b87-6150dfc6b28b') }}
+                    {{ $t('%R0') }}
                 </option>
             </Dropdown>
         </STInputBox>
 
         <template v-if="useNewDomain">
-            <STInputBox error-fields="customUrl" :error-box="errors.errorBox" class="max" :title="$t(`463fbf45-5a96-4caf-9bee-2b63158f9be3`)">
-                <input v-model="customUrl" class="input" type="text" :placeholder="$t('e06f1e9b-dc4c-4b3b-8ab7-52cd8048d894')" autocomplete="off" @blur="resetCache">
+            <STInputBox error-fields="customUrl" :error-box="errors.errorBox" class="max" :title="$t(`%RD`)">
+                <input v-model="customUrl" class="input" type="text" :placeholder="$t('%2m')" autocomplete="off" @blur="resetCache">
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('2ad81e83-bca1-43c9-9f18-3af1ae6e35a7') }}
+                {{ $t('%2v') }}
             </p>
 
             <template v-if="didDNSRecordsChange">
                 <p class="info-box">
-                    {{ $t('bd8f16a9-a34e-4b1d-b47b-5e53bfc3602e') }}
+                    {{ $t('%R1') }}
                 </p>
             </template>
             <template v-else>
                 <p v-if="webshop.meta.domainActive && originalWebshop.domain === webshop.domain" class="success-box">
-                    {{ $t('707cf90a-2999-471e-95dc-a3ccded49443') }}
+                    {{ $t('%R2') }}
                 </p>
                 <p v-else class="warning-box with-button selectable" @click="openDnsRecordSettings(false)">
-                    {{ $t('fe855268-0b76-47b5-b917-11f68f4407c8') }}
+                    {{ $t('%R3') }}
 
                     <button class="button text" type="button">
-                        {{ $t('1310f065-caf5-41e6-a3b8-cf9b39336483') }}
+                        {{ $t('%9H') }}
                     </button>
                 </p>
                 <p v-if="webshop.meta.domainActive && originalWebshop.domain === webshop.domain">
                     <button type="button" class="button text" @click="openDnsRecordSettings(false)">
-                        {{ $t('4e515c1e-616b-4eca-b033-15e5847a566d') }}
+                        {{ $t('%R4') }}
                     </button>
                 </p>
             </template>
 
             <p v-if="!webshop.meta.domainActive" class="info-box">
-                {{ $t('75b6fd85-2721-46fd-9ac0-8c96a782484c') }} {{ defaultUrl }}{{ $t('c88c3796-96f4-4ce7-9068-6d834c91769f') }}
+                {{ $t('%R5') }} {{ defaultUrl }}{{ $t('%R6') }}
             </p>
         </template>
 
         <template v-else-if="selectedDomain !== null">
-            <STInputBox error-fields="domainUri" :error-box="errors.errorBox" class="max" :title="$t(`463fbf45-5a96-4caf-9bee-2b63158f9be3`)">
+            <STInputBox error-fields="domainUri" :error-box="errors.errorBox" class="max" :title="$t(`%RD`)">
                 <template #right>
                     <button type="button" class="button text" @click="copyLink">
                         <span class="icon copy" />
-                        <span>{{ $t('b8e302b4-e30d-4892-9407-e72207d4c516') }}</span>
+                        <span>{{ $t('%R7') }}</span>
                     </button>
                 </template>
-                <PrefixInput v-model="domainUri" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" :placeholder="$t(`87b1175c-6cf0-42c4-af71-12460a470e8f`)" @blur="resetCache" />
+                <PrefixInput v-model="domainUri" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" :placeholder="$t(`%RE`)" @blur="resetCache" />
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('f7819757-1230-4923-bb41-f6855b002b9f') }}
+                {{ $t('%R8') }}
             </p>
         </template>
 
         <template v-else>
-            <STInputBox error-fields="uri" :error-box="errors.errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}" :title="$t(`463fbf45-5a96-4caf-9bee-2b63158f9be3`)">
+            <STInputBox error-fields="uri" :error-box="errors.errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}" :title="$t(`%RD`)">
                 <template #right>
                     <button type="button" class="button text" @click="copyLink">
                         <span class="icon copy" />
-                        <span>{{ $t('b8e302b4-e30d-4892-9407-e72207d4c516') }}</span>
+                        <span>{{ $t('%R7') }}</span>
                     </button>
                 </template>
-                <PrefixInput v-model="uri" :prefix="defaultDomain+'/'" :placeholder="$t(`87b1175c-6cf0-42c4-af71-12460a470e8f`)" @blur="updateUri" />
+                <PrefixInput v-model="uri" :prefix="defaultDomain+'/'" :placeholder="$t(`%RE`)" @blur="updateUri" />
             </STInputBox>
 
             <template v-if="errors.errorBox === null && ((availabilityCheckerCount > 0 && isAvailable !== null) || checkingAvailability)">
                 <p v-if="checkingAvailability" class="loading-box">
                     <Spinner />
-                    {{ $t('09d3184c-5df8-459e-990a-00517014fdb0') }}
+                    {{ $t('%R9') }}
                 </p>
 
                 <p v-else-if="uri.length === 0" class="error-box">
-                    {{ $t('8dbe81ab-f95e-46aa-8585-37936e4aac8d') }}
+                    {{ $t('%RA') }}
                 </p>
 
                 <p v-else-if="!isAvailable" class="error-box">
-                    {{ $t('f4324095-61d6-44a7-9c81-0a114355cbaa') }}
+                    {{ $t('%RB') }}
                 </p>
 
                 <p v-else class="success-box">
-                    {{ $t('efb861ec-6255-4f46-88ba-dfb409fee365') }}
+                    {{ $t('%RC') }}
                 </p>
             </template>
         </template>

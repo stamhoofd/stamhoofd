@@ -19,10 +19,10 @@
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            {{ $t('379d43fb-034f-4280-bb99-ea658eaec729') }}
+                            {{ $t('%L8') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('e1f33ca8-8103-4fe9-8d84-58d960e2519c') }}
+                            {{ $t('%L9') }}
                         </p>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
@@ -54,7 +54,7 @@
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            {{ shouldShowRegistrations ? $t('f068fe03-0b53-4ee2-bdc2-40dda5f6996c') : $t('33119a7d-4e82-4123-8742-dc7ec6da4a30') }}
+                            {{ shouldShowRegistrations ? $t('%1II') : $t('%LA') }}
                         </h2>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
@@ -79,22 +79,22 @@
                 <p v-if="canCreate" class="style-button-bar">
                     <button class="button text" type="button" @click="createGroup">
                         <span class="icon add" />
-                        <span>{{ $t('877284d7-31b4-4857-a963-405b4139adc2') }}</span>
+                        <span>{{ $t('%1IL') }}</span>
                     </button>
                 </p>
             </template>
 
             <p v-if="subCategories.length === 0 && groups.length === 0 && canCreate" class="info-box">
-                {{ $t('1c22a841-4402-4489-bf5d-a76b919eb4cb') }}
+                {{ $t('%LB') }}
             </p>
             <p v-else-if="subCategories.length === 0 && groups.length === 0" class="info-box">
-                {{ $t('d766699f-a294-43f4-a07e-c4eebb33fb6f') }}
+                {{ $t('%LC') }}
             </p>
 
             <p v-if="subCategories.length === 0 && groups.length === 0 && canCreate">
                 <button class="button text" type="button" @click="createGroup">
                     <span class="icon add" />
-                    <span>{{ $t('f30e6b0a-9808-4f17-8d0b-11d9d86d12ff') }}</span>
+                    <span>{{ $t('%LD') }}</span>
                 </button>
             </p>
         </main>
@@ -207,7 +207,7 @@ const name = computed(() => {
 });
 
 const title = computed(() => {
-    return isRoot.value ? $t('4dbf7584-7fe1-43d1-9bc8-a0d265865716') : name.value + '';
+    return isRoot.value ? $t('%1IJ') : name.value + '';
 });
 
 const canCreate = computed(() => {

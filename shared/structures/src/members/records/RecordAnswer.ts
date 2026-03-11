@@ -51,7 +51,7 @@ export class RecordAnswer extends AutoEncoder {
     }
 
     get stringValue() {
-        return $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`);
+        return $t(`%Gr`);
     }
 
     get objectValue(): string | number | boolean | null | Date | object {
@@ -206,7 +206,7 @@ export class RecordTextAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null || this.value.length === 0)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
+                message: $t(`%qt`),
                 field: 'input',
             });
         }
@@ -215,7 +215,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: "'" + (this.value) + $t(`77629645-c956-41ec-a7b1-837db4a30955`),
+                    message: "'" + (this.value) + $t(`%qu`),
                     field: 'input',
                 });
             }
@@ -249,7 +249,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     }
 
     get stringValue() {
-        return this.selected ? $t(`d87cdb56-c8a6-4466-a6fd-f32fe59561f5`) : $t(`01b79813-933b-4045-b426-82700f921eaa`);
+        return this.selected ? $t(`%BM`) : $t(`%BN`);
     }
 
     get objectValue() {
@@ -258,7 +258,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     get excelValues() {
         return [{
-            value: this.selected ? (this.comments ? this.comments : $t(`1ae8cbc7-9ef5-43db-b9a3-0117dfa43be1`)) : $t(`08dd4181-69c6-4888-b32a-07224f1c4349`),
+            value: this.selected ? (this.comments ? this.comments : $t(`%wo`)) : $t(`%18s`),
             format: null,
         }];
     }
@@ -267,7 +267,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
         if (this.settings.required && !this.selected) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`11135109-1f06-4937-ad14-bf1d2c4557ab`),
+                message: $t(`%qv`),
                 field: 'input',
             });
         }
@@ -319,7 +319,7 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoices.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`1c762269-151c-4787-9050-92d1798a7af0`),
+                message: $t(`%qw`),
                 field: 'input',
             });
         }
@@ -377,7 +377,7 @@ export class RecordChooseOneAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoice === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`ef8843bc-57b0-4d63-aa44-c63cbe8ec76a`),
+                message: $t(`%qx`),
                 field: 'input',
             });
         }
@@ -404,7 +404,7 @@ export class RecordAddressAnswer extends RecordAnswer {
         if (this.settings.required && this.address === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
+                message: $t(`%yw`),
                 field: 'input',
             });
         }
@@ -456,7 +456,7 @@ export class RecordDateAnswer extends RecordAnswer {
         if (this.settings.required && this.dateValue === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
+                message: $t(`%yw`),
                 field: 'input',
             });
         }
@@ -494,7 +494,7 @@ export class RecordIntegerAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
+                message: $t(`%qt`),
                 field: 'input',
             });
         }
@@ -533,7 +533,7 @@ export class RecordPriceAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
+                message: $t(`%qt`),
                 field: 'input',
             });
         }
@@ -560,7 +560,7 @@ export class RecordImageAnswer extends RecordAnswer {
         if (this.settings.required && this.image === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
+                message: $t(`%yw`),
                 field: 'input',
             });
         }
@@ -591,7 +591,7 @@ export class RecordFileAnswer extends RecordAnswer {
         if (this.settings.required && this.file === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
+                message: $t(`%yw`),
                 field: 'input',
             });
         }

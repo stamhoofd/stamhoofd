@@ -20,7 +20,7 @@
 
         <template v-if="!draggablePremises.length">
             <p class="info-box">
-                {{ $t('7d21c7fd-6aed-4147-881b-34041284b61c') }}
+                {{ $t('%OT') }}
             </p>
         </template>
 
@@ -33,7 +33,7 @@
         <p>
             <button class="button text" type="button" @click="addPremise">
                 <span class="icon add" />
-                <span>{{ $t('5e40dfe9-b4ed-497c-a37d-e162191ba96a') }}</span>
+                <span>{{ $t('%5z') }}</span>
             </button>
         </p>
     </SaveView>
@@ -196,7 +196,7 @@ const shouldNavigateAway = async () => {
     if (!hasSomeChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

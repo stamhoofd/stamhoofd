@@ -15,7 +15,7 @@
                         <slot name="buttons" />
                     </template>
                     <LoadingButton v-if="canDelete" :loading="deleting">
-                        <button v-tooltip="$t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689')" class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
+                        <button v-tooltip="$t('%CJ')" class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
                     </LoadingButton>
                     <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
                         <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation highlight ' + saveIconMobile" :disabled="disabled" type="submit" data-testid="save-button" />

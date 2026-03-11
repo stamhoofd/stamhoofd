@@ -1,13 +1,13 @@
 <template>
     <div class="property-filter-value-input">
-        <STInputBox v-if="!isAlwaysEnabled() || hasFilters" class="max" :title="$t(`f193133e-143e-48fa-8d13-afcc01031343`)">
+        <STInputBox v-if="!isAlwaysEnabled() || hasFilters" class="max" :title="$t(`%bZ`)">
             <STList>
                 <STListItem v-if="!required" :selectable="true" element-name="label">
                     <template #left>
                         <Radio :model-value="isDisabled() === true ? null : isAlwaysEnabled()" :value="null" @update:model-value="setDisabled()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ disabledText || $t('4929b81e-6f1d-4859-889b-3fb016e97286') }}
+                        {{ disabledText || $t('%1Io') }}
                     </h3>
                     <p v-if="disabledDescription" class="style-description-small">
                         {{ disabledDescription }}
@@ -19,7 +19,7 @@
                         <Radio :model-value="isDisabled() === true ? null : isAlwaysEnabled()" :value="true" @update:model-value="setAlwaysEnabled()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('8a4842b5-6304-4b02-a8c5-4b837edcd77d') }}
+                        {{ $t('%bW') }}
                     </h3>
                 </STListItem>
 
@@ -28,7 +28,7 @@
                         <Radio :model-value="isDisabled() === true ? null : isAlwaysEnabled()" :value="false" @update:model-value="setEnabledWhen(true)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('a606fec7-273d-4642-b871-002d3f702a21') }}
+                        {{ $t('%bX') }}
                     </h3>
                     <p class="style-description-small">
                         {{ enabledText }}
@@ -36,21 +36,21 @@
                     <template #right>
                         <button v-if="!isAlwaysEnabled()" class="button text" type="button" @click="setEnabledWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">{{ $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}</span>
+                            <span class="hide-small">{{ $t('%1Bm') }}</span>
                         </button>
                     </template>
                 </STListItem>
             </STList>
         </STInputBox>
 
-        <STInputBox v-if="modelValue && allowOptional" class="max" :title="$t(`879e4842-92f2-4e15-8a47-0f8e9d79770f`) + '*'">
+        <STInputBox v-if="modelValue && allowOptional" class="max" :title="$t(`%ba`) + '*'">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio :model-value="isAlwaysRequired()" :value="true" @update:model-value="setAlwaysRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('410b8deb-32fc-40a2-896a-927922fbf7e0') }}
+                        {{ $t('%1Ip') }}
                     </h3>
                 </STListItem>
 
@@ -59,7 +59,7 @@
                         <Radio :model-value="isNeverRequired()" :value="true" @update:model-value="setNeverRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('24cdc0fe-a863-4f1b-a89c-ed8b59fe5e3d') }}
+                        {{ $t('%1Iq') }}
                     </h3>
                 </STListItem>
 
@@ -68,7 +68,7 @@
                         <Radio :model-value="!isAlwaysRequired() && !isNeverRequired()" :value="true" @update:model-value="setRequiredWhen(true)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('a606fec7-273d-4642-b871-002d3f702a21') }}
+                        {{ $t('%bX') }}
                     </h3>
                     <p class="style-description-small">
                         {{ requiredText }}
@@ -76,14 +76,14 @@
                     <template #right>
                         <button v-if="!isAlwaysRequired() && !isNeverRequired()" class="button text" type="button" @click="setRequiredWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">{{ $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}</span>
+                            <span class="hide-small">{{ $t('%1Bm') }}</span>
                         </button>
                     </template>
                 </STListItem>
             </STList>
         </STInputBox>
         <p v-if="allowOptional" class="style-description-small">
-            * {{ $t("63b03f2b-6f8c-465f-9a4f-328fd67131e3") }}
+            * {{ $t("%bY") }}
         </p>
 
         <div v-if="isDevelopment">

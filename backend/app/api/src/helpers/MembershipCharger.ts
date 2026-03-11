@@ -17,7 +17,7 @@ export const MembershipCharger = {
             throw new SimpleError({
                 code: 'missing_membership_organization',
                 message: 'Missing membershipOrganizationId',
-                human: $t(`dd9d20ea-cf50-46be-8eb3-5c85bc5f30c8`),
+                human: $t(`%Ft`),
             });
         }
 
@@ -97,7 +97,7 @@ export const MembershipCharger = {
                 const balanceItem = new BalanceItem();
                 balanceItem.unitPrice = membership.price;
                 balanceItem.amount = 1;
-                balanceItem.description = Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
+                balanceItem.description = Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`%10C`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
                 balanceItem.relations = new Map([
                     [
                         BalanceItemRelationType.Member,

@@ -1,23 +1,23 @@
 <template>
     <div>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <PrefixInput v-model="uri" :prefix="prefix" :placeholder="$t(`6e520558-40b8-4d02-90fb-e4160ec305cf`)" @blur="onBlur" />
+        <PrefixInput v-model="uri" :prefix="prefix" :placeholder="$t(`%Gz`)" @blur="onBlur" />
         <template v-if="errors.errorBox === null && (checkingAvailability || (isAvailable !== null)) ">
             <p v-if="checkingAvailability" class="loading-box">
                 <Spinner />
-                {{ $t('ee01f571-fe9c-4c00-a4ec-68a22376edd2') }}
+                {{ $t('%Gv') }}
             </p>
 
             <p v-else-if="uri.length === 0" class="error-box">
-                {{ $t('07997a0a-bbf6-44dc-9627-d17dd30aedd7') }}
+                {{ $t('%Gw') }}
             </p>
 
             <p v-else-if="!isAvailable" class="error-box">
-                {{ $t('65e788b6-1f3f-43f0-ad5b-0a1f165b828b') }}
+                {{ $t('%Gx') }}
             </p>
 
             <p v-else class="success-box">
-                {{ $t('f2da81c3-cc48-4f1a-be93-f3833fe0d834') }}
+                {{ $t('%Gy') }}
             </p>
         </template>
     </div>

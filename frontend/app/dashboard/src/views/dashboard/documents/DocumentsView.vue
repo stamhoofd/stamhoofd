@@ -12,7 +12,7 @@
         :default-sort-direction="SortItemDirection.DESC"
     >
         <template #empty>
-            {{ $t('d3903009-28d5-48d6-b109-c89b88a9f36e') }}
+            {{ $t('%7n') }}
         </template>
     </ModernTableView>
 </template>
@@ -128,7 +128,7 @@ const allColumns: Column<Document, any>[] = [
 
     new Column<Document, Date>({
         id: 'createdAt',
-        name: $t('6711ac76-e8c7-482b-b6b4-635ba3d16f60'),
+        name: $t('%1Jc'),
         getValue: document => document.createdAt,
         format: date => Formatter.dateTime(date),
         minimumWidth: 100,
@@ -137,7 +137,7 @@ const allColumns: Column<Document, any>[] = [
 
     new Column<Document, Date>({
         id: 'updatedAt',
-        name: $t('874a72b7-66a8-48bf-86c5-134dc109fa04'),
+        name: $t('%1Ks'),
         getValue: document => document.updatedAt,
         format: date => Formatter.dateTime(date),
         minimumWidth: 100,

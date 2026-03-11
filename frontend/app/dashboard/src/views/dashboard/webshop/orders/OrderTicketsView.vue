@@ -1,12 +1,12 @@
 <template>
     <div class="st-view order-tickets-view">
-        <STNavigationBar :title="$t(`32e049b4-acd6-4d77-a5b8-0632111f2445`)" />
+        <STNavigationBar :title="$t(`%j`)" />
         <main>
             <h1 v-if="tickets.length > 1">
-                {{ $t('b40d200c-4265-4d58-a7f4-7c2498b062b9') }}
+                {{ $t('%1t') }}
             </h1>
             <h1 v-else>
-                {{ $t('de971042-551d-43d2-ab47-e76132156887') }}
+                {{ $t('%2K') }}
             </h1>
 
             <STList>
@@ -18,7 +18,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="downloadAllTickets">
                     <span class="icon download" />
-                    <span>{{ $t('d3e021e4-a9eb-4f7e-a538-8d2dbc27341c') }}</span>
+                    <span>{{ $t('%2E') }}</span>
                 </button>
             </template>
         </STToolbar>

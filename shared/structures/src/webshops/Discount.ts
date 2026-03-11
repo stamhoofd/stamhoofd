@@ -16,9 +16,9 @@ export enum OptionSelectionRequirement {
 export class OptionSelectionRequirementHelper {
     static getName(requirement: OptionSelectionRequirement): string {
         switch (requirement) {
-            case OptionSelectionRequirement.Required: return $t(`505a7d61-77d6-4531-aed6-4b6ed1ed7807`);
-            case OptionSelectionRequirement.Optional: return $t(`72fed4b0-ed62-4121-85b5-8f47c0167fc9`);
-            case OptionSelectionRequirement.Excluded: return $t(`b4f8ffba-e519-44a6-b0c3-9742c615c777`);
+            case OptionSelectionRequirement.Required: return $t(`%sp`);
+            case OptionSelectionRequirement.Optional: return $t(`%sq`);
+            case OptionSelectionRequirement.Excluded: return $t(`%sr`);
         }
     }
 }
@@ -98,7 +98,7 @@ export class ProductSelector extends AutoEncoder {
         const product = webshop.products.find(p => p.id === this.productId);
         if (!product) {
             return {
-                name: $t(`261191bf-7565-4444-9e4c-7fffe5f7b919`),
+                name: $t(`%Sb`),
                 footnote: '',
             };
         }
@@ -121,13 +121,13 @@ export class ProductSelector extends AutoEncoder {
         });
 
         if (excludedOptions.length && requiredOptions.length === 0) {
-            footnote = $t(`adbc415b-8253-4ecc-bfc9-5d2045eb7e7e`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`411cf334-eebb-4f27-beb6-d81bd544c3f5`) + ' ');
+            footnote = $t(`%ss`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`%GT`) + ' ');
         }
         else if (excludedOptions.length === 0 && requiredOptions.length) {
-            footnote = $t(`27a1749a-4496-4cb0-a8c3-dcda0d5c3002`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+            footnote = $t(`%st`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`%M1`) + ' ');
         }
         else if (excludedOptions.length && requiredOptions.length) {
-            footnote = $t(`27a1749a-4496-4cb0-a8c3-dcda0d5c3002`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`27103382-c303-4e1d-872e-ec37c499ad5c`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`411cf334-eebb-4f27-beb6-d81bd544c3f5`) + ' ');
+            footnote = $t(`%st`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%su`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`%GT`) + ' ');
         }
 
         return {
@@ -351,19 +351,19 @@ export class ProductDiscountSettings extends AutoEncoder {
             if (discount.percentageDiscount) {
                 if (discount.percentageDiscount >= 100 * 100) {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                        descriptions.push($t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`));
+                        descriptions.push($t(`%1Mn`));
                     }
                     else {
-                        descriptions.push($t(`8177904b-bbd1-4755-a877-1739e4ce9bfd`));
+                        descriptions.push($t(`%sv`));
                     }
                 }
                 else {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`c40c17f9-974a-401f-9728-f10fb0ab123b`));
+                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`%sT`));
                     }
                     else {
                         descriptions.push(
-                            $t(`f9a69315-3aab-475f-844d-5f56097ad2cd`) + ' ' + Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`c40c17f9-974a-401f-9728-f10fb0ab123b`),
+                            $t(`%sw`) + ' ' + Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`%sT`),
                         );
                     }
                 }
@@ -371,11 +371,11 @@ export class ProductDiscountSettings extends AutoEncoder {
 
             if (discount.discountPerPiece) {
                 if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t(`d7434363-1b1d-4415-ac5a-10638ffd44f1`));
+                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t(`%sx`));
                 }
                 else {
                     descriptions.push(
-                        $t(`f9a69315-3aab-475f-844d-5f56097ad2cd`) + ' ' + Formatter.price(discount.discountPerPiece) + ' ' + $t(`c40c17f9-974a-401f-9728-f10fb0ab123b`),
+                        $t(`%sw`) + ' ' + Formatter.price(discount.discountPerPiece) + ' ' + $t(`%sT`),
                     );
                 }
             }
@@ -384,36 +384,36 @@ export class ProductDiscountSettings extends AutoEncoder {
             let index = 0;
             for (const discount of this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern ? [...this.discounts, ...this.discounts, ...this.discounts] : this.discounts) {
                 index += 1;
-                let s = Formatter.ordinalNumber(index) + ' ' + $t(`599ce864-4059-48eb-82f8-9191e9507050`);
+                let s = Formatter.ordinalNumber(index) + ' ' + $t(`%12Q`);
 
                 if (index === this.discounts.length) {
                     if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {
                         if (descriptions.length > 0) {
-                            s = $t(`43d37b46-05f0-48b9-83c7-860fde833b69`);
+                            s = $t(`%sy`);
                         }
                         else {
-                            s = $t(`12473d4b-d675-433b-ae5c-6b5854b066ba`) + ' ' + s;
+                            s = $t(`%sz`) + ' ' + s;
                         }
                     }
                 }
 
                 if (discount.percentageDiscount) {
                     if (discount.percentageDiscount >= 100 * 100) {
-                        descriptions.push(s + ' ' + $t(`50af1227-4f3d-46bb-a832-b62c4e3bc6ab`));
+                        descriptions.push(s + ' ' + $t(`%s8`));
                     }
                     else {
-                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`a22b8194-113e-4c0b-b818-a94ce39ed701`) + ' ' + s);
+                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`%t0`) + ' ' + s);
                     }
                 }
 
                 if (discount.discountPerPiece) {
-                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t(`a22b8194-113e-4c0b-b818-a94ce39ed701`) + ' ' + s);
+                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t(`%t0`) + ' ' + s);
                 }
             }
 
             if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
                 if (descriptions.length === 3 && this.discounts[this.discounts.length - 1].percentageDiscount === 100 * 100) {
-                    descriptions = [(this.discounts.length - 1) + ' ' + $t(`1e976e4a-16ac-4d73-ad9b-f46720270c01`)];
+                    descriptions = [(this.discounts.length - 1) + ' ' + $t(`%t1`)];
                 }
                 else {
                     descriptions.push('...');
@@ -422,12 +422,12 @@ export class ProductDiscountSettings extends AutoEncoder {
         }
 
         if (descriptions.length === 0) {
-            descriptions.push($t(`fa7573e5-bcd0-4973-a9e3-29592d37f48e`));
+            descriptions.push($t(`%t2`));
         }
 
         return {
             title: titles.join(' '),
-            description: Formatter.capitalizeFirstLetter(Formatter.joinLast(descriptions, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ')),
+            description: Formatter.capitalizeFirstLetter(Formatter.joinLast(descriptions, ', ', ' ' + $t(`%M1`) + ' ')),
             footnote: footnotes.join('\n'),
         };
     }
@@ -536,12 +536,12 @@ export class Discount extends AutoEncoder {
 
         if (this.orderDiscount.percentageDiscount) {
             titles.push(
-                Formatter.percentage(this.orderDiscount.percentageDiscount) + ' ' + $t(`c40c17f9-974a-401f-9728-f10fb0ab123b`),
+                Formatter.percentage(this.orderDiscount.percentageDiscount) + ' ' + $t(`%sT`),
             );
         }
         if (this.orderDiscount.fixedDiscount) {
             titles.push(
-                Formatter.price(this.orderDiscount.fixedDiscount) + ' ' + $t(`c40c17f9-974a-401f-9728-f10fb0ab123b`),
+                Formatter.price(this.orderDiscount.fixedDiscount) + ' ' + $t(`%sT`),
             );
         }
 
@@ -549,7 +549,7 @@ export class Discount extends AutoEncoder {
             const t = productDiscount.getTitle(webshop, isAdmin);
 
             titles.push(
-                t.description + ' ' + $t(`4e1fc59e-32c1-4e36-a40e-af4f747e6e3b`) + ' ' + t.title,
+                t.description + ' ' + $t(`%t3`) + ' ' + t.title,
             );
 
             if (t.footnote) {
@@ -559,7 +559,7 @@ export class Discount extends AutoEncoder {
 
         if (titles.length === 0) {
             return {
-                title: $t(`fa7573e5-bcd0-4973-a9e3-29592d37f48e`),
+                title: $t(`%t2`),
                 description: '',
                 footnote: '',
             };
@@ -568,14 +568,14 @@ export class Discount extends AutoEncoder {
         if (this.requirements.length) {
             if (this.applyMultipleTimes) {
                 if (this.requirements.length > 1) {
-                    descriptions.push($t(`10b47f7b-8038-4678-9787-32054c30c7e4`));
+                    descriptions.push($t(`%t4`));
                 }
                 else {
-                    descriptions.push($t(`2f3c8b2c-96ce-44a2-a6d1-7238a03e3793`));
+                    descriptions.push($t(`%t5`));
                 }
             }
             else {
-                descriptions.push($t(`ed3ec055-9777-49c1-8a77-c108114153b4`));
+                descriptions.push($t(`%t6`));
             }
 
             const subdescriptions: string[] = [];
@@ -591,7 +591,7 @@ export class Discount extends AutoEncoder {
                 }
             }
 
-            descriptions.push(Formatter.joinLast(subdescriptions, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
+            descriptions.push(Formatter.joinLast(subdescriptions, ', ', ' ' + $t(`%M1`) + ' '));
         }
 
         return {

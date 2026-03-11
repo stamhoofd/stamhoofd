@@ -1,20 +1,20 @@
 <template>
-    <SaveView class="auto" data-submit-last-field save-icon="lock" :title="$t(`b33f433c-0957-4411-a0d6-0f41cf5caa63`)" @save="submit">
+    <SaveView class="auto" data-submit-last-field save-icon="lock" :title="$t(`%uu`)" @save="submit">
         <h1 v-if="$context.user?.hasPassword">
-            {{ $t('b33f433c-0957-4411-a0d6-0f41cf5caa63') }}
+            {{ $t('%uu') }}
         </h1>
         <h1 v-else>
-            {{ $t('2dd603e2-2caf-4573-8d8b-6ce8ff1dfda6') }}
+            {{ $t('%jl') }}
         </h1>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email"><STInputBox :title="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
-            <input id="new-password" v-model="password" class="input" enterkeyhint="next" autocomplete="new-password" type="password" :placeholder="$t(`722ac9a8-7ccb-4e3b-aa51-77132c19b2bb`)">
+        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email"><STInputBox :title="$t(`%WV`)">
+            <input id="new-password" v-model="password" class="input" enterkeyhint="next" autocomplete="new-password" type="password" :placeholder="$t(`%ZV`)">
         </STInputBox>
 
-        <STInputBox :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
-            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" autocomplete="new-password" type="password" :placeholder="$t(`79537e4c-5363-4f06-9d82-9b1b007add73`)">
+        <STInputBox :title="$t(`%WW`)">
+            <input id="confirm-password" v-model="passwordRepeat" enterkeyhint="go" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%WX`)">
         </STInputBox>
 
         <PasswordStrength v-model="password" />
@@ -62,7 +62,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: $t(`8205ae73-2a27-4b01-a361-3a3c689726bc`),
+                message: $t(`%12T`),
             }));
             return;
         }
@@ -70,7 +70,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         if (this.password.length < 8) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: $t(`bac8adfa-0bd1-4180-9143-767f24efa111`),
+                message: $t(`%v2`),
             }));
             return;
         }
@@ -79,7 +79,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         try {
             await LoginHelper.changePassword(this.$context, this.password);
             this.dismiss({ force: true });
-            new Toast($t(`1de94b7d-3cc6-45a1-992f-c347813e90fb`), 'success').show();
+            new Toast($t(`%12U`), 'success').show();
         }
         catch (e) {
             this.loading = false;

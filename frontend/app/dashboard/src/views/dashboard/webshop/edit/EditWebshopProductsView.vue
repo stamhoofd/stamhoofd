@@ -24,23 +24,23 @@
         <p v-if="webshop.categories.length === 0">
             <button class="button text" type="button" @click="addProduct">
                 <span class="icon add" />
-                <span v-if="isTickets">{{ $t('ede8c6c4-9062-46a5-b873-1671c39f2edf') }}</span>
-                <span v-else>{{ $t('dfdcd5e4-c2a2-4667-b77b-435eef982693') }}</span>
+                <span v-if="isTickets">{{ $t('%Rf') }}</span>
+                <span v-else>{{ $t('%Rg') }}</span>
             </button>
         </p>
 
         <p>
             <button class="button text" type="button" @click="addCategory">
                 <span class="icon add" />
-                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('14dcbad9-e83b-4ff9-8f39-2a059d4caaf5') }}</span>
-                <span v-else>{{ $t('2e3852ef-423e-4fcc-82bb-c886a6c61050') }}</span>
+                <span v-if="webshop.categories.length === 0 && webshop.products.length > 0">{{ $t('%LO') }}</span>
+                <span v-else>{{ $t('%Rh') }}</span>
             </button>
         </p>
 
         <template v-if="webshop.canEnableCart">
-            <hr><h2>{{ $t('1259b59f-6447-4da8-887e-848f05da346f') }}</h2>
+            <hr><h2>{{ $t('%1DQ') }}</h2>
             <p>
-                {{ $t('d0990170-4ad6-48d7-a3d6-d4ac7d9f803c') }}
+                {{ $t('%Ri') }}
             </p>
 
             <STList>
@@ -49,7 +49,7 @@
                         <Checkbox v-model="cartEnabled" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('a5a76740-30d3-4b35-961c-558756998db3') }}
+                        {{ $t('%Rj') }}
                     </h3>
                 </STListItem>
             </STList>

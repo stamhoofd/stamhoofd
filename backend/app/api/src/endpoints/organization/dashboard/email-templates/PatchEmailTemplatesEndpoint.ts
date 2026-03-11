@@ -43,7 +43,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         for (const patch of request.body.getPatches()) {
             const template = await EmailTemplate.getByID(patch.id);
             if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
-                throw Context.auth.notFoundOrNoAccess($t(`ca80fb17-1557-491f-9e9d-554d842a74d7`));
+                throw Context.auth.notFoundOrNoAccess($t(`%ES`));
             }
 
             template.html = patch.html ?? template.html;
@@ -98,7 +98,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
             // Check if valid + write permissions
             if (!(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
-                throw Context.auth.error($t(`a2afb95e-1dc5-452d-a919-70720fd4e8a6`));
+                throw Context.auth.error($t(`%ET`));
             }
 
             await template.save();
@@ -109,7 +109,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         for (const id of request.body.getDeletes()) {
             const template = await EmailTemplate.getByID(id);
             if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
-                throw Context.auth.notFoundOrNoAccess($t(`54599fe6-d0a3-471d-bbe4-b41c367f9aa2`));
+                throw Context.auth.notFoundOrNoAccess($t(`%EU`));
             }
 
             await template.delete();

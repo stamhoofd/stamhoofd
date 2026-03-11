@@ -1,51 +1,51 @@
 <template>
     <LoadingViewTransition>
         <form v-if="!loadingRegisterCode" id="signup-general-view" class="st-view" @submit.prevent="goNext">
-            <STNavigationBar :title="$t(`7066aee7-9e51-4767-b288-460646ceca50`)" />
+            <STNavigationBar :title="$t(`%3E`)" />
 
             <main>
                 <h1>
-                    {{ $t("92f76d54-282e-448e-ae15-21411b7bc085") }}
+                    {{ $t("%5W") }}
                 </h1>
                 <p>
-                    {{ $t('6bce22dc-e4ac-47f5-aa66-873d02ba9f5f') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("2ca73761-bc6c-4ffb-9550-a988376f26ef") }}</a>
+                    {{ $t('%WY') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("%5V") }}</a>
                 </p>
                 <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss()">
-                    {{ $t('d80e2291-5bb9-4799-9594-bcda54480efa') }}
+                    {{ $t('%5S') }}
                     <span class="button text" type="button">
-                        {{ $t('4248538e-48b6-4596-a3f6-0fedb910cb8f') }}
+                        {{ $t('%WZ') }}
                     </span>
                 </button>
 
                 <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
-                    {{ $t('09909d45-d69c-4d17-9eff-44dc551032b8', {value: formatPrice(validatedRegisterCode.value), organization: validatedRegisterCode.organizationName ?? ''}) }}
+                    {{ $t('%Wa', {value: formatPrice(validatedRegisterCode.value), organization: validatedRegisterCode.organizationName ?? ''}) }}
                 </p>
                 <p v-else-if="validatedRegisterCode" class="success-box icon gift">
                     {{ validatedRegisterCode.customMessage }}
                 </p>
 
                 <p v-if="reuseRegisterCode" class="warning-box">
-                    {{ $t('5e60cf0f-5489-4e90-8dab-97c56c2e989c') }}
+                    {{ $t('%4F') }}
                 </p>
 
                 <STErrorsDefault :error-box="errorBox" />
                 <div class="split-inputs">
                     <div>
-                        <STInputBox :title="$t('d185d3ca-e20f-43a2-a79f-f77404b8f33a')" error-fields="name" :error-box="errorBox">
-                            <input id="organization-name" ref="firstInput" v-model="name" data-testid="organization-name-input" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization">
+                        <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errorBox">
+                            <input id="organization-name" ref="firstInput" v-model="name" data-testid="organization-name-input" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
                         </STInputBox>
 
-                        <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="validator" :link-country-to-locale="true" />
+                        <AddressInput v-model="address" :title="$t('%8a')" :validator="validator" :link-country-to-locale="true" />
                         <p class="style-description-small">
-                            {{ $t('0502b517-9f29-4b4a-ba02-f11a430edeb5') }}
+                            {{ $t('%Wb') }}
                         </p>
                     </div>
 
                     <div>
-                        <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`b26772a9-019a-4555-a6ca-7eb5200cab8f`)">
+                        <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`%Wj`)">
                             <Dropdown v-model="type" data-testid="organization-type-select">
                                 <option :value="null" disabled>
-                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
+                                    {{ $t('%1Fq') }}
                                 </option>
 
                                 <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
@@ -56,13 +56,13 @@
                             </Dropdown>
                         </STInputBox>
                         <p class="style-description-small">
-                            {{ $t('3f538b2d-e68f-4b87-917d-169305dfa42e') }}
+                            {{ $t('%Wc') }}
                         </p>
 
-                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`a5f71b13-f443-488a-81a4-62cf2498d9af`)">
+                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`%Wk`)">
                             <Dropdown v-model="umbrellaOrganization" data-testid="organization-umbrella-select">
                                 <option :value="null" disabled>
-                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
+                                    {{ $t('%1Fq') }}
                                 </option>
                                 <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                                     {{ item.name }}
@@ -73,22 +73,22 @@
                 </div>
 
                 <template v-if="!validatedRegisterCode">
-                    <hr><h2>{{ $t('937b407c-7681-45c1-8c29-f415cf03faaf') }}</h2>
+                    <hr><h2>{{ $t('%Wd') }}</h2>
 
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" data-testid="acquisition-recommended-checkbox" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
-                        {{ $t('05479234-2977-4bfd-a44b-924b01021b6e') }}
+                        {{ $t('%We') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" data-testid="acquisition-seen-checkbox" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
-                        {{ $t('c82d1491-73f8-4f05-af15-5b7bf58f1bcb') }}
+                        {{ $t('%Wf') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" data-testid="acquisition-social-media-checkbox" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
-                        {{ $t('d57a2f00-6cf5-4f37-b532-31fe5fae4946') }}
+                        {{ $t('%Wg') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" data-testid="acquisition-search-checkbox" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
-                        {{ $t('90816551-3afb-44d2-b698-bef4a73d36b3') }}
+                        {{ $t('%Wh') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" data-testid="acquisition-other-checkbox" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
-                        {{ $t('26677608-996f-41a5-8a53-543d6efa7de4') }}
+                        {{ $t('%1JG') }}
                     </Checkbox>
                 </template>
             </main>
@@ -97,7 +97,7 @@
                 <template #right>
                     <LoadingButton :loading="loading">
                         <button class="button primary" type="submit" data-testid="signup-next-button" @click.prevent="goNext">
-                            {{ $t('c34ab59f-979c-45e7-acd2-60ff24fc0705') }}
+                            {{ $t('%Wi') }}
                         </button>
                     </LoadingButton>
                 </template>

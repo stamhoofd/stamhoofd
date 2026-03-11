@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="iban" :error-box="errorBox">
-        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder !== null ? placeholder : $t('0c63751f-8cd1-48af-a8a6-2b6a02447d63')" :autocomplete="autocomplete" @change="validate">
+        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder !== null ? placeholder : $t('%2x')" :autocomplete="autocomplete" @change="validate">
     </STInputBox>
 </template>
 
@@ -36,7 +36,7 @@ export default class IBANInput extends VueComponent {
     @Prop({ default: null })
     placeholder!: string | null;
 
-    @Prop({ default: $t(`6285b165-8d32-4a00-bb3f-0f95abcda58f`) })
+    @Prop({ default: $t(`%16`) })
     autocomplete!: string;
 
     errorBox: ErrorBox | null = null;
@@ -91,21 +91,21 @@ export default class IBANInput extends VueComponent {
                     this.ibanRaw = 'BE42631299159354';
                     this.errorBox = new ErrorBox(new SimpleError({
                         code: 'invalid_field',
-                        message: $t(`1b84633d-5f01-44ec-ae98-dd096dd13fb4`),
+                        message: $t(`%z0`),
                         field: 'iban',
                     }));
                     return false;
                 }
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`14eefa10-1257-4e98-bcd5-6bddef38fa03`),
+                    message: $t(`%z1`),
                     field: 'iban',
                 }));
             }
             else {
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`b2add4d5-65c6-4a91-9e10-f74cadf24001`) + ' ' + this.ibanRaw,
+                    message: $t(`%z2`) + ' ' + this.ibanRaw,
                     field: 'iban',
                 }));
             }

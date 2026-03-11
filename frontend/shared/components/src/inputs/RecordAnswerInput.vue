@@ -55,7 +55,7 @@
         </STInputBox>
 
         <p v-else class="error-box">
-            {{ $t('670ff020-405b-4e81-88e0-c2afa77a4660') }}
+            {{ $t('%dc') }}
         </p>
 
         <div v-if="answer.settings.type === RecordType.Checkbox && selected && answer.settings.askComments" class="textarea-container">
@@ -167,9 +167,9 @@ const inputPlaceholder = computed(() => {
             if (props.record.type === RecordType.Integer) {
                 return answer.value.settings.inputPlaceholder;
             }
-            return $t(`b2933d54-b2ec-4fde-965c-7d62de768a1e`) + ' ' + answer.value.settings.inputPlaceholder;
+            return $t(`%zB`) + ' ' + answer.value.settings.inputPlaceholder;
         }
-        return $t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`);
+        return $t(`%14p`);
     }
     return answer.value.settings.inputPlaceholder.length ? answer.value.settings.inputPlaceholder : answer.value.settings.name;
 });

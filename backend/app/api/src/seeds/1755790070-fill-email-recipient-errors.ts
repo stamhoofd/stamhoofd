@@ -8,7 +8,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'email_skipped_hard_bounce',
                 message: 'The recipient has hard bounced. This means that the email address is invalid or no longer exists.',
-                human: $t(`af49a569-ce88-48d9-ac37-81e594e16c03`),
+                human: $t(`%ws`),
             }),
         );
     }
@@ -18,7 +18,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'email_skipped_spam',
                 message: 'Recipient has marked as spam',
-                human: $t(`e6523f56-397e-4127-8bf7-8396f6f25a62`),
+                human: $t(`%wt`),
             }),
         );
     }
@@ -28,7 +28,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'email_skipped_unsubscribed',
                 message: 'Recipient has unsubscribed',
-                human: $t('ffbebae7-eac3-44fe-863b-25942c5be7d0'),
+                human: $t('%1E3'),
             }),
         );
     }
@@ -38,7 +38,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'email_skipped_unsubscribed',
                 message: 'Recipient has unsubscribed from marketing',
-                human: $t('ffbebae7-eac3-44fe-863b-25942c5be7d0'),
+                human: $t('%1E3'),
             }),
         );
     }
@@ -48,7 +48,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'all_filtered',
                 message: 'All recipients are filtered due to hard bounce or spam',
-                human: $t('f6ca0939-f191-4aba-9c53-cd370453c0bc'),
+                human: $t('%1E4'),
             }),
         );
     }
@@ -58,7 +58,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'invalid_email_address',
                 message: 'Invalid email address',
-                human: $t(`4737b9ce-06b0-4fa7-b63a-703245f347e2`),
+                human: $t(`%1Mi`),
             }),
         );
     }

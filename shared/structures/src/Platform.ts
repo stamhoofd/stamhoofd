@@ -36,26 +36,26 @@ export enum OrganizationTagType {
 export function getOrganizationTagTypeName(type: OrganizationTagType): string {
     switch (type) {
         case OrganizationTagType.Tag:
-            return $t(`fe29857c-e4ac-4b25-aa0e-31813f3570c2`);
+            return $t(`%2T`);
         case OrganizationTagType.Verbond:
-            return $t(`54979c74-008d-4435-a9a7-49ac63b4352e`);
+            return $t(`%n5`);
         case OrganizationTagType.Gewest:
-            return $t(`e0517811-de10-4974-9818-efd3570aefe6`);
+            return $t(`%n6`);
         case OrganizationTagType.Gouw:
-            return $t(`c100e695-9562-49cc-a979-49fc1bf636f6`);
+            return $t(`%n7`);
     }
 }
 
 export function getOrganizationTagTypePluralName(type: OrganizationTagType): string {
     switch (type) {
         case OrganizationTagType.Tag:
-            return $t(`ceba695c-105b-49c9-aaa4-bf716c4aec6b`);
+            return $t(`%2C`);
         case OrganizationTagType.Verbond:
-            return $t(`462860e4-8b8f-42b8-942c-9465e20d24a9`);
+            return $t(`%n8`);
         case OrganizationTagType.Gewest:
-            return $t(`56808421-5e4f-4139-9035-9f2a35bb924f`);
+            return $t(`%n9`);
         case OrganizationTagType.Gouw:
-            return $t(`b735d3ab-9a13-402b-8b21-0c231b4c1073`);
+            return $t(`%nA`);
     }
 }
 
@@ -172,9 +172,9 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
 
     get name() {
         if (this.startDate) {
-            return $t(`2c3d1aac-2496-4992-ae08-327268a36a0a`) + ' ' + Formatter.date(this.startDate);
+            return $t(`%nB`) + ' ' + Formatter.date(this.startDate);
         }
-        return $t(`373c7fe8-cc53-4b2d-9110-07d0fcac9738`);
+        return $t(`%nC`);
     }
 }
 

@@ -26,7 +26,7 @@
         <STToolbar>
             <template #right>
                 <button class="button primary" type="submit" :disabled="selectedAmount !== amount">
-                    <span>{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>
+                    <span>{{ $t('%X9') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>
@@ -66,7 +66,7 @@ import SeatSelectionBox from './SeatSelectionBox.vue';
         priceChange: Formatter.priceChange.bind(Formatter),
         priceFree: (p: number) => {
             if (p === 0) {
-                return $t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`);
+                return $t(`%1Mn`);
             }
             return Formatter.price(p);
         },
@@ -107,18 +107,18 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
 
     get title() {
         if (this.remainingAmount === 0) {
-            return $t(`0c406033-5a4a-4fa7-b3f2-d8702cf9a493`);
+            return $t(`%12X`);
         }
 
         if (this.remainingAmount === this.amount) {
-            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`))}`;
+            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`%12Y`), $t(`%UL`))}`;
         }
 
-        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`))}`;
+        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`%12Y`), $t(`%UL`))}`;
     }
 
     get description() {
-        return $t(`91e96a8b-b24b-4c57-a6a7-24bcdeeb1834`) + ' ' + Formatter.pluralText(this.amount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) + ' ' + $t(`5bb04c82-7366-4c36-ae04-1d2be15b528a`);
+        return $t(`%12Z`) + ' ' + Formatter.pluralText(this.amount, $t(`%12Y`), $t(`%UL`)) + ' ' + $t(`%12a`);
     }
 
     get seatingPlanSection() {
@@ -197,7 +197,7 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
 
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'adjusted',
-                    message: $t(`1009735f-288b-469a-a520-ddd9d83c4ff1`),
+                    message: $t(`%12b`),
                 }));
                 return;
             }

@@ -1,6 +1,6 @@
 <template>
     <div class="product-selector-box">
-        <STInputBox error-fields="productId" :error-box="errors.errorBox" class="max" :title="$t(`54e32267-042e-4cfc-a423-63977769a98d`)">
+        <STInputBox error-fields="productId" :error-box="errors.errorBox" class="max" :title="$t(`%Sc`)">
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
                     <STListItem :selectable="true">
@@ -20,12 +20,12 @@
                     </STListItem>
                 </STList>
                 <div v-else>
-                    {{ $t('261191bf-7565-4444-9e4c-7fffe5f7b919') }}
+                    {{ $t('%Sb') }}
                 </div>
             </div>
         </STInputBox>
 
-        <STInputBox v-if="product && product.prices.length > 1" error-fields="productPriceIds" :error-box="errors.errorBox" class="max" :title="$t(`3e0462a8-8a60-4366-8b35-3280824f0c96`)">
+        <STInputBox v-if="product && product.prices.length > 1" error-fields="productPriceIds" :error-box="errors.errorBox" class="max" :title="$t(`%Sd`)">
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
                     <template #left>
@@ -39,7 +39,7 @@
             </STList>
         </STInputBox>
 
-        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || $t(`0076d594-efee-4ec7-a00a-073a4c689a38`)" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
+        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || $t(`%CL`)" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
                     <template #left>

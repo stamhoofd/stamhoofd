@@ -41,8 +41,8 @@ const props =
 const pop = usePop();
 const errors = useErrors();
 
-const deleteText = $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`);
-const cancelText = $t(`11d2e292-fd08-4477-bd2a-dac599a9754c`);
+const deleteText = $t(`%CJ`);
+const cancelText = $t(`%1Lh`);
 const confirmationCodeInput = ref('');
 const isConfirm = ref(false);
 const disabled = computed(() => confirmationCodeInput.value.toLowerCase() !== props.confirmationCode.toLowerCase());
@@ -54,7 +54,7 @@ useValidation(errors.validator, () => {
     if (!isConfirm.value) {
         se.addError(new SimpleError({
             code: "invalid_field",
-            message: $t(`27f7c70a-302e-477a-b21c-ca0f46fc1ff2`),
+            message: $t(`%12c`),
             field: "isConfirm"
         }))
     }

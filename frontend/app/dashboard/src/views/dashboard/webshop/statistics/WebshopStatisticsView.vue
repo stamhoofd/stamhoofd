@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1>
-                {{ $t('121c350e-012c-4bf7-a2bc-2c07b7c433c8') }}
+                {{ $t('%Pa') }}
             </h1>
 
             <hr><div class="graph-grid">
@@ -12,7 +12,7 @@
             </div>
 
             <hr><div class="stats-grid">
-                <STInputBox :title="$t(`aed41648-b8ad-476d-b98a-0221d387f96a`)">
+                <STInputBox :title="$t(`%1JX`)">
                     <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : totalOrders }}
@@ -24,7 +24,7 @@
                 </STInputBox>
 
                 <template v-if="hasTickets">
-                    <STInputBox :title="$t(`b40d200c-4265-4d58-a7f4-7c2498b062b9`)">
+                    <STInputBox :title="$t(`%1t`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalTickets }}
                         </p>
@@ -35,7 +35,7 @@
                 </template>
 
                 <template v-if="hasVouchers">
-                    <STInputBox :title="$t(`c2ee9504-b07a-4d79-bd25-c14a1bba4d59`)">
+                    <STInputBox :title="$t(`%21`)">
                         <p class="style-statistic">
                             {{ loading ? '-' : totalVouchers }}
                         </p>
@@ -66,8 +66,8 @@
                 </STList>
             </div>
 
-            <hr><h2>{{ $t('0456ef2e-5e86-48fa-835c-fd8ec1921f5e') }}</h2>
-            <p>{{ $t('16d29c4e-f292-4a77-a995-c4fa9ae76200') }}</p>
+            <hr><h2>{{ $t('%J') }}</h2>
+            <p>{{ $t('%Vj') }}</p>
         </main>
     </div>
 </template>

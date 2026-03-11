@@ -38,8 +38,8 @@ export enum InvoiceType {
 export class InvoiceTypeHelper {
     static getName(type: InvoiceType): string {
         switch (type) {
-            case InvoiceType.Invoice: return $t('fbf8fca6-33f0-4ecc-8317-0033f256827e');
-            case InvoiceType.CreditNote: return $t('4578aaf4-a15a-4c53-ad46-768b91d96a4e');
+            case InvoiceType.Invoice: return $t('%1KG');
+            case InvoiceType.CreditNote: return $t('%1KH');
         }
     }
 }
@@ -218,7 +218,7 @@ export class Invoice extends AutoEncoder {
                     throw new SimpleError({
                         code: 'missing_vat_excemption',
                         message: 'Missing IntraCommunity VAT excemption',
-                        human: $t('8b562a1d-e7c0-4110-b320-db535f0ea0e9'),
+                        human: $t('%1KI'),
                     });
                 }
             }
@@ -229,7 +229,7 @@ export class Invoice extends AutoEncoder {
                     throw new SimpleError({
                         code: 'erroneous_vat_excemption',
                         message: 'IntraCommunity VAT excemption should not apply to this item',
-                        human: $t('d2c3f57f-ffae-45ea-97ce-3f4f30839cd6'),
+                        human: $t('%1KJ'),
                     });
                 }
             }
@@ -279,11 +279,11 @@ export class Invoice extends AutoEncoder {
     getPriceBreakdown(options?: { vatAction?: PriceBreakdownAction }): PriceBreakdown {
         return [
             {
-                name: $t(`d642f190-1607-4f54-8530-7af2f15c651b`),
+                name: $t(`%1KK`),
                 price: this.totalWithoutVAT,
             },
             {
-                name: $t(`13c04b8f-80f5-4274-9ea1-badb0f88a091`) + (this.VATTotal.length === 1 ? ' (' + Formatter.percentage(this.VATTotal[0].VATPercentage * 100) + ')' : ''),
+                name: $t(`%1JE`) + (this.VATTotal.length === 1 ? ' (' + Formatter.percentage(this.VATTotal[0].VATPercentage * 100) + ')' : ''),
                 description: this.VATTotal.length === 1 && this.VATTotal[0].VATExcempt ? getVATExcemptInvoiceNote(this.VATTotal[0].VATExcempt) : undefined,
                 price: this.VATTotalAmount,
                 action: this.VATTotal.length > 1 ? options?.vatAction : undefined,
@@ -291,13 +291,13 @@ export class Invoice extends AutoEncoder {
             ...(this.payableRoundingAmount !== 0
                 ? [
                         {
-                            name: $t(`5841f72b-67d8-4add-8cfa-801bcb71cba7`),
+                            name: $t(`%1I6`),
                             price: this.payableRoundingAmount,
                         },
                     ]
                 : []),
             {
-                name: $t(`0376551a-9af8-44b7-8ab3-d343384dc900`),
+                name: $t(`%1KL`),
                 price: this.totalWithVAT,
             },
         ];
@@ -396,7 +396,7 @@ export class Invoice extends AutoEncoder {
             throw new SimpleError({
                 code: 'price_difference',
                 message: 'The price of the generated invoice did not match the price of the corresponding payments. Possibly caused by rounding that could not be corrected automatically.',
-                human: $t('8de3f0d6-3bbe-4668-a357-1fbf3d698177'),
+                human: $t('%1Kn'),
             });
         }
     }

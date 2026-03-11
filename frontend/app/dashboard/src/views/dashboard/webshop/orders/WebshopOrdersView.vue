@@ -11,7 +11,7 @@
         @click="$event => openOrder($event)"
     >
         <template #empty>
-            {{ $t('8827deb6-8c18-4b98-a495-57696801a73e') }}
+            {{ $t('%75') }}
         </template>
     </ModernTableView>
 </template>
@@ -34,7 +34,7 @@ import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
-const title = $t('aed41648-b8ad-476d-b98a-0221d387f96a');
+const title = $t('%1JX');
 const configurationId = 'WebshopOrdersRepo';
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
@@ -62,7 +62,7 @@ const actions = computed(() => {
 
     const results = [
         new InMemoryTableAction({
-            name: $t('9e85b407-6e12-4003-9847-5b7d277b87ff'),
+            name: $t('%Ob'),
             icon: 'eye',
             priority: 0,
             groupIndex: 1,
@@ -79,13 +79,13 @@ const actions = computed(() => {
 
     if (STAMHOOFD.environment === 'development') {
         results.push(new InMemoryTableAction({
-            name: $t(`724e6ab3-81c5-49a3-a0b7-f4b8eed0534e`),
+            name: $t(`%1M8`),
             icon: 'retry',
             priority: 10,
             groupIndex: 4,
             handler: async () => {
                 if (objectFetcher.isOffline) {
-                    Toast.fromError(new Error($t('a4bcdac7-92dd-4bf8-aee2-adf62175c2f7'))).show();
+                    Toast.fromError(new Error($t('%1M6'))).show();
                     return;
                 }
 
@@ -94,7 +94,7 @@ const actions = computed(() => {
                     tableObjectFetcher.reset(true, true);
                 }
                 else {
-                    Toast.fromError(new Error($t('72239a70-caaa-48c9-adaa-13f047118caf'))).show();
+                    Toast.fromError(new Error($t('%1M7'))).show();
                 }
             },
         }));

@@ -3,8 +3,8 @@
         <hr v-if="withTitle"><h2 v-if="withTitle">
             {{ field.name || 'Maak een keuze' }}
         </h2>
-        <STInputBox :title="withTitle ? undefined : (field.name || $t(`2e498401-c4e4-43cf-9f9e-fbcfc09afad3`))" :error-box="errorBox" :error-fields="'fieldAnswers.'+field.id" :class="{'no-padding': withTitle}">
-            <input v-model="value" :placeholder="field.required ? (field.placeholder || field.name) : $t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`) " class="input"><p v-if="field.description" class="style-description-small" v-text="field.description" />
+        <STInputBox :title="withTitle ? undefined : (field.name || $t(`%1Fq`))" :error-box="errorBox" :error-fields="'fieldAnswers.'+field.id" :class="{'no-padding': withTitle}">
+            <input v-model="value" :placeholder="field.required ? (field.placeholder || field.name) : $t(`%14p`) " class="input"><p v-if="field.description" class="style-description-small" v-text="field.description" />
         </STInputBox>
     </div>
 </template>

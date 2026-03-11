@@ -40,7 +40,7 @@
         <template v-if="item.calculatedPriceDueLater > 0">
             <footer>
                 <p class="style-price">
-                    {{ formatPrice(item.calculatedPriceDueLater) }} {{ $t('c8f348d5-d497-48dd-b7a2-c9c6d8f99199') }}
+                    {{ formatPrice(item.calculatedPriceDueLater) }} {{ $t('%fd') }}
                 </p>
             </footer>
         </template>
@@ -49,7 +49,7 @@
             {{ item.cartError.getHuman() }}
 
             <span v-if="canEdit" class="button text">
-                <span>{{ $t('43735610-03c1-494b-b76b-74a13a560880') }}</span>
+                <span>{{ $t('%fe') }}</span>
                 <span class="icon arrow-right-small" />
             </span>
         </p>

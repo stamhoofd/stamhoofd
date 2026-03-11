@@ -27,7 +27,7 @@ export class DocumentActionBuilder {
     getActions(): TableAction<DocumentStruct>[] {
         return [
             new InMemoryTableAction({
-                name: $t(`1adf1842-a0c1-4428-92d8-a8c760e79cf1`),
+                name: $t(`%1B7`),
                 icon: 'download',
                 priority: 5,
                 groupIndex: 2,
@@ -39,7 +39,7 @@ export class DocumentActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: $t(`208ae3f1-1720-4d79-96fd-5c05d97c9de0`),
+                name: $t(`%1GW`),
                 icon: 'email',
                 priority: 6,
                 groupIndex: 2,
@@ -49,7 +49,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`3b95fc70-7928-426b-b65b-3389d9e762cc`),
+                name: $t(`%1Bm`),
                 icon: 'edit',
                 priority: 0,
                 groupIndex: 1,
@@ -61,7 +61,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`1c8e7100-b4ac-4c22-8e22-a19d3c039f74`),
+                name: $t(`%KK`),
                 icon: 'copy',
                 priority: 1,
                 groupIndex: 2,
@@ -74,7 +74,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`),
+                name: $t(`%CJ`),
                 icon: 'trash',
                 priority: 1,
                 groupIndex: 3,
@@ -86,7 +86,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`574829bb-6ffc-489b-bc83-f3439dc62ffa`),
+                name: $t(`%KL`),
                 icon: 'undo',
                 priority: 1,
                 groupIndex: 3,
@@ -107,11 +107,11 @@ export class DocumentActionBuilder {
 
         options.push({
             type: 'ChooseOne',
-            name: $t('19da8d23-acea-43c2-bfdd-742447ca57f1'),
+            name: $t('%1EH'),
             options: [
                 {
                     id: 'accounts',
-                    name: $t(`379d43fb-034f-4280-bb99-ea658eaec729`),
+                    name: $t(`%L8`),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Documents,
@@ -147,7 +147,7 @@ export class DocumentActionBuilder {
     }
 
     async deleteDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('d95060d8-ba97-4955-8731-142fe5322055', { count: documents.length.toString() }) : $t(`9ec68c0f-9a7c-4ad2-adae-201148284060`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`)))) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('%KE', { count: documents.length.toString() }) : $t(`%KM`), $t(`%CJ`)))) {
             return;
         }
         try {
@@ -172,7 +172,7 @@ export class DocumentActionBuilder {
                     originalDocument.deepSet(d);
                 }
             }
-            new Toast(documents.length === 1 ? $t(`5ba065ed-884a-4bea-aa3b-839550938146`) : $t('a1f37704-1f81-44cd-94ce-9b26ffc8e3dd', { count: documents.length.toString() }), 'success').show();
+            new Toast(documents.length === 1 ? $t(`%KN`) : $t('%KF', { count: documents.length.toString() }), 'success').show();
         }
         catch (e) {
             Toast.fromError(e).show();
@@ -180,7 +180,7 @@ export class DocumentActionBuilder {
     }
 
     async undoDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('27979c56-6bea-4832-ad5d-4f3b0ca699db', { count: documents.length.toString() }) : $t(`c10b9adb-b872-4960-8141-bb28abdf2312`), $t(`574829bb-6ffc-489b-bc83-f3439dc62ffa`)))) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('%KG', { count: documents.length.toString() }) : $t(`%KO`), $t(`%KL`)))) {
             return;
         }
         try {
@@ -205,7 +205,7 @@ export class DocumentActionBuilder {
                     originalDocument.deepSet(d);
                 }
             }
-            new Toast(documents.length === 1 ? $t(`8c4639d3-2c92-46a7-9964-d991731f8846`) : $t('7a1ba709-2353-4106-9207-9205edac9c37', { count: documents.length.toString() }), 'success').show();
+            new Toast(documents.length === 1 ? $t(`%KP`) : $t('%KH', { count: documents.length.toString() }), 'success').show();
         }
         catch (e) {
             Toast.fromError(e).show();
@@ -213,7 +213,7 @@ export class DocumentActionBuilder {
     }
 
     async duplicateDocument(document: DocumentStruct) {
-        if (!(await CenteredMessage.confirm($t(`9b55fc64-a8c9-4d8d-a476-13a33b8d1fb0`), $t(`1c8e7100-b4ac-4c22-8e22-a19d3c039f74`), $t(`f7459630-8638-43ff-888d-2fcf6995dced`)))) {
+        if (!(await CenteredMessage.confirm($t(`%KQ`), $t(`%KK`), $t(`%KR`)))) {
             return;
         }
         try {
@@ -239,10 +239,10 @@ export class DocumentActionBuilder {
                 this.addDocument?.(duplicatedDocument);
                 this.editDocument(duplicatedDocument).catch(console.error);
 
-                new Toast($t('e76ab11c-5160-47a1-baa9-a20f44d47877'), 'success').show();
+                new Toast($t('%KI'), 'success').show();
             }
             else {
-                new Toast($t('609e9ee3-cd02-4055-9f06-11cf75e43c7e'), 'error red').show();
+                new Toast($t('%KJ'), 'error red').show();
             }
         }
         catch (e) {
@@ -254,7 +254,7 @@ export class DocumentActionBuilder {
         // Filter invalid documents
         const invalidDocuments = documents.filter(d => d.status === DocumentStatus.MissingData);
         if (invalidDocuments.length > 0) {
-            new Toast(`${invalidDocuments.length} ${invalidDocuments.length === 1 ? $t(`acaf4b80-5061-4875-9365-d729f3ea0afb`) : $t(`dd7d331c-73ff-4c6a-946d-e4dd2116efe9`)}`, invalidDocuments.length === documents.length ? 'error red' : 'warning yellow').show();
+            new Toast(`${invalidDocuments.length} ${invalidDocuments.length === 1 ? $t(`%KS`) : $t(`%KT`)}`, invalidDocuments.length === documents.length ? 'error red' : 'warning yellow').show();
         }
         const validDocuments = documents.filter(d => d.status !== DocumentStatus.MissingData);
         if (validDocuments.length) {
@@ -263,7 +263,7 @@ export class DocumentActionBuilder {
     }
 
     async resetDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length == 1 ? $t(`db59de67-3f9f-4a02-bf65-556bdd2bf817`) : $t(`0370632e-e36d-4bc2-87c7-4d785f709d74`), $t(`56813a5d-8e74-4487-8fa9-d2d9d72bfd3d`)))) {
+        if (!(await CenteredMessage.confirm(documents.length == 1 ? $t(`%KU`) : $t(`%KV`), $t(`%KW`)))) {
             return;
         }
         try {

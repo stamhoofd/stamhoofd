@@ -2,7 +2,7 @@
     <STErrorsDefault :error-box="ownErrors.errorBox" />
     <div class="split-inputs">
         <STInputBox :title="title" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="price" :min="min" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
+            <PriceInput v-model="price" :min="min" :placeholder="$t(`%1Mn`)" />
             <p v-if="defaultMembershipTypeId" class="style-description-small">
                 {{ formatPriceForPlatform(platformMembershipPrice, platformMembershipPriceNow) }}
             </p>
@@ -46,7 +46,7 @@ const props = withDefaults(
     {
         errorBox: null,
         min: null,
-        title: () => $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
+        title: () => $t(`%1IP`),
         group: null,
         defaultMembershipTypeId: null,
         startDate: () => new Date(0),
@@ -110,9 +110,9 @@ function getPlatformMembershipPrice(isReduced: boolean, date: Date) {
 
 function formatPriceForPlatform(price: number, priceNow: number) {
     if (priceNow < price) {
-        return $t('f6e06abd-3e58-4f99-bc8d-6cf6a44273b3', { price: Formatter.price(price), priceReduced: Formatter.price(priceNow) });
+        return $t('%Bw', { price: Formatter.price(price), priceReduced: Formatter.price(priceNow) });
     }
-    return $t('75815048-939a-4ac1-a81c-f23fc3ec5006', { price: Formatter.price(price) });
+    return $t('%6h', { price: Formatter.price(price) });
 }
 
 useValidation(props.validator, () => {
@@ -121,7 +121,7 @@ useValidation(props.validator, () => {
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Financial support is not enabled, but you have set a reduced price',
-            human: $t('a83523bb-ba90-4a6c-a73a-4d4f12defe7a', {
+            human: $t('%6i', {
                 financialSupportTitle: financialSupportSettings.value.title,
                 financialSupportPriceName: financialSupportSettings.value.priceName,
             }),
@@ -136,7 +136,7 @@ useValidation(props.validator, () => {
             code: 'invalid_reduced_price',
             field: 'price',
             message: 'Reduced price should be at least be the normal price minus the minimum difference between the normal and reduced price',
-            human: $t('77578f4e-049c-4d64-b63c-357fb6d0d7ac', {
+            human: $t('%6j', {
                 financialSupportPriceName: financialSupportSettings.value.priceName,
                 minDifference: Formatter.price(minPriceDifference.value),
             }),

@@ -1,7 +1,7 @@
 <template>
     <div class="hover-box container">
         <hr><h2 class="style-with-button">
-            <span class="icon-spacer">{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</span>
+            <span class="icon-spacer">{{ $t('%16X') }}</span>
         </h2>
 
         <STList>
@@ -11,7 +11,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('d549cddb-5a1b-4ea9-a7a6-c013029067b2') }}
+                    {{ $t('%fj') }}
                 </h3>
             </STListItem>
 
@@ -21,7 +21,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('890ba51d-2bf0-4966-bf80-407a294f55c9', {member: props.member.patchedMember.firstName}) }}
+                    {{ $t('%fk', {member: props.member.patchedMember.firstName}) }}
                 </h3>
             </STListItem>
 
@@ -31,7 +31,7 @@
                 </template>
 
                 <h3 class="style-title-list red">
-                    {{ $t('6381fb21-c5be-4318-ba47-a5ee669335a7') }}
+                    {{ $t('%ek') }}
                 </h3>
             </STListItem>
         </STList>
@@ -62,7 +62,7 @@ const platformFamilyManager = usePlatformFamilyManager();
 const chooseGroupForMember = useChooseGroupForMember();
 
 async function editMember() {
-    await $editMember(props.member, { title: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`) });
+    await $editMember(props.member, { title: $t(`%XO`) });
 }
 async function addRegistration() {
     await chooseGroupForMember({ member: props.member, displayOptions: { action: 'show' } });
@@ -75,12 +75,12 @@ async function deleteMember() {
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: $t(`63786627-79e7-4ab7-b759-774ef3f856d9`, { name }),
-                description: $t(`c4f7d503-ed7f-4526-b082-28dc2ab7cb17`, { name }),
-                confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
-                confirmationPlaceholder: $t(`3610e3ed-5df6-41d2-b6e6-a5823abcaff7`),
+                title: $t(`%15Y`, { name }),
+                description: $t(`%15Z`, { name }),
+                confirmationTitle: $t(`%eu`),
+                confirmationPlaceholder: $t(`%10H`),
                 confirmationCode: name,
-                checkboxText: $t(`4a1ad6f2-d061-4fe0-8206-8540442ad038`),
+                checkboxText: $t(`%6P`),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     patch.addDelete(member.id);
@@ -89,7 +89,7 @@ async function deleteMember() {
                     GlobalEventBus.sendEvent('members-deleted', [member]).catch(console.error);
 
                     Toast.success(
-                        $t('67ce1c2e-a5ed-4f26-a369-41f4d8000590', {
+                        $t('%15D', {
                             name,
                         }),
                     ).show();

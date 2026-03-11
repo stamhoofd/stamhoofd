@@ -47,7 +47,7 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'webshop_has_registered_ticket_sales',
                 message: `Webshop ${webshop.id} has registered ticket sales`,
-                human: $t(`0b3d6ea1-a70b-428c-9ba4-cc0c327ed415`),
+                human: $t(`%1DL`),
             });
         }
 

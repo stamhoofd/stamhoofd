@@ -2,26 +2,26 @@
     <STList>
         <STListItem element-name="label" :selectable="!dataPermissions.locked.value">
             <template #left>
-                <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="dataPermissions.locked.value" />
+                <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('%jE') : ''" :disabled="dataPermissions.locked.value" />
             </template>
             <p class="style-title-list">
-                {{ $t('27bc7f00-1839-4f47-b8e5-7f4c6996fa53') }}
+                {{ $t('%vY') }}
             </p>
         </STListItem>
 
         <STListItem element-name="label" :selectable="!financialSupport.locked.value" class="right-stack">
             <template #left>
-                <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="financialSupport.locked.value" />
+                <Checkbox v-model="financialSupport.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('%jE') : ''" :disabled="financialSupport.locked.value" />
             </template>
             <p class="style-title-list">
                 {{ financialSupportSettings.title }}
-                <span v-tooltip="$t('83e663a6-e62d-4dac-a2df-d7a9a90774d2')" class="gray small icon privacy" />
+                <span v-tooltip="$t('%jF')" class="gray small icon privacy" />
             </p>
         </STListItem>
 
         <STListItem v-for="property of properties" :key="property.value.title" element-name="label" :selectable="!property.value.locked">
             <template #left>
-                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="property.value.locked" />
+                <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('%jE') : ''" :disabled="property.value.locked" />
             </template>
 
             <p v-if="property.value.configuration" class="style-title-prefix-list">
@@ -36,7 +36,7 @@
                 {{ property.value.title }}
 
                 <span
-                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('ca9b48ce-2fee-4691-a6f9-494ddde94a1c')"
+                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('%1It')"
                     class="icon dot primary small"
                 />
             </p>
@@ -45,7 +45,7 @@
             </p>
 
             <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
-                {{ property.value.options?.warning ?? $t('cfbb0a9e-e6ce-4e40-ae55-bd7388f98eb9') }}
+                {{ property.value.options?.warning ?? $t('%jG') }}
             </p>
 
             <template v-if="property.value.enabled" #right>
@@ -55,7 +55,7 @@
 
         <STListItem v-for="category of inheritedRecordsConfiguration?.recordCategories ?? []" :key="category.id" element-name="label" :selectable="!getRefForInheritedCategory(category.id).value.locked" class="right-stack">
             <template #left>
-                <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
+                <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? $t('%jE') : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
             </template>
 
             <p v-if="getRefForInheritedCategory(category.id).value.configuration" class="style-title-prefix-list">
@@ -63,7 +63,7 @@
             </p>
             <p class="style-title-list">
                 {{ getRefForInheritedCategory(category.id).value.title }}
-                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="$t('83e663a6-e62d-4dac-a2df-d7a9a90774d2')" class="gray icon privacy small" />
+                <span v-if="getRefForInheritedCategory(category.id).value.requiresDataPermissions" v-tooltip="$t('%jF')" class="gray icon privacy small" />
             </p>
             <template #right>
                 <button class="button gray icon eye" type="button" @click.stop="previewCategory(category)" />
@@ -122,8 +122,8 @@ const settings = new RecordEditorSettings({
     exampleValue: new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
-                lastName: $t(`946f5e2e-d92c-4bbd-b64f-115958a04d01`),
+                firstName: $t(`%ID`),
+                lastName: $t(`%ym`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),
@@ -137,36 +137,36 @@ const settings = new RecordEditorSettings({
 family.members.push(settings.exampleValue);
 
 const properties = [
-    buildPropertyRefs('gender', $t(`9e080d96-2c2b-47e3-b56c-d58d993974c9`)),
-    buildPropertyRefs('birthDay', $t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`)),
+    buildPropertyRefs('gender', $t(`%1d`)),
+    buildPropertyRefs('birthDay', $t(`%17w`)),
     buildPropertyRefs(
-        'nationalRegisterNumber', $t(`00881b27-7501-4c56-98de-55618be2bf11`), {
-            description: $t('e4603a61-7e45-4ca4-99b2-4e4208f127d1'),
+        'nationalRegisterNumber', $t(`%wK`), {
+            description: $t('%17a'),
         },
     ),
-    buildPropertyRefs('parents', $t(`fae120e5-80b0-4b67-a8b7-638b43362429`), {
-        description: $t(`bd1d21bd-b58f-4d13-b7c7-510db5702441`),
+    buildPropertyRefs('parents', $t(`%11P`), {
+        description: $t(`%11Q`),
     }),
-    buildPropertyRefs('phone', $t('90d84282-3274-4d85-81cd-b2ae95429c34') + ' ' + $t(`347b9603-d66d-4587-9935-192eaeb0d3bd`), {
-        description: $t(`f06acd8c-4cec-42ff-b4b4-5da57ef7db09`),
-        warning: $t(`30047312-8c15-4988-8095-a0f605874c22`),
+    buildPropertyRefs('phone', $t('%2k') + ' ' + $t(`%11R`), {
+        description: $t(`%11S`),
+        warning: $t(`%11T`),
         preventAlways: true,
     }),
-    buildPropertyRefs('emailAddress', $t(`0d2bf5c4-db71-465b-8795-9cf8cac63c75`), {
-        description: $t(`86db1ded-a836-486d-9ee3-4efc5b24a08f`),
-        warning: $t(`154a3457-6357-4a43-9465-a343d218a591`),
+    buildPropertyRefs('emailAddress', $t(`%11U`), {
+        description: $t(`%11V`),
+        warning: $t(`%11W`),
         preventAlways: true,
     }),
-    buildPropertyRefs('address', $t(`bba50e14-c3a1-4b18-9102-14f323453ca0`), {
-        description: $t(`52b884eb-4437-4ecb-94b8-6079730d45c4`),
-        warning: $t(`d905b0d6-f472-4290-b9c2-3e566cdbaf33`),
+    buildPropertyRefs('address', $t(`%11X`), {
+        description: $t(`%11Y`),
+        warning: $t(`%11Z`),
         preventAlways: true,
     }),
-    buildPropertyRefs('emergencyContacts', $t(`243b1b1d-feca-43ab-a240-24e5ba785983`), {
-        description: $t(`8a1ef416-1a1d-4e12-8b47-29d9c86a1dfe`),
+    buildPropertyRefs('emergencyContacts', $t(`%11a`), {
+        description: $t(`%11b`),
     }),
-    buildPropertyRefs('uitpasNumber', $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`), {
-        warning: $t(`0fcd2a4c-1c44-46df-be27-c8800370769d`),
+    buildPropertyRefs('uitpasNumber', $t(`%wF`), {
+        warning: $t(`%11c`),
         preventAlways: true,
     }),
 ];
@@ -190,7 +190,7 @@ const financialSupport = {
         set: (value: boolean) => {
             if (value) {
                 if (!dataPermissions.enabled.value) {
-                    Toast.error($t(`521bbf47-fee2-4491-afd5-d263b0ebeda9`)).show();
+                    Toast.error($t(`%11d`)).show();
                     return;
                 }
                 addPatch({
@@ -265,7 +265,7 @@ function setEnableProperty(property: MemberPropertyWithFilter, enable: boolean) 
 
 async function editPropertyFilterConfiguration(property: MemberPropertyWithFilter, title: string, options?: { warning?: string; description?: string }) {
     if (props.inheritedRecordsConfiguration?.[property] && props.inheritedRecordsConfiguration?.[property].isAlwaysEnabledAndRequired) {
-        return Toast.info($t('d787080f-6133-4f81-bb73-891e68d48029')).show();
+        return Toast.info($t('%1Iu')).show();
     }
 
     await present({
@@ -312,7 +312,7 @@ function buildRefForInheritedCategory(categoryId: string) {
 
             if (enable) {
                 if (requiresDataPermissions.value && !dataPermissions.enabled.value) {
-                    Toast.error($t(`1f1e0d12-3960-46f9-b1e7-d8b42a89e51f`)).show();
+                    Toast.error($t(`%10m`)).show();
                     return;
                 }
 
@@ -335,7 +335,7 @@ function buildRefForInheritedCategory(categoryId: string) {
     const configuration = computed(() => enabled.value ? (patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? PropertyFilter.createDefault()) : null);
 
     return ref({
-        title: category.value?.name ?? $t(`0076d594-efee-4ec7-a00a-073a4c689a38`),
+        title: category.value?.name ?? $t(`%CL`),
         enabled,
         locked,
         configuration,

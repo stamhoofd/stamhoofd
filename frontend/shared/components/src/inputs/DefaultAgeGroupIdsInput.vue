@@ -3,7 +3,7 @@
         v-model="model"
         :items="defaultAgeGroups.map(group => ({ name: group.name, value: group.id }))"
         :nullable="nullable"
-        :nullable-label="$t('07d642d2-d04a-4d96-b155-8dbdb1a9e4ff')"
+        :nullable-label="$t('%52')"
     />
 </template>
 
@@ -38,7 +38,7 @@ useValidation(errors.validator, () => {
         if (model.value !== null && model.value.length === 0) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('2712befc-5cc5-4013-b8df-ec0861a82c36'),
+                message: $t('%DW'),
                 field: 'agegroups',
             }));
         }

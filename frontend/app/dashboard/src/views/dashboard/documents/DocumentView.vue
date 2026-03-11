@@ -1,21 +1,21 @@
 <template>
     <div class="st-view document-view">
-        <STNavigationBar :title="$t(`9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d`)">
+        <STNavigationBar :title="$t(`%1U`)">
             <template #right>
-                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('09874d23-8023-402b-b464-8fa59460a509')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('516c5273-3f27-41e2-9b2b-0ffb94501ca1')" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%Ko')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%Kp')" @click="goForward" />
                 <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
         <main>
             <h1>
-                {{ $t('9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d') }}
+                {{ $t('%1U') }}
             </h1>
 
             <p v-if="unlinkedAnswers.length" class="info-box">
-                {{ $t('719f31f6-cae0-41b0-97e6-ab8f5ff01d19', { unlinkedAnswersText }) }}
+                {{ $t('%5T', { unlinkedAnswersText }) }}
                 <button class="button text" type="button" @click="resetDocument">
-                    {{ $t('4efa0c2b-f5af-48fc-9fb3-37ccbdf1ca24') }}
+                    {{ $t('%x') }}
                 </button>
             </p>
 
@@ -32,7 +32,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}
+                        {{ $t('%Gq') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.name }}
@@ -41,7 +41,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c') }}
+                        {{ $t('%6o') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.description }}
@@ -50,7 +50,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('bb5c03d2-d684-40b6-9aa9-6f0877f41441') }}
+                        {{ $t('%Kq') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.id }} ({{ document.number || 'Zonder nummer' }})
@@ -59,7 +59,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }}
+                        {{ $t('%1JJ') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ capitalizeFirstLetter(formatDateTime(document.createdAt)) }}
@@ -68,7 +68,7 @@
 
                 <STListItem>
                     <h3 :class="'style-definition-label '+statusColor">
-                        {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
+                        {{ $t('%1A') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>

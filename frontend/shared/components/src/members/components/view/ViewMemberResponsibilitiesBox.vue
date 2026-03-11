@@ -1,17 +1,17 @@
 <template>
     <div v-if="hasResponsibilities && (sortedResponsibilities.length || auth.hasFullAccess())" class="hover-box container">
         <hr><h2 class="style-with-button">
-            <div>{{ $t('b0cb950d-856f-4068-bf2f-9636927020f4') }}</div>
+            <div>{{ $t('%7D') }}</div>
             <div class="hover-show">
                 <button v-if="auth.hasFullAccess()" type="button" class="button icon edit gray" @click.prevent="editResponsibilities" />
             </div>
         </h2>
 
         <button v-if="sortedResponsibilities.length === 0" class="info-box selectable with-button" type="button" @click="editResponsibilities">
-            {{ $t('c1253fe5-e16e-47c2-aa49-93815efe79f4', {member: props.member.patchedMember.details.firstName}) }}
+            {{ $t('%g0', {member: props.member.patchedMember.details.firstName}) }}
 
             <span class="button text">
-                {{ $t('ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad') }}
+                {{ $t('%f9') }}
             </span>
         </button>
 

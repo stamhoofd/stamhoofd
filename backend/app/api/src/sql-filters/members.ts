@@ -453,14 +453,14 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'This email does not exist.',
-                            human: $t('491156e4-a75d-4487-a97e-b208cd3a1d11'),
+                            human: $t('%1E5'),
                             statusCode: 404,
                         });
                     }
                     if (!await Context.auth.canAccessEmail(email)) {
                         throw Context.auth.error({
                             message: 'No permissions to access this email.',
-                            human: $t('be46002c-d77e-42ca-b163-23bde0bc628c'),
+                            human: $t('%1E6'),
                         });
                     }
                 },
@@ -516,7 +516,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'No permissions to filter on record ' + key,
-                            human: result.record ? $t(`3560487e-3f2c-4cc9-ad7f-4e9a0fc1bbb8`, { recordName: result.record.name }) : $t(`Je hebt niet voldoende toegangsrechten om te filteren op dit gegevensveld`),
+                            human: result.record ? $t(`%1Bc`, { recordName: result.record.name }) : $t(`Je hebt niet voldoende toegangsrechten om te filteren op dit gegevensveld`),
                             statusCode: 400,
                         });
                     }
@@ -547,7 +547,7 @@ async function throwIfNoFinancialReadAccess() {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'No permissions for financial support filter.',
-                human: $t(`64d658fa-0727-4924-9448-b243fe8e10a1`),
+                human: $t(`%G2`),
                 statusCode: 400,
             });
         }
@@ -560,7 +560,7 @@ async function throwIfNoFinancialReadAccess() {
         throw new SimpleError({
             code: 'permission_denied',
             message: 'No permissions for financial support filter (organization scope).',
-            human: $t(`64d658fa-0727-4924-9448-b243fe8e10a1`),
+            human: $t(`%G2`),
             statusCode: 400,
         });
     }

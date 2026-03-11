@@ -366,14 +366,14 @@ export class LoadedPermissions {
     getDescription() {
         const stack: string[] = [];
         if (this.level === PermissionLevel.Read) {
-            stack.push($t(`d05c78a9-7bb6-4d16-9cf4-caa0f6401452`));
+            stack.push($t(`%m7`));
         }
         if (this.level === PermissionLevel.Write) {
-            stack.push($t(`82d8ac16-2b4e-430f-8322-2c4610f93cad`));
+            stack.push($t(`%m8`));
         }
         if (this.level === PermissionLevel.Full) {
-            stack.push($t(`d5c41a61-1870-4dff-9422-726f8e2a1227`));
-            return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
+            stack.push($t(`%m9`));
+            return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`%M1`) + ' '));
         }
 
         for (const right of this.accessRights) {
@@ -383,9 +383,9 @@ export class LoadedPermissions {
         stack.push(...ResourcePermissions.getMapDescription(this.resources));
 
         if (stack.length === 0) {
-            return $t(`02ef437e-2166-49be-b5ae-73e5452546a0`);
+            return $t(`%8v`);
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`%M1`) + ' '));
     }
 }

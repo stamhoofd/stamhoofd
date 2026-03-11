@@ -1,40 +1,40 @@
 <template>
     <form class="st-view login-view" data-submit-last-field novalidate @submit.prevent="submit">
-        <STNavigationBar :large="true" class="transparent" :title="$t(`1627a32a-56b8-4c74-8715-b885c1795af6`)" />
+        <STNavigationBar :large="true" class="transparent" :title="$t(`%Qg`)" />
 
         <main class="center small flex">
             <div class="st-view-vertical-center">
                 <div class="container">
                     <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
-                        {{ $t('c85603b9-d395-46d0-8df4-2b4522d08a43', {organization: $context.organization.name}) }}
+                        {{ $t('%1Ab', {organization: $context.organization.name}) }}
                     </h1>
                     <h1 v-else>
-                        {{ $t('d54c9b23-2d3c-49cd-b1fc-7e821d36fd41') }}
+                        {{ $t('%8') }}
                     </h1>
 
                     <STErrorsDefault :error-box="errors.errorBox" />
 
                     <template v-if="passwordConfig">
-                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
                         <p v-if="lock" class="style-description-small">
                             {{ lock }}
                         </p>
 
-                        <STInputBox class="max" :title="$t(`f3bcb2fd-6f56-436a-bf8d-8cde0d924d6a`)">
+                        <STInputBox class="max" :title="$t(`%HK`)">
                             <template #right>
                                 <button class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
-                                    <span>{{ $t('b8d6b8b0-5237-44ed-869d-33692571f4f4') }}</span>
+                                    <span>{{ $t('%Zj') }}</span>
                                     <span class="icon help" />
                                 </button>
                             </template>
-                            <input id="password" v-model="password" data-testid="password-input" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`e2cec378-4ed6-40c1-bc1b-ca93718bacf1`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
+                            <input id="password" v-model="password" data-testid="password-input" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`%Zn`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
                         </STInputBox>
                         <VersionFooter v-if="showVersionFooter" />
                         <div v-else class="style-form-buttons ">
                             <LoadingButton :loading="loading" class="block">
                                 <button id="submit" class="button primary full" type="submit" data-testid="login-button">
                                     <span class="lock icon" />
-                                    <span>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</span>
+                                    <span>{{ $t('%Qg') }}</span>
                                 </button>
                             </LoadingButton>
 
@@ -43,43 +43,43 @@
                                     <span class="icon">
                                         <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                     <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                    <span v-else>{{ $t('8e74fdc8-06e0-4686-8ca4-dca7e28aebe3') }}</span>
+                                    <span v-else>{{ $t('%15b') }}</span>
                                 </button>
                             </template>
 
                             <template v-if="ssoConfig">
                                 <button class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                     <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                    <span v-else-if="!passwordConfig">{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</span>
-                                    <span v-else>{{ $t('f0f27d05-3281-4d1c-8ff5-0e84ca35114f') }}</span>
+                                    <span v-else-if="!passwordConfig">{{ $t('%Qg') }}</span>
+                                    <span v-else>{{ $t('%Zk') }}</span>
                                 </button>
                             </template>
                         </div>
 
                         <hr><p class="style-description-small">
-                            {{ $t('647ac0ed-dcb5-43d2-bd0d-4ac5839a7974') }}
+                            {{ $t('%Zl') }}
                         </p>
 
                         <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
-                            <span>{{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}</span>
+                            <span>{{ $t('%ur') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>
                     <template v-else>
                         <p class="style-description-block">
-                            {{ $t('f35f414f-7358-4f4f-8d3a-0ddc04270f47') }}
+                            {{ $t('%Zm') }}
                         </p>
 
                         <div class="style-form-buttons">
                             <button v-if="ssoConfig" class="button primary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.SSO)">
                                 <span v-if="ssoConfig.loginButtonText">{{ ssoConfig.loginButtonText }}</span>
-                                <span v-else>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</span>
+                                <span v-else>{{ $t('%Qg') }}</span>
                             </button>
                             <button v-if="googleConfig" class="button secundary full" type="button" tabindex="-1" @click="startSSO(LoginProviderType.Google)">
                                 <span class="icon">
                                     <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                 <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                <span v-else>{{ $t('8e74fdc8-06e0-4686-8ca4-dca7e28aebe3') }}</span>
+                                <span v-else>{{ $t('%15b') }}</span>
                             </button>
                         </div>
                     </template>
@@ -247,7 +247,7 @@ async function submit() {
             // await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
             await AppManager.shared.checkUpdates({
                 // Always load the staging build
-                customText: $t(`a7e7f69a-3ea8-4821-983a-47b0be06b430`),
+                customText: $t(`%v1`),
                 visibleDownload: true,
                 installAutomatically: true,
                 force: true,

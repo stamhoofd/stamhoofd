@@ -512,8 +512,8 @@ export class MemberDetails extends AutoEncoder {
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
-                        message: $t(`02313223-edde-443f-8620-8951e696e77e`),
-                        description: $t(`121a5916-44ab-4870-9182-ffc53be0ceb2`, {
+                        message: $t(`%qX`),
+                        description: $t(`%15K`, {
                             'firstName': this.firstName,
                             'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
@@ -522,8 +522,8 @@ export class MemberDetails extends AutoEncoder {
 
                 if (group.settings.maxAge && age > group.settings.maxAge) {
                     return {
-                        message: $t(`af16be1f-5031-4d6d-82f6-85f63fa17500`),
-                        description: $t(`121a5916-44ab-4870-9182-ffc53be0ceb2`, {
+                        message: $t(`%qY`),
+                        description: $t(`%15K`, {
                             'firstName': this.firstName,
                             'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
@@ -534,8 +534,8 @@ export class MemberDetails extends AutoEncoder {
 
         if ((this.gender === Gender.Male && group.settings.genderType === GroupGenderType.OnlyFemale) || (this.gender === Gender.Female && group.settings.genderType === GroupGenderType.OnlyMale)) {
             return {
-                message: $t(`99785e34-7587-4be9-bd43-b57dcb63b4a7`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
-                description: $t(`f1a4bbb9-1fa7-429b-b498-a902f68cb679`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
+                message: $t(`%15I`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
+                description: $t(`%15J`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
             };
         }
 

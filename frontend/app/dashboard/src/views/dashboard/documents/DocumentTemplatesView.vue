@@ -1,36 +1,36 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`2f140e22-4940-453f-8f49-871a69f0776e`)">
+        <STNavigationBar :title="$t(`%tw`)">
             <template #right>
                 <button type="button" class="button text navigation" @click="addDocument()">
                     <span class="icon add" />
-                    <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
+                    <span>{{ $t('%1IY') }}</span>
                 </button>
             </template>
         </STNavigationBar>
 
         <main class="center">
             <h1>
-                {{ $t(`2f140e22-4940-453f-8f49-871a69f0776e`) }}
+                {{ $t(`%tw`) }}
             </h1>
 
             <p v-if="disableActivities" class="error-box">
-                {{ $t('bb17dafc-4305-4213-90c9-2bb2701d777f') }}
+                {{ $t('%Kl') }}
             </p>
 
             <p class="style-description">
-                {{ $t('72810aaa-d33f-414f-bab1-6c33aca18823') }}
+                {{ $t('%Km') }}
             </p>
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
+                        <span class="hide-small">{{ $t('%2J') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -46,17 +46,17 @@
                             {{ template.settings.name }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }} {{ Formatter.date(template.createdAt) }}
+                            {{ $t('%1JJ') }} {{ Formatter.date(template.createdAt) }}
                         </p>
                         <template #right>
-                            <span v-if="template.status === 'Draft'" class="style-tag">{{ $t('a4b33491-0ace-4b39-aba6-79371659fd51') }}</span>
+                            <span v-if="template.status === 'Draft'" class="style-tag">{{ $t('%Kn') }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`b18dedb2-a224-4c25-996e-53a52f1e3c01`)" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`%1Ia`)" />
         </main>
     </div>
 </template>
@@ -178,8 +178,8 @@ function setTabItemFromYear(year: number) {
 
 const yearLabels = tabItems.map((y) => {
     switch (y) {
-        case TabItem.Archive: return $t('18337b9f-03a1-4b85-a012-1c1ba16739d0');
-        default: return $t(`051d6df8-2c40-4dc6-9dd5-10579a8423a2`, { year: y.toString() });
+        case TabItem.Archive: return $t('%1IZ');
+        default: return $t(`%1Ib`, { year: y.toString() });
     }
 },
 );
@@ -201,7 +201,7 @@ const disableActivities = computed(() => organization.value.meta.packages.disabl
 
 function addDocument() {
     if (organization.value.meta.packages.disableActivities) {
-        new Toast($t('f0ff8a76-a986-440c-b966-a5579e0844f4'), 'error red').show();
+        new Toast($t('%5a'), 'error red').show();
         return;
     }
 
@@ -298,7 +298,7 @@ function groupTemplates(templates: DocumentTemplatePrivate[]): GroupedTemplates[
 
     return Array.from(map.entries())
         .sort(([a], [b]) => b - a)
-        .map(([year, templates]) => ({ title: $t(`051d6df8-2c40-4dc6-9dd5-10579a8423a2`, { year: year.toString() }), templates }));
+        .map(([year, templates]) => ({ title: $t(`%1Ib`, { year: year.toString() }), templates }));
 }
 
 useGlobalEventListener('document-template-deleted', async () => {

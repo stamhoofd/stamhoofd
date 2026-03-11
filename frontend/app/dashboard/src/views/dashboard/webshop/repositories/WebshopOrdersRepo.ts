@@ -189,7 +189,7 @@ export class WebshopOrdersRepo {
             console.error(e);
             throw new SimpleError({
                 code: 'loading_failed',
-                message: $t('b17b2abe-34a5-4231-a170-5a9b849ecd3c'),
+                message: $t('%17k'),
             });
         }
     }
@@ -202,7 +202,7 @@ export class WebshopOrdersRepo {
             console.error(e);
             throw new SimpleError({
                 code: 'loading_failed',
-                message: $t('b17b2abe-34a5-4231-a170-5a9b849ecd3c'),
+                message: $t('%17k'),
             });
         }
     }

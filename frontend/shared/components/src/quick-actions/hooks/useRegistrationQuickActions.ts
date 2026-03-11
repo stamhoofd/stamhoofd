@@ -60,7 +60,7 @@ export function useRegistrationQuickActions(): QuickActions {
     }
 
     async function checkAllMemberData(member: PlatformMember) {
-        await editMember(member, { title: $t(`b4cba044-12c3-464d-8bc1-2873996f02fa`) });
+        await editMember(member, { title: $t(`%uC`) });
     }
 
     const activeMembers = computed(() => memberManager.family.members.filter(m => m.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership] }).length > 0));
@@ -145,8 +145,8 @@ export function useRegistrationQuickActions(): QuickActions {
             if (!checkout.value.cart.isEmpty) {
                 arr.push({
                     illustration: cartSvg,
-                    title: $t(`ecdcc78a-f91f-42e5-92f9-636225616c4c`),
-                    description: checkout.value.cart.price > 0 ? $t(`ddff3e4b-56df-4279-8e91-b61011dfdb01`) : $t(`d73a6677-2a0d-456a-9c1a-85dccfc2c452`),
+                    title: $t(`%hv`),
+                    description: checkout.value.cart.price > 0 ? $t(`%hw`) : $t(`%hx`),
                     action: openCart,
                 });
             }
@@ -159,8 +159,8 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 arr.push({
                     illustration: outstandingAmountSvg,
-                    title: $t(`868011d2-7d0b-4739-955a-236d9cb6a39a`) + ' ' + organizationStatus.organization.name,
-                    description: $t(`6d5ed993-d9a6-4573-b838-adf3beaf17a5`) + ' ' + Formatter.price(open) + ' ' + $t(`4d72ebf2-dd5a-49cf-b5a0-dac956b6f2de`) + ' ' + organizationStatus.organization.name + '',
+                    title: $t(`%hy`) + ' ' + organizationStatus.organization.name,
+                    description: $t(`%hz`) + ' ' + Formatter.price(open) + ' ' + $t(`%i0`) + ' ' + organizationStatus.organization.name + '',
                     rightText: Formatter.price(open),
                     rightTextClass: 'style-price',
                     action: async () => {
@@ -172,8 +172,8 @@ export function useRegistrationQuickActions(): QuickActions {
             for (const member of membersWithMissingData.value) {
                 arr.push({
                     illustration: missingDataSvg,
-                    title: $t(`b9bac60d-1fd8-43e7-9c9d-4b9b5227f9d6`, { member: member.member.patchedMember.firstName }),
-                    description: $t(`77e44908-5498-4b91-9b4f-8e55cb282dc5`, { member: member.member.patchedMember.firstName }),
+                    title: $t(`%14A`, { member: member.member.patchedMember.firstName }),
+                    description: $t(`%14B`, { member: member.member.patchedMember.firstName }),
                     action: () => fillInMemberMissingData(member.member),
                 });
             }
@@ -182,8 +182,8 @@ export function useRegistrationQuickActions(): QuickActions {
                 // Het e-mailadres van dit account is niet toegevoegd bij
                 arr.push({
                     illustration: emailWarningSvg,
-                    title: $t(`69385e1a-413f-4583-9061-67072d0742b9`, { member: member.patchedMember.firstName }),
-                    description: $t(`9526c69d-cdbf-4c90-ae2b-a7a274e42c3c`, {
+                    title: $t(`%14C`, { member: member.patchedMember.firstName }),
+                    description: $t(`%14I`, {
                         email: user.value?.email ?? '',
                         member: member.patchedMember.details.firstName,
                     }),
@@ -230,7 +230,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     leftComponent: EventIcon,
                     leftProps: { event },
                     prefix: groupText,
-                    title: event.webshopId ? event.name : $t('464708ae-124c-4af2-a300-14557acb6f13', { event: event.name }),
+                    title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
                     description,
                     action: () => {
                         openEvent(event).catch(console.error);
@@ -275,7 +275,7 @@ function getGroupDescriptionForEvent(event: Event, platform: Platform) {
         return null;
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
 }
 
 export async function getFeaturedEventsForFamily({ context, family, owner }: { context: SessionContext; family: PlatformFamily; owner?: object }) {

@@ -47,14 +47,14 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
         if (isNaN(b)) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`b9965b22-27c6-428d-a184-634da7345eae`, { value }),
+                message: $t(`%18X`, { value }),
             });
         }
 
         if (Math.floor(b * 100) !== b * 100) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`f78dea7f-d99d-4a0b-8557-0ff17d082dbb`, { value }),
+                message: $t(`%18Y`, { value }),
             });
         }
 

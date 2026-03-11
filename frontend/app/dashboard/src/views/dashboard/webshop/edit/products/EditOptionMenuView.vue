@@ -1,15 +1,15 @@
 <template>
-    <SaveView :title="isNew ? $t(`cb1db7b7-2470-448c-8ebd-ce5702439538`) : $t(`23592db3-6fa9-48b0-9660-78eff742219d`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%u7`) : $t(`%TH`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('cb1db7b7-2470-448c-8ebd-ce5702439538') }}
+            {{ $t('%u7') }}
         </h1>
         <h1 v-else>
-            {{ $t('23592db3-6fa9-48b0-9660-78eff742219d') }}
+            {{ $t('%TH') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`7d80640e-7ecc-40b0-86df-4f375d9fd300`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%TM`)">
         </STInputBox>
 
         <STList>
@@ -18,10 +18,10 @@
                     <Checkbox v-model="multipleChoice" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('d95331fe-56b0-4423-b485-5f600b6ab49c') }}
+                    {{ $t('%TI') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t("ad0d3d8a-67b1-4eb1-bce3-159acfecbaa0") }}
+                    {{ $t("%TL") }}
                 </p>
             </STListItem>
 
@@ -30,20 +30,20 @@
                     <Checkbox v-model="autoSelectFirst" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('65a30e80-e452-4334-84b8-d584e710fa0c') }}
+                    {{ $t('%1AH') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t("4c310fdf-ac9b-46cb-9ac6-05b96728296b") }}
+                    {{ $t("%1AI") }}
                 </p>
             </STListItem>
         </STList>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('6c90965a-8334-43e6-8494-031e2932bc45') }}</div>
+            <div>{{ $t('%TJ') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addOption">
                     <span class="icon add" />
-                    <span>{{ $t('6c80efa8-5658-4728-ba95-d0536fdd25bd') }}</span>
+                    <span>{{ $t('%TE') }}</span>
                 </button>
             </div>
         </h2>
@@ -52,12 +52,12 @@
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('c73c2d8c-9f00-457b-a6e5-24c45c383228') }}
+                {{ $t('%TK') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

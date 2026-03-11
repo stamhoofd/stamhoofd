@@ -18,7 +18,7 @@ async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel
             code: 'invalid_field',
             field: 'filter',
             message: 'You must filter on a group of the organization you are trying to access',
-            human: $t(`d0ef2e12-dfa2-4d2a-9ee7-793e52e6b94f`),
+            human: $t(`%1HG`),
         });
     }
 
@@ -48,7 +48,7 @@ async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel
             }
             throw Context.auth.error({
                 message: 'You do not have access to this group',
-                human: $t(`45eedf49-0f0a-442c-a0bd-7881c2682698`, { groupName: group.settings.name }),
+                human: $t(`%15f`, { groupName: group.settings.name }),
             });
         }
     }

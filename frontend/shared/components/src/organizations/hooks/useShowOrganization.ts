@@ -19,7 +19,7 @@ export function useShowOrganization() {
                         limit: 1,
                     }));
                     if (organizations.results.length === 0) {
-                        Toast.error($t(`6350b2c6-ab40-4a92-873e-f667386055a4`)).show();
+                        Toast.error($t(`%yZ`)).show();
                         throw new Error('Organization not found');
                     }
                     const OrganizationView = (await import('@stamhoofd/admin-frontend/src/views/organizations/OrganizationView.vue')).default;

@@ -18,7 +18,7 @@
         <p>
             <button class="button text" type="button" @click="addType">
                 <span class="icon add" />
-                <span>{{ $t('97887ee6-2da2-4120-8baa-609441d6091c') }}</span>
+                <span>{{ $t('%8l') }}</span>
             </button>
         </p>
     </SaveView>
@@ -48,8 +48,8 @@ const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);
 
 const saving = ref(false);
 
-const title = $t('92c63ee2-f416-4690-99bc-dbda65399ce6');
-const description = $t('a1609316-b6dd-47b8-88ec-0ad383bf0aac');
+const title = $t('%8m');
+const description = $t('%8n');
 
 async function addType() {
     const arr: PatchableArrayAutoEncoder<EventNotificationType> = new PatchableArray();
@@ -112,7 +112,7 @@ async function save() {
                 eventNotificationTypes: patch.value,
             }),
         }));
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -126,7 +126,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

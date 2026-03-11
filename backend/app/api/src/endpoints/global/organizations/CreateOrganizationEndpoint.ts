@@ -32,7 +32,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Not allowed',
-                human: $t(`a010c110-bf4e-4c12-a324-6b84c992e728`),
+                human: $t(`%ED`),
             });
         }
 
@@ -41,7 +41,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Should not be empty',
-                    human: $t(`3f37782a-c07f-457d-994f-f1cc075cff44`),
+                    human: $t(`%Cz`),
                     field: 'organization.name',
                 });
             }
@@ -49,7 +49,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Field is too short',
-                human: $t(`0e82abec-5467-45d8-ba89-9b9fd10c085d`),
+                human: $t(`%D0`),
                 field: 'organization.name',
             });
         }
@@ -60,7 +60,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Field is too long',
-                human: $t(`c4d225ea-8e41-4829-bf0c-bc04755492de`),
+                human: $t(`%D1`),
                 field: 'organization.name',
             });
         }
@@ -70,7 +70,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             throw new SimpleError({
                 code: 'name_taken',
                 message: 'An organization with the same name already exists',
-                human: $t(`19e5262f-9dc1-40d9-b905-bda8462b6046`),
+                human: $t(`%D3`),
                 field: 'name',
             });
         }

@@ -30,7 +30,7 @@ export class UnknownUIFilter extends UIFilter {
     get styledDescription() {
         return [
             {
-                text: $t(`ae457502-49f4-4513-923b-86f353197b0e`),
+                text: $t(`%bu`),
                 style: ''
             }
         ]
@@ -39,7 +39,7 @@ export class UnknownUIFilter extends UIFilter {
 
 export class UnknownFilterBuilder implements UIFilterBuilder<UnknownUIFilter> {
     get name() {
-        return $t(`ae457502-49f4-4513-923b-86f353197b0e`);
+        return $t(`%bu`);
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {

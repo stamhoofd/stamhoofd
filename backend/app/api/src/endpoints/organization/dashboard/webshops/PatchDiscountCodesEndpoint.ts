@@ -66,7 +66,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                         throw new SimpleError({
                             code: 'used_code',
                             message: 'Discount code already in use',
-                            human: $t(`d8cf1267-28dd-4d70-9f5f-1ed800729f6d`) + ' ' + struct.code + $t(`9145b0bf-8539-4ddc-8867-859f8716f026`),
+                            human: $t(`%FK`) + ' ' + struct.code + $t(`%FL`),
                         });
                     }
                     throw e;
@@ -98,7 +98,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                         throw new SimpleError({
                             code: 'used_code',
                             message: 'Discount code already in use',
-                            human: $t(`d8cf1267-28dd-4d70-9f5f-1ed800729f6d`) + ' ' + model.code + $t(`9145b0bf-8539-4ddc-8867-859f8716f026`),
+                            human: $t(`%FK`) + ' ' + model.code + $t(`%FL`),
                         });
                     }
                     throw e;

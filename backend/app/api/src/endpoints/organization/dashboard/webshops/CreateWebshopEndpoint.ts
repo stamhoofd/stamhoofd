@@ -38,7 +38,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.canCreateWebshops(organization.id)) {
-            throw Context.auth.error($t(`e97dabba-7c7f-4705-b5be-fa4ea9f701ed`));
+            throw Context.auth.error($t(`%FH`));
         }
 
         const errors = new SimpleErrors();
@@ -141,7 +141,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'failed_to_generate_unique_uri',
                     message: 'Failed to generate unique uri',
-                    human: $t(`a159e71b-e975-48c0-a33b-fdb52ad22299`),
+                    human: $t(`%FI`),
                     statusCode: 500,
                 });
             }
@@ -168,7 +168,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'missing_permissions',
                 message: 'You cannot create a webshop without having full permissions on the created webshop',
-                human: $t(`28f1afe6-b40d-495c-a58e-2b665c20a294`),
+                human: $t(`%FJ`),
             });
         }
 
@@ -211,7 +211,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'failed_to_generate_unique_domainUri',
                     message: 'Failed to generate unique domainUri',
-                    human: $t(`a159e71b-e975-48c0-a33b-fdb52ad22299`),
+                    human: $t(`%FI`),
                     statusCode: 500,
                 });
             }

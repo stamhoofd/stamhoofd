@@ -1,6 +1,6 @@
 <template>
     <div>
-        <STInputBox v-if="addresses.length > 0" :title="title || $t(`f72b6819-f125-4176-8c8d-24a6e6c70371`)" :error-box="errorBox" error-fields="selectedAddress">
+        <STInputBox v-if="addresses.length > 0" :title="title || $t(`%de`)" :error-box="errorBox" error-fields="selectedAddress">
             <STList>
                 <STListItem v-for="_address in addresses" :key="_address.toString()" element-name="label" :selectable="true" class="left-center address-selection">
                     <template #left>
@@ -16,11 +16,11 @@
                     <template #left>
                         <Radio v-model="selectedAddress" :value="null" @update:model-value="changeSelected" />
                     </template>
-                    {{ $t('7b8a7a6d-89f8-487a-a2db-20d2a6c51051') }}
+                    {{ $t('%dd') }}
                 </STListItem>
             </STList>
         </STInputBox>
-        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? $t(`9179fbfd-3a86-4ea3-b191-56baf0344d3f`) : $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)) : $t(`db49b517-77d1-4260-a22f-d3b94f55f719`)" :validator="internalValidator" :required="false" />
+        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? $t(`%df`) : $t(`%Cn`)) : $t(`%dg`)" :validator="internalValidator" :required="false" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
 </template>
@@ -206,7 +206,7 @@ export default class SelectionAddressInput extends VueComponent {
         if (this.required && !this.customAddress) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`a0422d2b-5fbc-4df5-b9c2-d693d24cc68e`),
+                message: $t(`%zC`),
                 field: 'address',
             }));
             return false;

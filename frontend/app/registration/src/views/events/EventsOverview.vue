@@ -1,22 +1,22 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`60231186-b00f-4d07-a5c7-4a905467e254`)" />
+        <STNavigationBar :title="$t(`%uB`)" />
 
         <main class="center">
             <h1>
-                {{ $t('60231186-b00f-4d07-a5c7-4a905467e254') }}
+                {{ $t('%uB') }}
             </h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
+                        <span class="hide-small">{{ $t('%2J') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -30,7 +30,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`2a4caf43-3e88-45b6-b337-4c7036130769`)" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`%KD`)" />
         </main>
     </div>
 </template>
@@ -108,7 +108,7 @@ defineRoutes([
                     event: events.results[0],
                 };
             }
-            Toast.error($t(`42e0e0d5-b4f9-4774-ad91-bfae7121a29e`)).show();
+            Toast.error($t(`%yc`)).show();
             throw new Error('Event not found');
         },
 

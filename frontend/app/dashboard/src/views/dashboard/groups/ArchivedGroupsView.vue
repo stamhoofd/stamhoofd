@@ -8,7 +8,7 @@
             </h1>
 
             <p>
-                {{ $t('a4626cf2-9306-4505-ba49-4398f6cbf4ba') }}
+                {{ $t('%L7') }}
             </p>
 
             <Spinner v-if="loadingGroups" />
@@ -29,7 +29,7 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                {{ $t('e523c2e2-3b75-477f-957f-2392b8df82f8') }}
+                {{ $t('%KB') }}
             </p>
         </main>
     </div>

@@ -29,7 +29,7 @@ function errorToSimpleErrors(e: unknown) {
             new SimpleError({
                 code: 'unknown_error',
                 message: ((typeof e === 'object' && e !== null && 'message' in e && typeof e.message === 'string') ? e.message : 'Unknown error'),
-                human: $t(`41db9fc8-77f4-49a7-a77b-40a4ae8c4d8f`),
+                human: $t(`%1ED`),
             }),
         );
     }
@@ -236,7 +236,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing subject',
-                human: $t(`e78c8218-4d25-413b-ae6b-fd916e663e5a`),
+                human: $t(`%wu`),
             });
         }
 
@@ -244,7 +244,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing text',
-                human: $t(`65b701a3-c74c-4eb6-b98e-7b9dcad0a358`),
+                human: $t(`%wv`),
             });
         }
 
@@ -252,7 +252,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing html',
-                human: $t(`65b701a3-c74c-4eb6-b98e-7b9dcad0a358`),
+                human: $t(`%wv`),
             });
         }
 
@@ -260,7 +260,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing from',
-                human: $t(`e92cd077-b0f1-4b0a-82a0-8a8baa82e73a`),
+                human: $t(`%ww`),
             });
         }
 
@@ -268,7 +268,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_recipients',
                 message: 'Failed to build recipients (count)',
-                human: $t(`457ec920-2867-4d59-bbec-4466677e1b50`) + ' ' + this.recipientsErrors.getHuman(),
+                human: $t(`%1EE`) + ' ' + this.recipientsErrors.getHuman(),
             });
         }
 
@@ -276,7 +276,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_state',
                 message: 'Email is deleted',
-                human: $t(`a0524f41-bdde-4fcc-9a9a-9350905377d8`),
+                human: $t(`%1EF`),
             });
         }
 
@@ -301,7 +301,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'missing_unsubscribe_button',
                     message: 'Missing unsubscribe button',
-                    human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
+                    human: $t(`%DS`),
                     field: 'html',
                 });
             }
@@ -313,7 +313,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'missing_unsubscribe_button',
                     message: 'Missing unsubscribe button',
-                    human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
+                    human: $t(`%DS`),
                     field: 'text',
                 });
             }
@@ -330,7 +330,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'too_big_attachments',
                 message: 'Too big attachments',
-                human: $t(`e8b9a1db-97d0-410e-99b2-6a87c1087593`),
+                human: $t(`%wx`),
                 field: 'attachments',
             });
         }
@@ -351,7 +351,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'content_type_not_supported',
                     message: 'Content-Type not supported',
-                    human: $t(`54da84d6-5f6a-4db2-be34-9ddb7f47bbe8`),
+                    human: $t(`%wy`),
                     field: 'attachments',
                 });
             }
@@ -450,7 +450,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: $t(`55899a7c-f3d4-43fe-a431-70a3a9e78e34`),
+                    human: $t(`%wz`),
                 });
             }
             const c = await callback(upToDate, options);
@@ -619,7 +619,7 @@ export class Email extends QueryableModel {
                 continue;
             }
 
-            let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
+            let filename = $t('%180');
 
             if (attachment.contentType === 'application/pdf') {
                 // tmp solution for pdf only
@@ -650,7 +650,7 @@ export class Email extends QueryableModel {
                     throw new SimpleError({
                         code: 'attachment_not_found',
                         message: 'Attachment not found',
-                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                        human: $t(`%181`),
                     });
                 }
 
@@ -664,7 +664,7 @@ export class Email extends QueryableModel {
                     throw new SimpleError({
                         code: 'attachment_not_found',
                         message: 'Attachment not found',
-                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                        human: $t(`%181`),
                     });
                 }
 
@@ -808,7 +808,7 @@ export class Email extends QueryableModel {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Missing from',
-                            human: $t(`e92cd077-b0f1-4b0a-82a0-8a8baa82e73a`),
+                            human: $t(`%ww`),
                         });
                     }
 
@@ -836,7 +836,7 @@ export class Email extends QueryableModel {
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Email not found',
-                            human: $t(`55899a7c-f3d4-43fe-a431-70a3a9e78e34`),
+                            human: $t(`%wz`),
                         });
                     }
                     upToDate.copyFrom(c);
@@ -845,7 +845,7 @@ export class Email extends QueryableModel {
                         throw new SimpleError({
                             code: 'recipients_not_created',
                             message: 'Failed to create recipients',
-                            human: $t(`f660b2eb-e382-4d21-86e4-673ca7bc2d4a`),
+                            human: $t(`%x0`),
                         });
                     }
 
@@ -1020,7 +1020,7 @@ export class Email extends QueryableModel {
                             new SimpleError({
                                 code: 'no_recipients',
                                 message: 'No recipients',
-                                human: $t(`9fe3de8e-090c-4949-97da-4810ce9e61c7`),
+                                human: $t(`%1EG`),
                             }),
                         );
                     }
@@ -1162,7 +1162,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'organization_not_found',
                     message: 'Organization not found',
-                    human: $t(`9f239fc2-1c66-4917-8d7c-c8bc6b80d93a`),
+                    human: $t(`%1NV`),
                 });
             }
             const platform = await Platform.getSharedPrivateStruct();

@@ -1,38 +1,38 @@
 <template>
     <div class="st-menu st-view members-menu">
-        <STNavigationBar :title="$t(`19da8d23-acea-43c2-bfdd-742447ca57f1`)">
+        <STNavigationBar :title="$t(`%1EH`)">
             <template #right>
                 <button v-if="$canEdit" class="button icon settings" type="button" @click="editMe" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>{{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}</h1>
+            <h1>{{ $t('%1EH') }}</h1>
 
             <template v-if="auth.hasFullAccess()">
                 <button v-if="canUpgradePeriod" type="button" class="menu-button button cta" @click="upgradePeriod">
                     <span class="icon flag" />
-                    <span>{{ $t('33a6805e-a4f3-44ca-bd10-f26bc1664963', {'werkjaar-2025-2026': newestPeriod.name}) }}</span>
+                    <span>{{ $t('%17m', {'werkjaar-2025-2026': newestPeriod.name}) }}</span>
                 </button>
                 <button v-else-if="canSetDefaultPeriod" type="button" class="menu-button button cta" @click="setDefaultPeriod">
                     <span class="icon flag" />
-                    <span>{{ $t('410f13a0-286d-4f7a-b6f6-aef22327056b') }}</span>
+                    <span>{{ $t('%8R') }}</span>
                 </button>
                 <div v-else-if="period.id !== $organization.period.id" class="info-box">
-                    {{ $t('b2e0df73-bf2c-421c-8feb-7bec5fe7d8c1') }}
+                    {{ $t('%17n') }}
                 </div>
 
                 <hr v-if="canUpgradePeriod || canSetDefaultPeriod">
             </template>
 
             <p v-if="tree.categories.length === 0" class="info-box">
-                {{ $t('0289e748-906d-453a-b54f-dce6a0355da0') }}
+                {{ $t('%WK') }}
             </p>
 
             <div v-if="showAll" class="container">
                 <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
                     <span class="icon ul" />
-                    <span>{{ $t('379d43fb-034f-4280-bb99-ea658eaec729') }}</span>
+                    <span>{{ $t('%L8') }}</span>
                 </button>
             </div>
             <hr v-if="showAll">
@@ -41,7 +41,7 @@
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
                         <span :class="'icon ' + getCategoryIcon(category)" />
                         <span>{{ category.settings.name }}</span>
-                        <span v-if="isCategoryDeactivated(category)" class="icon error red right-icon" :v-tooltip="$t('24b0cf4b-a0be-4d8c-bd75-c04648cdf570')" />
+                        <span v-if="isCategoryDeactivated(category)" class="icon error red right-icon" :v-tooltip="$t('%WL')" />
                         <span v-else-if="category.groups.length || category.categories.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(category.id)}" @click.stop="collapsed.toggle(category.id)" />
                     </button>
 
@@ -289,7 +289,7 @@ async function setDefaultPeriod() {
         );
 
         // The period
-        Toast.success($t('e875d12e-fa1d-43f5-b96a-be4ba8af04eb', { name: period.value.period.name })).show();
+        Toast.success($t('%17o', { name: period.value.period.name })).show();
     }
     catch (e) {
         Toast.fromError(e).show();

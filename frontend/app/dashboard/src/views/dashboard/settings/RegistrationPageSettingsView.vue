@@ -1,43 +1,43 @@
 <template>
     <div id="registration-page-settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`6ce03229-0735-459d-aa3c-da665e4bafc2`)" />
+        <STNavigationBar :title="$t(`%Oa`)" />
 
         <main>
-            <h1>{{ $t('6ce03229-0735-459d-aa3c-da665e4bafc2') }}</h1>
+            <h1>{{ $t('%Oa') }}</h1>
 
             <p class="style-description">
-                {{ $t('3e94193d-873b-4770-ba03-5f7528debf2c') }}
+                {{ $t('%42') }}
             </p>
 
             <hr><h2 class="style-with-button">
-                <div>{{ $t('6ce03229-0735-459d-aa3c-da665e4bafc2') }}</div>
+                <div>{{ $t('%Oa') }}</div>
                 <div>
                     <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
                         <span class="icon external" />
-                        <span class="hide-small">{{ $t('9e85b407-6e12-4003-9847-5b7d277b87ff') }}</span>
+                        <span class="hide-small">{{ $t('%Ob') }}</span>
                     </a>
                 </div>
             </h2>
 
-            <input :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')" class="input" :value="organization.registerUrl" readonly @click="copyElement"><p class="info-box">
-                {{ $t('c78c4a14-8796-4ddc-a449-33a38ef3a6ac') }}
+            <input :v-tooltip="$t('%Ip')" class="input" :value="organization.registerUrl" readonly @click="copyElement"><p class="info-box">
+                {{ $t('%2u') }}
             </p>
 
-            <hr><h2>{{ $t('0f2e6f48-02a5-47af-8148-2f37af5ba91a') }}</h2>
+            <hr><h2>{{ $t('%Oc') }}</h2>
 
             <STList>
                 <STListItem :selectable="true" element-name="a" :href="$domains.getDocs('')" target="_blank">
                     <template #left>
                         <span class="icon link" />
                     </template>
-                    {{ $t('031cfca3-ca9a-44cc-95b5-03c81948f765') }}
+                    {{ $t('%xW') }}
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="a" :href="$domains.getDocs('tag/ledenadministratie-instellen')" target="_blank">
                     <template #left>
                         <span class="icon link" />
                     </template>
-                    {{ $t('9ce3b441-a826-4708-a0e9-ceb2c7a6136c') }}
+                    {{ $t('%Od') }}
                 </STListItem>
             </STList>
         </main>

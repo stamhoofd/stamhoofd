@@ -28,7 +28,7 @@
                 {{ name }}
                 <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
             </h1>
-            <p v-if="isSingle && order" class="description" v-text="$t('12be5ac0-8353-43a2-badb-ab3b27d156b3')+order.number" />
+            <p v-if="isSingle && order" class="description" v-text="$t('%x3')+order.number" />
             <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
             <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
             <p v-if="changedSeatString" class="warning-box">
@@ -38,7 +38,7 @@
             <STList>
                 <STListItem v-if="cartItem.product.location">
                     <h3 class="style-definition-label">
-                        {{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}
+                        {{ $t('%TW') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -59,14 +59,14 @@
                         </div>
                     </div>
                     <button class="button text" type="button" @click="showSeats">
-                        <span>{{ $t('cf0f413b-04c9-458a-b33d-12a72f6f24a6') }}</span>
+                        <span>{{ $t('%k6') }}</span>
                         <span class="icon arrow-right-small" />
                     </button>
                 </STListItem>
 
                 <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
-                        {{ $t('13081716-3941-44b8-87b4-398ab2288419') }}
+                        {{ $t('%Vc') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(cartItem.product.dateRange) }}
@@ -75,7 +75,7 @@
 
                 <STListItem v-if="price">
                     <h3 class="style-definition-label">
-                        {{ $t('1205deb9-498d-435d-a6e1-91ea98371523') }}
+                        {{ $t('%1IP') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(price) }}
@@ -88,7 +88,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="download">
                     <span class="icon download" />
-                    <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
+                    <span>{{ $t('%v7') }}</span>
                 </button>
             </template>
         </STToolbar>
@@ -132,7 +132,7 @@ const isSingle = computed(() => props.webshop.meta.ticketType === WebshopTicketT
 function share() {
     navigator.share({
         title: props.webshop.meta.name + ' - ' + name.value,
-        text: $t(`ed42a654-193c-4d1b-8f5b-a98bed2b575d`),
+        text: $t(`%12d`),
         url: qrMessage.value,
     }).catch(e => console.error(e));
 }

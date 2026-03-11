@@ -17,9 +17,9 @@
                 <p class="price">
                     <span class="price-value">{{ priceString }}</span>
 
-                    <span v-if="product.enableInFuture" class="style-tag">{{ $t('56954008-cc3d-4460-afaa-f986d1f35d24', {date: product.enableAfter ? formatDateTime(product.enableAfter) : '?'}) }}</span>
-                    <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('11b3bb72-0edb-401e-9c60-47fbb2d132fc') }}</span>
-                    <span v-else-if="product.isSoldOut" class="style-tag error">{{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}</span>
+                    <span v-if="product.enableInFuture" class="style-tag">{{ $t('%kR', {date: product.enableAfter ? formatDateTime(product.enableAfter) : '?'}) }}</span>
+                    <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('%Tk') }}</span>
+                    <span v-else-if="product.isSoldOut" class="style-tag error">{{ $t('%12p') }}</span>
                     <span v-else-if="stockText !== null" class="style-tag" :class="stockText.style">{{ stockText.text }}</span>
                 </p>
             </div>
@@ -64,7 +64,7 @@ const priceString = computed(() => {
             if (props.webshop.isAllFree) {
                 return '';
             }
-            return $t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`);
+            return $t(`%1Mn`);
         }
         return Formatter.price(priceRanges[0]);
     }
@@ -92,7 +92,7 @@ const stockText = computed(() => {
 
     if (remainingWithoutCart === 0) {
         return {
-            text: $t(`0100521c-b38e-4925-9484-44d44f3dfa09`),
+            text: $t(`%12p`),
             style: 'error',
         };
     }
@@ -104,7 +104,7 @@ const stockText = computed(() => {
         }
 
         return {
-            text: $t(`3ba66a09-31bc-4bef-9bba-ca44d5480c42`, { count: props.product.getRemainingStockText(remainingWithoutCart) }),
+            text: $t(`%12q`, { count: props.product.getRemainingStockText(remainingWithoutCart) }),
             style: 'warn',
         };
     }
@@ -115,7 +115,7 @@ const stockText = computed(() => {
 
     if (maxOrder && maxOrder.remaining === 0) {
         return {
-            text: $t(`947eb845-90da-43e5-a3bb-78903f7edd72`),
+            text: $t(`%zD`),
             style: 'error',
         };
     }
@@ -130,13 +130,13 @@ const stockText = computed(() => {
 
     if (remaining === 0) {
         return {
-            text: $t(`947eb845-90da-43e5-a3bb-78903f7edd72`),
+            text: $t(`%zD`),
             style: 'error',
         };
     }
 
     return {
-        text: $t(`3ba66a09-31bc-4bef-9bba-ca44d5480c42`, { count: props.product.getRemainingStockText(remaining) }),
+        text: $t(`%12q`, { count: props.product.getRemainingStockText(remaining) }),
         style: 'warn',
     };
 });

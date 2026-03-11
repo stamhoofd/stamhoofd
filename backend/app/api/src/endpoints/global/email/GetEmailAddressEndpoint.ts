@@ -53,7 +53,7 @@ export class GetEmailAddressEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'invalid_fields',
                     message: 'Invalid token or id',
-                    human: $t(`ceacb5a8-7777-4366-abcb-9dd90ffb832e`),
+                    human: $t(`%DQ`),
                 });
             }
 
@@ -95,7 +95,7 @@ export class GetEmailAddressEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
+                    human: $t(`%DR`),
                     statusCode: 404,
                 });
             }

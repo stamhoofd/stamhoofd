@@ -111,7 +111,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw new SimpleError({
                     code: 'missing_organization',
                     message: 'Missing organization',
-                    human: $t(`2bb4647b-a3b8-453e-8b75-41c290910fc8`),
+                    human: $t(`%Di`),
                     statusCode: 400,
                 });
             }
@@ -162,7 +162,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'not_allowed',
                         message: 'Cannot override details',
-                        human: $t(`b66ef4c3-9931-4fc3-9da1-c023857684fa`),
+                        human: $t(`%Dj`),
                         field: 'details',
                     });
                 }
@@ -215,7 +215,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error($t(`1d1b5807-af39-400b-8dea-2f222ee668ae`));
+                    throw Context.auth.error($t(`%Dk`));
                 }
 
                 const responsibilityRecord = await MemberResponsibilityRecord.getByID(patchResponsibility.id);
@@ -223,21 +223,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: "You don't have permissions to access this endpoint",
-                        human: $t(`738fc35a-da77-4e1a-8233-9ff651781f65`),
+                        human: $t(`%Dl`),
                     });
                 }
 
                 const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId);
 
                 if (responsibility && !responsibility.organizationBased && !Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error($t(`e2ceec71-367c-4cfd-98f3-b0ec0c83e2c2`));
+                    throw Context.auth.error($t(`%Dm`));
                 }
 
                 // Allow patching begin and end date
                 if (patchResponsibility.endDate !== undefined) {
                     if (responsibilityRecord.endDate) {
                         if (!Context.auth.hasPlatformFullAccess()) {
-                            throw Context.auth.error($t(`fd88b6ba-1f0b-4e82-9c5b-7c7a3ac8f4fa`));
+                            throw Context.auth.error($t(`%Dn`));
                         }
                     }
                     responsibilityRecord.endDate = patchResponsibility.endDate;
@@ -245,7 +245,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 if (patchResponsibility.startDate !== undefined) {
                     if (patchResponsibility.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                        throw Context.auth.error($t(`84c2346e-40b2-4b38-9b2d-e1fcba6f1202`));
+                        throw Context.auth.error($t(`%Do`));
                     }
                     if (patchResponsibility.startDate.getTime() > Date.now()) {
                         patchResponsibility.startDate = new Date(); // force now
@@ -254,7 +254,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24));
 
                     if (daysDiff > 60 && !Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error($t(`dc0c8bff-7b16-4597-adfb-cd6a4d7d4bf1`));
+                        throw Context.auth.error($t(`%Dp`));
                     }
                     responsibilityRecord.startDate = patchResponsibility.startDate;
                 }
@@ -271,7 +271,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Create responsibilities
             for (const { put } of patch.responsibilities.getPuts()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error($t(`1d1b5807-af39-400b-8dea-2f222ee668ae`));
+                    throw Context.auth.error($t(`%Dk`));
                 }
 
                 const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId);
@@ -281,7 +281,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`31757907-4cdd-4f0e-bb9d-cba9c1d997e4`),
+                        human: $t(`%Dq`),
                         field: 'organizationId',
                     });
                 }
@@ -291,7 +291,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid responsibility',
-                        human: $t(`03114785-acf5-4bba-a3b5-15d3ac4ae17c`),
+                        human: $t(`%Dr`),
                         field: 'responsibilityId',
                     });
                 }
@@ -300,7 +300,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e`),
+                        human: $t(`%Ds`),
                         field: 'organizationId',
                     });
                 }
@@ -329,7 +329,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: platformResponsibility ? $t('ec6a555e-6bb1-4b5f-b17e-38eaa8a478b5') : $t('d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840'),
+                        human: platformResponsibility ? $t('%1B9') : $t('%8G'),
                     });
                 }
 
@@ -342,7 +342,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`aa39f949-6fe5-4ed2-acb7-ff3d138cf243`),
+                        human: $t(`%Dt`),
                         field: 'organizationId',
                     });
                 }
@@ -352,7 +352,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Missing groupId',
-                            human: $t(`8bfe005a-a98a-48d6-afbf-bcca487b064b`),
+                            human: $t(`%Du`),
                             field: 'groupId',
                         });
                     }
@@ -362,7 +362,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid groupId',
-                            human: $t(`ca86d6ef-990e-42a4-834c-1c94622c95ef`),
+                            human: $t(`%Dv`),
                             field: 'groupId',
                         });
                     }
@@ -371,7 +371,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid groupId',
-                            human: $t(`aed1d5e3-1d42-46d4-a9c1-ac13bdffc2bd`),
+                            human: $t(`%Dw`),
                             field: 'groupId',
                         });
                     }
@@ -383,7 +383,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 model.endDate = put.endDate;
 
                 if (put.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                    throw Context.auth.error($t(`84c2346e-40b2-4b38-9b2d-e1fcba6f1202`));
+                    throw Context.auth.error($t(`%Do`));
                 }
 
                 if (put.startDate.getTime() > Date.now()) {
@@ -391,7 +391,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 if (put.endDate && put.endDate > new Date(Date.now() + 60 * 1000)) {
-                    throw Context.auth.error($t(`5c6106e8-6785-4f72-b0c7-00a940240019`));
+                    throw Context.auth.error($t(`%Dx`));
                 }
 
                 model.startDate = put.startDate;
@@ -418,7 +418,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid email',
-                        human: $t(`dcb9cd60-ddfe-403d-bfb7-d1c7b63e2fdf`),
+                        human: $t(`%Dy`),
                     });
                 }
 
@@ -435,7 +435,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`62103514-05f5-4dc0-a5cc-c9321f21c63d`),
+                            human: Context.i18n.$t(`%A9`),
                             field: 'periodId',
                         });
                     }
@@ -444,7 +444,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`745f5355-3398-406d-842e-5c9f7a700e91`, { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t(`%AA`, { period: period?.getBaseStructure().name }),
                             field: 'periodId',
                         });
                     }
@@ -454,13 +454,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`601c15e5-cfb0-4c34-af03-7dfc55e39d36`),
+                        human: $t(`%Dz`),
                         field: 'organizationId',
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(put.organizationId)) {
-                    throw Context.auth.error($t(`9c632c7f-242e-44a1-b8ad-335b613075d8`));
+                    throw Context.auth.error($t(`%E0`));
                 }
 
                 const putForOrganization = await Context.auth.getOrganization(put.organizationId);
@@ -472,7 +472,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Invalid membership type',
-                        human: $t(`fa79b34e-deef-4379-9c80-8795b0f5eaa3`),
+                        human: $t(`%E1`),
                     });
                 }
 
@@ -494,7 +494,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Invalid membership type',
-                        human: $t(`a17551ff-5097-4f09-a8bb-19fe377f2b98`),
+                        human: $t(`%E2`),
                     });
                 }
 
@@ -541,7 +541,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`84ef7751-ddf9-4591-ba5b-53371c67bdc3`),
+                            human: $t(`%1NA`),
                         });
                     }
                     if (existing.locked) {
@@ -549,7 +549,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`723af14b-38b8-4f33-a645-ed5087fc7461`),
+                            human: $t(`%1NB`),
                         });
                     }
                     if (!existing.generated) {
@@ -557,14 +557,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`b0280152-295f-48af-94e0-111c92dbda32`),
+                            human: $t(`%1NC`),
                         });
                     }
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
                         message: 'Overlapping memberships',
-                        human: $t(`1c0d9219-ef24-46ad-9b9c-f09b8d093fc8`),
+                        human: $t(`%1ND`),
                     });
                 }
                 else if (existing) {
@@ -596,12 +596,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'id',
                         message: 'Invalid id',
-                        human: $t(`ee79372d-c14d-41ab-afb1-336acbe52687`),
+                        human: $t(`%E3`),
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(membership.organizationId)) {
-                    throw Context.auth.error($t(`fa5797d7-dafb-469a-a75c-b3b8a6a08737`));
+                    throw Context.auth.error($t(`%E4`));
                 }
 
                 if (membership.periodId !== platform.periodId) {
@@ -611,7 +611,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: $t(`82af2364-c711-4e44-a871-9346c2cab66a`),
+                            human: $t(`%BZ`),
                             field: 'periodId',
                         });
                     }
@@ -620,7 +620,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: $t(`92a41b40-9841-4326-abaf-a8a7d97e5d55`),
+                            human: $t(`%Ba`),
                             field: 'periodId',
                         });
                     }
@@ -633,11 +633,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
                 else {
                     if (p.locked === true) {
-                        throw Context.auth.error($t('bbc639c8-abdb-42d8-b5ed-f58084886ad9'));
+                        throw Context.auth.error($t('%BX'));
                     }
 
                     if (p.locked === false) {
-                        throw Context.auth.error($t('c6494677-86f0-4d2e-b9ac-bedfc9e87187'));
+                        throw Context.auth.error($t('%BY'));
                     }
                 }
 
@@ -654,12 +654,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'id',
                         message: 'Invalid id',
-                        human: $t(`ee79372d-c14d-41ab-afb1-336acbe52687`),
+                        human: $t(`%E3`),
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(membership.organizationId)) {
-                    throw Context.auth.error($t(`c3cca571-d543-4ca7-9da1-1e5570f5063a`));
+                    throw Context.auth.error($t(`%E5`));
                 }
 
                 if (membership.periodId !== platform.periodId) {
@@ -669,7 +669,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`1f1d657d-bc73-4cae-9025-b3ec67a705e7`),
+                            human: Context.i18n.$t(`%AB`),
                             field: 'periodId',
                         });
                     }
@@ -678,7 +678,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`2e615670-813a-414f-b06c-f76136891bf8`, { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t(`%AC`, { period: period?.getBaseStructure().name }),
                             field: 'periodId',
                         });
                     }
@@ -689,14 +689,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid invoice',
-                            human: $t(`be7d7286-9c3f-41f9-9378-b028754c8533`),
+                            human: $t(`%E6`),
                         });
                     }
 
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid invoice',
-                        human: $t(`1a7b41da-9bd3-4019-9ed4-39e742f99f41`),
+                        human: $t(`%E7`),
                     });
                 }
 
@@ -746,7 +746,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         for (const id of ids) {
             const member = await Member.getByIdWithUsersAndRegistrations(id);
             if (!member || !await Context.auth.canDeleteMember(member)) {
-                throw Context.auth.error($t(`39f5696c-3755-429f-b0da-a0ca920ed11e`));
+                throw Context.auth.error($t(`%E8`));
             }
 
             await MemberUserSyncer.onDeleteMember(member);
@@ -939,14 +939,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
             catch (e) {
                 Email.sendWebmaster({
-                    subject: $t(`04cb945a-28aa-4f3e-95b3-16455cdd8892`),
-                    text: $t(`5f7b1766-eb58-4471-bff7-60f3fc66fe41`) + ' ' + member.details.name + ' ' + $t(`7254f2f6-0d15-4e81-85cf-cff6438c9e98`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
+                    subject: $t(`%E9`),
+                    text: $t(`%EA`) + ' ' + member.details.name + ' ' + $t(`%1G`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
                 });
 
                 throw new SimpleError({
                     code: 'too_many_tries',
                     message: 'Too many securityCodes limited',
-                    human: $t(`ddb1b9de-cc00-4960-ba36-fa70429cbac1`),
+                    human: $t(`%EB`),
                     field: 'details.securityCode',
                 });
             }
@@ -958,7 +958,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'details.securityCode',
                         message: 'Invalid security code',
-                        human: Context.i18n.$t('49753d6a-7ca4-4145-8024-0be05a9ab063'),
+                        human: Context.i18n.$t('%2i'),
                         statusCode: 400,
                     });
                 }
@@ -999,7 +999,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
-                human: $t(`510807a1-d4c7-45fa-9e3b-ddc8764d3f6e`, { member: member.details.firstName }),
+                human: $t(`%1BA`, { member: member.details.firstName }),
                 statusCode: 400,
             });
         }
@@ -1069,11 +1069,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     message: 'Maximum members reached',
                     human: responsibility.maximumMembers === 1
                         ? (model.groupId
-                                ? $t('e3e4ba16-7923-42bc-ae23-cd729ce06869', { responsibility: responsibility.name })
-                                : $t('77e408e8-59e5-42c2-b58d-956f7c391e5c', { responsibility: responsibility.name }))
+                                ? $t('%C5', { responsibility: responsibility.name })
+                                : $t('%C6', { responsibility: responsibility.name }))
                         : (model.groupId
-                                ? $t('10c13841-9f58-4651-a9b3-a34c8ce1a505', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })
-                                : $t('01ef9768-89b5-48ea-955e-b896306a9a87', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })),
+                                ? $t('%C7', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })
+                                : $t('%C8', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })),
                 });
             }
         }

@@ -90,7 +90,7 @@ const props = defineProps<{
 }>();
 
 defineOptions({
-    name: $t(`e1193431-b95a-4a8a-94b2-8659005dcb77`),
+    name: $t(`%2M`),
 });
 
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;

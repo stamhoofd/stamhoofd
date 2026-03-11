@@ -33,9 +33,9 @@ export enum EmailRecipientFilterType {
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
     return MemberWithRegistrationsBlob.create({
         details: MemberDetails.create({
-            firstName: $t(`65c9a375-fbca-4a27-9a42-01d49f7f9588`),
-            lastName: $t(`e028c78a-166d-4531-b03b-99a573f1661b`),
-            email: $t(`46e8393a-144d-477e-9b9e-c79616e4b9a7`),
+            firstName: $t(`%13h`),
+            lastName: $t(`%13i`),
+            email: $t(`%13a`),
         }),
     }).getEmailRecipients(['member'])[0];
 }
@@ -392,23 +392,23 @@ export function isSoftEmailRecipientError(error: SimpleErrors) {
 export function bounceErrorToHuman(message: string) {
     message = message.toLowerCase();
     if (message.startsWith('smtp; 554 4.4.7') || message.includes('storage') || message.includes('quota') || message.match(/inbox.*full/)) {
-        return $t('048392a6-9ee6-42f8-b5ec-599a9c305d4a');
+        return $t('%1GI');
     }
 
     if (message.includes('failed to establish connection') || message.includes('connection timed out')) {
-        return $t('f9735e0b-84b6-4f9f-a376-c171bacc9824');
+        return $t('%1GJ');
     }
 
     if (message.includes('unable to lookup dns')) {
-        return $t('7f3706ef-3d92-4e2d-ac88-84ede374ac7c');
+        return $t('%1GK');
     }
 
     if (message.includes('hop count exceeded')) {
-        return $t('4770f2c6-774f-4b5d-96fc-6226c7c57573');
+        return $t('%1GL');
     }
 
     if (message.includes('recipient address rejected: access denied') || message.includes('user does not exist') || message.includes('user unknown') || message.includes('the email account that you tried to reach does not exist')) {
-        return $t('7f8ae6ce-ac5d-48e8-aa9f-223a849aab02');
+        return $t('%1GM');
     }
 }
 

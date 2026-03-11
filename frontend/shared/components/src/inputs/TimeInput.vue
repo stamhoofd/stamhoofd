@@ -85,7 +85,7 @@ function validate() {
         if (hour > 24 || minute > 60) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`dce292b4-9edd-4e20-a2e3-e3be80d42eb4`),
+                message: $t(`%zF`),
                 field: 'time',
             }));
             return false;

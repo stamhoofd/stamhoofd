@@ -565,38 +565,38 @@ export class PlatformRegistration extends Registration {
 
         // Check missing information
         if (!details.phone && member.isPropertyRequired('phone', scope)) {
-            base.push($t(`de723a38-6e76-418a-a6f6-52c6ed45c5c8`));
+            base.push($t(`%zY`));
         }
 
         if (!details.email && member.isPropertyRequired('emailAddress', scope)) {
-            base.push($t(`64163c88-2610-4542-9fd4-db523670049c`));
+            base.push($t(`%zZ`));
         }
 
         if (!details.address && member.isPropertyRequired('address', scope)) {
-            base.push($t(`38f3e042-b8a7-4bba-bf2a-d7c391f23268`));
+            base.push($t(`%19P`));
         }
 
         if (!details.birthDay && member.isPropertyRequired('birthDay', scope)) {
-            base.push($t(`88a24a2b-d84a-4c7e-978d-6180e260a06f`));
+            base.push($t(`%za`));
         }
 
         if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
-            base.push($t(`cd5d00db-1fcc-4079-bbe3-36dc001e93d4`));
+            base.push($t(`%19Q`));
         }
         else {
             if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
-                base.push($t(`af59b3e6-e47c-4c9f-a571-2e1662f17114`));
+                base.push($t(`%zb`));
             }
         }
 
         if (member.isPropertyRequired('parents', scope)) {
             if (details.parents.length === 0) {
-                base.push($t(`8a5dfcff-bbe3-4b8f-8b6d-85df4d35dc94`));
+                base.push($t(`%zc`));
             }
         }
 
         if (details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
-            base.push($t(`d42f4d7d-a453-403b-9b3f-459020fc8849`));
+            base.push($t(`%zd`));
         }
 
         const { categories: enabledCategories } = member.getEnabledRecordCategories(scope);
@@ -1233,7 +1233,7 @@ export class PlatformMember implements ObjectWithRecords {
     get registrationDescription() {
         const groups = this.groups;
         if (groups.length === 0) {
-            return $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+            return $t('%5D');
         }
         return groups.map(g => g.settings.name).join(', ');
     }

@@ -8,7 +8,7 @@
                     <Checkbox v-model="allTags" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('4835dfd4-10b0-4e91-b581-d1b3eefa73f7') }}
+                    {{ $t('%53') }}
                 </h3>
             </STListItem>
             <template v-if="model !== null">
@@ -87,7 +87,7 @@ useValidation(errors.validator, () => {
         if (model.value !== null && model.value.length === 0) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('074933d6-e0da-4542-8ec0-efb759645826'),
+                message: $t('%8p'),
                 field: 'tags',
             }));
         }

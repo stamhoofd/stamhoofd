@@ -5,10 +5,10 @@
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon close" @click="setShowSelection(false)" />
                 <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="isAllSelected = !isAllSelected">
                     <template v-if="isAllSelected">
-                        {{ $t('d3850361-5954-45cd-8011-7c22f4b838a5') }}
+                        {{ $t('%126') }}
                     </template>
                     <template v-else>
-                        {{ $t('62d13348-4438-44e4-9ea0-c4fb42c0123b') }}
+                        {{ $t('%eH') }}
                     </template>
                 </button>
                 <BackButton v-else-if="canPop" @click="pop">
@@ -22,11 +22,11 @@
 
                 <template v-if="showSelection && isIOS && canLeaveSelectionMode">
                     <button v-if="canLeaveSelectionMode" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
-                        {{ $t('7e492b8b-771a-48cd-b10a-2d12fb0cb525') }}
+                        {{ $t('%jb') }}
                     </button>
                 </template>
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
-                    {{ $t('bbc1d7b9-1b97-426f-b8a6-df946bd50d4d') }}
+                    {{ $t('%jc') }}
                 </button>
                 <button v-else key="actions" v-long-press="(e: any) => showActions(true, e)" type="button" class="button icon more" data-testid="more-button" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
@@ -36,7 +36,7 @@
             <div class="container">
                 <h1 class="style-navigation-title with-icons">
                     <span>{{ title }}</span>
-                    <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('02e77c23-5f98-44fb-86f5-ff9d511af299')" type="button" class="button icon earth-off red" @click="refreshOnline" />
+                    <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('%17b')" type="button" class="button icon earth-off red" @click="refreshOnline" />
                     <span v-if="titleSuffix" class="title-suffix">
                         {{ titleSuffix }}
                     </span>
@@ -46,13 +46,13 @@
                 <div class="input-with-buttons">
                     <div>
                         <form novalidate class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                            <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                         </form>
                     </div>
                     <div v-if="canFilter">
                         <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter" />
-                            <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
+                            <span class="hide-small">{{ $t('%2J') }}</span>
                             <span v-if="!isEmptyFilter(tableObjectFetcher.baseFilter)" class="icon dot primary" />
                         </button>
                     </div>
@@ -79,7 +79,7 @@
                                     />
                                 </button>
                                 <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="(event) => handleDragStart(event, column)" @touchstart="(event) => handleDragStart(event, column)" /></span>
-                                <button v-else-if="canCollapse" type="button" class="button light-gray icon collapse-left" :v-tooltip="$t(`d0aea573-019a-4008-aefc-c785de44dfdc`)" @click="collapse" />
+                                <button v-else-if="canCollapse" type="button" class="button light-gray icon collapse-left" :v-tooltip="$t(`%je`)" @click="collapse" />
                             </div>
                         </div>
                     </div>
@@ -109,25 +109,25 @@
                 {{ errorMessage }}
 
                 <button class="button text" type="button" @click="refresh">
-                    {{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}
+                    {{ $t('%Y9') }}
                 </button>
             </p>
 
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0 && tableObjectFetcher.objectFetcher.isOffline" class="error-box icon earth-off with-button">
-                {{ $t('18e54ffc-b12d-4175-9128-46446334942f') }}
+                {{ $t('%gT') }}
 
                 <button class="button text" type="button" @click="refreshOnline">
-                    {{ $t('314810ef-ff16-4b22-b8a5-399d5d820a4a') }}
+                    {{ $t('%1EU') }}
                 </button>
             </p>
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0" class="info-box">
                 <slot name="empty" />
             </p>
             <p v-else-if="totalFilteredCount === 0" class="info-box with-button">
-                {{ $t('8c55753a-4ab8-419d-af51-0fb8d64e900e') }}
+                {{ $t('%jd') }}
 
                 <button class="button text" type="button" @click="resetFilter">
-                    {{ $t('4efa0c2b-f5af-48fc-9fb3-37ccbdf1ca24') }}
+                    {{ $t('%x') }}
                 </button>
             </p>
         </main>
@@ -281,7 +281,7 @@ if (props.Route) {
             if (objects.results.length === 1) {
                 return getPropertiesForRoute(objects.results[0]);
             }
-            Toast.error($t(`8ba8a143-e26a-40d3-b770-19788314295f`)).show();
+            Toast.error($t(`%125`)).show();
             throw new Error('Not found');
         },
 
@@ -570,7 +570,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     if (!showSelection.value) {
         // Add select action
         actions.push(new AsyncTableAction({
-            name: $t(`bbc1d7b9-1b97-426f-b8a6-df946bd50d4d`),
+            name: $t(`%jc`),
             groupIndex: -1,
             priority: 10,
             needsSelection: false,
@@ -583,7 +583,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     // Add select all action
     if (!isAllSelected.value) {
         actions.push(new AsyncTableAction({
-            name: $t(`62d13348-4438-44e4-9ea0-c4fb42c0123b`),
+            name: $t(`%eH`),
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
@@ -595,7 +595,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     }
     else {
         actions.push(new AsyncTableAction({
-            name: $t(`d3850361-5954-45cd-8011-7c22f4b838a5`),
+            name: $t(`%126`),
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
@@ -607,14 +607,14 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
 
     // Add action to change visible columns
     actions.push(new MenuTableAction({
-        name: wrapColumns.value ? $t(`db2ee1ce-3c26-47ba-9559-a8dfad4f480c`) : $t(`ae5e4000-3dc2-46cb-99a4-24f02b6e6cd3`),
+        name: wrapColumns.value ? $t(`%127`) : $t(`%128`),
         groupIndex: -1,
         priority: 8,
         childMenu: getColumnContextMenu(),
     }));
 
     actions.push(new MenuTableAction({
-        name: $t(`889f97cc-d14f-4865-bd82-e03ea0fdfbb6`),
+        name: $t(`%129`),
         groupIndex: -1,
         priority: 7,
         childMenu: getSortingContextMenu(),
@@ -895,7 +895,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         selection = buildSelectionObject();
 
         filteredActions.push(new AsyncTableAction({
-            name: $t(`40655788-f117-421c-bf1e-cc93dc10c9f6`),
+            name: $t(`%12A`),
             groupIndex: 1,
             priority: 10,
             handler: () => {
@@ -912,7 +912,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         // Only focus this row
         // Add select action
         filteredActions.push(new AsyncTableAction({
-            name: $t(`bbc1d7b9-1b97-426f-b8a6-df946bd50d4d`),
+            name: $t(`%jc`),
             groupIndex: !showSelection.value ? -1 : 1,
             priority: 10,
             handler: () => {

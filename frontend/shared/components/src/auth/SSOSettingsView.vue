@@ -1,33 +1,33 @@
 <template>
-    <SaveView :loading-view="!ssoConfiguration" :loading="saving" :disabled="!hasChanges" :error-box="errors.errorBox" :title="$t(`8cdbbc91-88ab-4d25-8f42-b34369e959f0`)" @save="save">
+    <SaveView :loading-view="!ssoConfiguration" :loading="saving" :disabled="!hasChanges" :error-box="errors.errorBox" :title="$t(`%1O`)" @save="save">
         <h1>
-            {{ $t('979af771-f3ab-4105-9478-d8ee14db66f1') }}{{ provider }})
+            {{ $t('%1X') }}{{ provider }})
         </h1>
         <p>
-            {{ $t('fcd3549b-1d81-4fe7-9e8f-fcd17501c014') }} <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">{{ $t('850e99a6-c2c9-4ba9-9159-d3ac3a74de63') }}</a> {{ $t('33fe6b98-1a87-4d0c-831d-5fcb441ee018') }}
+            {{ $t('%Zr') }} <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">{{ $t('%Zs') }}</a> {{ $t('%Zt') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="issuer" :error-box="errors.errorBox" class="max" :title="$t(`0b6247ef-b8bb-4ed7-b403-b0a58ddebaf5`)">
-            <input ref="firstInput" v-model="issuer" class="input" type="text" autocomplete="off" :placeholder="$t(`472e545f-4d75-4885-aeec-be67a6def534`)">
+        <STInputBox error-fields="issuer" :error-box="errors.errorBox" class="max" :title="$t(`%O`)">
+            <input ref="firstInput" v-model="issuer" class="input" type="text" autocomplete="off" :placeholder="$t(`%Zv`)">
         </STInputBox>
 
-        <STInputBox error-fields="clientId" :error-box="errors.errorBox" class="max" :title="$t(`9db3d461-f36c-4b2e-9e51-0b1e9a1517c2`)">
-            <input v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t(`2065700b-bddc-4616-a67b-5c331ab31df7`)">
+        <STInputBox error-fields="clientId" :error-box="errors.errorBox" class="max" :title="$t(`%1c`)">
+            <input v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t(`%Zw`)">
         </STInputBox>
 
-        <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" class="max" :title="$t(`70af9014-24ec-484c-b11b-4e2510bb09c1`)">
-            <input v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t(`2065700b-bddc-4616-a67b-5c331ab31df7`)">
+        <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" class="max" :title="$t(`%1E`)">
+            <input v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t(`%Zw`)">
         </STInputBox>
 
-        <STInputBox :error-box="errors.errorBox" class="max" :title="$t(`3b81d4a5-0af5-4807-8ea9-264d2f99ee05`)">
+        <STInputBox :error-box="errors.errorBox" class="max" :title="$t(`%n`)">
             <input v-model="redirectUri" :placeholder="defaultRedirectUri" class="input" type="text" autocomplete="off"><template #right>
                 <button v-copyable="redirectUri || defaultRedirectUri" class="button icon copy small" type="button" />
             </template>
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('c6e6c4b8-b3ad-4163-aa08-bbf22cc337aa') }}
+            {{ $t('%Zu') }}
         </p>
     </SaveView>
 </template>
@@ -136,7 +136,7 @@ async function save() {
             shouldRetry: false,
         });
 
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -150,7 +150,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

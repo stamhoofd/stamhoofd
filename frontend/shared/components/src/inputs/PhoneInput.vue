@@ -71,7 +71,7 @@ const phoneRaw = ref(model.value ?? '');
 const placeholder = computed(() => {
     if (props.placeholder) return props.placeholder;
     if (props.required) return '';
-    return $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f');
+    return $t('%14p');
 });
 
 watch(model, (value) => {
@@ -187,7 +187,7 @@ function validate(final = true, silent = false) {
                 if (country !== d && isValid(unformatted, country)) {
                     errors.errorBox = new ErrorBox(new SimpleError({
                         code: 'invalid_field',
-                        message: $t('deb077c6-7346-413e-b844-c73834e7aa1e', {
+                        message: $t('%1N8', {
                             'country': CountryHelper.getName(d),
                             'other-country': CountryHelper.getName(country),
                         }),
@@ -199,7 +199,7 @@ function validate(final = true, silent = false) {
 
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t('f7cbe04a-3175-4794-8f74-8261a11fbade'),
+                message: $t('%2y'),
                 field: props.errorFields,
             }));
         }

@@ -8,7 +8,7 @@
             </h1>
 
             <p>
-                {{ $t('0fb6b4fa-6238-4d9f-879b-512cf5b94bcc') }}
+                {{ $t('%Lo') }}
             </p>
 
             <Spinner v-if="loadingGroups" />
@@ -22,7 +22,7 @@
                         {{ group.settings.name }}
                     </h2>
                     <p v-if="group.deletedAt" class="style-description-small">
-                        {{ $t('d6a29b4f-4eb8-4e30-ad63-df2e60276081') }} {{ formatDate(group.deletedAt) }}
+                        {{ $t('%Lp') }} {{ formatDate(group.deletedAt) }}
                     </p>
 
                     <template #right>
@@ -31,7 +31,7 @@
                 </STListItem>
             </STList>
             <p v-else class="info-box">
-                {{ $t('4db09c4b-ffbd-492b-8ed4-3782c3dc338f') }}
+                {{ $t('%Lq') }}
             </p>
         </main>
     </div>
@@ -54,7 +54,7 @@ const periodId = props.period.period.id;
 
 const loadingGroups = ref(true);
 const groups: Ref<Group[]> = ref([]);
-const title = computed(() => `${$t('0671f7d3-7089-4cde-b28b-79acb10bea28')} (${props.period.period.nameShort ?? '?'})`);
+const title = computed(() => `${$t('%CR')} (${props.period.period.nameShort ?? '?'})`);
 const context = useContext();
 const organizationManager = useOrganizationManager();
 const allCategories = computed(() => props.period.getCategoryTree({
@@ -89,7 +89,7 @@ async function load() {
 
 async function restoreGroup(event: TouchEvent | MouseEvent | undefined, group: Group) {
     if (allCategories.value.length === 0) {
-        const toast = Toast.error($t('3e9cdd5a-b614-4e2b-bc84-48566628a60f'));
+        const toast = Toast.error($t('%5Y'));
         toast.show();
         return;
     }

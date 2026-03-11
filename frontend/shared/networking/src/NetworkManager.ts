@@ -87,7 +87,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
         if ((request as any).retryCount > 1 && !this.networkErrorToast) {
             // Only on second try
-            this.networkErrorToast = new Toast($t(`d24616fc-5633-4d01-90c8-cbe686cfdecc`), 'spinner').setHide(null).show();
+            this.networkErrorToast = new Toast($t(`%ks`), 'spinner').setHide(null).show();
         }
 
         if (navigator.onLine) {
@@ -171,14 +171,14 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
                 if (this.platformLatestVersion > Version) {
                     if (AppManager.shared.isNative) {
-                        new Toast($t(`88a2165a-f8f1-4cb0-bcda-8bd3f4cffffa`), 'yellow download').setHide(null).show();
+                        new Toast($t(`%kt`), 'yellow download').setHide(null).show();
                         AppManager.shared.checkUpdates({
                             checkTimeout: 20 * 1000,
                         }).catch(console.error);
                     }
                     else {
                         console.info('Received latest version: ', latestVersion, 'got', Version);
-                        new Toast($t(`1e883f17-305c-4755-a201-df4ced3faf1d`), 'yellow download').setHide(null).show();
+                        new Toast($t(`%ku`), 'yellow download').setHide(null).show();
                     }
                 }
             }

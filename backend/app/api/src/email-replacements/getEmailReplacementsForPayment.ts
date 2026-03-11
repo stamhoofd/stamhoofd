@@ -216,7 +216,7 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
                         const webshop = webshopMap.get(order.webshopId);
                         if (webshop) {
                             if (order.number) {
-                                overviewContext.add($t('80c86ad4-5ca1-481a-a408-db018a81f25e', {
+                                overviewContext.add($t('%1Kz', {
                                     webshop: webshop.meta.name,
                                     orderNumber: order.number ?? '',
                                 }));
@@ -226,7 +226,7 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
                             }
                         }
                         else {
-                            overviewContext.add($t('8bb27033-cf3c-4af1-a3f4-3373734ab189', {
+                            overviewContext.add($t('%1L0', {
                                 orderNumber: order.number ?? '',
                             }));
                         }
@@ -252,8 +252,8 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
     }
 
     if (registrationMemberNames.size > 0) {
-        const memberNames = Formatter.joinLast([...registrationMemberNames], ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
-        overviewContext.add($t(`01d5fd7e-2960-4eb4-ab3a-2ac6dcb2e39c`) + ' ' + memberNames);
+        const memberNames = Formatter.joinLast([...registrationMemberNames], ', ', ' ' + $t(`%M1`) + ' ');
+        overviewContext.add($t(`%x6`) + ' ' + memberNames);
     }
 
     if (overviewContext.size === 0) {
@@ -273,11 +273,11 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
             }
 
             // else return default text for multiple items
-            return $t('7462f89e-db05-452f-804f-b9f2d51bff0d', { count: payment.balanceItemPayments.length });
+            return $t('%1Kx', { count: payment.balanceItemPayments.length });
         }
 
         // else return default text for single item
-        return $t('fe349d88-fecf-4cd8-8ea4-9e3b13cfa0dc');
+        return $t('%1Ky');
     }
 
     // join texts for balance items with type order or registration

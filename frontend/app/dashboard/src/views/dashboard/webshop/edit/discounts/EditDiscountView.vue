@@ -1,32 +1,32 @@
 <template>
-    <SaveView :title="isNew ? $t(`46681ff6-bc40-4da6-9c3f-f8f335d72633`) : $t(`2e07e502-3239-4d75-bf62-ed65a619dfa7`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%S5`) : $t(`%SA`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('46681ff6-bc40-4da6-9c3f-f8f335d72633') }}
+            {{ $t('%S5') }}
         </h1>
         <h1 v-else>
-            {{ $t('2e07e502-3239-4d75-bf62-ed65a619dfa7') }}
+            {{ $t('%SA') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`6811d233-19c2-4e32-9900-6f138d818588`)">
-                <PriceInput v-model="fixedDiscount" :min="0" :required="true" :placeholder="$t(`f67ccf42-d4a8-4fe6-b7dc-91f43726646e`)" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%SK`)">
+                <PriceInput v-model="fixedDiscount" :min="0" :required="true" :placeholder="$t(`%JN`)" />
             </STInputBox>
 
-            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)">
-                <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`dd61d33b-367e-4e40-8ac6-84c286b931bc`)" />
+            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)">
+                <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`%2I`)" />
             </STInputBox>
         </div>
 
         <p class="style-description-small">
-            {{ $t('f4350366-03b5-4d0f-8bd5-a03672e347f5') }}
+            {{ $t('%SB') }}
         </p>
 
         <hr><h2>
-            {{ $t('d4ee2fbb-f8a8-4497-ba1e-98aee9a4d979') }}
+            {{ $t('%SC') }}
         </h2>
-        <p>{{ $t('9c89b752-8949-4fba-86f2-2da04c7a9485') }}</p>
+        <p>{{ $t('%SD') }}</p>
 
         <STList v-if="patchedDiscount.productDiscounts.length">
             <STListItem v-for="productDiscount of patchedDiscount.productDiscounts" :key="productDiscount.id" class="right-description right-stack" :selectable="true" @click="editProductDiscount(productDiscount)">
@@ -49,14 +49,14 @@
         <p>
             <button class="button text" type="button" @click="addProductDiscount">
                 <span class="icon add" />
-                <span>{{ $t('dfdcd5e4-c2a2-4667-b77b-435eef982693') }}</span>
+                <span>{{ $t('%Rg') }}</span>
             </button>
         </p>
 
         <hr><h2>
-            {{ $t('17dd48e6-a63e-4c3c-9636-c9abd8ce429c') }}
+            {{ $t('%SE') }}
         </h2>
-        <p>{{ $t('205c5904-64f1-4c90-9960-86bdccbafc7a') }}</p>
+        <p>{{ $t('%SF') }}</p>
 
         <STList v-if="patchedDiscount.requirements.length">
             <STListItem v-for="requirement of patchedDiscount.requirements" :key="requirement.id" class="right-description right-stack" :selectable="true" @click="editRequirement(requirement)">
@@ -76,7 +76,7 @@
         <p>
             <button class="button text" type="button" @click="addRequirement">
                 <span class="icon add" />
-                <span>{{ $t('a00e405f-c19b-4ce6-aafc-eb55b0406d0d') }}</span>
+                <span>{{ $t('%SG') }}</span>
             </button>
         </p>
 
@@ -87,22 +87,22 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('9fced9b2-f88d-45e4-a789-b9488e6894c3') }}
+                    {{ $t('%SH') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('dbcdd41b-c566-4356-9409-3668f1e7559a') }}
+                    {{ $t('%SI') }}
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('f86309f9-1830-4aff-858c-a8b9d52053b4') }}
+                {{ $t('%SJ') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

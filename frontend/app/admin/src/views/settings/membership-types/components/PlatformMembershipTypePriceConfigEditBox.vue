@@ -3,29 +3,29 @@
         <hr><template v-if="hasMultiplePrices">
             <h2 v-if="showStartDate" class="style-with-button">
                 <div>
-                    {{ $t('49a1a0a5-72fa-4170-89f5-8dfa78f2eef7') }} {{ startDate ? formatDate(startDate) : '?' }}
+                    {{ $t('%I9') }} {{ startDate ? formatDate(startDate) : '?' }}
                 </div>
                 <div>
                     <button class="button text" type="button" @click="emits('delete')">
                         <span class="icon trash" />
-                        <span class="hide-smartphone">{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                        <span class="hide-smartphone">{{ $t('%CJ') }}</span>
                     </button>
                 </div>
             </h2>
             <h2 v-else>
-                {{ $t('72974c5e-47ab-4c11-815c-e3d7a0f76b51') }}
+                {{ $t('%IA') }}
             </h2>
         </template>
 
-        <STInputBox v-if="showStartDate || startDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :error-box="errorBox">
-            <DateSelection v-model="startDate" :required="true" :min="config.startDate" :max="config.endDate" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')" />
+        <STInputBox v-if="showStartDate || startDate" :title="$t('%5M')" :error-box="errorBox">
+            <DateSelection v-model="startDate" :required="true" :min="config.startDate" :max="config.endDate" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t('%3S')" />
         </STInputBox>
 
         <STList>
             <STListItem v-for="[tagId, reduceablePrice] of patched.prices" :key="tagId">
                 <PlatformMembershipTypeReduceablePriceEditRow :model-value="reduceablePrice" :tag-id="tagId" :show-price-per-day="showPricePerDay" :error-box="errorBox" :validator="validator" @update:model-value="patchReduceablePrice(tagId, $event)">
-                    <STInputBox v-if="!tagId && (showPricePerDay || pricePerDay)" :error-box="errorBox" :title="$t(`35d99159-ef2f-48d5-a34b-a648497a3ac7`)">
-                        <PriceInput v-model="pricePerDay" :placeholder="$t(`35d99159-ef2f-48d5-a34b-a648497a3ac7`)" />
+                    <STInputBox v-if="!tagId && (showPricePerDay || pricePerDay)" :error-box="errorBox" :title="$t(`%IB`)">
+                        <PriceInput v-model="pricePerDay" :placeholder="$t(`%IB`)" />
                     </STInputBox>
                 </PlatformMembershipTypeReduceablePriceEditRow>
                 <template #right>
@@ -44,7 +44,7 @@
         <p>
             <button class="button text" type="button" @click="addPriceForTag">
                 <span class="icon add" />
-                <span>{{ $t('9ad86597-3455-4837-bfee-249835678f7c') }}</span>
+                <span>{{ $t('%3W') }}</span>
             </button>
         </p>
     </div>

@@ -1,64 +1,64 @@
 <template>
-    <SaveView :loading="saving" :title="isNew ? $t(`de44cdb8-fb65-4e7b-b57a-ae0571db1ab4`) : user.name" :disabled="!isNew && !hasChanges" @save="save">
+    <SaveView :loading="saving" :title="isNew ? $t(`%Yv`) : user.name" :disabled="!isNew && !hasChanges" @save="save">
         <template v-if="!getPermissions(user)">
             <h1 v-if="isNew">
-                {{ $t('fa7b2b7e-57a0-435c-b4e5-0ce5d4d82407') }}
+                {{ $t('%Yi') }}
             </h1>
             <h1 v-else>
-                {{ $t('da046234-ae13-4c33-9556-b58a8c0eb9af') }}
+                {{ $t('%Yj') }}
             </h1>
         </template>
         <template v-else>
             <h1 v-if="isNew">
-                {{ $t('35a636fb-a11c-4cbd-b648-3332cde7b587') }}
+                {{ $t('%Yk') }}
             </h1>
             <h1 v-else-if="!user.memberId">
-                {{ $t('9be57c4c-f9e2-40c2-932b-99b0a330365c') }}
+                {{ $t('%Yl') }}
             </h1>
             <h1 v-else>
-                {{ $t('992282bb-d879-4cde-90bc-afb558a3026f') }}
+                {{ $t('%Ym') }}
             </h1>
         </template>
 
         <LoadingButton v-if="getPermissions(user) && !isNew && !user.hasAccount" :loading="sendingInvite">
             <button class="warning-box with-button" type="button" :class="{selectable: !didSendInvite}" @click="resendInvite">
-                {{ $t('32e29a00-7799-49ec-9755-30a1e429fea4') }}
+                {{ $t('%Yn') }}
 
                 <span class="button text" :class="{disabled: didSendInvite}">
-                    {{ $t('fdca4ebb-8515-4e97-9474-2658d5c47436') }}
+                    {{ $t('%Yo') }}
                 </span>
             </button>
         </LoadingButton>
 
         <p v-if="getPermissions(user) && !user.memberId" class="info-box">
-            {{ $t('933f7954-e0bb-4e04-bd4a-9c4ea07fee74') }}
+            {{ $t('%Yp') }}
         </p>
 
         <STErrorsDefault :error-box="$errors.errorBox" />
-        <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
+        <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`%Gq`)">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`%1MT`)">
                 </div>
                 <div>
-                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" autocomplete="family-name" :disabled="!canEditDetails" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" autocomplete="family-name" :disabled="!canEditDetails" :placeholder="$t(`%1MU`)">
                 </div>
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" />
+        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`%1FK`)" :placeholder="$t(`%1FK`)" />
 
         <template v-if="getUnloadedPermissions(user)">
             <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
-                <hr><h2>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h2>
-                <p>{{ $t('a6008859-e90b-4219-b64d-9ebc6e88f25c') }}</p>
+                <hr><h2>{{ $t('%Jm') }}</h2>
+                <p>{{ $t('%Yq') }}</p>
 
                 <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
             </div>
 
             <div v-if="resources.length" class="container">
-                <hr><h2>{{ $t('12cf18a0-ce20-4cec-8622-a55ed1ab65d7') }}</h2>
-                <p>{{ $t('053d536d-3096-4450-8879-bb0fad04d96b') }}</p>
+                <hr><h2>{{ $t('%Yr') }}</h2>
+                <p>{{ $t('%Ys') }}</p>
 
                 <STList>
                     <ResourcePermissionRow v-for="resource in resources" :key="resource.id" :role="permissions.unloadedPermissions!" :resource="resource" :configurable-access-rights="[]" type="resource" @patch:role="addPermissionPatch" />
@@ -66,19 +66,19 @@
             </div>
         </template>
         <p v-else class="style-description-small">
-            {{ $t('14637b25-c719-40bc-a4c3-6108341c7c40') }}
+            {{ $t('%Yt') }}
         </p>
         <code v-if="STAMHOOFD.environment === 'development'" class="style-code">{{ JSON.stringify(getUnloadedPermissions(user)?.encode({version: 1000}), undefined, '    ') }}</code>
 
         <template v-if="!isNew && getUnloadedPermissions(user)">
             <hr v-if="!isNew"><h2>
-                {{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}
+                {{ $t('%CJ') }}
             </h2>
-            <p>{{ $t('45b52b33-dfa4-4afa-81d2-d598626b2701') }}</p>
+            <p>{{ $t('%Yu') }}</p>
 
             <button class="button secundary danger" type="button" @click="doDelete()">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </template>
     </SaveView>
@@ -147,14 +147,14 @@ const save = async () => {
     if ((firstName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`1186a60b-c59f-43d5-ba58-04ff9288c266`),
+            message: $t(`%uH`),
             field: 'firstName',
         }));
     }
     if ((lastName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`bc27bb72-c06d-4a05-8e22-e920d01cc1f4`),
+            message: $t(`%104`),
             field: 'lastName',
         }));
     }
@@ -187,7 +187,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`e54a2770-82f9-4dea-b1fc-5f1b52f3e9ab`, { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
+            new Toast($t(`%14i`, { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
         }
         else {
             const response = await $context.value.authenticatedServer.request({
@@ -197,7 +197,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`7d09e05b-865e-42dd-8d32-d37fd0b29c40`), 'success').setHide(2000).show();
+            new Toast($t(`%14j`), 'success').setHide(2000).show();
         }
 
         // Copy all data
@@ -225,7 +225,7 @@ const doDelete = async () => {
         return false;
     }
 
-    if (!await CenteredMessage.confirm($t(`e8b646d5-1377-465e-b29d-163d437e5c02`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
+    if (!await CenteredMessage.confirm($t(`%uI`), $t(`%CJ`))) {
         return false;
     }
 
@@ -253,7 +253,7 @@ const doDelete = async () => {
         await pop({ force: true });
 
         new Toast(
-            $t('18385fa4-410f-4adb-9b29-2ba7a3bfc8de', { firstName: props.user.firstName ?? props.user.email }),
+            $t('%14h', { firstName: props.user.firstName ?? props.user.email }),
             'success',
         ).setHide(2000).show();
     }
@@ -267,7 +267,7 @@ const doDelete = async () => {
 const resendInvite = async () => {
     // We can send a new invite by just recreating the admin (the API will merge with existing admins)
     if (hasChanges.value || props.isNew) {
-        new CenteredMessage($t(`88f254ee-bc8c-4a2f-9a00-9e9102354268`), $t(`acc4cfd1-42ad-45a2-bb1e-841b52f7c4e6`)).addCloseButton().show();
+        new CenteredMessage($t(`%uJ`), $t(`%uK`)).addCloseButton().show();
         return;
     }
     if (sendingInvite.value) {
@@ -288,7 +288,7 @@ const resendInvite = async () => {
         props.user.set(response.data);
         didSendInvite.value = true;
 
-        new Toast($t(`a94e08c1-bddf-4f13-af83-8349dc361a47`) + ' ' + props.user.email, 'success').setHide(2000).show();
+        new Toast($t(`%uL`) + ' ' + props.user.email, 'success').setHide(2000).show();
     }
     catch (e) {
         console.error(e);
@@ -316,7 +316,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({

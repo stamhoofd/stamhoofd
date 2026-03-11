@@ -49,7 +49,7 @@ export class ChargeRegistrationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'charge_pending',
                 message: 'Charge registrations already pending',
-                human: $t(`d2b84fdd-035b-4307-a897-000081aa814f`),
+                human: $t(`%Cu`),
             });
         }
 

@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="url" :error-box="errorBox">
-        <input v-model="urlRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder || $t('5d75775a-a4b5-426a-aea9-b1e75ee5f055')" autocomplete="url" @change="validate(false)" @input="(event: any) => {urlRaw = event.target.value; onTyping();}">
+        <input v-model="urlRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder || $t('%2n')" autocomplete="url" @change="validate(false)" @input="(event: any) => {urlRaw = event.target.value; onTyping();}">
     </STInputBox>
 </template>
 
@@ -119,7 +119,7 @@ export default class UrlInput extends VueComponent {
                     code: 'invalid_field',
                     field: 'url',
                     message: 'Invalid url',
-                    human: this.$t('a68b5c92-df5d-4413-a00a-61139f6efe19').toString(),
+                    human: this.$t('%5A').toString(),
                 });
             }
 
@@ -143,7 +143,7 @@ export default class UrlInput extends VueComponent {
                 }
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: this.$t('a68b5c92-df5d-4413-a00a-61139f6efe19').toString(),
+                    message: this.$t('%5A').toString(),
                     field: 'url',
                 }));
             }

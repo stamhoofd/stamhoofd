@@ -413,10 +413,10 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{if org 'De instellingen van ' org ' werden gewijzigd'}}{{unless org 'De instellingen werden gewijzigd'}}`;
 
         case AuditLogType.OrganizationAdded:
-            return $t(`24aa53d9-f929-4968-88d6-b6ea27309631`);
+            return $t(`%1Mq`);
 
         case AuditLogType.OrganizationDeleted:
-            return $t(`fcbdb33b-69d7-4b3c-a8ca-ed8f157c08fb`);
+            return $t(`%1Mr`);
 
         case AuditLogType.EventEdited:
             return `De activiteit {{e}}{{if org " (" org ")"}} werd gewijzigd`;

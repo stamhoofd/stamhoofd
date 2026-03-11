@@ -141,7 +141,7 @@ export class AdminPermissionChecker {
     }
 
     error(humanOrData?: string | { message: string; human?: string }): SimpleError {
-        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t(`ab071f11-e05b-4bd9-9370-cd4f220c1b54`));
+        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t(`%Fg`));
         const message = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.message ?? 'You do not have permissions for this action');
 
         return new SimpleError({
@@ -153,14 +153,14 @@ export class AdminPermissionChecker {
     }
 
     memberNotFoundOrNoAccess(): SimpleError {
-        return this.notFoundOrNoAccess($t('d24814a3-aedc-4569-9ab3-f854027c4e9f'));
+        return this.notFoundOrNoAccess($t('%CA'));
     }
 
     notFoundOrNoAccess(message?: string): SimpleError {
         return new SimpleError({
             code: 'not_found',
             message: 'Resource not found or no access',
-            human: message ?? $t(`8a8bb10d-9a78-48d0-8589-65d95331530e`),
+            human: message ?? $t(`%Fh`),
             statusCode: 404,
         });
     }
@@ -1602,7 +1602,7 @@ export class AdminPermissionChecker {
                 if (!canAccess) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: $t('0823202f-8c46-445b-9b49-f171e1ae85ac', { name: record?.name ?? 'deze vraag' }),
+                        message: $t('%Ff', { name: record?.name ?? 'deze vraag' }),
                         statusCode: 400,
                     });
                 }

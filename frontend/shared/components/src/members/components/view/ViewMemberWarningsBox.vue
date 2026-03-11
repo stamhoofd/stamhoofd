@@ -90,13 +90,13 @@ const warnings = computed(() => {
         if (props.member.patchedMember.details.parentsHaveAccess?.value === true) {
             if (props.member.patchedMember.details.defaultAge < 18) {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('aeeeb5ba-7576-497c-a40e-8bc48338b2a7')),
+                    text: TranslatedString.create($t('%1Hh')),
                     type: RecordWarningType.Info,
                 }));
             }
             else {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('54bdf92a-7ff9-46ba-a944-2422f4b84f80')),
+                    text: TranslatedString.create($t('%1Hi')),
                     type: RecordWarningType.Info,
                 }));
             }
@@ -104,7 +104,7 @@ const warnings = computed(() => {
         else if (props.member.patchedMember.details.parentsHaveAccess?.value === false) {
             if (props.member.patchedMember.details.defaultAge < 18) {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('9ce4a6f7-81ec-4dba-aac5-5d497d33a274')),
+                    text: TranslatedString.create($t('%1Hj')),
                     type: RecordWarningType.Info,
                 }));
             }
@@ -113,7 +113,7 @@ const warnings = computed(() => {
 
     if (props.member.membershipStatus === MembershipStatus.Trial) {
         warnings.push(RecordWarning.create({
-            text: TranslatedString.create($t('29343dad-93c5-4e72-a6d5-3960cfbfcf42')),
+            text: TranslatedString.create($t('%7z')),
             type: RecordWarningType.Info,
         }));
     }
@@ -124,13 +124,13 @@ const warnings = computed(() => {
 
         if (nextMembership) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('880e4cac-5a7e-4d6d-80ad-c5472a005df6', { date: Formatter.date(nextMembership.startDate) })),
+                text: TranslatedString.create($t('%Bh', { date: Formatter.date(nextMembership.startDate) })),
                 type: RecordWarningType.Warning,
             }));
         }
         else {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('60871aaf-1b90-4a7c-a755-a4aeb0585a8e')),
+                text: TranslatedString.create($t('%5C')),
                 type: RecordWarningType.Error,
             }));
         }
@@ -138,7 +138,7 @@ const warnings = computed(() => {
 
     if (props.member.membershipStatus === MembershipStatus.Expiring) {
         warnings.push(RecordWarning.create({
-            text: TranslatedString.create($t('1af084bf-42d6-4a59-a7da-d1e87c6dba8e')),
+            text: TranslatedString.create($t('%5B')),
             type: RecordWarningType.Warning,
         }));
     }

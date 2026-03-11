@@ -5,7 +5,7 @@
                 class="input with-spinner"
                 type="text"
                 autocomplete="off"
-                :placeholder="$t('8a9b7083-6a55-400f-a244-7513385c3a8a')"
+                :placeholder="$t('%1CU')"
                 :disabled="true"
             >
             <Spinner class="spinner-inside-input" />

@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
         <template #buttons>
-            <button v-tooltip="$t('caa4e548-ffa0-4878-a046-c359479423ad')" class="button icon add" type="button" @click="addResponsibility" />
+            <button v-tooltip="$t('%A1')" class="button icon add" type="button" @click="addResponsibility" />
         </template>
 
         <h1 class="style-navigation-title">
@@ -12,8 +12,8 @@
 
         <template v-if="inheritedResponsibilitiesWithGroup.length">
             <hr>
-            <h2>{{ $t('e55af974-4ce3-4cf2-a56b-d7c8f6fbeaec') }}</h2>
-            <p>{{ $t('45f0eefc-1ede-4a64-a811-da151361aec8') }}</p>
+            <h2>{{ $t('%3n') }}</h2>
+            <p>{{ $t('%A2') }}</p>
 
             <STList>
                 <InheritedResponsibilityRow v-for="{group, responsibility, role} of inheritedResponsibilitiesWithGroup" :key="responsibility.id" :responsibility="responsibility" :group="group" :role="role" @click="editInheritedResponsibility(responsibility, group, role)" />
@@ -28,7 +28,7 @@
             </p>
 
             <p v-if="!group.responsibilities.value.length" class="info-box">
-                {{ $t('390f755c-b757-4a54-9bb4-d380e5869081') }}
+                {{ $t('%A3') }}
             </p>
 
             <STList :model-value="group.responsibilities.value" :draggable="true" @update:model-value="group.responsibilities.value = $event;">
@@ -41,7 +41,7 @@
         <p>
             <button class="button text" type="button" @click="addResponsibility">
                 <span class="icon add" />
-                <span>{{ $t('caa4e548-ffa0-4878-a046-c359479423ad') }}</span>
+                <span>{{ $t('%A1') }}</span>
             </button>
         </p>
     </SaveView>
@@ -73,15 +73,15 @@ const draggableResponsibilities = useDraggableArray(() => responsibilities.value
 const groupedDraggableResponsibilites = computed(() => {
     const nationalResponsibilites = {
         id: 'national',
-        title: $t('e4f4c4a8-0185-4f84-b5a4-ae58d2b633e3'),
-        description: $t('dab378b1-f860-4377-bd0c-04eb2b57af74'),
+        title: $t('%A4'),
+        description: $t('%A5'),
         responsibilities: [] as MemberResponsibility[],
     };
 
     const organizationResponsibiities = {
         id: 'organization',
-        title: organization.value ? $t('20d0f420-edec-4c9f-9584-990258dcf1bf') : $t('fcf09121-af79-4d3f-90e7-31dec01ebb98'),
-        description: organization.value ? $t('aad47217-df26-43ce-a43c-896697d5fbd4') : $t('e6da382b-6acc-4a77-ab74-ece7ea002d5f'),
+        title: organization.value ? $t('%109') : $t('%A6'),
+        description: organization.value ? $t('%A7') : $t('%A8'),
         responsibilities: [] as MemberResponsibility[],
     };
 
@@ -111,7 +111,7 @@ const groupedDraggableResponsibilites = computed(() => {
     });
 });
 
-const title = $t('e7ba96d7-b233-45c4-8331-d429fcea40a9');
+const title = $t('%3p');
 
 async function addResponsibility() {
     const arr: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray();
@@ -198,7 +198,7 @@ async function save() {
     await rawSave(async () => {
         reload();
         await reloadPromise();
-        new Toast($t('17017abf-c2e0-4479-86af-300ad37347aa'), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     });
 }
@@ -207,7 +207,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

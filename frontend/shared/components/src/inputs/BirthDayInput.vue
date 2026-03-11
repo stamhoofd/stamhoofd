@@ -5,7 +5,7 @@
                 <select v-model="day" autocomplete="bday-day" name="bday-day" data-testid="day-select" @change="updateDate">
                     <!-- name is needed for autocomplete in safari -->
                     <option :disabled="required" :value="null">
-                        {{ $t('9ea48ee8-ed13-43f7-a900-82630b911b7a') }}
+                        {{ $t('%dS') }}
                     </option>
                     <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">
                         {{ day }}
@@ -16,7 +16,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="month" autocomplete="bday-month" name="bday-month" data-testid="month-select" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        {{ $t('2727f83e-20ba-436e-8449-1e6f3e15c628') }}
+                        {{ $t('%17f') }}
                     </option>
                     <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
                         {{ monthText(month) }}
@@ -27,7 +27,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="year" autocomplete="bday-year" name="bday-year" data-testid="year-select" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        {{ $t('4e99ee6d-2445-4d3a-ab0f-343236295366') }}
+                        {{ $t('%17g') }}
                     </option>
                     <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
                         {{ currentYear - year + 1 }}
@@ -123,7 +123,7 @@ function validate() {
 
     errors.errorBox = new ErrorBox(new SimpleError({
         code: 'empty_field',
-        message: $t(`a8a86928-92f9-41f2-bf1c-7e193b59e06c`),
+        message: $t(`%yq`),
         field: 'birthDay',
     }));
 

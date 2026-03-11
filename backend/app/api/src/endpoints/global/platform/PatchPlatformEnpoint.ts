@@ -163,7 +163,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                 throw new SimpleError({
                     code: 'cannot_set_locked_period',
                     message: 'Platform period cannot be set to a locked period',
-                    human: $t(`fdd15119-b950-4282-9413-fd6973afde07`),
+                    human: $t(`%EE`),
                 });
             }
             platform.periodId = period.id;

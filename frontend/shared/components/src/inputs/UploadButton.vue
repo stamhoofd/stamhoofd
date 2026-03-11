@@ -66,7 +66,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
         if (file.size > 5 * 1024 * 1024) {
             const error = new SimpleError({
                 code: 'file_too_large',
-                message: $t(`3d9d68f3-e953-46a4-b5cb-aa68aa0b1028`),
+                message: $t(`%z3`),
             });
             Toast.fromError(error).setHide(null).show();
             return;

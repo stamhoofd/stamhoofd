@@ -144,7 +144,7 @@ export class SessionManagerStatic {
                         throw new SimpleError({
                             code: 'invalid_organization',
                             message: e.message,
-                            human: $t(`67221175-c027-47be-bb1b-2a535cb9fc5f`),
+                            human: $t(`%kz`),
                         });
                     }
                 }
@@ -154,7 +154,7 @@ export class SessionManagerStatic {
                     throw new SimpleError({
                         code: 'network_error',
                         message: e.message,
-                        human: $t(`a76c1371-da18-4998-970d-ec4f443d5664`),
+                        human: $t(`%l0`),
                     });
                 }
 
@@ -180,7 +180,7 @@ export class SessionManagerStatic {
                         const error = new SimpleError({
                             code: 'invalid_organization',
                             message: e.message,
-                            human: $t(`67221175-c027-47be-bb1b-2a535cb9fc5f`),
+                            human: $t(`%kz`),
                         });
                         Toast.fromError(error).show();
                         session.setLoadingError(error);
@@ -315,7 +315,7 @@ export class SessionManagerStatic {
                 throw new SimpleError({
                     code: 'invalid_organization',
                     message: e.message,
-                    human: $t(`67221175-c027-47be-bb1b-2a535cb9fc5f`),
+                    human: $t(`%kz`),
                 });
             }
             throw e;

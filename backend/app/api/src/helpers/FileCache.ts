@@ -61,7 +61,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`a175829f-1075-4e04-ab5f-8f65bb715635`),
+                human: $t(`%Fk`),
                 statusCode: 400,
             });
         }
@@ -73,7 +73,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`a175829f-1075-4e04-ab5f-8f65bb715635`),
+                human: $t(`%Fk`),
                 statusCode: 400,
             });
         }
@@ -86,7 +86,7 @@ export class FileCache {
                 throw new SimpleError({
                     code: 'invalid_file',
                     message: 'Invalid file',
-                    human: $t(`d5d7b908-50a5-4b3e-94d2-1e54e549764b`),
+                    human: $t(`%Fl`),
                     statusCode: 400,
                 });
             }
@@ -99,7 +99,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`594fab23-b257-4d51-8d7b-eb3e75bc48ba`),
+                human: $t(`%Fm`),
                 statusCode: 400,
             });
         }
@@ -111,7 +111,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`796645b6-ded0-4d1b-a439-0062f9b6edc1`),
+                human: $t(`%Fn`),
                 statusCode: 400,
             });
         }
@@ -126,7 +126,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'file_expired',
                 message: 'File expired',
-                human: $t(`8a9a35d5-ff86-48e3-81e1-42cf85708e06`),
+                human: $t(`%Fo`),
                 statusCode: 404,
             });
         }
@@ -142,7 +142,7 @@ export class FileCache {
                 throw new SimpleError({
                     code: 'file_expired',
                     message: 'File expired',
-                    human: $t(`d445388b-9062-488b-9fa7-d15682e26fd4`),
+                    human: $t(`%Fp`),
                     statusCode: 404,
                 });
             }

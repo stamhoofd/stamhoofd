@@ -1,22 +1,22 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="$t(`7dfd0425-b8ff-4dec-8c6d-257d94eabbe7`)" />
+        <STNavigationBar :title="$t(`%1DK`)" />
 
         <main class="center">
             <h1>
-                {{ $t('7dfd0425-b8ff-4dec-8c6d-257d94eabbe7') }}
+                {{ $t('%1DK') }}
             </h1>
 
             <div class="input-with-buttons">
                 <div>
                     <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
-                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
+                        <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                     </form>
                 </div>
                 <div>
                     <button type="button" class="button text" @click="editFilter">
                         <span class="icon filter" />
-                        <span class="hide-small">{{ $t('de5706ec-7edc-4e62-b3f7-d6e414720480') }}</span>
+                        <span class="hide-small">{{ $t('%2J') }}</span>
                         <span v-if="!isEmptyFilter(fetcher.baseFilter)" class="icon dot primary" />
                     </button>
                 </div>
@@ -35,10 +35,10 @@
                 {{ errorMessage }}
 
                 <button class="button text" type="button" @click="refresh">
-                    {{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}
+                    {{ $t('%Y9') }}
                 </button>
             </p>
-            <InfiniteObjectFetcherEnd v-else :fetcher="fetcher" :empty-message="$t(`8fec0620-6293-4573-884d-07d7ab814a77`)" />
+            <InfiniteObjectFetcherEnd v-else :fetcher="fetcher" :empty-message="$t(`%1ET`)" />
         </main>
     </div>
 </template>
@@ -93,7 +93,7 @@ defineRoutes([
                     email: events.results[0],
                 };
             }
-            Toast.error($t(`6e1f9492-f036-4b73-8e85-ccbae0d31ad7`)).show();
+            Toast.error($t(`%1D0`)).show();
             throw new Error('Email not found');
         },
 
@@ -246,25 +246,25 @@ const dateRangeSuggestions = buildSuggestions();
 function buildSuggestions() {
     const r = [
         new DateRangeSuggestion({
-            name: $t(`13f1507b-7ad1-4748-981f-8b7b12aa2dce`),
+            name: $t(`%uT`),
             startDate: Formatter.luxon().startOf('day').toJSDate(),
             endDate: Formatter.luxon().endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`12a16bab-7d3e-46e0-95dc-43aef6818bff`),
+            name: $t(`%uU`),
             startDate: Formatter.luxon().minus({ day: 1 }).startOf('day').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 1 }).endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`1089afa3-5103-44de-a7e5-9501f058b26e`),
+            name: $t(`%uV`),
             startDate: Formatter.luxon().startOf('week').toJSDate(),
             endDate: Formatter.luxon().endOf('week').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`c37c5108-b223-4a83-8a05-e51324da93b7`),
+            name: $t(`%uW`),
             startDate: Formatter.luxon().minus({ day: 7 }).startOf('week').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 7 }).endOf('week').toJSDate(),
         }),

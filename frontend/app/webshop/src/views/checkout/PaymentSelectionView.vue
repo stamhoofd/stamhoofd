@@ -1,13 +1,13 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="$t('bd14d3cd-17de-4569-b12b-8bca0ff8fc57')" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :loading="loading" :save-text="$t('%Xv')" :prefer-large-button="true" @save="goNext">
         <template v-if="checkout.totalPrice > 0" #left>
-            <span>{{ $t('341172ee-281e-4458-aeb1-64ed5b2cc8bb') }}: {{ formatPrice(checkout.totalPrice) }}</span>
+            <span>{{ $t('%xL') }}: {{ formatPrice(checkout.totalPrice) }}</span>
         </template>
 
         <h1>{{ title }}</h1>
 
         <p v-if="isTrial" class="warning-box">
-            {{ $t('4fafca03-d46b-426b-ac73-75cc7fe29ebe') }}
+            {{ $t('%Xw') }}
         </p>
 
         <template v-if="checkout.totalPrice > 0">
@@ -15,7 +15,7 @@
             <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :organization="organization" :context="paymentContext" />
         </template>
         <template v-else>
-            <p>{{ $t('bf4bfebe-db5e-4e78-862d-f21ef23cc45a') }}</p>
+            <p>{{ $t('%Xx') }}</p>
             <STErrorsDefault :error-box="errors.errorBox" />
         </template>
     </SaveView>
@@ -45,9 +45,9 @@ const webshopManager = useWebshopManager();
 
 const title = computed(() => {
     if (checkout.value.totalPrice > 0) {
-        return $t('068b3219-9397-41fc-8ebf-77df845e74b8');
+        return $t('%1Dn');
     }
-    return $t('131d5fec-9960-4fc1-bcd8-8ddbc90e99c2');
+    return $t('%1Do');
 });
 
 const selectedPaymentMethod = computed<PaymentMethod | null>({

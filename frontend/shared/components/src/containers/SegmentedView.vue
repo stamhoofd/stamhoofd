@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<{
 });
 
 defineOptions({
-    name: $t(`e1193431-b95a-4a8a-94b2-8659005dcb77`),
+    name: $t(`%2M`),
 });
 const emit = defineEmits<{ (e: 'change', item: Item): void }>();
 

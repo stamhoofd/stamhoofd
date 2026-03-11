@@ -44,7 +44,7 @@ export function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, de
                         throw new SimpleError({
                             code: 'sorter_join_overlap',
                             message: 'This combination of sorters is not possible',
-                            human: $t('e328a7c2-318c-4425-b61a-61e6f4211707'),
+                            human: $t('%GU'),
                         });
                     }
                 }

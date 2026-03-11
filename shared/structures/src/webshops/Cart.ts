@@ -135,7 +135,7 @@ export class Cart extends AutoEncoder {
                 throw new SimpleError({
                     code: 'duplicate_uitpas_numbers',
                     message: 'Duplicate uitpas numbers used',
-                    human: $t('5fd16c16-3986-484a-9cef-d009c01b93bf'),
+                    human: $t('%1DU'),
                     field: 'cart.items.uitpasNumbers',
                 });
             }

@@ -304,7 +304,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'invalid_email_address',
                         message: 'Invalid email address',
-                        human: $t(`4737b9ce-06b0-4fa7-b63a-703245f347e2`),
+                        human: $t(`%1Mi`),
                     }),
                 );
             }
@@ -326,7 +326,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to hard bounce or spam',
-                        human: data.to.length > 1 ? $t(`e3c3f519-562e-4ef4-b670-599ce4cb74ac`) : $t('212d39e4-8da5-4096-84bb-bd7fadc192fc'),
+                        human: data.to.length > 1 ? $t(`%G4`) : $t('%1E7'),
                     }),
                 );
             }
@@ -351,7 +351,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'email_skipped_whitelist',
                         message: 'All recipients are filtered due to environment',
-                        human: data.to.length > 1 ? $t(`462d5e22-af11-40de-9e16-eda1b93ac0c7`) : $t('e2eeb4a3-2c32-4ba2-b991-3e139402225f'),
+                        human: data.to.length > 1 ? $t(`%G5`) : $t('%1E8'),
                     }),
                 );
             }
@@ -480,8 +480,8 @@ class EmailStatic {
                 if (STAMHOOFD.environment === 'production') {
                     if (data.from.email !== this.getWebmasterFromEmail().email) {
                         this.sendWebmaster({
-                            subject: $t(`2206e5e4-2fc4-4ffd-aefb-60ba0d20aa23`),
-                            text: $t(`d1b217e5-c82e-42fb-93e5-dd6f2d137692`, { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
+                            subject: $t(`%G6`),
+                            text: $t(`%G7`, { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
                             type: (data.type === 'transactional') ? 'broadcast' : 'transactional',
                         });
                     }

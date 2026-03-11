@@ -69,7 +69,7 @@ export class PaymentActionBuilder {
     getActions(): TableAction<ObjectType>[] {
         const actions: (TableAction<ObjectType> | null)[] = [
             new InMemoryTableAction({
-                name: $t('03bd6cff-83c4-44ec-8b0d-7826bf5b4166'),
+                name: $t('%1JQ'),
                 icon: 'success',
                 priority: 3,
                 groupIndex: 1,
@@ -81,7 +81,7 @@ export class PaymentActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t('b3d75fdd-8231-4a1f-a1b3-5c6401d90a75'),
+                name: $t('%MZ'),
                 icon: 'canceled',
                 priority: 2,
                 groupIndex: 1,
@@ -94,7 +94,7 @@ export class PaymentActionBuilder {
             }),
             this.getCancelPaymentsAction(),
             new AsyncTableAction({
-                name: $t('60c06238-ad4d-4599-a3d3-ebe856476618'),
+                name: $t('%V8'),
                 icon: 'download',
                 priority: 0,
                 groupIndex: 2,
@@ -128,7 +128,7 @@ export class PaymentActionBuilder {
 
     private getEmailAction() {
         return new AsyncTableAction({
-            name: $t(`208ae3f1-1720-4d79-96fd-5c05d97c9de0`),
+            name: $t(`%1GW`),
             icon: 'email',
             priority: 12,
             groupIndex: 3,
@@ -142,7 +142,7 @@ export class PaymentActionBuilder {
         // only for methods transfer and point of sale, not if any other method
         if (this.methods && this.methods.every(method => method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale)) {
             return new InMemoryTableAction({
-                name: $t('11d2e292-fd08-4477-bd2a-dac599a9754c'),
+                name: $t('%1Lh'),
                 icon: 'canceled',
                 priority: 1,
                 groupIndex: 4,
@@ -152,12 +152,12 @@ export class PaymentActionBuilder {
                 handler: async (payments: PaymentGeneral[]) => {
                     const filteredPayments = payments.filter(payment => (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created) && (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale));
                     if (filteredPayments.length === 0) {
-                        Toast.error($t('523385f0-a103-454b-909c-6a6e1b70972e')).show();
+                        Toast.error($t('%1NW')).show();
                         return;
                     }
 
-                    const text = filteredPayments.length === 1 ? $t('99810042-aa71-49a4-9cb4-c4fb23b7bc62') : $t('658662ba-ba2c-4e4c-8da7-7d73be8d7490', { count: payments.length });
-                    if (!await CenteredMessage.confirm(text, $t('cdf0fafe-b364-4dbb-ae31-b593cf447298'), $t('4d83cf39-66a5-4759-a95a-3245cd17d8b3'))) {
+                    const text = filteredPayments.length === 1 ? $t('%1KD') : $t('%1NX', { count: payments.length });
+                    if (!await CenteredMessage.confirm(text, $t('%1Jy'), $t('%1KE'))) {
                         return;
                     }
 
@@ -202,7 +202,7 @@ export class PaymentActionBuilder {
                 GlobalEventBus.sendEvent('paymentPatch', paymentResponse).catch(console.error);
             }
 
-            const message = payments.length === 1 ? $t('8076e99d-cac2-4fb6-84e0-d893d9b3c205') : $t('7fcd4a8a-e9ab-443b-b887-383c6802c644', { count: payments.length });
+            const message = payments.length === 1 ? $t('%Mb') : $t('%1NY', { count: payments.length });
             Toast.success(message).setHide(1000).show();
         }
         catch (e) {
@@ -225,7 +225,7 @@ export class PaymentActionBuilder {
                 options: [
                     {
                         id: 'all',
-                        name: $t(`2e0554e5-f223-4618-942e-53ec88f26e19`),
+                        name: $t(`%1Lo`),
                         value: [
                             EmailRecipientSubfilter.create({
                                 type: EmailRecipientFilterType.Payment,
@@ -240,7 +240,7 @@ export class PaymentActionBuilder {
         else {
             const organizationOption: RecipientMultipleChoiceOption = {
                 type: 'MultipleChoice',
-                name: $t('58575442-6c76-4454-b33c-2b83f23c5269'),
+                name: $t('%1Ln'),
                 options: [],
                 defaultSelection: this.organization?.privateMeta?.balanceNotificationSettings.getOrganizationContactsFilterResponsibilityIds() ?? [],
                 build: (selectedIds: string[]) => {
@@ -301,7 +301,7 @@ export class PaymentActionBuilder {
                 options: [
                     {
                         id: 'all',
-                        name: $t(`fad703f0-baef-4172-bea3-071711d8df6f`),
+                        name: $t(`%1Lp`),
                         value: [
                             EmailRecipientSubfilter.create({
                                 type: EmailRecipientFilterType.Payment,
@@ -331,7 +331,7 @@ export class PaymentActionBuilder {
                     },
                     {
                         id: 'none',
-                        name: $t(`1324e6e2-0703-49e1-8031-0a657787066d`),
+                        name: $t(`%1Lq`),
                         value: [],
                     },
                 ],

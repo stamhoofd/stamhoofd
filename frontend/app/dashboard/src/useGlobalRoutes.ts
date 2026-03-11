@@ -93,12 +93,12 @@ export function useGlobalRoutes() {
                             }
                             else {
                                 await navigationActions.dismiss({ force: true });
-                                new CenteredMessage($t(`c264b163-1fec-45b3-9d69-4807ee8901a2`), $t(`ebe7609c-0a44-4e91-b2d9-2d90be4269ed`)).addCloseButton().show();
+                                new CenteredMessage($t(`%Jc`), $t(`%Jd`)).addCloseButton().show();
                             }
                         }
                         else {
                             await navigationActions.dismiss({ force: true });
-                            new CenteredMessage($t(`5690126d-651e-475d-9503-cfe6825a9735`), $t(`5e16870b-d00f-424d-b904-d412bd2b7368`)).addCloseButton().show();
+                            new CenteredMessage($t(`%Je`), $t(`%Jf`)).addCloseButton().show();
                         }
                     },
                 }));

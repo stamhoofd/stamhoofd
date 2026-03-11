@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>{{ $t('4bff53d6-7455-45fc-aa6d-ae0bafbe0b47') }}</p>
+        <p>{{ $t('%7V') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -16,7 +16,7 @@
         <p>
             <button class="button text" type="button" @click="addGroup">
                 <span class="icon add" />
-                <span>{{ $t('a4f0a3f5-60a5-4959-800c-613e8c79d6d9') }}</span>
+                <span>{{ $t('%7W') }}</span>
             </button>
         </p>
     </SaveView>
@@ -44,7 +44,7 @@ const { patched: groups, patch, addArrayPatch, hasChanges } = usePatchArray(orig
 const draggableGroups = useDraggableArray(() => groups.value, addArrayPatch);
 const saving = ref(false);
 
-const title = $t('24682ea8-b3c6-4372-9a63-5385520888ff');
+const title = $t('%3M');
 
 async function addGroup() {
     const arr: PatchableArrayAutoEncoder<DefaultAgeGroup> = new PatchableArray();
@@ -106,7 +106,7 @@ async function save() {
                 defaultAgeGroups: patch.value,
             }),
         }));
-        new Toast($t('17017abf-c2e0-4479-86af-300ad37347aa'), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -120,7 +120,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

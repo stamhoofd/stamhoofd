@@ -1,92 +1,92 @@
 <template>
-    <SaveView id="personalize-settings-view" :loading="saving" :disabled="!hasChanges" :title="$t(`4a7e3838-f75a-4610-9caa-0f75849ea142`)" @save="save">
+    <SaveView id="personalize-settings-view" :loading="saving" :disabled="!hasChanges" :title="$t(`%ty`)" @save="save">
         <h1>
-            {{ $t('4a7e3838-f75a-4610-9caa-0f75849ea142') }}
+            {{ $t('%ty') }}
         </h1>
-        <p>{{ $t('ad37ed24-55c8-48a9-8c53-3c2fbba9e8c5') }}</p>
+        <p>{{ $t('%OA') }}</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
         <div class="split-inputs">
             <div>
-                <ImageInput v-model="horizontalLogo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :title="$t(`d318cac1-28c1-4a21-88a1-98ae60f7a619`)" />
+                <ImageInput v-model="horizontalLogo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :title="$t(`%OO`)" />
 
                 <p class="style-description-small">
-                    {{ $t('20e536a4-be51-42f4-92ec-ce64b3af3c7f') }}
+                    {{ $t('%OB') }}
                 </p>
             </div>
 
             <div>
-                <ImageInput v-model="squareLogo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :title="$t(`af11402d-47f2-4dfc-a522-b29c37014738`)" />
+                <ImageInput v-model="squareLogo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :title="$t(`%OP`)" />
                 <p class="style-description-small">
-                    {{ $t('9c6061e0-11f7-4f88-99c7-7a0bd6c5dea4') }}
+                    {{ $t('%OC') }}
                 </p>
             </div>
         </div>
 
         <Checkbox v-model="expandLogo">
-            {{ $t('9e68d551-a532-4681-9040-95e4c0f673aa') }}
+            {{ $t('%OD') }}
         </Checkbox>
         <p class="style-description-small">
-            {{ $t('6c68261d-e165-48c0-b93d-759fd08a8511') }}
+            {{ $t('%OE') }}
         </p>
 
-        <ColorInput v-model="color" :validator="validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`d111d211-9cc2-48be-9c8f-9483dded7fef`)" :placeholder="$t(`dc5f036d-4aac-4894-8d3f-70ae0874ebcc`)" />
+        <ColorInput v-model="color" :validator="validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`%OQ`)" :placeholder="$t(`%Hc`)" />
         <p class="style-description-small">
-            {{ $t('e1447811-99f2-4c3b-90c2-3ae2599d4454') }}
+            {{ $t('%OF') }}
         </p>
 
         <div v-if="STAMHOOFD.userMode === 'organization'" class="container">
-            <hr><h2>{{ $t('30e5c996-ef97-4ad6-8503-049163cd197d') }}</h2>
+            <hr><h2>{{ $t('%NE') }}</h2>
 
-            <p>{{ $t('d6803bae-250a-40f6-950c-475e760c35bd') }} <a class="inline-link" :href="$domains.getDocs('domeinnaam-koppelen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>
+            <p>{{ $t('%OG') }} <a class="inline-link" :href="$domains.getDocs('domeinnaam-koppelen')" target="_blank">{{ $t('%OH') }}</a>.</p>
 
             <template v-if="organization.privateMeta && (organization.privateMeta.mailDomain || organization.privateMeta.pendingMailDomain || organization.privateMeta.pendingRegisterDomain || organization.registerDomain)">
                 <p v-if="isMailOk" class="success-box">
-                    {{ $t('b7985e12-33ca-4c18-9b56-0d57e39c6dfa') }} <template v-if="!organization.privateMeta.mailDomainActive">
-                        {{ $t('93544666-3c0a-42b8-9ce3-ed4778735ded') }}
+                    {{ $t('%N5') }} <template v-if="!organization.privateMeta.mailDomainActive">
+                        {{ $t('%OI') }}
                     </template>
                 </p>
                 <p v-else class="warning-box">
-                    {{ $t('94547449-549d-4572-b217-c1a089b12997') }}
+                    {{ $t('%43') }}
                 </p>
 
                 <template v-if="enableMemberModule">
                     <p v-if="isRegisterOk" class="success-box">
-                        {{ $t('e7f331ed-3ca4-4aa6-a67f-be63e598a013') }} {{ organization.registerDomain }})
+                        {{ $t('%OJ') }} {{ organization.registerDomain }})
                     </p>
                     <p v-else class="warning-box">
-                        {{ $t("d9f5fd80-32b3-40d7-aaa6-3b65589299d6") }}
+                        {{ $t("%ON") }}
                     </p>
                 </template>
 
                 <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="style-button-bar">
                     <button class="button text" type="button" @click="setupDomain">
                         <span class="icon settings" />
-                        <span>{{ $t('b2248880-cba7-4115-912b-9cb981e3c2d1') }}</span>
+                        <span>{{ $t('%OK') }}</span>
                     </button>
                 </p>
 
                 <p v-else class="style-button-bar">
                     <button class="button text" type="button" @click="setupDomain">
                         <span class="icon settings" />
-                        <span>{{ $t('a6118aff-7bfe-4a5a-91d5-9c8fd09ae93d') }}</span>
+                        <span>{{ $t('%OL') }}</span>
                     </button>
                 </p>
             </template>
 
             <template v-else>
                 <p v-if="organization.registerUrl && enableMemberModule" class="style-description-block">
-                    {{ $t('0388d1ce-079c-4609-b11e-78ba654029d6') }} <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('57e20ed4-d50a-4947-96fc-57958550dcfa') }}
+                    {{ $t('%OM') }} <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('%2t') }}
                 </p>
                 <p v-else class="style-description-block">
-                    {{ $t('8b32118a-658d-4e17-96f9-a009449ec342') }}
+                    {{ $t('%2s') }}
                 </p>
 
                 <p class="style-button-bar">
                     <button class="button text" type="button" @click="setupDomain">
                         <span class="icon settings" />
-                        <span>{{ $t('a6118aff-7bfe-4a5a-91d5-9c8fd09ae93d') }}</span>
+                        <span>{{ $t('%OL') }}</span>
                     </button>
                 </p>
             </template>

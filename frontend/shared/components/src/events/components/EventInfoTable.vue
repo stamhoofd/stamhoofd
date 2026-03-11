@@ -43,13 +43,13 @@
             </template>
 
             <h2 v-if="event.meta.minAge !== null && event.meta.maxAge !== null && event.meta.minAge === event.meta.maxAge" class="style-title-list">
-                {{ $t('2410f840-edc0-4c3b-8d3a-29f28e1af553', {
+                {{ $t('%1Fx', {
                     x: event.meta.minAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.minAge),
                 }) }}
             </h2>
             <h2 v-else-if="event.meta.minAge !== null && event.meta.maxAge !== null" class="style-title-list">
-                {{ $t('4f301ef3-a260-4349-a981-af5741a46fce', {
+                {{ $t('%1Fy', {
                     x: event.meta.minAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.minAge),
                     y: event.meta.maxAge,
@@ -57,13 +57,13 @@
                 }) }}
             </h2>
             <h2 v-else-if="event.meta.minAge !== null" class="style-title-list">
-                {{ $t('b6e28985-659e-4e3a-84fb-53fe9b8ad36a', {
+                {{ $t('%1Fz', {
                     x: event.meta.minAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.minAge)
                 }) }}
             </h2>
             <h2 v-else-if="event.meta.maxAge !== null" class="style-title-list">
-                {{ $t('4e28f60f-8462-42a1-a6bb-36c05eeb74a2', {
+                {{ $t('%1G0', {
                     x: event.meta.maxAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.maxAge)
                 }) }}
@@ -76,15 +76,15 @@
             </template>
 
             <h2 class="style-title-list">
-                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">{{ $t('7aa189c8-5a21-4c4f-99c9-98e26119ee9b') }} {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
-                <span v-else-if="event.group.notYetOpen">{{ $t('3132b88b-2b83-4b1b-8ce6-3fe856779d14') }} {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-                <span v-else-if="event.group.closed">{{ $t('2d68fac2-1437-4c4e-9fa1-6e0ff4e81274') }}</span>
-                <span v-else-if="event.group.settings.registrationEndDate">{{ $t('dd3e1e64-a4fe-4737-bd7a-270c648628fd') }} {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
-                <span v-else>{{ $t('54b3473d-ba8c-49f3-b4f3-638c10dffa22') }}</span>
+                <span v-if="event.group.notYetOpen && event.group.settings.registrationEndDate">{{ $t('%b2') }} {{ Formatter.dateRange(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date(), event.group.settings.registrationEndDate, ' tot ') }}</span>
+                <span v-else-if="event.group.notYetOpen">{{ $t('%b3') }} {{ Formatter.startDate(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+                <span v-else-if="event.group.closed">{{ $t('%b4') }}</span>
+                <span v-else-if="event.group.settings.registrationEndDate">{{ $t('%b5') }} {{ Formatter.endDate(event.group.settings.registrationEndDate) }}</span>
+                <span v-else>{{ $t('%b6') }}</span>
             </h2>
 
             <p v-if="app !== 'registration' && !event.group.closed && (organization && event.organizationId !== organization.id && !event.group.settings.allowRegistrationsByOrganization)" class="style-description-small">
-                {{ $t('34fdb013-005c-46c4-b52e-e58f7697b586') }}
+                {{ $t('%5c') }}
             </p>
 
             <template v-if="!differentOrganization && !event.group.closed" #right>
@@ -142,7 +142,7 @@ const ageGroups = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`411cf334-eebb-4f27-beb6-d81bd544c3f5`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%GT`) + ' ');
 });
 
 const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();

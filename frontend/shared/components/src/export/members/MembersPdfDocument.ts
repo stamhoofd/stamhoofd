@@ -31,7 +31,7 @@ export class MembersPdfDocument {
                 },
             }),
             // description
-            new DefaultText($t('5b0672f0-f376-4306-9161-b2b840b723c2'), {
+            new DefaultText($t('%17Q'), {
                 spacing: {
                     bottom: mmToPoints(8),
                 },

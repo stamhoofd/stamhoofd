@@ -44,10 +44,10 @@ const title = computed(() => $isDone.value ? setupStepTranslations.getReviewTitl
 const description = computed(() => $isDone.value ? setupStepTranslations.getReviewDescription(props.setupStepType) : setupStepTranslations.getTodoDescription(props.setupStepType));
 const reviewDescription = computed(() => {
     const step = props.step;
-    const textIfNotReviewed = $t('c75d45e6-b741-462b-899e-56a41e10918a');
+    const textIfNotReviewed = $t('%6d');
 
     if (step.isDone) {
-        return getReviewDescription(step.review, true, $t('586cb220-498a-496a-8db5-89a4f10ba3df'));
+        return getReviewDescription(step.review, true, $t('%6a'));
     }
 
     return textIfNotReviewed;

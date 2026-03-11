@@ -16,16 +16,16 @@
 
             <template v-if="type === GroupType.Membership">
                 <p v-if="isNew" class="info-box">
-                    {{ $t('f82d0296-c037-4e8b-9150-08cfe8c8f231') }}
+                    {{ $t('%cI') }}
                 </p>
 
                 <div class="split-inputs">
-                    <TInput v-model="name" :placeholder="$t(`feeb5e82-d955-47f1-9f1d-6012ac9bc310`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
+                    <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%Gq`)" />
 
-                    <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('528545c4-028b-4711-9b16-f6fa990c3130')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
+                    <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('%2')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                         <Dropdown v-model="defaultAgeGroupId">
                             <option :value="null">
-                                {{ $t('086196b7-52df-4110-955a-b437ed924aa0') }}
+                                {{ $t('%cJ') }}
                             </option>
                             <option v-for="ageGroup of defaultAgeGroupsFiltered" :key="ageGroup.id" :value="ageGroup.id">
                                 {{ getAgeGroupSelectionText(ageGroup) }}
@@ -34,19 +34,19 @@
                     </STInputBox>
                 </div>
                 <p v-if="defaultAgeGroups.length" class="style-description-small">
-                    {{ $t('e99c7d31-f9fe-4e0f-8947-bdc30784de5b') }}
+                    {{ $t('%3') }}
                 </p>
             </template>
 
             <template v-if="type === GroupType.WaitingList">
                 <div class="split-inputs">
-                    <TInput v-model="name" :placeholder="$t(`1612603d-bc69-44b2-a899-6905ee46d2c7`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
+                    <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%Gq`)" />
                 </div>
             </template>
 
-            <TTextarea v-model="description" :placeholder="$t(`706063e0-e92f-4fdd-8b88-8dea252a55cc`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" />
+            <TTextarea v-model="description" :placeholder="$t(`%dA`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
             <p v-if="patchedGroup.type === GroupType.EventRegistration" class="style-description-small">
-                {{ $t('a20a78e9-60c4-425b-a416-5874d0ec4b11') }}
+                {{ $t('%cK') }}
             </p>
 
             <STList v-if="nonPatchedGroup.settings.hasCustomDates">
@@ -56,32 +56,32 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('d35a173c-5d80-48d6-a83b-5274f883a950') }}
+                        {{ $t('%1GC') }}
                     </h3>
 
                     <template v-if="hasCustomDates">
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('300d2935-b578-48cc-b58e-1c0446a68d59')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('%7e')" error-fields="settings.startDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
                             </STInputBox>
-                            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6')" />
+                            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('%1GD')" />
                         </div>
 
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('3c90169c-9776-4d40-bda0-dba27a5bad69')" error-fields="settings.endDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('%wB')" error-fields="settings.endDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
                             </STInputBox>
-                            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6')" />
+                            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('%1GD')" />
                         </div>
                     </template>
                 </STListItem>
             </STList>
 
             <template v-if="patchedGroup.type === GroupType.EventRegistration && isMultiOrganization">
-                <hr><h2>{{ $t('55e86a73-d637-4ca0-82ac-abd27d60705f') }}</h2>
-                <p>{{ $t('e1c25751-832f-455b-a5dd-a1b30b742433') }}</p>
+                <hr><h2>{{ $t('%cL') }}</h2>
+                <p>{{ $t('%cM') }}</p>
                 <p class="style-description-block">
-                    {{ $t('5fa1e94a-98fc-4d9d-a7f9-440d35d2e923') }}
+                    {{ $t('%cN') }}
                 </p>
 
                 <STList>
@@ -106,15 +106,15 @@
 
             <div v-if="type !== GroupType.WaitingList || patchedGroup.settings.prices.length !== 1 || patchedGroup.settings.prices[0]?.price.price" class="container">
                 <hr><h2 class="style-with-button">
-                    <div>{{ $t('0fb1a3a9-4ced-4097-b931-e865b3173cf9') }}</div>
+                    <div>{{ $t('%61') }}</div>
                     <div>
                         <button class="button text only-icon-smartphone" type="button" @click="addGroupPrice">
                             <span class="icon add" />
-                            <span>{{ $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc') }}</span>
+                            <span>{{ $t('%62') }}</span>
                         </button>
                     </div>
                 </h2>
-                <p>{{ $t("de2222d9-c934-4d06-8702-9527686de012") }}</p>
+                <p>{{ $t("%6e") }}</p>
 
                 <STList v-if="patchedGroup.settings.prices.length !== 1" v-model="draggablePrices" :draggable="true">
                     <template #item="{item: price}">
@@ -124,7 +124,7 @@
                             </h3>
 
                             <p class="style-description-small">
-                                {{ $t('1205deb9-498d-435d-a6e1-91ea98371523') }}: {{ formatPrice(price.price.price) }}
+                                {{ $t('%1IP') }}: {{ formatPrice(price.price.price) }}
                             </p>
 
                             <p v-if="price.price.reducedPrice !== null" class="style-description-small">
@@ -132,10 +132,10 @@
                             </p>
 
                             <p v-if="price.startDate" class="style-description-small">
-                                {{ $t('761ba5a0-8f9b-4c87-b3d0-559e3f6e8d92', {date: formatStartDate(price.startDate)}) }}
+                                {{ $t('%1CL', {date: formatStartDate(price.startDate)}) }}
                             </p>
                             <p v-if="price.endDate" class="style-description-small">
-                                {{ $t('543f5147-f7a5-430b-9b20-b974e809627d', {date: formatEndDate(price.endDate)}) }}
+                                {{ $t('%1CM', {date: formatEndDate(price.endDate)}) }}
                             </p>
 
                             <p v-for="[id, discount] of price.bundleDiscounts" :key="id" class="style-description-small">
@@ -143,14 +143,14 @@
                             </p>
 
                             <p v-if="price.isSoldOut(patchedGroup)" class="style-description-small">
-                                {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
+                                {{ $t('%12p') }}
                             </p>
                             <p v-else-if="price.stock" class="style-description-small">
-                                {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(price.getRemainingStock(patchedGroup) ?? 0, 'stuk', 'stuks')}) }}
+                                {{ $t('%U3', {stock: pluralText(price.getRemainingStock(patchedGroup) ?? 0, 'stuk', 'stuks')}) }}
                             </p>
 
                             <template #right>
-                                <span v-if="price.hidden" :v-tooltip="$t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5')" class="icon gray eye-off" />
+                                <span v-if="price.hidden" :v-tooltip="$t('%UC')" class="icon gray eye-off" />
                                 <span class="button icon drag gray" @click.stop @contextmenu.stop />
                                 <span class="icon arrow-right-small gray" />
                             </template>
@@ -171,13 +171,13 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('5473e2ee-81da-4671-922d-546548041f26') }}
+                        {{ $t('%cO') }}
                     </h3>
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('1a1f32bb-9469-43ca-a254-3018e07cbcc1') }}</h2>
-            <p>{{ $t('87722045-cb82-4f5d-b910-122d52bd193e') }}</p>
+            <hr><h2>{{ $t('%cP') }}</h2>
+            <p>{{ $t('%cQ') }}</p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -186,10 +186,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('ae8d3a27-6a56-4ae8-ada6-c843f01625b0') }}
+                        {{ $t('%cR') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('a83a23f9-7689-4ad7-9f29-dde62e434e8b') }}
+                        {{ $t('%cS') }}
                     </p>
                 </STListItem>
 
@@ -199,17 +199,17 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('160b9fb1-c214-43bb-9810-f5f5ccdac069') }}
+                        {{ $t('%cT') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('66c7d6ba-46ab-4f87-a26f-d59c3405c76d') }}
+                        {{ $t('%cU') }}
                     </p>
 
                     <div v-if="virtualOpenStatus === 'RegistrationStartDate'" class="split-inputs option" @click.stop.prevent>
-                        <STInputBox :title="$t('4f7cef46-0b46-4225-839e-510d8a8b95bc')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
+                        <STInputBox :title="$t('%4P')" error-fields="settings.registrationStartDate" :error-box="errors.errorBox">
                             <DateSelection v-model="registrationStartDate" />
                         </STInputBox>
-                        <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" />
+                        <TimeInput v-if="registrationStartDate" v-model="registrationStartDate" :title="$t('%5M')" :validator="errors.validator" />
                     </div>
                 </STListItem>
 
@@ -219,10 +219,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('cd0a1bf5-5cfe-40c6-bbd1-9f40574d559b') }}
+                        {{ $t('%28') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('645cf106-ee22-40a6-9d43-fcfb812b2351') }}
+                        {{ $t('%cV') }}
                     </p>
                 </STListItem>
 
@@ -232,39 +232,39 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('fd378bac-7d3d-4932-b511-851078805aff') }}
+                        {{ $t('%5K') }}
                     </h3>
 
                     <div v-if="useRegistrationEndDate" class="split-inputs option" @click.stop.prevent>
-                        <STInputBox :title="$t('6905dd1f-fe82-4ddc-bc6c-9ad496d34a71')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
+                        <STInputBox :title="$t('%4O')" error-fields="settings.registrationEndDate" :error-box="errors.errorBox">
                             <DateSelection v-model="registrationEndDate" />
                         </STInputBox>
-                        <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('1617abfe-8657-4a9f-9fe3-6e6d896c4ef6')" :validator="errors.validator" />
+                        <TimeInput v-if="registrationEndDate" v-model="registrationEndDate" :title="$t('%5L')" :validator="errors.validator" />
                     </div>
                 </STListItem>
             </STList>
 
             <div v-if="patchedGroup.type === GroupType.Membership" class="container">
-                <hr><h2>{{ $t('ca2235bb-f789-4859-899b-03c1d1ac2684') }}</h2>
+                <hr><h2>{{ $t('%cW') }}</h2>
 
                 <template v-if="isPropertyEnabled('birthDay')">
                     <div class="split-inputs">
-                        <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
-                            <AgeInput v-model="minAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
+                        <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%Hm`)">
+                            <AgeInput v-model="minAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`%4a`)" />
                         </STInputBox>
 
-                        <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`c0cab705-c129-4a72-8860-c33ef91ec630`)">
-                            <AgeInput v-model="maxAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
+                        <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%Hn`)">
+                            <AgeInput v-model="maxAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`%4a`)" />
                         </STInputBox>
                     </div>
                     <p class="style-description-small">
-                        *{{ $t('912639c7-e301-463e-b2d3-16b912848330') }}{{ patchedGroup.settings.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
-                            {{ $t('49030aa4-f77c-4db5-b976-2125675aae66') }}
+                        *{{ $t('%cX') }}{{ patchedGroup.settings.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                            {{ $t('%cY') }}
                         </template>
                     </p>
                 </template>
 
-                <STInputBox v-if="isPropertyEnabled('gender')" error-fields="genderType" :error-box="errors.errorBox" class="max" :title="$t(`9d766e89-0e75-491a-9207-d86cd7757263`)">
+                <STInputBox v-if="isPropertyEnabled('gender')" error-fields="genderType" :error-box="errors.errorBox" class="max" :title="$t(`%dB`)">
                     <STList>
                         <STListItem v-for="_genderType in genderTypes" :key="_genderType.value" element-name="label" :selectable="true">
                             <template #left>
@@ -278,7 +278,7 @@
                     </STList>
                 </STInputBox>
 
-                <STInputBox v-if="requirePlatformMembershipOnRegistrationDate || (!defaultAgeGroupId)" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`)">
+                <STInputBox v-if="requirePlatformMembershipOnRegistrationDate || (!defaultAgeGroupId)" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`%Wq`)">
                     <STList>
                         <STListItem :selectable="true" element-name="label">
                             <template #left>
@@ -286,10 +286,10 @@
                             </template>
 
                             <h3 class="style-title-list">
-                                {{ $t('b0d2d30a-f641-473a-91c7-4ab2297f25b1') }}
+                                {{ $t('%cZ') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('272cfcc9-e917-4e74-8952-076b8f2e8b23') }}
+                                {{ $t('%ca') }}
                             </p>
                         </STListItem>
                     </STList>
@@ -297,17 +297,17 @@
 
                 <button v-if="requireGroupIds.length === 0" type="button" class="button text" @click="addRequireGroupIds">
                     <span class="icon add" />
-                    <span>{{ $t('e7319239-1924-462c-bdfb-b9a29d875c41') }}</span>
+                    <span>{{ $t('%cb') }}</span>
                 </button>
 
                 <button v-if="preventGroupIds.length === 0" type="button" class="button text" @click="addPreventGroupIds">
                     <span class="icon add" />
-                    <span>{{ $t('7ee15d1f-e8bd-4100-900b-1ff69dc7c857') }}</span>
+                    <span>{{ $t('%1Gx') }}</span>
                 </button>
             </div>
 
             <div v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers" class="container">
-                <hr><h2>{{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}</h2>
+                <hr><h2>{{ $t('%1CP') }}</h2>
                 <STList>
                     <template v-if="isMultiOrganization">
                         <STListItem :selectable="true" element-name="label">
@@ -315,10 +315,10 @@
                                 <Checkbox v-model="allowRegistrationsByOrganization" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('7aa7f71d-cd2c-4fb4-b4e6-4085738c1e60') }}
+                                {{ $t('%cc') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('9dc28ec0-750c-464e-95f1-fa55b7cf3390') }}
+                                {{ $t('%cd') }}
                             </p>
                         </STListItem>
 
@@ -327,10 +327,10 @@
                                 <Checkbox v-model="allowViewRegistrations" :disabled="allowRegistrationsByOrganization" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t(`ddb211ab-2e6b-4a8c-9f05-5c18d16c911c`) }}
+                                {{ $t(`%1HL`) }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('f968eadd-511c-4bb7-ba95-26062633abc0') }}
+                                {{ $t('%1HJ') }}
                             </p>
                         </STListItem>
 
@@ -339,10 +339,10 @@
                                 <Checkbox v-model="sendConfirmationEmailForManualRegistrations" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('1383a10a-2804-4102-b583-ba13d35f3ca4') }}
+                                {{ $t('%1At') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('027bed5e-9c4b-43d2-85d4-06925be61a12') }}
+                                {{ $t('%1Au') }}
                             </p>
                         </STListItem>
                     </template>
@@ -352,10 +352,10 @@
                                 <Checkbox v-model="allowViewRegistrations" :disabled="allowRegistrationsByOrganization" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t(`a641a313-6916-4747-ba44-43d4df6d477f`) }}
+                                {{ $t(`%1HM`) }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('f968eadd-511c-4bb7-ba95-26062633abc0') }}
+                                {{ $t('%1HJ') }}
                             </p>
                         </STListItem>
 
@@ -364,10 +364,10 @@
                                 <Checkbox v-model="allowRegistrationsByOrganization" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t(`025ccb96-96ec-441f-9992-13668e1758ec`) }}
+                                {{ $t(`%1HN`) }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('fb540a87-1191-4e51-b53a-5f63f1b28d5c') }}
+                                {{ $t('%1HK') }}
                             </p>
                         </STListItem>
                     </template>
@@ -377,14 +377,14 @@
                             <Checkbox v-model="enableMaxMembers" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('cbe0f7dd-5a88-44a9-8876-2d39f8c8ef10', {stock: usedStock.toString()}) }}
+                            {{ $t('%ce', {stock: usedStock.toString()}) }}
                         </h3>
                         <div v-if="enableMaxMembers" class="option" @click.stop.prevent>
                             <STInputBox title="" error-fields="maxMembers" :error-box="errors.errorBox">
                                 <NumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
                             </STInputBox>
                             <p class="style-description-small">
-                                {{ $t('13839d7e-2260-4ded-945f-02e4479ef0d5') }}
+                                {{ $t('%cf') }}
                             </p>
                         </div>
                     </STListItem>
@@ -392,10 +392,10 @@
             </div>
 
             <div v-if="type === GroupType.Membership || type === GroupType.EventRegistration || waitingList" class="container">
-                <hr><h2>{{ $t('565a7968-e547-411e-aaff-6f936c128d5f') }}</h2>
-                <p>{{ $t('fb860b93-1b92-43ba-9e3d-1f6573725f23') }}</p>
+                <hr><h2>{{ $t('%1IQ') }}</h2>
+                <p>{{ $t('%cg') }}</p>
                 <p class="style-description-block">
-                    {{ $t('bb4aa0a1-3f9e-4ce6-9ef6-f775577967c9') }}
+                    {{ $t('%ch') }}
                 </p>
 
                 <STList v-if="availableWaitingLists.length">
@@ -405,7 +405,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('3e21b640-2f5e-40c6-95f2-0f8e9c99ab30') }}
+                            {{ $t('%ci') }}
                         </h3>
                     </STListItem>
 
@@ -425,23 +425,23 @@
                     </STListItem>
                 </STList>
                 <p v-else class="info-box">
-                    {{ $t('cea2cd4c-3023-40e1-b8f4-8ca9bedc9af8') }}
+                    {{ $t('%cj') }}
                 </p>
 
                 <p class="style-button-bar">
                     <button type="button" class="button text" @click="addWaitingList">
                         <span class="icon add" />
-                        <span>{{ $t('58649f04-8b21-43ba-9193-3fd3eb02b5ef') }}</span>
+                        <span>{{ $t('%ck') }}</span>
                     </button>
                 </p>
             </div>
 
             <template v-if="waitingListType !== WaitingListType.None || (enableMaxMembers && type === GroupType.Membership)">
-                <hr><h2>{{ $t('30457887-ca28-427f-b3ab-b3943e73a54b') }}</h2>
-                <p>{{ $t('9a8ee414-0dc9-4625-ab6b-d4ad8129c280') }}</p>
+                <hr><h2>{{ $t('%cl') }}</h2>
+                <p>{{ $t('%cm') }}</p>
 
                 <p v-if="waitingListType === WaitingListType.PreRegistrations || waitingListType === WaitingListType.ExistingMembersFirst" class="info-box">
-                    {{ $t('e2130593-e64d-4f3a-bb16-75ba4ed7604e') }}
+                    {{ $t('%8V') }}
                 </p>
 
                 <STList>
@@ -451,7 +451,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('d98e42dc-ac06-40af-b28b-c33d03319558') }}
+                            {{ $t('%cn') }}
                         </h3>
                     </STListItem>
 
@@ -461,20 +461,20 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('4fdfb0bb-c68b-4966-bfe0-a08bbd13da6b') }}
+                            {{ $t('%co') }}
                         </h3>
 
                         <p class="style-description-small">
-                            {{ $t('1eade60b-8648-403f-ac80-97300c48fee7') }}
+                            {{ $t('%cp') }}
                         </p>
 
                         <p v-if="!waitingList" class="style-description-small">
-                            {{ $t('fce84097-5cb4-4c49-bbcd-6a13b954cd72') }}
+                            {{ $t('%cq') }}
                         </p>
 
                         <div v-if="waitingListType === WaitingListType.ExistingMembersFirst" class="option">
                             <Checkbox v-model="priorityForFamily">
-                                {{ $t('8fd194c8-d490-40be-8fdc-acf0113d1d74') }}
+                                {{ $t('%cr') }}
                             </Checkbox>
                         </div>
                     </STListItem>
@@ -485,15 +485,15 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('0f3bcf65-6d8d-4ba3-81ff-6b85885eb88f') }}
+                            {{ $t('%cs') }}
                         </h3>
 
                         <p class="style-description-small">
-                            {{ $t('86165fe1-6bd8-4af4-8213-3158be8dad35') }}
+                            {{ $t('%ct') }}
                         </p>
 
                         <p v-if="!waitingList" class="style-description-small">
-                            {{ $t('fce84097-5cb4-4c49-bbcd-6a13b954cd72') }}
+                            {{ $t('%cq') }}
                         </p>
                     </STListItem>
 
@@ -503,28 +503,28 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('98dad67a-cd2c-44a4-b94e-bf7a97546046') }}
+                            {{ $t('%cu') }}
                         </h3>
 
                         <p class="style-description-small">
-                            {{ $t('db6e4b14-0559-49ae-9239-8718f35c8837') }}
+                            {{ $t('%cv') }}
                         </p>
 
                         <p v-if="!registrationStartDate" class="style-description-small">
-                            {{ $t('a6306aac-e1a5-41aa-9933-d740084a4d54') }}
+                            {{ $t('%cw') }}
                         </p>
 
                         <div v-if="waitingListType === WaitingListType.PreRegistrations" class="option">
                             <div class="split-inputs">
-                                <STInputBox error-fields="settings.preRegistrationsDate" :error-box="errors.errorBox" :title="$t(`3ec503e3-ac1d-41be-bef3-cfa2b9de548a`)">
+                                <STInputBox error-fields="settings.preRegistrationsDate" :error-box="errors.errorBox" :title="$t(`%dC`)">
                                     <DateSelection v-model="preRegistrationsDate" />
                                 </STInputBox>
 
-                                <TimeInput v-model="preRegistrationsDate" :validator="errors.validator" :title="$t(`1e43813a-f48e-436c-bb49-e9ebb0f27f58`)" />
+                                <TimeInput v-model="preRegistrationsDate" :validator="errors.validator" :title="$t(`%5M`)" />
                             </div>
 
                             <Checkbox v-model="priorityForFamily">
-                                {{ $t('29fcc704-c030-4488-a9bc-dfb66b9fcb81') }}
+                                {{ $t('%cx') }}
                             </Checkbox>
                         </div>
                     </STListItem>
@@ -532,53 +532,53 @@
             </template>
 
             <JumpToContainer v-if="patchedGroup.type === GroupType.Membership" class="container" :visible="forceShowRequireGroupIds || !!requireGroupIds.length">
-                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" :title="$t(`52c3975b-4d59-4293-9ad6-993d18982d89`)" />
+                <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" :title="$t(`%dD`)" />
             </JumpToContainer>
 
             <JumpToContainer v-if="patchedGroup.type === GroupType.Membership" class="container" :visible="forceShowPreventGroupIds || !!preventGroupIds.length">
-                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :title="$t('7ee15d1f-e8bd-4100-900b-1ff69dc7c857')" />
+                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :title="$t('%1Gx')" />
             </JumpToContainer>
 
             <template v-if="$feature('member-trials')">
                 <template v-if="patchedGroup.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
-                    <hr><h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
-                    <p>{{ $t('89a760d7-8995-458c-9635-da104971e95c') }}</p>
+                    <hr><h2>{{ $t('%7r') }}</h2>
+                    <p>{{ $t('%7s') }}</p>
 
-                    <STInputBox :title="$t('31d7f684-a6e1-4df5-8ac7-c971e5919cc7')" error-fields="settings.trialDays" :error-box="errors.errorBox">
-                        <NumberInput v-model="trialDays" :suffix="$t('6cb97c70-db56-4883-a2b3-87b65506d4f9')" :suffix-singular="$t('1ea8c630-af92-4cba-bfdc-acc0b0f67fae')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
+                    <STInputBox :title="$t('%CG')" error-fields="settings.trialDays" :error-box="errors.errorBox">
+                        <NumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
                     </STInputBox>
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
-                        {{ $t('d68a6d63-d782-49e2-84a5-4f77dbfa2977', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
+                        {{ $t('%7t', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
                     </p>
 
                     <template v-if="!hasCustomDates">
-                        <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                        <STInputBox :title="$t('%7u')" error-fields="settings.startDate" :error-box="errors.errorBox">
                             <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
                         </STInputBox>
 
                         <p class="style-description-small">
-                            {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
+                            {{ $t('%7v') }}
                         </p>
                     </template>
                     <p v-else-if="trialDays && patchedGroup.settings.startDate.getTime() !== patchedPeriod.period.startDate.getTime()" class="info-box">
-                        {{ $t('5fe368ac-80c1-4ea3-a148-27ebbb825870', {start: Formatter.date(patchedGroup.settings.startDate)}) }}
+                        {{ $t('%1GE', {start: Formatter.date(patchedGroup.settings.startDate)}) }}
                     </p>
                 </template>
             </template>
 
-            <hr><h2>{{ $t('5319e68a-c4fd-45e9-a6b0-f85d28cf4d85') }}</h2>
-            <p>{{ $t('53aa228f-3c36-49d7-be11-5819b34308d6') }}</p>
+            <hr><h2>{{ $t('%cy') }}</h2>
+            <p>{{ $t('%cz') }}</p>
             <p v-if="auth.hasFullAccess()" class="info-box">
-                {{ $t('e730fb63-3f7a-4322-84e7-e9fc6e1d7f64') }}
+                {{ $t('%d0') }}
             </p>
             <InheritedRecordsConfigurationBox :group-level="true" :override-organization="externalOrganization" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
 
-            <hr><h2>{{ $t('c94914a3-d4dd-40e9-b512-77394a5aae76') }}</h2>
-            <p>{{ $t('fd68ec93-bdab-4c08-b9c7-34757150259a') }} <strong class="style-strong">{{ $t('174038c4-9ee3-413f-8831-370eb9a12413') }}</strong> {{ $t('73acbb7e-5bd3-4e9b-9721-3300de84e32a') }}</p>
+            <hr><h2>{{ $t('%d1') }}</h2>
+            <p>{{ $t('%d2') }} <strong class="style-strong">{{ $t('%d3') }}</strong> {{ $t('%d4') }}</p>
 
             <p class="warning-box">
                 <span>
-                    {{ $t('af24b3e3-a379-479f-af8c-77228f1d6128') }} <strong class="style-strong style-underline">{{ $t('0c1a631e-b817-4b8e-98ad-97e82443c0be') }}</strong> {{ $t('dc8532ed-b773-40ad-8d3b-c2095c95e42b') }}
+                    {{ $t('%d5') }} <strong class="style-strong style-underline">{{ $t('%d6') }}</strong> {{ $t('%d7') }}
                 </span>
             </p>
 
@@ -757,7 +757,7 @@ const availableWaitingLists = computed(() => {
 
     return base.map((list) => {
         const usedByGroups = patchedPeriod.value.groups.filter(g => g.waitingList?.id === list.id);
-        let d = usedByGroups?.length ? $t(`4f6627be-b20b-48b0-a2f7-8fc68d2465b2`, { groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') }) : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`);
+        let d = usedByGroups?.length ? $t(`%14l`, { groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`%M1`) + ' ') }) : $t(`%yg`);
         if (list.periodId !== patchedPeriod.value.period.id && list.settings.period) {
             d = list.settings.period.nameShort + '\n' + d;
         }
@@ -1152,13 +1152,13 @@ const useRegistrationEndDate = computed({
 
 const title = computed(() => {
     if (patchedGroup.value.type === GroupType.WaitingList) {
-        return props.isNew ? $t('5936be80-5f7a-429b-8bc2-7afdd47ff232') : $t('b3f49e49-2db8-46e3-8a9b-bc05a4b989c0');
+        return props.isNew ? $t('%63') : $t('%64');
     }
 
     if (patchedGroup.value.type === GroupType.EventRegistration) {
-        return props.isNew ? $t('bd6ad13b-be70-4d03-a1a0-3578786f4df3') : $t('8fd3a74f-5dae-4a7e-bcd3-7ac1da2e7e6c');
+        return props.isNew ? $t('%4M') : $t('%4K');
     }
-    return props.isNew ? $t('c7944f69-c772-4cc5-b7c8-2ef96272dfe0') : $t('d886e927-86d1-48ed-93ed-60e924484db1');
+    return props.isNew ? $t('%4N') : $t('%4L');
 });
 
 const defaultMembershipTypeId = computed(() => defaultAgeGroup.value?.defaultMembershipTypeId ?? null);
@@ -1184,7 +1184,7 @@ async function save() {
         }
         await props.saveHandler(patch.value);
         if (props.showToasts) {
-            Toast.success($t('1e6b16bd-ca6e-49e2-9792-f8864a140d7b')).show();
+            Toast.success($t('%54')).show();
         }
         await pop({ force: true });
     }
@@ -1197,7 +1197,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm(patchedGroup.value.type === GroupType.EventRegistration ? $t('90ec517b-14e6-4436-8c91-fabac5c1bddf') : $t('11426f89-b2bf-4f7a-bd5a-a51c34e6aa96'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'))) {
+    if (!await CenteredMessage.confirm(patchedGroup.value.type === GroupType.EventRegistration ? $t('%4I') : $t('%4J'), $t('%55'))) {
         return;
     }
     if (deleting.value || saving.value || props.isNew) {
@@ -1216,7 +1216,7 @@ async function deleteMe() {
             }),
         );
         if (props.showToasts) {
-            Toast.success($t('94337d0a-0522-43be-b337-73ddcf7fdd45')).show();
+            Toast.success($t('%1FX')).show();
         }
         await pop({ force: true });
     }
@@ -1233,7 +1233,7 @@ async function addGroupPrice() {
 
     if (isValid) {
         const price = GroupPrice.create({
-            name: TranslatedString.create($t('0076d594-efee-4ec7-a00a-073a4c689a38')),
+            name: TranslatedString.create($t('%CL')),
             price: patchedGroup.value.settings.prices[0]?.price?.clone(),
         });
 
@@ -1289,10 +1289,10 @@ async function editGroupPrice(price: GroupPrice) {
 
 async function addGroupOptionMenu() {
     const optionMenu = GroupOptionMenu.create({
-        name: $t('0076d594-efee-4ec7-a00a-073a4c689a38'),
+        name: $t('%CL'),
         options: [
             GroupOption.create({
-                name: $t('82b0f786-db14-4a2c-8514-3ca3b28ac65f'),
+                name: $t('%65'),
             }),
         ],
     });
@@ -1322,7 +1322,7 @@ async function addWaitingList() {
         periodId: patchedGroup.value.periodId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: TranslatedString.create($t(`c1f1d9d0-3fa1-4633-8e14-8c4fc98b4f0f`) + ' ' + patchedGroup.value.settings.name.toString()),
+            name: TranslatedString.create($t(`%yh`) + ' ' + patchedGroup.value.settings.name.toString()),
         }),
     });
 
@@ -1388,15 +1388,15 @@ async function editWaitingList(waitingList: Group) {
 const genderTypes = [
     {
         value: GroupGenderType.Mixed,
-        name: $t(`905afd18-5e9a-4d30-9040-646d29b25c15`),
+        name: $t(`%yi`),
     },
     {
         value: GroupGenderType.OnlyFemale,
-        name: $t(`95e8c4b3-a548-4689-b581-88d346ee4e7b`),
+        name: $t(`%yj`),
     },
     {
         value: GroupGenderType.OnlyMale,
-        name: $t(`91ec0ba0-1840-4246-b804-27eb3cda67e3`),
+        name: $t(`%yk`),
     },
 ];
 
@@ -1404,7 +1404,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 function getAgeGroupAgeString(ageGroup: DefaultAgeGroup): string {
@@ -1437,7 +1437,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
     }
 
     if (!ageGroup.defaultMembershipTypeId) {
-        text = text + ' ' + $t(`bf9acd2b-f2d4-42df-8d13-6af97648eb27`);
+        text = text + ' ' + $t(`%yl`);
     }
 
     return text;
@@ -1454,8 +1454,8 @@ const recordEditorSettings = computed(() => {
     const exampleMember = new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
-                lastName: $t(`946f5e2e-d92c-4bbd-b64f-115958a04d01`),
+                firstName: $t(`%ID`),
+                lastName: $t(`%ym`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),

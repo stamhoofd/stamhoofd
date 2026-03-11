@@ -84,7 +84,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     const calendarTab = new TabBarItem({
         id: 'events',
         icon: 'calendar',
-        name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
+        name: $t(`%uB`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EventsOverview, {}),
         }),
@@ -93,7 +93,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`7dfd0425-b8ff-4dec-8c6d-257d94eabbe7`),
+        name: $t(`%1DK`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberCommunicationView, {}),
         }),
@@ -115,7 +115,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                             new TabBarItem({
                                 id: 'start',
                                 icon: 'home',
-                                name: $t(`04548161-abc0-4bea-bdd3-fdbacddc22f8`),
+                                name: $t(`%I`),
                                 component: startView,
                             }),
                             ...(enableEvents ? [calendarTab] : []),
@@ -123,7 +123,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                             new TabBarItem({
                                 id: 'cart',
                                 icon: 'basket',
-                                name: $t(`88db9833-34e4-488a-9f74-b6e230c69dc1`),
+                                name: $t(`%X5`),
                                 component: cartRoot,
                                 badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0)),
                             }),

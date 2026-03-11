@@ -1,14 +1,14 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`5a5c1ed2-516e-43a1-9e64-25a7f6190ed3`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`%HD`)" @save="save">
         <h1>
-            {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
+            {{ $t('%HD') }}
         </h1>
 
-        <p>{{ $t('cdd2999b-28bf-4b9b-ba31-371cd3021923') }}</p>
+        <p>{{ $t('%HE') }}</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <hr><h2>{{ $t('e580ade8-d2b5-44e0-b712-2e66f5bce0c6') }}</h2>
+        <hr><h2>{{ $t('%NN') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
@@ -16,10 +16,10 @@
                     <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                 </template>
                 <h2 class="style-title-list">
-                    {{ $t('a5b3b5e6-70c0-4818-9548-01f810477cd2') }}
+                    {{ $t('%K0') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('4d995169-f792-40f5-addf-60d8aed00362') }}
+                    {{ $t('%5P') }}
                 </p>
                 <template #right>
                     <span class="icon arrow-right-small gray" />
@@ -31,10 +31,10 @@
                     <img src="@stamhoofd/assets/images/illustrations/box-download.svg">
                 </template>
                 <h2 class="style-title-list">
-                    {{ $t('a6b4a111-2b23-4f15-bfb9-45c784a7159b') }}
+                    {{ $t('%NO') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('1985f023-e846-4ea2-9526-b24358c7a294') }}
+                    {{ $t('%NP') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="downloadingSettings">
@@ -48,10 +48,10 @@
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 </template>
                 <h2 class="style-title-list">
-                    {{ $t('4c795a2e-9675-4151-8cba-6222ed2ec3b5') }}
+                    {{ $t('%18k') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('2dc53487-2eb6-408c-beef-5e00c7a4b5b9') }}
+                    {{ $t('%NQ') }}
                 </p>
                 <template #right>
                     <LoadingButton :loading="uploadingSettings">
@@ -61,7 +61,7 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('ae010586-e7f2-4551-a486-77d4a92ec76b') }}</h2>
+        <hr><h2>{{ $t('%NR') }}</h2>
 
         <STList>
             <STListItem v-if="!enableBuckaroo && ($isStamhoofd || STAMHOOFD.environment === 'development')" :selectable="true" element-name="label">
@@ -70,18 +70,18 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('55aa8ece-1684-4c56-81ff-5fb40758d0fa') }}
+                    {{ $t('%NS') }}
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $t('76a35b17-68d8-4d2f-8022-755b4033dc46') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
+                    {{ $t('%NT') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
                 </p>
             </STListItem>
         </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr><h2>
-                {{ $t('a0044037-18fd-465d-8907-9f7064342279') }}
+                {{ $t('%NU') }}
             </h2>
 
             <STList>
@@ -91,11 +91,11 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('f7fe1fae-5b35-4491-9184-ab47b9c8f4ce') }} (wip)
+                        {{ $t('%1Hp') }} (wip)
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('584f3cc4-679e-4803-b923-033eb552aed5') }}
+                        {{ $t('%1Hq') }}
                     </p>
                 </STListItem>
 
@@ -104,11 +104,11 @@
                         <Checkbox v-model="useTestPayments" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('02fe4c35-562f-429c-9250-dbd25ca01357') }}
+                        {{ $t('%NV') }}
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('ff823505-f417-4e8c-a6bd-4eb05551c6cb') }}
+                        {{ $t('%1Hr') }}
                     </p>
                 </STListItem>
 
@@ -117,7 +117,7 @@
                         <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('8cdbbc91-88ab-4d25-8f42-b34369e959f0') }}
+                        {{ $t('%1O') }}
                     </h3>
                 </STListItem>
 
@@ -126,7 +126,7 @@
                         <Checkbox :model-value="getFeatureFlag('webshop-auth')" @update:model-value="setFeatureFlag('webshop-auth', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('5573d401-88aa-4221-9ed7-44380d970177') }}
+                        {{ $t('%10') }}
                     </h3>
                 </STListItem>
 
@@ -135,7 +135,7 @@
                         <Checkbox :model-value="getFeatureFlag('organization-receivable-balances')" @update:model-value="setFeatureFlag('organization-receivable-balances', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('47e866d9-5349-4318-b779-161da61c2250') }}
+                        {{ $t('%NW') }}
                     </h3>
                 </STListItem>
 
@@ -144,13 +144,13 @@
                         <Checkbox :model-value="getFeatureFlag('email-to-payments')" @update:model-value="setFeatureFlag('email-to-payments', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('cdbd1984-e326-4fd7-bc5c-3d54c0704fb3') }}
+                        {{ $t('%1Lu') }}
                     </h3>
                 </STListItem>
             </STList>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">
-                <span class="icon gift" /><span>{{ $t('5a58b689-5269-40a0-907e-c977b293c2fa') }}</span>
+                <span class="icon gift" /><span>{{ $t('%NX') }}</span>
             </button>
         </div>
     </SaveView>

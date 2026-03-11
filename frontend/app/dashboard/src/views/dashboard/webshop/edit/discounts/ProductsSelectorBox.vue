@@ -20,7 +20,7 @@
                     </STListItem>
                 </STList>
                 <div v-else>
-                    {{ $t('261191bf-7565-4444-9e4c-7fffe5f7b919') }}
+                    {{ $t('%Sb') }}
                 </div>
             </div>
         </STInputBox>
@@ -34,7 +34,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ price.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
+                            {{ price.name || $t('%CL') }}
                         </h2>
                     </STListItem>
                 </STList>
@@ -48,7 +48,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ option.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
+                            {{ option.name || $t('%CL') }}
                         </h2>
 
                         <template #right>

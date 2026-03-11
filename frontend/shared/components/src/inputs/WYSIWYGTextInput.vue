@@ -7,28 +7,28 @@
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
-                            <span>{{ $t('d703d8bc-b08f-4b4d-9c26-f255edd70f56') }}:</span>
+                            <span>{{ $t('%2H') }}:</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`780fa99d-7109-4f57-934b-1f4c5643a794`)">
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" enterkeyhint="go" :placeholder="$t(`%1J`)">
                         </div>
                         <template #right>
                             <button class="button text" type="submit" @mousedown.prevent>
                                 {{ editLink.length === 0 ? "Sluiten" : "Opslaan" }}
                             </button>
-                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('025d14dd-57d4-4ec4-aa85-ddf9ddf98b6f')" @mousedown.prevent @click.stop.prevent="clearLink()" />
+                            <button v-if="editor.isActive('link')" class="button icon trash gray" type="button" :v-tooltip="$t('%a8')" @mousedown.prevent @click.stop.prevent="clearLink()" />
                         </template>
                     </STListItem>
                 </STList>
             </form>
 
             <div v-else class="small editor-button-bar sticky">
-                <button class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" :v-tooltip="$t('f7057816-fb9f-42f9-b864-bec9756d07f7')" @click="editor.chain().focus().toggleBold().run()" />
-                <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" :v-tooltip="$t('85ebbd8d-0585-4621-bed9-0d3cacb138a8')" @click="editor.chain().focus().toggleItalic().run()" />
-                <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" :v-tooltip="$t('c69c6268-44cb-41a3-9a22-01c0828cb87a')" @click="editor.chain().focus().toggleUnderline().run()" />
+                <button class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" :v-tooltip="$t('%aG')" @click="editor.chain().focus().toggleBold().run()" />
+                <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" :v-tooltip="$t('%aH')" @click="editor.chain().focus().toggleItalic().run()" />
+                <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" :v-tooltip="$t('%aI')" @click="editor.chain().focus().toggleUnderline().run()" />
 
-                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" :v-tooltip="$t('109b8d55-5b39-47da-92ad-fbdfa0f3d0b0')" @click="openTextStyles" />
-                <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-                <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click.prevent.stop="openLinkEditor()" @mousedown.stop />
+                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" :v-tooltip="$t('%vC')" @click="openTextStyles" />
+                <button class="button icon hr" type="button" :v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
+                <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('%aC')" @click.prevent.stop="openLinkEditor()" @mousedown.stop />
             </div>
         </div>
     </div>
@@ -184,7 +184,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             return;
         }
         if (!this.editor!.isActive('link') && this.editor!.state.selection.empty) {
-            new Toast($t(`1a4e5a36-80ae-4858-a16b-a430c806ee8f`), 'info').show();
+            new Toast($t(`%v8`), 'info').show();
             return;
         }
         this.editLink = this.editor!.getAttributes('link')?.href ?? '';
@@ -200,7 +200,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: $t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`),
+                    name: $t(`%vC`),
                     icon: 'h1',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel }),
                     action: () => {
@@ -209,7 +209,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`5d0d84fe-2ddb-4962-b104-337abbeeaa1f`),
+                    name: $t(`%aJ`),
                     icon: 'h2',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel + 1 }),
                     action: () => {
@@ -218,7 +218,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`4943ece9-450b-4913-a6d8-6834d011a1ee`),
+                    name: $t(`%zJ`),
                     icon: 'warning',
                     selected: this.editor.isActive('warningBox', { type: 'warning' }),
                     action: () => {
@@ -227,7 +227,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`0456ef2e-5e86-48fa-835c-fd8ec1921f5e`),
+                    name: $t(`%J`),
                     icon: 'info',
                     selected: this.editor.isActive('warningBox', { type: 'info' }),
                     action: () => {
@@ -238,7 +238,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             ],
             [
                 new ContextMenuItem({
-                    name: $t(`277573b6-5edd-46bc-bd1b-c40f6935dd38`),
+                    name: $t(`%aL`),
                     icon: 'ul',
                     selected: this.editor.isActive('bulletList'),
                     action: () => {
@@ -247,7 +247,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`8d17be46-de96-4e84-af15-6bd18e8b4b17`),
+                    name: $t(`%vF`),
                     icon: 'ol',
                     selected: this.editor.isActive('orderedList'),
                     action: () => {
@@ -300,7 +300,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         }
 
         if (!this.isValidHttpUrl(cleanedUrl)) {
-            new Toast($t(`375a57e9-815f-42d0-88e0-1ce09df72c1b`), 'error red').show();
+            new Toast($t(`%zK`), 'error red').show();
             return;
         }
 

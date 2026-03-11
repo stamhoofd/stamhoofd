@@ -40,7 +40,7 @@ export function useFetchOrganizationPeriodForGroup() {
             throw new SimpleError({
                 code: 'missing-organization-period',
                 message: 'Missing organization period',
-                human: $t('cd37a13c-6779-49fa-a97f-1eddb6b61ebb'),
+                human: $t('%16a'),
             });
         }
 

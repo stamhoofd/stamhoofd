@@ -3,7 +3,7 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        <p>{{ $t('08aa378f-6e1d-4882-965f-756108c677e1') }}</p>
+        <p>{{ $t('%IR') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -16,7 +16,7 @@
         <p>
             <button class="button text" type="button" @click="addPolicy">
                 <span class="icon add" />
-                <span>{{ $t('23229877-c51f-4e18-8563-88315be182aa') }}</span>
+                <span>{{ $t('%IS') }}</span>
             </button>
         </p>
     </SaveView>
@@ -51,7 +51,7 @@ const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.p
 });
 const saving = ref(false);
 
-const title = $t(`23229877-c51f-4e18-8563-88315be182aa`);
+const title = $t(`%IS`);
 
 async function addPolicy() {
     const privacyPatch = PrivacySettings.patch({});
@@ -122,7 +122,7 @@ async function save() {
             return;
         }
         await platformManager.value.patch(patch.value);
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -136,7 +136,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

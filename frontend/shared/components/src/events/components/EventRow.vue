@@ -14,7 +14,7 @@
         </p>
 
         <p v-if="prefix" class="style-description-small">
-            {{ $t('60898eb6-b3e7-44ef-820c-3bd57b4c6bca') }} {{ prefix }}
+            {{ $t('%b7') }} {{ prefix }}
         </p>
 
         <p v-if="event.meta.location?.name || event.meta.location?.address?.city" class="style-description-small">
@@ -22,9 +22,9 @@
         </p>
 
         <p v-if="event.group" class="style-description-small">
-            <span v-if="event.group.notYetOpen">{{ $t('4837760e-e747-427f-a976-0acbc786365f') }} {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
-            <span v-else-if="event.group.closed">{{ $t('8222f272-8e50-4d5d-9e30-ddd534c30081') }}</span>
-            <span v-else>{{ $t('5e56d87a-0c2b-412c-8a84-92091856e538') }}</span>
+            <span v-if="event.group.notYetOpen">{{ $t('%b8') }} {{ Formatter.date(event.group.activePreRegistrationDate ?? event.group.settings.registrationStartDate ?? new Date()) }}</span>
+            <span v-else-if="event.group.closed">{{ $t('%b9') }}</span>
+            <span v-else>{{ $t('%bA') }}</span>
         </p>
 
         <p v-if="event.group && app !== 'registration' && (event.group.organizationId === organization?.id || app === 'admin')" class="style-description-small">
@@ -32,11 +32,11 @@
         </p>
 
         <p v-if="event.webshopId && app !== 'registration'" class="style-description-small">
-            {{ $t('3c38f59d-07f9-49f5-9223-d074b9eda853') }}
+            {{ $t('%1As') }}
         </p>
 
         <template #right>
-            <span v-if="!event.meta.visible" class="icon gray eye-off" :v-tooltip="$t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5')" />
+            <span v-if="!event.meta.visible" class="icon gray eye-off" :v-tooltip="$t('%UC')" />
             <span v-if="event.id" class="icon arrow-right-small gray" />
             <span v-else class="icon add gray" />
         </template>
@@ -68,7 +68,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`33c4f792-005f-4fb1-ad98-397dd92038aa`));
+            prefixes.push($t(`%XF`));
         }
     }
     else {
@@ -83,7 +83,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
 });
 
 const prefix = computed(() => {
@@ -103,7 +103,7 @@ const prefix = computed(() => {
             prefixes.push(group.name);
         }
     }
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
 });
 
 </script>

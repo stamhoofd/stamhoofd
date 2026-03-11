@@ -1,12 +1,12 @@
 <template>
     <div id="settings-view" class="st-view">
-        <STNavigationBar :title="$t('c112eac2-2515-4476-81d1-e8dc51bc063c')" />
+        <STNavigationBar :title="$t('%1Bf')" />
 
         <main>
-            <h1>{{ $t('bb419e01-886f-47b1-b1d9-2a3ef7094c92') }}</h1>
+            <h1>{{ $t('%1Bi') }}</h1>
 
             <p>
-                <I18nComponent :t="$t('50c110d0-67dd-4733-9fb1-49a1a541e2bd')">
+                <I18nComponent :t="$t('%1Bj')">
                     <template #button="{content}">
                         <a class="inline-link" href="https://platform.publiq.be/nl" target="_blank">
                             {{ content }}
@@ -30,16 +30,16 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('549c952e-347f-4b1d-ae55-b645636e2522') }}
+                        {{ $t('%1Bk') }}
                     </h3>
 
                     <p class="style-description">
-                        {{ uitpasOrganizerId ? uitpasOrganizerName : $t('87e8488b-4190-42d9-bdd0-564a46671f7f') }}
+                        {{ uitpasOrganizerId ? uitpasOrganizerName : $t('%1Bl') }}
                     </p>
 
                     <template #right>
                         <span class="button text">
-                            {{ uitpasOrganizerId ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('01e2b860-7045-4a0c-84ca-2303346d14b2') }}
+                            {{ uitpasOrganizerId ? $t('%1Bm') : $t('%KC') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -59,7 +59,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('0c503313-92c1-4063-887d-87bbff5a6e53') }}
+                        {{ $t('%1Bn') }}
                     </h3>
 
                     <p class="style-description">
@@ -68,7 +68,7 @@
 
                     <template #right>
                         <span v-if="uitpasOrganizerId" class="button text">
-                            {{ uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.NotConfigured ? $t('aa6ef361-7d1f-4a9a-a7e1-644958739117') : $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}
+                            {{ uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.NotConfigured ? $t('%1Bo') : $t('%1Bm') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -88,16 +88,16 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('1e92a151-6161-4941-aa3f-fa69e14f75ee') }}
+                        {{ $t('%1Bp') }}
                     </h3>
 
                     <p class="style-description">
-                        {{ uitpasEvent?.name ?? $t('c4fa8a72-56cd-4b5c-ae12-6533a493bac6') }}
+                        {{ uitpasEvent?.name ?? $t('%1Bq') }}
                     </p>
 
                     <template #right>
                         <span v-if="!!uitpasOrganizerId && uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" class="button text">
-                            {{ uitpasEvent ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('01e2b860-7045-4a0c-84ca-2303346d14b2') }}
+                            {{ uitpasEvent ? $t('%1Bm') : $t('%KC') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -161,7 +161,7 @@ const uitpasClientCredentialsStatus = computed(() => organizationManager.value.o
 const openSearchOrganizer = async () => {
     await show(
         new ComponentWithProperties(SearchUitpasOrganizerView, {
-            title: $t('2c7dc287-58ab-423b-984a-b0582c992b4d'),
+            title: $t('%1Br'),
             selectOrganizer: async (organizer: UitpasOrganizerResponse, { pop }: NavigationActions) => {
                 uitpasOrganizerName.value = organizer.name;
                 uitpasOrganizerId.value = organizer.id;
@@ -197,7 +197,7 @@ const openSearchUitpasEvent = async () => {
     await show({
         components: [
             new ComponentWithProperties(SearchUitpasEventView, {
-                title: $t('d37c7255-33dd-42a8-872d-0c719307f842'),
+                title: $t('%1Bs'),
                 selectEvent: async (event: UitpasEventResponse | null, navigationActions: NavigationActions) => {
                     uitpasEvent.value = event;
                     if (props.onFixedAndEventSelected && uitpasClientCredentialsStatus.value === UitpasClientCredentialsStatus.Ok && event) {

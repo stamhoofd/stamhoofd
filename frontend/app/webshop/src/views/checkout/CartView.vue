@@ -7,11 +7,11 @@
             </h1>
 
             <p v-if="cart.items.length === 0" class="info-box">
-                {{ $t('a6862509-523b-4b07-bbd7-6bfba863874e') }}
+                {{ $t('%Xp') }}
             </p>
 
             <p v-for="code of checkout.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }} <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" type="button" @click="deleteCode(code)" />
             </p>
@@ -30,13 +30,13 @@
             <template #right>
                 <button type="button" class="button secundary" @click="() => pop()">
                     <span class="icon add" />
-                    <span v-if="cart.items.length > 0">{{ $t('95136eb9-934d-4188-b3a9-9a8d4de48dce') }}</span>
-                    <span v-else>{{ $t('ab745da8-a058-448a-b81d-2544dd93e4da') }}</span>
+                    <span v-if="cart.items.length > 0">{{ $t('%Xq') }}</span>
+                    <span v-else>{{ $t('%Xr') }}</span>
                 </button>
                 <LoadingButton v-if="cart.items.length > 0" :loading="loading">
                     <button class="button primary" type="button" @click="goToCheckout">
                         <span class="icon flag" />
-                        <span>{{ $t('a209d3fe-7b1c-43c2-b519-45fb66581201') }}</span>
+                        <span>{{ $t('%Xs') }}</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -54,7 +54,7 @@ import { useWebshopManager } from '../../composables/useWebshopManager';
 
 import { CheckoutStepsManager } from './CheckoutStepsManager';
 
-const title = $t('1259b59f-6447-4da8-887e-848f05da346f');
+const title = $t('%1DQ');
 const loading = ref(false);
 
 const errors = useErrors();

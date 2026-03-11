@@ -65,46 +65,46 @@ export function getRecordTypeName(type: RecordType) {
     const all = [
         {
             value: RecordType.Text,
-            name: $t(`668f1663-e8d1-4e1c-9397-32a1c2b70022`),
+            name: $t(`%111`),
         },
         {
             value: RecordType.Textarea,
-            name: $t(`99cf6d44-681c-450b-8c5c-74bc75ca0cde`),
+            name: $t(`%112`),
         },
         {
             value: RecordType.Address,
-            name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
+            name: $t(`%Cn`),
         },
         {
             value: RecordType.Email,
-            name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
+            name: $t(`%1FK`),
         },
         {
             value: RecordType.Phone,
-            name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
+            name: $t(`%wD`),
         },
         {
             value: RecordType.Date,
-            name: $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
+            name: $t(`%7R`),
         },
         {
             value: RecordType.Checkbox,
-            name: $t(`be247511-3af8-4006-b944-19db50d75a89`),
+            name: $t(`%115`),
         },
         {
             value: RecordType.ChooseOne,
-            name: $t(`0c57da32-95ac-4e64-a61a-0a7fa104294a`),
+            name: $t(`%116`),
         },
         {
             value: RecordType.MultipleChoice,
-            name: $t(`06f06102-d0a6-4b23-84b0-43d53fc87ca1`),
+            name: $t(`%117`),
         },
         {
             value: RecordType.File,
-            name: $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`),
+            name: $t(`%yU`),
         },
     ];
-    return all.find(t => t.value === type)?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`);
+    return all.find(t => t.value === type)?.name ?? $t(`%Gr`);
 }
 
 export enum RecordWarningType {
@@ -276,7 +276,7 @@ export class RecordSettings extends BaseRecordSettings {
     getDiffValue() {
         const type = getRecordTypeName(this.type);
         if (this.required) {
-            return $t(`bbe18b42-bbd7-4c1f-9f1c-367b27e5c18d`) + ' ' + type;
+            return $t(`%Qk`) + ' ' + type;
         }
         return type;
     }
@@ -292,7 +292,7 @@ export class RecordSettings extends BaseRecordSettings {
         if (this.required && !answer) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
+                message: $t(`%qt`),
                 field: this.id,
             });
         }
@@ -301,7 +301,7 @@ export class RecordSettings extends BaseRecordSettings {
             if (answer.settings.type !== this.type) {
                 throw new SimpleError({
                     code: 'field_type_changed',
-                    message: $t(`621c533c-23fe-43b5-b493-a4352ac479d2`),
+                    message: $t(`%1Cu`),
                     field: this.id,
                 });
             }
@@ -317,34 +317,34 @@ export class RecordSettings extends BaseRecordSettings {
     get excelColumns(): { name: string; width?: number; defaultCategory?: string }[] {
         if (this.type === RecordType.Address) {
             let prefix = '';
-            const defaultCategory = $t('0a37de09-120b-4bea-8d13-6d7ed6823884');
+            const defaultCategory = $t('%Cn');
             if (this.name.toString() !== defaultCategory) {
                 prefix = this.name + ' - ';
             }
 
             return [
                 {
-                    name: prefix + $t('780f327b-5a25-497f-b741-7d0b1a659db9'),
+                    name: prefix + $t('%Co'),
                     defaultCategory, // Ignore this name
                     width: 40,
                 },
                 {
-                    name: prefix + $t('89eafa94-6447-4608-a71e-84752eab10c8'),
+                    name: prefix + $t('%cH'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('28b0f035-cb44-48b7-b60f-093f6adc26fb'),
+                    name: prefix + $t('%c'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('3f4f6c6a-e2c5-4bee-83a3-77d8e55a1e60'),
+                    name: prefix + $t('%CQ'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('b1064996-ca77-48d0-b178-4bbd6af44e8e'),
+                    name: prefix + $t('%Cp'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },

@@ -5,12 +5,12 @@
         </h2>
 
         <dl class="details-grid hover">
-            <dt>{{ $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') }}</dt>
+            <dt>{{ $t('%Gq') }}</dt>
             <dd v-copyable>
                 {{ emergencyContact.name }}
             </dd>
 
-            <dt>{{ $t('90d84282-3274-4d85-81cd-b2ae95429c34') }}</dt>
+            <dt>{{ $t('%2k') }}</dt>
             <dd v-copyable>
                 {{ emergencyContact.phone }}
             </dd>

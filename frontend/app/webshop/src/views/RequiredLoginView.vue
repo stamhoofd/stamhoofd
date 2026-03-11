@@ -9,7 +9,7 @@
                 <template #right>
                     <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                         <span class="icon external" />
-                        <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
+                        <span>{{ $t('%Xf') }}</span>
                     </a>
                 </template>
             </STNavigationBar>
@@ -17,14 +17,14 @@
             <main>
                 <div class="box">
                     <main>
-                        <h1>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</h1>
+                        <h1>{{ $t('%Qg') }}</h1>
                         <p>
-                            {{ $t('5069be1b-b060-436f-97bc-3a927f906a1a') }}
+                            {{ $t('%Xi') }}
                         </p>
 
                         <p>
                             <button type="button" class="button primary" @click="login">
-                                {{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}
+                                {{ $t('%Qg') }}
                             </button>
                         </p>
                     </main>

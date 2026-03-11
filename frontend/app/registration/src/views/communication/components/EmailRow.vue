@@ -11,7 +11,7 @@
             {{ !organization && email.organization && email.fromName && (email.organization.name !== email.fromName) ? `${email.organization.name} (${email.fromName || email.organization?.name || email.fromAddress })` : email.fromName || email.organization?.name || email.fromAddress }}
         </p>
         <h3 class="style-title-list large">
-            {{ email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8') }}
+            {{ email.replacedSubject || $t('%1D1') }}
         </h3>
         <p v-if="email.snippet" class="style-description-small pre-wrap style-limit-lines" v-text="email.snippet" />
 

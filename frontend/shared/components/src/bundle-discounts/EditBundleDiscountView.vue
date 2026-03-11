@@ -3,40 +3,40 @@
         <h1>
             {{ title }}
         </h1>
-        <p>{{ $t('ca70876e-5a32-40fe-9224-6e61ed055df6') }}</p>
+        <p>{{ $t('%15z') }}</p>
 
         <p class="warning-box">
-            {{ $t('2b00749a-bd88-4140-a074-79bf08d359fe') }}
+            {{ $t('%160') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <TInput v-model="name" :placeholder="$t(`0f3a6e76-b5f2-4f92-b4e4-d709dffc1bde`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
+                <TInput v-model="name" :placeholder="$t(`%16R`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)" />
                 <p class="style-description-small">
-                    {{ $t('c1ed9e16-70d4-4337-a4e1-ecf31ec00bed') }}
+                    {{ $t('%161') }}
                 </p>
             </div>
         </div>
 
         <hr>
-        <h2>{{ $t('f9015fbd-7b3f-450b-b54a-25f017bb8d86') }}</h2>
+        <h2>{{ $t('%17c') }}</h2>
 
-        <STInputBox :title="$t('59a2cb2c-8935-42df-afab-6c5995e2cea3')" class="max">
+        <STInputBox :title="$t('%162')" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
                         <Radio v-model="countWholeFamily" :value="false" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('1337c2d7-aec6-4ca9-be43-b211421b772a') }}
+                        {{ $t('%163') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('09389428-111c-453b-8ed9-884e4b26fcb3') }}
+                        {{ $t('%164') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('cafe0f16-604c-436e-b12e-ef6b0e9d2387') }}
+                        {{ $t('%165') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -44,32 +44,32 @@
                         <Radio v-model="countWholeFamily" :value="true" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('7bf36754-abf8-40f0-a7f0-70439bbbecac') }}
+                        {{ $t('%166') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('02a33069-e9a3-4477-a55b-e05a627976f1') }}
+                        {{ $t('%167') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('2509e2f2-111f-4eb5-8612-487dd62950a2') }}
+                        {{ $t('%168') }}
                     </p>
                 </STListItem>
             </STList>
         </STInputBox>
 
-        <STInputBox v-if="countWholeFamily" :title="$t('6a21c1ba-b3fb-4a6f-983f-7f407a2a3f66')" class="max">
+        <STInputBox v-if="countWholeFamily" :title="$t('%169')" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <template #left>
                         <Radio v-model="countPerGroup" :value="false" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('3ce43f2c-d59c-4cb7-8957-3508770fd5a8') }}
+                        {{ $t('%16A') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('b9b2c925-1396-4536-b883-6f7d82acfcb1') }}
+                        {{ $t('%16B') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('a7ec27e7-ec66-41da-ae2d-ea67fe8a088d') }}
+                        {{ $t('%16C') }}
                     </p>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -77,33 +77,33 @@
                         <Radio v-model="countPerGroup" :value="true" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('ea9dfea3-7c81-4b90-9d1a-aee6a9e34aea') }}
+                        {{ $t('%16D') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('374ffe63-707c-4e33-958b-30c91db2a527') }}
+                        {{ $t('%16E') }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('fef46e6b-6dd7-406b-947e-8317a6736d68') }}
+                        {{ $t('%16F') }}
                     </p>
                 </STListItem>
             </STList>
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('e3e20081-5971-478e-a69b-09b61fb858da') }}</h2>
-        <p>{{ $t('09087d69-6c29-447e-8d6c-0b1aac491afc') }}</p>
+        <h2>{{ $t('%16G') }}</h2>
+        <p>{{ $t('%16H') }}</p>
 
         <GroupPriceDiscountsInput v-model="discounts" />
 
         <hr>
-        <h2>{{ $t('98666406-d3e9-4c35-a1c8-d6dc80949866') }}</h2>
+        <h2>{{ $t('%16I') }}</h2>
         <p>
-            {{ $t('1eb85876-5ca5-4388-9a1a-bfece589bdcf') }}
+            {{ $t('%16J') }}
         </p>
 
         <LoadingBoxTransition :error-box="errors.errorBox">
             <div v-if="patchedGroups !== null && patchedGroups.length === 0" class="info-box">
-                {{ $t('d64c7018-f8f5-4532-88b4-a1a29490a49c') }}
+                {{ $t('%16K') }}
             </div>
             <STList v-if="patchedGroups !== null">
                 <STListItem v-for="group of patchedGroups" :key="group.id" class="container" :selectable="true" @click="editGroup(group)">
@@ -149,7 +149,7 @@ const props = withDefaults(
     },
 );
 
-const title = $t('472a987d-498d-46b0-b925-3963f729492b');
+const title = $t('%16L');
 const deleting = ref(false);
 const pop = usePop();
 const errors = useErrors();
@@ -210,7 +210,7 @@ useValidation(errors.validator, () => {
     if (name.value.length === 0) {
         throw new SimpleError({
             code: 'invalid_field',
-            message: $t('c6be4ce9-199f-43cc-9c64-1b2ec1c83b80'),
+            message: $t('%16M'),
             field: 'name',
         });
     }
@@ -294,7 +294,7 @@ function getDescriptionForGroup(group: Group): string | undefined {
     if (group.settings.prices.length === 1) {
         const customDiscounts = group.settings.prices[0].bundleDiscounts.get(props.id)?.customDiscounts;
         if (customDiscounts) {
-            return $t('62397a8b-fcf1-404e-afef-d6cc49c577d6') + '\n' + BundleDiscount.discountsToText(customDiscounts);
+            return $t('%16N') + '\n' + BundleDiscount.discountsToText(customDiscounts);
         }
         return;
     }
@@ -306,18 +306,18 @@ function getDescriptionForGroup(group: Group): string | undefined {
     if (applicablePrices.length === group.settings.prices.length) {
         const hasCustom = group.settings.prices.map(p => ({ name: p.name, customDiscounts: p.bundleDiscounts.get(props.id)?.customDiscounts })).filter(p => !!p.customDiscounts);
         if (hasCustom.length) {
-            return $t('d4db6f9b-ede7-4c60-b910-5ca947208d91') + '\n' + hasCustom.map(p => `${p.name}: ${BundleDiscount.discountsToText(p.customDiscounts!)}`).join('\n');
+            return $t('%16O') + '\n' + hasCustom.map(p => `${p.name}: ${BundleDiscount.discountsToText(p.customDiscounts!)}`).join('\n');
         }
         // default prices
         return;
     }
 
     if (applicablePrices.length === 1) {
-        return $t('2bd72941-dfeb-48a8-872a-16ef0aff1dc6', {
+        return $t('%16S', {
             priceName: applicablePrices[0].name,
         });
     }
-    return $t('1363a154-392e-41a2-b18f-938fb72c3ef3') + applicablePrices.map(p => p.name).join(', ');
+    return $t('%16P') + applicablePrices.map(p => p.name).join(', ');
 }
 
 async function save() {
@@ -342,7 +342,7 @@ async function doDelete() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('f79934ca-a26c-4728-9a5f-c9cec74d6b90'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'))) {
+    if (!await CenteredMessage.confirm($t('%16Q'), $t('%CJ'))) {
         return;
     }
 
@@ -364,7 +364,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

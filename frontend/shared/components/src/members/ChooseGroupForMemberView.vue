@@ -4,16 +4,16 @@
         <STNavigationBar :title="member.patchedMember.name" />
 
         <main class="center">
-            <h1>{{ $t('aca992fc-1a62-41dd-a9c4-791df30e27fb', {member: member.patchedMember.firstName}) }}</h1>
+            <h1>{{ $t('%di', {member: member.patchedMember.firstName}) }}</h1>
 
             <ScrollableSegmentedControl v-if="allowChangingOrganization" v-model="selectedOrganization" :items="items" :labels="labels">
                 <template #right>
-                    <button :v-tooltip="$t('b0c1a91e-f776-4b10-a90f-5806d9fdd400')" class="button icon gray add" type="button" @click="searchOrganization" />
+                    <button :v-tooltip="$t('%dj')" class="button icon gray add" type="button" @click="searchOrganization" />
                 </template>
             </ScrollableSegmentedControl>
 
             <p v-if="differentOrganization" class="info-box icon basket">
-                {{ $t('4aeecfa0-8780-4062-86e7-962dc037e794') }} {{ selectedOrganization.name }}.
+                {{ $t('%dk') }} {{ selectedOrganization.name }}.
             </p>
 
             <template v-else>
@@ -29,7 +29,7 @@
                 <hr v-if="index > 0 || !allowChangingOrganization"><h2 class="style-with-button">
                     <div>
                         {{ category.settings.name }}
-                        <span v-if="!category.settings.public" class="icon lock gray" :v-tooltip="$t('e11ad49e-d853-464c-a951-d45b9549ec30')" />
+                        <span v-if="!category.settings.public" class="icon lock gray" :v-tooltip="$t('%dl')" />
                     </div>
                     <div>
                         <span class="title-suffix">{{ selectedOrganization.period.period.nameShort }}</span>
@@ -62,7 +62,7 @@ const auth = useUninheritedPermissions({ patchedOrganization: selectedOrganizati
 const present = usePresent();
 const app = useAppContext();
 
-const searchOrganizationTitle = computed(() => $t('2669729c-718d-49a1-9e4f-b3a65a6479a8', { firstName: props.member.patchedMember.firstName }));
+const searchOrganizationTitle = computed(() => $t('%5G', { firstName: props.member.patchedMember.firstName }));
 const navigate = useNavigationActions();
 const organization = useOrganization();
 const differentOrganization = computed(() => selectedOrganization.value && !props.member.family.checkout.cart.isEmpty && props.member.family.checkout.singleOrganization?.id !== selectedOrganization.value.id);
@@ -117,8 +117,8 @@ const alreadyRegisteredMessage = computed(() => {
 
     if (groups.length > 0) {
         const firstName = props.member.patchedMember.firstName;
-        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
-        return $t(`fc00001e-5d05-485c-b931-1122504e5d36`, { firstName, groups: groupsString });
+        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
+        return $t(`%15W`, { firstName, groups: groupsString });
     }
 
     return null;
@@ -147,10 +147,10 @@ const noGroupsMessage = computed(() => {
     const organizationName = selectedOrganization.value?.name;
 
     if (groups.length > 0) {
-        return $t(`2ae30b48-9f5d-4e55-9b7d-41a792704442`, { organization: organizationName ?? '', member: firstName });
+        return $t(`%zL`, { organization: organizationName ?? '', member: firstName });
     }
 
-    return $t(`90c49f44-4daa-4746-8fda-3558c588e651`, {
+    return $t(`%14G`, {
         member: firstName,
         organization: organizationName ?? '',
     });

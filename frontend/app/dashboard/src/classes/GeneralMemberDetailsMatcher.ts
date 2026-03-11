@@ -70,7 +70,7 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
         if (!cell && this.required) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`48f95d88-4cd4-414e-8236-e8ec8b921bfa`),
+                message: $t(`%18F`),
             });
         }
 
@@ -84,7 +84,7 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
             if (this.required) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`48f95d88-4cd4-414e-8236-e8ec8b921bfa`),
+                    message: $t(`%18F`),
                 });
             }
             return;

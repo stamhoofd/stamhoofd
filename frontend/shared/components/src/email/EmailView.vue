@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" :email-block="patchedEmail.recipientFilter.canShowInMemberPortal" :save-icon-mobile="hasMoreSettings || !willSend ? undefined : 'send'" :save-icon="hasMoreSettings || !willSend ? undefined : 'send'" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="hasMoreSettings ? ($t('618f51bc-cad2-453f-bece-70ba56b7d1a9') + '…') : (willSend ? (sendAsEmail ? $t('618f51bc-cad2-453f-bece-70ba56b7d1a9') : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3')) : $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d'))" :replacements="replacements" :title="title" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" :email-block="patchedEmail.recipientFilter.canShowInMemberPortal" :save-icon-mobile="hasMoreSettings || !willSend ? undefined : 'send'" :save-icon="hasMoreSettings || !willSend ? undefined : 'send'" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="hasMoreSettings ? ($t('%1DC') + '…') : (willSend ? (sendAsEmail ? $t('%1DC') : $t('%1Fe')) : $t('%v7'))" :replacements="replacements" :title="title" @save="send">
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
                 <ProgressRing :radius="7" :stroke="2" :loading="true" :opacity="showLoading ? 1 : 0" />
@@ -16,20 +16,20 @@
                     accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif"
                     @change="appendAttachment($event)"
                 >
-                    <span v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button icon attachment">
+                    <span v-tooltip="$t('%aa')" class="button icon attachment">
                         <span v-if="$isMobile && patchedEmail.attachments.length > 0" class="bubble">{{ patchedEmail.attachments.length }}</span>
                     </span>
                 </UploadFileButton>
 
                 <hr v-if="canOpenTemplates">
-                <button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
+                <button v-if="canOpenTemplates" v-tooltip="$t('%ab')" class="button icon email-template" type="button" @click="openTemplates" />
             </template>
 
             <!-- List -->
             <template #list>
                 <STListItem v-if="!props.editEmail" class="no-padding right-stack">
                     <div class="list-input-box">
-                        <span>{{ $t('17a71942-a3d7-4d19-97bb-307cabffc1d6') }}:</span>
+                        <span>{{ $t('%RV') }}:</span>
 
                         <div v-if="onlyOption" class="list-input">
                             {{ toDescription }}
@@ -40,26 +40,26 @@
                         </button>
                     </div>
                     <template #right>
-                        <span v-if="patchedEmail.emailRecipientsCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('69e2b2ce-e8d5-4833-9b6c-05c058743634') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
+                        <span v-if="patchedEmail.emailRecipientsCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('%1Fp') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
                         <span v-else-if="patchedEmail.emailRecipientsCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.emailRecipientsCount) }}</span>
                         <span v-else class="style-placeholder-skeleton" />
                     </template>
                 </STListItem>
                 <STListItem class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>{{ $t('709a5ff3-8d79-447b-906d-2c3cdabb41cf') }}:</span>
-                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`13b42902-e159-4e6a-8562-e87c9c691c8b`)">
+                        <span>{{ $t('%aO') }}:</span>
+                        <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`%aQ`)">
                     </div>
                 </STListItem>
 
                 <STListItem v-if="senders.length > 0" class="no-padding" element-name="label">
                     <div class="list-input-box">
-                        <span>{{ $t('01b5d104-748c-4801-a369-4eab05809fcf') }}:</span>
+                        <span>{{ $t('%TA') }}:</span>
 
                         <div class="input-icon-container right icon arrow-down-small gray" :class="{'no-padding': !auth.hasFullAccess()}">
                             <select v-model="senderId" class="list-input">
                                 <option :value="null" disabled>
-                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
+                                    {{ $t('%1Fq') }}
                                 </option>
                                 <option v-for="e in senders" :key="e.id" :value="e.id">
                                     {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
@@ -97,14 +97,14 @@
             <!-- Warnings and errors -->
             <template v-if="senders.length === 0">
                 <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
-                    {{ $t('ae013398-3667-40ff-ad66-c0cd0050f35c') }}
+                    {{ $t('%ac') }}
                     <span class="button text inherit-color">
                         <span class="icon settings" />
-                        <span>{{ $t('741168a8-76e8-4bcb-889e-432b1048df11') }}</span>
+                        <span>{{ $t('%1Ki') }}</span>
                     </span>
                 </p>
                 <p v-else class="warning-box">
-                    {{ $t('9ec8b45b-3321-4c1a-90bb-74e22c3e7f09') }}
+                    {{ $t('%ad') }}
                 </p>
             </template>
         </editorview>
@@ -171,7 +171,7 @@ export type RecipientMultipleChoiceOption = {
 const willSend = computed(() => {
     return (!props.editEmail || props.editEmail.status === EmailStatus.Draft);
 });
-const title = computed(() => props.editEmail ? (willSend.value ? $t('ce6d1409-7683-406e-836b-d1a48981c060') : $t('b13d463e-fc48-402e-be6a-95240cc09d7c')) : $t('34bb46fd-8e22-4f18-a4d0-eaa9b382ceb4'));
+const title = computed(() => props.editEmail ? (willSend.value ? $t('%1Fj') : $t('%1Fr')) : $t('%1Fs'));
 const creatingEmail = ref(true);
 const organization = useOrganization();
 const platform = usePlatform();
@@ -323,8 +323,8 @@ async function doDelete() {
         return false;
     }
     if (!await CenteredMessage.confirm(
-        $t('c3a06b52-d25c-4ec4-afe7-208773e1332e'),
-        $t('201437e3-f779-47b6-b4de-a0fa00f3863e'),
+        $t('%1Ev'),
+        $t('%55'),
     )) {
         return false;
     }
@@ -619,7 +619,7 @@ async function send() {
     await waitForSave();
 
     if (savingPatch.value) {
-        Toast.info($t(`a6d49891-5af9-4dee-8dba-57ad854fb955`)).show();
+        Toast.info($t(`%vH`)).show();
         return;
     }
 
@@ -628,7 +628,7 @@ async function send() {
     }
 
     if (subject.value.trim().length === 0) {
-        Toast.error($t(`466a4e32-6cad-41ca-902c-b01ba6215de3`)).show();
+        Toast.error($t(`%1Ft`)).show();
         return;
     }
 
@@ -658,22 +658,22 @@ async function send() {
     }
 
     if (!sendAsEmail.value && !showInMemberPortal.value) {
-        Toast.info($t(`040cc66c-e27f-4822-87ad-722bca4f5038`)).show();
+        Toast.info($t(`%1Fu`)).show();
         return;
     }
 
     const emailRecipientsCount = email.value.emailRecipientsCount;
-    let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
+    let confirmText = $t(`%vI`);
 
     if (emailRecipientsCount) {
-        confirmText = emailRecipientsCount === 1 ? $t('62beee9f-1bbc-4d3c-9cec-58981122c5a6') : $t('3a666229-22b8-41b8-b2f8-17b70c32feb8', { count: emailRecipientsCount });
+        confirmText = emailRecipientsCount === 1 ? $t('%1Fl') : $t('%1Fm', { count: emailRecipientsCount });
     }
 
     if (!sendAsEmail.value) {
-        confirmText = $t(`98603c16-adf9-4aa9-9685-4a1199dd04d4`);
+        confirmText = $t(`%1Fo`);
     }
 
-    const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`618f51bc-cad2-453f-bece-70ba56b7d1a9`) : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3'));
+    const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`%1DC`) : $t('%1Fe'));
 
     if (!isConfirm) return;
 
@@ -698,10 +698,10 @@ async function send() {
 
         email.value.deepSet(response.data);
         if (email.value.sendAsEmail) {
-            Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
+            Toast.success($t(`%vJ`)).show();
         }
         else {
-            Toast.success($t('730f955b-964e-4bb3-8caf-df6c7961c1ae')).show();
+            Toast.success($t('%1Fn')).show();
         }
 
         await GlobalEventBus.sendEvent('selectTabById', 'communication');
@@ -768,7 +768,7 @@ async function showToMenu(event: MouseEvent) {
             const selectedOption = option.options.find(o => o.id === selectedIds[0]);
 
             return [new ContextMenuItem({
-                name: option.name ?? selectedOption?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
+                name: option.name ?? selectedOption?.name ?? $t(`%Gr`),
                 childMenu: new ContextMenu([
                     getContextMenuForOption(option, j),
                 ]),
@@ -788,7 +788,7 @@ function deleteAttachment(attachment: EmailAttachment) {
 async function appendAttachment(file: File) {
     // Add this file as an attachment
     if (file.size > 9.5 * 1024 * 1024) {
-        const error = $t(`93533097-46c1-4f88-a582-1634d57ac2c0`);
+        const error = $t(`%vK`);
         Toast.error(error).setHide(20 * 1000).show();
         return;
     }
@@ -799,7 +799,7 @@ async function appendAttachment(file: File) {
     }
 
     if (!file.name) {
-        const error = $t(`4de518e0-b600-4aa9-912d-4cba86331427`);
+        const error = $t(`%182`);
         Toast.error(error).setHide(20 * 1000).show();
         return;
     }
@@ -810,7 +810,7 @@ async function appendAttachment(file: File) {
 
     // todo
     if (file.name.endsWith('.docx') || file.name.endsWith('.xlsx') || file.name.endsWith('.doc') || file.name.endsWith('.xls')) {
-        const error = $t(`70436d52-5a86-4231-89d5-2adf8bfd628f`);
+        const error = $t(`%vL`);
         Toast.warning(error).setHide(30 * 1000).show();
     }
 
@@ -845,9 +845,9 @@ async function openTemplates() {
                 onSelect: async (template: EmailTemplate) => {
                     if (hasExistingContent) {
                         if (!(await CenteredMessage.confirm(
-                            $t(`e7ff72f3-ca11-4a2d-b6f9-afeb344f5da6`),
-                            $t(`53a090af-f09b-4f12-885e-de93a00d9278`),
-                            $t(`be3680ca-ee60-4d09-b2f4-346617949956`),
+                            $t(`%vM`),
+                            $t(`%ko`),
+                            $t(`%vN`),
                         ))) {
                             return false;
                         }
@@ -903,23 +903,23 @@ const shouldNavigateAway = async () => {
     if (autoSaveEnabled.value) {
         // todo check saving
         const option = await CenteredMessage.show({
-            title: $t('449779b6-61ac-4d4a-bc9d-906fc6db8cf6'),
-            description: $t('7b96067c-cab3-4585-932b-f78545a0bd81'),
+            title: $t('%1MH'),
+            description: $t('%1MI'),
             buttons: [
                 {
-                    text: $t('5b1cda18-8c4c-479d-9cea-cef827b3d707'),
+                    text: $t('%1MJ'),
                     type: 'primary',
                     value: 'save',
                     icon: 'download small',
                 },
                 {
-                    text: $t('30cdfa90-7756-4bc3-9b17-27760775b138'),
+                    text: $t('%1MK'),
                     type: 'secundary',
                     value: 'delete',
                     icon: 'trash small',
                 },
                 {
-                    text: $t('11d2e292-fd08-4477-bd2a-dac599a9754c'),
+                    text: $t('%1Lh'),
                     type: 'secundary',
                     value: 'cancel',
                 },
@@ -933,11 +933,11 @@ const shouldNavigateAway = async () => {
             await waitForSave();
 
             if (savingPatch.value) {
-                Toast.info($t(`6acb7c08-0c26-49c7-b5b9-eefca4ab3954`)).show();
+                Toast.info($t(`%1ML`)).show();
                 return false;
             }
             await patchEmail(false);
-            Toast.success($t(`cbc7e6ec-3219-4fd2-a0a5-79cff3cd82e4`)).show();
+            Toast.success($t(`%1MM`)).show();
             return true;
         }
         if (option === 'delete') {
@@ -948,7 +948,7 @@ const shouldNavigateAway = async () => {
         }
         return false;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

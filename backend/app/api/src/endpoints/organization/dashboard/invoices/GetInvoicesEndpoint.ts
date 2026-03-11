@@ -158,7 +158,7 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: $t(`dce51638-6129-448b-8a15-e6d778f3a76a`),
+                    human: $t(`%Cv`),
                 });
             }
             throw error;

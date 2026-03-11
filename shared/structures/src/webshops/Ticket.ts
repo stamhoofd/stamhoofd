@@ -67,7 +67,7 @@ export class TicketPublic extends Ticket {
 
     getTitle() {
         if (!this.isSingle) {
-            return $t(`de971042-551d-43d2-ab47-e76132156887`);
+            return $t(`%2K`);
         }
         return this.items[0].product.name;
     }
@@ -94,9 +94,9 @@ export class TicketPublic extends Ticket {
         const from = this.originalSeat.getNameString(webshop, item.product);
 
         if (isCustomer) {
-            return $t(`bfbfa403-7d12-4cbd-b299-2dd3a8b32ad1`, { from, to });
+            return $t(`%tE`, { from, to });
         }
-        return $t(`6d281e06-4827-4b95-9434-9e3d5d96215a`, { from, to });
+        return $t(`%tF`, { from, to });
     }
 
     getIndexDescriptionString(webshop: Webshop | WebshopPreview) {
@@ -125,8 +125,8 @@ export class TicketPublic extends Ticket {
         }
         return [
             {
-                title: $t(`8435edb8-619e-4ddf-b5c8-4d1a2bc44acc`),
-                value: $t(`896f4cd8-ee2e-4ff6-a174-a1c8078b6a52`),
+                title: $t(`%sA`),
+                value: $t(`%tG`),
             },
         ];
     }

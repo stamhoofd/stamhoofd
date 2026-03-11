@@ -6,16 +6,16 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox v-model="dataPermissions" :indeterminate="!dataPermissionsChangeDate">
-            {{ $t('f1f52196-360d-4d73-bf72-473d8df81d64') }}
+            {{ $t('%fB') }}
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('78dedb37-a33d-4907-8034-43345eea18a0') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" @click="clear">
-                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
+            {{ $t('%fC') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('%fD')" @click="clear">
+                {{ $t('%fE') }}
             </button>.
         </p>
         <p v-if="!dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('308d1e59-057c-4a51-846f-8557ba5a385e') }}
+            {{ $t('%Bn') }}
         </p>
 
         <p v-if="checkboxWarning" v-show="!dataPermissions" class="warning-box">

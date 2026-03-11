@@ -1,26 +1,26 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" data-submit-last-field :title="$t(`1db407ec-4d25-40f9-92b9-abf820faaf98`)" @save="goNext">
-        <h1>{{ $t('1db407ec-4d25-40f9-92b9-abf820faaf98') }}</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :title="$t(`%uE`)" @save="goNext">
+        <h1>{{ $t('%uE') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!isLoggedIn">
-            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
+            <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" />
+            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`%1FK`)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
         </template>
 
-        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`d72f4e7e-91b8-4edf-82a7-35c97c4498af`)" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('%2k' )" name="mobile" :validator="errors.validator" autocomplete="tel" :placeholder="$t(`%Xu`)" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="checkoutManager.checkout.fieldAnswers" :error-box="errors.errorBox" />
     </SaveView>
@@ -48,14 +48,14 @@ const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 
 const emailPlaceholder = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
-        return $t('b01571e1-077d-4874-b59a-fe380253bfd6');
+        return $t('%1Dk');
     }
-    return $t('97c9795d-dede-48ca-af05-1e4791209e17');
+    return $t('%1Dl');
 });
 
 const emailDescription = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
-        return $t('b57b303a-b0e2-414f-be96-c61f40d64a87');
+        return $t('%1Dm');
     }
     return null;
 });

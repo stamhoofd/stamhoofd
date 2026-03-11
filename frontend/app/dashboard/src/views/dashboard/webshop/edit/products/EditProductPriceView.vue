@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? $t(`5da36b5d-903c-415e-a5bc-10c8a05038ae`) : $t(`4f42fede-70b7-46cd-9749-fbefdb744567`)" :disabled="!hasChanges && !isNew" :loading="saveLoading" @save="save">
+    <SaveView :title="isNew ? $t(`%TR`) : $t(`%TS`)" :disabled="!hasChanges && !isNew" :loading="saveLoading" @save="save">
         <h1 v-if="isNew">
-            {{ $t('5da36b5d-903c-415e-a5bc-10c8a05038ae') }}
+            {{ $t('%TR') }}
         </h1>
         <h1 v-else>
-            {{ $t('4f42fede-70b7-46cd-9749-fbefdb744567') }}
+            {{ $t('%TS') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -13,12 +13,12 @@
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('bf57e599-cac3-4b3c-a115-470efa0f3dea') }}
+                {{ $t('%TT') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

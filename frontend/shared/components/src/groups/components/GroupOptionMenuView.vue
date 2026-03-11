@@ -45,7 +45,7 @@ const deleting = ref(false);
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t('a587b5d0-594e-421c-95a5-35c0c560938c') : $t('d7d3677f-6225-4769-a5b1-389a769bb84a');
+    return props.isNew ? $t('%68') : $t('%69');
 });
 
 async function save() {
@@ -65,7 +65,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('f58412a9-9db9-4aa3-ad68-fa089d4f345b'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9f8c1ed0-371b-4c22-940c-57d624734c18'))) {
+    if (!await CenteredMessage.confirm($t('%66'), $t('%55'), $t('%67'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
@@ -76,7 +76,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('94337d0a-0522-43be-b337-73ddcf7fdd45')).show();
+            await Toast.success($t('%1FX')).show();
         }
         await pop({force: true})
     } catch (e) {
@@ -91,7 +91,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'))
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'))
 }
 
 defineExpose({

@@ -70,7 +70,7 @@ export class CityWithZipColumnMatcher extends SharedMemberDetailsMatcher impleme
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'City and zipcode expected',
-                    human: $t(`b56e5d51-3269-47c2-8586-5dec2873f67b`),
+                    human: $t(`%18Q`),
                 });
             }
             // TODO! order!

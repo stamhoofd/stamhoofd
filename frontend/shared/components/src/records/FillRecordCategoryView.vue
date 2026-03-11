@@ -23,7 +23,7 @@ const props = withDefaults(
         saveText?: string;
         forceMarkReviewed?: boolean | null;
     }>(), {
-        saveText: () => $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
+        saveText: () => $t(`%v7`),
         forceMarkReviewed: null,
     },
 );
@@ -72,7 +72,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 }
 
 defineExpose({

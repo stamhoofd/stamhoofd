@@ -93,7 +93,7 @@ export function renderAny(obj: unknown): () => (string | ReturnType<typeof h> | 
                         'overflow': 'hidden',
                     },
                 }),
-                obj.value || $t(`31a0612a-b8a3-481d-9738-80be685a8680`),
+                obj.value || $t(`%la`),
             ]);
         }
 
@@ -104,7 +104,7 @@ export function renderAny(obj: unknown): () => (string | ReturnType<typeof h> | 
                 href: obj.id,
                 target: '_blank',
             }, [
-                obj.value || $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`),
+                obj.value || $t(`%yU`),
             ]);
         }
 
@@ -166,7 +166,7 @@ export function renderAny(obj: unknown): () => (string | ReturnType<typeof h> | 
         }
 
         if (obj.id) {
-            return () => copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString() || $t('0e21480d-5597-4337-bcee-5f4eba73fb7e')), 'ID: ' + obj.id), obj.id);
+            return () => copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString() || $t('%15v')), 'ID: ' + obj.id), obj.id);
         }
         const str = obj.toString();
 

@@ -1,19 +1,19 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :disable-pop="true" :disable-dismiss="!isPopup" :title="$t(`53a090af-f09b-4f12-885e-de93a00d9278`)" />
+        <STNavigationBar :disable-pop="true" :disable-dismiss="!isPopup" :title="$t(`%ko`)" />
 
         <main>
             <h1 v-if="created && type === 'order'">
-                {{ $t('66268088-4ab1-4ace-b4fa-bb04abb383a1') }}
+                {{ $t('%kT') }}
             </h1>
             <h1 v-else-if="created">
-                {{ $t('fc18da3f-8c6a-4a86-9de5-08c56fbf7ede') }}
+                {{ $t('%kU') }}
             </h1>
             <h1 v-else-if="payment.price < 0">
-                {{ $t('447d1679-8b5c-4bce-8398-9df88cdae1a1') }}
+                {{ $t('%kV') }}
             </h1>
             <h1 v-else>
-                {{ $t('f0188924-973f-4b4e-a644-0bdb2f43ce75') }}
+                {{ $t('%kW') }}
             </h1>
 
             <p v-if="payment.price > 0 && payment.status !== 'Succeeded'">
@@ -21,55 +21,55 @@
                     {{ payment.transferSettings.infoDescription }}
                 </template>
                 <template v-else-if="created">
-                    {{ $t('0dee04b6-4e22-4fbf-af88-09c067bf9ebd', {description: formattedTransferDescription ?? ''}) }}
+                    {{ $t('%kX', {description: formattedTransferDescription ?? ''}) }}
                 </template>
                 <template v-else>
-                    {{ $t('eaccc532-f920-49d6-8eb9-08d43f24b1fd', {description: transferDescription ?? ''}) }}
+                    {{ $t('%kY', {description: transferDescription ?? ''}) }}
                 </template>
             </p>
             <p v-else-if="payment.price < 0 && payment.status !== 'Succeeded' && !created">
-                {{ $t('6f258e1c-997c-461b-99ca-e9cc0020579d') }}
+                {{ $t('%kZ') }}
             </p>
             <p v-else-if="payment.price < 0 && payment.status === 'Succeeded'" class="success-box">
-                {{ $t('6511bf8a-b374-4dd1-8048-03f7f22d8067') }}
+                {{ $t('%ka') }}
             </p>
 
             <div class="payment-split">
                 <div class="rectangle">
                     <div v-if="payment.price > 0" class="rectangle-top hide-smartphone">
-                        {{ $t('75e4605c-cfa2-4906-a922-fffe2af099db') }}
+                        {{ $t('%kb') }}
                     </div>
                     <table class="payment-transfer-table rectangle">
                         <tbody>
                             <tr>
-                                <td>{{ $t('43ca079c-2af8-4bde-9f68-abeca3c3a7d0') }}</td>
-                                <td v-copyable="payment.price/100" class="style-copyable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
+                                <td>{{ $t('%1JL') }}</td>
+                                <td v-copyable="payment.price/100" class="style-copyable" :v-tooltip="$t('%Ip')">
                                     {{ formatPrice(payment.price) }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
-                                <td>{{ $t('31c28f13-d3b8-42ee-8979-c8224633237e') }}</td>
-                                <td v-copyable="creditor" class="style-copyable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
+                                <td>{{ $t('%J5') }}</td>
+                                <td v-copyable="creditor" class="style-copyable" :v-tooltip="$t('%Ip')">
                                     {{ creditor }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
-                                <td>{{ $t('1fbed7d4-9e6e-4c87-b7fe-a9059aef2492') }}</td>
-                                <td v-copyable="iban" class="style-copyable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
+                                <td>{{ $t('%kc') }}</td>
+                                <td v-copyable="iban" class="style-copyable" :v-tooltip="$t('%Ip')">
                                     {{ iban }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td v-if="isStructured && isBelgium">
-                                    {{ $t('136b7ba4-7611-4ee4-a46d-60758869210f') }}
+                                    {{ $t('%J8') }}
                                 </td>
                                 <td v-else-if="isStructured">
-                                    {{ $t('013baf49-0ed9-4d41-8d3c-509897a2890a') }}
+                                    {{ $t('%kd') }}
                                 </td>
                                 <td v-else>
-                                    {{ $t('136b7ba4-7611-4ee4-a46d-60758869210f') }}
+                                    {{ $t('%J8') }}
                                 </td>
-                                <td v-copyable="transferDescription" class="style-copyable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
+                                <td v-copyable="transferDescription" class="style-copyable" :v-tooltip="$t('%Ip')">
                                     {{ formattedTransferDescription }}
                                 </td>
                             </tr>
@@ -78,7 +78,7 @@
                 </div>
                 <div v-if="payment.price > 0" class="hide-smartphone rectangle">
                     <div class="rectangle-top">
-                        {{ $t('dd954163-a042-412a-acb3-49a55d3864b4') }}
+                        {{ $t('%ke') }}
                     </div>
                     <div class="rectangle-bottom">
                         <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg"><img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
@@ -88,8 +88,8 @@
             </div>
 
             <div v-if="false && isBelgium && getOS() === 'iOS' && payment.price > 0 && payment.status !== 'Succeeded'" class="only-smartphone container">
-                <hr><h2>{{ $t('a0c9ef06-4f8e-4fa0-b94b-c1e612b390dc') }}</h2>
-                <p>{{ $t('7e08e7df-a19c-486d-9ab4-e892762c0913') }}</p>
+                <hr><h2>{{ $t('%kf') }}</h2>
+                <p>{{ $t('%kg') }}</p>
 
                 <STList>
                     <STListItem element-name="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
@@ -97,10 +97,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg">
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('a2f52798-c27f-4904-b651-2bec3aeebf21') }}
+                            {{ $t('%1h') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('e340ffec-98ed-4951-a5e0-dd98f2949229') }}
+                            {{ $t('%kh') }}
                         </p>
                     </STListItem>
 
@@ -109,10 +109,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg">
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('9f6b5880-d02b-46a8-9b83-fc1e5320defe') }}
+                            {{ $t('%1e') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('d8a84fa6-ddc2-4518-8d12-3608ab830a15') }}
+                            {{ $t('%ki') }}
                         </p>
                     </STListItem>
 
@@ -121,10 +121,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg">
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('0b894cff-2ae3-4954-a71c-7ccd1280668a') }}
+                            {{ $t('%P') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('d8a84fa6-ddc2-4518-8d12-3608ab830a15') }}
+                            {{ $t('%ki') }}
                         </p>
                     </STListItem>
 
@@ -133,10 +133,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png">
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('21b523b8-b6f1-4b21-ba56-0f9640670339') }}
+                            {{ $t('%b') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('d8a84fa6-ddc2-4518-8d12-3608ab830a15') }}
+                            {{ $t('%ki') }}
                         </p>
                     </STListItem>
 
@@ -145,10 +145,10 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('5b576dbc-9ed9-4faf-8bf7-9cf95c2b6dbe') }}
+                            {{ $t('%kj') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('d8a84fa6-ddc2-4518-8d12-3608ab830a15') }}
+                            {{ $t('%ki') }}
                         </p>
                     </STListItem>
 
@@ -157,28 +157,28 @@
                             <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png">
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('131fbe93-acac-497e-a768-bbfccf3425f0') }}
+                            {{ $t('%V') }}
                         </h3>
                         <p class="style-description">
-                            {{ $t('d8a84fa6-ddc2-4518-8d12-3608ab830a15') }}
+                            {{ $t('%ki') }}
                         </p>
                     </STListItem>
                 </STList>
 
                 <p class="style-description">
-                    {{ $t('a69c9d5b-7191-49d8-b21a-f196547dfc0e') }}
+                    {{ $t('%kk') }}
                 </p>
             </div>
 
             <p v-if="payment.price > 0 && payment.status === 'Succeeded'" class="success-box">
-                {{ $t('5a4e3984-d134-42c0-abbd-d97ea48a6a11') }}
+                {{ $t('%kl') }}
             </p>
             <template v-else-if="payment.price > 0 && created">
                 <p v-if="isBelgium" class="hide-smartphone info-box">
-                    <span>*{{ $t('a9a8348c-369e-4a06-8fcd-00da473238bc') }} <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a></span>
+                    <span>*{{ $t('%km') }} <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">{{ $t('%19t') }}</a></span>
                 </p>
                 <p v-else class="hide-smartphone info-box">
-                    {{ $t('3ae15f2e-b4fb-43dd-9dc6-1c388a9dc062') }}
+                    {{ $t('%kn') }}
                 </p>
             </template>
         </main>
@@ -187,10 +187,10 @@
             <template #right>
                 <button v-if="payment.price > 0 && payment.status !== 'Succeeded'" class="button secundary hide-smartphone" type="button" @click="helpMe">
                     <span class="icon help" />
-                    <span>{{ $t('809b7c07-e6fb-4d65-806d-7ec52cc8b3b8') }}</span>
+                    <span>{{ $t('%kI') }}</span>
                 </button>
                 <button class="button primary" type="button" @click="goNext">
-                    <span>{{ $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') }}</span>
+                    <span>{{ $t('%16p') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>
@@ -286,16 +286,16 @@ const preventLeave = (event: BeforeUnloadEvent) => {
 
     if (props.type === 'registration') {
         // Chrome requires returnValue to be set
-        event.returnValue = $t(`392abeb5-1b80-404a-99bb-a8312778e44d`);
+        event.returnValue = $t(`%12t`);
 
         // This message is not visible on most browsers
-        return $t(`392abeb5-1b80-404a-99bb-a8312778e44d`);
+        return $t(`%12t`);
     }
     // Chrome requires returnValue to be set
-    event.returnValue = $t(`74ffa9d6-33a5-4dba-aa37-458bf9596aa7`);
+    event.returnValue = $t(`%12u`);
 
     // This message is not visible on most browsers
-    return $t(`74ffa9d6-33a5-4dba-aa37-458bf9596aa7`);
+    return $t(`%12u`);
 };
 
 onBeforeUnmount(() => {
@@ -352,10 +352,10 @@ async function generateQRCode() {
 
 function helpMe() {
     if (props.type === 'order') {
-        new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`82e41420-4b71-4fef-b604-592f87d812c9`)).addCloseButton().show();
+        new CenteredMessage($t(`%kI`), $t(`%12v`)).addCloseButton().show();
     }
     else {
-        new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`ce058fa7-aba3-4e48-90b5-43de91db590c`)).addCloseButton().show();
+        new CenteredMessage($t(`%kI`), $t(`%12w`)).addCloseButton().show();
     }
 }
 

@@ -1,37 +1,37 @@
 <template>
     <div id="account-view" class="st-view">
-        <STNavigationBar :title="$t('a48e6035-5e61-4fc7-9ac4-89016e7174fe')" />
+        <STNavigationBar :title="$t('%E')" />
 
         <main class="center">
             <h1>
-                {{ $t("a48e6035-5e61-4fc7-9ac4-89016e7174fe") }}
+                {{ $t("%E") }}
             </h1>
-            <p>{{ $t('76741df9-b885-4143-b2eb-210329e23169') }}</p>
+            <p>{{ $t('%jj') }}</p>
 
             <p v-if="isUserModeOrganization && patched.organizationId === null" class="error-box icon privacy">
-                {{ $t('8539962c-88cc-48f1-b51d-db922ff42c04') }}
+                {{ $t('%jk') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form @submit.prevent="save" novalidate>
-                <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`d9f16258-ce87-41ad-a5d4-a66ad6bd514d`)">
+                <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%jx`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`%1MT`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`%1MU`)">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
 
                 <div v-if="usesPassword" class="style-button-bar">
                     <LoadingButton :loading="saving">
                         <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
-                            <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
+                            <span>{{ $t('%v7') }}</span>
                         </button>
                     </LoadingButton>
                 </div>
@@ -46,7 +46,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('a9f552ad-87f3-4ed4-8fb6-2aea378b9665') }}
+                        {{ $t('%14d') }}
                     </h3>
                     <p class="style-description-small">
                         {{ LanguageHelper.getNativeName(I18nController.shared.language) }}
@@ -63,10 +63,10 @@
                     </template>
 
                     <h3 v-if="usesPassword" class="style-title-list">
-                        {{ $t('b33f433c-0957-4411-a0d6-0f41cf5caa63') }}
+                        {{ $t('%uu') }}
                     </h3>
                     <h3 v-else class="style-title-list">
-                        {{ $t('2dd603e2-2caf-4573-8d8b-6ce8ff1dfda6') }}
+                        {{ $t('%jl') }}
                     </h3>
                 </STListItem>
 
@@ -76,10 +76,10 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('e0d2207c-2f86-4f94-881e-a1696b9e463b') }}
+                        {{ $t('%jm') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('bcd5dd71-e93e-4d19-ba21-18ff079dba55') }}
+                        {{ $t('%jn') }}
                     </p>
                 </STListItem>
 
@@ -89,7 +89,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('9ca710ba-28cc-4008-9e10-9c61a1da3c2e', {sso: ssoConfig?.fullName || $t('662467b7-da51-4fe2-bff4-784c8f028e58') }) }}
+                        {{ $t('%jo', {sso: ssoConfig?.fullName || $t('%2b') }) }}
                     </h3>
                 </STListItem>
 
@@ -99,7 +99,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('e3398474-26b0-49d4-9f64-bae38495fb4f') }}
+                        {{ $t('%12N') }}
                     </h3>
                 </STListItem>
 
@@ -111,7 +111,7 @@
                     </template>
 
                     <h3 class="style-title-list red">
-                        {{ $t('1a202159-1cde-460c-b30e-8369cb6d34b7') }}
+                        {{ $t('%jp') }}
                     </h3>
                 </STListItem>
             </STList>
@@ -125,8 +125,8 @@
             </template>
 
             <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled)" class="container">
-                <hr><h2>{{ googleConfig.fullName || $t('8e74fdc8-06e0-4686-8ca4-dca7e28aebe3') }}</h2>
-                <p>{{ $t('25f4a491-db39-43e0-9424-96217321efc7') }}</p>
+                <hr><h2>{{ googleConfig.fullName || $t('%15b') }}</h2>
+                <p>{{ $t('%jq') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.Google)">
@@ -142,7 +142,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('0fdf16ae-29b4-4524-be32-dcbd571944df') }}
+                            {{ $t('%jr') }}
                         </h3>
                     </STListItem>
                 </STList>
@@ -150,7 +150,7 @@
 
             <div v-if="ssoConfig && ssoEnabled && usesSSO && (passwordEnabled || googleEnabled)" class="container">
                 <hr><h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
-                <p>{{ $t('a1be09e1-a95a-4597-977a-a062e46bc76e', {sso: ssoConfig.shortName || 'SSO'}) }}</p>
+                <p>{{ $t('%js', {sso: ssoConfig.shortName || 'SSO'}) }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="disconnectProvider(LoginProviderType.SSO)">
@@ -166,15 +166,15 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('1b6b261b-b5d1-4f61-96f9-a4ce241e5e02', {sso: ssoConfig.shortName || 'SSO'}) }}
+                            {{ $t('%jt', {sso: ssoConfig.shortName || 'SSO'}) }}
                         </h3>
                     </STListItem>
                 </STList>
             </div>
 
             <div v-if="passwordEnabled && usesPassword && (usesGoogle || usesSSO)" class="container">
-                <hr><h2>{{ $t('a3face2a-de93-4388-bd47-675901902508') }}</h2>
-                <p>{{ $t('ea51eb19-b496-4663-9404-bb1a14385bbd') }}</p>
+                <hr><h2>{{ $t('%ju') }}</h2>
+                <p>{{ $t('%jv') }}</p>
 
                 <STList>
                     <STListItem :selectable="true" @click.prevent="deletePassword">
@@ -190,7 +190,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('a7ca7ce4-b5e8-471a-b35a-63613e96c653') }}
+                            {{ $t('%jw') }}
                         </h3>
                     </STListItem>
                 </STList>
@@ -299,7 +299,7 @@ async function save() {
             await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle('sheet'));
         }
         else {
-            const toast = new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green');
+            const toast = new Toast($t(`%HA`), 'success green');
             toast.show();
         }
 
@@ -324,16 +324,16 @@ async function deleteRequest() {
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: $t(`de26c235-6736-40b9-880a-82046fc2da66`),
-                description: $t(`4bbc8b26-74b8-43e2-95e7-86fa00ca517b`),
-                confirmationTitle: $t(`6d4c71ba-0757-4792-aab1-a0b7b80e7c30`),
-                confirmationPlaceholder: $t(`6a5dd477-ac82-48a1-9b7a-341192783e22`),
+                title: $t(`%12B`),
+                description: $t(`%15a`),
+                confirmationTitle: $t(`%12C`),
+                confirmationPlaceholder: $t(`%12D`),
                 confirmationCode,
-                checkboxText: $t(`4a1ad6f2-d061-4fe0-8206-8540442ad038`),
+                checkboxText: $t(`%6P`),
                 onDelete: async () => {
                     await $context.value.deleteAccount();
 
-                    Toast.success($t(`df74b936-f96f-4853-9bce-57239b3263f3`)).show();
+                    Toast.success($t(`%12E`)).show();
                     await pop({ force: true });
                     return true;
                 },
@@ -355,7 +355,7 @@ async function disconnectProvider(provider: LoginProviderType) {
     }
     disconnecting = true;
 
-    if (await CenteredMessage.confirm($t(`5f824a9b-6fda-4aa2-be1b-eca5c82eccef`), $t(`188ff806-6983-4912-ae35-b11e2621c5b5`))) {
+    if (await CenteredMessage.confirm($t(`%12F`), $t(`%12G`))) {
         const metaPatch = UserMeta.patch({});
         metaPatch.loginProviderIds.set(provider, null);
 
@@ -368,7 +368,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 
         try {
             await LoginHelper.patchUser($context.value, patch);
-            Toast.success($t(`3772eed6-90ea-45a9-90bc-f895f4c80651`)).show();
+            Toast.success($t(`%12H`)).show();
         }
         catch (e) {
             errors.errorBox = new ErrorBox(e);
@@ -378,7 +378,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 }
 
 async function deletePassword() {
-    if (await CenteredMessage.confirm($t(`a5f68615-9c65-4a37-bfb2-dae9774c912c`), $t(`201437e3-f779-47b6-b4de-a0fa00f3863e`))) {
+    if (await CenteredMessage.confirm($t(`%12I`), $t(`%55`))) {
         const patch = NewUser.patch({
             id: $user.value!.id,
             hasPassword: false,
@@ -388,7 +388,7 @@ async function deletePassword() {
 
         try {
             await LoginHelper.patchUser($context.value, patch);
-            Toast.success($t(`06d6ec0d-c5d9-4251-a749-23c400e61905`)).show();
+            Toast.success($t(`%12J`)).show();
         }
         catch (e) {
             errors.errorBox = new ErrorBox(e);
@@ -404,7 +404,7 @@ async function connectProvider(provider: LoginProviderType) {
     }
     connecting.value = true;
 
-    if (await CenteredMessage.confirm($t(`5fb8075f-4599-406c-a90e-4923be523a0a`), $t(`4b2b58ff-d6fc-46c9-8a99-638b1ce2b0d4`))) {
+    if (await CenteredMessage.confirm($t(`%12K`), $t(`%12L`))) {
         // This will redirect, so the loading will stay forever
         await $context.value.startSSO({
             providerType: provider,
@@ -414,7 +414,7 @@ async function connectProvider(provider: LoginProviderType) {
 }
 
 async function logout() {
-    if (await CenteredMessage.confirm($t(`034eed1e-a6b2-41ee-8ca1-b6bdacbd0d9c`), $t(`e3398474-26b0-49d4-9f64-bae38495fb4f`))) {
+    if (await CenteredMessage.confirm($t(`%12M`), $t(`%12N`))) {
         // Prevent auto sign in via sso
         try {
             sessionStorage.setItem('triedLogin', 'true');
@@ -442,7 +442,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

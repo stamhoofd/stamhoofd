@@ -149,8 +149,8 @@ export class STPackageService {
         item.type = BalanceItemType.STPackage;
         item.description = pack.meta.name + ' ' + (
             pack.validUntil
-                ? $t('58b2c936-9025-4613-a9be-9d9bab212ea6', { startDate: Formatter.date(now, true), endDate: Formatter.date(pack.validUntil, true) })
-                : $t('33b8f500-248a-4020-b775-4dd437ca0173', { startDate: Formatter.date(pack.meta.startDate, true) })
+                ? $t('%1LM', { startDate: Formatter.date(now, true), endDate: Formatter.date(pack.validUntil, true) })
+                : $t('%1LN', { startDate: Formatter.date(pack.meta.startDate, true) })
         );
         item.relations.set(BalanceItemRelationType.STPackage, BalanceItemRelation.create({
             id: pack.id,

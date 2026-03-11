@@ -2,65 +2,65 @@ import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordChoic
 
 export const fiscal = DocumentTemplateDefinition.create({
     type: 'fiscal',
-    name: $t(`2e2c43a8-3709-4947-83e0-3b0345cd7b44`),
+    name: $t(`%xX`),
     defaultMaxAge: 13,
     defaultMinPrice: 1_00, // = 1 cent
     fieldCategories: [
         RecordCategory.create({
             id: 'organization',
-            name: TranslatedString.create($t(`2f325358-6e2f-418c-9fea-31a14abbc17a`)),
-            description: TranslatedString.create($t(`2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd`)),
+            name: TranslatedString.create($t(`%5E`)),
+            description: TranslatedString.create($t(`%xY`)),
             records: [
                 RecordSettings.create({
                     id: 'organization.companyName',
-                    name: TranslatedString.create($t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)),
+                    name: TranslatedString.create($t(`%Gq`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.companyNumber',
-                    name: TranslatedString.create($t(`da1e6727-6f1f-4713-93a5-2ec93092b9d0`)),
+                    name: TranslatedString.create($t(`%y8`)),
                     required: false,
                     type: RecordType.Text,
-                    description: TranslatedString.create($t(`e13d9fec-ff5a-43e0-8cf4-4edc6e576d17`)),
+                    description: TranslatedString.create($t(`%y9`)),
                 }),
                 RecordSettings.create({
                     id: 'organization.companyAddress',
-                    name: TranslatedString.create($t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)),
+                    name: TranslatedString.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
                 RecordSettings.create({
                     id: 'certification.type',
-                    name: TranslatedString.create($t(`7d6fa164-e3f8-4c09-9eb4-9d2828de7128`)),
-                    description: TranslatedString.create($t(`50f3e5f0-8589-43cc-87ec-04c8ed628ed7`)),
+                    name: TranslatedString.create($t(`%xa`)),
+                    description: TranslatedString.create($t(`%xb`)),
                     required: true,
                     type: RecordType.ChooseOne,
                     choices: [
                         RecordChoice.create({
                             id: 'exception',
-                            name: TranslatedString.create($t(`5b822590-b76a-43d4-a2c9-78825f98c4e7`)),
-                            description: TranslatedString.create($t(`e089fe1b-ae31-4244-9d29-37f21655fe52`)),
+                            name: TranslatedString.create($t(`%xc`)),
+                            description: TranslatedString.create($t(`%xd`)),
                         }),
                         RecordChoice.create({
                             id: 'kind-en-gezin',
-                            name: TranslatedString.create($t(`e201d9ff-c8bb-4b39-8e33-1fa3e8882248`)),
-                            description: TranslatedString.create($t(`72d62e2a-b6e3-4d86-9d40-a316dd8386a1`)),
+                            name: TranslatedString.create($t(`%xe`)),
+                            description: TranslatedString.create($t(`%xf`)),
                         }),
                         RecordChoice.create({
                             id: 'authorities',
-                            name: TranslatedString.create($t(`20a43c31-e394-4bb4-9b1f-8afd5d5268fa`)),
-                            description: TranslatedString.create($t(`b80c6123-24fb-42fc-9770-b6c251951c58`)),
+                            name: TranslatedString.create($t(`%xg`)),
+                            description: TranslatedString.create($t(`%xh`)),
                         }),
                         RecordChoice.create({
                             id: 'foreign',
-                            name: TranslatedString.create($t(`6c729f25-24a1-4795-9558-dcc478fdb44d`)),
-                            description: TranslatedString.create($t(`2d8e8d29-9cb9-49a2-8824-5285dea824b7`)),
+                            name: TranslatedString.create($t(`%xi`)),
+                            description: TranslatedString.create($t(`%xj`)),
                         }),
                         RecordChoice.create({
                             id: 'schools',
-                            name: TranslatedString.create($t(`60f135eb-adb3-4e1a-9ba2-7e6e084a83aa`)),
-                            description: TranslatedString.create($t(`79c1d4a0-f5f3-465d-bf7b-a15b5f2a4bb4`)),
+                            name: TranslatedString.create($t(`%xk`)),
+                            description: TranslatedString.create($t(`%xl`)),
                         }),
                     ],
                 }),
@@ -68,24 +68,24 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'certification',
-            name: TranslatedString.create($t(`4ce7c41a-f020-4949-a889-71549e0f6d0f`)),
-            description: TranslatedString.create($t(`d6686410-12c2-4481-90e1-87e112e65043`)),
+            name: TranslatedString.create($t(`%xm`)),
+            description: TranslatedString.create($t(`%xn`)),
             records: [
                 RecordSettings.create({
                     id: 'certification.name',
-                    name: TranslatedString.create($t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)),
+                    name: TranslatedString.create($t(`%Gq`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'certification.companyNumber',
-                    name: TranslatedString.create($t(`65fd44a4-cc92-49e7-8b44-91a75d601a7f`)),
+                    name: TranslatedString.create($t(`%xZ`)),
                     required: false,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'certification.address',
-                    name: TranslatedString.create($t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)),
+                    name: TranslatedString.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -100,25 +100,25 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'signature',
-            name: TranslatedString.create($t(`7fec542e-0f75-4dfe-be2f-29e1d3027373`)),
-            description: TranslatedString.create($t(`dd431861-0d75-4c28-8a26-2140465e5556`)),
+            name: TranslatedString.create($t(`%xo`)),
+            description: TranslatedString.create($t(`%xp`)),
             records: [
                 RecordSettings.create({
                     id: 'signature.name',
-                    name: TranslatedString.create($t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)),
+                    name: TranslatedString.create($t(`%Gq`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'signature.capacity',
-                    name: TranslatedString.create($t(`bb8c9f3b-3578-4662-b78f-1e0e92f90229`)),
+                    name: TranslatedString.create($t(`%xq`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'signature.image',
-                    name: TranslatedString.create($t(`9c50bba5-620b-4391-88a2-a69e9034cf00`)),
-                    description: TranslatedString.create($t(`b36e52ad-a913-43ef-a36b-bda1ed04761e`)),
+                    name: TranslatedString.create($t(`%xr`)),
+                    description: TranslatedString.create($t(`%xs`)),
                     required: true,
                     type: RecordType.Image,
                     resolutions: [
@@ -135,36 +135,36 @@ export const fiscal = DocumentTemplateDefinition.create({
     documentFieldCategories: [
         RecordCategory.create({
             id: 'debtor',
-            name: TranslatedString.create($t(`72b10926-c8b2-4e8b-8527-43d8286dd9e1`)),
-            description: TranslatedString.create($t(`b1549fce-7655-4e22-9622-48eb70f35e52`)),
+            name: TranslatedString.create($t(`%Mn`)),
+            description: TranslatedString.create($t(`%xt`)),
             records: [
                 RecordSettings.create({
                     id: 'debtor.firstName',
-                    name: TranslatedString.create($t(`603606c2-95ca-4967-814c-53ec3297bf33`)),
+                    name: TranslatedString.create($t(`%1MT`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'debtor.lastName',
-                    name: TranslatedString.create($t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)),
+                    name: TranslatedString.create($t(`%1MU`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'debtor.nationalRegisterNumber',
-                    name: TranslatedString.create($t(`00881b27-7501-4c56-98de-55618be2bf11`)),
+                    name: TranslatedString.create($t(`%wK`)),
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.debtor.nationalRegisterNumber',
-                        text: TranslatedString.create($t(`d05b1cb9-e9cf-46e4-8b27-620b5562d30d`)),
+                        text: TranslatedString.create($t(`%xu`)),
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
                 }),
                 RecordSettings.create({
                     id: 'debtor.address',
-                    name: TranslatedString.create($t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)),
+                    name: TranslatedString.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -172,42 +172,42 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'member',
-            name: TranslatedString.create($t(`c3a8a598-5b30-4d37-bc99-9f3157b36246`)),
-            description: TranslatedString.create($t(`74941f69-d7cd-4003-bc5a-18d9b22e03ed`)),
+            name: TranslatedString.create($t(`%xv`)),
+            description: TranslatedString.create($t(`%xw`)),
             records: [
                 RecordSettings.create({
                     id: 'member.nationalRegisterNumber',
-                    name: TranslatedString.create($t(`00881b27-7501-4c56-98de-55618be2bf11`)),
+                    name: TranslatedString.create($t(`%wK`)),
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.member.nationalRegisterNumber',
-                        text: TranslatedString.create($t(`3f5b1183-9db6-4bd4-9187-552b7ae4126c`)),
+                        text: TranslatedString.create($t(`%xx`)),
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
                 }),
                 RecordSettings.create({
                     id: 'member.firstName',
-                    name: TranslatedString.create($t(`603606c2-95ca-4967-814c-53ec3297bf33`)),
+                    name: TranslatedString.create($t(`%1MT`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.lastName',
-                    name: TranslatedString.create($t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)),
+                    name: TranslatedString.create($t(`%1MU`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.birthDay',
-                    name: TranslatedString.create($t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`)),
+                    name: TranslatedString.create($t(`%17w`)),
                     required: true,
                     type: RecordType.Date,
                 }),
                 RecordSettings.create({
                     id: 'member.address',
-                    name: TranslatedString.create($t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)),
+                    name: TranslatedString.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -215,17 +215,17 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'price',
-            name: TranslatedString.create($t(`1205deb9-498d-435d-a6e1-91ea98371523`)),
-            description: TranslatedString.create($t(`f3262b38-7afe-485b-bd97-fab76e825818`)),
+            name: TranslatedString.create($t(`%1IP`)),
+            description: TranslatedString.create($t(`%xy`)),
             records: [
                 RecordSettings.create({
                     id: 'registration.price',
-                    name: TranslatedString.create($t(`1205deb9-498d-435d-a6e1-91ea98371523`)),
+                    name: TranslatedString.create($t(`%1IP`)),
                     required: true,
                     type: RecordType.Price,
                     warning: RecordWarning.create({
                         id: 'missing.registration.price',
-                        text: TranslatedString.create($t(`325dd5fa-871c-45b4-b732-5c5370c44b03`)),
+                        text: TranslatedString.create($t(`%xz`)),
                         type: RecordWarningType.Error,
                         inverted: true,
                     }),
@@ -236,13 +236,13 @@ export const fiscal = DocumentTemplateDefinition.create({
     exportFieldCategories: [
         RecordCategory.create({
             id: 'confirmation',
-            name: TranslatedString.create($t(`15bc5064-cd0d-4052-937b-cade8e19a858`)),
-            description: TranslatedString.create($t(`2c9a2838-607e-4e19-87d9-ce5c1f46f7f0`)),
+            name: TranslatedString.create($t(`%y0`)),
+            description: TranslatedString.create($t(`%y1`)),
             records: [
                 RecordSettings.create({
                     id: 'confirmation',
-                    name: TranslatedString.create($t(`ae4c10ae-478e-48d9-b901-86f3f79df32e`)),
-                    label: TranslatedString.create($t(`079e1823-91db-4ef4-ba7b-94218d6a980e`)),
+                    name: TranslatedString.create($t(`%y2`)),
+                    label: TranslatedString.create($t(`%y3`)),
                     required: true,
                     type: RecordType.Checkbox,
                 }),
@@ -250,37 +250,37 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'additional-belcotax',
-            name: TranslatedString.create($t(`1b4a943c-e44d-4f9f-b5bd-08a485ef05d3`)),
-            description: TranslatedString.create($t(`1e58daa1-b5dc-4e51-8c2c-5ce461963f61`)),
+            name: TranslatedString.create($t(`%y4`)),
+            description: TranslatedString.create($t(`%y5`)),
             records: [
                 RecordSettings.create({
                     id: 'organization.contactName',
-                    name: TranslatedString.create($t(`084a7b59-d7d6-4352-8fe7-8f9e98ba1483`)),
+                    name: TranslatedString.create($t(`%y6`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.phone',
-                    name: TranslatedString.create($t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`)),
+                    name: TranslatedString.create($t(`%wD`)),
                     required: true,
                     type: RecordType.Phone,
                 }),
                 RecordSettings.create({
                     id: 'organization.email',
-                    name: TranslatedString.create($t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)),
+                    name: TranslatedString.create($t(`%1FK`)),
                     required: true,
                     type: RecordType.Email,
-                    description: TranslatedString.create($t(`73219854-e149-4797-bae0-de7340b6f304`)),
+                    description: TranslatedString.create($t(`%y7`)),
                 }),
                 RecordSettings.create({
                     id: 'organization.companyNumber',
-                    name: TranslatedString.create($t(`da1e6727-6f1f-4713-93a5-2ec93092b9d0`)),
+                    name: TranslatedString.create($t(`%y8`)),
                     required: true,
                     type: RecordType.Text,
-                    description: TranslatedString.create($t(`e13d9fec-ff5a-43e0-8cf4-4edc6e576d17`)),
+                    description: TranslatedString.create($t(`%y9`)),
                 }),
             ],
         }),
     ],
-    xmlExportDescription: $t(`bf58c9d8-b970-412f-bcf3-9fd2f037c4ff`),
+    xmlExportDescription: $t(`%yA`),
 });

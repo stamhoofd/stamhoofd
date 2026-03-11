@@ -3,13 +3,13 @@
         <RadioListItem v-for="(customer, index) of customers" :key="index" v-model="selectedCustomerModel" :label="customer.dynamicName" :value="customer">
             <template v-if="customer.company">
                 <p v-if="customer.company.VATNumber" class="style-description-small">
-                    {{ customer.company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
+                    {{ customer.company.VATNumber }} {{ $t('%Gn') }}
                 </p>
                 <p v-else-if="customer.company.companyNumber" class="style-description-small">
-                    {{ customer.company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
+                    {{ customer.company.companyNumber }} {{ $t('%eS') }}
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
+                    {{ $t('%1CH') }}
                 </p>
 
                 <p v-if="customer.company.address" class="style-description-small">
@@ -26,7 +26,7 @@
                 </p>
 
                 <p v-if="!customer.name" class="style-description-small">
-                    {{ $t('e20260ab-00a7-4acf-8dc8-938a4c0249d7') }}
+                    {{ $t('%1JF') }}
                 </p>
 
                 <p v-if="customer.email && customer.email !== customer.dynamicName" class="style-description-small">
@@ -34,17 +34,17 @@
                 </p>
 
                 <p class="style-description-small">
-                    {{ $t('1474bb78-8f01-456a-9e85-c6b1748b76d5') }}
+                    {{ $t('%1J8') }}
                 </p>
             </template>
         </RadioListItem>
 
-        <RadioListItem v-model="selectedCustomerModel" :label="$t('26677608-996f-41a5-8a53-543d6efa7de4')" :value="null" />
+        <RadioListItem v-model="selectedCustomerModel" :label="$t('%1JG')" :value="null" />
     </STList>
 
     <template v-if="customers.length > 0 && selectedCustomerModel === null">
         <hr>
-        <h2>{{ $t('37bdf570-09b9-4f44-a48c-b8f3a3c698ce') }}</h2>
+        <h2>{{ $t('%1KX') }}</h2>
     </template>
     <PaymentCustomerInput v-if="selectedCustomerModel === null || customers.length <= 0" :customer="mappedCustomer" :validator="validator" :error-box="errorBox" @patch:customer="addPatch" />
 </template>

@@ -55,13 +55,13 @@ const showDescriptionInTitle = computed(() => props.log.type === AuditLogType.Un
 
 if (props.log.user) {
     if (props.log.source === AuditLogSource.User) {
-        userDescription.push($t(`6df4e1c5-81cd-4abb-a0dd-528aee6acaa3`) + ' ');
+        userDescription.push($t(`%uX`) + ' ');
     }
     else if (props.log.source === AuditLogSource.Payment) {
-        userDescription.push($t(`ba7666c5-9641-4ba2-affa-a811e1773af6`) + ' ');
+        userDescription.push($t(`%uY`) + ' ');
     }
     else {
-        userDescription.push($t(`6137567d-3cd1-4b89-bfcb-7cbebb60e43a`) + ' ');
+        userDescription.push($t(`%uZ`) + ' ');
     }
 
     userDescription.push(AuditLogReplacement.create({
@@ -71,16 +71,16 @@ if (props.log.user) {
     }));
 }
 else if (props.log.source === AuditLogSource.User) {
-    userDescription.push($t(`09219c0e-ed21-49eb-889d-9409d5f66006`));
+    userDescription.push($t(`%ua`));
 }
 else if (props.log.source === AuditLogSource.Anonymous) {
-    userDescription.push($t(`c2fd98f0-5081-4ce2-8313-ca45ee302eda`));
+    userDescription.push($t(`%ub`));
 }
 else if (props.log.source === AuditLogSource.System) {
-    userDescription.push($t(`6ccdb9e8-c878-4bd9-a66e-8366ad66c0d1`));
+    userDescription.push($t(`%uc`));
 }
 else if (props.log.source === AuditLogSource.Payment) {
-    userDescription.push($t(`12d14007-0c25-4bec-86f6-d018260d8644`));
+    userDescription.push($t(`%ud`));
 }
 
 const present = usePresent();
@@ -92,7 +92,7 @@ async function showContext(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`27a704b7-9e97-432f-bfb4-ab8322b2a016`),
+                name: $t(`%ue`),
                 action: async () => {
                     await present({
                         components: [

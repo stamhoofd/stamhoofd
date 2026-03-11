@@ -1,10 +1,10 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`5ca94078-d742-4e17-abf7-957c4721a559`)" />
+        <STNavigationBar :title="$t(`%xU`)" />
 
         <main class="center">
             <h1>
-                {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
+                {{ $t('%xU') }}
             </h1>
 
             <BillingWarningBox />
@@ -13,7 +13,7 @@
                 {{ stripeWarning.text }}
 
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}
+                    {{ $t('%19t') }}
                 </a>
             </p>
 
@@ -23,10 +23,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/flag.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('35757756-d817-419d-82dd-1ba14128af30') }}
+                        {{ $t('%Lb') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('f042b512-f374-4088-9175-955f62575744') }}
+                        {{ $t('%Of') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -38,10 +38,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('4a7e3838-f75a-4610-9caa-0f75849ea142') }}
+                        {{ $t('%ty') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('d07dd246-d0b6-4941-a015-a7d305fd8e1c') }}
+                        {{ $t('%Og') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -53,10 +53,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/admin.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('30ea5656-b3df-4b67-9f8c-2d71924f7eee') }}
+                        {{ $t('%Oh') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('c1b71652-5398-4398-8185-0d80e09c9827') }}
+                        {{ $t('%Oi') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -68,10 +68,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('9f4f2cef-7466-42e3-bca3-d3bfd9f29aa4') }}
+                        {{ $t('%Oj') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('518e8449-5f7e-4493-b724-4a4d32efc40b') }}
+                        {{ $t('%Ok') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -83,10 +83,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3') }}
+                        {{ $t('%3i') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('ef07b66f-6b78-4c47-9599-d8847ea97aaa') }}
+                        {{ $t('%3e') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -98,10 +98,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('46c3ece9-3197-4668-9528-b1258b77e789') }}
+                        {{ $t('%40') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('eec0bece-8f7a-4da4-8943-d6eef7cd7c31') }}
+                        {{ $t('%3z') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -113,10 +113,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/uitpas.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ true ? $t('c112eac2-2515-4476-81d1-e8dc51bc063c') : $t('1b313bdc-e15f-4633-9bcf-969e55139b94') }}
+                        {{ true ? $t('%1Bf') : $t('%1Bg') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('b6334ba0-a28d-4ee4-b443-03f293473249') }}
+                        {{ $t('%1Bh') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -128,10 +128,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('7f531562-9609-456e-a8c3-2b373cad3f29') }}
+                        {{ $t('%6c') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('52f90401-117a-42e7-b500-f13db35f23a4') }}
+                        {{ $t('%Ol') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -140,7 +140,7 @@
             </STList>
 
             <template v-if="membersPackage">
-                <hr><h2>{{ $t('64d8c751-a6c4-427e-b3db-cef827058780') }}</h2>
+                <hr><h2>{{ $t('%Om') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationPage)">
@@ -148,10 +148,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('7e571340-71b3-4d22-8c01-c895ee0997a4') }}
+                            {{ $t('%On') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('ab663eb3-5e1b-4876-8e85-c0ffadd5ab3b') }}
+                            {{ $t('%Oo') }}
                         </p>
 
                         <template #right>
@@ -164,10 +164,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('741fa4dc-7001-40d6-b1d2-cd3c88334607') }}
+                            {{ $t('%41') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('c42e02a5-8d91-47fd-98b8-c2407119b41d') }}
+                            {{ $t('%2p') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -179,10 +179,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('30ceddd4-0f32-4d92-b42e-f2d8ffeebb2a') }}
+                            {{ $t('%Op') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('cfa83be3-964c-46ca-95e8-0ee74e2e8389') }}
+                            {{ $t('%Oq') }}
                         </p>
 
                         <template #right>
@@ -195,10 +195,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('98237c41-e107-4997-a645-cc4c16bb5b9a') }}
+                            {{ $t('%15q') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('86fbcc70-2118-4399-9b7c-4461b8d40369') }}
+                            {{ $t('%15r') }}
                         </p>
 
                         <template #right>
@@ -211,10 +211,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('15e411ef-7a28-41e0-ad90-8c6ffae730f1') }}
+                            {{ $t('%Or') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('9cd854d2-c290-4169-aedc-35cabb608198') }}
+                            {{ $t('%Os') }}
                         </p>
 
                         <template #right>
@@ -227,10 +227,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('16ca0372-9c8f-49f0-938d-aee012e59f8c') }}
+                            {{ $t('%Ot') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('45193033-dfd3-4dff-a7a6-cf4bd0883b5e') }}
+                            {{ $t('%Ou') }}
                         </p>
 
                         <template #right>
@@ -243,10 +243,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }}
+                            {{ $t('%18D') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('cc545de8-cbf3-4bfe-8bf7-188ef3f7680e') }}
+                            {{ $t('%18d') }}
                         </p>
 
                         <template #right>
@@ -256,7 +256,7 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('92e7bbdd-f3b7-4794-b3b1-2b824ca8c633') }}</h2>
+            <hr><h2>{{ $t('%1EO') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
@@ -264,10 +264,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('369772ac-070a-4d86-a5f4-9d7b24b3dbec') }}
+                        {{ $t('%1EJ') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('5c0e8dda-122a-4ec9-a3ca-f8dcb2593fc7') }}
+                        {{ $t('%Ov') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -279,10 +279,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
+                        {{ $t('%1DD') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('ba4eeb34-6c93-4537-92ac-ea4f30c28fbb') }}
+                        {{ $t('%HO') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -294,10 +294,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('4539b2ba-71f8-4839-aee8-60da1189b520') }}
+                        {{ $t('%HH') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('4abf9650-55e0-45ad-8412-7570ac42117f') }}
+                        {{ $t('%Ow') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -306,17 +306,17 @@
             </STList>
 
             <template v-if="feature('sso')">
-                <hr><h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
+                <hr><h2>{{ $t('%HQ') }}</h2>
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/lock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('662467b7-da51-4fe2-bff4-784c8f028e58') }}
+                            {{ $t('%2b') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('1a4edf37-9d52-4a9d-b535-5e098236a61e') }}
+                            {{ $t('%HS') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -326,17 +326,17 @@
             </template>
 
             <template v-if="!salesDisabled">
-                <hr><h2>{{ $t('405a811e-ebb1-4948-84cd-8fb5860104e6') }}</h2>
+                <hr><h2>{{ $t('%q') }}</h2>
                 <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('04fe8969-a277-417d-92e8-8bd532affc19') }}
+                            {{ $t('%1HV') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('e923e4f3-42d4-4f9b-a919-2709c99780bb') }}
+                            {{ $t('%1HW') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -348,10 +348,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t("0208e14e-b26e-4411-9e8e-461b63b1c0c1") }}
+                            {{ $t("%5R") }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('141a681a-da48-45e8-a37f-058eb042d841') }}
+                            {{ $t('%Ox') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -363,10 +363,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
+                            {{ $t('%HD') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('0e276c36-671b-442a-89a0-ad87f5a947f3') }}
+                            {{ $t('%HR') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

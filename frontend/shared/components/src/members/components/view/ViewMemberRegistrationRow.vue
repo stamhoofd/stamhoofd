@@ -7,10 +7,10 @@
             {{ registrationOrganization.name }}
         </p>
         <p v-else-if="registration.deactivatedAt" class="style-title-prefix-list">
-            {{ $t('9f80f234-d51c-4ef2-ba59-fc55fb1044c4') }}
+            {{ $t('%7y') }}
         </p>
         <p v-else-if="registration.isTrial" class="style-title-prefix-list">
-            {{ $t('1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0') }}
+            {{ $t('%1IH') }}
         </p>
 
         <h3 class="style-title-list">
@@ -21,32 +21,32 @@
         <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
 
         <p v-if="registration.startDate" class="style-description-small">
-            {{ $t('44567967-8a8b-480a-b6e0-d802459b7bd5') }} {{ formatDate(registration.startDate) }}
+            {{ $t('%fp') }} {{ formatDate(registration.startDate) }}
         </p>
 
         <p v-if="registration.registeredAt && !(registration.startDate && formatDate(registration.registeredAt) === formatDate(registration.startDate))" class="style-description-small">
-            {{ $t('bb0b39ca-9822-4215-a79a-4be940cfc0c6') }} {{ formatDate(registration.registeredAt) }}
+            {{ $t('%fq') }} {{ formatDate(registration.registeredAt) }}
         </p>
         <p v-if="registration.deactivatedAt" class="style-description-small">
-            {{ $t('e8d02ca3-9828-405b-a885-53982c54f6e8') }} {{ formatDate(registration.deactivatedAt) }}
+            {{ $t('%fr') }} {{ formatDate(registration.deactivatedAt) }}
         </p>
         <p v-if="registration.isTrial && registration.trialUntil" class="style-description-small">
-            {{ $t('87c51af2-6e81-4342-a18d-2f15bec7c6cb') }} {{ formatDate(registration.trialUntil) }}
+            {{ $t('%fs') }} {{ formatDate(registration.trialUntil) }}
         </p>
         <p v-else-if="registration.startDate && registration.trialUntil" class="style-description-small">
-            {{ $t('8c15d15c-0857-48b4-a2cb-296791d098dc') }} {{ Formatter.dateNumber(registration.startDate) }} tot {{ Formatter.dateNumber(registration.trialUntil) }}
+            {{ $t('%ft') }} {{ Formatter.dateNumber(registration.startDate) }} tot {{ Formatter.dateNumber(registration.trialUntil) }}
         </p>
 
         <p v-if="!registration.registeredAt && registration.canRegister" class="style-description-small">
-            {{ $t('b6f9e628-5c06-44e6-b0ae-a0c23d5de4e9') }}
+            {{ $t('%fu') }}
         </p>
 
         <p v-if="registration.payingOrganizationId" class="style-description-small">
-            {{ $t('1db1b8fa-1544-43be-a016-9d38c62cd8aa') }}
+            {{ $t('%fv') }}
         </p>
 
         <p v-if="registration.deactivatedAt && registration.calculatedPrice" class="style-description-small">
-            {{ $t('b557c22d-d44e-43ad-9f05-de74d956c413') }}: {{ formatPrice(registration.calculatedPrice) }}
+            {{ $t('%16t') }}: {{ formatPrice(registration.calculatedPrice) }}
         </p>
 
         <template #right>
@@ -95,7 +95,7 @@ const defaultAgeGroup = computed(() => {
     }
     
     if (!group.value.defaultAgeGroupId) {
-        return $t(`22e7c344-54b6-493e-84c3-cbb453810781`);
+        return $t(`%10I`);
     }
     return platform.value.config.defaultAgeGroups.find(ag => ag.id === group.value.defaultAgeGroupId)?.name;
 });

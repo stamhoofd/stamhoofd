@@ -1,26 +1,26 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`213bb888-16d4-4cdc-b917-6e6ec8b6fc84`)" />
+        <STNavigationBar :title="$t(`%Vk`)" />
 
         <main>
             <h1>
-                {{ $t('213bb888-16d4-4cdc-b917-6e6ec8b6fc84') }}
+                {{ $t('%Vk') }}
             </h1>
 
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
             <p v-else-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
-                {{ $t(`6b2de32e-471e-4e77-97d0-a800856ee5ba`) }}
+                {{ $t(`%Vn`) }}
             </p>
             <p v-else>
-                {{ $t(`a2d46fc7-a82b-49ba-a2c8-98fe91a1c4d9`) }}
+                {{ $t(`%Vo`) }}
             </p>
 
             <p v-if="noDatabaseSupport" class="error-box">
-                {{ $t('fd3f86b0-c773-4c11-8c24-72fc990975c3') }}
+                {{ $t('%Vl') }}
             </p>
 
             <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('tickets-scannen')" target="_blank">
-                {{ $t('7093eb23-893e-445b-bc51-d637030d88c2') }}
+                {{ $t('%1KZ') }}
             </a>
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
@@ -49,7 +49,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="start">
                     <span class="icon play" />
-                    <span>{{ $t('8e829200-f906-49c1-a17e-dbfb193ed9f9') }}</span>
+                    <span>{{ $t('%Vm') }}</span>
                 </button>
             </template>
         </STToolbar>

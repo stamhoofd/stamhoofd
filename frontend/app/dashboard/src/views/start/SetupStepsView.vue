@@ -2,22 +2,22 @@
     <template v-if="$setupSteps && !$setupSteps.isEmpty()">
         <TransitionFade>
             <p v-if="$areAllComplete && !$overrideShowSteps" key="done" class="success-box selectable with-button" @click="showSteps">
-                {{ $t('a654551b-6dcd-48a9-a5c5-4609fdcba5f3') }}
+                {{ $t('%9') }}
 
                 <button class="button text" type="button">
-                    {{ $t('72f84037-1626-49e6-ab24-c657a51266a5') }}
+                    {{ $t('%Wu') }}
                 </button>
             </p>
             <div v-else key="steps" class="container">
-                <hr><h2>{{ $t('8e77d1c1-87dc-4fdb-ad6e-13145bc96f78') }}</h2>
-                <p>{{ $t('cd60d49f-9fc8-4fb7-b574-1231874c1d43') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a></p>
+                <hr><h2>{{ $t('%A') }}</h2>
+                <p>{{ $t('%C') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('%19t') }}</a></p>
                 <SetupStepRows :steps="$setupSteps" list-type="todo" @select="onClickStep" />
             </div>
         </TransitionFade>
     </template>
     <template v-else>
         <p v-if="organization$?.period.period.id !== platform.period.id" class="info-box">
-            {{ $t('ab0c7981-0d5f-4c36-bd3f-07ddc2a63759') }}
+            {{ $t('%B') }}
         </p>
     </template>
 </template>

@@ -15,11 +15,11 @@
             </STList>
         </div>
 
-        <hr><h2>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h2>
-        <p>{{ $t('cf6faf7d-57e2-455c-89e2-837b09c612f8') }}</p>
+        <hr><h2>{{ $t('%Jm') }}</h2>
+        <p>{{ $t('%Yw') }}</p>
 
         <p v-if="roles.length === 0" class="info-box">
-            {{ $t('4aebc029-a507-466a-b766-d28adb967966') }}
+            {{ $t('%Yx') }}
         </p>
 
         <STList>
@@ -45,7 +45,7 @@ withDefaults(
         resource: { id: string; name: string; type: PermissionsResourceType };
         configurableAccessRights?: AccessRight[] | null;
     }>(), {
-        title: () => $t(`70c5edd2-3550-447e-8a36-b43d7833fe1c`),
+        title: () => $t(`%Ld`),
         description: '',
         configurableAccessRights: null,
     });
@@ -97,14 +97,14 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: organization.value === null ? '' : $t(`89b5d229-1850-4063-960a-dbacee794d72`),
+            title: organization.value === null ? '' : $t(`%uM`),
             roles: groupedPlatformResponsibilities,
         });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: $t(`20d0f420-edec-4c9f-9584-990258dcf1bf`),
+            title: $t(`%109`),
             roles: groupedOrganizationResponsibilities,
         });
     }
@@ -162,7 +162,7 @@ function patchResponsibilityRole(patch: AutoEncoderPatchType<PermissionRoleForRe
 
 const save = async () => {
     await rawSave(async () => {
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+        new Toast($t(`%HA`), 'success green').show();
         await pop({ force: true });
     });
 };

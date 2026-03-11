@@ -12,7 +12,7 @@
                         <span class="icon group" />
                     </template>
                     <h2 class="style-title-list bolder">
-                        {{ $t('919139ab-1103-4e1b-aaf7-94cfec03a9e3', { name: title }) }}
+                        {{ $t('%7X', { name: title }) }}
                     </h2>
                     <template #right>
                         <span class="style-description-small">{{ tag.organizationCount }}</span>

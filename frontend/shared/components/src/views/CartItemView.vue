@@ -27,15 +27,15 @@
             </p>
 
             <p v-else-if="cartItem.product.isSoldOut" class="warning-box">
-                {{ $t('f3109566-4bdf-485d-93e8-384857eb585e') }}
+                {{ $t('%k1') }}
             </p>
 
             <p v-else-if="areSeatsSoldOut" class="warning-box">
-                {{ $t('37dfb251-cd3a-409c-8fd0-30de600d2db0') }}
+                {{ $t('%k2') }}
             </p>
 
             <p v-else-if="!canOrder" class="warning-box">
-                {{ $t('351070c7-5df7-4c0b-8371-476e6737e941') }}
+                {{ $t('%k3') }}
             </p>
 
             <p v-else-if="cartItem.product.closesSoonText" class="info-box">
@@ -43,7 +43,7 @@
             </p>
 
             <p v-if="remainingReduced > 0" class="info-box">
-                {{ $t('cf335b59-ab51-4975-9c09-45325d7eb90c', {amount: cartItem.productPrice.discountAmount.toString(), price: formatPrice(discountPrice) }) }}
+                {{ $t('%k4', {amount: cartItem.productPrice.discountAmount.toString(), price: formatPrice(discountPrice) }) }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -51,7 +51,7 @@
             <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}
+                        {{ $t('%TW') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -63,7 +63,7 @@
 
                 <STListItem v-if="cartItem.product.dateRange">
                     <h3 class="style-definition-label">
-                        {{ $t('13081716-3941-44b8-87b4-398ab2288419') }}
+                        {{ $t('%Vc') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateRange(cartItem.product.dateRange) }}
@@ -101,7 +101,7 @@
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
             <template v-if="canOrder && canSelectAmount">
-                <hr><h2>{{ $t('697df3e7-fbbf-421d-81c2-9c904dce4842') }}</h2>
+                <hr><h2>{{ $t('%M4') }}</h2>
 
                 <STInputBox class="max">
                     <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
@@ -111,7 +111,7 @@
             </template>
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
-                <hr><h2>{{ cartItem.amount < 2 ? $t('87c1a48c-fef5-44c3-ae56-c83463fcfb84') : $t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') }}</h2>
+                <hr><h2>{{ cartItem.amount < 2 ? $t('%wF') : $t('%1B4') }}</h2>
                 <div v-for="(value, index) in uitpasNumbers" :key="index">
                     <UitpasNumberInput
                         v-model="uitpasNumbers[index].uitpasNumber"
@@ -129,7 +129,7 @@
                             && cartItem.calculatedPrices[index].price !== cartItem.productPrice.price"
                         class="style-description-small"
                     >
-                        {{ $t('805da469-0061-4c7f-b2fd-f0a8835cb21e', {
+                        {{ $t('%1DT', {
                             specificPrice: formatPrice(cartItem.calculatedPrices[index].price),
                             generalPrice: formatPrice(cartItem.productPrice.price)
                         }) }}
@@ -146,17 +146,17 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button v-if="willNeedSeats" class="button primary" type="submit">
-                        <span>{{ $t('88fa4580-52a2-4b79-aa03-cd31eb98f3e1') }}</span>
+                        <span>{{ $t('%k5') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                     <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
                         <span class="icon basket" />
-                        <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
+                        <span>{{ $t('%v7') }}</span>
                     </button>
                     <button v-else class="button primary" type="submit">
                         <span v-if="cartEnabled" class="icon basket" />
-                        <span v-if="cartEnabled">{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
-                        <span v-else>{{ $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') }}</span>
+                        <span v-if="cartEnabled">{{ $t('%SN') }}</span>
+                        <span v-else>{{ $t('%16p') }}</span>
                         <span v-if="!cartEnabled" class="icon arrow-right" />
                     </button>
                 </LoadingButton>
@@ -319,7 +319,7 @@ async function validateUitpasNumbers() {
             throw new SimpleError({
                 code: 'invalid_uitpas_numbers',
                 message: 'Not all uitpas numbers were valid',
-                human: $t('4bc1cd70-a8ea-45c0-b9c6-c95a4d766990'),
+                human: $t('%1B5'),
             });
         }
         for (let i = 0; i < props.cartItem.uitpasNumbers.length; i++) {
@@ -406,16 +406,16 @@ const cartEnabled = computed(() => props.webshop.shouldEnableCart);
 const withSeats = computed(() => props.cartItem.product.seatingPlanId !== null);
 const suffixSingular = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return $t(`3cb04b43-16ca-4467-8729-ea7dcd206ed0`);
+        return $t(`%o`);
     }
-    return props.cartItem.product.type === ProductType.Person ? $t(`28f60cd9-f9bc-46ff-8fd3-8b6a6a109b4b`) : $t(`599ce864-4059-48eb-82f8-9191e9507050`);
+    return props.cartItem.product.type === ProductType.Person ? $t(`%12P`) : $t(`%12Q`);
 });
 
 const suffix = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
-        return $t(`390d335e-98c4-4c60-92fc-f1616096c875`);
+        return $t(`%m`);
     }
-    return props.cartItem.product.type === ProductType.Person ? $t(`414f837c-b446-41c4-b522-3e6b473d5b5d`) : $t(`3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a`);
+    return props.cartItem.product.type === ProductType.Person ? $t(`%12R`) : $t(`%12S`);
 });
 
 const image = computed(() => props.cartItem.product.images[0]?.getResolutionForSize(600, undefined));
@@ -542,7 +542,7 @@ const shouldNavigateAway = async () => {
     if (originalUitpasNumbers.length === uitpasNumbers.value.length && originalUitpasNumbers.every((val, index) => val === uitpasNumbers.value[index].uitpasNumber)) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

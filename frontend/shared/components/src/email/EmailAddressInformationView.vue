@@ -11,7 +11,7 @@
                 <STList class="info">
                     <STListItem>
                         <h3 class="style-definition-label">
-                            {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
+                            {{ $t('%1FK') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             <span>{{ emailInformation.email }}</span>
@@ -20,10 +20,10 @@
 
                     <STListItem v-if="emailInformation.markedAsSpam" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('272e92e0-d532-4481-ac20-f752d7921007') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('%1M9') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            <I18nComponent :t="$t('351a0698-e182-410a-989f-a138325fab16')">
+                            <I18nComponent :t="$t('%1MA')">
                                 <template #button="{content}">
                                     <a class="inline-link" :href="LocalizedDomains.getDocs('spam-complaints')" target="_blank">
                                         {{ content }}
@@ -35,10 +35,10 @@
 
                     <STListItem v-if="emailInformation.hardBounce" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('b33eff3e-008a-4859-b2c7-dc84ae77a2f8') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('%1F8') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            <I18nComponent :t="$t('0ee9632b-1462-4edf-9e68-abe77c8b9c8f')">
+                            <I18nComponent :t="$t('%1MB')">
                                 <template #button="{content}">
                                     <a class="inline-link" :href="LocalizedDomains.getDocs('bounces')" target="_blank">
                                         {{ content }}
@@ -50,26 +50,26 @@
 
                     <STListItem v-if="emailInformation.unsubscribedAll" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('6b4e14de-9439-48d2-9be3-08611ca6f931') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('%1MC') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            {{ $t('24f0e13e-6e72-4045-8246-4063833ac36a') }}
+                            {{ $t('%1MD') }}
                         </p>
                     </STListItem>
 
                     <STListItem v-if="emailInformation.unsubscribedMarketing" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('638979a6-27c7-4f17-a61b-5604d9f2900c') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('%1ME') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            {{ $t('79694c7e-c6d0-4548-989d-5bbd798e41dd') }}
+                            {{ $t('%1MF') }}
                         </p>
                     </STListItem>
                 </STList>
 
                 <template v-if="canManageEmailAddress && wasBlocked">
                     <hr>
-                    <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+                    <h2>{{ $t('%16X') }}</h2>
 
                     <STList>
                         <STListItem v-if="isBlocked" :selectable="true" element-name="button" @click="unblockEmailAddress">
@@ -81,10 +81,10 @@
                                 </IconContainer>
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('93fb5220-c5dc-4fdf-b014-52238288207c') }}
+                                {{ $t('%1Gg') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('c5706725-504c-44e7-bb39-b29df279a345') }}
+                                {{ $t('%1Gh') }}
                             </p>
 
                             <template #right>
@@ -102,10 +102,10 @@
                                 </IconContainer>
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('d04e6513-d40e-4888-8ea7-1b18c8721829') }}
+                                {{ $t('%1Gi') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('15f327f6-3f58-446f-8e23-2470883133ce') }}
+                                {{ $t('%1Gj') }}
                             </p>
                         </STListItem>
                     </STList>
@@ -131,7 +131,7 @@ const props = defineProps<{
     emailInformation: EmailInformation;
 }>();
 
-const title = $t('dd65290a-646f-4fed-9e0f-d0489b2c07c5');
+const title = $t('%1MG');
 
 const context = useContext();
 const owner = useRequestOwner();
@@ -149,9 +149,9 @@ async function unblockEmailAddress() {
         return;
     }
     if (!await CenteredMessage.confirm(
-        $t('24c3fee7-0709-4e61-91ec-a77010e6cee5'),
-        $t('6f7e2f7f-c8ad-4ce4-8838-0d7ab855d72e'),
-        $t('ea52e93e-6e9d-41d7-8b4c-9a5bc41440e7'),
+        $t('%1Gr'),
+        $t('%1Gs'),
+        $t('%1Gt'),
     )) {
         return;
     }
@@ -174,7 +174,7 @@ async function unblockEmailAddress() {
         props.emailInformation.hardBounce = false;
 
         Toast.success(
-            $t('4a1a3ddf-3ae9-41a8-933f-bf0ca4726c11', { email: props.emailInformation.email || '' }),
+            $t('%1Gu', { email: props.emailInformation.email || '' }),
         ).setIcon('unlock green').show();
     }
     catch (e) {

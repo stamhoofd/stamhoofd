@@ -4,65 +4,65 @@
             {{ title || FinancialSupportSettings.defaultTitle }}
         </h1>
 
-        <p>{{ $t("367d239e-3b54-4eb0-b6bd-9c994f3f9523") }}</p>
+        <p>{{ $t("%j4") }}</p>
 
         <p class="info-box">
-            {{ $t('bf4e3b50-034f-4095-89ba-4580c09aaa43') }}
+            {{ $t('%iu') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!inheritedFinancialSupport">
-            <STInputBox class="max" :title="$t(`e5ccedf8-b036-4a6d-9340-3751894f0ae2`)">
+            <STInputBox class="max" :title="$t(`%j5`)">
                 <input v-model="title" class="input" :placeholder="FinancialSupportSettings.defaultTitle">
             </STInputBox>
             <p class="style-description-small">
-                {{ $t(`54c43796-dab2-4458-96b2-7566541e865b`) }}
+                {{ $t(`%j6`) }}
             </p>
         </template>
 
-        <hr><h2>{{ $t('b2a56f24-fea4-4874-90be-f2d15e93e862') }}</h2>
-        <p>{{ $t('7ccf0d86-8609-411f-9f3f-fb801ae61b5e') }}</p>
+        <hr><h2>{{ $t('%i4') }}</h2>
+        <p>{{ $t('%iv') }}</p>
 
-        <STInputBox class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
+        <STInputBox class="max" :title="$t(`%6o`)">
             <textarea v-model="description" class="input" :placeholder="inheritedFinancialSupport?.description || FinancialSupportSettings.defaultDescription" />
         </STInputBox>
         <p class="style-description-small">
-            {{ $t('133c6530-b963-48d4-b1a9-fd7a8d286772') }}
+            {{ $t('%iw') }}
         </p>
 
-        <STInputBox class="max" :title="$t(`5886d034-5962-4d4c-99f3-35733367a20b`)">
+        <STInputBox class="max" :title="$t(`%iB`)">
             <input v-model="checkboxLabel" class="input" :placeholder="inheritedFinancialSupport?.checkboxLabel || FinancialSupportSettings.defaultCheckboxLabel">
         </STInputBox>
         <p class="style-description-small">
-            {{ $t(`fb1e6ade-f8d5-450e-8d10-029b29fce80d`) }}{{ FinancialSupportSettings.defaultCheckboxLabel }}"
+            {{ $t(`%j7`) }}{{ FinancialSupportSettings.defaultCheckboxLabel }}"
         </p>
 
-        <hr><h2>{{ $t('56be103d-0397-4d29-a75b-5e431a0ceadd') }}</h2>
-        <p>{{ $t('04626342-7da4-4fb8-ba4a-9e9d2a6b1197') }}</p>
+        <hr><h2>{{ $t('%ix') }}</h2>
+        <p>{{ $t('%iy') }}</p>
 
-        <STInputBox class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)">
+        <STInputBox class="max" :title="$t(`%JE`)">
             <input v-model="warningText" class="input" :placeholder="inheritedFinancialSupport?.warningText || FinancialSupportSettings.defaultWarningText">
         </STInputBox>
 
-        <hr><h2>{{ $t('7d4be8f3-fc0f-42ed-bb86-5bf672dedf5c') }}</h2>
-        <p>{{ $t('d3c56d05-d038-4aad-b796-445ddce980b9') }}</p>
+        <hr><h2>{{ $t('%iz') }}</h2>
+        <p>{{ $t('%j0') }}</p>
 
-        <STInputBox :title="$t(`e5ccedf8-b036-4a6d-9340-3751894f0ae2`)">
+        <STInputBox :title="$t(`%j5`)">
             <input v-model="priceName" class="input" :placeholder="inheritedFinancialSupport?.priceName || FinancialSupportSettings.defaultPriceName">
         </STInputBox>
 
-        <hr><h2>{{ $t('0208fdd1-27c1-42bc-b6fb-32dd4fafe7ee') }}</h2>
-        <p>{{ $t('f29a7edb-249f-4332-a9f7-22fb53873be5') }}</p>
+        <hr><h2>{{ $t('%j1') }}</h2>
+        <p>{{ $t('%j2') }}</p>
 
         <STList>
             <STListItem>
                 <Checkbox v-model="preventSelfAssignment" :locked="inheritedFinancialSupport?.preventSelfAssignment">
-                    {{ $t('7e707e25-868c-417a-adb1-05532b8d0c9e') }}
+                    {{ $t('%j3') }}
                 </Checkbox>
 
                 <template v-if="preventSelfAssignment">
-                    <STInputBox class="max extra-padding" :title="$t(`da131f14-8671-4826-a270-34a867bf14b5`)">
+                    <STInputBox class="max extra-padding" :title="$t(`%j8`)">
                         <textarea v-model="preventSelfAssignmentText" class="input" :placeholder="FinancialSupportSettings.defaultPreventSelfAssignmentText" />
                     </STInputBox>
                 </template>
@@ -179,7 +179,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({

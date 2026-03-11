@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : (willStartCheckoutFlow ? $t('7de2e636-dcec-44b1-a681-daeb9cd85316') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
+    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('%e5') : (willStartCheckoutFlow ? $t('%X9') : $t('%SN'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
         <p class="style-title-prefix">
             {{ item.organization.name }}
         </p>
@@ -13,10 +13,10 @@
         </h1>
         <p v-for="{registration} in item.replaceRegistrations" :key="registration.id" class="style-description">
             <template v-if="registration.group.id !== item.group.id">
-                {{ $t('ece5e681-db76-4ce3-8e5e-c9dbcc4d8f0e', {group: registration.group.settings.name}) }}
+                {{ $t('%e6', {group: registration.group.settings.name}) }}
             </template>
             <template v-else>
-                {{ $t('5f1406dd-4801-49f5-9906-37e89b393baf') }}
+                {{ $t('%e7') }}
             </template>
         </p>
 
@@ -33,12 +33,12 @@
         </p>
 
         <p v-if="cachedTotalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
-            {{ $t('4e758459-990f-488d-b457-d2e0f7edd9cc', {organization: contextOrganization.name}) }}
+            {{ $t('%e8', {organization: contextOrganization.name}) }}
         </p>
 
         <template v-if="item.replaceRegistrations.length === 0">
             <p v-if="item.group.settings.description.toString()" class="style-description-block" v-text="item.group.settings.description.toString()" />
-            <p v-else class="style-description-block" v-text="$t('ea2ad051-2874-42e2-8275-aa6e8d05d66a', {member: item.member.patchedMember.firstName})" />
+            <p v-else class="style-description-block" v-text="$t('%e9', {member: item.member.patchedMember.firstName})" />
         </template>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -47,33 +47,33 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="$t('300d2935-b578-48cc-b58e-1c0446a68d59')" error-fields="customStartDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('%7e')" error-fields="customStartDate" :error-box="errors.errorBox">
                         <DateSelection v-model="customStartDate" :required="false" :placeholder-date="item.defaultStartDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
                     </STInputBox>
                 </div>
                 <div>
-                    <STInputBox :title="$t('3c90169c-9776-4d40-bda0-dba27a5bad69')" error-fields="customEndDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('%wB')" error-fields="customEndDate" :error-box="errors.errorBox">
                         <DateSelection v-model="customEndDate" :required="false" :placeholder-date="item.defaultEndDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
                     </STInputBox>
                 </div>
             </div>
             <p v-if="item.group.settings.trialDays > 0" class="style-description-small">
-                {{ $t('914a5499-b6db-4495-91dd-be4e412c9d64') }}
+                {{ $t('%eA') }}
             </p>
             <p v-else class="style-description-small">
-                {{ $t('4ad9864f-c191-4f00-8321-d3ba67e5adab') }}
+                {{ $t('%eB') }}
             </p>
         </div>
 
         <div v-if="item.canHaveTrial || trial" class="container">
             <hr><h2>
-                <span>{{ $t('1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0') }}</span>
+                <span>{{ $t('%1IH') }}</span>
                 <span class="style-tag">{{ Formatter.days(item.group.settings.trialDays) }}</span>
             </h2>
-            <p>{{ $t('1b2f2b52-0852-40c3-b1d3-758577b28424', {member: item.member.patchedMember.details.firstName, days: Formatter.days(item.group.settings.trialDays)}) }}</p>
+            <p>{{ $t('%eC', {member: item.member.patchedMember.details.firstName, days: Formatter.days(item.group.settings.trialDays)}) }}</p>
 
             <STList>
-                <CheckboxListItem v-model="trial" :description="$t('c88d1d2c-f336-424f-858a-4c8aa75a068d')" :label="$t(`f40cdbc2-a5b2-4020-bd34-12c181905764`)" />
+                <CheckboxListItem v-model="trial" :description="$t('%eD')" :label="$t(`%eF`)" />
             </STList>
         </div>
 
@@ -88,7 +88,7 @@
                     </h4>
 
                     <p v-if="price.getRemainingStock(item) === 0" class="style-description-small">
-                        {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
+                        {{ $t('%12p') }}
                     </p>
 
                     <p v-if="admin && getPeriodString(price)" class="style-description-small">
@@ -118,15 +118,15 @@
                         {{ option.name || 'Naamloos' }}
                     </h4>
                     <p v-if="option.allowAmount && option.price.forMember(item.member)" class="style-description-small">
-                        {{ $t('2f7604ae-889e-4574-af76-1559ab0e8120', {price: formatPrice(option.price.forMember(item.member))}) }}
+                        {{ $t('%eE', {price: formatPrice(option.price.forMember(item.member))}) }}
                     </p>
 
                     <p v-if="option.getRemainingStock(item) && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
-                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: Formatter.pluralText(option.getRemainingStock(item)!, $t('599ce864-4059-48eb-82f8-9191e9507050'), $t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a'))}) }}
+                        {{ $t('%U3', {stock: Formatter.pluralText(option.getRemainingStock(item)!, $t('%12Q'), $t('%12S'))}) }}
                     </p>
 
                     <p v-else-if="option.getRemainingStock(item) === 0" class="style-description-small">
-                        {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
+                        {{ $t('%12p') }}
                     </p>
 
                     <template #right>
@@ -319,15 +319,15 @@ function getPeriodString(groupPrice: GroupPrice): string | null {
     const endDate = groupPrice.endDate;
 
     if (startDate && endDate) {
-        return $t(`25d1906f-b5b8-441c-8ff7-2e41a75d13e4`, { range: Formatter.dateRange(startDate, endDate) });
+        return $t(`%1CS`, { range: Formatter.dateRange(startDate, endDate) });
     }
 
     if (startDate) {
-        return $t(`761ba5a0-8f9b-4c87-b3d0-559e3f6e8d92`, { date: Formatter.startDate(startDate) });
+        return $t(`%1CL`, { date: Formatter.startDate(startDate) });
     }
 
     if (endDate) {
-        return $t(`543f5147-f7a5-430b-9b20-b974e809627d`, { date: Formatter.endDate(endDate) });
+        return $t(`%1CM`, { date: Formatter.endDate(endDate) });
     }
 
     return null;

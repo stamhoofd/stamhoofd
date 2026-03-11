@@ -48,7 +48,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             if (!foundCompany) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`0ab71307-8f4f-4701-b120-b552a1b6bdd0`),
+                    message: $t(`%w1`),
                 });
             }
         }
@@ -100,7 +100,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Package not found',
-                            human: $t('0e5baf7f-89be-4665-a3dd-b1603b5a6627'),
+                            human: $t('%1L1'),
                         });
                     }
 
@@ -181,7 +181,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new SimpleError({
                 code: 'missing_data',
                 message: 'Checkout was empty',
-                human: $t('c5cf0531-9751-4be0-be0c-31ccfac1722d'),
+                human: $t('%1L2'),
             });
         }
 

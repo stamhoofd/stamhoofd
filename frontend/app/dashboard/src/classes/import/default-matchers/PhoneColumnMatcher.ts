@@ -11,7 +11,7 @@ import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {
     getName(): string {
-        return $t('3174ba16-f035-4afd-a69f-74865e64ef34');
+        return $t('%18Z');
     }
 
     get id() {
@@ -60,7 +60,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
             throw new SimpleError({
                 code: 'invalid_field',
                 message: e.message || 'Invalid phone',
-                human: $t(`16c76c49-48f8-4532-91ae-97867c2ad668`),
+                human: $t(`%18a`),
                 field: 'phone',
             });
         }
@@ -73,7 +73,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
                     if (phoneNumber && phoneNumber.isValid()) {
                         throw new SimpleError({
                             code: 'invalid_field',
-                            message: $t('2ed46ae7-03d8-4a9c-8555-0edfc7157d53'),
+                            message: $t('%1Bd'),
                             field: 'phone',
                         });
                     }
@@ -86,7 +86,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: e.message || 'Invalid phone',
-                        human: $t(`16c76c49-48f8-4532-91ae-97867c2ad668`),
+                        human: $t(`%18a`),
                         field: 'phone',
                     });
                 }
@@ -94,7 +94,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
 
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('0bf875c9-f6a8-417d-82dd-4d6bfff9669f'),
+                message: $t('%1Be'),
                 field: 'phone',
             });
         }

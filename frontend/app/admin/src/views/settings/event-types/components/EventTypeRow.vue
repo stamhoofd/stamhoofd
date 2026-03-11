@@ -8,7 +8,7 @@
         </p>
 
         <p v-if="type.maximum !== null" class="style-description-small">
-            {{ $t('5fc133cc-fc37-40c3-909f-3a4e690e6d9e', { aantal: type.maximum.toFixed() }) }}
+            {{ $t('%6W', { aantal: type.maximum.toFixed() }) }}
         </p>
 
         <template #right>

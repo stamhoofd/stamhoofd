@@ -5,11 +5,11 @@
         </h1>
 
         <p>
-            {{ $t('2803b7f1-be08-48ec-8b4c-2dced27f7113') }}
+            {{ $t('%8E') }}
         </p>
 
         <p class="style-description-block">
-            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
+            {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
@@ -33,7 +33,7 @@ const saving = ref(false);
 
 const pop = usePop();
 
-const title = computed(() => $t('e6405d38-2bd8-4e24-8e35-24f4daea2a37'));
+const title = computed(() => $t('%89'));
 const platform = usePlatform();
 
 const { patch: patchRecords, patched, addPatch, hasChanges: hasRecordChanges } = usePatch(props.recordsConfiguration);
@@ -52,12 +52,12 @@ const editorSettings = computed(() => {
             return getOrganizationUIFilterBuildersForTags(platform.value)[0];
         },
         exampleValue: Organization.create({
-            name: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
+            name: $t(`%ID`),
             address: Address.create({
-                street: $t(`4fe1ed50-7a5c-410a-8aa0-1625b5beb844`),
+                street: $t(`%IE`),
                 number: '1',
                 postalCode: '1234AB',
-                city: $t(`ab2559af-f877-4ee0-bc40-ba563314cded`),
+                city: $t(`%IF`),
                 country: Country.Belgium,
             }),
             privateMeta: OrganizationPrivateMetaData.create({}),
@@ -87,7 +87,7 @@ const shouldNavigateAway = async () => {
     if (!hasRecordChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

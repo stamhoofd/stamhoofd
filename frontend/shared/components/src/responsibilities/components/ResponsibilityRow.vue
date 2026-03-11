@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="(e: any) => showContextMenu()" :selectable="true" class="right-stack" @contextmenu.prevent="showContextMenu">
         <template #left>
-            <span v-if="mergedRole.isEmpty" class="icon layered" :v-tooltip="$t('973b8b5e-9c84-4e86-aae8-da7ae1a1ad6a')">
+            <span v-if="mergedRole.isEmpty" class="icon layered" :v-tooltip="$t('%f3')">
                 <span class="icon user-blocked-layer-1" />
                 <span class="icon user-blocked-layer-2 red" />
             </span>
@@ -17,7 +17,7 @@
         </h2>
 
         <p v-if="responsibility.organizationTagIds !== null" class="style-description">
-            {{ $t('925249f2-cdcb-4db8-be29-030b35bd816e', {organization: organizationTagIdsDescription}) }}
+            {{ $t('%jZ', {organization: organizationTagIdsDescription}) }}
         </p>
 
         <p v-if="defaultAgeGroupIdsDescription" class="style-description">
@@ -29,14 +29,14 @@
         </p>
 
         <p v-if="responsibility.minimumMembers" class="style-description">
-            {{ $t('53f798cf-f2d0-4a3b-ad26-c5d67af71343', {min: responsibility.minimumMembers.toString()}) }}
+            {{ $t('%ja', {min: responsibility.minimumMembers.toString()}) }}
         </p>
 
         <p v-if="responsibility.maximumMembers" class="style-description">
-            {{ $t('6dde271d-4108-48ce-a433-4ad80478c4ef', {max: responsibility.maximumMembers.toString()}) }}
+            {{ $t('%1C', {max: responsibility.maximumMembers.toString()}) }}
         </p>
         <p class="style-description-small">
-            {{ $t('52acb4e7-fb83-4406-8119-9adbda0ecc22') }}: {{ capitalizeFirstLetter(roleDescription) }}
+            {{ $t('%fW') }}: {{ capitalizeFirstLetter(roleDescription) }}
         </p>
 
         <template #right>
@@ -71,7 +71,7 @@ const defaultAgeGroupIdsDescription = computed(() => {
     if (props.responsibility.defaultAgeGroupIds === null) {
         return '';
     }
-    return $t(`67ff4ca3-6f9e-4f74-92f7-ea63acfdb3b8`);
+    return $t(`%124`);
 });
 
 const mergedRole = computed(() => {

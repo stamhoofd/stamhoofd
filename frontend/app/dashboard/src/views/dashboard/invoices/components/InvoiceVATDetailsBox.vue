@@ -1,18 +1,18 @@
 <template>
     <div class="st-view">
-        <STNavigationBar v-if="!popup" :title="$t('13c04b8f-80f5-4274-9ea1-badb0f88a091')" />
+        <STNavigationBar v-if="!popup" :title="$t('%1JE')" />
 
         <main>
             <STGrid>
                 <STGridItem class="header price-grid">
-                    {{ $t('4669ddfd-b0f2-46c2-88dc-beb49dd43262') }}
+                    {{ $t('%1KU') }}
 
                     <template #middleRight>
-                        {{ $t('9f822d74-c9fe-480b-b141-4d758d188720') }}
+                        {{ $t('%1KV') }}
                     </template>
 
                     <template #right>
-                        {{ $t('13c04b8f-80f5-4274-9ea1-badb0f88a091') }}
+                        {{ $t('%1JE') }}
                     </template>
                 </STGridItem>
 

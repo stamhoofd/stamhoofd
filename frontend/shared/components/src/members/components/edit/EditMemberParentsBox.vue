@@ -1,12 +1,12 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="$t(`00306f91-9f66-4cc3-9c8e-36c08f9964d7`)" />
+        <Title v-bind="$attrs" :title="$t(`%XH`)" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="visibleParents.length === 0" class="info-box">
-            {{ $t('63ccb420-e7ca-4b0a-a8a7-403a40f670a1', {member: member.patchedMember.details.firstName}) }}
+            {{ $t('%fT', {member: member.patchedMember.details.firstName}) }}
         </p>
 
         <STList v-else :with-animation="true">
@@ -15,14 +15,14 @@
                     <Checkbox v-model="parentsHaveAccess" :indeterminate="!parentsHaveAccessChangeDate" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('2f657935-44b2-4fd6-baaa-a89b7b4da83d') }}
+                    {{ $t('%1Hc') }}
                 </h3>
                 <p v-if="!parentsHaveAccessChangeDate && parentsHaveAccess" class="style-description-small">
-                    {{ $t('810b15cd-001e-4ab9-9d9e-054044904879', {firstName: member.patchedMember.details.firstName}) }}
+                    {{ $t('%1Hd', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
                 <p v-else-if="parentsHaveAccess" class="style-description-small">
-                    {{ $t('a9439a82-82d3-4254-a3a6-abe14952a392', {firstName: member.patchedMember.details.firstName}) }}
-                    <I18nComponent v-if="member.patchedMember.details.defaultAge < 18" :t="$t('d5ee5112-988f-4d4b-82e0-46f257c40bbb', {firstName: member.patchedMember.details.firstName})">
+                    {{ $t('%1He', {firstName: member.patchedMember.details.firstName}) }}
+                    <I18nComponent v-if="member.patchedMember.details.defaultAge < 18" :t="$t('%1Hf', {firstName: member.patchedMember.details.firstName})">
                         <template #button="{content}">
                             <button class="inline-link" type="button" @click="clearParentsHaveAccess">
                                 {{ content }}
@@ -31,7 +31,7 @@
                     </I18nComponent>
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('78c16cd9-a935-4382-9828-7b30d9808e0f', {firstName: member.patchedMember.details.firstName}) }}
+                    {{ $t('%1Hg', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
             </STListItem>
 
@@ -53,18 +53,18 @@
                     {{ parent.address }}
                 </p>
                 <p v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
-                    {{ $t('9ce60d74-86a4-420f-92ab-91fb536a79be') }}: {{ parent.nationalRegisterNumber }}
+                    {{ $t('%fU') }}: {{ parent.nationalRegisterNumber }}
                 </p>
 
                 <template #right>
                     <span v-if="!isParentSelected(parent)" class="button text limit-space">
                         <span class="icon add" />
-                        <span>{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
+                        <span>{{ $t('%SN') }}</span>
                     </span>
 
                     <button v-else class="button text limit-space" type="button" @click.stop="editParent(parent)">
                         <span class="icon edit" />
-                        <span>{{ $t('ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad') }}</span>
+                        <span>{{ $t('%f9') }}</span>
                     </button>
                 </template>
             </STListItem>
@@ -73,13 +73,13 @@
         <div class="style-button-bar">
             <button type="button" class="button text" :class="{selected: visibleParents.length <= 1}" @click="addParent()">
                 <span class="icon add" />
-                <span>{{ $t('6d4c2c27-ac05-4843-b329-c8bb806bfcb0') }}</span>
+                <span>{{ $t('%fV') }}</span>
             </button>
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('78dedb37-a33d-4907-8034-43345eea18a0') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" @click="clear">
-                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
+            {{ $t('%fC') }} {{ formatDate(reviewDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('%fD')" @click="clear">
+                {{ $t('%fE') }}
             </button>.
         </p>
     </div>
@@ -125,14 +125,14 @@ useValidation(errors.validator, () => {
     if (parents.value.length === 0 && isPropertyRequired('parents')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`372836f6-9b19-49b6-b6d9-5afe781d836e`),
+            message: $t(`%107`),
             field: 'parents',
         }));
     }
     else if (parents.value.length > 0 && !parents.value.some(p => !!p.nationalRegisterNumber) && isPropertyRequired('parents.nationalRegisterNumber')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`ccc74056-d922-4af6-8318-4e797e0fd35e`),
+            message: $t(`%108`),
             field: 'parents',
         }));
     }
@@ -144,8 +144,8 @@ useValidation(errors.validator, () => {
         if (clone.phone === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('072ffa8e-f3a9-41f4-bd0b-f085f5d4ed52', { 
-                    parentName: props.member.patchedMember.details.parents.find(p => p.phone === props.member.patchedMember.details.phone)?.firstName ?? $t('45c3b8c0-2d27-48e4-9943-4dea45e0a34d'),
+                message: $t('%1NR', { 
+                    parentName: props.member.patchedMember.details.parents.find(p => p.phone === props.member.patchedMember.details.phone)?.firstName ?? $t('%1NQ'),
                     firstName: props.member.patchedMember.details.firstName
                 }),
                 field: 'phone',
@@ -160,8 +160,8 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('45eb88ba-7807-45a9-8f73-dc4f5c4050e7', { 
-                    parentName: props.member.patchedMember.details.parents.find(p => p.email === props.member.patchedMember.details.email)?.firstName ?? $t('45c3b8c0-2d27-48e4-9943-4dea45e0a34d'),
+                message: $t('%1NS', { 
+                    parentName: props.member.patchedMember.details.parents.find(p => p.email === props.member.patchedMember.details.email)?.firstName ?? $t('%1NQ'),
                     firstName: props.member.patchedMember.details.firstName 
                 }),
                 field: 'email',

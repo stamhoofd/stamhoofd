@@ -1,39 +1,39 @@
 <template>
-    <SaveView :title="isNew ? $t(`1e78e9e7-bc02-4334-af6f-415ca265fdd8`) : $t(`beb8d8e8-9ea2-4976-82b8-ca7956cc57cc`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%u6`) : $t(`%T7`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
-            {{ $t('1e78e9e7-bc02-4334-af6f-415ca265fdd8') }}
+            {{ $t('%u6') }}
         </h1>
         <h1 v-else>
-            {{ $t('beb8d8e8-9ea2-4976-82b8-ca7956cc57cc') }}
+            {{ $t('%T7') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="date" :error-box="errors.errorBox" :title="$t(`112b7686-dffc-4ae9-9706-e3efcd34898f`)">
+        <STInputBox error-fields="date" :error-box="errors.errorBox" :title="$t(`%7R`)">
             <DateSelection v-model="date" />
         </STInputBox>
 
-        <TimeMinutesInput v-model="startTime" :validator="errors.validator" :title="$t(`01b5d104-748c-4801-a369-4eab05809fcf`)" />
-        <TimeMinutesInput v-model="endTime" :validator="errors.validator" :title="$t(`68860bdb-dad1-40d5-9130-6219c83fe977`)" />
+        <TimeMinutesInput v-model="startTime" :validator="errors.validator" :title="$t(`%TA`)" />
+        <TimeMinutesInput v-model="endTime" :validator="errors.validator" :title="$t(`%ze`)" />
 
-        <STInputBox error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`fcb7332b-ae0e-4262-9220-bd38e44a42a9`)">
-            <NumberInput v-model="maxOrders" :required="false" :placeholder="$t(`3433bd78-f07f-4661-ba9e-28b76c468d58`)" />
+        <STInputBox error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`%TB`)">
+            <NumberInput v-model="maxOrders" :required="false" :placeholder="$t(`%TC`)" />
         </STInputBox>
         <p v-if="remainingOrders !== null && remainingOrders !== maxOrders" class="style-description">
-            {{ $t('40758899-6ad8-46ea-a196-4b03ccd80751', {orders: remainingOrders === 0 ? '0' : remainingOrders?.toString() ?? ''}) }}
+            {{ $t('%T8', {orders: remainingOrders === 0 ? '0' : remainingOrders?.toString() ?? ''}) }}
         </p>
 
-        <STInputBox error-fields="maxPersons" :error-box="errors.errorBox" :title="$t(`7b1a3b35-1f6b-4cb7-8675-35302454a3b9`)">
-            <NumberInput v-model="maxPersons" :required="false" :placeholder="$t(`3433bd78-f07f-4661-ba9e-28b76c468d58`)" />
+        <STInputBox error-fields="maxPersons" :error-box="errors.errorBox" :title="$t(`%TD`)">
+            <NumberInput v-model="maxPersons" :required="false" :placeholder="$t(`%TC`)" />
         </STInputBox>
         <p v-if="remainingPersons !== null && remainingPersons !== maxPersons" class="style-description">
-            {{ $t('101cfdc7-4cb2-4c71-a25f-9b5af9933624', {persons: remainingPersons === 0 ? '0' : remainingPersons?.toString() ?? ''}) }}
+            {{ $t('%T9', {persons: remainingPersons === 0 ? '0' : remainingPersons?.toString() ?? ''}) }}
         </p>
 
         <div v-if="!isNew" class="container">
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>

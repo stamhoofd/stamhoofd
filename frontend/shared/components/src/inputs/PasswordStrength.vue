@@ -1,28 +1,28 @@
 <template>
-    <STInputBox :title="$t(`f45010df-47d0-4a9c-8da9-0c1d94e1154a`)">
+    <STInputBox :title="$t(`%db`)">
         <div class="password-strength">
             <div :style="{ width: strength+'%' }" :class="type" />
         </div>
         <p v-if="!modelValue" class="style-description-small">
-            {{ $t('7664f47d-225d-46f2-83d7-f96447a87ebc') }}
+            {{ $t('%dV') }}
         </p>
         <p v-else-if="warning.length > 0" class="style-description-small">
             {{ warning }}
         </p>
         <p v-else-if="duration <= 60*60" class="style-description-small">
-            {{ $t('472aad06-aa6e-41d9-8cc9-9cd6bc655a70') }}
+            {{ $t('%dW') }}
         </p>
         <p v-else-if="duration <= 60*60*24" class="style-description-small">
-            {{ $t('aac87352-9ee9-4d8e-a49d-442426e1d75d') }}
+            {{ $t('%dX') }}
         </p>
         <p v-else-if="duration <= 60*60*24*30" class="style-description-small">
-            {{ $t('78c8c642-1036-48db-8f21-592ca3efc29a') }}
+            {{ $t('%dY') }}
         </p>
         <p v-else-if="duration <= 60*60*24*30*12" class="style-description-small">
-            {{ $t('8d24cecf-ab4b-485c-90e0-b6b14b418fd8') }}
+            {{ $t('%dZ') }}
         </p>
         <p v-else class="style-description-small">
-            {{ $t('780337a3-ce5b-4071-b53f-465e7e55ad65') }}
+            {{ $t('%da') }}
         </p>
 
         <template #right>
@@ -115,18 +115,18 @@ export default class PasswordStrength extends VueComponent {
     get description() {
         const strength = this.strength;
         if (strength < 50) {
-            return $t(`a5feaa9e-0e9f-42f3-9ebc-5c536ecfdebc`);
+            return $t(`%z7`);
         }
 
         if (strength < 75) {
-            return $t(`702a8908-fe5d-4c0f-a24f-cef7694a4b37`);
+            return $t(`%z8`);
         }
 
         if (strength < 100) {
-            return $t(`b43451f9-127b-4cb5-8310-e5c85936567f`);
+            return $t(`%z9`);
         }
 
-        return $t(`fee65508-7b87-4db2-a56f-457cd3e7d808`);
+        return $t(`%zA`);
     }
 
     get detailDescription() {

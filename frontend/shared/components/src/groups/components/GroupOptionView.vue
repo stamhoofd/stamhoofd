@@ -5,11 +5,11 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sk`)">
         </STInputBox>
 
-        <ReduceablePriceInput v-model="price" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :title="$t(`295faf23-65af-4820-80de-fa6abfe751e3`)" />
+        <ReduceablePriceInput v-model="price" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :title="$t(`%TQ`)" />
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -18,10 +18,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5') }}
+                    {{ $t('%UC') }}
                 </h3>
                 <p v-if="hidden" class="style-description-small">
-                    {{ $t('9562217e-b18e-480e-ad7f-7fd6596dddd6') }}
+                    {{ $t('%dI') }}
                 </p>
             </STListItem>
 
@@ -31,10 +31,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('2cf796b8-5968-4e10-82f6-cffa4e3d8948') }}
+                    {{ $t('%dJ') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('f2460d7a-606e-4b03-bf79-d020f4f6c658') }}
+                    {{ $t('%dK') }}
                 </p>
             </STListItem>
 
@@ -44,12 +44,12 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('bf8d7839-2261-404e-bf74-66d3156a839e') }}
+                    {{ $t('%dL') }}
                 </h3>
 
                 <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="maximum" :error-box="errors.errorBox" :title="$t(`701fc423-4bf4-4de7-917b-eed7923b2164`)">
-                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('c5562430-7c78-454c-8d61-7b4a98fbaf02')" :min="2" />
+                    <STInputBox error-fields="maximum" :error-box="errors.errorBox" :title="$t(`%dN`)">
+                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('%6A')" :min="2" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -60,7 +60,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('193b7c4b-a401-43bb-8a1a-5be6368c16bd', {stock: usedStock.toString()}) }}
+                    {{ $t('%dM', {stock: usedStock.toString()}) }}
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
@@ -110,7 +110,7 @@ const deleting = ref(false);
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t('c4c91c69-3b09-4db5-b83f-170475a509f7') : $t('0dbd634f-8012-4d75-97a2-594f6dffe752');
+    return props.isNew ? $t('%6B') : $t('%6C');
 });
 
 const name = computed({
@@ -173,7 +173,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t('6e82b7fc-581f-43cb-8b3a-cff97b9820ed'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('659cbbac-a470-4ab6-803d-b45ac580ea68'))) {
+    if (!await CenteredMessage.confirm($t('%6D'), $t('%55'), $t('%6E'))) {
         return;
     }
     if (deleting.value || saving.value || !props.deleteHandler) {
@@ -184,7 +184,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('94337d0a-0522-43be-b337-73ddcf7fdd45')).show();
+            await Toast.success($t('%1FX')).show();
         }
         await pop({ force: true });
     }
@@ -200,7 +200,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

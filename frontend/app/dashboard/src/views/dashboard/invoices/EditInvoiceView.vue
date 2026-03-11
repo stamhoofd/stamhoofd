@@ -1,12 +1,12 @@
 <template>
     <CategorizedView :title="title" :loading="saving" :disabled="!hasChanges && !isNew" @save="save">
         <p v-if="patched.payments.length > 1 && isNew" class="warning-box">
-            {{ $t('a6efcc6f-d148-44ef-b916-8f76dda018e3') }}
+            {{ $t('%1J0') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <CategorizedBox icon="company" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')">
+        <CategorizedBox icon="company" :title="$t('%5M')">
             <template #summary>
                 <p class="style-description-small">
                     {{ seller.name }}
@@ -16,13 +16,13 @@
             <STList v-if="companies.length">
                 <RadioListItem v-for="company of companies" :key="company.id" v-model="seller" :label="company.name" :value="company">
                     <p v-if="company.VATNumber" class="style-description-small">
-                        {{ company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
+                        {{ company.VATNumber }} {{ $t('%Gn') }}
                     </p>
                     <p v-else-if="company.companyNumber" class="style-description-small">
-                        {{ company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
+                        {{ company.companyNumber }} {{ $t('%eS') }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
+                        {{ $t('%1CH') }}
                     </p>
 
                     <p v-if="company.address" class="style-description-small">
@@ -35,34 +35,34 @@
                 </RadioListItem>
             </STList>
             <p v-else class="info-box">
-                {{ $t('b2fbd227-40a3-495d-9826-0e199000cda9') }}
+                {{ $t('%eR') }}
             </p>
 
             <p v-if="auth.hasFullAccess()" class="style-button-bar">
                 <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
-                    <span>{{ $t('1310f065-caf5-41e6-a3b8-cf9b39336483') }}</span>
+                    <span>{{ $t('%9H') }}</span>
                 </button>
                 <button v-else type="button" class="button text" @click="editInvoiceSettings">
                     <span class="icon edit" />
-                    <span>{{ $t('f31b5c28-56a6-4a21-b1de-dcb4f7f5b6c8') }}</span>
+                    <span>{{ $t('%eT') }}</span>
                 </button>
             </p>
             <p v-else class="warning-box">
-                {{ $t('8bc53634-08a5-4404-9455-421955e83ce4') }}
+                {{ $t('%Ac') }}
             </p>
         </CategorizedBox>
 
-        <CategorizedBox icon="user" :title="$t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9')">
+        <CategorizedBox icon="user" :title="$t('%1Ke')">
             <template v-if="customer" #summary>
                 <template v-if="customer.company">
                     <p v-if="customer.company.VATNumber" class="style-description-small">
-                        {{ customer.company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
+                        {{ customer.company.VATNumber }} {{ $t('%Gn') }}
                     </p>
                     <p v-else-if="customer.company.companyNumber" class="style-description-small">
-                        {{ customer.company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
+                        {{ customer.company.companyNumber }} {{ $t('%eS') }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
+                        {{ $t('%1CH') }}
                     </p>
 
                     <p v-if="customer.company.address" class="style-description-small">
@@ -79,7 +79,7 @@
                     </p>
 
                     <p v-if="!customer.name" class="style-description-small">
-                        {{ $t('e20260ab-00a7-4acf-8dc8-938a4c0249d7') }}
+                        {{ $t('%1JF') }}
                     </p>
 
                     <p v-if="customer.email && customer.email !== customer.dynamicName" class="style-description-small">
@@ -87,26 +87,26 @@
                     </p>
 
                     <p class="style-description-small">
-                        {{ $t('1474bb78-8f01-456a-9e85-c6b1748b76d5') }}
+                        {{ $t('%1J8') }}
                     </p>
                 </template>
             </template>
             <PaymentCustomerSelectionBox :validator="errors.validator" :customer="customer" :customers="suggestedCustomers" @patch:customer="addPatch({customer: $event})" />
         </CategorizedBox>
 
-        <CategorizedBox icon="box" :title="$t('a593d3de-632e-42e1-a9c6-eb54af683907')">
+        <CategorizedBox icon="box" :title="$t('%1J2')">
             <template #summary>
                 <p class="style-description-small">
                     {{ formatPrice(patched.totalWithVAT) }}
                 </p>
 
                 <p class="style-description-small">
-                    {{ pluralText(patched.items.length, $t('76eb946b-7e2d-4086-bb83-b9a9b5016ab8'), $t('5717eaac-50f5-436f-a6c7-55a372a97a35')) }}
+                    {{ pluralText(patched.items.length, $t('%1Li'), $t('%1Lj')) }}
                 </p>
             </template>
 
             <p v-if="patched.didChangeUnitPricesToCorrectRounding" class="warning-box">
-                {{ $t('ef7af39b-c000-4deb-acf7-14250757816b') }}
+                {{ $t('%1Lk') }}
             </p>
             <InvoiceItemsBox :invoice="patched" />
         </CategorizedBox>
@@ -145,7 +145,7 @@ const organization = useRequiredOrganization();
 const auth = useAuth();
 
 const saving = ref(false);
-const title = props.isNew ? $t('3db5575a-8a20-47ab-807f-fe82ffa3525b') : $t('40ce0817-94a9-4863-9f96-a90e4d09054a');
+const title = props.isNew ? $t('%1J4') : $t('%1J5');
 const companies = computed(() => organization.value.meta.companies);
 const present = usePresent();
 const context = useContext();
@@ -208,10 +208,10 @@ async function save() {
         }
 
         if (props.isNew) {
-            Toast.success($t('389636c3-0f21-4eb5-9ae2-202afa5ff8bb')).show();
+            Toast.success($t('%1Ll')).show();
         }
         else {
-            Toast.success($t('308e71a7-0eae-4501-9aff-3eb1d3ceb37c')).show();
+            Toast.success($t('%1Lm')).show();
         }
 
         props.saveHandler?.(props.invoice);
@@ -240,7 +240,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

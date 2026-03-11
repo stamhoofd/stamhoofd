@@ -145,26 +145,26 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: Formatter.percentage(this.percentageDiscount) + ' ' + $t(`c40c17f9-974a-401f-9728-f10fb0ab123b`),
+                name: Formatter.percentage(this.percentageDiscount) + ' ' + $t(`%sT`),
                 price: -this.appliedPercentageDiscount,
             },
             {
-                name: $t(`40939025-cebb-4afb-90e9-847233cb256f`),
+                name: $t(`%176`),
                 price: -this.fixedDiscount,
             },
             {
-                name: $t(`482bd766-39fa-4340-91b4-ae22a23d5fa5`),
+                name: $t(`%Sn`),
                 price: this.deliveryPrice,
             },
             {
-                name: $t(`307f8b34-7f74-4045-9335-c7f0d7649b70`),
+                name: $t(`%qs`),
                 price: this.administrationFee,
             },
         ].filter(a => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
-                name: $t(`26369a8f-8080-4f00-af46-576fdf563ced`),
+                name: $t(`%xJ`),
                 price: this.cart.priceWithDiscounts,
             });
         }
@@ -172,7 +172,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
+                name: $t(`%xL`),
                 price: this.totalPrice,
             },
         ];
@@ -239,7 +239,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'cart_empty',
                 message: 'Cart is empty',
-                human: $t(`db37b836-f898-4f9d-8a5f-488e65dd5480`),
+                human: $t(`%sU`),
                 field: 'cart',
             });
         }
@@ -279,7 +279,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: $t(`83fc18c2-54a1-4d2c-a624-995d5999cd89`),
+                human: $t(`%sV`),
             });
         }
 
@@ -287,7 +287,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: $t(`a654d6d0-2ada-492a-8090-a78a9486da5a`, { date: Formatter.dateTime(webshop.meta.openAt) }),
+                human: $t(`%sW`, { date: Formatter.dateTime(webshop.meta.openAt) }),
             });
         }
 
@@ -295,7 +295,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'closed',
                 message: 'Orders are closed',
-                human: $t(`836b4de1-ca21-4e0c-8798-b582dae5607e`),
+                human: $t(`%sX`),
             });
         }
     }
@@ -306,7 +306,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'missing_checkout_method',
                     message: 'Checkout method is required',
-                    human: $t(`d14046b4-7ea4-4b13-bdd2-ead917215458`),
+                    human: $t(`%sY`),
                     field: 'checkoutMethod',
                 });
             }
@@ -324,7 +324,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_checkout_method',
                 message: 'Checkout method is invalid',
-                human: $t(`d14046b4-7ea4-4b13-bdd2-ead917215458`),
+                human: $t(`%sY`),
                 field: 'checkoutMethod',
             });
         }
@@ -341,7 +341,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_data_type',
                 message: 'Invalid data type',
-                human: $t(`e20397e0-daac-447e-b267-1474ca90f76c`),
+                human: $t(`%sZ`),
                 field: 'address',
             });
         }
@@ -350,7 +350,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_address',
                 message: 'Checkout address is invalid',
-                human: $t(`28e59971-5697-4463-9dea-91d49a7673e6`),
+                human: $t(`%sa`),
                 field: 'address',
             });
         }
@@ -375,7 +375,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         throw new SimpleError({
             code: 'region_not_supported',
             message: 'Region not supported',
-            human: $t(`a19f8038-410a-48c8-88f0-62c1d8cc0b9c`),
+            human: $t(`%sb`),
             field: 'address',
         });
     }
@@ -390,7 +390,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_timeslot',
                 message: 'Checkout timeslot is missings',
-                human: $t(`44f62830-5f3d-4af0-87ae-c8ab1bc28d7a`),
+                human: $t(`%sc`),
                 field: 'timeSlot',
             });
         }
@@ -403,7 +403,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_timeslot',
                 message: 'Checkout timeslot is invalid',
-                human: $t(`acc6ca8e-7eac-4d32-b310-ba8eec941346`),
+                human: $t(`%sd`),
                 field: 'timeSlot',
             });
         }
@@ -413,7 +413,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum orders',
-                human: (availableTimeslots !== 1 ? $t(`3fdcbfbf-51b4-46f3-8074-5419ee9acc7e`) : $t(`92c49e88-f1de-4a43-b6be-65f3c1685810`)),
+                human: (availableTimeslots !== 1 ? $t(`%se`) : $t(`%sf`)),
                 field: 'timeSlot',
             });
         }
@@ -425,7 +425,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'timeslot_full',
                     message: 'Timeslot has reached maximum orders',
-                    human: (availableTimeslots !== 1 ? $t(`3fdcbfbf-51b4-46f3-8074-5419ee9acc7e`) : $t(`92c49e88-f1de-4a43-b6be-65f3c1685810`)),
+                    human: (availableTimeslots !== 1 ? $t(`%se`) : $t(`%sf`)),
                     field: 'timeSlot',
                 });
             }
@@ -433,7 +433,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum persons',
                 // todo translation
-                human: $t(`1310bb11-6ed9-44e9-bec3-9da905e10404`) + ' ' + (remainingPersons !== 1 ? $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`) : $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`)) + ' ' + $t(`decbc1e7-7ce8-467c-a41a-69a713bb59ab`) + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`) : $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`)) + ' ' + $t(`deadeba1-191f-471a-8501-8bb3e4c6e72f`) + ' ' + (availableTimeslots !== 1 ? $t(`773799cf-d924-49a6-8670-41d0b2b3b1b2`) : $t(`46ac8b35-f54e-4b3b-a2b4-36daad8561e8`)) + $t(`a045462a-ed9a-4a3f-9569-bb1b7a0f7cd1`) + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t(`414f837c-b446-41c4-b522-3e6b473d5b5d`) : $t(`28f60cd9-f9bc-46ff-8fd3-8b6a6a109b4b`)) + (availableTimeslots !== 1 ? $t(`2af4961f-b316-452a-9063-622bb4864d01`) : ''),
+                human: $t(`%sg`) + ' ' + (remainingPersons !== 1 ? $t(`%bR`) : $t(`%1q`)) + ' ' + $t(`%sh`) + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t(`%UL`) : $t(`%12Y`)) + ' ' + $t(`%si`) + ' ' + (availableTimeslots !== 1 ? $t(`%sj`) : $t(`%sk`)) + $t(`%sl`) + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t(`%12R`) : $t(`%12P`)) + (availableTimeslots !== 1 ? $t(`%sm`) : ''),
                 field: 'timeSlot',
             });
         }
@@ -456,7 +456,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_first_name',
                 message: 'Invalid first name',
-                human: $t(`7cd99473-cc44-44e3-b9be-8c6385711ffa`),
+                human: $t(`%sn`),
                 field: 'customer.firstName',
             });
         }
@@ -465,7 +465,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_last_name',
                 message: 'Invalid last name',
-                human: $t(`311c26e0-7170-4099-9fd7-417ebe22dd7b`),
+                human: $t(`%so`),
                 field: 'customer.lastName',
             });
         }
@@ -490,7 +490,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_email',
                 message: 'Invalid email',
-                human: $t('da207832-8a8b-4aee-8f88-17f9ad323e21'),
+                human: $t('%sR'),
                 field: 'customer.email',
             });
         }
@@ -503,7 +503,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_payment_method',
                 message: 'Missing payment method',
-                human: $t('6f2975aa-d60f-4abb-b597-c30e2382da12'),
+                human: $t('%eU'),
                 field: 'paymentMethod',
             });
         }
@@ -511,7 +511,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_payment_method',
                 message: 'Invalid payment method',
-                human: $t('321f027a-3a4d-479e-9c17-5db19358aa3b'),
+                human: $t('%sS'),
                 field: 'paymentMethod',
             });
         }

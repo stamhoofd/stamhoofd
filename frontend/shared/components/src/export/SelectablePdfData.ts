@@ -50,7 +50,7 @@ export class SelectablePdfData<T> implements SelectableData {
             case 'number':
                 return value.toString();
             case 'boolean':
-                return value ? $t('4f68e4bc-4432-4655-b20e-84e6550eda48') : $t('b21855f6-2e9f-4b57-bfe8-05dc38fc330d');
+                return value ? $t('%17O') : $t('%17P');
             case 'object': {
                 if (value instanceof Date) {
                     return Formatter.date(value);

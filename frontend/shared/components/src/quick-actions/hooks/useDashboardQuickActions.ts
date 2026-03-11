@@ -79,10 +79,10 @@ export function useDashboardQuickActions(): QuickActions {
             if (registrationActions.length > 0) {
                 arr.push({
                     leftComponent: PlatformAvatar,
-                    title: $t('5dac2674-d262-409c-a3f7-58b958c10876'),
+                    title: $t('%6U'),
                     description: registrationActions.length === 1
-                        ? $t('6720c55c-b9a5-44ad-bdd5-4681e8e2478e')
-                        : $t('d43da88d-8890-4fa8-894d-e0a4fa6d3565', { count: registrationActions.length.toString() }),
+                        ? $t('%6V')
+                        : $t('%6X', { count: registrationActions.length.toString() }),
                     action: async () => {
                         contextOptions.selectOption(contextOptions.getRegistrationOption());
                     },
@@ -97,8 +97,8 @@ export function useDashboardQuickActions(): QuickActions {
 
                 arr.push({
                     illustration: outstandingAmountSvg,
-                    title: $t(`adabf246-d27a-4a35-9881-d86860213b24`) + ' ' + organizationStatus.organization.name,
-                    description: $t('492cd771-4145-4249-a009-147e11a6904f', {
+                    title: $t(`%hu`) + ' ' + organizationStatus.organization.name,
+                    description: $t('%14H', {
                         price: Formatter.price(open),
                         name: organizationStatus.organization.name,
                     }),

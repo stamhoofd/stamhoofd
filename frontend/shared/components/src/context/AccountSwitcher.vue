@@ -15,11 +15,11 @@
     <template v-else-if="!isNative">
         <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
             <span class="icon external" />
-            <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
+            <span>{{ $t('%Xf') }}</span>
         </a>
 
         <a v-if="!isPlatform" class="button primary" href="/aansluiten">
-            {{ $t("2cd40bd9-b158-42e3-81e2-c02c560ab2e5") }}
+            {{ $t("%3t") }}
         </a>
     </template>
 </template>

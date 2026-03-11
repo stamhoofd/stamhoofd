@@ -23,13 +23,13 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
                 (STAMHOOFD.environment !== 'development' && (p.endDate < new Date() || p.startDate < organization.period.period.startDate))
                 || p.locked
             ) {
-                new CenteredMessage($t(`28f78c8b-c553-4cb0-88d9-d1d766eaa1dd`), $t(`b34e7f10-2e03-42f5-b865-2d88571d2a6e`)).addCloseButton().show();
+                new CenteredMessage($t(`%10G`), $t(`%WO`)).addCloseButton().show();
                 return false;
             }
 
             // or if not starging within 8 months
             if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 31 * 8) {
-                new CenteredMessage($t(`28f78c8b-c553-4cb0-88d9-d1d766eaa1dd`), $t('0ab4ec6b-ae79-4d48-bd45-37da8e712509')).addCloseButton().show();
+                new CenteredMessage($t(`%10G`), $t('%17v')).addCloseButton().show();
                 return false;
             }
 
@@ -56,7 +56,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
             return true;
         }
 
-        new Toast($t(`253b64ce-1507-4655-a75d-ae046e983329`) + ' ' + p.name, 'success').show();
+        new Toast($t(`%WP`) + ' ' + p.name, 'success').show();
         period.value = organizationPeriod;
 
         if (options?.onSwitch) {

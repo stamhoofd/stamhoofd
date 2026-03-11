@@ -7,23 +7,23 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('300d2935-b578-48cc-b58e-1c0446a68d59')" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%7e')" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox :title="$t('3c90169c-9776-4d40-bda0-dba27a5bad69')" error-fields="endDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%wB')" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
             </STInputBox>
         </div>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Days" class="style-description-small">
-            {{ $t('ec5437dc-5d11-4092-8ab7-e9090af1f71a') }}
+            {{ $t('%I1') }}
         </p>
 
-        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('92c75f77-9120-424a-83f5-39e26623c1ad')" error-fields="expireDate" :error-box="errors.errorBox">
-            <DateSelection v-model="expireDate" :required="false" :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')" :time="{hours: 23, minutes: 59, seconds: 59}" />
+        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('%1J7')" error-fields="expireDate" :error-box="errors.errorBox">
+            <DateSelection v-model="expireDate" :required="false" :placeholder="$t('%3S')" :time="{hours: 23, minutes: 59, seconds: 59}" />
         </STInputBox>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
-            {{ $t('e866488b-bc8d-481f-900b-9cf1779f44b8') }}
+            {{ $t('%3R') }}
         </p>
 
         <PlatformMembershipTypePriceConfigEditBox v-for="(priceConfig, index) of prices" :key="priceConfig.id" :config="patched" :has-multiple-prices="prices.length > 1" :show-start-date="index > 0" :show-price-per-day="$showPricePerDay" :error-box="errors.errorBox" :validator="errors.validator" :price-config="priceConfig" @patch:price-config="patchPrice(priceConfig, $event)" @delete="deletePrice(priceConfig)" />
@@ -31,20 +31,20 @@
         <hr><p>
             <button class="button text" type="button" @click="addPrice">
                 <span class="icon add" />
-                <span>{{ $t('285539ab-4119-4dcd-b0fe-87952f71d90d') }}</span>
+                <span>{{ $t('%3V') }}</span>
             </button>
         </p>
 
-        <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`7a010291-3eac-4690-b6d8-2972d3ab8e58`)">
-            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`)" />
+        <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%I3`)">
+            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`%1FW`)" />
         </STInputBox>
 
         <template v-if="$feature('member-trials')">
-            <STInputBox :title="$t('31d7f684-a6e1-4df5-8ac7-c971e5919cc7')+ '*'" error-fields="trialDays" :error-box="errors.errorBox">
-                <NumberInput v-model="trialDays" :suffix="$t('6cb97c70-db56-4883-a2b3-87b65506d4f9')" :suffix-singular="$t('1ea8c630-af92-4cba-bfdc-acc0b0f67fae')" :min="0" />
+            <STInputBox :title="$t('%CG')+ '*'" error-fields="trialDays" :error-box="errors.errorBox">
+                <NumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" />
             </STInputBox>
             <p class="style-description-small">
-                * {{ $t('513b343f-6a4e-402c-90c4-c0d73e4f65a3') }}
+                * {{ $t('%I2') }}
             </p>
         </template>
     </SaveView>
@@ -72,7 +72,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformMembershipTypeConfig>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => $t('8301bf8b-569b-4a66-8985-455392098279', { periodName: props.period.name }));
+const title = computed(() => $t('%3Z', { periodName: props.period.name }));
 const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.config);
@@ -98,7 +98,7 @@ const save = async () => {
         if (!startDateInPeriod || !endDateInPeriod) {
             throw new SimpleError({
                 code: 'invalid_date_range',
-                message: $t('e821b318-928b-4eee-9bca-d00366554792'),
+                message: $t('%8H'),
                 field: 'startDate',
             });
         }
@@ -106,7 +106,7 @@ const save = async () => {
         if (patched.value.expireDate && (patched.value.expireDate.getTime() > patched.value.endDate.getTime() || patched.value.expireDate.getTime() < patched.value.startDate.getTime())) {
             throw new SimpleError({
                 code: 'invalid_date_range',
-                message: $t(`de1f0a0d-4251-41db-bc28-c332cc20dc8b`),
+                message: $t(`%I4`),
                 field: 'expireDate',
             });
         }
@@ -130,7 +130,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('0d0147f0-f42e-4f6b-bf04-16c21fb8ae7d'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'))) {
+    if (!await CenteredMessage.confirm($t('%3X'), $t('%CJ'))) {
         return;
     }
 
@@ -181,7 +181,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 function patchPrice(priceConfig: PlatformMembershipTypeConfigPrice, patch: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>) {

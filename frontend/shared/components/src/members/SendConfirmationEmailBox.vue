@@ -1,9 +1,9 @@
 <template>
     <div v-if="props.group && checkout.isAdminFromSameOrganization" class="container">
         <STList>
-            <CheckboxListItem v-model="checkout.sendConfirmationEmail" :disabled="!templates || templates.length === 0" :label="$t('bfbc0e34-10ac-45d8-9a2f-fbdf87bf3cbc')" :description="!templates || templates.length === 0 ? $t('5b9b209e-e78d-46be-ae67-a55c90df4933') : $t('0247f358-5758-4dae-a59e-0d4695adba0b')">
+            <CheckboxListItem v-model="checkout.sendConfirmationEmail" :disabled="!templates || templates.length === 0" :label="$t('%1Av')" :description="!templates || templates.length === 0 ? $t('%1Aw') : $t('%1Ax')">
                 <template v-if="templates && templates.length && (shouldRememberConfirmationEmail || checkout.sendConfirmationEmail !== getDefaultConfirmationEnabled()) && !props.group.settings.allowRegistrationsByOrganization" #right>
-                    <button v-tooltip="$t('471f8c80-a354-4004-a9d0-437d9f90feb4')" class="button icon reverse" :class="{enabled: shouldRememberConfirmationEmail}" type="button" @click.stop="toggleShouldRememberConfirmationEmail()" />
+                    <button v-tooltip="$t('%1Ay')" class="button icon reverse" :class="{enabled: shouldRememberConfirmationEmail}" type="button" @click.stop="toggleShouldRememberConfirmationEmail()" />
                 </template>
             </CheckboxListItem>
         </STList>
@@ -64,10 +64,10 @@ function toggleShouldRememberConfirmationEmail() {
 
     if (shouldRememberConfirmationEmail.value) {
         if (props.checkout.sendConfirmationEmail) {
-            Toast.success($t('1dc43852-ac65-4407-ae3f-1575f521b243')).show();
+            Toast.success($t('%1Az')).show();
         }
         else {
-            Toast.success($t('ee25893a-c254-46fe-b441-5560c6aff841')).show();
+            Toast.success($t('%1B0')).show();
         }
     }
     else {
@@ -77,10 +77,10 @@ function toggleShouldRememberConfirmationEmail() {
         }
 
         if (getDefaultConfirmationEnabled()) {
-            Toast.info($t('606e7afd-d6b3-4054-81ec-1d641a271852')).show();
+            Toast.info($t('%1B1')).show();
         }
         else {
-            Toast.info($t('79f4c175-0429-42fa-918e-6815ac830f5c')).show();
+            Toast.info($t('%1B2')).show();
         }
     }
 }

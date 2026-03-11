@@ -1,13 +1,13 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`b4cba044-12c3-464d-8bc1-2873996f02fa`)" />
+        <STNavigationBar :title="$t(`%uC`)" />
 
         <main>
-            <h1>{{ $t('b4cba044-12c3-464d-8bc1-2873996f02fa') }}</h1>
+            <h1>{{ $t('%uC') }}</h1>
 
             <template v-if="members.length > 0">
                 <hr><h2>
-                    <div>{{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}</div>
+                    <div>{{ $t('%1EH') }}</div>
                 </h2>
 
                 <STList class="illustration-list">
@@ -37,12 +37,12 @@
                 </STList>
             </template>
             <p v-else class="info-box">
-                {{ $t('a88bd350-756b-4fcd-ba06-585fabd0e197') }}
+                {{ $t('%XG') }}
             </p>
 
             <template v-if="parents.length">
-                <hr><h2>{{ $t('00306f91-9f66-4cc3-9c8e-36c08f9964d7') }}</h2>
-                <p>{{ $t('b3304780-9d9a-47c2-97f5-13b6fbb03307') }}</p>
+                <hr><h2>{{ $t('%XH') }}</h2>
+                <p>{{ $t('%XI') }}</p>
 
                 <STList class="illustration-list">
                     <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
@@ -71,7 +71,7 @@
             </template>
 
             <template v-if="addresses.length">
-                <hr><h2>{{ $t('d86b0f9d-ad2d-4bb6-9ea0-b41a7925094f') }}</h2>
+                <hr><h2>{{ $t('%XJ') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem v-for="address in addresses" :key="address.toString()" class="right-stack" :selectable="false">
@@ -109,7 +109,7 @@ const addresses = computed(() => memberManager.family.addresses);
 const editMember = useEditMember();
 
 async function checkAllMemberData(member: PlatformMember) {
-    await editMember(member, { title: $t(`b4cba044-12c3-464d-8bc1-2873996f02fa`) });
+    await editMember(member, { title: $t(`%uC`) });
 }
 
 function editAddress(_address: Address) {

@@ -4,13 +4,13 @@
             {{ productPrice.name || 'Naamloos' }}
         </h3>
         <p v-if="productPrice.hidden" class="style-description-small">
-            {{ $t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5') }}
+            {{ $t('%UC') }}
         </p>
         <p v-if="productPrice.isSoldOut" class="style-description-small">
-            {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
+            {{ $t('%12p') }}
         </p>
         <p v-else-if="productPrice.stock" class="style-description-small">
-            {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(productPrice.remainingStock ?? 0, $t('599ce864-4059-48eb-82f8-9191e9507050'), $t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a'))}) }}
+            {{ $t('%U3', {stock: pluralText(productPrice.remainingStock ?? 0, $t('%12Q'), $t('%12S'))}) }}
         </p>
 
         <template #right>

@@ -115,7 +115,7 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 code: 'client_update_required',
                 statusCode: 400,
                 message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
-                human: $t(`adb0e7c8-aed7-43f5-bfcc-a350f03aaabe`),
+                human: $t(`%G8`),
             });
         }
 

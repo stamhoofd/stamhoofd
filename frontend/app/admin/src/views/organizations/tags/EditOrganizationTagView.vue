@@ -6,17 +6,17 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
-            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`3446a6ac-5bda-4564-a268-5c7a66d74ff9`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)">
+            <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%H4`)">
         </STInputBox>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`8d767b75-7a76-4cb7-b4b1-36d596f1848c`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%H5`)" />
         </STInputBox>
         <div class="container">
-            <hr><h2>{{ $t('b381ed6f-c509-418d-9668-7c161a0fa652') }}</h2>
+            <hr><h2>{{ $t('%6y') }}</h2>
             <p class="style-description">
-                {{ $t('4139ef30-55c8-4775-b97a-69b3a8b7d112') }}
+                {{ $t('%6z') }}
             </p>
             <STList v-model="draggableChildTags" :draggable="true">
                 <template #item="{item}">
@@ -26,22 +26,22 @@
             <p>
                 <button class="button text" type="button" @click="addTag">
                     <span class="icon add" />
-                    <span>{{ $t('20699886-7112-43f5-b38c-f5b686c37257') }}</span>
+                    <span>{{ $t('%70') }}</span>
                 </button>
             </p>
         </div>
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('e5c15476-6092-45c9-ac55-541f45720c71') }}
+                {{ $t('%71') }}
             </h2>
             <p v-if="!isEmpty" class="style-description">
-                {{ $t('ceaaf7f7-900e-497e-91f5-16c3a173b7bf') }}
+                {{ $t('%72') }}
             </p>
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
+                <span>{{ $t('%CJ') }}</span>
             </button>
         </div>
     </SaveView>
@@ -71,7 +71,7 @@ const props = defineProps<{
     saveHandler: (patch: PatchableArrayAutoEncoder<OrganizationTag>) => Promise<void>;
 }>();
 
-const title = computed(() => props.isNew ? $t(`969ae056-dd8b-49ba-aeb5-ca810c65f599`) : Formatter.capitalizeFirstLetter($t('cd52133a-d8bf-4dde-a924-962f3f0e3fe9', { tagType: getOrganizationTagTypeName(props.tag.type) })));
+const title = computed(() => props.isNew ? $t(`%H6`) : Formatter.capitalizeFirstLetter($t('%7Y', { tagType: getOrganizationTagTypeName(props.tag.type) })));
 const pop = usePop();
 
 const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;
@@ -80,7 +80,7 @@ if (props.isNew) {
 }
 
 const allPatchedTags = computed(() => patch.value.applyTo(props.allTags) as OrganizationTag[]);
-const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: $t(`6748967b-c512-454f-9d30-a1a42e2814bc`) }));
+const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: $t(`%Gp`) }));
 
 const hasChanges = computed(() => patch.value.changes.length > 0);
 
@@ -111,7 +111,7 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`9aa8ff59-33ae-4ac4-93b6-97e071b13012`),
+                message: $t(`%56`),
                 field: 'name',
             });
         }
@@ -131,7 +131,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`c05ea3d6-e656-4ede-a87e-7f46b0598663`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
+    if (!await CenteredMessage.confirm($t(`%H7`), $t(`%CJ`))) {
         return;
     }
 
@@ -218,7 +218,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({

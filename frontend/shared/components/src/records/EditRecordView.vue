@@ -4,18 +4,18 @@
             {{ title }}
         </h1>
         <p>
-            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('0759d023-2306-4601-911e-5af949960753') }}
+            {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%ia') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
             <div>
-                <TInput v-model="name" error-fields="name" :placeholder="$t(`79e3b4c3-e117-4907-942b-a0e06e01a573`)" :error-box="errors.errorBox" :title="$t(`21d2abc5-55c1-4ad2-a7ba-44061fae2fd1`)" />
+                <TInput v-model="name" error-fields="name" :placeholder="$t(`%ip`)" :error-box="errors.errorBox" :title="$t(`%Qo`)" />
             </div>
 
             <div>
-                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                     <Dropdown v-model="type">
                         <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
                             <option v-for="_type in group.values" :key="_type.value" :value="_type.value">
@@ -25,7 +25,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`af55bdcd-8177-4560-ab5a-f45adb52d87c`)">
+                <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`%iq`)">
                     <Dropdown v-model="fileType">
                         <option v-for="item in availableFileTypes" :key="item.value || 'null'" :value="item.value">
                             {{ item.name }}
@@ -39,16 +39,16 @@
             {{ requiredText }}
         </Checkbox>
         <Checkbox v-if="type === RecordType.Checkbox" v-model="askComments">
-            {{ $t('3fd57fae-8af6-4ca4-b551-7b5dbefd1547') }}
+            {{ $t('%ib') }}
         </Checkbox>
 
         <div v-if="type === RecordType.MultipleChoice || type === RecordType.ChooseOne" class="container">
             <hr><h2 class="style-with-button with-list">
-                <div>{{ $t('84017949-ee42-4297-8fa2-f89b85e8cf40') }}</div>
+                <div>{{ $t('%ic') }}</div>
                 <div>
                     <button class="button text" type="button" @click="addChoice">
                         <span class="icon add" />
-                        <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
+                        <span>{{ $t('%1IY') }}</span>
                     </button>
                 </div>
             </h2>
@@ -60,48 +60,48 @@
             </STList>
 
             <p v-else class="info-box">
-                <span>{{ $t('8ba6ec31-c0f8-4104-aa4b-5169a7b43781') }} <span class="icon add middle" />{{ $t('2b6f5a92-33fe-4541-87ca-3677a9f44d9f') }}</span>
+                <span>{{ $t('%id') }} <span class="icon add middle" />{{ $t('%ie') }}</span>
             </p>
         </div>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c') }}</div>
+            <div>{{ $t('%6o') }}</div>
             <div>
                 <button class="button text" type="button" @click="openPreview">
                     <span class="icon eye" />
-                    <span>{{ $t('38e2c1aa-13f6-4339-8cfd-68c2603beb51') }}</span>
+                    <span>{{ $t('%ID') }}</span>
                 </button>
             </div>
         </h2>
-        <p>{{ $t('46374fd8-2e04-4008-a437-ef8da0857400') }}</p>
+        <p>{{ $t('%if') }}</p>
 
         <TInput v-model="label" :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max" :placeholder="name" />
 
-        <TTextarea v-model="description" :title="descriptionTitle" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" error-fields="description" :error-box="errors.errorBox" class="max" />
+        <TTextarea v-model="description" :title="descriptionTitle" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errors.errorBox" class="max" />
         <p class="style-description-small">
-            {{ $t('ee593263-9493-4a9c-a3e5-fe0a4e596887') }}
+            {{ $t('%ig') }}
         </p>
 
-        <TTextarea v-if="shouldAskInputPlaceholder" v-model="inputPlaceholder" :placeholder="$t(`4f04a0fd-f7f9-46b0-9fe0-3d4b443c7f37`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`111715d8-0347-4e60-80fc-e405999430ee`)" />
+        <TTextarea v-if="shouldAskInputPlaceholder" v-model="inputPlaceholder" :placeholder="$t(`%is`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%ir`)" />
         <p class="style-description-small">
-            {{ $t('9f3d1ce2-aa2e-421b-84f1-07e875e9e4a8') }}
+            {{ $t('%ih') }}
         </p>
 
-        <TTextarea v-if="shouldAskCommentsDescription" v-model="commentsDescription" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`5a3c9444-fcf0-408c-99fc-4e5395c37eb0`)" />
+        <TTextarea v-if="shouldAskCommentsDescription" v-model="commentsDescription" :placeholder="$t(`%14p`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%it`)" />
         <p v-if="shouldAskCommentsDescription" class="style-description-small">
-            {{ $t('b8e94451-af94-47ac-8e2c-b39301d3e829') }}
+            {{ $t('%ii') }}
         </p>
 
         <template v-if="showExternalPermissionLevel">
-            <hr><h2>{{ $t('e5c00498-7be5-4dca-94e5-8f73edfcbda0') }}</h2>
-            <p>{{ $t('78e39cfd-8a14-4db6-aeac-76976a40206f') }}</p>
+            <hr><h2>{{ $t('%ij') }}</h2>
+            <p>{{ $t('%ik') }}</p>
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio v-model="externalPermissionLevel" :value="PermissionLevel.None" name="righstForNonAdmins" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('65893f5f-e4f6-487a-b0ea-077fe620cb31') }}
+                        {{ $t('%il') }}
                     </h3>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
@@ -109,7 +109,7 @@
                         <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Read" name="righstForNonAdmins" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('103e19d1-d82d-4270-81f9-af4e7f33b13e') }}
+                        {{ $t('%im') }}
                     </h3>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
@@ -117,15 +117,15 @@
                         <Radio v-model="externalPermissionLevel" :value="PermissionLevel.Write" name="righstForNonAdmins" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('ad3ad207-6470-4f3e-aaf4-1ea5ea8b85ad') }}
+                        {{ $t('%f9') }}
                     </h3>
                 </STListItem>
             </STList>
         </template>
 
         <template v-if="canAddWarning">
-            <hr><h2>{{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}</h2>
-            <p>{{ $t('5c832a65-7b8d-4e3d-a55d-291567ddb71a') }}</p>
+            <hr><h2>{{ $t('%zJ') }}</h2>
+            <p>{{ $t('%in') }}</p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -133,7 +133,7 @@
                         <Radio v-model="warningInverted" :value="null" name="warningInverted" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('7042e593-92bc-4166-9eff-8379f4d80754') }}
+                        {{ $t('%iQ') }}
                     </h3>
                 </STListItem>
 
@@ -156,18 +156,18 @@
                 </STListItem>
             </STList>
 
-            <TTextarea v-if="warningText !== null" v-model="warningText" :placeholder="$t(`fd5e3142-7a0e-4305-8a49-35f2f4d89083`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`73dbf494-16a3-4e9a-8cbe-5170334209c0`)" />
-            <STInputBox v-if="warningType" class="max" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+            <TTextarea v-if="warningText !== null" v-model="warningText" :placeholder="$t(`%iZ`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%JE`)" />
+            <STInputBox v-if="warningType" class="max" :title="$t(`%1B`)">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
                         <template #left>
                             <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('fd69163a-0141-4540-af7a-ef2b45682383') }}
+                            {{ $t('%iT') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('90eed78f-7d02-4433-ba89-42da46201282') }}
+                            {{ $t('%iU') }}
                         </p>
                     </STListItem>
 
@@ -176,10 +176,10 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}
+                            {{ $t('%zJ') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('aef8493c-6d75-4270-ba4c-f9f09b65caf7') }}
+                            {{ $t('%iV') }}
                         </p>
                     </STListItem>
 
@@ -188,10 +188,10 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('b4714037-0561-4ce1-9601-9fd753fd9825') }}
+                            {{ $t('%iW') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t("e34424b4-80ff-46a2-987e-85f89cfd806c") }}
+                            {{ $t("%iY") }}
                         </p>
                     </STListItem>
                 </STList>
@@ -199,20 +199,20 @@
         </template>
 
         <template v-if="settings.dataPermission">
-            <hr><h2>{{ $t('27bc7f00-1839-4f47-b8e5-7f4c6996fa53') }}</h2>
+            <hr><h2>{{ $t('%vY') }}</h2>
             <p>
-                {{ $t('30fe36de-4e4e-42e3-a2f9-7740b028b415') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
-                    {{ $t('d6386cef-8e84-4107-920a-03db17372613') }}
+                {{ $t('%i1') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
+                    {{ $t('%i2') }}
                 </a>
             </p>
 
             <Checkbox v-model="sensitive">
-                {{ $t('09121186-9d8a-4bbb-ad08-080bb8a2d29f') }}
+                {{ $t('%io') }}
             </Checkbox>
         </template>
 
         <div v-if="hasFilters" class="container">
-            <hr><h2>{{ $t('6ba4f526-8b64-4902-903b-7cb176684151') }}</h2>
+            <hr><h2>{{ $t('%iK') }}</h2>
 
             <PropertyFilterInput v-model="filter" :allow-optional="false" :builder="filterBuilder" />
         </div>
@@ -260,69 +260,69 @@ const showExternalPermissionLevel = computed(() => editorType.value === RecordEd
 
 const availableTypes = [
     {
-        name: $t(`571437e8-8eee-4cdb-bbf8-39a6144bff8c`),
+        name: $t(`%110`),
         values: [
             {
                 value: RecordType.Text,
-                name: $t(`668f1663-e8d1-4e1c-9397-32a1c2b70022`),
+                name: $t(`%111`),
             },
             {
                 value: RecordType.Textarea,
-                name: $t(`99cf6d44-681c-450b-8c5c-74bc75ca0cde`),
+                name: $t(`%112`),
             },
             {
                 value: RecordType.Address,
-                name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
+                name: $t(`%Cn`),
             },
             {
                 value: RecordType.Email,
-                name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
+                name: $t(`%1FK`),
             },
             {
                 value: RecordType.Phone,
-                name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
+                name: $t(`%wD`),
             },
             {
                 value: RecordType.Date,
-                name: $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
+                name: $t(`%7R`),
             },
             {
                 value: RecordType.Integer,
-                name: $t(`b877974f-ec5a-4e92-8ad2-3169ece7da77`),
+                name: $t(`%113`),
             },
             {
                 value: RecordType.Price,
-                name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
+                name: $t(`%1IP`),
             },
         ],
     },
     {
-        name: $t(`e6ce4fef-ea7e-4218-840e-9435cfaa9931`),
+        name: $t(`%114`),
         values: [
             {
                 value: RecordType.Checkbox,
-                name: $t(`be247511-3af8-4006-b944-19db50d75a89`),
+                name: $t(`%115`),
             },
             {
                 value: RecordType.ChooseOne,
-                name: $t(`0c57da32-95ac-4e64-a61a-0a7fa104294a`),
+                name: $t(`%116`),
             },
             {
                 value: RecordType.MultipleChoice,
-                name: $t(`06f06102-d0a6-4b23-84b0-43d53fc87ca1`),
+                name: $t(`%117`),
             },
         ],
     },
     {
-        name: $t(`6a11d3a7-6348-4aca-893e-0f026e5eb8b0`),
+        name: $t(`%HQ`),
         values: [
             {
                 value: RecordType.Image,
-                name: $t(`15a3e04d-9fa1-414c-87aa-22c2bd1d39ac`),
+                name: $t(`%118`),
             },
             {
                 value: RecordType.File,
-                name: $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`),
+                name: $t(`%yU`),
             },
         ],
     },
@@ -330,7 +330,7 @@ const availableTypes = [
 
 const availableFileTypes = [
     {
-        name: $t(`3743b6e2-1c6b-4831-a228-6ef082377e3b`),
+        name: $t(`%c9`),
         value: null,
     },
     {
@@ -357,49 +357,49 @@ const canAddWarning = computed(() => {
 
 const warningNonInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`dba56cdb-1bbc-409f-8b9d-550f87505db3`);
+        return $t(`%iR`);
     }
-    return $t(`87150a09-54be-4640-9203-74d0399f1e02`);
+    return $t(`%119`);
 });
 
 const warningInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`1e3c4174-138d-460c-82aa-521fb4edcd49`);
+        return $t(`%iS`);
     }
-    return $t(`64b39ce3-9624-4a38-a669-90a50443876f`);
+    return $t(`%11A`);
 });
 
 const title = computed(() => {
     if (props.isNew) {
-        return $t(`dcfc3edf-b906-420d-ac49-d89886824de9`);
+        return $t(`%11B`);
     }
-    return $t(`18d8f60a-ec12-405e-b26a-ed9ba39fefe4`);
+    return $t(`%Sf`);
 });
 
 const labelTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`5886d034-5962-4d4c-99f3-35733367a20b`);
+        return $t(`%iB`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`13cac71a-fb4c-46b6-9f17-1a57c5da2420`);
+        return $t(`%11C`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`13cac71a-fb4c-46b6-9f17-1a57c5da2420`);
+        return $t(`%11C`);
     }
-    return $t(`f019894f-69ad-4999-abc0-8682bd024827`);
+    return $t(`%11D`);
 });
 
 const descriptionTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`fa02d08e-aa63-41f0-b9d4-360011c0690d`);
+        return $t(`%11E`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`33b05ed3-efea-4993-83a1-9c855f6ba427`);
+        return $t(`%11F`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`33b05ed3-efea-4993-83a1-9c855f6ba427`);
+        return $t(`%11F`);
     }
-    return $t(`4dd7660f-3a18-4791-87b9-0e47115148f0`);
+    return $t(`%11G`);
 });
 
 const name = computed({
@@ -490,15 +490,15 @@ const shouldAskCommentsDescription = computed(() => {
 
 const requiredText = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`8499aa55-27b9-430a-b10e-c356a685d499`);
+        return $t(`%11H`);
     }
     if (type.value === RecordType.MultipleChoice) {
-        return $t(`40bbc5f7-2295-4c7a-a280-3a7b3d6ae8db`);
+        return $t(`%11I`);
     }
     if (type.value === RecordType.ChooseOne) {
-        return $t(`3e726684-099f-4229-8d45-d1bfe0d21d07`);
+        return $t(`%11J`);
     }
-    return $t(`0169f40b-45fd-4552-979d-095381626df1`);
+    return $t(`%yw`);
 });
 
 const type = computed({
@@ -521,8 +521,8 @@ const type = computed({
                 else {
                     patchRecord.value = patchRecord.value.patch({
                         choices: [
-                            RecordChoice.create({ name: TranslatedString.create($t(`4b9cc9ee-d989-4459-a8d5-727ae490380d`)) }),
-                            RecordChoice.create({ name: TranslatedString.create($t(`a09b08eb-216c-4f07-b05c-0a26a4c580eb`)) }),
+                            RecordChoice.create({ name: TranslatedString.create($t(`%11K`)) }),
+                            RecordChoice.create({ name: TranslatedString.create($t(`%11L`)) }),
                         ] as any,
                     });
                 }
@@ -671,7 +671,7 @@ async function save() {
     if (name.value.length < 2) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: $t(`396f75d7-e7d9-42d9-a50e-9ace51c92fe6`),
+            message: $t(`%11M`),
             field: 'name',
         }));
         return;
@@ -680,7 +680,7 @@ async function save() {
     if ((type.value === RecordType.ChooseOne || type.value === RecordType.MultipleChoice) && choices.value.length === 0) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_record',
-            message: $t('a3101c16-5dc1-4baf-82fd-9f1f900281d0'),
+            message: $t('%CU'),
         }));
         return;
     }
@@ -699,7 +699,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t(`025e44e2-c48d-4af2-95b4-3e60c98724f6`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`fa50aa94-4f8a-428a-9b97-8b477176240a`))) {
+    if (!await CenteredMessage.confirm($t(`%11N`), $t(`%CJ`), $t(`%11O`))) {
         return;
     }
 
@@ -720,7 +720,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 function openPreview() {

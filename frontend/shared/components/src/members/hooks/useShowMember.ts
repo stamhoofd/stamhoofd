@@ -20,7 +20,7 @@ export function useShowMember() {
                         limit: 1,
                     }));
                     if (members.results.length === 0) {
-                        Toast.error($t(`22541ecc-ba4f-4a91-b8d3-8213bfaaea0b`)).show();
+                        Toast.error($t(`%yX`)).show();
                         throw new Error('Member not found');
                     }
                     return new ComponentWithProperties(MemberSegmentedView, {

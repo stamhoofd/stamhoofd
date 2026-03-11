@@ -1,10 +1,10 @@
 <template>
-    <SaveView :disabled="!hasChanges" :title="$t(`9a9c02aa-ea5a-4882-be31-e650e80f56ec`)" @save="save">
+    <SaveView :disabled="!hasChanges" :title="$t(`%Ta`)" @save="save">
         <h1>
-            {{ $t('a035d80f-55ec-4ceb-91ee-19a1632a022f') }}
+            {{ $t('%UH') }}
         </h1>
         <p>
-            {{ $t('aec69675-a97a-4f16-8dbd-91dad7954228') }}
+            {{ $t('%UI') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -16,10 +16,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('0fb07d44-b0e4-4235-89d8-8e23b4cde498') }}
+                    {{ $t('%UJ') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('d95da277-7a38-4a3b-874b-f20491427679') }}
+                    {{ $t('%UK') }}
                 </p>
             </STListItem>
 
@@ -32,11 +32,11 @@
                     {{ plan.name }}
                 </h3>
                 <p v-if="plan.seatCount > 1" class="style-description-small">
-                    {{ plan.seatCount }} {{ $t('a76b6d3c-05a1-4c71-9f88-077261a4e595') }}
+                    {{ plan.seatCount }} {{ $t('%UL') }}
                 </p>
 
                 <p v-if="isFromOtherWebshop(plan)" class="style-description-small">
-                    {{ $t('d87da00e-fea0-426d-a055-dd53e78f6eb2', {name: getWebshopFor(plan)?.meta?.name ?? 'Onbekend'}) }}
+                    {{ $t('%UM', {name: getWebshopFor(plan)?.meta?.name ?? 'Onbekend'}) }}
                 </p>
 
                 <template #right>
@@ -49,11 +49,11 @@
         <p>
             <button class="button text" type="button" @click="addSeatingPlan">
                 <span class="icon add" />
-                <span>{{ $t('95935651-4fc3-4a1a-9f36-8d15b089425b') }}</span>
+                <span>{{ $t('%UN') }}</span>
             </button>
         </p>
 
-        <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+        <hr><h2>{{ $t('%16X') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" element-name="label">
@@ -62,10 +62,10 @@
                 </template>
 
                 <h2 class="style-title-list">
-                    {{ $t('b33fe025-bf02-45da-868a-fef0f2076b3f') }}
+                    {{ $t('%UO') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('5c7d8f29-9d83-4f33-9d6b-0f947e384f75') }}
+                    {{ $t('%49') }}
                 </p>
 
                 <template #right>
@@ -357,7 +357,7 @@ async function importSeatingPlan(event: InputEvent & any) {
 
         if (!jsonFile) {
             importingSeatingPlan.value = false;
-            new CenteredMessage($t('de1d5cdf-6aa6-4912-828a-82cb53f8abf6')).addCloseButton().show();
+            new CenteredMessage($t('%5b')).addCloseButton().show();
             return;
         }
 
@@ -396,7 +396,7 @@ async function importSeatingPlan(event: InputEvent & any) {
     }
     catch (e) {
         console.error(e);
-        const message = $t('977fa720-e451-4dd8-a317-881cf7a409b1');
+        const message = $t('%4A');
         new Toast(message, 'error red');
     }
     finally {

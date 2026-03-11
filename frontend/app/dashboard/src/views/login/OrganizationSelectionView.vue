@@ -3,34 +3,34 @@
         <STGradientBackground v-if="$isStamhoofd" />
 
         <div class="st-view" :class="{ transparent: $isStamhoofd }">
-            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`5eb72046-9ec6-4072-89ff-5c123636afbe`)">
+            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`%WJ`)">
                 <template #left>
                     <PlatformLogo />
                 </template>
                 <template v-if="!isNative" #right>
                     <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
                         <span class="icon external" />
-                        <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
+                        <span>{{ $t('%Xf') }}</span>
                     </a>
 
                     <a v-if="!isPlatform" class="button primary" href="/aansluiten" data-testid="signup-link" @click.prevent="$navigate(Routes.Join)">
-                        {{ $t("2cd40bd9-b158-42e3-81e2-c02c560ab2e5") }}
+                        {{ $t("%3t") }}
                     </a>
                 </template>
             </STNavigationBar>
 
             <main class="flex center small organization-selection-view">
                 <h1>
-                    {{ $t('24a048f6-3c97-4c80-87b7-eccc244b5d12') }}
+                    {{ $t('%5N') }}
                 </h1>
 
                 <p class="style-description-block style-description-large">
-                    {{ $t('b4307772-62dd-48a4-bae3-9d46df314727') }}
+                    {{ $t('%6') }}
                 </p>
 
                 <form class="input-icon-container icon search gray" @submit.prevent>
                     <input
-                        ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="organization-search-input"
+                        ref="input" v-model="query" autofocus class="input" :placeholder="$t('%3u')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="organization-search-input"
                         @keydown.down.prevent="focusResult(0)"
                     >
                 </form>
@@ -50,7 +50,7 @@
                                 {{ getAppDescription(option.app, option.organization) }}
                             </p>
                             <p v-if="option.userDescription" class="style-description-small style-em">
-                                {{ $t('2dfdd151-6245-4f46-ba42-695a09b74607') }} {{ option.userDescription }}
+                                {{ $t('%WF') }} {{ option.userDescription }}
                             </p>
 
                             <span v-if="option.userDescription" class="icon success primary floating" />
@@ -59,18 +59,18 @@
                 </template>
 
                 <p v-if="!loadingResults && visibleOptions.length === 0 && query" class="info-box">
-                    {{ $t('7046d9e3-c3ce-406b-af52-fd2c81220867') }}
+                    {{ $t('%WG') }}
                 </p>
 
                 <footer v-if="!isPlatform">
                     <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate(Routes.Join)">
                         <span class="icon add" />
-                        <span>{{ $t('5b3e65b1-9444-4b65-a032-e184ed7c2471') }}</span>
+                        <span>{{ $t('%WH') }}</span>
                     </a>
 
                     <button class="button text full" type="button" @click="help">
                         <span class="icon help" />
-                        <span>{{ $t('2aead74c-c67c-4844-8ba2-f7f930b35b5e') }}</span>
+                        <span>{{ $t('%WI') }}</span>
                     </button>
                 </footer>
 
@@ -124,16 +124,16 @@ let counter = 0;
 const help = () => {
     if (isNative.value) {
         new CenteredMessage(
-            $t('4c7b94c4-1f14-4a8f-881a-a643b3591144'),
-            $t('77a3f842-960f-43fa-a9f2-fcac7d3ecc88'),
+            $t('%1AR'),
+            $t('%1AS'),
         )
             .addCloseButton()
             .show();
     }
     else {
         new CenteredMessage(
-            $t('4c7b94c4-1f14-4a8f-881a-a643b3591144'),
-            $t('ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5'),
+            $t('%1AR'),
+            $t('%1AT'),
         )
             .addCloseButton()
             .show();

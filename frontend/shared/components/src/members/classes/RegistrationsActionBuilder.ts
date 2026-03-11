@@ -92,7 +92,7 @@ export class RegistrationsActionBuilder {
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
             return [
                 new MenuTableAction({
-                    name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                    name: $t(`%eh`),
                     groupIndex: 1,
                     enabled: period.waitingLists.length > 0,
                     description: addPeriodDescription ? period.period.name : undefined,
@@ -120,7 +120,7 @@ export class RegistrationsActionBuilder {
 
         return [
             new MenuTableAction({
-                name: $t(`507c48cb-35ae-4c94-bc7a-4611360409c8`),
+                name: $t(`%HB`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -164,7 +164,7 @@ export class RegistrationsActionBuilder {
     getEditAction(): TableAction<PlatformMember>[] {
         return [
             new InMemoryTableAction({
-                name: $t(`7c6e4f2d-297d-4183-9079-ba123f481eb5`),
+                name: $t(`%zt`),
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -180,7 +180,7 @@ export class RegistrationsActionBuilder {
 
     getUnsubscribeAction(): TableAction<PlatformMember>[] {
         return [new InMemoryTableAction({
-            name: $t(`5ac7a958-ec4d-4e37-b2c0-35b2ada59044`),
+            name: $t(`%zu`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -245,7 +245,7 @@ export class RegistrationsActionBuilder {
         // Add quick switch action
         return [
             new InMemoryTableAction({
-                name: $t(`25faeb66-9c64-4431-85de-cef9edfac517`),
+                name: $t(`%zv`),
                 description: organization.name,
                 priority: 0,
                 groupIndex: 5,

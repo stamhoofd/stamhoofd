@@ -36,7 +36,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_code',
                 message: 'This code is invalid',
-                human: $t(`6dfd3a88-1de2-4462-b2a4-625026f9a62f`),
+                human: $t(`%DN`),
                 statusCode: 400,
             });
         }
@@ -47,7 +47,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_code',
                 message: 'This code is invalid',
-                human: $t(`6dfd3a88-1de2-4462-b2a4-625026f9a62f`),
+                human: $t(`%DN`),
                 statusCode: 400,
             });
         }
@@ -77,7 +77,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'email_in_use',
                     message: 'This e-mail is already in use, we cannot set it',
-                    human: $t(`3073cc35-f434-4c2c-8347-34db10fc9940`, { email: code.email, contactEmail: request.$t('59b85264-c4c3-4cf6-8923-9b43282b2787') }),
+                    human: $t(`%DO`, { email: code.email, contactEmail: request.$t('%2a') }),
                 });
             }
             throw e;

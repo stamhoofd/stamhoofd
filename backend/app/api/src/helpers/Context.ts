@@ -259,7 +259,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'invalid_access_token',
                 message: 'The access token is invalid',
-                human: $t(`739f88f4-e87d-4872-aef3-8124a59b160c`),
+                human: $t(`%Fi`),
                 statusCode: 401,
             });
         }
@@ -273,7 +273,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'expired_access_token',
                 message: 'The access token is expired',
-                human: $t(`739f88f4-e87d-4872-aef3-8124a59b160c`),
+                human: $t(`%Fi`),
                 statusCode: 401,
             });
         }
@@ -287,7 +287,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'not_activated',
                 message: 'This user is not yet activated',
-                human: $t(`28cf3aaf-d6b3-4325-8b01-4c0e754034ed`),
+                human: $t(`%Fj`),
                 statusCode: 401,
             });
         }
@@ -315,7 +315,7 @@ export class ContextInstance {
                 throw new SimpleError({
                     code: 'archived',
                     message: 'Platform access is required to view inactive organizations',
-                    human: $t('3e8dba08-a505-41ec-96c1-b2b5c1c17852'),
+                    human: $t('%1GR'),
                     statusCode: 401,
                 });
             }

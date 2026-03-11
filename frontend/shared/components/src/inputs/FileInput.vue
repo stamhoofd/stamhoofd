@@ -102,7 +102,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
         if (file.size > 20 * 1024 * 1024) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: 'file_too_large',
-                message: $t(`97f9599f-cfdd-4705-a94e-8ec6351e99d4`),
+                message: $t(`%yz`),
             }));
             return;
         }
@@ -134,7 +134,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
                 if (Request.isNetworkError(e)) {
                     e = new SimpleError({
                         code: 'network_error',
-                        message: $t(`b9912181-cf0a-4c85-bb9a-fc9ee7fa54f5`),
+                        message: $t(`%16m`),
                     });
                 }
                 this.errorBox = new ErrorBox(e);

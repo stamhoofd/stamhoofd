@@ -54,28 +54,28 @@ export class CartStockHelper {
         const remainingStock = product.remainingStock + reserved;
         const remaining = Math.max(0, remainingStock - inCart);
 
-        let text = $t('8e07d5a3-f396-47a0-a6a1-4840fa3a896b', {
+        let text = $t('%1Da', {
             '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
         });
 
         if (inCart > 0) {
-            text = $t('a692b530-6f04-48a1-b2a0-75816ec408b0', {
+            text = $t('%1Db', {
                 '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
             });
         }
 
         if (remainingStock !== 1) {
-            text = $t('5a535712-c618-43a3-8eed-59a547db6c91', {
+            text = $t('%1Dc', {
                 '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
             });
 
             if (inCart === 1) {
-                text = $t('d5cbe857-9b30-4809-bfd1-b74a6938fdd4', {
+                text = $t('%1Dd', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                 });
             }
             else if (inCart > 0) {
-                text = $t('cdb66c67-f212-48d1-a5bc-f969748f6bfa', {
+                text = $t('%1De', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     '4': inCart.toString(),
                 });
@@ -86,7 +86,7 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? $t('6a33dbcd-25ae-462a-897c-d7e33a9acdd9', { 'product-name': product.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? $t('%1DY', { 'product-name': product.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
         };
     }
 
@@ -121,32 +121,32 @@ export class CartStockHelper {
         const remainingStock = productPrice.remainingStock + reserved;
         const remaining = Math.max(0, remainingStock - inCart);
 
-        let text = $t('380b897e-c3b8-418f-9c46-ef10724c6cf2', {
+        let text = $t('%1Df', {
             '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
             'product-price-name': productPrice.name,
         });
 
         if (inCart > 0) {
-            text = $t('50be5122-c04e-4d53-a059-5c40e34a92b6', {
+            text = $t('%1Dg', {
                 '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
                 'product-price-name': productPrice.name,
             });
         }
 
         if (remainingStock !== 1) {
-            text = $t('a50f1798-62eb-4980-8678-17abe9bfded4', {
+            text = $t('%1Dh', {
                 '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                 'product-price-name': productPrice.name,
             });
 
             if (inCart === 1) {
-                text = $t('5e0f0a60-2cb9-4093-8f85-a3f37c62b27f', {
+                text = $t('%1Di', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': productPrice.name,
                 });
             }
             else if (inCart > 0) {
-                text = $t('04301229-4cbe-4ea0-bfdf-03284120f09f', {
+                text = $t('%1Dj', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': productPrice.name,
                     '4': inCart.toString(),
@@ -158,8 +158,8 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? $t('f9083abe-bb56-4e5d-9af6-f73a91c2666b', { 'product-price-name': productPrice.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`0100521c-b38e-4925-9484-44d44f3dfa09`) : (remaining === 0 ? $t(`947eb845-90da-43e5-a3bb-78903f7edd72`) : (remaining < showStockBelow ? $t('bd543e10-ee7c-4207-b6e6-e3a74ea69cee', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            text: remainingStock === 0 ? $t('%1DZ', { 'product-price-name': productPrice.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            shortText: remainingStock === 0 ? $t(`%12p`) : (remaining === 0 ? $t(`%zD`) : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
         };
     }
 
@@ -198,32 +198,32 @@ export class CartStockHelper {
         const remainingStock = option.remainingStock + reserved;
         const remaining = Math.max(0, remainingStock - inCart);
 
-        let text = $t('380b897e-c3b8-418f-9c46-ef10724c6cf2', {
+        let text = $t('%1Df', {
             '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
             'product-price-name': option.name,
         });
 
         if (inCart > 0) {
-            text = $t('50be5122-c04e-4d53-a059-5c40e34a92b6', {
+            text = $t('%1Dg', {
                 '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
                 'product-price-name': option.name,
             });
         }
 
         if (remainingStock !== 1) {
-            text = $t('a50f1798-62eb-4980-8678-17abe9bfded4', {
+            text = $t('%1Dh', {
                 '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                 'product-price-name': option.name,
             });
 
             if (inCart === 1) {
-                text = $t('5e0f0a60-2cb9-4093-8f85-a3f37c62b27f', {
+                text = $t('%1Di', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': option.name,
                 });
             }
             else if (inCart > 0) {
-                text = $t('04301229-4cbe-4ea0-bfdf-03284120f09f', {
+                text = $t('%1Dj', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': option.name,
                     '4': inCart.toString(),
@@ -236,7 +236,7 @@ export class CartStockHelper {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht` : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`0100521c-b38e-4925-9484-44d44f3dfa09`) : (remaining === 0 ? $t(`947eb845-90da-43e5-a3bb-78903f7edd72`) : (remaining < showStockBelow ? $t('bd543e10-ee7c-4207-b6e6-e3a74ea69cee', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            shortText: remainingStock === 0 ? $t(`%12p`) : (remaining === 0 ? $t(`%zD`) : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
         };
     }
 
@@ -265,24 +265,24 @@ export class CartStockHelper {
         const remainingStock = remainingSeats + reserved;
         const remaining = Math.max(0, remainingStock - inCart);
 
-        let text = $t('b1af9723-7908-472c-94d4-00021a92a803');
+        let text = $t('%1H5');
 
         if (inCart > 0) {
-            text = $t('5d697eff-bb5e-426a-9ccc-ce18d58891e8');
+            text = $t('%1H6');
         }
 
         if (remainingStock !== 1) {
-            text = $t('3b26c975-10ca-4b38-a86a-0ea27c0cd584', {
+            text = $t('%1H7', {
                 x: Formatter.integer(remainingStock),
             });
 
             if (inCart === 1) {
-                text = $t('42be9a70-2480-4510-93bf-94d6dfdc0628', {
+                text = $t('%1H8', {
                     x: Formatter.integer(remainingStock),
                 });
             }
             else if (inCart > 0) {
-                text = $t('f9ecdf70-de9f-4349-a301-7139fee95029', {
+                text = $t('%1H9', {
                     x: Formatter.integer(remainingStock),
                     4: Formatter.integer(inCart),
                 });
@@ -293,7 +293,7 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining,
-            text: remainingStock === 0 ? $t(`460b1ea5-15c9-4b4f-8de3-76b5f319aa0f`) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? $t(`%sP`) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
         };
     }
 
@@ -319,28 +319,28 @@ export class CartStockHelper {
         const remaining = product.maxPerOrder - inCart;
         const show = (amount === undefined || (remaining <= amount));
 
-        let text = $t('bba032fe-170c-452e-96f2-4a53c30aa1c7', {
+        let text = $t('%1HA', {
             '1-item-or-person-or-ticket': product.getRemainingStockText(product.maxPerOrder),
         });
 
         if (inCart > 0) {
-            text = $t('f0966b9d-6eb5-4e89-a45e-fa3ced8f17fe', {
+            text = $t('%1HB', {
                 '1-item-or-person-or-ticket': product.getRemainingStockText(product.maxPerOrder),
             });
         }
 
         if (product.maxPerOrder !== 1) {
-            text = $t('02af3451-0f6a-4001-bc1d-8b35db5c09a9', {
+            text = $t('%1HC', {
                 '5-items-or-persons-or-tickets': product.getRemainingStockText(product.maxPerOrder),
             });
 
             if (inCart === 1) {
-                text = $t('6c2f78d7-0b5d-4264-8a55-9164ed4f2ddd', {
+                text = $t('%1HD', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(product.maxPerOrder),
                 });
             }
             else if (inCart > 0) {
-                text = $t('5bef85b2-cefb-4c43-8986-7f745807ba38', {
+                text = $t('%1HE', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(product.maxPerOrder),
                     '4': Formatter.integer(inCart),
                 });
@@ -376,8 +376,8 @@ export class CartStockHelper {
             return {
                 stock: 1,
                 remaining: 0,
-                text: $t(`5a6717be-0f1e-47b3-b9a8-76d6eb0057be`),
-                shortText: $t(`947eb845-90da-43e5-a3bb-78903f7edd72`),
+                text: $t(`%sQ`),
+                shortText: $t(`%zD`),
             };
         }
 

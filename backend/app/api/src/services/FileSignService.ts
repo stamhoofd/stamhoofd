@@ -191,7 +191,7 @@ export class FileSignService {
                 throw new SimpleError({
                     code: 'invalid_signature',
                     message: 'Invalid signature for file',
-                    human: $t('479684ab-6c50-4ced-82d7-8245f4f475f4'),
+                    human: $t('%B7'),
                 });
             }
             return;

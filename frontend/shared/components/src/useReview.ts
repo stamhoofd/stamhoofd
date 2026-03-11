@@ -78,8 +78,8 @@ export function useReview(type: SetupStepType): UseReview {
         if (!hasChanges.value) return true;
 
         const isConfirm = $checkboxValue.value
-            ? await CenteredMessage.confirm($t(`91edc253-7664-4d27-bdea-e050a7c0b553`), $t(`168f25d2-74c1-4c18-818a-796e7a8fee41`))
-            : await CenteredMessage.confirm($t(`203da4cf-6fd5-46d5-8fdb-2695ba34e5d8`), $t(`1ae8cbc7-9ef5-43db-b9a3-0117dfa43be1`));
+            ? await CenteredMessage.confirm($t(`%jh`), $t(`%jC`))
+            : await CenteredMessage.confirm($t(`%ji`), $t(`%wo`));
 
         if (!isConfirm) return false;
 

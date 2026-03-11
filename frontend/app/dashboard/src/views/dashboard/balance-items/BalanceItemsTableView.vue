@@ -1,7 +1,7 @@
 <template>
     <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :default-sort-column="allColumns.find(c => c.id === 'createdAt')" :default-sort-direction="SortItemDirection.DESC" :default-filter="defaultFilter" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :Route="Route">
         <template #empty>
-            {{ $t('763f791b-dd8d-4cb2-aa57-3d93f33a7c8e') }}
+            {{ $t('%Lu') }}
         </template>
     </ModernTableView>
 </template>
@@ -34,7 +34,7 @@ const configurationId = computed(() => {
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = getBalanceItemsUIFilterBuilders();
 const title = computed(() => {
-    return $t('fbe6e4c4-8d98-41b5-b839-11d469031002');
+    return $t('%1LA');
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
@@ -64,7 +64,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, BalanceItemType>({
         id: 'type',
-        name: $t('23671282-34da-4da9-8afd-503811621055'),
+        name: $t('%1LP'),
         getValue: object => object.type,
         format: val => getBalanceItemTypeName(val),
         minimumWidth: 100,
@@ -74,7 +74,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'category',
-        name: $t('502dc65d-e8d3-4b20-a478-a76ca9084e60'),
+        name: $t('%M2'),
         getValue: object => Formatter.capitalizeFirstLetter(object.category),
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -84,7 +84,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'itemTitle',
-        name: $t('109b8d55-5b39-47da-92ad-fbdfa0f3d0b0'),
+        name: $t('%vC'),
         getValue: object => object.itemTitle,
         minimumWidth: 150,
         recommendedWidth: 300,
@@ -95,9 +95,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'itemDescription',
-        name: $t('936808bb-97a7-4834-8959-468bbf0610bf'),
+        name: $t('%1LQ'),
         getValue: object => object.itemDescription ?? '',
-        format: (val, width) => val || $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598'),
+        format: (val, width) => val || $t('%Rs'),
         getStyle: val => !val ? 'gray' : '',
         minimumWidth: 150,
         recommendedWidth: 300,
@@ -106,7 +106,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amount',
-        name: $t('697df3e7-fbbf-421d-81c2-9c904dce4842'),
+        name: $t('%M4'),
         getValue: object => object.quantity,
         format: (val, width) => Formatter.integer(val),
         minimumWidth: 50,
@@ -117,7 +117,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'unitPrice',
-        name: $t('7453643b-fdb2-4aa1-9964-ddd71762c983'),
+        name: $t('%6q'),
         getValue: object => object.unitPrice,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -129,7 +129,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'payablePriceWithVAT',
-        name: $t('1205deb9-498d-435d-a6e1-91ea98371523'),
+        name: $t('%1IP'),
         getValue: object => object.payablePriceWithVAT,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -141,7 +141,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'priceOpen',
-        name: $t('18aed6d0-0880-4d06-9260-fe342e6e8064'),
+        name: $t('%m0'),
         getValue: object => object.priceOpen,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -152,7 +152,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePaid',
-        name: $t('25c803f0-6b45-42aa-9b88-573e3706b8bb'),
+        name: $t('%Ml'),
         getValue: object => object.pricePaid,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -164,7 +164,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePending',
-        name: $t('5c75e9bf-1b64-4d28-a435-6e33247d5170'),
+        name: $t('%wc'),
         getValue: object => object.pricePending,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -179,7 +179,7 @@ const allColumns: Column<ObjectType, any>[] = [
             id: `balanceItem.relations.${type}`,
             name: getBalanceItemRelationTypeName(type),
             getValue: object => object.relations.get(type)?.name?.toString() || '',
-            format: (val, width) => val || $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598'),
+            format: (val, width) => val || $t('%Rs'),
             getStyle: val => !val ? 'gray' : '',
             minimumWidth: 150,
             recommendedWidth: 300,
@@ -190,7 +190,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'description',
-        name: $t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c'),
+        name: $t('%6o'),
         getValue: object => object.description,
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -200,7 +200,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, BalanceItemStatus>({
         id: 'status',
-        name: $t('66f5134c-9e11-4d36-88f9-526587491ecb'),
+        name: $t('%1JM'),
         getValue: object => object.status,
         format: val => getBalanceItemStatusName(val),
         getStyle: (val) => {
@@ -219,7 +219,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'createdAt',
-        name: $t('10fd24bb-43dd-4174-9a23-db3ac54af9be'),
+        name: $t('%1JJ'),
         getValue: object => object.createdAt,
         format: (value, width) => width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true),
         minimumWidth: 120,
@@ -261,7 +261,7 @@ const present = usePresent();
 const { getSelectableWorkbook } = useSelectableWorkbook();
 const actions = [
     new AsyncTableAction({
-        name: $t('60c06238-ad4d-4599-a3d3-ebe856476618'),
+        name: $t('%V8'),
         icon: 'download',
         priority: 0,
         groupIndex: 2,

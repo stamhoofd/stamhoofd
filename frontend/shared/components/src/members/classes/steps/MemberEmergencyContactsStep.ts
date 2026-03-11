@@ -15,7 +15,7 @@ export class MemberEmergencyContactsStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return $t(`36756394-4c8d-4b0d-bc88-9fe1d58caf1d`)
+        return $t(`%f1`)
     }
 
     isEnabled(manager: MemberStepManager) {    
@@ -46,10 +46,10 @@ export class MemberEmergencyContactsStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
-            title: $t(`36756394-4c8d-4b0d-bc88-9fe1d58caf1d`),
+            title: $t(`%f1`),
             member: manager.member,
             component: markRaw(EditEmergencyContactsBox),
-            saveText: $t(`2a9075bb-a743-411e-8a3d-94e5e57363f0`),
+            saveText: $t(`%16p`),
             markReviewed: ['emergencyContacts'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate)

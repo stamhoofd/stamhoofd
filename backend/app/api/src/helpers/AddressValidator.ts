@@ -20,7 +20,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postal code format (NL)',
-                    human: $t(`0677422e-58c0-4e6a-9f71-512323d708c5`),
+                    human: $t(`%Fb`),
                     field: 'postalCode',
                 });
             }
@@ -30,7 +30,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postal code format (NL)',
-                    human: $t(`0677422e-58c0-4e6a-9f71-512323d708c5`),
+                    human: $t(`%Fb`),
                     field: 'postalCode',
                 });
             }
@@ -52,7 +52,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Postal code is required',
-                    human: $t(`3aee5a0a-d30d-4d30-ba6e-ccfd5689d198`),
+                    human: $t(`%Fc`),
                     field: 'postalCode',
                 });
             }
@@ -75,7 +75,7 @@ export class AddressValidatorStatic {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid postal code or city',
-                human: $t(`683fff47-012a-48e6-838c-66c2d13e22a4`),
+                human: $t(`%Fd`),
                 field: 'postalCode',
             });
         }
@@ -129,7 +129,7 @@ export class AddressValidatorStatic {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid street',
-                            human: $t(`3c20da07-3302-420e-867d-627ae4707e23`),
+                            human: $t(`%Fe`),
                             field: 'street',
                         });
                     }
@@ -137,7 +137,7 @@ export class AddressValidatorStatic {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid street, do you mean ' + bestStreet.name + '?',
-                        human: $t('f35e3d3a-880e-4703-a018-a24eed53bf64', { street: bestStreet.name }),
+                        human: $t('%Fa', { street: bestStreet.name }),
                         field: 'street',
                     });
                 }

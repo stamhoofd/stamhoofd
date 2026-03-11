@@ -1,33 +1,33 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`36459d6c-1685-463a-829f-bc92f83d1f0f`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`%l`)" @save="save">
         <h1>
-            {{ $t('36459d6c-1685-463a-829f-bc92f83d1f0f') }}
+            {{ $t('%l') }}
         </h1>
         <p>
-            {{ $t('ec02ca17-cd7e-4416-b22f-b63aef41be2a') }}
+            {{ $t('%OU') }}
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STInputBox error-fields="privacy" :error-box="errorBox" class="max" :title="$t(`0ea39adf-90dc-43bd-aa66-c95cf1a42cf1`)">
+        <STInputBox error-fields="privacy" :error-box="errorBox" class="max" :title="$t(`%OX`)">
             <RadioGroup>
                 <Radio v-model="selectedPrivacyType" value="none">
-                    {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
+                    {{ $t('%1FW') }}
                 </Radio>
                 <Radio v-model="selectedPrivacyType" value="website">
-                    {{ $t('321a898b-ec70-44e3-a511-f2353061cd66') }}
+                    {{ $t('%OV') }}
                 </Radio>
                 <Radio v-model="selectedPrivacyType" value="file">
-                    {{ $t('a10aa0f7-592b-434c-bebe-2974943c392c') }}
+                    {{ $t('%OW') }}
                 </Radio>
             </RadioGroup>
         </STInputBox>
 
-        <STInputBox v-if="selectedPrivacyType === 'website'" key="website" error-fields="privacyPolicyUrl" :error-box="errorBox" :title="$t(`0eacaeba-c809-40fb-823d-af2d283d22e3`)">
-            <input v-model="privacyPolicyUrl" class="input" type="url" :placeholder="$t('daf8a992-77cd-4c20-8bca-5c692fd1e431')">
+        <STInputBox v-if="selectedPrivacyType === 'website'" key="website" error-fields="privacyPolicyUrl" :error-box="errorBox" :title="$t(`%OY`)">
+            <input v-model="privacyPolicyUrl" class="input" type="url" :placeholder="$t('%2l')">
         </STInputBox>
 
-        <FileInput v-if="selectedPrivacyType === 'file'" key="file" v-model="privacyPolicyFile" :validator="validator" :required="false" :title="$t(`2e45c772-02e9-431d-8273-79b3d10b0638`)" />
+        <FileInput v-if="selectedPrivacyType === 'file'" key="file" v-model="privacyPolicyFile" :validator="validator" :required="false" :title="$t(`%OZ`)" />
     </SaveView>
 </template>
 

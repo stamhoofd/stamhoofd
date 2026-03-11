@@ -47,11 +47,11 @@ const policies = computed(() => {
 
         return [
             PlatformPolicy.create({
-                name: $t(`892db826-a373-4f7f-96bf-6f1f3fa6eede`),
+                name: $t(`%v3`),
                 url,
                 checkbox: true,
                 richText: RichText.create({
-                    html: $t(`cad17893-df84-445c-b85b-b48e2eccfdaf`) + ' <a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`005c5e2d-8185-46e7-b1a0-4e4eaaf60d41`) + `</a>.`,
+                    html: $t(`%v4`) + ' <a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`%Jh`) + `</a>.`,
                 }),
             }),
         ];
@@ -79,7 +79,7 @@ useValidation(props.validator, () => {
         if (!isAccepted(policy)) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'read_privacy',
-                message: $t(`d5474814-62d6-4a54-94ea-6b9cd0a0d769`),
+                message: $t(`%v5`),
             }));
             return false;
         }

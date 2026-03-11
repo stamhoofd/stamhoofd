@@ -1,12 +1,12 @@
 <template>
     <div v-if="securityCode" class="hover-box container">
         <hr><h2 class="style-with-button">
-            <div>{{ $t('0fa4253f-1cfd-4394-93b4-dfba8da04738') }}</div>
+            <div>{{ $t('%wE') }}</div>
             <div v-if="shouldShowResetSecurityCode">
                 <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />
             </div>
         </h2>
-        <p>{{ $t('5b035b31-579b-4d02-bce7-23e500e4fe9d') }}</p>
+        <p>{{ $t('%g3') }}</p>
 
         <p class="style-description">
             <code v-copyable class="style-inline-code style-copyable">{{ Formatter.spaceString(securityCode, 4, '\u2011') }}</code>
@@ -44,9 +44,9 @@ const securityCode = computed(() => props.member.patchedMember.details.securityC
 
 async function renewSecurityCode() {
     if (!await CenteredMessage.confirm(
-        $t('db2fa1f9-4a3d-4f03-ad7d-fba479452d14'),
-        $t('3341eabb-512a-40f9-8679-6420ae92f1c6'),
-        $t('d9870397-d89a-47ec-8ae6-0601e49b9116'))) {
+        $t('%6Q'),
+        $t('%6R'),
+        $t('%6S'))) {
         return;
     }
 
@@ -68,7 +68,7 @@ async function renewSecurityCode() {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         arr.addPatch(patch);
         await platformFamilyManager.isolatedPatch([props.member], arr);
-        Toast.success($t('0c427a9d-2485-498f-bb88-a420843745f4')).show();
+        Toast.success($t('%6T')).show();
     }
     catch (e) {
         Toast.fromError(e).show();

@@ -5,19 +5,19 @@
         </h1>
 
         <p v-if="allowChildCategories && type === RecordEditorType.PlatformMember" class="style-description">
-            {{ $t('73a3d0bc-55a4-47e6-b650-27bb961a0721') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
+            {{ $t('%iE') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
         <p v-else-if="isRootCategory" class="style-description">
-            {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
+            {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <TInput v-model="name" enterkeyhint="next" :placeholder="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)" />
+            <TInput v-model="name" enterkeyhint="next" :placeholder="$t(`%vC`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)" />
         </div>
 
-        <TTextarea v-model="description" error-fields="description" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" />
+        <TTextarea v-model="description" error-fields="description" :placeholder="$t(`%14p`)" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
 
         <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
             <STListItem :selectable="true" element-name="label">
@@ -26,21 +26,21 @@
                 </template>
 
                 <h3 v-if="app === 'admin'" class="style-title-list">
-                    {{ $t('3c283583-6a2d-497e-abe4-0e67852497b7') }}
+                    {{ $t('%iF') }}
                 </h3>
                 <h3 v-else class="style-title-list">
-                    {{ $t('090e5afe-2d7a-4948-9f3b-56a3fb4919aa') }}
+                    {{ $t('%iG') }}
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $t("2a38f9c1-2904-4b14-a477-40c7ada7b743") }}
+                    {{ $t("%iO") }}
                 </p>
             </STListItem>
         </STList>
 
         <hr>
         <p v-if="records.length === 0 && categories.length === 0" class="info-box">
-            {{ isRootCategory ? $t('86e7714a-6658-4efd-9cd2-00ba243b4d10') : $t('006de532-e3d1-4567-8def-48c99477d65e') }}
+            {{ isRootCategory ? $t('%iH') : $t('%17h') }}
         </p>
 
         <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
@@ -52,13 +52,13 @@
         <p class="style-button-bar">
             <button class="button text" type="button" @click="addRecord()">
                 <span class="icon add" />
-                <span v-if="categories.length === 0">{{ $t('00b57923-c4f1-47ab-a90a-275d192e53e8') }}</span>
-                <span v-else>{{ $t('49d8a87b-542f-4522-b054-3a374ab7df1f') }}</span>
+                <span v-if="categories.length === 0">{{ $t('%iI') }}</span>
+                <span v-else>{{ $t('%123') }}</span>
             </button>
 
             <button v-if="allowChildCategories" class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>{{ $t('502dc65d-e8d3-4b20-a478-a76ca9084e60') }}</span>
+                <span>{{ $t('%M2') }}</span>
             </button>
         </p>
 
@@ -78,7 +78,7 @@
             </p>
 
             <p v-if="c.records.length === 0" class="info-box">
-                {{ $t('e60901dd-8a37-48e1-9223-ed444f1d1d4b') }}
+                {{ $t('%iJ') }}
             </p>
 
             <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description" />
@@ -91,22 +91,22 @@
         </div>
 
         <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
-            <hr><h2>{{ $t('6ba4f526-8b64-4902-903b-7cb176684151') }}</h2>
+            <hr><h2>{{ $t('%iK') }}</h2>
             <p v-if="!hasFilters">
-                {{ $t('bb4843f4-d853-4953-8869-7d9c6c12b974') }}
+                {{ $t('%iL') }}
             </p>
             <p v-else-if="allowChildCategories && patchedCategory.getAllRecords().length > 1">
-                {{ $t('d68cc8ee-9d6c-471a-a532-6ad566cf1ea1') }}
+                {{ $t('%iM') }}
             </p>
             <p v-else>
-                {{ $t('273ea198-4956-4645-a4a5-fb0566b871c5') }}
+                {{ $t('%iN') }}
             </p>
 
             <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder" />
         </div>
 
         <template #toolbar>
-            <button v-tooltip="$t('0e35cf4e-81ea-41f3-973e-d7b9421363dc')" class="button icon eye" type="button" @click="showExample" />
+            <button v-tooltip="$t('%jH')" class="button icon eye" type="button" @click="showExample" />
         </template>
     </SaveView>
 </template>
@@ -180,9 +180,9 @@ const hasFilters = computed(() => {
 
 const title = computed(() => {
     if (isRootCategory.value) {
-        return props.isNew ? $t(`51f9909d-c91f-455d-8cd4-ee0a1897e59d`) : $t('270c18bf-7852-4d33-809d-6567c4bd56a9');
+        return props.isNew ? $t(`%10l`) : $t('%17i');
     }
-    return props.isNew ? $t(`97ddbaef-0a49-4b53-893d-4c77dad6f52b`) : $t('770518af-b094-4fca-bc0a-641f508895ef');
+    return props.isNew ? $t(`%LN`) : $t('%17j');
 });
 const records = computed(() => patchedCategory.value.records);
 const categories = computed(() => patchedCategory.value.childCategories);
@@ -213,7 +213,7 @@ useValidation(errors.validator, () => {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'name',
-            message: $t('396f75d7-e7d9-42d9-a50e-9ace51c92fe6')
+            message: $t('%11M')
         })
     }
 });
@@ -234,7 +234,7 @@ const defaultEnabled = computed({
     get: () => patchedCategory.value.defaultEnabled,
     set: (v: boolean) => {
         if (v && patchedCategory.value.containsSensitiveData && !props.settings.inheritedRecordsConfiguration?.dataPermission) {
-            Toast.error($t(`1f1e0d12-3960-46f9-b1e7-d8b42a89e51f`)).show();
+            Toast.error($t(`%10m`)).show();
             return;
         }
 
@@ -455,18 +455,18 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`d76e80a1-b717-4002-b40c-1e890e87bf1c`),
+                name: $t(`%8k`),
                 icon: 'settings',
                 action: () => editCategory(category),
             }),
             new ContextMenuItem({
-                name: $t(`d4ac382c-5394-4451-a25b-3b97f6d60168`),
+                name: $t(`%10n`),
                 icon: 'copy',
                 action: () => addCategory(category.duplicate()),
             }),
         ], [
             new ContextMenuItem({
-                name: $t(`f05a29d6-2df3-45f7-a185-e4a0357fcfae`),
+                name: $t(`%10o`),
                 icon: 'arrow-up',
                 disabled: !moveRecordCategories.canMoveUp(category.id),
                 action: () => {
@@ -474,7 +474,7 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`fa6ca066-51cf-479f-be0a-adf42b328983`),
+                name: $t(`%10p`),
                 icon: 'arrow-down',
                 disabled: !moveRecordCategories.canMoveDown(category.id),
                 action: () => {
@@ -487,14 +487,14 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`58351618-cc4a-4785-a8c7-dfd741aa9985`),
+                name: $t(`%10q`),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: $t(`ba261762-9151-487c-a3a1-deb1c59e2a14`),
+                            name: $t(`%10r`),
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm($t(`e2193879-76cd-431e-90b5-37cb1871f156`), $t(`9a384a73-d222-49f8-9203-76b8e525f1ab`), $t(`4b82085a-2d05-4172-8503-8aadd2767343`))) {
+                                if (!await CenteredMessage.confirm($t(`%10s`), $t(`%10t`), $t(`%10u`))) {
                                     return;
                                 }
 
@@ -520,7 +520,7 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
                             disabled: c.id === props.categoryId,
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm($t(`e2193879-76cd-431e-90b5-37cb1871f156`), $t(`9a384a73-d222-49f8-9203-76b8e525f1ab`), $t(`a3605548-d249-489e-bf64-4d3bd3555a8c`))) {
+                                if (!await CenteredMessage.confirm($t(`%10s`), $t(`%10t`), $t(`%10v`))) {
                                     return;
                                 }
 
@@ -576,7 +576,7 @@ async function deleteMe() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`95557c11-2b92-4a70-8945-99f6c6f7051c`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
+    if (!await CenteredMessage.confirm($t(`%10w`), $t(`%CJ`))) {
         return;
     }
     // Note we create a patch, but don't use it internally because that would throw errors. The view itszelf is not aware of the delete
@@ -606,7 +606,7 @@ async function showExample() {
                     defaultEnabled: true,
                 }),
                 value: reactiveValue,
-                saveText: $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
+                saveText: $t(`%v7`),
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
                     await navigationActions.pop({ force: true });
                 },
@@ -621,7 +621,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
+    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
 };
 
 defineExpose({

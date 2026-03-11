@@ -1,7 +1,7 @@
 <template>
     <div v-if="!category.isEnabled(value as ObjectWithRecords)" class="container">
         <p v-if="STAMHOOFD.environment === 'development'" class="error-box">
-            {{ $t('02b0533d-31b1-44ce-a22b-47d7f90adea8') }}
+            {{ $t('%H') }}
         </p>
     </div>
     <div v-else class="container">
@@ -19,7 +19,7 @@
                 </span>
             </div>
             <div>
-                <button v-if="!markReviewed && hasAnswers" type="button" class="button icon trash" :v-tooltip="$t('dd1f78c5-9a9e-4535-8527-3f50619860c7')" @click="clearAnswers" />
+                <button v-if="!markReviewed && hasAnswers" type="button" class="button icon trash" :v-tooltip="$t('%j9')" @click="clearAnswers" />
             </div>
         </h2>
 
@@ -38,18 +38,18 @@
         </div>
 
         <p v-if="!markReviewed && lastReviewed" class="style-description-small">
-            {{ $t('46f4bb39-74c1-43fc-9000-ec7ef9574f03', {date: formatDate(lastReviewed)}) }}<template v-if="isLastReviewIncomplete">
-                {{ $t('5811ac7a-ecb4-4ef4-8cbd-1a7c437c9c2e') }}
+            {{ $t('%jA', {date: formatDate(lastReviewed)}) }}<template v-if="isLastReviewIncomplete">
+                {{ $t('%jB') }}
             </template>. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                {{ $t('168f25d2-74c1-4c18-818a-796e7a8fee41') }}
+                {{ $t('%jC') }}
             </button>
             <button v-else class="inline-link" type="button" @click="clearReviewed">
-                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
+                {{ $t('%fE') }}
             </button>
         </p>
         <p v-if="!markReviewed && !lastReviewed" class="style-description-small">
-            {{ $t('252a9a8f-4310-4ee6-98de-d6405ca544f1') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
-                {{ $t('168f25d2-74c1-4c18-818a-796e7a8fee41') }}
+            {{ $t('%jD') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+                {{ $t('%jC') }}
             </button>
         </p>
     </div>
@@ -222,7 +222,7 @@ const hasAnswers = computed(() => {
 });
 
 async function clearAnswers() {
-    if (!await CenteredMessage.confirm($t('e977e290-dff3-401c-a520-0a5e8abac1e1'), $t('587c7b87-b79e-4f3c-a55e-9fc8331d86c6'))) {
+    if (!await CenteredMessage.confirm($t('%C2'), $t('%C3'))) {
         return;
     }
     const patch = new PatchMap() as PatchAnswers;

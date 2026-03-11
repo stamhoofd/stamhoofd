@@ -6,26 +6,26 @@
 
             <template v-if="!checkout || !checkout.isAdminFromSameOrganization">
                 <p v-if="names.length > 0">
-                    {{ $t('98d05123-a351-4fb7-a0d7-87f46bcd127d') }}
+                    {{ $t('%eY') }}
                 </p>
 
                 <p v-else-if="waitingListNames.length > 0">
-                    {{ $t('6f719fff-fd1f-4aee-91c1-605ef3d700e3') }}
+                    {{ $t('%eZ') }}
                 </p>
 
                 <p v-else>
-                    {{ $t('8ff9d707-c8f8-4d37-85d1-fc578ef31f50') }}
+                    {{ $t('%ea') }}
                 </p>
             </template>
             <p v-else-if="checkout.sendConfirmationEmail">
-                {{ $t('4bb7718d-8198-41c6-b480-d71cd2eeae8b') }}
+                {{ $t('%eb') }}
             </p>
         </main>
 
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss({ force: true })">
-                    <span>{{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}</span>
+                    <span>{{ $t('%9b') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>
@@ -82,38 +82,38 @@ if (props.payment && names.length === 0 && waitingListNames.length === 0) {
 }
 
 const title = computed(() => {
-    let t = $t(`2c11315f-96a5-424d-a1e0-f24f2abf5e8a`) + ' ';
+    let t = $t(`%zm`) + ' ';
 
     if (names.length > 0) {
         if (names.length > 3) {
-            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
+            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
         }
         else if (names.length > 1) {
-            t += Formatter.joinLast(names, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
+            t += Formatter.joinLast(names, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
         }
         else {
-            t += names.join('') + ' ' + $t(`4ca47c6a-ca4e-4f63-b303-b45536072957`);
+            t += names.join('') + ' ' + $t(`%zp`);
         }
     }
 
     if (waitingListNames.length > 0) {
         if (names.length > 0) {
-            t += ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ';
+            t += ' ' + $t(`%M1`) + ' ';
         }
 
         if (waitingListNames.length > 3) {
-            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
+            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
         }
         else if (waitingListNames.length > 1) {
-            t += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
+            t += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
         }
         else {
-            t += waitingListNames.join('') + ' ' + $t(`59ecd638-c6a3-45b1-80bb-96c4e3bdde05`);
+            t += waitingListNames.join('') + ' ' + $t(`%zr`);
         }
     }
 
     if (names.length === 0 && waitingListNames.length === 0) {
-        t += $t(`56c85b34-a9f3-46ac-a77c-991a0f463c73`);
+        t += $t(`%zs`);
     }
 
     return t;

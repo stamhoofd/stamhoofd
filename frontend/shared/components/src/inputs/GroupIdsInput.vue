@@ -18,7 +18,7 @@
                         <Checkbox v-model="allGroups" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('07d642d2-d04a-4d96-b155-8dbdb1a9e4ff') }}
+                        {{ $t('%52') }}
                     </h3>
                 </STListItem>
 
@@ -38,7 +38,7 @@
             </STList>
 
             <p v-if="groups.length === 0" class="info-box">
-                {{ $t('fd52fa36-16e6-4106-807c-c387bc0acc0e') }}
+                {{ $t('%8W') }}
             </p>
         </div>
     </LoadingBoxTransition>
@@ -59,7 +59,7 @@ const props = withDefaults(
     }>(), {
         nullable: false,
         defaultPeriodId: null,
-        title: () => $t(`2a033cd8-b9e4-4a92-a8a6-b4a687d87e79`),
+        title: () => $t(`%wP`),
     },
 );
 

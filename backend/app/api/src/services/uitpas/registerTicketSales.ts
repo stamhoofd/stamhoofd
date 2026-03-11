@@ -46,7 +46,7 @@ function assertisSuccessResponse(json: unknown): asserts json is SuccessResponse
         throw new SimpleError({
             code: 'invalid_register_ticket_sale_response',
             message: `Invalid register ticket sale response`,
-            human: $t(`f5cac12d-ced6-43e6-bbd9-81b381807154`),
+            human: $t(`%1BX`),
         });
     }
 }
@@ -69,7 +69,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
             throw new SimpleError({
                 code: 'invalid_uitpas_event_url',
                 message: `Invalid UiTPAS event URL: ${ticketSale.uitpasEventUrl}`,
-                human: $t(`85fb6e02-9b69-43cc-acf7-96a576461560`),
+                human: $t(`%1BS`),
             });
         }
 
@@ -108,7 +108,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         throw new SimpleError({
             code: 'unsuccessful_response_registering_ticket_sales',
             message: `Unsuccessful response when registering UiTPAS ticket sales`,
-            human: $t(`dd9b30ca-860f-47aa-8cb1-527fd156d9ca`),
+            human: $t(`%18C`),
         });
     }
     const json = await response.json().catch(() => {});
@@ -117,7 +117,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         throw new SimpleError({
             code: 'invalid_response_registering_ticket_sales',
             message: `Invalid response when registering ticket sales`,
-            human: $t(`f5cac12d-ced6-43e6-bbd9-81b381807154`),
+            human: $t(`%1BX`),
         });
     }
     const now = new Date();

@@ -4,19 +4,19 @@
             {{ title }}
         </h1>
         <button v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled" class="error-box icon disabled selectable" type="button" @click="markDue">
-            <span>{{ $t('39e508ae-7803-4da8-ac84-89cde3d46867') }}</span>
-            <span class="button text">{{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}</span>
+            <span>{{ $t('%1Jl') }}</span>
+            <span class="button text">{{ $t('%hP') }}</span>
         </button>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="balanceItem.relations.size === 0" error-fields="description" :error-box="errors.errorBox" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" class="max">
-            <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
+        <STInputBox v-if="balanceItem.relations.size === 0" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)" class="max">
+            <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`%gp`)">
         </STInputBox>
         <STList v-else>
             <STListItem>
                 <h3 class="style-definition-label">
-                    {{ $t('23671282-34da-4da9-8afd-503811621055') }}
+                    {{ $t('%1LP') }}
                 </h3>
                 <p class="style-definition-text">
                     {{ getBalanceItemTypeName(patchedBalanceItem.type) }}
@@ -42,46 +42,46 @@
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`7453643b-fdb2-4aa1-9964-ddd71762c983`)">
-                    <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
+                <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`%6q`)">
+                    <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`%1Mn`)" />
 
                     <template v-if="$feature('vat') || !VATIncluded" #right>
                         <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
-                            <span v-if="VATIncluded">{{ $t('f107bcb8-5414-4abf-954f-3e63855d65e1') }}</span>
-                            <span v-else>{{ $t('63713e8d-73e7-4013-a7be-549f035b563f') }}</span>
+                            <span v-if="VATIncluded">{{ $t('%1Hs') }}</span>
+                            <span v-else>{{ $t('%1Ht') }}</span>
                             <span class="icon arrow-swap small" />
                         </button>
                     </template>
 
                     <p v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled && (patchedBalanceItem.unitPrice !== balanceItem.unitPrice || patchedBalanceItem.amount !== balanceItem.amount)" class="warning-box small">
-                        {{ $t('81b36015-481c-4c6f-9a79-8e1038c78796') }}
+                        {{ $t('%1Jm') }}
                     </p>
                 </STInputBox>
             </div>
 
-            <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`697df3e7-fbbf-421d-81c2-9c904dce4842`)">
-                <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a`)" />
+            <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`%M4`)">
+                <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`%20`)" />
             </STInputBox>
         </div>
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
+                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`%gq`)">
                     <DateSelection v-model="createdAt" :adjust-initial-time="isNew" :time="{hours: 12}" />
                 </STInputBox>
             </div>
 
             <div v-if="(patchedBalanceItem.unitPrice >= 0 && balanceItem.status === BalanceItemStatus.Due) || dueAt !== null">
-                <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`1402e826-1f61-498a-81b4-595dce3248d0`)">
+                <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`%Cj`)">
                     <template #right>
-                        <span v-tooltip="$t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575')" class="style-tooltip"><span class="icon small gray help" /></span>
+                        <span v-tooltip="$t('%94')" class="style-tooltip"><span class="icon small gray help" /></span>
                     </template>
-                    <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
+                    <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`%gr`)" />
                 </STInputBox>
             </div>
         </div>
 
-        <STInputBox v-if="$feature('vat') || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('9ad5f13f-0c61-4109-b733-7015740c64cf')" class="max">
+        <STInputBox v-if="$feature('vat') || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('%1Hu')" class="max">
             <template #right>
                 <button v-if="!VATExcempt" class="button text small" type="button" @click="toggleVATExcempt">
                     <span>Verleggen</span>
@@ -95,8 +95,8 @@
                         <Radio v-model="VATPercentage" :value="null" autocomplete="off" name="VATPercentage" />
                     </template>
                     <h4 class="style-list-title">
-                        {{ $t('7288e80f-000d-4409-a7ad-12a6353ea6c2') }}
-                        <span v-if="VATPercentage === null && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
+                        {{ $t('%1Hv') }}
+                        <span v-if="VATPercentage === null && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
                     </h4>
                 </STListItem>
 
@@ -106,7 +106,7 @@
                     </template>
                     <h4 class="style-list-title">
                         21%
-                        <span v-if="VATPercentage === 21 && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
+                        <span v-if="VATPercentage === 21 && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
                     </h4>
                 </STListItem>
 
@@ -116,7 +116,7 @@
                     </template>
                     <h4 class="style-list-title">
                         12%
-                        <span v-if="VATPercentage === 12 && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
+                        <span v-if="VATPercentage === 12 && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
                     </h4>
                 </STListItem>
 
@@ -126,13 +126,13 @@
                     </template>
                     <h4 class="style-list-title">
                         6%
-                        <span v-if="VATPercentage === 6 && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
+                        <span v-if="VATPercentage === 6 && VATExcempt" class="style-tag inline-first">{{ $t('%1Hw') }}</span>
                     </h4>
                 </STListItem>
             </STList>
         </STInputBox>
         <p v-if="VATExcempt" class="style-description-small">
-            <I18nComponent :t="$t('8a3444b1-38a5-4199-bd71-c40eec709833', {reden: getVATExcemptReasonName(VATExcempt)})">
+            <I18nComponent :t="$t('%1Hx', {reden: getVATExcemptReasonName(VATExcempt)})">
                 <template #button="{content}">
                     <button class="inline-link" type="button" @click="toggleVATExcempt">
                         {{ content }}
@@ -144,11 +144,11 @@
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="patchedBalanceItem.relations.size === 0 && family && family.members.length >= (originalMemberId ? 2 : 1)">
-            <hr><h2>{{ $t('946f5e2e-d92c-4bbd-b64f-115958a04d01') }}</h2>
-            <p>{{ $t('00c61f8a-204c-41d5-abbb-7da96675b0e3') }}</p>
+            <hr><h2>{{ $t('%ym') }}</h2>
+            <p>{{ $t('%gk') }}</p>
 
             <p v-if="!memberId" class="warning-box">
-                {{ $t('14c1d37c-a2df-428f-b62a-27259600aadc') }}
+                {{ $t('%gl') }}
             </p>
 
             <STList>
@@ -161,7 +161,7 @@
                         {{ m.patchedMember.name }}
                     </h3>
                     <p v-if="!memberId" class="style-description-small">
-                        {{ $t('946f5e2e-d92c-4bbd-b64f-115958a04d01') }}
+                        {{ $t('%ym') }}
                     </p>
                 </STListItem>
 
@@ -174,18 +174,18 @@
                         {{ user.name }} ({{ user.email }})
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('ac747fb2-d391-499b-8cee-1ed7241e6177') }}
+                        {{ $t('%1o') }}
                     </p>
                 </STListItem>
             </STList>
         </template>
 
         <template v-if="!isNew && hasPaymentsRelation(patchedBalanceItem)">
-            <hr><h2>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h2>
-            <p>{{ $t('a4474840-0a73-4268-8d06-be3361fe5fc7') }}</p>
+            <hr><h2>{{ $t('%1JH') }}</h2>
+            <p>{{ $t('%gm') }}</p>
 
             <p v-if="patchedBalanceItem.payments.length === 0" class="info-box">
-                {{ $t('a051f89d-5456-4990-a9c1-37094445ad58') }}
+                {{ $t('%gn') }}
             </p>
 
             <STList v-else>
@@ -193,7 +193,7 @@
             </STList>
 
             <hr>
-            <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
+            <h2>{{ $t('%16X') }}</h2>
 
             <STList>
                 <STListItem v-if="balanceItem.status === BalanceItemStatus.Canceled" :selectable="true" @click="markDue">
@@ -206,10 +206,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('db67c24e-cb6b-499e-9bee-8dcbc1710c10') }}
+                        {{ $t('%1Jn') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('c556cc16-1755-48bb-a16d-8b9c73d57ec7') }}
+                        {{ $t('%1Jo') }}
                     </p>
 
                     <template #right>
@@ -227,7 +227,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('382c3c3e-7ac0-4d9d-871f-2316c85b51ae') }}
+                        {{ $t('%go') }}
                     </h2>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -244,10 +244,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('b548b1b7-8366-49e1-9111-bc14c758acc1') }}
+                        {{ $t('%1Jp') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('6d3b3257-d194-4cd7-bdd2-ffebd3f237c2') }}
+                        {{ $t('%1Jq') }}
                     </p>
 
                     <template #right>
@@ -300,9 +300,9 @@ loadFamilyFromUser().catch(console.error);
 
 const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
-        return props.isNew ? $t(`c40f80b1-3553-4639-ac5c-937c45baf05e`) : $t(`6c1f62aa-e2c7-40cb-8cb9-7ea3365d5cf4`);
+        return props.isNew ? $t(`%10d`) : $t(`%10e`);
     }
-    return props.isNew ? $t(`04c01f07-f37c-4f9c-8a4c-7d4e396af16d`) : $t(`54d0c2bf-ca9b-4005-9fb5-11c5a8a6b6fe`);
+    return props.isNew ? $t(`%1Mj`) : $t(`%1Mk`);
 });
 
 const sortedPayments = computed(() => {
@@ -384,7 +384,7 @@ async function toggleVATExcempt(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('60faa1ad-58e5-484a-b10e-21835398ca84'),
+                name: $t('%1Hy'),
                 selected: VATExcempt.value === null,
                 action: () => {
                     VATExcempt.value = null;
@@ -430,7 +430,7 @@ async function save() {
                 code: 'invalid_field',
                 field: 'description',
                 message: 'description cannot be empty',
-                human: $t('fc883ab4-2743-4f39-9048-4afbf548ba76'),
+                human: $t('%1Hz'),
             });
         }
         if (patchedBalanceItem.value.unitPrice === 0) {
@@ -438,7 +438,7 @@ async function save() {
                 code: 'invalid_field',
                 field: 'unitPrice',
                 message: 'unitPrice cannot be zero',
-                human: $t('7596149b-b7cf-4624-99e1-b8fd949d593d'),
+                human: $t('%1I0'),
             });
         }
         await props.saveHandler(patch.value);
@@ -480,7 +480,7 @@ async function markDue() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`c2b671e8-d20a-469a-8636-c80ddd18b474`), $t(`0cbc8bd6-b4ac-4141-a177-c571010d2275`), $t(`50b0083d-a783-4364-8f2c-007947ec613e`)))) {
+    if (!(await CenteredMessage.confirm($t(`%1Ju`), $t(`%1Jv`), $t(`%1Jw`)))) {
         return;
     }
     if (loading.value) {
@@ -495,7 +495,7 @@ async function markDue() {
             status: BalanceItemStatus.Due,
         }));
 
-        Toast.success($t('e5ec1057-507d-48ef-aa51-d4b0af98fbe6')).show();
+        Toast.success($t('%1Jr')).show();
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -507,7 +507,7 @@ async function doCancel() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`85f9a47d-520b-4a73-b765-582b4b231a68`), $t(`cdf0fafe-b364-4dbb-ae31-b593cf447298`), $t(`81c3580c-d7b5-483c-bfb1-2eec511e36fb`)))) {
+    if (!(await CenteredMessage.confirm($t(`%1Jx`), $t(`%1Jy`), $t(`%1Jz`)))) {
         return;
     }
     if (loading.value) {
@@ -521,7 +521,7 @@ async function doCancel() {
         await props.saveHandler(BalanceItemWithPayments.patch({
             status: BalanceItemStatus.Canceled,
         }));
-        Toast.success($t('81735589-1395-4067-87e5-43b5e2ce335e')).show();
+        Toast.success($t('%1Js')).show();
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -533,7 +533,7 @@ async function doDelete() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`7020d061-6349-4b42-8ee3-eca6b6cca87d`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`2c9ef19d-3838-4e9a-bb9b-e5f9a714fe4c`)))) {
+    if (!(await CenteredMessage.confirm($t(`%10f`), $t(`%CJ`), $t(`%1Fc`)))) {
         return;
     }
     if (loading.value) {
@@ -548,7 +548,7 @@ async function doDelete() {
             status: BalanceItemStatus.Hidden,
             price: 0,
         }));
-        Toast.success($t('a2110850-3b10-45ef-964f-1c1f497691f7')).show();
+        Toast.success($t('%1Jt')).show();
         await pop({ force: true });
     }
     catch (e) {
@@ -627,7 +627,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

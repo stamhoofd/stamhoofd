@@ -30,8 +30,8 @@ export function useCreateEventGroup() {
                 components: [
                     new ComponentWithProperties(NavigationController, {
                         root: new ComponentWithProperties(SearchOrganizationView, {
-                            title: $t('67967405-d320-4d40-8dc0-889915da1f34'),
-                            description: $t('2e5e052c-98b7-4375-b771-05a8913c145b'),
+                            title: $t('%CO'),
+                            description: $t('%CP'),
                             selectOrganization: async (organization: Organization, navigationActions: NavigationActions) => {
                                 group.organizationId = organization.id;
                                 group.periodId = organization.period.period.id;

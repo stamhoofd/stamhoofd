@@ -35,7 +35,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid description',
-                human: $t(`2449fba5-99dc-496f-a9d6-a67263d56616`),
+                human: $t(`%Cr`),
                 field: 'description',
             });
         }
@@ -44,7 +44,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid price',
-                human: $t(`1e165aac-8a58-45c5-bdd8-c58131a7b7f5`),
+                human: $t(`%Cs`),
                 field: 'price',
             });
         }
@@ -53,7 +53,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid amount',
-                human: $t(`0bdf4953-1eae-41fd-b142-5ad3287f17a7`),
+                human: $t(`%Ct`),
                 field: 'amount',
             });
         }
@@ -77,7 +77,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'charge_pending',
                 message: 'Charge members already pending',
-                human: $t(`d2b84fdd-035b-4307-a897-000081aa814f`),
+                human: $t(`%Cu`),
             });
         }
 

@@ -51,7 +51,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'You do not have permissions to edit an inactive organization',
-                human: $t(`b33ba9f0-c12d-4918-ac9d-7aeec5de41a5`),
+                human: $t(`%EV`),
                 statusCode: 403,
             });
         }
@@ -77,7 +77,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         code: 'invalid_field',
                         message: 'Name is too short',
                         field: 'name',
-                        human: $t('50b198a4-af37-4514-8d82-b9e4c41d9e91'),
+                        human: $t('%1L7'),
                     });
                 }
                 organization.name = request.body.name ?? organization.name;
@@ -97,7 +97,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Field is too long',
-                        human: $t(`864675a2-7376-4a61-9c7d-f488e7906d7b`),
+                        human: $t(`%EW`),
                         field: 'uri',
                     });
                 }
@@ -106,7 +106,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Field is too short',
-                        human: $t(`0fa660da-1e74-4940-af88-eafafb1094b6`),
+                        human: $t(`%EX`),
                         field: 'uri',
                     });
                 }
@@ -116,7 +116,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'name_taken',
                         message: 'An organization with the same URI already exists',
-                        human: $t(`daa7dc61-e8c9-4629-97b6-a75f39eaebac`),
+                        human: $t(`%EY`),
                         field: 'uri',
                     });
                 }
@@ -329,7 +329,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'You cannot set the uitpasClientCredentialsStatus manually',
-                        human: $t('d8937ba8-6689-4c76-9841-d5a00c99074b'),
+                        human: $t('%1BB'),
                     });
                 }
 
@@ -357,7 +357,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (request.body.active !== undefined) {
                 if (!Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error($t(`e46f34cd-f166-421e-be97-28ccecdf9c73`));
+                    throw Context.auth.error($t(`%EZ`));
                 }
                 organization.active = request.body.active;
             }
@@ -373,7 +373,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'name_taken',
                         message: 'An organization with the same name already exists',
-                        human: $t(`6e675a7d-b124-4507-bf0c-9b70013e98ca`),
+                        human: $t(`%D2`),
                         field: 'name',
                     });
                 }
@@ -387,7 +387,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'The period you want to set does not exist (anymore)',
-                        human: $t('a3795bf6-ed50-4aa6-9caf-33820292c159'),
+                        human: $t('%15h'),
                         field: 'period',
                     });
                 }
@@ -398,7 +398,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set does not exist (anymore)',
-                            human: $t('a3795bf6-ed50-4aa6-9caf-33820292c159'),
+                            human: $t('%15h'),
                             field: 'period',
                         });
                     }
@@ -408,7 +408,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period has no organization id',
-                            human: $t('d004e93c-e67f-48ab-bf3d-7b4ad86c7a38'),
+                            human: $t('%1Gw'),
                             field: 'period',
                         });
                     }
@@ -417,7 +417,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set is already closed',
-                            human: $t('b6bc2fef-71ac-43a1-b430-50945427a9e3'),
+                            human: $t('%15i'),
                             field: 'period',
                         });
                     }
@@ -427,7 +427,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set has not started yet',
-                            human: $t('2655c006-55af-47e6-959c-16acdb1917dc'),
+                            human: $t('%15k'),
                             field: 'period',
                         });
                     }
@@ -580,7 +580,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (!model || !await Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
                 errors.addError(
-                    Context.auth.error($t(`5e92a9b3-a94d-41db-9d0e-c58122400725`)),
+                    Context.auth.error($t(`%Ea`)),
                 );
                 continue;
             }
@@ -636,7 +636,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Too many companies',
-                        human: $t(`35d462bc-121e-46ad-824b-a7838a6665ae`),
+                        human: $t(`%Eb`),
                         field: 'companies',
                     });
                 }
@@ -649,7 +649,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Too many companies',
-                    human: $t(`35d462bc-121e-46ad-824b-a7838a6665ae`),
+                    human: $t(`%Eb`),
                     field: 'companies',
                 });
             }

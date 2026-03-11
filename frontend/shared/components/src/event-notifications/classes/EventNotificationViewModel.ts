@@ -65,7 +65,7 @@ export class EventNotificationViewModel {
     }
 
     get type() {
-        return this.platform.config.eventNotificationTypes.find(t => t.id === this.eventNotification.typeId) ?? EventNotificationType.create({ title: $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`) });
+        return this.platform.config.eventNotificationTypes.find(t => t.id === this.eventNotification.typeId) ?? EventNotificationType.create({ title: $t(`%Gr`) });
     }
 
     useType() {
@@ -89,7 +89,7 @@ export class EventNotificationViewModel {
                 if (this.isSaving) {
                     throw new SimpleError({
                         code: 'saving',
-                        message: $t('3f34c1d2-0305-432f-b789-7d334a7c093b'),
+                        message: $t('%bD'),
                     });
                 }
                 this.isSaving = true;
@@ -140,7 +140,7 @@ export class EventNotificationViewModel {
                 if (this.isSaving) {
                     throw new SimpleError({
                         code: 'saving',
-                        message: $t('3f34c1d2-0305-432f-b789-7d334a7c093b'),
+                        message: $t('%bD'),
                     });
                 }
                 this.isSaving = true;

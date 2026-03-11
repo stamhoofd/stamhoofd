@@ -1,5 +1,5 @@
 <template>
-    <component :is="inputComponent" v-model="filter.value" :min="null" :max="null" :required="true" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`f820fe9e-aee2-4e08-9fe7-8b531280f371`)" />
+    <component :is="inputComponent" v-model="filter.value" :min="null" :max="null" :required="true" :floating-point="floatingPoint" :stepper="!floatingPoint" class="option" :placeholder="$t(`%bU`)" />
 </template>
 
 <script lang="ts" setup>

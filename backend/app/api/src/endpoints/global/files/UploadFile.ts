@@ -156,7 +156,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
                 throw new SimpleError({
                     code: 'failed_to_sign',
                     message: 'Failed to sign file',
-                    human: $t('509cdb4f-131a-42a6-b3b1-a63cca231e65'),
+                    human: $t('%B6'),
                     statusCode: 500,
                 });
             }

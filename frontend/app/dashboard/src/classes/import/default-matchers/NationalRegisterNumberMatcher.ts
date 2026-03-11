@@ -11,7 +11,7 @@ import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 // should come after birthday
 export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatcher implements BaseColumnMatcher {
     getName(): string {
-        return $t('00881b27-7501-4c56-98de-55618be2bf11');
+        return $t('%wK');
     }
 
     get id() {
@@ -61,7 +61,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
         if (!DataValidator.verifyBelgianNationalNumber(value)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('1072ba5d-292b-4546-b2ea-646f0bf56931'),
+                message: $t('%18V'),
             });
         }
 
@@ -71,7 +71,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
             if (birthDay && !DataValidator.doesMatchBelgianNationalNumber(value, birthDay)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`b809571c-08ed-464c-9f40-3522f8dac440`),
+                    message: $t(`%z6`),
 
                 });
             }
@@ -101,7 +101,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
         if (!DataValidator.verifyBelgianNationalNumber(value)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('1072ba5d-292b-4546-b2ea-646f0bf56931'),
+                message: $t('%18V'),
             });
         }
 
@@ -111,7 +111,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
             if (birthDay && !DataValidator.doesMatchBelgianNationalNumber(value, birthDay)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`b809571c-08ed-464c-9f40-3522f8dac440`),
+                    message: $t(`%z6`),
 
                 });
             }

@@ -96,19 +96,19 @@ export class ResourcePermissions extends AutoEncoder {
         const resourceDescription = (resource: ResourceLike) => {
             const accessRights = resource.accessRights.map(a => AccessRightHelper.getDescription(a));
             if (resource.level === PermissionLevel.None) {
-                return Formatter.joinLast(accessRights, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
+                return Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ');
             }
 
-            let prefix = $t(`5f235a48-96bc-4db1-9de8-a3266b8edede`);
+            let prefix = $t(`%nD`);
 
             if (resource.level === PermissionLevel.Write) {
-                prefix = $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`);
+                prefix = $t(`%Rw`);
             }
             else if (resource.level === PermissionLevel.Full) {
-                prefix = $t(`d5c41a61-1870-4dff-9422-726f8e2a1227`);
+                prefix = $t(`%m9`);
             }
 
-            return prefix + (accessRights.length > 0 ? ' ' + $t(`21ff33a7-fe02-4056-b867-f382fd202c14`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') : '');
+            return prefix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : '');
         };
 
         for (const [type, resources] of map) {
@@ -118,21 +118,21 @@ export class ResourcePermissions extends AutoEncoder {
             if (all && !all.isEmpty) {
                 const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
                 if (all.level === PermissionLevel.None) {
-                    stack.push($t(`0a46c343-e81a-45f7-9c01-22db578bd867`) + ' ' + getPermissionResourceTypeName(type, true) + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
+                    stack.push($t(`%nF`) + ' ' + getPermissionResourceTypeName(type, true) + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' '));
                 }
 
-                let prefix = $t(`0a46c343-e81a-45f7-9c01-22db578bd867`) + ' ';
-                let suffix = ' ' + $t(`5f235a48-96bc-4db1-9de8-a3266b8edede`);
+                let prefix = $t(`%nF`) + ' ';
+                let suffix = ' ' + $t(`%nD`);
 
                 if (all.level === PermissionLevel.Write) {
-                    suffix = ' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`);
+                    suffix = ' ' + $t(`%Rw`);
                 }
                 else if (all.level === PermissionLevel.Full) {
-                    prefix = $t(`ef63f5fe-3428-4c1a-b98d-5816bc403e09`) + ' ';
+                    prefix = $t(`%nG`) + ' ';
                     suffix = '';
                 }
 
-                stack.push(prefix + getPermissionResourceTypeName(type, true) + suffix + (accessRights.length > 0 ? ' ' + $t(`21ff33a7-fe02-4056-b867-f382fd202c14`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') : ''));
+                stack.push(prefix + getPermissionResourceTypeName(type, true) + suffix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : ''));
                 allDescription = resourceDescription(all);
             }
 

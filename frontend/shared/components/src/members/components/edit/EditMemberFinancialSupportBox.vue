@@ -10,7 +10,7 @@
                 {{ checkboxLabel }}
             </Checkbox>
             <p class="style-description-small">
-                {{ $t('dd49cb08-cb38-44c1-9c4f-c339b2d9254e') }}
+                {{ $t('%fF') }}
             </p>
         </template>
         <Checkbox v-else v-model="requiresFinancialSupport" :indeterminate="!dataPermissionsChangeDate">
@@ -18,13 +18,13 @@
         </Checkbox>
 
         <p v-if="!willMarkReviewed && dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('78dedb37-a33d-4907-8034-43345eea18a0') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" @click="clear">
-                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
+            {{ $t('%fC') }} {{ formatDate(dataPermissionsChangeDate) }}. <button type="button" class="inline-link" :v-tooltip="$t('%fD')" @click="clear">
+                {{ $t('%fE') }}
             </button>.
         </p>
 
         <p v-if="!dataPermissionsChangeDate" class="style-description-small">
-            {{ $t('cd5ee584-5b0c-4acb-af75-7b21ad37cead') }}
+            {{ $t('%Bo') }}
         </p>
     </div>
     <div v-else class="container" data-testid="financial-support-box">
@@ -39,7 +39,7 @@
                 {{ checkboxLabel }}
             </Checkbox>
             <p class="style-description-small">
-                {{ $t('bc81421d-f016-4cdd-9757-c5efc6607295') }}
+                {{ $t('%fG') }}
             </p>
         </template>
         <Checkbox v-else v-model="requiresFinancialSupport" :disabled="hasKansenTarief">
