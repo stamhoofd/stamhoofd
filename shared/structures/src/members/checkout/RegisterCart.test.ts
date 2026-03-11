@@ -467,7 +467,7 @@ describe('Unit.RegisterCart', () => {
             expect(checkout.totalPrice).toEqual(-90_0000);
             expect(checkout.priceBreakown).toEqual([
                 {
-                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
+                    name: '%175 (Multiple family members discount)',
                     price: 10_0000,
                 },
                 expect.objectContaining({
@@ -568,7 +568,7 @@ describe('Unit.RegisterCart', () => {
             expect(checkout.priceBreakown).toEqual([
                 {
                     // Side effect in registration B
-                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
+                    name: '%175 (Multiple family members discount)',
                     price: 10_0000,
                 },
                 expect.objectContaining({
@@ -663,7 +663,7 @@ describe('Unit.RegisterCart', () => {
                     price: 50_0000,
                 }),
                 {
-                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
+                    name: '%175 (Multiple family members discount)',
                     price: 10_0000,
                 },
                 expect.objectContaining({
