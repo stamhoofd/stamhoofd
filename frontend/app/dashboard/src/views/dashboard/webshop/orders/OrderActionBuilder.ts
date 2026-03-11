@@ -443,6 +443,16 @@ export class OrderActionBuilder {
     }
 
     async deleteOrders(orders: PrivateOrder[]) {
+        const isSomePaid = orders.some(order => order.payments.some(payment => payment.status === PaymentStatus.Succeeded));
+        if (isSomePaid) {
+            const text = orders.length > 1 ? $t('Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven') : $t('Het verwijderen van deze bestelling kan financieel een vertekend beeld geven');
+            const description = orders.length > 1 ? $t('Sommige bestellingen zijn al betaald. Als je deze bestellingen verwijdert dan kan dit financieel een vertekend beeld geven omdat de betalingen blijven bestaan waardoor er een schuld ontstaat tegenover de bestellers. Indien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.') : $t('Deze bestelling is al betaald. Als je deze verwijdert dan kan dit financieel een vertekend beeld geven omdat de betaling blijft bestaan waardoor er een schuld ontstaat tegenover de besteller. Indien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.');
+            const isConfirm = await CenteredMessage.confirm(text, $t(`Doorgaan`), description, undefined, false);
+            if (!isConfirm) {
+                return;
+            }
+        }
+
         if (!await CenteredMessage.confirm(orders.length === 1 ? $t(`059520a3-0798-46a6-8c41-e3e401aa1a59`, { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name }) : $t(`Bestellingen verwijderen?`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`Je kan dit niet ongedaan maken.`))) {
             return;
         }
