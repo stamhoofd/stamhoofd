@@ -937,7 +937,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                 allForCategory.push(
                     new NumberFilterBuilder({
                         name: prefix + categoryPrefix + record.name,
-                        key: 'numberValue',
+                        key: 'value',
                         type: record.type === RecordType.Price ? NumberFilterFormat.Currency : NumberFilterFormat.Number,
                         wrapper: {
                             recordAnswers: {

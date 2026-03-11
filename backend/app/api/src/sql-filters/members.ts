@@ -503,11 +503,6 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                     type: SQLValueType.JSONString,
                     nullable: true,
                 }),
-                numberValue: createColumnFilter({
-                    expression: SQL.jsonExtract(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
-                    type: SQLValueType.JSONNumber,
-                    nullable: true,
-                }),
             }),
             {
                 checkPermission: async (key: string) => {
