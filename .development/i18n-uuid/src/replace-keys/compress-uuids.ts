@@ -13,7 +13,7 @@ export function compressUuids() {
     const usedKeys = new Set<string>();
 
     // Build map
-    let largestBase62 = 0;
+    let largestBase62 = -1;
 
     for (const [filePath, translations] of translationsWithPath) {
         for (const key in translations) {
@@ -36,10 +36,10 @@ export function compressUuids() {
     // Find uuids in translationsForKeys with the exact same content (so same map keys and values, same size)
     let merge: Map<string, string> = new Map();
     for (const uuid of usedKeys.values()) {
-        if (isUuid(uuid)) {
+        if (!isBase62(uuid)) {
             // todo compress
-            merge.set(uuid, encodeBase62(largestBase62));
             largestBase62 += 1;
+            merge.set(uuid, encodeBase62(largestBase62));
         }
     }
 
@@ -96,26 +96,13 @@ export function compressUuids() {
     });
 }
 
-function isMapEqual(a: Map<string, string>, b: Map<string, string>) {
-    if (a.size !== b.size) {
-        return false;
-    }
-    for (const [keyA, valueA] of a.entries()) {
-        const valueB = b.get(keyA);
-        if (valueB !== valueA) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function isUuid(key: string) {
-    return uuidValidate(key);
-}
-
+const START_CHAR = '%';
 export function isBase62(str: string) {
     if (str.length > 10) {
         // skip: we won't reach here
+        return false;
+    }
+    if (!str.startsWith(START_CHAR)) {
         return false;
     }
 
@@ -129,19 +116,19 @@ export function isBase62(str: string) {
 
 const BASE62_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
-function encodeBase62(num: number): string {
-  if (num === 0) return '0';
+export function encodeBase62(num: number): string {
+  if (num === 0) return START_CHAR + '0';
 
   let result = '';
   while (num > 0) {
     result = BASE62_CHARS[num % 62] + result;
     num = Math.floor(num / 62);
   }
-  return result;
+  return START_CHAR + result;
 }
 
-function decodeBase62(str: string): number {
-  return str.split('').reduce((acc, char) => {
+export function decodeBase62(str: string): number {
+  return str.substring(START_CHAR.length).split('').reduce((acc, char) => {
     const index = BASE62_CHARS.indexOf(char);
     if (index === -1) throw new Error(`Invalid Base62 character: '${char}'`);
     return acc * 62 + index;

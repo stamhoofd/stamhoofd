@@ -3,6 +3,7 @@ import { v4 as uuidv4, validate as uuidValidate } from "uuid";
 import { getFilesToSearch } from "../shared/get-files-to-search";
 import { getTranslationsWithPath } from "./get-translations-with-path";
 import { writeTranslation } from "./write-translations";
+import { isBase62 } from "./compress-uuids";
 
 /**
  * Searches for keys that are present in translation files that are not uuids, and replaces them with uuids in both the locale.json file and the $t(keys).
@@ -76,11 +77,12 @@ function replaceKeysWithUuidInTranslations(
                 const uuidKey = replacedKeys.get(fullKey)!;
                 setOnResult(uuidKey);
                 continue;
-            } else if (isUuid(key)) continue;
+            } else if (isUuid(key) || isBase62(key)) continue;
 
             const value = translations[key];
 
             if (typeof value === "string") {
+                // For now inject a uuidv4 - we'll replace it with an auto incrementing ID when we loaded all translations into memory
                 const uuidKey = uuidv4();
                 replacedKeys.set(fullKey, uuidKey);
                 setOnResult(uuidKey);
