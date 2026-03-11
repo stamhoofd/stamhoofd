@@ -200,11 +200,6 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                 type: SQLValueType.JSONString,
                 nullable: true,
             }),
-            numberValue: createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
-                type: SQLValueType.JSONNumber,
-                nullable: true,
-            }),
         }),
     ),
 };
