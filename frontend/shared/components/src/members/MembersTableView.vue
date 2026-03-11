@@ -108,19 +108,22 @@ useGlobalEventListener('paymentPatch', async () => {
 });
 
 const configurationId = computed(() => {
+    // Note, this key cannot be the same key as the key returned by the registrations table.
+    // The column id's are not the same, so the storage is incomatible.
+
     if (props.responsibility) {
-        return 'responsibility-' + props.responsibility.id;
+        return 'members-responsibility-' + props.responsibility.id;
     }
     if (props.group && props.group.type === GroupType.EventRegistration) {
-        return 'event-registrations';
+        return 'members-event-registrations';
     }
     if (props.group && props.group.type === GroupType.WaitingList) {
-        return 'waitinglist';
+        return 'members-waitinglist';
     }
     if (organization.value) {
-        return 'registrations';
+        return 'members-registrations';
     }
-    return 'platform-registrations';
+    return 'members-platform-registrations';
 });
 
 const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false);
