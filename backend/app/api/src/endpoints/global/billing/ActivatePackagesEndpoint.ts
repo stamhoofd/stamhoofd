@@ -16,7 +16,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
     bodyDecoder = PackageCheckout as Decoder<Body>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != 'POST') {
+        if (request.method !== 'POST') {
             return [false];
         }
 
