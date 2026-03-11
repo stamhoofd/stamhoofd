@@ -6,6 +6,7 @@ import { fixDoubleTranslations } from "./src/auto-translate/fix-double-translati
 import { replaceKeys } from "./src/replace-keys/replace-keys";
 import { fileCache } from "./src/replace-text/FileCache";
 import { replaceText } from "./src/replace-text/replace-text";
+import { unusedKeys } from "./src/replace-keys/unused-keys";
 
 const program = new Command();
 
@@ -77,6 +78,7 @@ program
     });
 
 program.command("replace-keys").action(() => replaceKeys());
+program.command("unused-keys").action(() => unusedKeys());
 
 const autoTranslateCommand = program
     .command("auto-translate")

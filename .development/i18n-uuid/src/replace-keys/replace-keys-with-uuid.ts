@@ -141,6 +141,42 @@ export function replaceOccurrences(replacedKeys: Map<string, string>, files: str
     }
 }
 
+export function findUnusedTranslationKeys(keys: Set<string>, files: string[] = getFilesToSearch(['typescript', 'vue'])) {
+    if(keys.size === 0) return new Set<string>();
+
+    const remaining = new Set<string>(keys);
+    for(const file of files) {
+        const fileContent = fs.readFileSync(file, 'utf8');
+        let newContent = fileContent;
+
+        for(const key of remaining.values()) {
+            const toReplace: {searchValue: RegExp}[] = [
+                {searchValue: createRegexPattern(`\$t('${key}'`)},
+                {searchValue: createRegexPattern(`\$t("${key}"`)},
+                {searchValue: createRegexPattern(`\$t(\`${key}\``)},
+            ]
+
+            let found = false;
+            for(const {searchValue} of toReplace) {
+                const containsPattern = searchValue.test(newContent);
+                if(!containsPattern) continue;
+                
+                const didMatch = newContent.match(searchValue);
+                if (didMatch) {
+                    remaining.delete(key);
+                    break;
+                }
+            }
+        }
+
+        if (remaining.size === 0) {
+            // all found
+            break;
+        }
+    }
+    return remaining;
+}
+
 function escapeRegExp(stringToGoIntoTheRegex: string): string {
     return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
