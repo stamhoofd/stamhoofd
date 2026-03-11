@@ -6,9 +6,26 @@ import { replaceOccurrences } from "./replace-keys-with-uuid";
 import { writeTranslation } from "./write-translations";
 
 /**
- * Add keys from source files to the default .json translation files,
- * if they do not already exist.
- * @returns the default languages with the missing keys added
+ * Adds all usages of `$t(key)` in the code base - where they key is not present in the default translation file, to the default translation file (with a newly generated uuid). 
+ * It also replaces the keys with the generated uuids in the files.
+ * 
+ * 1. So for `$t("Hello world")` this adds an entry in nl.json:
+ *    ```json
+ *    {
+ *        "generated-uuid": "Hello world"
+ *    }
+ *    ```
+ *    And it chagnes `$t("Hello world")` to `$t("generated-uuid")`
+ * 
+ * 2. if the key is aalready an existing uuid, we'll set it to 'todo' (means the uuid is missing and has no translation yet)
+ *    ```json
+ *    {
+ *        "uuid-uuid-uuid": "todo"
+ *    }
+ *     ```
+ *    The key won't be replaced in the $t in this case.
+ * 
+ * @returns the keys added to the default translation file
  */
 export function addMissingKeys(): Record<string, string> {
     console.log("Start add missing keys.");
@@ -20,24 +37,23 @@ export function addMissingKeys(): Record<string, string> {
             `Found ${missingKeys.size} missing key(s) in ${filesWithMissingKeys.size} file(s).`,
         );
 
-        //#region create uuid for missing keys
         const missingUuidKeys = new Map<string, string>();
         const replacedKeys = new Map<string, string>();
 
         for (const key of missingKeys) {
             if (uuidValidate(key)) {
                 missingUuidKeys.set("todo", key);
+
+                console.warn(
+                    `Found missing translation for key ${key}. Replace the 'todo' in ${filePath} manually.`,
+                );
             } else {
                 const uuid = uuidv4();
                 replacedKeys.set(key, uuid);
             }
         }
-        //#endregion
 
-        // replace the missing key with the uuid
-        replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys));
-
-        //#region add the keys and the value to the default translations
+        // Build a map of the translations we need to inject in nl.json
         for (const [oldKey, newKey] of new Map([
             ...replacedKeys,
             ...missingUuidKeys,
@@ -46,8 +62,12 @@ export function addMissingKeys(): Record<string, string> {
             translations[newKey] = oldKey;
         }
 
+        // First write the translation files (no risk of losing data)
+        // Add the uuids to the nl.json file
         writeTranslation(filePath, translations);
-        //#endregion
+
+        // Replace the translations with the generated keys
+        replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys));
     } else {
         console.log("No missing keys found.");
     }
@@ -56,6 +76,9 @@ export function addMissingKeys(): Record<string, string> {
     return translations;
 }
 
+/**
+ * Returns used keys ( $t(key) ), found anywhere in the source code, where the key is not present in the provided translations map, including the file where the keys are used.
+ */
 function getMissingKeys(translations: Record<string, string>): {
     missingKeys: Set<string>;
     filesWithMissingKeys: Set<string>;

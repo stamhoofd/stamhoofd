@@ -4,6 +4,33 @@ import { getFilesToSearch } from "../shared/get-files-to-search";
 import { getTranslationsWithPath } from "./get-translations-with-path";
 import { writeTranslation } from "./write-translations";
 
+/**
+ * Searches for keys that are present in translation files that are not uuids, and replaces them with uuids in both the locale.json file and the $t(keys).
+ * 
+ * Transforms 
+ * ```json
+ * {
+ *      "Not a uuid": "Some translation",
+ *      "namespace": {
+ *           "not a uuid": "Other translation"
+ *      }
+ * }
+ * ```
+ * 
+ * into
+ * 
+ * ```json
+ * {
+ *      "uuid1": "Some translation",
+ *      "uuid2": "Other translation"
+ * }
+ * ```
+ * 
+ * and replaces the keys in all source files
+ * - `$t('Not a uuid')` → `$t('uuid1')`
+ * - `$t('namespace.not a uuid')` → `$t('uuid2')`
+ * 
+ */
 export function replaceKeysWithUuid() {
     console.log('Start replace keys with uuids.')
     const translationsWithPath = getTranslationsWithPath();
