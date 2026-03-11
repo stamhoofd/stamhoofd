@@ -4,6 +4,7 @@ import { getFilesToSearch } from "../shared/get-files-to-search";
 import { getDefaultTranslations } from "./get-translations-with-path";
 import { replaceOccurrences } from "./replace-keys-with-uuid";
 import { writeTranslation } from "./write-translations";
+import { isBase62 } from "./compress-uuids";
 
 /**
  * Adds all usages of `$t(key)` in the code base - where they key is not present in the default translation file, to the default translation file (with a newly generated uuid). 
@@ -41,8 +42,8 @@ export function addMissingKeys(): Record<string, string> {
         const replacedKeys = new Map<string, string>();
 
         for (const key of missingKeys) {
-            if (uuidValidate(key)) {
-                missingUuidKeys.set("todo", key);
+            if (uuidValidate(key) || isBase62(key)) {
+                missingUuidKeys.set(key, "todo");
 
                 console.warn(
                     `Found missing translation for key ${key}. Replace the 'todo' in ${filePath} manually.`,
@@ -53,20 +54,29 @@ export function addMissingKeys(): Record<string, string> {
             }
         }
 
-        // Build a map of the translations we need to inject in nl.json
-        for (const [oldKey, newKey] of new Map([
+        // First replace keys
+        for (const [value, key] of new Map([
             ...replacedKeys,
+        ]).entries()) {
+            translations[key] = value;
+        }
+
+        // Missing keys
+        for (const [key, value] of new Map([
             ...missingUuidKeys,
         ]).entries()) {
-            if (translations[newKey]) continue;
-            translations[newKey] = oldKey;
+            if (translations[key]) {
+                // Already exists
+                continue;
+            }
+            translations[key] = value;
         }
 
         // First write the translation files (no risk of losing data)
         // Add the uuids to the nl.json file
         writeTranslation(filePath, translations);
 
-        // Replace the translations with the generated keys
+        // Replace the translations with the generated keys. Run multiple times because this sometimes fails
         replaceOccurrences(replacedKeys, Array.from(filesWithMissingKeys));
     } else {
         console.log("No missing keys found.");

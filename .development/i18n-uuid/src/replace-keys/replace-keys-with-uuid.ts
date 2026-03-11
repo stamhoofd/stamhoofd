@@ -122,17 +122,13 @@ export function replaceOccurrences(replacedKeys: Map<string, string>, files: str
 
         for(const [oldKey, newKey] of replacedKeys.entries()) {
             const toReplace: {searchValue: RegExp, replaceValue: string}[] = [
-                {searchValue: createRegexPattern(`\$t('${oldKey}'`), replaceValue: `$t('${newKey}'`},
-                {searchValue: createRegexPattern(`\$t("${oldKey}"`), replaceValue: `$t("${newKey}"`},
-                {searchValue: createRegexPattern(`\$t(\`${oldKey}\``), replaceValue: `$t(\`${newKey}\``},
+                {searchValue: createRegexPattern(`$t('${oldKey}'`), replaceValue: `$t('${newKey}'`},
+                {searchValue: createRegexPattern(`$t("${oldKey}"`), replaceValue: `$t("${newKey}"`},
+                {searchValue: createRegexPattern(`$t(\`${oldKey}\``), replaceValue: `$t(\`${newKey}\``},
             ]
 
-            for(const {searchValue, replaceValue} of toReplace) {
-                const containsPattern = searchValue.test(newContent);
-                if(!containsPattern) continue;
-                
+            for (const {searchValue, replaceValue} of toReplace) {
                 newContent = newContent.replace(searchValue, replaceValue);
-                break;
             }
         }
 
@@ -153,16 +149,12 @@ export function findUnusedTranslationKeys(keys: Set<string>, files: string[] = g
 
         for(const key of remaining.values()) {
             const toReplace: {searchValue: RegExp}[] = [
-                {searchValue: createRegexPattern(`\$t('${key}'`)},
-                {searchValue: createRegexPattern(`\$t("${key}"`)},
-                {searchValue: createRegexPattern(`\$t(\`${key}\``)},
+                {searchValue: createRegexPattern(`$t('${key}'`)},
+                {searchValue: createRegexPattern(`$t("${key}"`)},
+                {searchValue: createRegexPattern(`$t(\`${key}\``)},
             ]
 
-            let found = false;
             for(const {searchValue} of toReplace) {
-                const containsPattern = searchValue.test(newContent);
-                if(!containsPattern) continue;
-                
                 const didMatch = newContent.match(searchValue);
                 if (didMatch) {
                     remaining.delete(key);

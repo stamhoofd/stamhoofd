@@ -1,4 +1,3 @@
-import { validate as uuidValidate } from "uuid";
 import { TranslationManager } from "../auto-translate/TranslationManager";
 import { getTranslationsWithPath } from "./get-translations-with-path";
 import { replaceOccurrences } from "./replace-keys-with-uuid";
@@ -69,8 +68,6 @@ export function compressUuids() {
  
     // Also replace in all translation files
     // Run multiple times to avoid regex errors
-    replaceOccurrences(merge)
-    replaceOccurrences(merge)
     replaceOccurrences(merge)
 
     // Replace machine translations

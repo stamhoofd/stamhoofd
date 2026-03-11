@@ -7,16 +7,16 @@ export function getFilesToSearch(types: ('vue' | 'typescript' | 'eslint')[]): st
     
     const includes: RegExp[] = [];
 
-    if(types.includes('vue')) {
-        includes.push(/^[^.]+.vue$/)
+    if (types.includes('vue')) {
+        includes.push(/\.vue$/)
     }
 
-    if(types.includes('typescript')) {
-        includes.push(/^[^.]+.ts$/);
+    if (types.includes('typescript')) {
+        includes.push(/\.ts$/);
     }
 
-    if(types.includes('eslint')) {
-        includes.push(/^[^.]+eslint.config.mjs$/);
+    if (types.includes('eslint')) {
+        includes.push(/eslint\.config\.mjs$/);
     }
 
     const excludeDirectories = globals.I18NUUID_EXCLUDE_DIRS_ARRAY;
