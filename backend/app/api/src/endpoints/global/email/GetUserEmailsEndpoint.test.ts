@@ -548,7 +548,7 @@ describe('Endpoint.GetUserEmails', () => {
         // Check balanceTable replacement
         const balanceTableReplacement = recipient.replacements.find(r => r.token === 'balanceTable');
         expect(balanceTableReplacement).toBeDefined();
-        expect(balanceTableReplacement!.html).toBe('<p class="description">' + $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') + '</p>');
+        expect(balanceTableReplacement!.html).toBe('<p class="description">' + $t('%hX') + '</p>');
     });
 
     test('Should return one recipient for each member the user is associated with, if the email is different for each member', async () => {

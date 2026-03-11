@@ -1000,10 +1000,10 @@ describe('Model.Email', () => {
                 // Check if the table is correct
                 expect(EmailMocker.getSucceededEmail(0).html).not.toInclude('<table');
                 expect(EmailMocker.getSucceededEmail(0).html).not.toInclude(' x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p class="description">' + $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p class="description">' + $t('%hX') + '</p>');
 
                 expect(EmailMocker.getSucceededEmail(0).text).not.toInclude(' x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toInclude($t('4c4f6571-f7b5-469d-a16f-b1547b43a610').toLowerCase());
+                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toInclude($t('%hX').toLowerCase());
             }, 15_000);
 
             it('loginDetails are added for existing users without password', async () => {
@@ -1049,10 +1049,10 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toInclude(
-                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: existingUser.email }),
+                    $t('%1EB', { email: existingUser.email }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toInclude(
-                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: existingUser.email }),
+                    $t('%1EB', { email: existingUser.email }),
                 );
             }, 15_000);
 
@@ -1094,10 +1094,10 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toInclude(
-                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: 'unknown@example.com' }),
+                    $t('%1EB', { email: 'unknown@example.com' }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toInclude(
-                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: 'unknown@example.com' }),
+                    $t('%1EB', { email: 'unknown@example.com' }),
                 );
             }, 15_000);
 
@@ -1144,10 +1144,10 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toInclude(
-                    $t('5403b466-98fe-48ac-beff-38acf7c9734d', { email: existingUser.email }),
+                    $t('%1EA', { email: existingUser.email }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toInclude(
-                    $t('5403b466-98fe-48ac-beff-38acf7c9734d', { email: existingUser.email }),
+                    $t('%1EA', { email: existingUser.email }),
                 );
             }, 15_000);
 
@@ -1203,13 +1203,13 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toInclude(
-                    $t('e2519632-c495-4629-9ddb-334a4f00e272', {
+                    $t('%1EC', {
                         firstName: Formatter.escapeHtml(member.firstName),
                         securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
                     }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toInclude(
-                    $t('e2519632-c495-4629-9ddb-334a4f00e272', {
+                    $t('%1EC', {
                         firstName: member.firstName,
                         securityCode: Formatter.spaceString(member.details.securityCode ?? '', 4, '-'),
                     }),

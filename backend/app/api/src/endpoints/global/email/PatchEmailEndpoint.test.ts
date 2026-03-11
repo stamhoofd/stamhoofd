@@ -707,7 +707,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
             const balanceTable = recipient.replacements.find(r => r.token === 'balanceTable');
             expect(balanceTable).toBeDefined();
-            expect(balanceTable?.html).toInclude($t('4c4f6571-f7b5-469d-a16f-b1547b43a610'));
+            expect(balanceTable?.html).toInclude($t('%hX'));
 
             // Outstanding balance
             const outstandingBalance = recipient.replacements.find(r => r.token === 'outstandingBalance');
