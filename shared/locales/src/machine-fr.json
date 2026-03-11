@@ -5891,6 +5891,34 @@
     "original": "Betaalstatus gewijzigd voor {count} betalingen",
     "translation": "Statut de paiement modifié pour {count} paiements."
   },
+  "%1NZ": {
+    "original": "Ja, ik begrijp het",
+    "translation": "Oui, je comprends"
+  },
+  "%1Na": {
+    "original": "Het verwijderen van deze bestelling kan financieel een vertekend beeld geven",
+    "translation": "Supprimer cette commande peut fausser l'aperçu financier"
+  },
+  "%1Nc": {
+    "original": "Begrepen",
+    "translation": "Compris"
+  },
+  "%1Nd": {
+    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "La commande sera supprimée, mais le paiement restera dans le système. Le système considérera dès lors que ce client a payé trop et pourrait plus tard suggérer un remboursement dans l’aperçu des montants en attente.\\n\\nSi vous souhaitez supprimer toutes les commandes, nous vous conseillons de dupliquer la boutique en ligne pour repartir sur une nouvelle boutique vide. Si l'acheteur souhaite annuler son achat, il vaut mieux annuler la commande plutôt que de la supprimer."
+  },
+  "%1Ne": {
+    "original": "Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven",
+    "translation": "Supprimer ces commandes peut fausser l'aperçu financier"
+  },
+  "%1Nf": {
+    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "Les commandes seront supprimées, mais les paiements resteront dans le système. Le système considérera alors que ces clients ont payé trop et pourrait plus tard suggérer un remboursement dans l’aperçu des montants en attente.\\n\\nSi vous souhaitez supprimer toutes les commandes, nous vous conseillons de dupliquer la boutique en ligne pour repartir sur une nouvelle boutique vide. Si l'acheteur souhaite annuler son achat, il vaut mieux annuler la commande plutôt que de la supprimer."
+  },
+  "%1Ng": {
+    "original": "Bestellingen verwijderen?",
+    "translation": "Supprimer les commandes ?"
+  },
   "%1O": {
     "original": "Single-Sign-On",
     "translation": "Authentification unique"

@@ -5851,6 +5851,34 @@
     "original": "Betaalstatus gewijzigd voor {count} betalingen",
     "translation": "Payment status updated for {count} payments."
   },
+  "%1NZ": {
+    "original": "Ja, ik begrijp het",
+    "translation": "Yes, I understand"
+  },
+  "%1Na": {
+    "original": "Het verwijderen van deze bestelling kan financieel een vertekend beeld geven",
+    "translation": "Deleting this order may give a distorted overview of the finances"
+  },
+  "%1Nc": {
+    "original": "Begrepen",
+    "translation": "Understood"
+  },
+  "%1Nd": {
+    "original": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "The order will be deleted, but the payment will remain in the system. As a result, the system will think the customer has overpaid and may later suggest a refund in the list of open amounts.\n\nIf you want to remove all orders, we recommend duplicating the webshop to start with a clean slate. If the customer wants to cancel the purchase, it is better to cancel the order instead of deleting it."
+  },
+  "%1Ne": {
+    "original": "Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven",
+    "translation": "Deleting these orders may give a distorted overview of the finances"
+  },
+  "%1Nf": {
+    "original": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+    "translation": "The orders will be deleted, but the payments will remain in the system. This means the system will think these customers have overpaid and may later suggest a refund in the overview of open amounts.\n\nIf you want to remove all orders, we recommend duplicating the webshop and starting with a new empty webshop. If the customer wants to cancel their purchase, it is better to cancel the order instead of deleting it."
+  },
+  "%1Ng": {
+    "original": "Bestellingen verwijderen?",
+    "translation": "Delete orders?"
+  },
   "%2": {
     "original": "Aansluiting/verzekering Stamhoofd*",
     "translation": "Affiliation/insurance Stamhoofd*"
