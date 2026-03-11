@@ -197,7 +197,7 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             },
             value: createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
-                type: SQLValueType.JSONString,
+                type: SQLValueType.JSONScalar, // Can be string, number or boolean
                 nullable: true,
             }),
         }),
