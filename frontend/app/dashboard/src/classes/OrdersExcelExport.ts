@@ -316,6 +316,7 @@ export class OrdersExcelExport {
                     order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : '/',
                     order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime) + ' - ' + Formatter.minutes(order.data.timeSlot.endTime) : '/',
                     PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
+                    // should be replaced by amount in the future if not 0
                     order.openBalance <= 0 ? $t(`%Kw`) : $t(`%xI`),
                     OrderStatusHelper.getName(order.status),
                     order.data.discountCodes.map(d => d.code).join(', '),
@@ -531,6 +532,7 @@ export class OrdersExcelExport {
                     format: '€0.00',
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
+                // should be replaced by amount in the future if not 0
                 order.openBalance <= 0 ? $t(`%Kw`) : $t(`%xI`),
                 OrderStatusHelper.getName(order.status),
                 order.data.discountCodes.map(d => d.code).join(', '),
