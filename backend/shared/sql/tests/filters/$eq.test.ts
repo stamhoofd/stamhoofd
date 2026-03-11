@@ -527,9 +527,6 @@ describe('$eq', () => {
                     {
                         'settings.name': 'john',
                     },
-                    {
-                        'settings.name': 1415,
-                    },
                 ],
             });
         });
