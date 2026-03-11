@@ -257,6 +257,14 @@ select.input {
             }
         }
     }
+
+    // Fix windows dark mode select
+    select {
+        option {
+            color: $color-dark;
+            background: $color-background;
+        }
+    }
 }
 
 .input-with-buttons {
@@ -344,6 +352,12 @@ select.input {
             flex-shrink: 0;
         }
     }
+
+    option {
+        color: $color-dark;
+        background: $color-background;
+    }
+
 }
 
 .illustration-radio-container {
