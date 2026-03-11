@@ -251,21 +251,16 @@ export type WebshopStoreName = 'orders' | 'tickets' | 'ticketPatches' | 'setting
 function initOrdersStore({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
     const storeName: WebshopStoreName = 'orders';
 
-    let storeToBeIndexed: IDBObjectStore | null = null;
-
-    if (oldVersion < 1) {
-        storeToBeIndexed = database.createObjectStore(storeName, { keyPath: 'value.id' });
-    }
-    else if (transaction) {
-        const storeToClear = transaction.objectStore(storeName);
-        storeToClear.clear();
-
-        if (oldVersion < 394) {
-            storeToBeIndexed = storeToClear;
+    if (oldVersion < 394) {
+        // delete store if exists
+        if (database.objectStoreNames.contains(storeName)) {
+            console.log('delete store ', storeName);
+            database.deleteObjectStore(storeName);
         }
-    }
 
-    if (storeToBeIndexed) {
+        // create new store
+        const newStore = database.createObjectStore(storeName, { keyPath: 'value.id' });
+
         // create indexes
 
         // typescript will show an error if an index is missing
@@ -277,8 +272,12 @@ function initOrdersStore({ oldVersion, database, transaction }: { oldVersion: nu
             ;
 
         Object.entries(indexes).forEach(([index, options]) => {
-            storeToBeIndexed.createIndex(index, options.keyPath ?? index, options);
+            newStore.createIndex(index, options.keyPath ?? index, options);
         });
+    }
+    else if (transaction) {
+        const storeToClear = transaction.objectStore(storeName);
+        storeToClear.clear();
     }
 }
 
@@ -295,24 +294,24 @@ function initWebshopSettingsStore({ oldVersion, database, transaction }: { oldVe
 }
 
 function initWebshopTicketsStore({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
-    let storeToBeIndexed: IDBObjectStore | null = null;
     const storeName: WebshopStoreName = 'tickets';
 
-    if (oldVersion < 1) {
-        storeToBeIndexed = database.createObjectStore(storeName, { keyPath: 'secret' });
+    if (oldVersion < 114) {
+        // delete store if exists
+        if (database.objectStoreNames.contains(storeName)) {
+            console.log('delete store ', storeName);
+            database.deleteObjectStore(storeName);
+        }
+
+        // create new store
+        const newStore = database.createObjectStore(storeName, { keyPath: 'secret' });
+
+        // create indexes
+        newStore.createIndex('orderId', 'orderId', { unique: false });
     }
     else if (transaction) {
         const storeToClear = transaction.objectStore(storeName);
         storeToClear.clear();
-
-        if (oldVersion < 114) {
-            storeToBeIndexed = storeToClear;
-        }
-    }
-
-    if (storeToBeIndexed) {
-        // create indexes
-        storeToBeIndexed.createIndex('orderId', 'orderId', { unique: false });
     }
 }
 
