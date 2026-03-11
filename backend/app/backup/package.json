@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-backup",
-    "version": "2.118.1",
+    "version": "2.119.0",
     "main": "./dist/index.js",
     "exports": {
         ".": {
