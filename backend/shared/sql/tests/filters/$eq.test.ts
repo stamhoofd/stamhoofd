@@ -480,6 +480,12 @@ describe('$eq', () => {
                     {
                         'settings.scalar': 'john',
                     },
+                    {
+                        'settings.scalar': 1415,
+                    },
+                    {
+                        'settings.scalar': 14.15,
+                    },
                 ],
             });
         });
@@ -520,6 +526,9 @@ describe('$eq', () => {
                     },
                     {
                         'settings.name': 'john',
+                    },
+                    {
+                        'settings.name': 1415,
                     },
                 ],
             });
@@ -978,6 +987,9 @@ describe('$eq', () => {
                 doNotMatch: [
                     {
                         'settings.age': 0,
+                    },
+                    {
+                        'settings.age': 15,
                     },
                 ],
             });
