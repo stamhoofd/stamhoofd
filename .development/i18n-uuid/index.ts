@@ -8,6 +8,7 @@ import { fileCache } from "./src/replace-text/FileCache";
 import { replaceText } from "./src/replace-text/replace-text";
 import { unusedKeys } from "./src/replace-keys/unused-keys";
 import { mergeDuplicates } from "./src/replace-keys/merge-duplicates";
+import { compressUuids } from "./src/replace-keys/compress-uuids";
 
 const program = new Command();
 
@@ -81,6 +82,7 @@ program
 program.command("replace-keys").action(() => replaceKeys());
 program.command("unused-keys").action(() => unusedKeys());
 program.command("merge-duplicates").action(() => mergeDuplicates());
+program.command("compress-uuids").action(() => compressUuids());
 
 const autoTranslateCommand = program
     .command("auto-translate")

@@ -10,6 +10,7 @@
         "replace-text": "yarn build && node --enable-source-maps ./dist/index.js replace-text",
         "unused-keys": "yarn build && node --enable-source-maps ./dist/index.js unused-keys",
         "merge-duplicates": "yarn build && node --enable-source-maps ./dist/index.js merge-duplicates",
+        "compress-uuids": "yarn build && node --enable-source-maps ./dist/index.js compress-uuids",
         "clear-cache": "yarn build && node --enable-source-maps ./dist/index.js clear-cache",
         "replace-keys": "yarn build && node --enable-source-maps ./dist/index.js replace-keys",
         "auto-translate": "yarn build && node --enable-source-maps ./dist/index.js auto-translate",
