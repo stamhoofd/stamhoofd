@@ -453,7 +453,13 @@ export class OrderActionBuilder {
             }
         }
 
-        if (!await CenteredMessage.confirm(orders.length === 1 ? $t(`%VN`, { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name }) : $t(`Bestellingen verwijderen?`), $t(`%CJ`), $t(`Je kan dit niet ongedaan maken.`))) {
+        if (!await CenteredMessage.confirm(orders.length === 1
+            ? $t(`%VN`,
+                    { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name })
+            : $t(`Bestellingen verwijderen?`),
+        $t(`%CJ`),
+        $t(`Je kan dit niet ongedaan maken.`), undefined, true, $t('Ja, ik begrijp het'))
+        ) {
             return;
         }
 
