@@ -8,7 +8,7 @@ export function unusedKeys() {
         const keys = new Set<string>();
 
         for (const key in translations) {
-            if (key === 'replacements' || key === 'extends' || key === 'consistent-words') {
+            if (key === 'replacements' || key === 'extends' || key === 'consistent-words') {
                 continue;
             }
             if (typeof translations[key] === 'string') {
