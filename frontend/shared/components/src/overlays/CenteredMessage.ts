@@ -3,6 +3,10 @@ import { reactive } from 'vue';
 
 export type CenteredMessageListener = (centeredMessage: CenteredMessage) => unknown;
 
+type CenteredMessageCheckbox = {
+    text: string;
+};
+
 export class CenteredMessageButton {
     text: string;
     href?: string;
@@ -11,6 +15,11 @@ export class CenteredMessageButton {
     icon: string | null = null;
     loading = false;
     disabled = false;
+    /**
+     * If true, the button will only be enabled if the checkbox is checked.
+     * Do not forget to add a checkbox to the CenteredMessage first.
+     */
+    requireAcceptCheckbox = false;
 
     constructor(text, settings?: {
         action?: (() => Promise<any>);
@@ -18,6 +27,7 @@ export class CenteredMessageButton {
         icon?: string ;
         href?: string;
         disabled?: boolean;
+        requireAcceptCheckbox?: boolean;
     }) {
         this.text = text;
         this.action = settings?.action ?? null;
@@ -25,6 +35,7 @@ export class CenteredMessageButton {
         this.icon = settings?.icon ?? null;
         this.href = settings?.href;
         this.disabled = settings?.disabled ?? false;
+        this.requireAcceptCheckbox = settings?.requireAcceptCheckbox ?? false;
     }
 }
 
@@ -36,6 +47,7 @@ export class CenteredMessage {
     description = '';
 
     buttons: CenteredMessageButton[] = [];
+    checkbox?: CenteredMessageCheckbox;
 
     doHide: (() => void) | null = null;
 
@@ -91,6 +103,11 @@ export class CenteredMessage {
         return this;
     }
 
+    addCheckbox(checkbox: CenteredMessageCheckbox) {
+        this.checkbox = checkbox;
+        return this;
+    }
+
     show() {
         CenteredMessage.callListeners(this);
         return this;
@@ -104,7 +121,11 @@ export class CenteredMessage {
         return this;
     }
 
-    static confirm(text: string, confirmText: string, description = '', cancelText?: string, destructive = true): Promise<boolean> {
+    /**
+     * @param requireCheckbox if a text is provided a checkbox has to be checked first before the message can be confirmed
+     * @returns
+     */
+    static confirm(text: string, confirmText: string, description = '', cancelText?: string, destructive = true, requireCheckbox: string | undefined = undefined): Promise<boolean> {
         return this.show({
             title: text,
             description,
@@ -114,6 +135,7 @@ export class CenteredMessage {
                     type: destructive ? 'destructive' : 'primary',
                     value: true,
                     availabilityDelay: destructive && confirmText !== $t('%4X') ? 1_000 : undefined,
+                    requireAcceptCheckbox: requireCheckbox !== undefined,
                 },
                 {
                     text: cancelText ?? $t(`%9b`),
@@ -121,6 +143,11 @@ export class CenteredMessage {
                     value: false,
                 },
             ],
+            checkbox: requireCheckbox
+                ? {
+                        text: requireCheckbox,
+                    }
+                : undefined,
         });
     }
 
@@ -132,11 +159,13 @@ export class CenteredMessage {
             type?: 'destructive' | 'primary' | 'secundary';
             icon?: string;
             availabilityDelay?: number;
+            requireAcceptCheckbox?: boolean;
         }[],
     >(options: {
         title: string;
         description?: string;
         buttons: Buttons;
+        checkbox?: CenteredMessageCheckbox;
     }): Promise<Buttons[number]['value']> {
         return new Promise((resolve) => {
             const message = new CenteredMessage(options.title, options.description);
@@ -150,6 +179,7 @@ export class CenteredMessage {
                     type: data.type as any ?? 'primary',
                     icon: data.icon ?? undefined,
                     disabled: data.availabilityDelay ? true : false,
+                    requireAcceptCheckbox: data.requireAcceptCheckbox,
                 });
                 // Make it reactive, otherwise we cannot alter the loading state here
                 button = reactive(button);
@@ -162,6 +192,10 @@ export class CenteredMessage {
                         button.disabled = false;
                     }, data.availabilityDelay + 300); // 300 ms for delay presenting the message
                 }
+            }
+
+            if (options.checkbox) {
+                message.addCheckbox(options.checkbox);
             }
 
             message.show();

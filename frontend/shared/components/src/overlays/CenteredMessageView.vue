@@ -16,13 +16,19 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
+            <div v-if="centeredMessage.checkbox" class="checkbox-container">
+                <Checkbox v-model="isChecked" error-fields="isChecked">
+                    {{ centeredMessage.checkbox.text }}
+                </Checkbox>
+            </div>
+
             <div class="buttons" :class="{'single-button': centeredMessage.buttons.length === 1, 'multiple-buttons': centeredMessage.buttons.length > 2}">
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" :disabled="button.disabled" @click="onClickButton(button)">
+                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </a>
-                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" :disabled="button.disabled" @click="onClickButton(button)">
+                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" :disabled="button.disabled || (button.requireAcceptCheckbox && !isChecked)" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </button>
@@ -50,6 +56,7 @@ const isClosing = ref(false);
 const errors = useErrors();
 const pop = usePop();
 const buttonsRef = useTemplateRef<HTMLButtonElement[] | HTMLButtonElement | null>('buttons');
+const isChecked = ref(false);
 
 onMounted(() => {
     props.centeredMessage.doHide = () => {
@@ -244,7 +251,12 @@ function onKey(event: KeyboardEvent) {
     overflow: auto;
     overflow-x: hidden;
 
+    .checkbox-container {
+        padding-top: 15px;
+    }
+
     &.few-buttons {
+
         @media (max-width: 551px) {
             padding: 20px;
 
@@ -270,6 +282,7 @@ function onKey(event: KeyboardEvent) {
                 flex-direction: row-reverse;
                 gap: 10px;
             }
+
         }
     }
 
