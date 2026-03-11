@@ -142,7 +142,7 @@ export class PaymentActionBuilder {
         // only for methods transfer and point of sale, not if any other method
         if (this.methods && this.methods.every(method => method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale)) {
             return new InMemoryTableAction({
-                name: $t('Annuleren'),
+                name: $t('ead8825c-53fc-4968-aa38-8fd402552a17'),
                 icon: 'canceled',
                 priority: 1,
                 groupIndex: 4,
@@ -152,11 +152,11 @@ export class PaymentActionBuilder {
                 handler: async (payments: PaymentGeneral[]) => {
                     const filteredPayments = payments.filter(payment => (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created) && (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale));
                     if (filteredPayments.length === 0) {
-                        Toast.error($t('De geselecteerde betalingen zijn al geannuleerd of zijn niet annuleerbaar.')).show();
+                        Toast.error($t('523385f0-a103-454b-909c-6a6e1b70972e')).show();
                         return;
                     }
 
-                    const text = filteredPayments.length === 1 ? $t('99810042-aa71-49a4-9cb4-c4fb23b7bc62') : $t('{count} betalingen annuleren?', { count: payments.length });
+                    const text = filteredPayments.length === 1 ? $t('99810042-aa71-49a4-9cb4-c4fb23b7bc62') : $t('658662ba-ba2c-4e4c-8da7-7d73be8d7490', { count: payments.length });
                     if (!await CenteredMessage.confirm(text, $t('cdf0fafe-b364-4dbb-ae31-b593cf447298'), $t('4d83cf39-66a5-4759-a95a-3245cd17d8b3'))) {
                         return;
                     }
@@ -202,7 +202,7 @@ export class PaymentActionBuilder {
                 GlobalEventBus.sendEvent('paymentPatch', paymentResponse).catch(console.error);
             }
 
-            const message = payments.length === 1 ? $t('f7fab124-62ac-432c-80a7-5d594058f3f1') : $t('Betaalstatus gewijzigd voor {count} betalingen', { count: payments.length });
+            const message = payments.length === 1 ? $t('f7fab124-62ac-432c-80a7-5d594058f3f1') : $t('7fcd4a8a-e9ab-443b-b887-383c6802c644', { count: payments.length });
             Toast.success(message).setHide(1000).show();
         }
         catch (e) {

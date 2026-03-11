@@ -6039,5 +6039,10 @@
   "45eb88ba-7807-45a9-8f73-dc4f5c4050e7": "Het e-mailadres van {parentName} is hetzelfde als {firstName}. Vul een ander e-mailadres dan {firstName} in, of verwijder het eerst bij {firstName}.",
   "e79bcdf1-1e84-4ce6-a011-9338b800db52": "en",
   "c0887d28-ecba-47e0-a8db-dfcc00d38630": "{member} is al ingeschreven voor {otherGroup} onder de categorie {category} (maximum één mogelijk). Je kan niet meer inschrijven voor {group}.",
-  "3c0deffd-bc9e-4f8e-8c5e-e89d2edbd450": "{member} is al ingeschreven voor {group-a-and-group-b} onder de categorie {category}. Je kan niet meer inschrijven voor {group} (maximum van {count} bereikt)."
+  "3c0deffd-bc9e-4f8e-8c5e-e89d2edbd450": "{member} is al ingeschreven voor {group-a-and-group-b} onder de categorie {category}. Je kan niet meer inschrijven voor {group} (maximum van {count} bereikt).",
+  "9f239fc2-1c66-4917-8d7c-c8bc6b80d93a": "Er ging iets mis bij het ophalen van de vereniging",
+  "ead8825c-53fc-4968-aa38-8fd402552a17": "Annuleren",
+  "523385f0-a103-454b-909c-6a6e1b70972e": "De geselecteerde betalingen zijn al geannuleerd of zijn niet annuleerbaar.",
+  "658662ba-ba2c-4e4c-8da7-7d73be8d7490": "{count} betalingen annuleren?",
+  "7fcd4a8a-e9ab-443b-b887-383c6802c644": "Betaalstatus gewijzigd voor {count} betalingen"
 }
