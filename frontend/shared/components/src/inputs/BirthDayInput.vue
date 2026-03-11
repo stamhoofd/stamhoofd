@@ -16,7 +16,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="month" autocomplete="bday-month" name="bday-month" data-testid="month-select" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        {{ $t('30a79bd4-2e8d-4bd4-97be-f23d04c337c8') }}
+                        {{ $t('2727f83e-20ba-436e-8449-1e6f3e15c628') }}
                     </option>
                     <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
                         {{ monthText(month) }}
@@ -27,7 +27,7 @@
             <div class="input-icon-container right icon arrow-down-small gray">
                 <select v-model="year" autocomplete="bday-year" name="bday-year" data-testid="year-select" @change="updateDate">
                     <option :disabled="required" :value="null">
-                        {{ $t('f88a59b7-e4ab-453b-96f2-8b1b60cb2fc0') }}
+                        {{ $t('4e99ee6d-2445-4d3a-ab0f-343236295366') }}
                     </option>
                     <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
                         {{ currentYear - year + 1 }}

@@ -65,43 +65,43 @@ export function getRecordTypeName(type: RecordType) {
     const all = [
         {
             value: RecordType.Text,
-            name: $t(`f21f351e-d844-440c-9118-7a395459a5f1`),
+            name: $t(`668f1663-e8d1-4e1c-9397-32a1c2b70022`),
         },
         {
             value: RecordType.Textarea,
-            name: $t(`c1f20884-94f6-4420-87c2-49c5d1398261`),
+            name: $t(`99cf6d44-681c-450b-8c5c-74bc75ca0cde`),
         },
         {
             value: RecordType.Address,
-            name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+            name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
         },
         {
             value: RecordType.Email,
-            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+            name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
         },
         {
             value: RecordType.Phone,
-            name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+            name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
         },
         {
             value: RecordType.Date,
-            name: $t(`40aabd99-0331-4267-9b6a-a87c06b3f7fe`),
+            name: $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
         },
         {
             value: RecordType.Checkbox,
-            name: $t(`f8e1d0e8-28ab-45f5-83e1-302950647d41`),
+            name: $t(`be247511-3af8-4006-b944-19db50d75a89`),
         },
         {
             value: RecordType.ChooseOne,
-            name: $t(`b27916ed-72d6-497b-8944-dcb5cb3f94c8`),
+            name: $t(`0c57da32-95ac-4e64-a61a-0a7fa104294a`),
         },
         {
             value: RecordType.MultipleChoice,
-            name: $t(`d3e7fd3e-a7ad-44a7-80f2-f94ba10c788f`),
+            name: $t(`06f06102-d0a6-4b23-84b0-43d53fc87ca1`),
         },
         {
             value: RecordType.File,
-            name: $t(`6e9064fc-f18e-40c7-b36b-e544a4801b2d`),
+            name: $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`),
         },
     ];
     return all.find(t => t.value === type)?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`);
@@ -329,17 +329,17 @@ export class RecordSettings extends BaseRecordSettings {
                     width: 40,
                 },
                 {
-                    name: prefix + $t('af42889c-3278-4dab-8e5c-5ada25e40cf8'),
+                    name: prefix + $t('89eafa94-6447-4608-a71e-84752eab10c8'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('997da269-7091-470e-9032-abe1a1ea8096'),
+                    name: prefix + $t('28b0f035-cb44-48b7-b60f-093f6adc26fb'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },
                 {
-                    name: prefix + $t('b87def14-63e9-4c00-bff9-21283f7890a9'),
+                    name: prefix + $t('3f4f6c6a-e2c5-4bee-83a3-77d8e55a1e60'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },

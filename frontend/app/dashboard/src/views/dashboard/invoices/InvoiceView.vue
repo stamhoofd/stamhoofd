@@ -46,19 +46,19 @@
             <STList v-if="invoice.customer.company" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('e016131d-770c-45fe-b6e9-5631761cbab2') }}
+                        {{ $t('67928a02-b3f1-465a-9dd7-569d061599a9') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ invoice.customer.company.name }}
                     </p>
                     <p v-if="!invoice.customer.company.VATNumber && !invoice.customer.company.companyNumber" class="style-description">
-                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                     </p>
                 </STListItem>
 
                 <STListItem v-if="invoice.customer.company.VATNumber">
                     <h3 class="style-definition-label">
-                        {{ $t('4d2a6054-26bf-49ed-b91f-59a8819e6436') }}
+                        {{ $t('263b7054-d38f-4bb9-be63-84b4e614613d') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ invoice.customer.company.VATNumber }}
@@ -67,7 +67,7 @@
 
                 <STListItem v-if="invoice.customer.company.companyNumber && (!invoice.customer.company.VATNumber || (invoice.customer.company.companyNumber !== invoice.customer.company.VATNumber && invoice.customer.company.companyNumber !== invoice.customer.company.VATNumber.slice(2)))">
                     <h3 class="style-definition-label">
-                        {{ $t('fb64a034-071e-45d6-8d78-6b5f291ee5f9') }}
+                        {{ $t('12f64ea7-fb54-4178-8267-9de12bdf70d7') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ invoice.customer.company.companyNumber }}
@@ -76,7 +76,7 @@
 
                 <STListItem v-if="invoice.customer.company.address">
                     <h3 class="style-definition-label">
-                        {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
+                        {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ invoice.customer.company.address.toString() }}
@@ -85,7 +85,7 @@
 
                 <STListItem v-if="invoice.customer.company.administrationEmail">
                     <h3 class="style-definition-label">
-                        {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
+                        {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ invoice.customer.company.administrationEmail }}
@@ -94,7 +94,7 @@
 
                 <STListItem v-if="invoice.customer.name">
                     <h3 class="style-definition-label">
-                        {{ $t('2cb138d8-38c3-4ca8-baa8-64bcd32fb2eb') }}
+                        {{ $t('2a10aac1-e404-4de4-865d-75593b2b5e8d') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ invoice.customer.name }}
@@ -111,7 +111,7 @@
                         {{ $t('1474bb78-8f01-456a-9e85-c6b1748b76d5') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.name || $t('b815f278-1240-4aba-a99a-222d7f43e407') }}
+                        {{ invoice.customer.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
                     </p>
                     <p v-if="invoice.customer.email" v-copyable class="style-description style-copyable">
                         {{ invoice.customer.email }}

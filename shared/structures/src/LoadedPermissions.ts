@@ -383,7 +383,7 @@ export class LoadedPermissions {
         stack.push(...ResourcePermissions.getMapDescription(this.resources));
 
         if (stack.length === 0) {
-            return $t(`6802d7c7-44d0-43d3-ab91-956ab5edc1f6`);
+            return $t(`02ef437e-2166-49be-b5ae-73e5452546a0`);
         }
 
         return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));

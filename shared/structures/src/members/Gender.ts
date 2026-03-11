@@ -7,10 +7,10 @@ export enum Gender {
 export function getGenderName(gender: Gender) {
     switch (gender) {
         case Gender.Male:
-            return $t(`f972abd4-de1e-484b-b7da-ad4c75d37808`);
+            return $t(`b54b9706-4c0c-46a6-9027-37052eb76b28`);
         case Gender.Female:
-            return $t(`e21f499d-1078-4044-be5d-6693d2636699`);
+            return $t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`);
         default:
-            return $t(`60f13ba4-c6c9-4388-9add-43a996bf6bee`);
+            return $t(`26677608-996f-41a5-8a53-543d6efa7de4`);
     }
 }

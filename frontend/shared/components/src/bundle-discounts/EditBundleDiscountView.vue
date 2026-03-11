@@ -13,7 +13,7 @@
 
         <div class="split-inputs">
             <div>
-                <TInput v-model="name" :placeholder="$t(`0f3a6e76-b5f2-4f92-b4e4-d709dffc1bde`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`8822547e-03a0-4e70-bdce-9661a6c6f613`)" />
+                <TInput v-model="name" :placeholder="$t(`0f3a6e76-b5f2-4f92-b4e4-d709dffc1bde`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
                 <p class="style-description-small">
                     {{ $t('c1ed9e16-70d4-4337-a4e1-ecf31ec00bed') }}
                 </p>
@@ -342,7 +342,7 @@ async function doDelete() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('f79934ca-a26c-4728-9a5f-c9cec74d6b90'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
+    if (!await CenteredMessage.confirm($t('f79934ca-a26c-4728-9a5f-c9cec74d6b90'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'))) {
         return;
     }
 
@@ -364,7 +364,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

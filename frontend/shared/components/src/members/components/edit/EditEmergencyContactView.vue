@@ -64,7 +64,7 @@ const details = computed(() => props.member.patchedMember.details);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`));
+const saveText = ref($t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`));
 const title = computed(() => !props.isNew ? `${patched.value.name || $t(`757f4504-e8c3-4188-a471-0d5a88c353ea`)} bewerken` : $t(`e01a065d-e946-4fe8-99bc-505c33b055f0`));
 
 const name = computed({
@@ -126,7 +126,7 @@ async function save() {
             if (minorMembers.length > 0 && !await CenteredMessage.confirm(
                 $t(`7e6694ee-7a21-41a3-8df0-dc9e0df35b2f`),
                 $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`),
-                $t(`7b66774f-4b96-4407-aff5-54b60d7a36bc`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
+                $t(`7b66774f-4b96-4407-aff5-54b60d7a36bc`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') }),
                 $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
                 false)
             ) {
@@ -155,7 +155,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 }
 
 defineExpose({

@@ -19,7 +19,7 @@
 
                     <span v-if="product.enableInFuture" class="style-tag">{{ $t('56954008-cc3d-4460-afaa-f986d1f35d24', {date: product.enableAfter ? formatDateTime(product.enableAfter) : '?'}) }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('11b3bb72-0edb-401e-9c60-47fbb2d132fc') }}</span>
-                    <span v-else-if="product.isSoldOut" class="style-tag error">{{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}</span>
+                    <span v-else-if="product.isSoldOut" class="style-tag error">{{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}</span>
                     <span v-else-if="stockText !== null" class="style-tag" :class="stockText.style">{{ stockText.text }}</span>
                 </p>
             </div>
@@ -64,7 +64,7 @@ const priceString = computed(() => {
             if (props.webshop.isAllFree) {
                 return '';
             }
-            return $t(`30e129d7-349d-4369-a8c4-c86b82ce2e01`);
+            return $t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`);
         }
         return Formatter.price(priceRanges[0]);
     }

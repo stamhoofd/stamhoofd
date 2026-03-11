@@ -9,7 +9,7 @@
 
             <main>
                 <h1 class="style-navigation-title">
-                    {{ $t('6a49e896-3491-4f6e-a947-d180fce6c6e8') }}
+                    {{ $t('5b280bad-2167-42e6-8c4f-177ab1d76c67') }}
                 </h1>
 
                 <button v-if="selectedProduct && availableProducts.length > 1" class="button text inline" type="button" @click="chooseProduct">

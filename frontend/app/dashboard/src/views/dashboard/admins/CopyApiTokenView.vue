@@ -19,7 +19,7 @@
                 </div>
             </STInputBox>
             <p class="style-description-small">
-                {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }} {{ formatDate(user.createdAt) }}
+                {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }} {{ formatDate(user.createdAt) }}
                 <template v-if="user.expiresAt">
                     {{ $t('52ab641f-5864-4fac-8c52-0df00ad7e0a9') }} {{ formatDate(user.expiresAt) }}
                 </template>

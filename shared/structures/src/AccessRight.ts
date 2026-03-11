@@ -74,13 +74,13 @@ export class AccessRightHelper {
     static getNameShort(right: AccessRight): string {
         switch (right) {
             case AccessRight.PlatformLoginAs: return $t(`1627a32a-56b8-4c74-8715-b885c1795af6`);
-            case AccessRight.OrganizationFinanceDirector: return $t(`5d5cb596-1b5b-4ec3-98dd-2c0f012d9093`);
+            case AccessRight.OrganizationFinanceDirector: return $t(`0fc72e2d-5fe5-4ed2-ba5d-1f880790c174`);
             case AccessRight.OrganizationManagePayments: return $t(`6c58724b-afce-40a4-b11d-a6f6b86976b9`);
             case AccessRight.OrganizationCreateWebshops: return $t(`f3de2983-5c64-4653-b2c5-62c94eb3d04f`);
             case AccessRight.OrganizationCreateGroups: return $t(`f3de2983-5c64-4653-b2c5-62c94eb3d04f`);
             case AccessRight.WebshopScanTickets: return $t(`ca94a7e0-afaa-4076-9340-4620fb034d8d`);
-            case AccessRight.EventWrite: return $t(`d9b4472a-a395-4877-82fd-da6cb0140594`);
-            case AccessRight.OrganizationEventNotificationReviewer: return $t(`caf486c6-818a-4d2b-9fdb-728c6af71481`);
+            case AccessRight.EventWrite: return $t(`60231186-b00f-4d07-a5c7-4a905467e254`);
+            case AccessRight.OrganizationEventNotificationReviewer: return $t(`000be3fe-9354-4c2c-baf1-d0cd4d079830`);
 
             // Member data
             case AccessRight.MemberReadFinancialData: return $t(`8d64ab67-da1d-4143-8c6c-94ade8e1823f`);

@@ -1,6 +1,6 @@
 <template>
     <form class="st-view login-view" data-submit-last-field novalidate @submit.prevent="submit">
-        <STNavigationBar :large="true" class="transparent" :title="$t(`8ea6b1b7-4c8b-462d-83d7-7856cee51d6c`)" />
+        <STNavigationBar :large="true" class="transparent" :title="$t(`1627a32a-56b8-4c74-8715-b885c1795af6`)" />
 
         <main class="center small flex">
             <div class="st-view-vertical-center">
@@ -15,7 +15,7 @@
                     <STErrorsDefault :error-box="errors.errorBox" />
 
                     <template v-if="passwordConfig">
-                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+                        <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="!initialEmail" enterkeyhint="next" class="max" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
                         <p v-if="lock" class="style-description-small">
                             {{ lock }}
                         </p>
@@ -43,7 +43,7 @@
                                     <span class="icon">
                                         <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                     <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                    <span v-else>{{ $t('eb3fdbca-6393-44ec-9e0d-f416c6dded10') }}</span>
+                                    <span v-else>{{ $t('8e74fdc8-06e0-4686-8ca4-dca7e28aebe3') }}</span>
                                 </button>
                             </template>
 
@@ -61,7 +61,7 @@
                         </p>
 
                         <button class="button text selected" type="button" tabindex="-1" @click="openSignup">
-                            <span>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</span>
+                            <span>{{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>
@@ -79,7 +79,7 @@
                                 <span class="icon">
                                     <img src="@stamhoofd/assets/images/partners/icons/google.svg"></span>
                                 <span v-if="googleConfig.loginButtonText">{{ googleConfig.loginButtonText }}</span>
-                                <span v-else>{{ $t('eb3fdbca-6393-44ec-9e0d-f416c6dded10') }}</span>
+                                <span v-else>{{ $t('8e74fdc8-06e0-4686-8ca4-dca7e28aebe3') }}</span>
                             </button>
                         </div>
                     </template>

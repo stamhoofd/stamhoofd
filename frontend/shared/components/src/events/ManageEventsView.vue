@@ -4,14 +4,14 @@
             <template #right>
                 <button v-if="canWriteSomeEvent" type="button" class="button text navigation" @click="addEvent()">
                     <span class="icon add" />
-                    <span>{{ $t('e69989bf-c310-49b4-aff1-b9c84cfe5760') }}</span>
+                    <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
                 </button>
             </template>
         </STNavigationBar>
 
         <main class="center">
             <h1>
-                {{ $t('d9b4472a-a395-4877-82fd-da6cb0140594') }}
+                {{ $t('60231186-b00f-4d07-a5c7-4a905467e254') }}
             </h1>
 
             <div class="input-with-buttons">

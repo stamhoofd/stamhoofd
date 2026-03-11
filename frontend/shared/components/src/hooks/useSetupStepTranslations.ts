@@ -42,7 +42,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Companies]: $t('5a8403bb-90f8-4722-8cad-b275ffa781d9'),
         [SetupStepType.Groups]: '',
         [SetupStepType.Premises]: $t('5c37d309-63da-44af-8eec-fb593b8bad31'),
-        [SetupStepType.Emails]: $t('da415fb3-06f2-45eb-9230-ef56bcd52970'),
+        [SetupStepType.Emails]: $t('7e68086e-0dcc-445a-a639-984f1a7298ad'),
         [SetupStepType.Payment]: $t('8587ff64-b9b5-4e57-84b1-4afd342ffec3'),
         [SetupStepType.Registrations]: $t('ca88e88f-d859-4445-a13a-4b73c359cd6f'),
     };
@@ -52,7 +52,7 @@ export function useSetupStepTranslations(): {
         [SetupStepType.Companies]: $t('457fc4b2-9145-45c8-aba3-1fd629317330'),
         [SetupStepType.Groups]: '',
         [SetupStepType.Premises]: $t('05afcd20-5dda-4e01-88a7-e58d46487d30'),
-        [SetupStepType.Emails]: $t('9ef3cbb3-93bb-4f77-93af-3752ff869894'),
+        [SetupStepType.Emails]: $t('9eb28669-42a5-4211-b72f-3335c0d4b329'),
         [SetupStepType.Payment]: $t('953003c6-6653-4cef-a2ca-09723658b828'),
         [SetupStepType.Registrations]: $t('d14ea349-afa8-49f3-bdb0-aac23a41887f'),
     };

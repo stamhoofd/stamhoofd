@@ -1,6 +1,6 @@
 <template>
     <div id="registration-page-settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`7f2ccfd4-a570-46fe-bc8a-44e4a6144081`)" />
+        <STNavigationBar :title="$t(`6ce03229-0735-459d-aa3c-da665e4bafc2`)" />
 
         <main>
             <h1>{{ $t('6ce03229-0735-459d-aa3c-da665e4bafc2') }}</h1>
@@ -30,7 +30,7 @@
                     <template #left>
                         <span class="icon link" />
                     </template>
-                    {{ $t('36399c64-c1e2-4427-b1ab-5fd8edbf0f4a') }}
+                    {{ $t('031cfca3-ca9a-44cc-95b5-03c81948f765') }}
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="a" :href="$domains.getDocs('tag/ledenadministratie-instellen')" target="_blank">

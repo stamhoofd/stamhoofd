@@ -46,7 +46,7 @@
                             {{ permissionList(user) }}
                         </p>
                         <p class="style-description-small">
-                            {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }} {{ formatDate(user.createdAt) }}
+                            {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }} {{ formatDate(user.createdAt) }}
                         </p>
                         <p v-if="user.expiresAt" class="style-description-small">
                             {{ $t('52ab641f-5864-4fac-8c52-0df00ad7e0a9') }} {{ formatDate(user.expiresAt) }}
@@ -126,7 +126,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         const list: string[] = [];
         const o = user.permissions?.organizationPermissions.get(this.organization.id);
         if (o?.level === PermissionLevel.Full) {
-            list.push($t(`feff031d-9953-443f-ae78-eee68cec0fb7`));
+            list.push($t(`6e948886-0b41-49e8-80be-0e2e3c795359`));
         }
 
         for (const role of o?.roles ?? []) {

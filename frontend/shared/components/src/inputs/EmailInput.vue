@@ -118,7 +118,7 @@ export default class EmailInput extends VueComponent {
             if (!silent) {
                 this.errorBox = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: this.emailRaw.length === 0 ? $t(`7178d4db-3143-4fd3-832a-a6ffcad60b84`) : $t(`e9d08384-b7a9-4c7e-9364-63a90a889657`) + ' ' + this.emailRaw,
+                    message: this.emailRaw.length === 0 ? $t(`7178d4db-3143-4fd3-832a-a6ffcad60b84`) : $t(`4737b9ce-06b0-4fa7-b63a-703245f347e2`) + ' ' + this.emailRaw,
                     field: 'email',
                 }));
             }

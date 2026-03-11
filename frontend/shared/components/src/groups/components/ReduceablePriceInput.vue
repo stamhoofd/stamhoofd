@@ -2,7 +2,7 @@
     <STErrorsDefault :error-box="ownErrors.errorBox" />
     <div class="split-inputs">
         <STInputBox :title="title" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="price" :min="min" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
+            <PriceInput v-model="price" :min="min" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
             <p v-if="defaultMembershipTypeId" class="style-description-small">
                 {{ formatPriceForPlatform(platformMembershipPrice, platformMembershipPriceNow) }}
             </p>
@@ -46,7 +46,7 @@ const props = withDefaults(
     {
         errorBox: null,
         min: null,
-        title: () => $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+        title: () => $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
         group: null,
         defaultMembershipTypeId: null,
         startDate: () => new Date(0),

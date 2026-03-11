@@ -10,7 +10,7 @@ import { UIFilter, UIFilterBuilder } from '../UIFilter';
 export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>[] {
     const all: UIFilterBuilder<UIFilter>[] = [
         new StringFilterBuilder({
-            name: $t(`274b2697-e44a-43bb-a635-79d9721e8581`),
+            name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
             key: 'name',
         }),
         new NumberFilterBuilder({
@@ -18,7 +18,7 @@ export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
             key: 'year',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`45d95ed4-349b-4f6d-8b4b-417467099f3e`),
+            name: $t(`23671282-34da-4da9-8afd-503811621055`),
             options: [
                 new MultipleChoiceUIFilterOption(
                     $t(`2e2c43a8-3709-4947-83e0-3b0345cd7b44`),
@@ -36,7 +36,7 @@ export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
             },
         }),
         new DateFilterBuilder({
-            name: $t(`52961dd4-be19-47a1-abe6-1e3c34e8157c`),
+            name: $t(`10fd24bb-43dd-4174-9a23-db3ac54af9be`),
             key: 'createdAt',
         }),
         new MultipleChoiceFilterBuilder({

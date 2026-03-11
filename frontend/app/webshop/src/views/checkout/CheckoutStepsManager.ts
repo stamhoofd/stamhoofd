@@ -185,7 +185,7 @@ export class CheckoutStepsManager {
                             // Force a save if nothing changed (to fix timeSlot + updated data)
                             await this.goNext(id, navigate);
                         },
-                        saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
+                        saveText: $t(`2a9075bb-a743-411e-8a3d-94e5e57363f0`),
                     });
                 },
                 validate: (checkout, webshop) => {

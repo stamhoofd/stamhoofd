@@ -33,7 +33,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('a01ee6b1-f27f-4ad2-a87c-28bce4dedfbd') }}
+                        {{ $t('2f140e22-4940-453f-8f49-871a69f0776e') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('7b0f4117-9e6f-4c1b-b56e-c154b5defce3') }}
@@ -48,7 +48,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
+                        {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('eb865045-d332-47f7-bb52-0eaa58785d67') }}
@@ -69,7 +69,7 @@
                 </Checkbox>
             </template>
 
-            <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+            <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
             <STList>
                 <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">

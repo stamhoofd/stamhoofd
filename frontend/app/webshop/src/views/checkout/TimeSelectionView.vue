@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" :prefer-large-button="true" @save="goNext">
         <h1>
             {{ title }}
         </h1>

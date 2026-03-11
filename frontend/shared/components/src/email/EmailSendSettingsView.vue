@@ -5,7 +5,7 @@
         :loading="saving"
         :save-icon-mobile="willSend ? 'send' : undefined"
         :save-icon="willSend ? 'send' : undefined"
-        :save-text="willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3')) : $t('87e450fe-1c15-4eed-9066-f78979e44810')"
+        :save-text="willSend ? (sendAsEmail ? $t('618f51bc-cad2-453f-bece-70ba56b7d1a9') : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3')) : $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d')"
         :prefer-large-button="false"
         :disabled="willSend && (!showInMemberPortal && !sendAsEmail)"
         @save="save"
@@ -112,7 +112,7 @@ async function save() {
             confirmText = $t(`98603c16-adf9-4aa9-9685-4a1199dd04d4`);
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`) : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3'));
+        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`618f51bc-cad2-453f-bece-70ba56b7d1a9`) : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3'));
         if (!isConfirm) {
             return;
         }
@@ -165,7 +165,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

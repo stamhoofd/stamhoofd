@@ -5,7 +5,7 @@
 
             <main class="center">
                 <h1>
-                    {{ $t('fb8c1c30-2108-4a1b-a412-0381263e860e') }}
+                    {{ $t('bc00376e-db0e-4ace-aecc-9bfc05ee573e') }}
                 </h1>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
@@ -15,7 +15,7 @@
                 </p>
                 <template v-else>
                     <template v-if="membershipOrganization">
-                        <hr><h2>{{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }} {{ membershipOrganization.name }}</h2>
+                        <hr><h2>{{ $t('0fc72e2d-5fe5-4ed2-ba5d-1f880790c174') }} {{ membershipOrganization.name }}</h2>
 
                         <STList class="illustration-list">
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/' + appToUri('dashboard') + '/' + membershipOrganization.uri + '/boekhouding/exporteren'">
@@ -53,7 +53,7 @@
                                     <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('9ac518c6-00fc-47c1-bd01-2f1f6fa17613') }}
+                                    {{ $t('2e0554e5-f223-4618-942e-53ec88f26e19') }}
                                 </h2>
                                 <p class="style-description">
                                     {{ $t('67433a1e-efe1-48a1-9b4c-84dea499c5b9') }}
@@ -80,7 +80,7 @@
                         </STList>
                     </template>
                     <hr><h2>
-                        {{ $t('f3d64c72-9a4e-4de2-8329-39e387fbc933') }}
+                        {{ $t('3024d542-4987-4487-ae83-6593036a7e1d') }}
                     </h2>
                     <p>
                         {{ $t("4a2a630f-3396-404f-9316-d660df9935a9") }}
@@ -127,7 +127,7 @@
                     <p class="style-button-bar">
                         <LoadingButton :loading="charging">
                             <button class="button primary" type="button" @click="charge">
-                                {{ $t('fb8224d8-e010-4632-9d50-91cb42a35215') }}
+                                {{ $t('00bdd5bd-af3f-4f83-abe0-696d5b872ca9') }}
                             </button>
                         </LoadingButton>
                     </p>
@@ -158,7 +158,7 @@
 
                             <template #right>
                                 <span class="button text">
-                                    {{ $t('6c9746ca-285b-444a-89d3-4052897e2dc2') }}
+                                    {{ $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}
                                     <span class="icon arrow-right-small" />
                                 </span>
                             </template>
@@ -175,16 +175,16 @@
                     <p v-if="hasChanges" class="style-button-bar">
                         <LoadingButton :loading="saving">
                             <button class="button primary" type="button" @click="save">
-                                {{ $t('5d9d5777-5ecb-4223-8dc2-973ee3fee4bb') }}
+                                {{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}
                             </button>
                         </LoadingButton>
                     </p>
 
                     <div v-if="summary && summary?.trials.members > 0" class="container">
-                        <hr><h2>{{ $t('cc3d3da6-27ce-4f32-a696-4e08d649a7bc') }}</h2>
+                        <hr><h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
 
                         <div class="style-stats-grid">
-                            <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">
+                            <STInputBox :title="$t('697df3e7-fbbf-421d-81c2-9c904dce4842')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -193,7 +193,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('8e0924af-042c-42ab-85e1-dda0a2106b98')">
+                            <STInputBox :title="$t('082fff79-1ecd-450b-a2ed-a5cef7769f0f')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -202,7 +202,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('e886fb7a-9312-4e74-b426-5acb694fe009')">
+                            <STInputBox :title="$t('da735211-2f9d-45bf-a688-d76aaf796cc4')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -223,10 +223,10 @@
                     </div>
 
                     <div v-for="type of platform.config.membershipTypes" :key="type.id" class="container">
-                        <hr><h2>{{ $t('ed995f5d-eeff-44ad-ac35-f518b2892524') }} "{{ type.name }}"</h2>
+                        <hr><h2>{{ $t('151006be-86c2-48cd-bcd7-7c3bf9b76080') }} "{{ type.name }}"</h2>
 
                         <div class="style-stats-grid">
-                            <STInputBox :title="$t('faa31f24-a42f-454b-9ceb-417c46dcee0d')">
+                            <STInputBox :title="$t('697df3e7-fbbf-421d-81c2-9c904dce4842')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -235,7 +235,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('8e0924af-042c-42ab-85e1-dda0a2106b98')">
+                            <STInputBox :title="$t('082fff79-1ecd-450b-a2ed-a5cef7769f0f')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>
@@ -244,7 +244,7 @@
                                 </p>
                             </STInputBox>
 
-                            <STInputBox :title="$t('e886fb7a-9312-4e74-b426-5acb694fe009')">
+                            <STInputBox :title="$t('da735211-2f9d-45bf-a688-d76aaf796cc4')">
                                 <p class="style-price-big">
                                     <span v-if="!summary" class="style-placeholder-skeleton" />
                                     <span v-else>

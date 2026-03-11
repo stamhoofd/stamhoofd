@@ -1,6 +1,6 @@
 <template>
     <div class="st-menu st-view">
-        <STNavigationBar :title="$t(`edfc89fe-a16e-4789-bda9-1529f8a97f7c`)">
+        <STNavigationBar :title="$t(`2a033cd8-b9e4-4a92-a8a6-b4a687d87e79`)">
             <template #right>
                 <button v-if="hasFullAccess" class="button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
             </template>
@@ -13,7 +13,7 @@
                 <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.All) }" @click="navigate(Routes.All)">
                     <span class="icon group" />
                     <span>
-                        {{ $t("cd0975fc-75c4-4c1e-b80a-f611f0992caa") }}
+                        {{ $t("5a1993a8-2604-4ca5-be6e-8d6902d9f8c1") }}
                     </span>
                 </button>
             </div>

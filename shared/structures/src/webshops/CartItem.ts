@@ -446,7 +446,7 @@ export class CartItem extends AutoEncoder {
 
             if (price === 0) {
                 if (sorted.length === 1) {
-                    parts.push($t(`99e41cea-bce3-4329-8b17-e3487c4534ac`));
+                    parts.push($t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`));
                 }
                 else {
                     parts.push(amount + ' ' + $t(`50af1227-4f3d-46bb-a832-b62c4e3bc6ab`));
@@ -525,7 +525,7 @@ export class CartItem extends AutoEncoder {
 
         if (this.uitpasNumbers.length) {
             if (this.uitpasNumbers.length === 1) {
-                descriptions.push($t('e330f60b-d331-49a2-a437-cddc31a878de') + ': ' + DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber));
+                descriptions.push($t('87c1a48c-fef5-44c3-ae56-c83463fcfb84') + ': ' + DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber));
             }
             else {
                 descriptions.push($t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') + ': ' + this.uitpasNumbers.map(item => DataValidator.formatUitpasNumber(item.uitpasNumber)).join(', '));
@@ -846,14 +846,14 @@ export class CartItem extends AutoEncoder {
                     throw new SimpleError({
                         code: 'invalid_seats',
                         message: 'Invalid seats',
-                        human: $t(`5d8d7f45-85ae-44d0-b8ac-b7db850003ba`, { seats: Formatter.pluralText(this.amount, $t(`886ea5ba-4715-43a2-88b6-4715df3cfa2c`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
+                        human: $t(`5d8d7f45-85ae-44d0-b8ac-b7db850003ba`, { seats: Formatter.pluralText(this.amount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
                         meta: { recoverable: true },
                     });
                 }
                 throw new SimpleError({
                     code: 'invalid_seats',
                     message: 'Invalid seats',
-                    human: $t(`2858b401-42b8-4a95-8bd1-d67addbda5e1`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`886ea5ba-4715-43a2-88b6-4715df3cfa2c`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
+                    human: $t(`2858b401-42b8-4a95-8bd1-d67addbda5e1`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) }),
                     meta: { recoverable: true },
                 });
             }

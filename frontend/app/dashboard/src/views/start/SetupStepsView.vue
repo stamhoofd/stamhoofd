@@ -10,7 +10,7 @@
             </p>
             <div v-else key="steps" class="container">
                 <hr><h2>{{ $t('8e77d1c1-87dc-4fdb-ad6e-13145bc96f78') }}</h2>
-                <p>{{ $t('cd60d49f-9fc8-4fb7-b574-1231874c1d43') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a></p>
+                <p>{{ $t('cd60d49f-9fc8-4fb7-b574-1231874c1d43') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a></p>
                 <SetupStepRows :steps="$setupSteps" list-type="todo" @select="onClickStep" />
             </div>
         </TransitionFade>

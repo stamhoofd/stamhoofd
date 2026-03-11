@@ -3,7 +3,7 @@
         <STNavigationBar :title="$t(`19bd9ed4-585f-4cc5-a4ea-643f00481b77`)" />
         <main>
             <h1>
-                {{ $t('41ffb09f-0986-42f4-9b7d-2b9df06324c7') }}
+                {{ $t('19bd9ed4-585f-4cc5-a4ea-643f00481b77') }}
             </h1>
 
             <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" :admin="true" />

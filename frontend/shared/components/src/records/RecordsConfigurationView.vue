@@ -1,7 +1,7 @@
 <template>
-    <SaveView :loading="saving" :title="$t('69a7751b-c316-42cd-a766-98e7e11fe3d6')" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="$t('15e411ef-7a28-41e0-ad90-8c6ffae730f1')" :disabled="!hasChanges" @save="save">
         <h1>
-            {{ $t('69a7751b-c316-42cd-a766-98e7e11fe3d6') }}
+            {{ $t('15e411ef-7a28-41e0-ad90-8c6ffae730f1') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -108,8 +108,8 @@ const settings = computed(() => {
         exampleValue: new PlatformMember({
             member: MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
-                    firstName: $t('a9c8e948-2bf2-4915-90a0-1513397d747c'),
-                    lastName: $t('e9a2ed45-f158-4e88-9a3c-75ee502f0e7a'),
+                    firstName: $t('38e2c1aa-13f6-4339-8cfd-68c2603beb51'),
+                    lastName: $t('946f5e2e-d92c-4bbd-b64f-115958a04d01'),
                     dataPermissions: BooleanStatus.create({ value: true }),
                     birthDay: new Date('2020-01-01'),
                 }),
@@ -154,7 +154,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('9bd792a4-fb4a-4275-8308-e316285be890'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

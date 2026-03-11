@@ -89,7 +89,7 @@ async function deleteAddress(address: Address) {
 }
 
 async function deleteFromMemberDetails<T extends string | number | (AutoEncoder & { id: string })>({ valueToDelete, key, confirmMessage, confirmButtonText }: { valueToDelete: T; confirmMessage: string; confirmButtonText?: string; key: keyof MemberDetails }) {
-    const isConfirm = await CenteredMessage.confirm(confirmMessage, confirmButtonText ?? $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`));
+    const isConfirm = await CenteredMessage.confirm(confirmMessage, confirmButtonText ?? $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`));
     if (isConfirm) {
         const member = props.member;
         const membersPatch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;

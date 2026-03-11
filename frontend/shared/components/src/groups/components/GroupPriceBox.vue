@@ -86,7 +86,7 @@
                         <Checkbox :model-value="getBundleDiscountSelected(bundleDiscount)" @update:model-value="setBundleDiscountSelected(bundleDiscount, $event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ bundleDiscount.name || $t('0a0f4ac1-1b0e-48f0-9f21-d1c77ec3f008') }}
+                        {{ bundleDiscount.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
                     </h3>
                     <p class="style-description-small">
                         {{ bundleDiscount.humanDescription }}

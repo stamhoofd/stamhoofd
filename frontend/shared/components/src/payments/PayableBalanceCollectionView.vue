@@ -1,14 +1,14 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`cda73dc5-5612-4561-bf92-f18157dcad64`)" />
+        <STNavigationBar :title="$t(`15589562-1e34-4197-8097-5ec5bf1636fb`)" />
 
         <main>
-            <h1>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h1>
+            <h1>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h1>
 
             <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8') }}</h2>
+                <hr><h2>{{ $t('5c75e9bf-1b64-4d28-a435-6e33247d5170') }}</h2>
                 <p>{{ $t('d0099dec-d92f-41dc-9e42-7409de459d71') }}</p>
 
                 <STList>
@@ -16,7 +16,7 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h2>
+            <hr><h2>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
                 {{ $t('24b3d716-8db4-49c6-991d-239d5824e34d') }}

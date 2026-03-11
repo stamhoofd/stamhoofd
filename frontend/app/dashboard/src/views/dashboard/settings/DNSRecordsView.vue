@@ -1,6 +1,6 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar :title="$t(`bab38c80-8ab6-4cb7-80c3-1f607057e45d`)" />
+        <STNavigationBar :title="$t(`5ca94078-d742-4e17-abf7-957c4721a559`)" />
 
         <main>
             <h1>

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('7de2e636-dcec-44b1-a681-daeb9cd85316') : $t('a2ca0160-2d94-45f8-a96a-3e02a43b17d8')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`809b158a-2a1f-459f-a60c-4ae5c69fbe8e`)" @save="goToCheckout">
+    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('7de2e636-dcec-44b1-a681-daeb9cd85316') : $t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`809b158a-2a1f-459f-a60c-4ae5c69fbe8e`)" @save="goToCheckout">
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>
@@ -10,7 +10,7 @@
             {{ $t('f640fb74-eee1-43cf-8b28-0c6ff17da4d2') }} {{ group.settings.name }}
         </h1>
         <h1 v-else>
-            {{ $t('5e2654f2-6423-47bc-b7e7-054e41bf287f') }}
+            {{ $t('1259b59f-6447-4da8-887e-848f05da346f') }}
         </h1>
 
         <p v-if="checkout.totalPrice && checkout.isAdminFromSameOrganization" class="info-box">
@@ -228,7 +228,7 @@ const shouldNavigateAway = async () => {
     if (props.checkout.cart.isEmpty) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

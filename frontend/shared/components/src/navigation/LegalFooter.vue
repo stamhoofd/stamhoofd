@@ -7,7 +7,7 @@
                     -
                 </template>
                 <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                    {{ $t('f6c4cd8c-97e5-40d0-9331-69d15e100726') }}
+                    {{ $t('00c90aa3-2d42-45bc-a3e7-56565b7a4e0e') }}
                 </a>
 
                 <template v-for="policy in policies" :key="policy.id">
@@ -30,7 +30,7 @@
                 </template>
 
                 <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
-                    {{ $t('ecefb25b-4125-4df3-883b-73ddc301529e') }}
+                    {{ $t('e3398474-26b0-49d4-9f64-bae38495fb4f') }}
                 </button>
 
                 <br>

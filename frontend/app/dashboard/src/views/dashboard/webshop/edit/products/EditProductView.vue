@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? typeName+' ' + $t(`34bfcf6f-ac25-45e2-a26b-614384e34923`) : name+' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? typeName+' ' + $t(`06da1310-e17c-475e-bcd3-bb47844c24c1`) : name+' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`)" :disabled="!hasChanges" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
             {{ typeName }} {{ $t('06da1310-e17c-475e-bcd3-bb47844c24c1') }}
         </h1>
         <h1 v-else>
-            {{ name || typeName }} {{ $t('ee3bc635-c294-4134-9155-7a74f47dec4f') }}
+            {{ name || typeName }} {{ $t('8455850d-829f-412f-bf1f-eedb2caa9f57') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -51,7 +51,7 @@
             </STInputBox>
         </div>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
             <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`8b049701-1a5f-4b35-bac8-e2b28309ac5f`)" />
         </STInputBox>
 
@@ -107,7 +107,7 @@
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addProductPrice()">
                     <span class="icon add" />
-                    <span>{{ $t('52bff8d2-52af-4d3f-b092-96bcfa4c0d03') }}</span>
+                    <span>{{ $t('1205deb9-498d-435d-a6e1-91ea98371523') }}</span>
                 </button>
             </div>
         </h2>
@@ -225,7 +225,7 @@
                 <div>
                     <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
                         <span class="icon trash" />
-                        <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                        <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                     </button>
                     <UploadButton v-model="image" :text="image ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
                 </div>
@@ -237,7 +237,7 @@
         </template>
 
         <hr><h2>
-            {{ $t('bf2af52c-de5d-4089-b46d-9be48594cdb4') }}
+            {{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}
             <span v-if="remainingStock !== null" class="title-suffix">{{ $t('949b7f3f-3aac-4e9c-9b54-d109486eb28a') }} {{ remainingStock }} {{ $t('0467006a-7ded-4e4f-acec-986d013bea6b') }}</span>
         </h2>
 
@@ -276,7 +276,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('c06b7729-059e-46d2-b701-825fa063f315') }}
+                            {{ $t('9128e6d1-9772-4258-b1e6-5d271b71727f') }}
                         </h3>
                         <p v-if="useEnableAfter" class="style-description-small">
                             {{ $t('1631299a-246c-4923-bc48-a09c6ead77b5') }}
@@ -296,7 +296,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('a0f96736-4411-4439-bb4b-819dd77fca22') }}
+                            {{ $t('163c78b9-f0dd-4ec5-bdfe-32b389aeda7d') }}
                         </h3>
                         <p v-if="useDisableAfter" class="style-description-small">
                             {{ $t('53b8e515-daa7-40ee-8140-c5a6e851a829') }}
@@ -325,7 +325,7 @@
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                                <NumberInput v-model="stock" :suffix="$t('5cdeae87-7fc9-4b46-b384-f8dabb022a32')" :suffix-singular="$t('7447ec38-44b1-448e-8745-c5aebbdf846b')" />
+                                <NumberInput v-model="stock" :suffix="$t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a')" :suffix-singular="$t('599ce864-4059-48eb-82f8-9191e9507050')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -345,7 +345,7 @@
 
                         <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="showStockBelow" :error-box="showStockBelow">
-                                <NumberInput v-model="showStockBelow" :suffix="$t('5cdeae87-7fc9-4b46-b384-f8dabb022a32')" :suffix-singular="$t('7447ec38-44b1-448e-8745-c5aebbdf846b')" />
+                                <NumberInput v-model="showStockBelow" :suffix="$t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a')" :suffix-singular="$t('599ce864-4059-48eb-82f8-9191e9507050')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -413,7 +413,7 @@
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>

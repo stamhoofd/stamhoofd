@@ -9,15 +9,15 @@
                 <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" data-testid="first-name-input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                            <input v-model="firstName" class="input" data-testid="first-name-input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" data-testid="last-name-input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                            <input v-model="lastName" class="input" data-testid="last-name-input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                         </div>
                     </div>
                 </STInputBox>
 
-                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`) : $t(`a611c2d2-0ac2-430e-8a0f-df2b95bb66cf`)" :validator="validator" :required="isPropertyRequired('birthDay')">
+                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? $t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`) : $t(`a611c2d2-0ac2-430e-8a0f-df2b95bb66cf`)" :validator="validator" :required="isPropertyRequired('birthDay')">
                     <template v-if="!trackingYear && isAdmin" #right>
                         <button class="button icon more-horizontal small gray" type="button" @click="showBirthDayMenu" />
                     </template>
@@ -43,13 +43,13 @@
                             {{ $t('06466432-eca6-41d0-a3d6-f262f8d6d2ac') }}
                         </Radio>
                         <Radio v-model="gender" :value="Gender.Other" autocomplete="sex" name="sex">
-                            {{ $t('8f7475aa-c110-49b2-8017-1a6dd0fe72f9') }}
+                            {{ $t('26677608-996f-41a5-8a53-543d6efa7de4') }}
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
 
                 <PhoneInput error-fields="phone" :error-box="errors.errorBox" v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`e3d3b76b-e18c-4351-b5af-87186ebabe86`): $t(`17e804e0-5c41-4893-8008-89c7392e1d18`)" />
-                <EmailInput v-if="!(member.isNew && isAdmin) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`e3d3b76b-e18c-4351-b5af-87186ebabe86`): $t(`17e804e0-5c41-4893-8008-89c7392e1d18`)" :validator="validator">
+                <EmailInput v-if="!(member.isNew && isAdmin) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`e3d3b76b-e18c-4351-b5af-87186ebabe86`): $t(`17e804e0-5c41-4893-8008-89c7392e1d18`)" :validator="validator">
                     <template #right>
                         <button :v-tooltip="$t('2797d590-7e74-4852-84aa-076f7919a2fb')" class="button icon add small gray" type="button" @click="addEmail" />
                     </template>
@@ -70,7 +70,7 @@
                 </div>
 
                 <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`439176a5-dd35-476b-8c65-3216560cac2f`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('3e128951-fbcd-4b44-88a3-6c5340ce1dfc')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`00881b27-7501-4c56-98de-55618be2bf11`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('3e128951-fbcd-4b44-88a3-6c5340ce1dfc')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
                         <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
                             <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
                         </template>
@@ -97,7 +97,7 @@
             </div>
 
             <div v-if="!member.isNew">
-                <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="$t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`) + lidSuffix + (isPropertyRequired('address') ? '' : ' ' + $t(`49b1c5d0-0511-42f0-a9fe-791572ba96f9`))" :validator="validator" />
+                <SelectionAddressInput v-if="address || isPropertyEnabled('address')" v-model="address" :addresses="availableAddresses" :required="isPropertyRequired('address')" :title="$t(`0a37de09-120b-4bea-8d13-6d7ed6823884`) + lidSuffix + (isPropertyRequired('address') ? '' : ' ' + $t(`49b1c5d0-0511-42f0-a9fe-791572ba96f9`))" :validator="validator" />
             </div>
         </div>
 
@@ -159,7 +159,7 @@ const title = computed(() => {
     if (props.member.isNew) {
         return $t('ce4185d5-0d84-435b-bbd2-ff4a6e2e61c1');
     }
-    return $t('43817091-8f0c-41f3-a72b-bcd0a489dfd3');
+    return $t('35757756-d817-419d-82dd-1ba14128af30');
 });
 
 useValidation(errors.validator, () => {
@@ -167,7 +167,7 @@ useValidation(errors.validator, () => {
     if (firstName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`7764f616-f742-4704-93ff-22f1dd31f830`),
+            message: $t(`1186a60b-c59f-43d5-ba58-04ff9288c266`),
             field: 'firstName',
         }));
     }

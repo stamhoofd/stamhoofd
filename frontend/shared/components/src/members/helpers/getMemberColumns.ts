@@ -12,7 +12,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             name: '#',
             getValue: member => member.member.details.memberNumber ?? '',
             getStyle: val => val ? '' : 'gray',
-            format: val => val ? val : $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`),
+            format: val => val ? val : $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`),
             minimumWidth: 100,
             recommendedWidth: 150,
             grow: true,
@@ -22,7 +22,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
         new Column<ObjectType, string>({
             id: 'name',
-            name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
+            name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
             getValue: member => member.member.name,
             minimumWidth: 100,
             recommendedWidth: 200,
@@ -30,7 +30,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         }),
         new Column<ObjectType, Date | null>({
             id: 'birthDay',
-            name: $t(`7d7b5a21-105a-41a1-b511-8639b59024a4`),
+            name: $t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`),
             getValue: member => member.member.details.birthDay,
             format: date => date ? Formatter.dateNumber(date, true) : '',
             minimumWidth: 50,
@@ -39,15 +39,15 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         }),
         new Column<ObjectType, number | null>({
             id: 'age',
-            name: $t(`992b79e9-8c6e-4096-aa59-9e5f546eac41`),
+            name: $t(`8c1f264f-3b0b-49b9-8a29-9ceb2dfd7754`),
             getValue: member => member.member.details.age,
-            format: (age, width) => age !== null ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`ba6f46a9-2598-4da2-beb2-fdf9ba890bfd`))) : $t(`af93c340-950c-4f6c-be6a-6bb847ec2d41`),
+            format: (age, width) => age !== null ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`608082c7-ce63-43c9-a577-ebaf56c4df82`))) : $t(`0e21480d-5597-4337-bcee-5f4eba73fb7e`),
             minimumWidth: 50,
             recommendedWidth: 120,
         }),
         new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'membership',
-            name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
+            name: $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`),
             getValue: (member) => {
                 return {
                     status: member.membershipStatus,
@@ -57,11 +57,11 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             format: ({ status }) => {
                 switch (status) {
                     case MembershipStatus.Trial:
-                        return $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`);
+                        return $t(`1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0`);
                     case MembershipStatus.Active:
-                        return $t(`b56351e9-4847-4a0c-9eec-348d75c794c4`);
+                        return $t(`079afc7a-6ccb-4c7f-b739-24198b0cfec2`);
                     case MembershipStatus.Expiring:
-                        return $t(`d9858110-37d9-4b4a-8bfb-d76b3cc5ef27`);
+                        return $t(`cc528c3f-aed3-4eb6-9db1-70aae5261a28`);
                     case MembershipStatus.Temporary:
                         return $t(`75e62d3c-f348-4104-8a1e-e11e6e7fbe32`);
                     case MembershipStatus.Inactive:
@@ -123,12 +123,12 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             })
             : null,
         new Column<ObjectType, string[]>({
-            name: $t(`d0defb77-0a25-4b85-a03e-57569c5edf6c`),
+            name: $t(`b0cb950d-856f-4068-bf2f-9636927020f4`),
             allowSorting: false,
             getValue: member => member.getResponsibilities({ organization: organization ?? undefined }).map(l => l.getName(member, false)),
             format: (list) => {
                 if (list.length === 0) {
-                    return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
+                    return $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`);
                 }
                 return list.join(', ');
             },
@@ -138,7 +138,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             enabled: false,
         }),
         new Column<ObjectType, string[]>({
-            name: $t(`d84503e9-7d0e-4c4b-a3ca-92bfbed6ca49`),
+            name: $t(`ac747fb2-d391-499b-8cee-1ed7241e6177`),
             allowSorting: false,
             getValue: member => member.patchedMember.users.filter(u => u.hasAccount).map(u => u.email),
             format: (accounts) => {
@@ -162,7 +162,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     allowSorting: false,
                     name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
                     getValue: member => member.filterRegistrations({ groups: [group!] }).map(r => r.groupPrice),
-                    format: prices => Formatter.joinLast(prices.map(o => o.name.toString()).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
+                    format: prices => Formatter.joinLast(prices.map(o => o.name.toString()).sort(), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') || $t('3ef9e622-426f-4913-89a0-0ce08f4542d4'),
                     getStyle: prices => prices.length === 0 ? 'gray' : '',
                     minimumWidth: 100,
                     recommendedWidth: 300,
@@ -185,7 +185,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     }),
                     format: (values) => {
                         if (values.length === 0) {
-                            return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
+                            return $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`);
                         }
                         return values.map(v => v.option.allowAmount || v.amount > 1 ? (v.amount + 'x ' + v.option.name) : v.option.name).join(', ');
                     },
@@ -259,7 +259,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     }
 
                     if (!member.patchedMember.details.address && member.isPropertyRequired('address', scope)) {
-                        base.push($t(`ca287035-d735-4eaa-bbb3-ae0db435b4ea`));
+                        base.push($t(`38f3e042-b8a7-4bba-bf2a-d7c391f23268`));
                     }
 
                     if (!member.patchedMember.details.birthDay && member.isPropertyRequired('birthDay', scope)) {
@@ -267,7 +267,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     }
 
                     if (!member.patchedMember.details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
-                        base.push($t(`e7a21ff5-4f90-4518-8279-ea4fb747fb66`));
+                        base.push($t(`cd5d00db-1fcc-4079-bbe3-36dc001e93d4`));
                     }
                     else {
                         if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
@@ -290,7 +290,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     const incomplete = enabledCategories.filter(c => !c.isComplete(member));
                     return [...base, ...incomplete.map(c => c.name.toString())];
                 },
-                format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
+                format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') || $t('3ef9e622-426f-4913-89a0-0ce08f4542d4')),
                 getStyle: prices => prices.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -306,7 +306,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 allowSorting: false,
                 name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
                 getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-                format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
+                format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -318,9 +318,9 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             new Column<ObjectType, Organization[]>({
                 id: 'uri',
                 allowSorting: false,
-                name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
+                name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
                 getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-                format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
+                format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') || $t('3ef9e622-426f-4913-89a0-0ce08f4542d4'),
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -340,11 +340,11 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     const registrations = member.filterRegistrations({ groups, periodId: filterPeriodId });
                     if (registrations.find(r => r.payingOrganizationId)) {
                         const organization = member.organizations.find(o => o.id === registrations[0].payingOrganizationId);
-                        return organization ? organization.name : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`);
+                        return organization ? organization.name : $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`);
                     }
                     return null;
                 },
-                format: organizations => organizations || $t(`b8b730fb-f1a3-4c13-8ec4-0aebe08a1449`),
+                format: organizations => organizations || $t(`08dd4181-69c6-4888-b32a-07224f1c4349`),
                 getStyle: organizations => organizations === null ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -356,7 +356,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
     if (groups.find(g => g.settings.trialDays)) {
         allColumns.push(
             new Column<ObjectType, Date | null>({
-                name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
+                name: $t(`1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0`),
                 allowSorting: false,
                 getValue: (v) => {
                     const registrations = v.filterRegistrations({ groups, periodId: periodId ?? group?.periodId ?? '' });
@@ -375,7 +375,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 },
                 format: (v, width) => {
                     if (!v) {
-                        return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
+                        return $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`);
                     }
                     return $t(`68860bdb-dad1-40d5-9130-6219c83fe977`) + ' ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
                 },
@@ -388,7 +388,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
+            name: $t(`300d2935-b578-48cc-b58e-1c0446a68d59`),
             allowSorting: false,
             getValue: (v) => {
                 const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -404,7 +404,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 }
                 return new Date(Math.min(...filtered));
             },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 200,
@@ -414,7 +414,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: $t(`aef10d71-39c4-4cdb-8252-5fd31781abd8`),
+            name: $t(`3c90169c-9776-4d40-bda0-dba27a5bad69`),
             allowSorting: false,
             getValue: (v) => {
                 const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -430,7 +430,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 }
                 return new Date(Math.max(...filtered));
             },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 200,
@@ -456,7 +456,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 }
                 return new Date(Math.min(...filtered));
             },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 220,
@@ -466,7 +466,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
     allColumns.push(
         new Column<ObjectType, Date>({
             id: 'createdAt',
-            name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+            name: $t('6711ac76-e8c7-482b-b6b4-635ba3d16f60'),
             allowSorting: true,
             getValue: (v) => {
                 return v.member.createdAt;
@@ -481,7 +481,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
     if (!waitingList && financialRead && groups.length > 0) {
         allColumns.push(
             new Column<ObjectType, number>({
-                name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+                name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
                 allowSorting: false,
                 getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0),
                 format: (outstandingBalance) => {
@@ -489,7 +489,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                         return Formatter.price(outstandingBalance);
                     }
                     if (outstandingBalance <= 0) {
-                        return $t(`30e129d7-349d-4369-a8c4-c86b82ce2e01`);
+                        return $t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`);
                     }
                     return Formatter.price(outstandingBalance);
                 },
@@ -502,7 +502,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
         allColumns.push(
             new Column<ObjectType, number>({
-                name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
+                name: $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`),
                 description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
                 allowSorting: false,
                 getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0),
@@ -511,7 +511,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                         return Formatter.price(outstandingBalance);
                     }
                     if (outstandingBalance <= 0) {
-                        return $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`);
+                        return $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`);
                     }
                     return Formatter.price(outstandingBalance);
                 },
@@ -525,7 +525,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, number>({
-            name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+            name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
             description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
             allowSorting: false,
             getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
@@ -544,7 +544,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             new Column<ObjectType, Group[]>({
                 id: 'category',
                 allowSorting: false,
-                name: waitingList ? $t(`a1608b0c-760b-4de1-9616-dea65c812437`) : (category.settings.name || $t('b467444b-879a-4bce-b604-f7e890008c4f')),
+                name: waitingList ? $t(`565a7968-e547-411e-aaff-6f936c128d5f`) : (category.settings.name || $t('3f4c9896-7f02-4b49-ad29-2d363a8af71f')),
                 getValue: (member) => {
                     if (!category) {
                         return [];
@@ -556,7 +556,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 },
                 format: (groups) => {
                     if (groups.length === 0) {
-                        return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
+                        return $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`);
                     }
                     return groups.map(g => g.settings.name).join(', ');
                 },
@@ -573,7 +573,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             new Column<ObjectType, Group[]>({
                 id: 'category',
                 allowSorting: false,
-                name: $t('b467444b-879a-4bce-b604-f7e890008c4f'),
+                name: $t('3f4c9896-7f02-4b49-ad29-2d363a8af71f'),
                 getValue: (member) => {
                     let memberGroups = member.filterGroups({ periodId: filterPeriodId, types: [GroupType.Membership, GroupType.WaitingList] });
                     if (app === 'admin') {
@@ -583,7 +583,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 },
                 format: (groups) => {
                     if (groups.length === 0) {
-                        return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
+                        return $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`);
                     }
                     return groups.map(g => g.settings.name).join(', ');
                 },

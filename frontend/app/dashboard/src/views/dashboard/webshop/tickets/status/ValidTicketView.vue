@@ -5,7 +5,7 @@
         <main v-if="!publicTicket.isSingle">
             <h1>
                 <span class="icon green success" />
-                <span>{{ $t('1a2a842e-4f98-4818-911b-c9634aca4214') }}{{ order.number }}</span>
+                <span>{{ $t('12be5ac0-8353-43a2-badb-ab3b27d156b3') }}{{ order.number }}</span>
             </h1>
 
             <p v-if="order.pricePaid < order.totalToPay" class="warning-box">
@@ -73,7 +73,7 @@
 
                 <STListItem v-long-press="(e: Event) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     <h3 :class="'style-definition-label '+statusColor">
-                        {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
+                        {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>
@@ -103,7 +103,7 @@
 
             <template v-if="order.data.checkoutMethod">
                 <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    {{ $t('edd72e8b-76de-45df-93a0-ecc72efb849a') }}
+                    {{ $t('cca905ff-7d00-4b9d-84c6-bda2bb5ea898') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
                     {{ $t('acde7540-a0b2-4eaf-88af-2d92851f73de') }}
@@ -135,7 +135,7 @@
                     </STListItem>
                     <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                         <h3 class="style-definition-label">
-                            {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
+                            {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -179,7 +179,7 @@
                     </STListItem>
                     <STListItem v-if="order.data.administrationFee > 0" class="right-description">
                         <h3 class="style-definition-label">
-                            {{ $t('be98be36-f796-4f96-b054-4d2a09be3d79') }}
+                            {{ $t('a0d99100-f225-416f-bcec-e25df9d651ac') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -189,7 +189,7 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('f4d00d5c-77c9-41dd-9689-a447c7977449') }}</h2>
+            <hr><h2>{{ $t('120012bf-f877-46de-b6d9-55ea46f3f2ce') }}</h2>
 
             <STList class="info">
                 <STListItem>
@@ -203,7 +203,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
+                        {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.email }}

@@ -399,7 +399,7 @@ export class RegisterCheckout {
 
         if (all.length > 0 && (this.cart.price + this.cart.priceDueLater) !== 0) {
             all.unshift({
-                name: $t(`8a04f032-01e5-4ee0-98fb-6f36bf971080`),
+                name: $t(`26369a8f-8080-4f00-af46-576fdf563ced`),
                 price: this.cart.price + this.cart.priceDueLater,
             });
         }
@@ -409,7 +409,7 @@ export class RegisterCheckout {
         if (totalLater !== 0) {
             all.push(
                 {
-                    name: $t(`7e1d2f82-ca2d-4acc-ab37-88834e63c999`),
+                    name: $t(`3b051406-b285-4f04-a80d-b98c966cbb1c`),
                     price: totalLater,
                 },
             );
@@ -423,7 +423,7 @@ export class RegisterCheckout {
         }
         else {
             all.push({
-                name: this.cart.priceDueLater ? $t(`bedb1bf7-9b38-4ef4-a1f3-53ade0f56352`) : $t(`e67d0122-6f15-46c6-af94-92a79268710a`),
+                name: this.cart.priceDueLater ? $t(`35337319-2bc6-41d6-9427-c1974d8a37ae`) : $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
                 price: this.totalPrice,
             });
         }

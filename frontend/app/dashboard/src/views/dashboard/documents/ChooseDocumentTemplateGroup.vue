@@ -53,7 +53,7 @@
                     </STList>
                 </div>
 
-                <hr><h2>{{ $t('c51b35d1-228b-4ce3-8b27-312b5620b662') }}</h2>
+                <hr><h2>{{ $t('18337b9f-03a1-4b85-a012-1c1ba16739d0') }}</h2>
                 <Spinner v-if="loadingGroups" />
                 <STList v-else-if="archivedGroups.length">
                     <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" @click="selectGroup(group)">
@@ -142,7 +142,7 @@ const activitiesTab = {
 
 const showOnlyActivities = props.documentType === fiscal.type && STAMHOOFD.userMode === 'platform';
 const tabs = ref(showOnlyActivities ? [activitiesTab] : [groupsTab, activitiesTab]);
-const title = showOnlyActivities ? $t('dce02131-5547-4723-adfe-983f8792d082') : $t(`f52db2d7-c0f5-4f9c-b567-62f657787339`);
+const title = showOnlyActivities ? $t('614dbf30-ddf8-4e85-9da3-cc8d30f7ac77') : $t(`877284d7-31b4-4857-a963-405b4139adc2`);
 
 const selectedTab = ref(tabs.value[0].id);
 

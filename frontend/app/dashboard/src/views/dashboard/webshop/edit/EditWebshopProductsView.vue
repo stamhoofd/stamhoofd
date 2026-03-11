@@ -38,7 +38,7 @@
         </p>
 
         <template v-if="webshop.canEnableCart">
-            <hr><h2>{{ $t('5e2654f2-6423-47bc-b7e7-054e41bf287f') }}</h2>
+            <hr><h2>{{ $t('1259b59f-6447-4da8-887e-848f05da346f') }}</h2>
             <p>
                 {{ $t('d0990170-4ad6-48d7-a3d6-d4ac7d9f803c') }}
             </p>

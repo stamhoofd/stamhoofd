@@ -178,7 +178,7 @@ const editRole = async (role: PermissionRoleDetailed | PermissionRoleForResponsi
 
 const save = async () => {
     await rawSave(() => {
-        new Toast($t(`89360094-8856-4b28-8921-e3d561ef824c`), 'success green').show();
+        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
         void pop({ force: true });
     });
 };
@@ -187,7 +187,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`3953d383-4f04-42ea-83cd-bf65478ed4a9`), $t(`4cfb2940-8532-446e-b543-a4c7ba9618a3`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 };
 
 defineExpose({

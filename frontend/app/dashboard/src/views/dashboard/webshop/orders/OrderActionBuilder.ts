@@ -61,7 +61,7 @@ export class OrderActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t(`c1bb5197-b80f-482e-aac8-db8f08e37108`),
+                name: $t(`aa934a39-f0dd-4e8b-9db8-a7686684a411`),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrderWithTickets[]) => {
@@ -96,7 +96,7 @@ export class OrderActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t(`8e65de81-dc74-4bc0-8d73-6440d754b6a4`),
+                name: $t(`14806378-4cc0-4b16-bd94-82bec5a9572d`),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrder[]) => {
@@ -134,7 +134,7 @@ export class OrderActionBuilder {
             }),
 
             new MenuTableAction({
-                name: $t(`e0fff11f-5ddc-4edc-bab9-a1b293d2681f`),
+                name: $t(`13daa284-503c-4841-a2ec-16d89ab38cdc`),
                 enabled: this.webshopManager.hasWrite,
                 icon: 'flag',
                 priority: 1,
@@ -219,7 +219,7 @@ export class OrderActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`63af93aa-df6a-4937-bce8-9e799ff5aebd`),
+                name: $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`),
                 icon: 'trash',
                 enabled: this.webshopManager.hasWrite,
                 priority: 0,
@@ -403,7 +403,7 @@ export class OrderActionBuilder {
         }
 
         if (data.changes.length) {
-            if (willSendEmail && !await CenteredMessage.confirm($t(`c8217f03-4005-47e7-b032-69f59dd05499`), paid ? $t(`aca879f0-55d3-4964-a8ad-0eedf18228fb`) : $t(`b3d75fdd-8231-4a1f-a1b3-5c6401d90a75`), paid ? $t(`616292aa-dda9-4a7c-8e02-d35582bf3519`) : undefined)) {
+            if (willSendEmail && !await CenteredMessage.confirm($t(`c8217f03-4005-47e7-b032-69f59dd05499`), paid ? $t(`03bd6cff-83c4-44ec-8b0d-7826bf5b4166`) : $t(`b3d75fdd-8231-4a1f-a1b3-5c6401d90a75`), paid ? $t(`616292aa-dda9-4a7c-8e02-d35582bf3519`) : undefined)) {
                 return;
             }
             const session = this.organizationManager.$context;
@@ -443,7 +443,7 @@ export class OrderActionBuilder {
     }
 
     async deleteOrders(orders: PrivateOrder[]) {
-        if (!await CenteredMessage.confirm(orders.length === 1 ? $t(`059520a3-0798-46a6-8c41-e3e401aa1a59`, { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name }) : $t(`Bestellingen verwijderen?`), $t(`63af93aa-df6a-4937-bce8-9e799ff5aebd`), $t(`Je kan dit niet ongedaan maken.`))) {
+        if (!await CenteredMessage.confirm(orders.length === 1 ? $t(`059520a3-0798-46a6-8c41-e3e401aa1a59`, { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name }) : $t(`Bestellingen verwijderen?`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`Je kan dit niet ongedaan maken.`))) {
             return;
         }
 

@@ -18,20 +18,20 @@
                 <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`d9f16258-ce87-41ad-a5d4-a66ad6bd514d`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :disabled="!usesPassword" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :disabled="!usesPassword" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+                <EmailInput v-model="email" :validator="errors.validator" autocomplete="email" :disabled="!usesPassword" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
 
                 <div v-if="usesPassword" class="style-button-bar">
                     <LoadingButton :loading="saving">
                         <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
-                            <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
+                            <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
                         </button>
                     </LoadingButton>
                 </div>
@@ -63,7 +63,7 @@
                     </template>
 
                     <h3 v-if="usesPassword" class="style-title-list">
-                        {{ $t('cc1728cb-e600-4888-ad64-6ee498da11e0') }}
+                        {{ $t('b33f433c-0957-4411-a0d6-0f41cf5caa63') }}
                     </h3>
                     <h3 v-else class="style-title-list">
                         {{ $t('2dd603e2-2caf-4573-8d8b-6ce8ff1dfda6') }}
@@ -99,7 +99,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('ecefb25b-4125-4df3-883b-73ddc301529e') }}
+                        {{ $t('e3398474-26b0-49d4-9f64-bae38495fb4f') }}
                     </h3>
                 </STListItem>
 
@@ -299,7 +299,7 @@ async function save() {
             await present(new ComponentWithProperties(ConfirmEmailView, { token: result.verificationToken, email: patched.value.email }).setDisplayStyle('sheet'));
         }
         else {
-            const toast = new Toast($t(`5a1df63c-b028-4a77-a2bf-d595a74f29a3`), 'success green');
+            const toast = new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green');
             toast.show();
         }
 
@@ -329,7 +329,7 @@ async function deleteRequest() {
                 confirmationTitle: $t(`6d4c71ba-0757-4792-aab1-a0b7b80e7c30`),
                 confirmationPlaceholder: $t(`6a5dd477-ac82-48a1-9b7a-341192783e22`),
                 confirmationCode,
-                checkboxText: $t(`b0427a33-f98d-439d-8625-0727c3cf53c3`),
+                checkboxText: $t(`4a1ad6f2-d061-4fe0-8206-8540442ad038`),
                 onDelete: async () => {
                     await $context.value.deleteAccount();
 
@@ -378,7 +378,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 }
 
 async function deletePassword() {
-    if (await CenteredMessage.confirm($t(`a5f68615-9c65-4a37-bfb2-dae9774c912c`), $t(`3e204a5f-3198-4125-ac32-fcf973e144b2`))) {
+    if (await CenteredMessage.confirm($t(`a5f68615-9c65-4a37-bfb2-dae9774c912c`), $t(`201437e3-f779-47b6-b4de-a0fa00f3863e`))) {
         const patch = NewUser.patch({
             id: $user.value!.id,
             hasPassword: false,
@@ -442,7 +442,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('2199906b-9125-4838-8ffc-3d88a47681d1'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

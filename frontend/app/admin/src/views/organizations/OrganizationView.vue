@@ -23,7 +23,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5') }}
+                        {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ organization.address }}
@@ -32,7 +32,7 @@
 
                 <STListItem v-for="company of organization.meta.companies" :key="company.id">
                     <h3 class="style-definition-label">
-                        {{ $t('3dae9ed2-c904-448a-834e-c60bfaed88d1') }}
+                        {{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ company.name }}
@@ -44,7 +44,7 @@
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                     </p>
 
                     <p v-if="company.address" v-copyable class="style-description-small style-copyable">
@@ -118,7 +118,7 @@
                         <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('9a6474d8-0bb5-4760-8dca-e85ba79035ce') }}
+                        {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('a5b61d4d-207f-485c-8748-cbb04fcb2d23') }}
@@ -133,7 +133,7 @@
                         <img src="~@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('c3158561-e0dc-4dd5-8581-d2d861238946') }}
+                        {{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('eb91fb5c-72fc-44d4-9b84-4c9f7791e27a') }}
@@ -173,7 +173,7 @@
             <LoadingButton :loading="deleting">
                 <button class="button secundary danger" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>{{ $t('838cae8b-92a5-43d2-82ba-01b8e830054b') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
             </LoadingButton>
         </main>
@@ -219,7 +219,7 @@ const title = computed(() => {
 });
 
 const tagStringList = computed(() => {
-    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`2c848249-09d3-46b4-b09e-ea3357add631`)).join(', ');
+    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`0e21480d-5597-4337-bcee-5f4eba73fb7e`)).join(', ');
 });
 
 const setupSteps = computed(() => props.organization.period.setupSteps);
@@ -258,7 +258,7 @@ async function deleteMe() {
     }
     deleting.value = true;
 
-    if (!await CenteredMessage.confirm($t('92c19888-7ac0-46b5-b691-05b29e52e110'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9a528611-db36-4bb0-9de4-29b653ea6165'))) {
+    if (!await CenteredMessage.confirm($t('92c19888-7ac0-46b5-b691-05b29e52e110'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('988f9fce-a36a-44b5-8df6-5d9ff9eaa694'))) {
         deleting.value = false;
         return;
     }
@@ -268,7 +268,7 @@ async function deleteMe() {
 
     // Second confirmation window
 
-    if (!await CenteredMessage.confirm($t('2be85b13-52d6-4322-adcc-b491b5749422'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9a528611-db36-4bb0-9de4-29b653ea6165'))) {
+    if (!await CenteredMessage.confirm($t('2be85b13-52d6-4322-adcc-b491b5749422'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('988f9fce-a36a-44b5-8df6-5d9ff9eaa694'))) {
         deleting.value = false;
         return;
     }
@@ -276,7 +276,7 @@ async function deleteMe() {
     // Wait 3 seconds
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    if (!await CenteredMessage.confirm($t('6435b870-2298-49bb-bd28-904e864178d3'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9a528611-db36-4bb0-9de4-29b653ea6165'))) {
+    if (!await CenteredMessage.confirm($t('6435b870-2298-49bb-bd28-904e864178d3'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('988f9fce-a36a-44b5-8df6-5d9ff9eaa694'))) {
         deleting.value = false;
         return;
     }

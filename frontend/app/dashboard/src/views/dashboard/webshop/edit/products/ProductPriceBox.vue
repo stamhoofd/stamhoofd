@@ -4,9 +4,9 @@
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`)">
+        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`1205deb9-498d-435d-a6e1-91ea98371523`)">
             <LoadingInputBox :loading="uitpasSocialTariffLoading">
-                <PriceInput v-model="price" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" :disabled="!!product.uitpasEvent && enableUitpasSocialTariff" />
+                <PriceInput v-model="price" :min="null" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" :disabled="!!product.uitpasEvent && enableUitpasSocialTariff" />
             </LoadingInputBox>
             <p v-if="!!product.uitpasEvent" class="style-description-small">
                 {{ $t('3028ddfe-f756-4b75-b3d2-e9281dd75c63') }}
@@ -32,11 +32,11 @@
 
                 <div v-if="useDiscount" class="split-inputs option" @click.stop.prevent>
                     <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`a9f97aed-ed48-41b7-a2d3-9bbab28981d8`)">
-                        <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
+                        <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
                     </STInputBox>
 
                     <STInputBox error-fields="discountAmount" :error-box="errorBox" :title="$t(`f4306def-3d82-420c-98d5-795879461006`)">
-                        <NumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
+                        <NumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
                     </STInputBox>
                 </div>
             </STListItem>

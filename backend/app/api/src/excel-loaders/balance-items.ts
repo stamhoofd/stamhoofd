@@ -42,7 +42,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'type',
-            name: $t(`f97ad8c1-31d2-4b61-9e09-3be86eaeba08`),
+            name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
             width: 30,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: getBalanceItemTypeName(object.type),
@@ -50,7 +50,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'category',
-            name: $t(`c5d24ab8-a87a-481d-a470-23e9386199f3`),
+            name: $t(`502dc65d-e8d3-4b20-a478-a76ca9084e60`),
             width: 30,
             getValue: (object: BalanceItemWithPayments) => {
                 return {
@@ -60,7 +60,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'description',
-            name: $t(`9c4977db-1ce9-424b-92cf-4bbe7f6606fd`),
+            name: $t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.description,
@@ -113,7 +113,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'quantity',
-            name: $t(`f085f874-242d-47cb-a404-96eab69662ec`),
+            name: $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
             width: 20,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.quantity,
@@ -126,7 +126,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'unitPrice',
-            name: $t(`7f7fdce2-1fcd-44c9-8c98-856aea11ffc3`),
+            name: $t(`7453643b-fdb2-4aa1-9964-ddd71762c983`),
             width: 20,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.unitPrice / 1_0000,
@@ -139,7 +139,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'payablePriceWithVAT',
-            name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+            name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
             width: 20,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.payablePriceWithVAT / 1_0000,

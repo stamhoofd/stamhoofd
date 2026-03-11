@@ -351,7 +351,7 @@ export class ProductDiscountSettings extends AutoEncoder {
             if (discount.percentageDiscount) {
                 if (discount.percentageDiscount >= 100 * 100) {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                        descriptions.push($t(`99e41cea-bce3-4329-8b17-e3487c4534ac`));
+                        descriptions.push($t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`));
                     }
                     else {
                         descriptions.push($t(`8177904b-bbd1-4755-a877-1739e4ce9bfd`));
@@ -384,7 +384,7 @@ export class ProductDiscountSettings extends AutoEncoder {
             let index = 0;
             for (const discount of this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern ? [...this.discounts, ...this.discounts, ...this.discounts] : this.discounts) {
                 index += 1;
-                let s = Formatter.ordinalNumber(index) + ' ' + $t(`86e03c52-25db-45f7-a129-5f165b289324`);
+                let s = Formatter.ordinalNumber(index) + ' ' + $t(`599ce864-4059-48eb-82f8-9191e9507050`);
 
                 if (index === this.discounts.length) {
                     if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {

@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1>
-                {{ $t('a6304a41-8c83-419b-8e7e-c26f4a047c19') }}
+                {{ $t('7dfd0425-b8ff-4dec-8c6d-257d94eabbe7') }}
             </h1>
             <p v-if="props.members && props.members.length > 0">
                 {{ $t('7bd45367-4d32-408d-80f8-83bcc120d1de', { firstName: props.members.map(m => m.patchedMember.firstName).join(', ') }) }}

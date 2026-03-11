@@ -175,7 +175,7 @@ const props = withDefaults(
         saveText: () => $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
         saveIcon: null,
         saveIconMobile: null,
-        cancelText: () => $t(`4e1dc79e-b09c-41ec-aa8d-a2d052761bfe`),
+        cancelText: () => $t(`11d2e292-fd08-4477-bd2a-dac599a9754c`),
         replacements: () => [],
         emailBlock: false,
     },
@@ -318,7 +318,7 @@ async function saveLink() {
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {
-        Toast.error($t(`f60878fd-f28a-4585-a2d6-3e90437ae8c1`)).show();
+        Toast.error($t(`375a57e9-815f-42d0-88e0-1ce09df72c1b`)).show();
         return;
     }
 
@@ -400,7 +400,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`fc5107e1-3576-4a8a-b35c-26918f0d8052`),
+                name: $t(`5d0d84fe-2ddb-4962-b104-337abbeeaa1f`),
                 icon: 'h2',
                 selected: editor.value.isActive('heading', { level: 2 }),
                 action: () => {
@@ -429,7 +429,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`9f87bc88-6829-46dc-8bf3-333437e7bee3`),
+                name: $t(`277573b6-5edd-46bc-bd1b-c40f6935dd38`),
                 icon: 'ul',
                 selected: editor.value.isActive('bulletList'),
                 action: () => {

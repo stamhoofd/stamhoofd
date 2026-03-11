@@ -230,7 +230,7 @@ const transferTypes = computed(() => {
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? $t(`1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07`) : $t(`4d496edf-0203-4df3-a6e9-3e58d226d6c5`),
+            name: props.type === 'registration' ? $t(`1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07`) : $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
             description: $t(`6d5b370e-491e-4565-acc9-444fe7e230fe`),
         },
         {
@@ -350,7 +350,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

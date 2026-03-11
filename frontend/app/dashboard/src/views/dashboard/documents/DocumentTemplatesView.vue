@@ -46,7 +46,7 @@
                             {{ template.settings.name }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }} {{ Formatter.date(template.createdAt) }}
+                            {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }} {{ Formatter.date(template.createdAt) }}
                         </p>
                         <template #right>
                             <span v-if="template.status === 'Draft'" class="style-tag">{{ $t('a4b33491-0ace-4b39-aba6-79371659fd51') }}</span>

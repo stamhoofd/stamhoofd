@@ -42,7 +42,7 @@
                     <table class="payment-transfer-table rectangle">
                         <tbody>
                             <tr>
-                                <td>{{ $t('a023893e-ab2c-4215-9981-76ec16336911') }}</td>
+                                <td>{{ $t('43ca079c-2af8-4bde-9f68-abeca3c3a7d0') }}</td>
                                 <td v-copyable="payment.price/100" class="style-copyable" :v-tooltip="$t('6b0bca07-3cba-45cf-bc94-e3217e59a69f')">
                                     {{ formatPrice(payment.price) }}
                                 </td>
@@ -175,7 +175,7 @@
             </p>
             <template v-else-if="payment.price > 0 && created">
                 <p v-if="isBelgium" class="hide-smartphone info-box">
-                    <span>*{{ $t('a9a8348c-369e-4a06-8fcd-00da473238bc') }} <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a></span>
+                    <span>*{{ $t('a9a8348c-369e-4a06-8fcd-00da473238bc') }} <a class="inline-link" :href="$domains.getDocs('betalen-qr-code')" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a></span>
                 </p>
                 <p v-else class="hide-smartphone info-box">
                     {{ $t('3ae15f2e-b4fb-43dd-9dc6-1c388a9dc062') }}
@@ -190,7 +190,7 @@
                     <span>{{ $t('809b7c07-e6fb-4d65-806d-7ec52cc8b3b8') }}</span>
                 </button>
                 <button class="button primary" type="button" @click="goNext">
-                    <span>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
+                    <span>{{ $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>
@@ -352,10 +352,10 @@ async function generateQRCode() {
 
 function helpMe() {
     if (props.type === 'order') {
-        new CenteredMessage($t(`99f9efd3-4d2d-4fd8-845c-b690daed606a`), $t(`82e41420-4b71-4fef-b604-592f87d812c9`)).addCloseButton().show();
+        new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`82e41420-4b71-4fef-b604-592f87d812c9`)).addCloseButton().show();
     }
     else {
-        new CenteredMessage($t(`99f9efd3-4d2d-4fd8-845c-b690daed606a`), $t(`ce058fa7-aba3-4e48-90b5-43de91db590c`)).addCloseButton().show();
+        new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`ce058fa7-aba3-4e48-90b5-43de91db590c`)).addCloseButton().show();
     }
 }
 

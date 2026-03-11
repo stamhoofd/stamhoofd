@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <CategorizedBox icon="company" :title="$t('3c8b07fe-9862-456a-a990-a6da13c2b794')">
+        <CategorizedBox icon="company" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')">
             <template #summary>
                 <p class="style-description-small">
                     {{ seller.name }}
@@ -22,7 +22,7 @@
                         {{ company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                     </p>
 
                     <p v-if="company.address" class="style-description-small">
@@ -40,7 +40,7 @@
 
             <p v-if="auth.hasFullAccess()" class="style-button-bar">
                 <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
-                    <span>{{ $t('f624c73d-afc6-4d15-ac75-fc4527dbfef2') }}</span>
+                    <span>{{ $t('1310f065-caf5-41e6-a3b8-cf9b39336483') }}</span>
                 </button>
                 <button v-else type="button" class="button text" @click="editInvoiceSettings">
                     <span class="icon edit" />
@@ -52,7 +52,7 @@
             </p>
         </CategorizedBox>
 
-        <CategorizedBox icon="user" :title="$t('5af44e91-8f18-462b-bb7b-d59cd0edffd5')">
+        <CategorizedBox icon="user" :title="$t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9')">
             <template v-if="customer" #summary>
                 <template v-if="customer.company">
                     <p v-if="customer.company.VATNumber" class="style-description-small">
@@ -62,7 +62,7 @@
                         {{ customer.company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                     </p>
 
                     <p v-if="customer.company.address" class="style-description-small">
@@ -240,7 +240,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

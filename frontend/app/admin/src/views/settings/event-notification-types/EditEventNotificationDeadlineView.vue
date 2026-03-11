@@ -23,7 +23,7 @@
             <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`0a2e758f-37b1-448a-a14f-a0548443faec`)">
                 <DateSelection v-model="deadlineDate" />
             </STInputBox>
-            <TimeInput v-model="deadlineDate" :validator="errors.validator" :title="$t(`7853cca1-c41a-4687-9502-190849405f76`)" />
+            <TimeInput v-model="deadlineDate" :validator="errors.validator" :title="$t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`)" />
         </div>
 
         <STInputBox :title="$t('9106b204-3db9-4fac-acfa-e53e07d5a867')" error-fields="reminderText" :error-box="errors.errorBox" class="max">
@@ -90,7 +90,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('67494091-03bf-4700-a003-84f53dcea922'), $t('ba246326-994d-4133-9f85-5f693cdd2007'))) {
+    if (!await CenteredMessage.confirm($t('67494091-03bf-4700-a003-84f53dcea922'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'))) {
         return;
     }
 
@@ -141,7 +141,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

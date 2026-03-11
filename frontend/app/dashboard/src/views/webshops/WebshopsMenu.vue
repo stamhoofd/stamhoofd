@@ -27,7 +27,7 @@
                     <hr>
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Archive) }" @click="$navigate(Routes.Archive)">
                         <span class="icon archive" />
-                        <span>{{ $t('c51b35d1-228b-4ce3-8b27-312b5620b662') }}</span>
+                        <span>{{ $t('18337b9f-03a1-4b85-a012-1c1ba16739d0') }}</span>
                     </button>
                 </template>
 

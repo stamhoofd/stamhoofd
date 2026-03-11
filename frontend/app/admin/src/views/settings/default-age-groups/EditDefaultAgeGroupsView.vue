@@ -44,7 +44,7 @@ const { patched: groups, patch, addArrayPatch, hasChanges } = usePatchArray(orig
 const draggableGroups = useDraggableArray(() => groups.value, addArrayPatch);
 const saving = ref(false);
 
-const title = $t('9af957c4-5dea-47ee-a30f-1ef5802a9437');
+const title = $t('24682ea8-b3c6-4372-9a63-5385520888ff');
 
 async function addGroup() {
     const arr: PatchableArrayAutoEncoder<DefaultAgeGroup> = new PatchableArray();
@@ -106,7 +106,7 @@ async function save() {
                 defaultAgeGroups: patch.value,
             }),
         }));
-        new Toast($t('f80e230f-9621-439d-b4ba-bc49fb921698'), 'success green').show();
+        new Toast($t('17017abf-c2e0-4479-86af-300ad37347aa'), 'success green').show();
         await pop({ force: true });
     }
     catch (e) {
@@ -120,7 +120,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

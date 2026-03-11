@@ -36,7 +36,7 @@
                     <template #right>
                         <button v-if="!isAlwaysEnabled()" class="button text" type="button" @click="setEnabledWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">{{ $t('ab817255-45d5-4eb8-970c-ea927730532b') }}</span>
+                            <span class="hide-small">{{ $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}</span>
                         </button>
                     </template>
                 </STListItem>
@@ -76,7 +76,7 @@
                     <template #right>
                         <button v-if="!isAlwaysRequired() && !isNeverRequired()" class="button text" type="button" @click="setRequiredWhen(false)">
                             <span class="icon edit" />
-                            <span class="hide-small">{{ $t('ab817255-45d5-4eb8-970c-ea927730532b') }}</span>
+                            <span class="hide-small">{{ $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}</span>
                         </button>
                     </template>
                 </STListItem>

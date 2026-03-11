@@ -39,7 +39,7 @@
             </STList>
         </STInputBox>
 
-        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || $t(`ca58e25b-edae-49b8-b49e-80a1a8b73aff`)" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
+        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || $t(`0076d594-efee-4ec7-a00a-073a4c689a38`)" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errors.errorBox" class="max">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
                     <template #left>

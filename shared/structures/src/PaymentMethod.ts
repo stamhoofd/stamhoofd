@@ -49,7 +49,7 @@ export class PaymentMethodHelper {
             }
             case PaymentMethod.Transfer: return $t(`c87a5b7b-f01e-4fe2-91c7-0e9848112562`);
             case PaymentMethod.DirectDebit: return $t(`5e93b172-67cf-4c24-a536-87841f9f691d`);
-            case PaymentMethod.Bancontact: return $t(`b96a2898-7229-4397-99f1-2ffd761982f3`);
+            case PaymentMethod.Bancontact: return $t(`8f9575f3-9787-4fa5-9ddf-dd1fa4103996`);
             case PaymentMethod.iDEAL: return $t(`aa5a52fe-dd8e-4d28-9dcc-a730146e7972`);
             case PaymentMethod.CreditCard: return $t(`8da866ba-9114-4633-874c-99c2ea891bb8`);
             case PaymentMethod.Payconiq: return $t(`a4dde8e6-d0f7-4ad6-b880-cf5467771770`);
@@ -91,7 +91,7 @@ export class PaymentMethodHelper {
             }
             case PaymentMethod.Transfer: return $t(`97f33d05-54af-4568-a932-4dac4530417f`);
             case PaymentMethod.DirectDebit: return $t(`ca7bc184-3548-4198-935f-b0fea69ea2da`);
-            case PaymentMethod.Bancontact: return $t(`b96a2898-7229-4397-99f1-2ffd761982f3`);
+            case PaymentMethod.Bancontact: return $t(`8f9575f3-9787-4fa5-9ddf-dd1fa4103996`);
             case PaymentMethod.iDEAL: return $t(`aa5a52fe-dd8e-4d28-9dcc-a730146e7972`);
             case PaymentMethod.CreditCard: return $t(`8da866ba-9114-4633-874c-99c2ea891bb8`);
             case PaymentMethod.Payconiq: return $t(`8f39177b-f214-4f23-82ab-329c66ae731a`);

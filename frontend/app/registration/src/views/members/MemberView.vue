@@ -2,7 +2,7 @@
     <div class="st-view" data-testid="member-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
-                <button :v-tooltip="$t('f2eb0c04-0dca-4c8e-b920-7044a65aee6a')" class="button icon edit" type="button" data-testid="edit-member-button" @click="doEdit" />
+                <button :v-tooltip="$t('28f20fae-6270-4210-b49d-68b9890dbfaf')" class="button icon edit" type="button" data-testid="edit-member-button" @click="doEdit" />
             </template>
         </STNavigationBar>
 

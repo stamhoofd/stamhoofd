@@ -1,10 +1,10 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`88136719-d85f-499f-8c5f-252519947c03`)" />
+        <STNavigationBar :title="$t(`5ca94078-d742-4e17-abf7-957c4721a559`)" />
 
         <main class="center">
             <h1>
-                {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
+                {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
             </h1>
 
             <STList class="illustration-list">
@@ -88,7 +88,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/tent.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('de211760-1306-4108-92e3-9301435d8988') }}
+                        {{ $t('51850490-5d94-4e0b-a415-9b84e07d86f2') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('70fd0ad1-d005-46ff-9376-50e16d876f4e') }}
@@ -103,7 +103,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('5e2a299f-a166-46a8-9975-cf1b1ce334a6') }}
+                        {{ $t('000be3fe-9354-4c2c-baf1-d0cd4d079830') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('9e53d8ca-d01f-4d64-8707-3877435f28fc') }}
@@ -152,7 +152,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('97201c59-fdcc-48c4-a305-c6b585fddf71') }}
+                        {{ $t('15e411ef-7a28-41e0-ad90-8c6ffae730f1') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('c5247c05-c8f2-401d-9b77-967e052ef5f7') }}
@@ -182,7 +182,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('2eed292c-1a52-4432-8195-c4ea8a951358') }}
+                        {{ $t('27bc7f00-1839-4f47-b8e5-7f4c6996fa53') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('a122d0f1-c29d-40de-8700-7506596cdf63') }}
@@ -231,7 +231,7 @@
                         <img src="~@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
+                        {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('ba4eeb34-6c93-4537-92ac-ea4f30c28fbb') }}
@@ -280,7 +280,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/tent.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('de211760-1306-4108-92e3-9301435d8988') }}
+                        {{ $t('51850490-5d94-4e0b-a415-9b84e07d86f2') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('70fd0ad1-d005-46ff-9376-50e16d876f4e') }}
@@ -295,7 +295,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('5e2a299f-a166-46a8-9975-cf1b1ce334a6') }}
+                        {{ $t('000be3fe-9354-4c2c-baf1-d0cd4d079830') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('9e53d8ca-d01f-4d64-8707-3877435f28fc') }}

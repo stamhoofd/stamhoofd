@@ -8,7 +8,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <p v-if="groupedResponsibilites.length === 0" class="info-box">
-            {{ $t('f743df11-3d56-4c4a-a0eb-df8f818ba4e1') }}
+            {{ $t('390f755c-b757-4a54-9bb4-d380e5869081') }}
         </p>
 
         <div v-for="({title: groupTitle, responsibilities}, index) of groupedResponsibilites" :key="''+index" class="container">
@@ -24,7 +24,7 @@
 
                     <h2 class="style-title-list">
                         {{ responsibility.name }} <template v-if="group">
-                            {{ $t('e9ec956f-3a71-4460-b09d-dfec22a1aaf0') }} {{ group.settings.name }}
+                            {{ $t('9ddd7aba-9426-4718-9eb0-673b615efcf4') }} {{ group.settings.name }}
                         </template>
                     </h2>
                     <p v-if="group && selectedOrganization && group.periodId === selectedOrganization?.period.period.id" class="style-description-small">
@@ -171,7 +171,7 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: selectedOrganization.value === null ? '' : $t(`8c143a89-4f63-45f8-a369-1eae10620db4`),
+            title: selectedOrganization.value === null ? '' : $t(`89b5d229-1850-4063-960a-dbacee794d72`),
             responsibilities: groupedPlatformResponsibilities,
         });
     }
@@ -207,7 +207,7 @@ const labels = computed(() => {
 });
 
 const title = computed(() => {
-    return $t(`81e6a643-e2e6-4ee5-bfc3-29fc17f83f9a`) + ' ' + props.member.patchedMember.firstName;
+    return $t(`53ffa1a5-9b55-4ff9-9c97-eeaf54ce6b47`) + ' ' + props.member.patchedMember.firstName;
 });
 
 useValidation(errors.validator, () => {
@@ -231,9 +231,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 
     if (rr) {
         if (!rr.endDate) {
-            return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
+            return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
         }
-        return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(rr.endDate, true);
+        return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(rr.endDate, true);
     }
 
     return null;
@@ -242,9 +242,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 function getResponsibilityRecordEnabledDescription(record: MemberResponsibilityRecord | undefined) {
     if (record) {
         if (!record.endDate) {
-            return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
+            return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`264096eb-4cc6-4c2f-807a-107a84980f25`);
         }
-        return $t(`40eced71-abce-42f2-a157-5c7a6686bc63`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(record.endDate, true);
+        return $t(`01b5d104-748c-4801-a369-4eab05809fcf`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.date(record.endDate, true);
     }
 
     return null;

@@ -6,12 +6,12 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
-            <input v-model="name" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
+        <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
+            <input v-model="name" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
         </STInputBox>
 
-        <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')" autocomplete="off" />
+        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f')" autocomplete="off" />
         </STInputBox>
 
         <Checkbox v-if="app === 'admin'" v-model="notOrganizationBased">
@@ -19,22 +19,22 @@
         </Checkbox>
 
         <template v-if="organizationBased && app === 'admin'">
-            <hr><h2>{{ $t('d6ee7c6e-8614-44cc-adab-24ff88ec262c') }}</h2>
+            <hr><h2>{{ $t('c6c8e406-3d1f-41c4-b3df-d0b1e8661040') }}</h2>
 
             <div class="split-inputs">
                 <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`17dc0c45-14fb-4296-9b1d-1dddccf3970e`)">
-                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`57ee093f-d5f8-40f5-a991-53ff348c7376`)" />
+                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`)" />
                 </STInputBox>
 
                 <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`74797680-f43e-49dc-ba7e-c60990a76946`)">
-                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
                 </STInputBox>
             </div>
         </template>
 
         <JumpToContainer :visible="organizationTagIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('edfc89fe-a16e-4789-bda9-1529f8a97f7c') }}</div>
+                <div>{{ $t('2a033cd8-b9e4-4a92-a8a6-b4a687d87e79') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="organizationTagIds = null" />
                 </div>
@@ -66,7 +66,7 @@
                         <Radio v-model="groupPermissionLevel" :value="PermissionLevel.None" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
+                        {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
                     </h3>
                 </STListItem>
 
@@ -156,7 +156,7 @@
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('838cae8b-92a5-43d2-82ba-01b8e830054b') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>
@@ -228,7 +228,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('8f155af7-52ce-441f-bd3c-669bda1450eb'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('78085d8c-9987-4eda-a747-7f7847d86dc4'))) {
+    if (!await CenteredMessage.confirm($t('8f155af7-52ce-441f-bd3c-669bda1450eb'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('78085d8c-9987-4eda-a747-7f7847d86dc4'))) {
         return;
     }
 
@@ -345,7 +345,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

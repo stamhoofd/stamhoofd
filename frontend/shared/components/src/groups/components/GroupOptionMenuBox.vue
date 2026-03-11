@@ -18,7 +18,7 @@
                 <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`722de8c9-feea-4169-8c9d-3d945fc8c9f5`)">
             </STInputBox>
 
-            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+            <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
                 <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`3a12fa06-088d-413d-a36d-b5a2afdfc504`)" />
             </STInputBox>
 
@@ -77,7 +77,7 @@
 
                     <template #right>
                         <StepperInput v-if="option.allowAmount" />
-                        <span v-if="option.hidden" v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
+                        <span v-if="option.hidden" v-tooltip="$t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5')" class="icon gray eye-off" />
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
                     </template>
@@ -153,7 +153,7 @@ const multipleChoice = computed({
 
 function addOption() {
     const price = GroupOption.create({
-        name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
+        name: $t('0076d594-efee-4ec7-a00a-073a4c689a38'),
         price: patched.value.options[0]?.price?.clone(),
     });
     addOptionPut(price);
@@ -211,7 +211,7 @@ async function showContextMenu(event: MouseEvent) {
             }),
 
             new ContextMenuItem({
-                name: $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`),
+                name: $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`),
                 icon: 'trash',
                 action: async () => {
                     if (!await CenteredMessage.confirm($t('f58412a9-9db9-4aa3-ad68-fa089d4f345b'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('9f8c1ed0-371b-4c22-940c-57d624734c18'))) {

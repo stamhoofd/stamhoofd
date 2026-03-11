@@ -3,11 +3,11 @@
         <STNavigationBar :title="$t(`b4cba044-12c3-464d-8bc1-2873996f02fa`)" />
 
         <main>
-            <h1>{{ $t('d14e4e63-c77d-44d9-b8d0-adf05e299303') }}</h1>
+            <h1>{{ $t('b4cba044-12c3-464d-8bc1-2873996f02fa') }}</h1>
 
             <template v-if="members.length > 0">
                 <hr><h2>
-                    <div>{{ $t('97dc1e85-339a-4153-9413-cca69959d731') }}</div>
+                    <div>{{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}</div>
                 </h2>
 
                 <STList class="illustration-list">

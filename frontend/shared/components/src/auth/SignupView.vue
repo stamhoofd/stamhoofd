@@ -7,7 +7,7 @@
                 {{ $t('975e20dd-d5c2-4377-ad4f-359a332b9687', {organization: $context.organization.name}) }}
             </h1>
             <h1 v-else>
-                {{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}
+                {{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}
             </h1>
 
             <p v-if="!lock">
@@ -40,7 +40,7 @@
                 <LoadingButton :loading="loading" class="block input-spacing">
                     <button id="submit" class="button primary" type="submit">
                         <span class="icon lock" />
-                        <span>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</span>
+                        <span>{{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}</span>
                     </button>
                 </LoadingButton>
             </SignupPoliciesBox>
@@ -92,7 +92,7 @@ async function submit() {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: 'password_mismatch',
-                message: $t(`a5fbbeef-50dc-4825-8677-ba984b13d5cc`),
+                message: $t(`8205ae73-2a27-4b01-a361-3a3c689726bc`),
             }),
         );
         return;

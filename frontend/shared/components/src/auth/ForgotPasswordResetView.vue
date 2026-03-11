@@ -12,10 +12,10 @@
                 <STInputBox v-if="allowNameChange" error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                         </div>
                     </div>
                 </STInputBox>
@@ -101,7 +101,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.hasAccount ? $t(`a7c42cd2-eeca-4286-9ac9-1a9bc951f86f`) : $t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`);
+        return this.hasAccount ? $t(`7cd26cd1-6d1b-4555-81d0-abcc2c43d87c`) : $t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`);
     }
 
     get allowNameChange() {
@@ -160,7 +160,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                 });
         }
         else {
-            new Toast($t(`bd9a0e83-7491-4d0b-bc51-69e6d93db1c8`), 'error red').show();
+            new Toast($t(`35b369bd-5766-41d1-8da3-3d362e316c1a`), 'error red').show();
             this.dismiss({ force: true });
         }
     }
@@ -204,7 +204,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
         if (this.password !== this.passwordRepeat) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: $t(`a5fbbeef-50dc-4825-8677-ba984b13d5cc`),
+                message: $t(`8205ae73-2a27-4b01-a361-3a3c689726bc`),
             }));
             return;
         }
@@ -264,7 +264,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
             }
 
             if (this.hasAccount) {
-                const toast = new Toast($t(`ba5fb68b-b43b-4e7a-8dfe-abe142b2b647`), 'success green');
+                const toast = new Toast($t(`1de94b7d-3cc6-45a1-992f-c347813e90fb`), 'success green');
                 toast.show();
             }
             else {

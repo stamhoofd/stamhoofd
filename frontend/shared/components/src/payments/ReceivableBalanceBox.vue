@@ -96,7 +96,7 @@
             </STList>
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8') }}</h2>
+                <hr><h2>{{ $t('5c75e9bf-1b64-4d28-a435-6e33247d5170') }}</h2>
                 <p>{{ $t('f06c6769-1e42-4a15-b44d-f74a32980d26') }}</p>
 
                 <STList>
@@ -104,7 +104,7 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h2>
+            <hr><h2>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
                 {{ $t('a0b932dc-3f60-45a5-aca3-32918474e315') }}

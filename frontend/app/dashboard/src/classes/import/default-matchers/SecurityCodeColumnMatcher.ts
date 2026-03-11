@@ -8,7 +8,7 @@ export class SecurityCodeColumnMatcher implements ColumnMatcher {
     readonly id = 'security-code';
 
     getName(): string {
-        return $t('34a37057-5c76-43ea-bc79-e67b8b09a4ee');
+        return $t('0fa4253f-1cfd-4394-93b4-dfba8da04738');
     }
 
     doesMatch(columnName: string, _examples: string[]): boolean {

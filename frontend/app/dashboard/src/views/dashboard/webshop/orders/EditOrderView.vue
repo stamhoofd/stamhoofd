@@ -17,15 +17,15 @@
             <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" />
+            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
 
             <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34' )" name="mobile" :validator="errors.validator" autocomplete="tel" :required="false" :placeholder="$t(`ef8c870d-6733-4d6c-a3cb-57114e91f307`)" />
@@ -37,7 +37,7 @@
             </div>
 
             <template v-if="checkoutMethods.length > 1">
-                <hr><h2>{{ $t('48429cdc-81fd-4bf5-81ce-5ed8e8c2c7db') }}</h2>
+                <hr><h2>{{ $t('402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3') }}</h2>
 
                 <STList>
                     <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
@@ -70,7 +70,7 @@
                     {{ $t('8976df0a-fc34-4107-85f2-23b485e2d074') }}
                 </h2>
                 <h2 v-else-if="selectedMethod.type === 'OnSite'">
-                    {{ $t('7853cca1-c41a-4687-9502-190849405f76') }}
+                    {{ $t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6') }}
                 </h2>
 
                 <p v-if="selectedMethod.type === 'Takeout'">
@@ -126,10 +126,10 @@
                 <AddressInput v-model="address" :required="true" :validator="errors.validator" :validate-server="server" :title="$t(`8f5f55a6-5cab-4928-a52f-2cbe34904ef0`)" />
             </template>
 
-            <hr><h2>{{ $t('5e2654f2-6423-47bc-b7e7-054e41bf287f') }}</h2>
+            <hr><h2>{{ $t('1259b59f-6447-4da8-887e-848f05da346f') }}</h2>
 
             <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>{{ $t('46a3962f-7d21-4cf4-b3a9-bfec8007e68a') }} <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }} <span class="style-discount-code">{{ code.code }}</span></span>
 
                 <button class="button icon trash" type="button" @click="deleteCode(code)" />
             </p>
@@ -141,7 +141,7 @@
             <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
                 <button class="button text" type="button" @click="addProduct">
                     <span class="icon add" />
-                    <span>{{ $t('e69989bf-c310-49b4-aff1-b9c84cfe5760') }}</span>
+                    <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
                 </button>
             </p>
 

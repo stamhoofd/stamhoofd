@@ -1,12 +1,12 @@
 <template>
     <div class="container">
-        <Title v-bind="$attrs" :title="isAdmin ? $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`) : $t(`612b0f89-4a6e-4616-a50f-6e228daa86c3`)" />
+        <Title v-bind="$attrs" :title="isAdmin ? $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`) : $t(`612b0f89-4a6e-4616-a50f-6e228daa86c3`)" />
         <p v-if="!isAdmin" class="style-description pre-wrap" v-text="$t('45ec384e-f7c5-4a4f-bb70-396f800f1929')" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <UitpasNumberInputWithStatus v-model="uitpasNumberDetails" :required="isPropertyRequired('uitpasNumber')" :validator="validator" :title="isAdmin ? undefined : $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`)" error-fields="uitpasNumber" />
+        <UitpasNumberInputWithStatus v-model="uitpasNumberDetails" :required="isPropertyRequired('uitpasNumber')" :validator="validator" :title="isAdmin ? undefined : $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`)" error-fields="uitpasNumber" />
 
         <p v-if="!willMarkReviewed && isAdmin && reviewDate" class="style-description-small">
             {{ $t('ef93c19a-9c97-4598-a11a-95d7a2bf2f02') }} {{ formatDate(reviewDate) }}. <button :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" type="button" class="inline-link" @click="clear">

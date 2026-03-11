@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1>
-                {{ $t('ac8f8aa5-466f-4552-b658-de017a97839f') }}
+                {{ $t('7dfd0425-b8ff-4dec-8c6d-257d94eabbe7') }}
             </h1>
 
             <div class="input-with-buttons">

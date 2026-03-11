@@ -1,6 +1,6 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" :prefer-large-button="true" :title="$t(`b799ec1f-af00-45a9-a0bf-7d02418d18b8`)" @save="goNext">
-        <h1>{{ $t('cd539f63-31c0-46f3-a0b5-a3826796a9d0') }}</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" :prefer-large-button="true" :title="$t(`b799ec1f-af00-45a9-a0bf-7d02418d18b8`)" @save="goNext">
+        <h1>{{ $t('b799ec1f-af00-45a9-a0bf-7d02418d18b8') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 

@@ -304,7 +304,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'invalid_email_address',
                         message: 'Invalid email address',
-                        human: $t(`cbbff442-758c-4f76-b8c2-26bb176fefcc`),
+                        human: $t(`4737b9ce-06b0-4fa7-b63a-703245f347e2`),
                     }),
                 );
             }

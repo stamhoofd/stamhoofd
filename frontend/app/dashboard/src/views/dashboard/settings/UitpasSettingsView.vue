@@ -39,7 +39,7 @@
 
                     <template #right>
                         <span class="button text">
-                            {{ uitpasOrganizerId ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('8012defc-bf79-4ee5-b8f4-6e6cc5242bf8') }}
+                            {{ uitpasOrganizerId ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('01e2b860-7045-4a0c-84ca-2303346d14b2') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -97,7 +97,7 @@
 
                     <template #right>
                         <span v-if="!!uitpasOrganizerId && uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" class="button text">
-                            {{ uitpasEvent ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('8012defc-bf79-4ee5-b8f4-6e6cc5242bf8') }}
+                            {{ uitpasEvent ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('01e2b860-7045-4a0c-84ca-2303346d14b2') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>

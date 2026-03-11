@@ -194,7 +194,7 @@ export function filterToString(filter: StamhoofdFilter, builder: UIFilterBuilder
 export function propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
     if (filter.enabledWhen === null || isEmptyFilter(filter.enabledWhen)) {
         if (filter.requiredWhen === null) {
-            return $t(`9e0461d2-7439-4588-837c-750de6946287`);
+            return $t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`);
         }
         if (isEmptyFilter(filter.requiredWhen)) {
             return $t(`bbe18b42-bbd7-4c1f-9f1c-367b27e5c18d`);

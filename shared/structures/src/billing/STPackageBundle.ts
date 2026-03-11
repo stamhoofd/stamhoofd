@@ -20,7 +20,7 @@ export enum STPackageBundle {
 export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`e15286b6-ccc1-463c-95de-d5d87b6b84a4`);
+            case STPackageBundle.Members: return $t(`64d8c751-a6c4-427e-b3db-cef827058780`);
             case STPackageBundle.Webshops: return $t(`3b1c092c-fdb5-4322-a34d-b8142881b3cf`);
         }
         return '?';

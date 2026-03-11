@@ -18,8 +18,8 @@
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <span v-if="payment.isPending" v-tooltip="$t('ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8')" class="icon small hourglass primary" />
-                <span v-if="payment.isFailed" v-tooltip="$t('c25c4919-ea71-4874-8573-d02242040f6f')" class="icon small disabled error" />
+                <span v-if="payment.isPending" v-tooltip="$t('5c75e9bf-1b64-4d28-a435-6e33247d5170')" class="icon small hourglass primary" />
+                <span v-if="payment.isFailed" v-tooltip="$t('c147043d-f708-4aa8-aad6-0547f4fb425a')" class="icon small disabled error" />
             </h1>
 
             <template v-if="canWrite">
@@ -74,7 +74,7 @@
 
                 <STListItem v-if="isManualMethod">
                     <h3 class="style-definition-label">
-                        {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }}
+                        {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(payment.createdAt) }}
@@ -89,7 +89,7 @@
                         {{ $t('7fb9593e-9937-4c47-ba0f-fb79a5ba3d87') }}
                     </h3>
                     <h3 v-else-if="payment.price >= 0" class="style-definition-label">
-                        {{ $t('445f778c-5d66-44d3-af4a-84254a4475ea') }}
+                        {{ $t('297af5d5-1cb0-4862-b8d4-13416bdefa9f') }}
                     </h3>
                     <h3 v-else class="style-definition-label">
                         {{ $t('7cea4ccc-16d1-42ae-87af-34a603013577') }}
@@ -136,7 +136,7 @@
                     <p class="style-description-small">
                         <template v-if="VATPercentage > 0">
                             {{ $t('a95a8551-7686-4df2-92aa-2c453bba6bf6', {percentage: VATPercentage.toString()}) }}
-                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
+                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
                     </p>
                 </STListItem>
 
@@ -145,7 +145,7 @@
                         {{ $t('68fd5834-9b48-4d42-928d-1815e608467a') }}
                     </h3>
                     <p class="style-definition-text with-icons">
-                        <span>{{ $t('b8f75dab-a034-4857-8c06-b4fa65851c19') }}</span>
+                        <span>{{ $t('b5d89272-7ee8-4bd3-80fb-5b99398a4c0b') }}</span>
                         <span class="icon success small primary" />
                     </p>
 
@@ -155,7 +155,7 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('f777a982-6f69-41cc-bef1-18d146e870db') }}</h2>
+            <hr><h2>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h2>
 
             <p v-if="!payment.customer" class="info-box">
                 {{ $t('cc6a87de-8228-4a0b-8d31-b9805556c6b8') }}
@@ -180,19 +180,19 @@
                 <template v-if="payment.customer.company">
                     <STListItem>
                         <h3 class="style-definition-label">
-                            {{ $t('e016131d-770c-45fe-b6e9-5631761cbab2') }}
+                            {{ $t('67928a02-b3f1-465a-9dd7-569d061599a9') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.name }}
                         </p>
                         <p v-if="!payment.customer.company.VATNumber && !payment.customer.company.companyNumber" class="style-description">
-                            {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                            {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                         </p>
                     </STListItem>
 
                     <STListItem v-if="payment.customer.company.VATNumber">
                         <h3 class="style-definition-label">
-                            {{ $t('4d2a6054-26bf-49ed-b91f-59a8819e6436') }}
+                            {{ $t('263b7054-d38f-4bb9-be63-84b4e614613d') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.VATNumber || 'Niet BTW-plichtig' }}
@@ -201,7 +201,7 @@
 
                     <STListItem v-if="payment.customer.company.companyNumber && (!payment.customer.company.VATNumber || (payment.customer.company.companyNumber !== payment.customer.company.VATNumber && payment.customer.company.companyNumber !== payment.customer.company.VATNumber.slice(2)))">
                         <h3 class="style-definition-label">
-                            {{ $t('fb64a034-071e-45d6-8d78-6b5f291ee5f9') }}
+                            {{ $t('12f64ea7-fb54-4178-8267-9de12bdf70d7') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.companyNumber || 'Niet BTW-plichtig' }}
@@ -210,7 +210,7 @@
 
                     <STListItem v-if="payment.customer.company.address">
                         <h3 class="style-definition-label">
-                            {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
+                            {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             {{ payment.customer.company.address.toString() }}
@@ -219,7 +219,7 @@
 
                     <STListItem v-if="payment.customer.company.administrationEmail">
                         <h3 class="style-definition-label">
-                            {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
+                            {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
                         </h3>
                         <p class="style-definition-text">
                             <EmailAddress :email="payment.customer.company.administrationEmail" />
@@ -229,10 +229,10 @@
 
                 <STListItem v-if="!payment.customer.company || payment.customer.name">
                     <h3 class="style-definition-label">
-                        {{ $t('2cb138d8-38c3-4ca8-baa8-64bcd32fb2eb') }}
+                        {{ $t('2a10aac1-e404-4de4-865d-75593b2b5e8d') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.name || $t('67d1816c-8cfb-4e48-8155-867a2da19641') }}
+                        {{ payment.customer.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
                     </p>
                     <p v-if="payment.customer.email" v-copyable class="style-description">
                         <EmailAddress :email="payment.customer.email" />
@@ -244,7 +244,7 @@
             </STList>
 
             <template v-if="(isManualMethod || $feature('vat')) && canWrite">
-                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+                <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
                 <STList>
                     <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
@@ -277,7 +277,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('aca879f0-55d3-4964-a8ad-0eedf18228fb') }}
+                            {{ $t('03bd6cff-83c4-44ec-8b0d-7826bf5b4166') }}
                         </h2>
                         <p v-if="payment.webshopIds.length" class="style-description-small">
                             {{ $t('9e211b50-4422-411f-9c77-8e036e2a2416') }}
@@ -320,7 +320,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}
+                            {{ $t('11d2e292-fd08-4477-bd2a-dac599a9754c') }}
                         </h2>
                         <p v-if="payment.type !== PaymentType.Payment" class="style-description-small">
                             {{ $t('5c940c27-7609-443e-941c-52cd29067f9b') }}
@@ -544,7 +544,7 @@ async function mark(status: PaymentStatus) {
         });
         props.payment.deepSet(response.data[0]);
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
-        Toast.success($t(`f7fab124-62ac-432c-80a7-5d594058f3f1`)).setHide(1000).show();
+        Toast.success($t(`8076e99d-cac2-4fb6-84e0-d893d9b3c205`)).setHide(1000).show();
     }
     catch (e) {
         Toast.fromError(e).show();

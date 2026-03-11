@@ -109,7 +109,7 @@ export class PaymentGeneral extends Payment {
 
             if (customer.phone) {
                 replacements.push({
-                    title: $t(`feea3664-9353-4bd4-b17d-aff005d3e265`),
+                    title: $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
                     value: customer.phone,
                 });
             }
@@ -121,7 +121,7 @@ export class PaymentGeneral extends Payment {
         });
 
         replacements.push({
-            title: $t(`c728fcc6-562c-4111-b0b5-5cfa98187941`),
+            title: $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
             value: Formatter.price(this.price),
         });
 

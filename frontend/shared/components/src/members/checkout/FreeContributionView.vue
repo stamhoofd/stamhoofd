@@ -1,8 +1,8 @@
 <template>
     <div id="free-contribution-view" class="st-view">
-        <STNavigationBar :title="$t(`6a1afe5c-dd96-4b0f-ad6f-f0598b366d54`)" />
+        <STNavigationBar :title="$t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`)" />
         <main>
-            <h1>{{ $t('16ca0372-9c8f-49f0-938d-aee012e59f8c') }} <span class="style-tag">{{ $t('9e0461d2-7439-4588-837c-750de6946287') }}</span></h1>
+            <h1>{{ $t('16ca0372-9c8f-49f0-938d-aee012e59f8c') }} <span class="style-tag">{{ $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f') }}</span></h1>
             <p v-if="description" class="style-description pre-wrap" v-text="description" />
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -47,7 +47,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="goNext">
-                        <span>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
+                        <span>{{ $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>

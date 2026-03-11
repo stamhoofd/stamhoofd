@@ -41,7 +41,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
     sheets: [
         {
             id: 'payments',
-            name: $t(`d4dbb3ee-ab9d-4231-be12-945b7d156900`),
+            name: $t(`15589562-1e34-4197-8097-5ec5bf1636fb`),
             columns: [
                 ...getGeneralColumns(),
                 ...getInvoiceColumns(),
@@ -53,7 +53,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
         },
         {
             id: 'balanceItemPayments',
-            name: $t(`fb8a50ba-0429-46f6-8a83-0602ba46bca7`),
+            name: $t(`d62b3102-adc0-4d5f-9dbb-c03138e44fe2`),
             transform: (data: PaymentGeneral): PaymentWithItem[] => data.balanceItemPayments.map(p => ({
                 payment: data,
                 balanceItemPayment: p,
@@ -131,7 +131,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'balanceItem.type',
-            name: $t(`f97ad8c1-31d2-4b61-9e09-3be86eaeba08`),
+            name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
             width: 30,
             getValue: (object: PaymentWithItem) => ({
                 value: getBalanceItemTypeName(object.balanceItemPayment.balanceItem.type),
@@ -139,7 +139,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'balanceItem.category',
-            name: $t(`c5d24ab8-a87a-481d-a470-23e9386199f3`),
+            name: $t(`502dc65d-e8d3-4b20-a478-a76ca9084e60`),
             width: 30,
             getValue: (object: PaymentWithItem) => {
                 return {
@@ -149,7 +149,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'balanceItem.description',
-            name: $t(`9c4977db-1ce9-424b-92cf-4bbe7f6606fd`),
+            name: $t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`),
             width: 40,
             getValue: (object: PaymentWithItem) => ({
                 value: object.balanceItemPayment.balanceItem.description,
@@ -202,7 +202,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'amount',
-            name: $t(`f085f874-242d-47cb-a404-96eab69662ec`),
+            name: $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
             width: 20,
             getValue: (object: PaymentWithItem) => ({
                 value: object.balanceItemPayment.amount,
@@ -215,7 +215,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'unitPrice',
-            name: $t(`7f7fdce2-1fcd-44c9-8c98-856aea11ffc3`),
+            name: $t(`7453643b-fdb2-4aa1-9964-ddd71762c983`),
             width: 20,
             getValue: (object: PaymentWithItem) => ({
                 value: object.balanceItemPayment.unitPrice / 1_0000,
@@ -228,7 +228,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'price',
-            name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+            name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
             width: 20,
             getValue: (object: PaymentWithItem) => ({
                 value: object.balanceItemPayment.price / 1_0000,
@@ -259,7 +259,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
         },
         {
             id: 'price',
-            name: $t(`61b7b9cb-287a-4655-bac2-bb2d0b83fe47`),
+            name: $t(`43ca079c-2af8-4bde-9f68-abeca3c3a7d0`),
             width: 10,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.price / 1_0000,
@@ -272,7 +272,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
         },
         {
             id: 'status',
-            name: $t(`d7003b29-cc92-4ef4-b07b-f283193ef2ae`),
+            name: $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: PaymentStatusHelper.getNameCapitalized(object.status),
@@ -280,7 +280,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
         },
         {
             id: 'method',
-            name: $t(`f12ffd5b-2138-41b4-8179-ae7ea2ce7621`),
+            name: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: PaymentMethodHelper.getNameCapitalized(object.method),
@@ -296,7 +296,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
         },
         {
             id: 'createdAt',
-            name: $t(`e5902b28-754d-42cd-b245-f403d03b8c56`),
+            name: $t(`10fd24bb-43dd-4174-9a23-db3ac54af9be`),
             width: 16,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
                 value: object.createdAt,
@@ -340,7 +340,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
     return [
         {
             id: 'settlement.reference',
-            name: $t(`544a77e9-c915-4f47-afbf-c626396b0308`),
+            name: $t(`02b47907-73e2-4cb2-b398-784f6cbce23a`),
             width: 21,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -350,7 +350,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'settlement.settledAt',
-            name: $t(`fe56b791-fc88-4301-a59a-b5b185d1f124`),
+            name: $t(`4ff3b4aa-8668-4287-bce3-b06cde51ddb7`),
             width: 16,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -365,7 +365,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'settlement.amount',
-            name: $t(`3790be02-581f-4713-8c4b-14cdf430f54a`),
+            name: $t(`285990a8-0565-4d38-a97f-a9c935096159`),
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -410,7 +410,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'iban',
-            name: $t(`f8dd1b1a-3da5-472d-bb46-8763537e53c8`),
+            name: $t(`dc091655-124e-4dce-98c2-67061bf5ba14`),
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -420,7 +420,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'ibanName',
-            name: $t(`04d9151b-cca1-4bce-b320-3e2b7da25575`),
+            name: $t(`037aebd6-adf9-4ddb-90f5-5d89aa7dee01`),
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -435,7 +435,7 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
     return [
         {
             id: 'transferDescription',
-            name: $t(`dccdacf7-0760-4b17-8e03-fbfcda7a0b4f`),
+            name: $t(`136b7ba4-7611-4ee4-a46d-60758869210f`),
             width: 25,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -445,7 +445,7 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'transferSettings.creditor',
-            name: $t(`63c0eca3-d13a-4e13-a9d6-1fc54718fbba`),
+            name: $t(`31c28f13-d3b8-42ee-8979-c8224633237e`),
             width: 25,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_bank_name) {
@@ -461,7 +461,7 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'transferSettings.iban',
-            name: $t(`6d5a8830-866d-4fe9-ae26-002a29b6054f`),
+            name: $t(`64d16d6d-bcf9-427f-9aaa-441e2f61a3ab`),
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_last4) {
@@ -482,7 +482,7 @@ function getPayingOrganizationColumns(): XlsxTransformerColumn<PaymentGeneral>[]
     return [
         {
             id: 'payingOrganization.id',
-            name: $t(`bc1ac306-adaa-4e7b-a02f-47a1683c10b8`),
+            name: $t(`73ddcf23-84a5-4911-9f1a-19fb101bf2d1`),
             width: 40,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -492,7 +492,7 @@ function getPayingOrganizationColumns(): XlsxTransformerColumn<PaymentGeneral>[]
         },
         {
             id: 'payingOrganization.name',
-            name: $t(`ffd75ec7-b80b-4b97-961f-21246df7d803`),
+            name: $t(`5f25a20d-ca03-4155-88c6-f9ae3872c052`),
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -502,7 +502,7 @@ function getPayingOrganizationColumns(): XlsxTransformerColumn<PaymentGeneral>[]
         },
         {
             id: 'payingOrganization.uri',
-            name: $t(`a5332744-e6e1-4af9-b05c-cbc21515c4d0`),
+            name: $t(`711fa35a-e20e-4372-b807-09192714250e`),
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -521,7 +521,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
     return [
         {
             id: 'customer.name',
-            name: $t(`522fb6c5-6d4d-4d9c-94b7-3e282fb0ea1f`),
+            name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -531,7 +531,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'customer.email',
-            name: $t(`82f4b6ed-afee-4655-9f07-22802e0e7ad9`),
+            name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
             width: 40,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -541,7 +541,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'customer.company.name',
-            name: $t(`ea302250-6bae-409a-a547-78ff71181cfc`),
+            name: $t(`67928a02-b3f1-465a-9dd7-569d061599a9`),
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
@@ -551,7 +551,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         {
             id: 'customer.company.VATNumber',
-            name: $t(`ee7d3d8e-9dc3-472f-900a-d1c1cc7e3947`),
+            name: $t(`263b7054-d38f-4bb9-be63-84b4e614613d`),
             width: 20,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {

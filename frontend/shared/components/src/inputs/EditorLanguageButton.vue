@@ -43,9 +43,9 @@ async function showMenu(event: MouseEvent) {
                         selected: lang === editorLanguage.value,
                         description: (editorContext.hasLanguage(lang)
                             ? (
-                                    !editorContext.isComplete(lang) ? $t('edcbd633-f0f9-4e7f-97bc-e91a6eb1fff0') : undefined
+                                    !editorContext.isComplete(lang) ? $t('21b3891d-7c0e-49ca-ae35-d77d54e9f0c3') : undefined
                                 )
-                            : $t('f910a622-522a-4507-89a1-8cae473ea043')),
+                            : $t('2f5d5e2d-cc3b-4cf6-8f4e-97b72a106163')),
                         action: () => {
                             editorLanguage.value = lang;
                         },

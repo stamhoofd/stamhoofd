@@ -2,11 +2,11 @@
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" class="webshop-view-page" @save="save">
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="meta.title" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+        <STInputBox error-fields="meta.title" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
             <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="$t(`4915968a-8d8d-4632-8ad8-27965c3e3dba`)">
         </STInputBox>
 
-        <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+        <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
             <WYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`8cc2eb71-2a22-4a82-9a60-33c91dc9a829`)" />
         </STInputBox>
 
@@ -38,11 +38,11 @@
         </STList>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('b8a111c0-5f3d-480b-833a-6d7f05bf134d') }}</div>
+            <div>{{ $t('17d579e1-518b-4dd4-98d8-f8184b7287be') }}</div>
             <div>
                 <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
                 <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hs" />
             </div>
@@ -132,7 +132,7 @@
 
         <div v-if="hasFullAccess && areAdvancedWebshopSettingsEnabled" class="container">
             <hr>
-            <h2>{{ $t('badafccc-80ac-4716-87dc-0385f4741af7') }}</h2>
+            <h2>{{ $t('6a11d3a7-6348-4aca-893e-0f026e5eb8b0') }}</h2>
             <p v-if="!hasCustomDomain" class="info-box">
                 {{ $t('4b9e6ec2-a698-43b7-aa6e-be4b05dfd34e') }}
             </p>

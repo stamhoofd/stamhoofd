@@ -1,13 +1,13 @@
 <template>
     <div class="st-menu st-view members-menu">
-        <STNavigationBar :title="$t(`6e958518-8f12-4e1b-b3af-c7d7cd0afbb6`)">
+        <STNavigationBar :title="$t(`19da8d23-acea-43c2-bfdd-742447ca57f1`)">
             <template #right>
                 <button v-if="$canEdit" class="button icon settings" type="button" @click="editMe" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>{{ $t('97dc1e85-339a-4153-9413-cca69959d731') }}</h1>
+            <h1>{{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}</h1>
 
             <template v-if="auth.hasFullAccess()">
                 <button v-if="canUpgradePeriod" type="button" class="menu-button button cta" @click="upgradePeriod">

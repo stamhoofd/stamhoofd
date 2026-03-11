@@ -1,7 +1,7 @@
 <template>
-    <SaveView :title="isNew ? $t(`7230cd66-d5b3-4f3e-9cf6-27f5486b52f1`) : $t(`b5de4be6-b533-4949-97d8-ad8f1d3ca896`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
+    <SaveView :title="isNew ? $t(`7230cd66-d5b3-4f3e-9cf6-27f5486b52f1`) : $t(`8f236ffd-4cf4-49e7-9056-78105932ea83`)" :disabled="!hasChanges && !isNew" class="edit-sponsor-view" @save="save">
         <h1 v-if="isNew">
-            {{ $t('84c9db16-05a3-42a1-a10f-db4514f314d4') }}
+            {{ $t('7230cd66-d5b3-4f3e-9cf6-27f5486b52f1') }}
         </h1>
         <h1 v-else>
             {{ $t('8f236ffd-4cf4-49e7-9056-78105932ea83') }}
@@ -59,7 +59,7 @@
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>

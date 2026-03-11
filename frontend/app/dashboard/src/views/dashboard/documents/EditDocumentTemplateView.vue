@@ -10,7 +10,7 @@
             <LoadingButton :loading="loadingHtml || loadingXml">
                 <Dropdown v-model="editingType" error-fields="type">
                     <option :value="null" disabled>
-                        {{ $t('569d1c4a-9389-47dd-9acb-930419271276') }}
+                        {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
                     </option>
                     <option v-for="_type in availableTypes" :key="_type.value ?? _type.definition.name" :value="_type.value">
                         {{ _type.definition.name }}
@@ -52,7 +52,7 @@
                 <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" :placeholder="$t(`358e6e0b-9736-4cc8-9f96-99583880d15c`)" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
-            <hr><h2>{{ $t('95ac7564-3fdd-4427-be59-51fd02606b76') }}</h2>
+            <hr><h2>{{ $t('3f4c9896-7f02-4b49-ad29-2d363a8af71f') }}</h2>
             <p>{{ $t('1fd616a7-b465-480a-9777-dc036e7b2a08') }}</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
@@ -77,12 +77,12 @@
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
                 <hr><h2>{{ $t('260a3c1e-5e4f-464e-b380-ea6f4022bc91') }}</h2>
                 <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`8c4df8c5-1ed9-402b-aedd-f4bcd940ca34`)">
-                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`45ff02db-f404-4d91-853f-738d55c40cb6`)" />
+                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`)" />
                 </STInputBox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
-                <hr><h2>{{ $t('a023893e-ab2c-4215-9981-76ec16336911') }}</h2>
+                <hr><h2>{{ $t('43ca079c-2af8-4bde-9f68-abeca3c3a7d0') }}</h2>
                 <Checkbox v-model="nonZeroPriceOnly">
                     {{ $t('30c6addd-ebd7-470e-8f9b-e115d5e86820') }}
                 </Checkbox>

@@ -43,7 +43,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
     }
 
     if (data.changes.length > 0) {
-        if (!await CenteredMessage.confirm($t(`c8217f03-4005-47e7-b032-69f59dd05499`), paid ? $t(`aca879f0-55d3-4964-a8ad-0eedf18228fb`) : $t(`b3d75fdd-8231-4a1f-a1b3-5c6401d90a75`), paid && hasOrder ? $t(`0a79a933-90a4-477e-9598-b64d6bb28281`) : undefined)) {
+        if (!await CenteredMessage.confirm($t(`c8217f03-4005-47e7-b032-69f59dd05499`), paid ? $t(`03bd6cff-83c4-44ec-8b0d-7826bf5b4166`) : $t(`b3d75fdd-8231-4a1f-a1b3-5c6401d90a75`), paid && hasOrder ? $t(`0a79a933-90a4-477e-9598-b64d6bb28281`) : undefined)) {
             return;
         }
 

@@ -444,7 +444,7 @@ export class RegisterItem implements ObjectWithRecords {
         if (this.calculatedPriceDueLater !== 0) {
             const trialUntil = this.calculatedTrialUntil;
             all.push({
-                name: $t('45d9b6c1-1af8-4590-88ff-091a2a93c71a'),
+                name: $t('3b051406-b285-4f04-a80d-b98c966cbb1c'),
                 price: this.calculatedPriceDueLater - discountsLater,
                 description: trialUntil ? $t('4789d323-f2da-4e87-a17c-7d29f813d68e', { date: Formatter.date(trialUntil) }) : undefined,
             });
@@ -454,7 +454,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (all.length > 0) {
             all.unshift({
-                name: $t('bf12f6a6-3513-451e-bf8e-fdec5833f5da'),
+                name: $t('26369a8f-8080-4f00-af46-576fdf563ced'),
                 price: this.calculatedPrice + this.calculatedPriceDueLater,
             });
         }
@@ -463,7 +463,7 @@ export class RegisterItem implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : (this.calculatedPriceDueLater !== 0 ? $t('6219b760-90aa-4758-8102-119af7e596e7') : $t('482bf48b-ebbc-42e5-8718-6ee11d217510')),
+                name: this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('566df267-1215-4b90-b893-0344c1f1f3d3') : $t('566e4010-63b7-42e7-9b94-fcdec3f95767')) : (this.calculatedPriceDueLater !== 0 ? $t('35337319-2bc6-41d6-9427-c1974d8a37ae') : $t('341172ee-281e-4458-aeb1-64ed5b2cc8bb')),
                 price: this.checkout.isAdminFromSameOrganization ? Math.abs(correctedTotalPrice) : correctedTotalPrice,
             },
         ];
@@ -671,7 +671,7 @@ export class RegisterItem implements ObjectWithRecords {
                 if (requiredGroups.length && requiredGroups.length === this.group.settings.requireGroupIds.length) {
                     return $t('1a537046-de7c-45ba-a990-da2fccd54325', {
                         firstName: this.member.patchedMember.details.firstName,
-                        aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('9a1ce222-c80d-4690-97be-0a896f2aa2ad') + ' '),
+                        aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') + ' '),
                         group: this.group.settings.name.toString(),
                     });
                 }
@@ -702,7 +702,7 @@ export class RegisterItem implements ObjectWithRecords {
                 const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds.map(id => Platform.shared.config.defaultAgeGroups.find(d => d.id === id)).filter(d => !!d).map(d => d!.name);
                 return $t('1a537046-de7c-45ba-a990-da2fccd54325', {
                     firstName: this.member.patchedMember.details.firstName,
-                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('9a1ce222-c80d-4690-97be-0a896f2aa2ad') + ' ') : $t('ab204a0e-c114-4c5a-8f86-95aafe9464b0'),
+                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') + ' ') : $t('ab204a0e-c114-4c5a-8f86-95aafe9464b0'),
                     group: this.group.settings.name.toString(),
                 });
             }
@@ -1203,13 +1203,13 @@ export class RegisterItem implements ObjectWithRecords {
                 message: 'Maximum reached',
                 human: (categoryMaximum.category.settings.maximumRegistrations ?? 1) === 1
                     ? $t(`c0887d28-ecba-47e0-a8db-dfcc00d38630`, {
-                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('e79bcdf1-1e84-4ce6-a011-9338b800db52') + ' '),
+                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '),
                             group: this.group.settings.name,
                             member: this.member.patchedMember.name,
                             category: categoryMaximum.category.settings.name,
                         })
                     : $t(`3c0deffd-bc9e-4f8e-8c5e-e89d2edbd450`, {
-                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('e79bcdf1-1e84-4ce6-a011-9338b800db52') + ' '),
+                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '),
                             'count': categoryMaximum.category.settings.maximumRegistrations ?? 2,
                             'group': this.group.settings.name,
                             'member': this.member.patchedMember.name,

@@ -29,7 +29,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary full" type="button">
-                        <span>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
+                        <span>{{ $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
@@ -120,7 +120,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
                 this.dismiss({ force: true });
                 return;
             }
-            new Toast($t(`cc0f2b34-b2c3-4df1-871d-17ad969205c5`), $t(`6df6c342-d948-41b1-b913-55cfd3c2b558`)).show();
+            new Toast($t(`cc0f2b34-b2c3-4df1-871d-17ad969205c5`), $t(`6285b165-8d32-4a00-bb3f-0f95abcda58f`)).show();
         }
         catch (error) {
             this.errorBox = new ErrorBox(error);

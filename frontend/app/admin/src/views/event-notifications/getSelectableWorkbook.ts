@@ -20,7 +20,7 @@ export function getSelectableWorkbook(platform: Platform) {
 
                     new SelectableColumn({
                         id: 'name',
-                        name: $t('ab4f65c9-8acb-4e7d-a40c-78afe71a489d'),
+                        name: $t('a7db7ad2-4106-4cf0-a8fc-1e68b0a5bf24'),
                     }),
 
                     new SelectableColumn({
@@ -30,7 +30,7 @@ export function getSelectableWorkbook(platform: Platform) {
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t('eae11d90-befa-4482-9fe3-412cba791ef5'),
+                        name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
                     }),
 
                     new SelectableColumn({
@@ -40,23 +40,23 @@ export function getSelectableWorkbook(platform: Platform) {
 
                     new SelectableColumn({
                         id: 'feedbackText',
-                        name: $t('387f4352-c78d-4e21-9dfe-a2433e3ba554'),
+                        name: $t('12b2ce84-6297-49a2-a9c4-d5619b764313'),
                     }),
 
                     new SelectableColumn({
                         id: 'startDate',
-                        name: $t('f36ea1e0-7bf6-4e15-b921-cd50ec889e33'),
+                        name: $t('300d2935-b578-48cc-b58e-1c0446a68d59'),
                     }),
 
                     new SelectableColumn({
                         id: 'endDate',
-                        name: $t('43deefc6-dd11-4d2c-bf95-2c20150a246f'),
+                        name: $t('3c90169c-9776-4d40-bda0-dba27a5bad69'),
                     }),
 
                     new SelectableColumn({
                         id: 'submittedAt',
                         category: $t(`70de758a-58c5-45ce-8cbd-6a984069cd1b`),
-                        name: $t('65110237-a12e-4cbd-8514-75a942626d7a'),
+                        name: $t('112b7686-dffc-4ae9-9706-e3efcd34898f'),
                     }),
 
                     new SelectableColumn({

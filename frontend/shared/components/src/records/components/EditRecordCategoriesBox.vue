@@ -9,7 +9,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory()">
                 <span class="icon add" />
-                <span>{{ $t('9a390ab2-bb28-49dc-9837-b389f5877c53') }}</span>
+                <span>{{ $t('51f9909d-c91f-455d-8cd4-ee0a1897e59d') }}</span>
             </button>
         </p>
     </div>

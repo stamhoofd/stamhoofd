@@ -291,7 +291,7 @@ export class Invoice extends AutoEncoder {
             ...(this.payableRoundingAmount !== 0
                 ? [
                         {
-                            name: $t(`dafd5091-0698-4117-bc5a-db8ba05cefcd`),
+                            name: $t(`5841f72b-67d8-4add-8cfa-801bcb71cba7`),
                             price: this.payableRoundingAmount,
                         },
                     ]

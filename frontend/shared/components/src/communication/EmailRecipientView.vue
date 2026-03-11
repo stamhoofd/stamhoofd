@@ -71,7 +71,7 @@
 
                     <STListItem v-for="(member, index) of members" :key="member.id" :selectable="true" @click="showMember(member.id)">
                         <h3 class="style-definition-label">
-                            {{ $t('9603f7a2-14f0-4e9b-a191-0fddd8f6ec8a') }} {{ members.length > 1 ? `(${index + 1})` : '' }}
+                            {{ $t('6c7534a5-53c7-4343-b9e0-5277fe640496') }} {{ members.length > 1 ? `(${index + 1})` : '' }}
                         </h3>
                         <p class="style-definition-text">
                             <span>{{ capitalizeFirstLetter(member.name) }}</span>
@@ -136,7 +136,7 @@
 
                 <template v-if="email && email.status === EmailStatus.Sent && (!recipient.sentAt || (emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce))) && auth.hasPlatformFullAccess()">
                     <hr>
-                    <h2>{{ $t('7c093146-6de1-413b-bbda-2ada3fd63dea') }}</h2>
+                    <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
                     <STList>
                         <STListItem v-if="emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce)" :selectable="true" element-name="button" @click="unblockEmailAddress">
@@ -253,7 +253,7 @@ async function retrySending() {
     }
     if (!await CenteredMessage.confirm(
         $t('ea396cc2-98a0-4147-bd60-7ed9e2f7c0ad'),
-        $t('ed127618-9fac-448d-ae8c-04d6c582156e'),
+        $t('3dc84002-909a-45e2-a033-317be0a09c4e'),
         $t('89e57caf-d083-4efc-8a21-8e31aa86ea14'),
     )) {
         return;

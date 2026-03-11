@@ -27,7 +27,7 @@ export class DocumentActionBuilder {
     getActions(): TableAction<DocumentStruct>[] {
         return [
             new InMemoryTableAction({
-                name: $t(`7c4a4aa1-de17-466c-94a1-1fdff3fa4fc5`),
+                name: $t(`1adf1842-a0c1-4428-92d8-a8c760e79cf1`),
                 icon: 'download',
                 priority: 5,
                 groupIndex: 2,
@@ -49,7 +49,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`ab817255-45d5-4eb8-970c-ea927730532b`),
+                name: $t(`3b95fc70-7928-426b-b65b-3389d9e762cc`),
                 icon: 'edit',
                 priority: 0,
                 groupIndex: 1,
@@ -74,7 +74,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`63af93aa-df6a-4937-bce8-9e799ff5aebd`),
+                name: $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`),
                 icon: 'trash',
                 priority: 1,
                 groupIndex: 3,
@@ -107,7 +107,7 @@ export class DocumentActionBuilder {
 
         options.push({
             type: 'ChooseOne',
-            name: $t('672a6035-da6d-403b-a31e-242cdd92cc5b'),
+            name: $t('19da8d23-acea-43c2-bfdd-742447ca57f1'),
             options: [
                 {
                     id: 'accounts',
@@ -147,7 +147,7 @@ export class DocumentActionBuilder {
     }
 
     async deleteDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('d95060d8-ba97-4955-8731-142fe5322055', { count: documents.length.toString() }) : $t(`9ec68c0f-9a7c-4ad2-adae-201148284060`), $t(`63af93aa-df6a-4937-bce8-9e799ff5aebd`)))) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('d95060d8-ba97-4955-8731-142fe5322055', { count: documents.length.toString() }) : $t(`9ec68c0f-9a7c-4ad2-adae-201148284060`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`)))) {
             return;
         }
         try {

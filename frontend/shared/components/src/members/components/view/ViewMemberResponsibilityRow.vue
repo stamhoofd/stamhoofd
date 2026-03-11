@@ -63,7 +63,7 @@ const resp = computed(() => {
 
 const name = computed(() => {
     const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' ' + $t(`d67b2375-8426-47de-8637-74557f6ad0a4`) : '');
-    return (resp.value?.name ?? $t(`dce3d5b2-7cce-4ada-ab77-0572b2be509d`)) + suffix;
+    return (resp.value?.name ?? $t(`25c47121-5fa2-4b1b-b0bb-765752a81084`)) + suffix;
 });
 
 const hasRegistration = computed(() => {

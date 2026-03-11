@@ -60,7 +60,7 @@ export function useRegistrationQuickActions(): QuickActions {
     }
 
     async function checkAllMemberData(member: PlatformMember) {
-        await editMember(member, { title: $t(`d14e4e63-c77d-44d9-b8d0-adf05e299303`) });
+        await editMember(member, { title: $t(`b4cba044-12c3-464d-8bc1-2873996f02fa`) });
     }
 
     const activeMembers = computed(() => memberManager.family.members.filter(m => m.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership] }).length > 0));
@@ -275,7 +275,7 @@ function getGroupDescriptionForEvent(event: Event, platform: Platform) {
         return null;
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
 }
 
 export async function getFeaturedEventsForFamily({ context, family, owner }: { context: SessionContext; family: PlatformFamily; owner?: object }) {

@@ -41,8 +41,8 @@ const props =
 const pop = usePop();
 const errors = useErrors();
 
-const deleteText = $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`);
-const cancelText = $t(`80651252-e037-46b2-8272-a1a030c54653`);
+const deleteText = $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`);
+const cancelText = $t(`11d2e292-fd08-4477-bd2a-dac599a9754c`);
 const confirmationCodeInput = ref('');
 const isConfirm = ref(false);
 const disabled = computed(() => confirmationCodeInput.value.toLowerCase() !== props.confirmationCode.toLowerCase());

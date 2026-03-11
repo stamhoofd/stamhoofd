@@ -34,7 +34,7 @@
 
             <div v-if="members.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('97dc1e85-339a-4153-9413-cca69959d731') }}
+                    {{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -74,7 +74,7 @@
 
             <div v-if="members.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('dc052084-eea5-407e-8775-237bf550895a') }}
+                    {{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}
                 </h2>
 
                 <STList class="illustration-list">
@@ -101,7 +101,7 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('d14e4e63-c77d-44d9-b8d0-adf05e299303') }}
+                            {{ $t('b4cba044-12c3-464d-8bc1-2873996f02fa') }}
                         </h3>
                         <p class="style-description-small">
                             {{ $t('60823584-6df5-4c99-9eca-c5e64d83a730') }}
@@ -133,7 +133,7 @@
 
             <div v-if="documents.length > 0" class="container">
                 <hr><h2>
-                    {{ $t('a01ee6b1-f27f-4ad2-a87c-28bce4dedfbd') }}
+                    {{ $t('2f140e22-4940-453f-8f49-871a69f0776e') }}
                 </h2>
                 <STList>
                     <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="onDownloadDocument(document)">

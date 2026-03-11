@@ -145,7 +145,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string | null>({
         id: 'name',
-        name: $t('45ebf52f-e5ba-4995-a3d8-e300f5a9e707'),
+        name: $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926'),
         getValue: e => e.name || '',
         minimumWidth: 150,
         recommendedWidth: 200,

@@ -7,9 +7,9 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <TInput v-model="name" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)" error-fields="name" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" />
-        <TTextarea v-model="description" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" />
+        <TTextarea v-model="description" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" />
 
-        <hr><h2>{{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}</h2>
+        <hr><h2>{{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}</h2>
         <p>{{ $t('8cc76242-2d6a-4354-b199-c6086e8ea03d') }}</p>
 
         <STList>
@@ -61,7 +61,7 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}
+                            {{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}
                         </h3>
                         <p class="style-description-small">
                             {{ $t('aef8493c-6d75-4270-ba4c-f9f09b65caf7') }}
@@ -88,7 +88,7 @@
 
                 <button class="button secundary danger" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
             </div>
     </SaveView>
@@ -265,7 +265,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm($t(`e817f9c6-5714-44b9-93f0-bf698a4d2723`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`))) {
+        if (!await CenteredMessage.confirm($t(`e817f9c6-5714-44b9-93f0-bf698a4d2723`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
             return;
         }
 
@@ -294,7 +294,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         if (!this.hasChanges) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+        return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
     }
 }
 </script>

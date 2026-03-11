@@ -54,7 +54,7 @@
             {{ $t('b56f4d0f-93c0-4f22-9597-735ee03cc9e2') }}
         </p>
 
-        <hr><h2>{{ $t('bf2af52c-de5d-4089-b46d-9be48594cdb4') }}</h2>
+        <hr><h2>{{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}</h2>
 
         <Checkbox v-model="hasStatusClosed">
             {{ $t('4ae26268-586e-41f7-875d-90137f9ed836') }}

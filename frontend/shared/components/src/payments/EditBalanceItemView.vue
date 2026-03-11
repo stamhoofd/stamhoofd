@@ -5,12 +5,12 @@
         </h1>
         <button v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled" class="error-box icon disabled selectable" type="button" @click="markDue">
             <span>{{ $t('39e508ae-7803-4da8-ac84-89cde3d46867') }}</span>
-            <span class="button text">{{ $t('659662e6-8a63-4e5a-93c2-8b878e3ab0b0') }}</span>
+            <span class="button text">{{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}</span>
         </button>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="balanceItem.relations.size === 0" error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" class="max">
+        <STInputBox v-if="balanceItem.relations.size === 0" error-fields="description" :error-box="errors.errorBox" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" class="max">
             <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
         </STInputBox>
         <STList v-else>
@@ -42,8 +42,8 @@
 
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`)">
-                    <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
+                <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`7453643b-fdb2-4aa1-9964-ddd71762c983`)">
+                    <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`)" />
 
                     <template v-if="$feature('vat') || !VATIncluded" #right>
                         <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
@@ -72,7 +72,7 @@
             </div>
 
             <div v-if="(patchedBalanceItem.unitPrice >= 0 && balanceItem.status === BalanceItemStatus.Due) || dueAt !== null">
-                <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`bf30128b-4c99-4a97-b4d2-1a4e62f33f41`)">
+                <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`1402e826-1f61-498a-81b4-595dce3248d0`)">
                     <template #right>
                         <span v-tooltip="$t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575')" class="style-tooltip"><span class="icon small gray help" /></span>
                     </template>
@@ -144,7 +144,7 @@
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="patchedBalanceItem.relations.size === 0 && family && family.members.length >= (originalMemberId ? 2 : 1)">
-            <hr><h2>{{ $t('f4052a0b-9564-49c4-a6b6-41af3411f3b0') }}</h2>
+            <hr><h2>{{ $t('946f5e2e-d92c-4bbd-b64f-115958a04d01') }}</h2>
             <p>{{ $t('00c61f8a-204c-41d5-abbb-7da96675b0e3') }}</p>
 
             <p v-if="!memberId" class="warning-box">
@@ -161,7 +161,7 @@
                         {{ m.patchedMember.name }}
                     </h3>
                     <p v-if="!memberId" class="style-description-small">
-                        {{ $t('f4052a0b-9564-49c4-a6b6-41af3411f3b0') }}
+                        {{ $t('946f5e2e-d92c-4bbd-b64f-115958a04d01') }}
                     </p>
                 </STListItem>
 
@@ -181,7 +181,7 @@
         </template>
 
         <template v-if="!isNew && hasPaymentsRelation(patchedBalanceItem)">
-            <hr><h2>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h2>
+            <hr><h2>{{ $t('15589562-1e34-4197-8097-5ec5bf1636fb') }}</h2>
             <p>{{ $t('a4474840-0a73-4268-8d06-be3361fe5fc7') }}</p>
 
             <p v-if="patchedBalanceItem.payments.length === 0" class="info-box">
@@ -193,7 +193,7 @@
             </STList>
 
             <hr>
-            <h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+            <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
             <STList>
                 <STListItem v-if="balanceItem.status === BalanceItemStatus.Canceled" :selectable="true" @click="markDue">
@@ -533,7 +533,7 @@ async function doDelete() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`7020d061-6349-4b42-8ee3-eca6b6cca87d`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`), $t(`6260efe1-ecdb-4a22-a046-7ce84233d11b`)))) {
+    if (!(await CenteredMessage.confirm($t(`7020d061-6349-4b42-8ee3-eca6b6cca87d`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`2c9ef19d-3838-4e9a-bb9b-e5f9a714fe4c`)))) {
         return;
     }
     if (loading.value) {
@@ -627,7 +627,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

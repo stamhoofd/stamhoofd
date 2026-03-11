@@ -51,7 +51,7 @@ const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.p
 });
 const saving = ref(false);
 
-const title = $t(`e9a19cd1-7a57-440d-a97e-6cff23a7f46c`);
+const title = $t(`23229877-c51f-4e18-8563-88315be182aa`);
 
 async function addPolicy() {
     const privacyPatch = PrivacySettings.patch({});
@@ -136,7 +136,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

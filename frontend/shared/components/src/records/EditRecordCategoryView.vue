@@ -14,10 +14,10 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <TInput v-model="name" enterkeyhint="next" :placeholder="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)" />
+            <TInput v-model="name" enterkeyhint="next" :placeholder="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)" />
         </div>
 
-        <TTextarea v-model="description" error-fields="description" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" />
+        <TTextarea v-model="description" error-fields="description" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" />
 
         <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
             <STListItem :selectable="true" element-name="label">
@@ -53,7 +53,7 @@
             <button class="button text" type="button" @click="addRecord()">
                 <span class="icon add" />
                 <span v-if="categories.length === 0">{{ $t('00b57923-c4f1-47ab-a90a-275d192e53e8') }}</span>
-                <span v-else>{{ $t('7a153144-a909-4c8c-bb35-54aac1c9aef3') }}</span>
+                <span v-else>{{ $t('49d8a87b-542f-4522-b054-3a374ab7df1f') }}</span>
             </button>
 
             <button v-if="allowChildCategories" class="button text" type="button" @click="addCategory()">
@@ -106,7 +106,7 @@
         </div>
 
         <template #toolbar>
-            <button v-tooltip="$t('ee2852cb-6458-4127-8ad0-3281cc286884')" class="button icon eye" type="button" @click="showExample" />
+            <button v-tooltip="$t('0e35cf4e-81ea-41f3-973e-d7b9421363dc')" class="button icon eye" type="button" @click="showExample" />
         </template>
     </SaveView>
 </template>
@@ -182,7 +182,7 @@ const title = computed(() => {
     if (isRootCategory.value) {
         return props.isNew ? $t(`51f9909d-c91f-455d-8cd4-ee0a1897e59d`) : $t('270c18bf-7852-4d33-809d-6567c4bd56a9');
     }
-    return props.isNew ? $t(`b5822ffa-2c8b-4c88-bf4d-eb5566da56e7`) : $t('770518af-b094-4fca-bc0a-641f508895ef');
+    return props.isNew ? $t(`97ddbaef-0a49-4b53-893d-4c77dad6f52b`) : $t('770518af-b094-4fca-bc0a-641f508895ef');
 });
 const records = computed(() => patchedCategory.value.records);
 const categories = computed(() => patchedCategory.value.childCategories);
@@ -213,7 +213,7 @@ useValidation(errors.validator, () => {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'name',
-            message: $t('f443476a-44f5-4dda-8c39-50332319d9ec')
+            message: $t('396f75d7-e7d9-42d9-a50e-9ace51c92fe6')
         })
     }
 });
@@ -455,7 +455,7 @@ async function showCategoryMenu(event: MouseEvent, category: RecordCategory) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`df8def26-260a-431b-a7fe-09fac12f97e0`),
+                name: $t(`d76e80a1-b717-4002-b40c-1e890e87bf1c`),
                 icon: 'settings',
                 action: () => editCategory(category),
             }),
@@ -576,7 +576,7 @@ async function deleteMe() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`95557c11-2b92-4a70-8945-99f6c6f7051c`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`))) {
+    if (!await CenteredMessage.confirm($t(`95557c11-2b92-4a70-8945-99f6c6f7051c`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
         return;
     }
     // Note we create a patch, but don't use it internally because that would throw errors. The view itszelf is not aware of the delete
@@ -606,7 +606,7 @@ async function showExample() {
                     defaultEnabled: true,
                 }),
                 value: reactiveValue,
-                saveText: $t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`),
+                saveText: $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
                     await navigationActions.pop({ force: true });
                 },
@@ -621,7 +621,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 };
 
 defineExpose({

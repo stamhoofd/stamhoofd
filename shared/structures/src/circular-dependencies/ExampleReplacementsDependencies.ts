@@ -136,7 +136,7 @@ function fillReplacements(replacements: Replacement[]) {
         method: PaymentMethod.Transfer,
         status: PaymentStatus.Pending,
         iban: 'BE1234 1234 1234',
-        ibanName: $t(`fbe32760-d352-4d3d-813c-acd50f3cba50`),
+        ibanName: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
         transferDescription: '+++111/111/111+++',
         transferSettings: TransferSettings.create({
             type: TransferDescriptionType.Structured,

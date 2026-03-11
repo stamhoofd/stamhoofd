@@ -11,7 +11,7 @@
                 <STList class="info">
                     <STListItem>
                         <h3 class="style-definition-label">
-                            {{ $t('a4476eb9-6d58-4b4e-af2b-feb227a30329') }}
+                            {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             <span>{{ emailInformation.email }}</span>
@@ -35,7 +35,7 @@
 
                     <STListItem v-if="emailInformation.hardBounce" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('d6a2e574-1334-4c3f-861e-5beb2a906d27') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('b33eff3e-008a-4859-b2c7-dc84ae77a2f8') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
                             <I18nComponent :t="$t('0ee9632b-1462-4edf-9e68-abe77c8b9c8f')">
@@ -69,7 +69,7 @@
 
                 <template v-if="canManageEmailAddress && wasBlocked">
                     <hr>
-                    <h2>{{ $t('7c093146-6de1-413b-bbda-2ada3fd63dea') }}</h2>
+                    <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
                     <STList>
                         <STListItem v-if="isBlocked" :selectable="true" element-name="button" @click="unblockEmailAddress">

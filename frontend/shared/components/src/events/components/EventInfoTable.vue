@@ -142,7 +142,7 @@ const ageGroups = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`8dc963d1-ba79-47c0-80d8-629b8e09c4c2`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`411cf334-eebb-4f27-beb6-d81bd544c3f5`) + ' ');
 });
 
 const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();

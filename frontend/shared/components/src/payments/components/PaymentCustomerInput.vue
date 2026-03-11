@@ -28,13 +28,13 @@
             <CompanyInputBox :validator="validator" :company="customer.company" @patch:company="addPatch({ company: $event })" />
 
             <template v-if="companyWithContectPreferred || !!firstName || !!lastName || !!phone || !!email">
-                <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`4d8a44e5-eebc-48e2-955d-87ca0595d4cc`)">
+                <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`2a10aac1-e404-4de4-865d-75593b2b5e8d`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                         </div>
                     </div>
 
@@ -43,8 +43,8 @@
                     </template>
                 </STInputBox>
 
-                <EmailInput v-model="email" :validator="validator" autocomplete="email" :required="false" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`4c65c34a-e96f-4887-9b75-26278b5d402c`)" />
-                <PhoneInput v-model="phone" :validator="validator" autocomplete="phone" :required="false" :title="$t(`e08d3cd9-7d2d-4cb9-b8b7-7417de2a8e59`)" :placeholder="$t(`4c65c34a-e96f-4887-9b75-26278b5d402c`)" />
+                <EmailInput v-model="email" :validator="validator" autocomplete="email" :required="false" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
+                <PhoneInput v-model="phone" :validator="validator" autocomplete="phone" :required="false" :title="$t(`3174ba16-f035-4afd-a69f-74865e64ef34`)" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
             </template>
             <button v-else type="button" class="button text" @click="enableContact">
                 <span class="icon add" />
@@ -52,19 +52,19 @@
             </button>
         </template>
         <template v-else>
-            <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`ed9eecdb-c3f8-4e87-a66e-39f5d484628c`)">
+            <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                        <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                        <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" :validator="validator" autocomplete="email" :required="false" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`4c65c34a-e96f-4887-9b75-26278b5d402c`)" />
-            <PhoneInput v-model="phone" :validator="validator" autocomplete="phone" :required="false" :title="$t(`e08d3cd9-7d2d-4cb9-b8b7-7417de2a8e59`)" :placeholder="$t(`4c65c34a-e96f-4887-9b75-26278b5d402c`)" />
+            <EmailInput v-model="email" :validator="validator" autocomplete="email" :required="false" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
+            <PhoneInput v-model="phone" :validator="validator" autocomplete="phone" :required="false" :title="$t(`3174ba16-f035-4afd-a69f-74865e64ef34`)" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
         </template>
     </div>
 </template>

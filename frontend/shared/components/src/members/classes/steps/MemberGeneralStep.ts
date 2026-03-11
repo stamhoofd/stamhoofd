@@ -65,7 +65,7 @@ export class MemberGeneralStep implements EditMemberStep {
             title: $t(`67254c38-5652-4daf-a412-b6e835c403bd`),
             member: manager.member,
             component: markRaw(EditMemberGeneralBox),
-            saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
+            saveText: $t(`2a9075bb-a743-411e-8a3d-94e5e57363f0`),
             markReviewed: ['details'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="title" :loading="loading" :save-text="$t('bd14d3cd-17de-4569-b12b-8bca0ff8fc57')" :prefer-large-button="true" @save="goNext">
         <template v-if="checkout.totalPrice > 0" #left>
-            <span>{{ $t('e67d0122-6f15-46c6-af94-92a79268710a') }}: {{ formatPrice(checkout.totalPrice) }}</span>
+            <span>{{ $t('341172ee-281e-4458-aeb1-64ed5b2cc8bb') }}: {{ formatPrice(checkout.totalPrice) }}</span>
         </template>
 
         <h1>{{ title }}</h1>

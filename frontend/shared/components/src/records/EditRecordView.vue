@@ -48,7 +48,7 @@
                 <div>
                     <button class="button text" type="button" @click="addChoice">
                         <span class="icon add" />
-                        <span>{{ $t('e69989bf-c310-49b4-aff1-b9c84cfe5760') }}</span>
+                        <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
                     </button>
                 </div>
             </h2>
@@ -65,7 +65,7 @@
         </div>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d') }}</div>
+            <div>{{ $t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c') }}</div>
             <div>
                 <button class="button text" type="button" @click="openPreview">
                     <span class="icon eye" />
@@ -77,7 +77,7 @@
 
         <TInput v-model="label" :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max" :placeholder="name" />
 
-        <TTextarea v-model="description" :title="descriptionTitle" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" error-fields="description" :error-box="errors.errorBox" class="max" />
+        <TTextarea v-model="description" :title="descriptionTitle" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" error-fields="description" :error-box="errors.errorBox" class="max" />
         <p class="style-description-small">
             {{ $t('ee593263-9493-4a9c-a3e5-fe0a4e596887') }}
         </p>
@@ -87,7 +87,7 @@
             {{ $t('9f3d1ce2-aa2e-421b-84f1-07e875e9e4a8') }}
         </p>
 
-        <TTextarea v-if="shouldAskCommentsDescription" v-model="commentsDescription" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`5a3c9444-fcf0-408c-99fc-4e5395c37eb0`)" />
+        <TTextarea v-if="shouldAskCommentsDescription" v-model="commentsDescription" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`5a3c9444-fcf0-408c-99fc-4e5395c37eb0`)" />
         <p v-if="shouldAskCommentsDescription" class="style-description-small">
             {{ $t('b8e94451-af94-47ac-8e2c-b39301d3e829') }}
         </p>
@@ -124,7 +124,7 @@
         </template>
 
         <template v-if="canAddWarning">
-            <hr><h2>{{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}</h2>
+            <hr><h2>{{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}</h2>
             <p>{{ $t('5c832a65-7b8d-4e3d-a55d-291567ddb71a') }}</p>
 
             <STList>
@@ -176,7 +176,7 @@
                             <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('509ab71d-f9e0-4f2a-8683-590b6363b32d') }}
+                            {{ $t('4943ece9-450b-4913-a6d8-6834d011a1ee') }}
                         </h3>
                         <p class="style-description-small">
                             {{ $t('aef8493c-6d75-4270-ba4c-f9f09b65caf7') }}
@@ -199,7 +199,7 @@
         </template>
 
         <template v-if="settings.dataPermission">
-            <hr><h2>{{ $t('3936222c-5399-4d5e-9543-e483fa4f058a') }}</h2>
+            <hr><h2>{{ $t('27bc7f00-1839-4f47-b8e5-7f4c6996fa53') }}</h2>
             <p>
                 {{ $t('30fe36de-4e4e-42e3-a2f9-7740b028b415') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
                     {{ $t('d6386cef-8e84-4107-920a-03db17372613') }}
@@ -272,11 +272,11 @@ const availableTypes = [
             },
             {
                 value: RecordType.Address,
-                name: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`),
+                name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
             },
             {
                 value: RecordType.Email,
-                name: $t(`82f4b6ed-afee-4655-9f07-22802e0e7ad9`),
+                name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
             },
             {
                 value: RecordType.Phone,
@@ -284,7 +284,7 @@ const availableTypes = [
             },
             {
                 value: RecordType.Date,
-                name: $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
+                name: $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
             },
             {
                 value: RecordType.Integer,
@@ -292,7 +292,7 @@ const availableTypes = [
             },
             {
                 value: RecordType.Price,
-                name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+                name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
             },
         ],
     },
@@ -314,7 +314,7 @@ const availableTypes = [
         ],
     },
     {
-        name: $t(`af8afc36-22de-4f22-8235-e1e8f5eef7ca`),
+        name: $t(`6a11d3a7-6348-4aca-893e-0f026e5eb8b0`),
         values: [
             {
                 value: RecordType.Image,
@@ -330,7 +330,7 @@ const availableTypes = [
 
 const availableFileTypes = [
     {
-        name: $t(`4760e3ab-3cb5-4045-b252-ef923dc2bc9d`),
+        name: $t(`3743b6e2-1c6b-4831-a228-6ef082377e3b`),
         value: null,
     },
     {
@@ -357,14 +357,14 @@ const canAddWarning = computed(() => {
 
 const warningNonInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`eaea9adf-d1c8-48ab-b6e9-4cc8d68e2392`);
+        return $t(`dba56cdb-1bbc-409f-8b9d-550f87505db3`);
     }
     return $t(`87150a09-54be-4640-9203-74d0399f1e02`);
 });
 
 const warningInvertedText = computed(() => {
     if (patchedRecord.value.type === RecordType.Checkbox) {
-        return $t(`deb80c9b-6f0d-4185-800f-79e419cc8943`);
+        return $t(`1e3c4174-138d-460c-82aa-521fb4edcd49`);
     }
     return $t(`64b39ce3-9624-4a38-a669-90a50443876f`);
 });
@@ -373,12 +373,12 @@ const title = computed(() => {
     if (props.isNew) {
         return $t(`dcfc3edf-b906-420d-ac49-d89886824de9`);
     }
-    return $t(`6b58e96c-fbd3-4998-909d-ed25cc758818`);
+    return $t(`18d8f60a-ec12-405e-b26a-ed9ba39fefe4`);
 });
 
 const labelTitle = computed(() => {
     if (type.value === RecordType.Checkbox) {
-        return $t(`fac8120c-d891-42e3-8383-090db955c8ca`);
+        return $t(`5886d034-5962-4d4c-99f3-35733367a20b`);
     }
     if (type.value === RecordType.MultipleChoice) {
         return $t(`13cac71a-fb4c-46b6-9f17-1a57c5da2420`);
@@ -699,7 +699,7 @@ async function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm($t(`025e44e2-c48d-4af2-95b4-3e60c98724f6`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`), $t(`fa50aa94-4f8a-428a-9b97-8b477176240a`))) {
+    if (!await CenteredMessage.confirm($t(`025e44e2-c48d-4af2-95b4-3e60c98724f6`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`fa50aa94-4f8a-428a-9b97-8b477176240a`))) {
         return;
     }
 
@@ -720,7 +720,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 };
 
 function openPreview() {

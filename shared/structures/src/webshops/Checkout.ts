@@ -149,7 +149,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 price: -this.appliedPercentageDiscount,
             },
             {
-                name: $t(`f177a8e3-ae76-4894-af0a-56936b79100f`),
+                name: $t(`40939025-cebb-4afb-90e9-847233cb256f`),
                 price: -this.fixedDiscount,
             },
             {
@@ -164,7 +164,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
 
         if (all.length > 0) {
             all.unshift({
-                name: $t(`8a04f032-01e5-4ee0-98fb-6f36bf971080`),
+                name: $t(`26369a8f-8080-4f00-af46-576fdf563ced`),
                 price: this.cart.priceWithDiscounts,
             });
         }
@@ -172,7 +172,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: $t(`e67d0122-6f15-46c6-af94-92a79268710a`),
+                name: $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
                 price: this.totalPrice,
             },
         ];
@@ -433,7 +433,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum persons',
                 // todo translation
-                human: $t(`1310bb11-6ed9-44e9-bec3-9da905e10404`) + ' ' + (remainingPersons !== 1 ? $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`) : $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`)) + ' ' + $t(`decbc1e7-7ce8-467c-a41a-69a713bb59ab`) + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`) : $t(`886ea5ba-4715-43a2-88b6-4715df3cfa2c`)) + ' ' + $t(`deadeba1-191f-471a-8501-8bb3e4c6e72f`) + ' ' + (availableTimeslots !== 1 ? $t(`773799cf-d924-49a6-8670-41d0b2b3b1b2`) : $t(`46ac8b35-f54e-4b3b-a2b4-36daad8561e8`)) + $t(`a045462a-ed9a-4a3f-9569-bb1b7a0f7cd1`) + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t(`b78c8455-7e28-47b2-b2fd-ba6a82302976`) : $t(`61ab3304-e7b1-4ffc-ab43-110f232f8e23`)) + (availableTimeslots !== 1 ? $t(`2af4961f-b316-452a-9063-622bb4864d01`) : ''),
+                human: $t(`1310bb11-6ed9-44e9-bec3-9da905e10404`) + ' ' + (remainingPersons !== 1 ? $t(`31bacb3a-2920-4bf3-9e68-d7887ef17fe4`) : $t(`af839b8a-1367-4655-ad1c-ee658843e9f1`)) + ' ' + $t(`decbc1e7-7ce8-467c-a41a-69a713bb59ab`) + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`) : $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`)) + ' ' + $t(`deadeba1-191f-471a-8501-8bb3e4c6e72f`) + ' ' + (availableTimeslots !== 1 ? $t(`773799cf-d924-49a6-8670-41d0b2b3b1b2`) : $t(`46ac8b35-f54e-4b3b-a2b4-36daad8561e8`)) + $t(`a045462a-ed9a-4a3f-9569-bb1b7a0f7cd1`) + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t(`414f837c-b446-41c4-b522-3e6b473d5b5d`) : $t(`28f60cd9-f9bc-46ff-8fd3-8b6a6a109b4b`)) + (availableTimeslots !== 1 ? $t(`2af4961f-b316-452a-9063-622bb4864d01`) : ''),
                 field: 'timeSlot',
             });
         }

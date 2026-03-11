@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('a103aa7c-4693-4bd2-b903-d14b70bfd602')" :replacements="replacements" :title="$t(`6a972ca2-8a5f-4e9d-bb26-b59e1f7165a2`)" @save="save">
+    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d')" :replacements="replacements" :title="$t(`6a972ca2-8a5f-4e9d-bb26-b59e1f7165a2`)" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
             {{ $t('8af02386-a68c-46c0-bb86-91b2177f1ba6') }}
@@ -127,7 +127,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value && (await getHTML()).text === patched.value.text) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

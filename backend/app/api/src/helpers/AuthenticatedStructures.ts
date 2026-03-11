@@ -36,7 +36,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: $t(`9f5ee239-d01b-4ee1-961b-2e3224489781`),
+                    human: $t(`6024d1b5-f0a0-42f4-b972-636286edf929`),
                 });
             }
         }
@@ -1029,7 +1029,7 @@ export class AuthenticatedStructures {
         for (const balance of balances) {
             let object = ReceivableBalanceObject.create({
                 id: balance.objectId,
-                name: $t('6c3e777c-7cd6-4566-9540-8a829c26212f'),
+                name: $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b'),
             });
 
             if (balance.objectType === ReceivableBalanceType.organization) {
@@ -1171,7 +1171,7 @@ export class AuthenticatedStructures {
                     else {
                         userStruct = NamedObject.create({
                             id: '',
-                            name: $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+                            name: $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
                         });
                     }
                 }

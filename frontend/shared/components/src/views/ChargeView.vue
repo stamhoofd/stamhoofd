@@ -25,8 +25,8 @@
             <STInputBox :title="$t('7453643b-fdb2-4aa1-9964-ddd71762c983')" error-fields="price" :error-box="errors.errorBox">
                 <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null" />
             </STInputBox>
-            <STInputBox :title="$t('a0f52fae-a4e6-4c3c-a6af-83218dd399b2')" error-fields="amount" :error-box="errors.errorBox">
-                <NumberInput v-model="amount" :title="$t('a0f52fae-a4e6-4c3c-a6af-83218dd399b2')" :validator="errors.validator" :min="1" :stepper="true" />
+            <STInputBox :title="$t('697df3e7-fbbf-421d-81c2-9c904dce4842')" error-fields="amount" :error-box="errors.errorBox">
+                <NumberInput v-model="amount" :title="$t('697df3e7-fbbf-421d-81c2-9c904dce4842')" :validator="errors.validator" :min="1" :stepper="true" />
             </STInputBox>
         </div>
 
@@ -113,7 +113,7 @@ const chargeViewDescription = computed(() => {
 
 const saving = ref(false);
 
-const title = $t('e412b71e-566b-41d4-8b1f-97ab7f140b29');
+const title = $t('4273d00c-7b8b-48ec-906d-80d6feb23655');
 
 const defaultOrganizationId = computed(() => organization.value === null ? platform.value.membershipOrganizationId : null);
 const { externalOrganization: defaultOrganization } = useExternalOrganization(defaultOrganizationId);
@@ -140,7 +140,7 @@ useValidation(errors.validator, () => {
     if (descriptionNormalized.length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`6223bc9f-b3e9-4cb2-a73e-62555499b6b7`),
+            message: $t(`2449fba5-99dc-496f-a9d6-a67263d56616`),
             field: 'description',
         }));
     }
@@ -148,7 +148,7 @@ useValidation(errors.validator, () => {
     if (price.value === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`8e1e706c-e42c-49c2-a398-f16ecc649a2b`),
+            message: $t(`1e165aac-8a58-45c5-bdd8-c58131a7b7f5`),
             field: 'price',
         }));
     }

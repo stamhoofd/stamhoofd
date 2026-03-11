@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`e58db898-16ad-4bb4-840c-2315ca894ff6`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`5a5c1ed2-516e-43a1-9e64-25a7f6190ed3`)" @save="save">
         <h1>
             {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
         </h1>
@@ -48,7 +48,7 @@
                     <img src="@stamhoofd/assets/images/illustrations/box-upload.svg">
                 </template>
                 <h2 class="style-title-list">
-                    {{ $t('7b742cf1-1f8d-4848-b893-db0f34dac948') }}
+                    {{ $t('4c795a2e-9675-4151-8cba-6222ed2ec3b5') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('2dc53487-2eb6-408c-beef-5e00c7a4b5b9') }}
@@ -74,7 +74,7 @@
                 </h3>
 
                 <p class="style-description-small">
-                    {{ $t('76a35b17-68d8-4d2f-8022-755b4033dc46') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
+                    {{ $t('76a35b17-68d8-4d2f-8022-755b4033dc46') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
                 </p>
             </STListItem>
         </STList>

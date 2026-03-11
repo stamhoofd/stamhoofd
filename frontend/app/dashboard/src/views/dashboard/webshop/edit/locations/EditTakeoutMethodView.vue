@@ -4,7 +4,7 @@
             {{ locationTitleName }} {{ $t('06da1310-e17c-475e-bcd3-bb47844c24c1') }}
         </h1>
         <h1 v-else>
-            {{ locationTitleName }} {{ $t('ee3bc635-c294-4134-9155-7a74f47dec4f') }}
+            {{ locationTitleName }} {{ $t('8455850d-829f-412f-bf1f-eedb2caa9f57') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -15,12 +15,12 @@
                     <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`3bb5eb55-784a-41ea-8bc1-b487c6421b51`)">
                 </STInputBox>
 
-                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+                <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
                     <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`bb9c4b26-8f77-4334-a6bd-6649c2fe7a1c`)" />
                 </STInputBox>
             </div>
             <div>
-                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`)" />
+                <AddressInput v-model="address" :validator="errors.validator" :required="true" :title="$t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)" />
             </div>
         </div>
 
@@ -33,12 +33,12 @@
 
         <div v-if="!isNew" class="container">
             <hr><h2>
-                {{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}
+                {{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>

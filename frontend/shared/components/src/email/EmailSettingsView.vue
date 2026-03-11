@@ -23,7 +23,7 @@
                     </p>
 
                     <template #right>
-                        <span v-if="email.default" class="style-tag">{{ $t('b67ee618-6873-4dfe-84b6-faa51f37d661') }}</span>
+                        <span v-if="email.default" class="style-tag">{{ $t('40c0b334-e007-4fc1-88e5-b38707175d45') }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>

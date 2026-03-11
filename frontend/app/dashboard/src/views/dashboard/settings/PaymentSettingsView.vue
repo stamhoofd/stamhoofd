@@ -1,10 +1,10 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :loading-view="loadingStripeAccounts" :title="$t(`12b644c9-c1a7-4930-afb2-79f62648d243`)" @save="save">
         <h1>
-            {{ $t('e8600ed0-ac82-4c0f-8719-bd91173d653f') }}
+            {{ $t('46c3ece9-3197-4668-9528-b1258b77e789') }}
         </h1>
 
-        <p>{{ $t('a31eaafb-e2d1-4e41-8fa1-1c58a9bd585f') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('079c3c5d-b816-4adf-9287-6f5352a2cd81') }}</a> {{ $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') }} <a class="inline-link" :href="$domains.getDocs('payconiq')" target="_blank">{{ $t('8f39177b-f214-4f23-82ab-329c66ae731a') }}</a>  {{ $t('e06250b5-6d74-4690-8837-a4455aa9e44d') }} <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>.</p>
+        <p>{{ $t('a31eaafb-e2d1-4e41-8fa1-1c58a9bd585f') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('079c3c5d-b816-4adf-9287-6f5352a2cd81') }}</a> {{ $t('411cf334-eebb-4f27-beb6-d81bd544c3f5') }} <a class="inline-link" :href="$domains.getDocs('payconiq')" target="_blank">{{ $t('8f39177b-f214-4f23-82ab-329c66ae731a') }}</a>  {{ $t('e06250b5-6d74-4690-8837-a4455aa9e44d') }} <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>.</p>
 
         <STErrorsDefault :error-box="errorBox" />
 
@@ -33,7 +33,7 @@
             <p v-if="account.warning" :class="account.warning.type + '-box'">
                 {{ account.warning.text }}
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}
+                    {{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}
                 </a>
             </p>
 
@@ -67,7 +67,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
+                        {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
                     </h3>
                     <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled && !account.warning" class="style-definition-text with-icons">
                         <span>{{ $t('6f442433-dc3a-4500-918a-65e5776307fc') }}</span>
@@ -154,7 +154,7 @@
             <hr>
             <h2>{{ $t('df421a41-36de-4225-b22b-2401a4009f90') }}</h2>
             <p>
-                {{ $t('455200de-131e-4508-b5e7-3f94a05fb52b') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
+                {{ $t('455200de-131e-4508-b5e7-3f94a05fb52b') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
             </p>
 
             <STInputBox error-fields="payconiqApiKey" :error-box="errorBox" class="max" :title="$t(`da7c1f63-529d-47c6-8d2d-87e5cb98a411`)">

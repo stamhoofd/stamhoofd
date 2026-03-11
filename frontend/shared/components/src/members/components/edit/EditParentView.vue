@@ -7,7 +7,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+                <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
                     <Dropdown v-model="type">
                         <option v-for="t in parentTypes" :key="t" :value="t">
                             {{ formatParentType(t) }}
@@ -18,17 +18,17 @@
                 <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                         </div>
                     </div>
                 </STInputBox>
 
                 <PhoneInput v-model="phone" :title="$t('90d84282-3274-4d85-81cd-b2ae95429c34')" :validator="errors.validator" :placeholder="$t('7f30db7e-4851-4aa6-b731-2c898054f707')" :required="app === 'registration'" />
 
-                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`) " :validator="errors.validator" :placeholder="$t(`80e0424d-40a8-4ce8-94e4-2e0394d6f39c`)">
+                <EmailInput v-model="email" :required="app === 'registration'" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`) " :validator="errors.validator" :placeholder="$t(`80e0424d-40a8-4ce8-94e4-2e0394d6f39c`)">
                     <template #right>
                         <button :v-tooltip="$t('2797d590-7e74-4852-84aa-076f7919a2fb')" class="button icon add gray" type="button" @click="addEmail" />
                     </template>
@@ -64,7 +64,7 @@
                 </p>
 
                 <template v-if="(isPropertyEnabled('parents.nationalRegisterNumber') || nationalRegisterNumber)">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`439176a5-dd35-476b-8c65-3216560cac2f`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`00881b27-7501-4c56-98de-55618be2bf11`)" :required="isNRNRequiredForThisParent" :nullable="true" :validator="errors.validator" />
                     <p v-if="nationalRegisterNumber !== NationalRegisterNumberOptOut" class="style-description-small">
                         {{ $t('cb5c9f59-30ae-470a-ab94-ed33b111850c') }} <template v-if="isPropertyRequired('parents.nationalRegisterNumber')">
                             {{ $t('c78ae112-296b-4b37-899b-8e3f56729079') }}
@@ -131,10 +131,10 @@ const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`));
+const saveText = ref($t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`));
 const app = useAppContext();
 const parentTypes = ParentTypeHelper.getPublicTypes();
-const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`92a1d590-2388-4193-9fac-ad41b6122fe4`)} bewerken` : $t(`eb1bf015-9263-4f25-a7e4-f57b07342fb8`));
+const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`1db644a2-8fc8-4471-b7ef-544ac1a82f60`)} bewerken` : $t(`6d4c2c27-ac05-4843-b329-c8bb806bfcb0`));
 const navigate = useNavigationActions();
 
 const relatedMembers = computed(() => {
@@ -249,7 +249,7 @@ async function save() {
         if (firstName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`7764f616-f742-4704-93ff-22f1dd31f830`),
+                message: $t(`1186a60b-c59f-43d5-ba58-04ff9288c266`),
                 field: 'firstName',
             }));
         }
@@ -314,7 +314,7 @@ async function save() {
             if (minorMembers.length > 0 && !await CenteredMessage.confirm(
                 $t(`27091cc2-c42d-457d-8250-05abc7d4937d`),
                 $t(`290ab18c-dc62-4d85-a669-dd83c77758e7`),
-                $t(`0e3277e8-932a-4555-9f0e-ba3340bf2465`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
+                $t(`0e3277e8-932a-4555-9f0e-ba3340bf2465`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') }),
                 $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
                 false)) {
                 props.member.addParent(patched.value);
@@ -359,7 +359,7 @@ async function modifyAddress(from: Address, to: Address) {
     if (!await CenteredMessage.confirm(
         $t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`),
         $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`),
-        $t(`a87d3f1e-7e08-4415-b1a9-8fd49aafcb12`, { from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }),
+        $t(`a87d3f1e-7e08-4415-b1a9-8fd49aafcb12`, { from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') }),
         $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`),
         false)
     ) {
@@ -373,7 +373,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 }
 
 defineExpose({

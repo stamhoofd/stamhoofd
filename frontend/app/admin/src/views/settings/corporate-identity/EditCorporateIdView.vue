@@ -37,11 +37,11 @@
         </div>
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('b8a111c0-5f3d-480b-833a-6d7f05bf134d') }}</div>
+            <div>{{ $t('17d579e1-518b-4dd4-98d8-f8184b7287be') }}</div>
             <div>
                 <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
                 <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
             </div>
@@ -61,7 +61,7 @@
             <div>
                 <button v-if="coverBottomLeftOverlayImage" type="button" class="button text only-icon-smartphone" @click="coverBottomLeftOverlayImage = null">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
                 <UploadButton v-model="coverBottomLeftOverlayImage" :text="coverBottomLeftOverlayImage ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="overlayResolutions" />
             </div>
@@ -104,7 +104,7 @@ const pop = usePop();
 const { patched, patch, hasChanges, addPatch } = usePatch(platform);
 const saving = ref(false);
 
-const title = $t(`c654281e-1993-4643-a876-94caa3a192ff`);
+const title = $t(`017ee92d-62a3-4f64-afec-e2fa7055e97c`);
 
 const $name = computed({
     get: () => patched.value.config.name,
@@ -191,7 +191,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 const organizationLogoResolutions = [

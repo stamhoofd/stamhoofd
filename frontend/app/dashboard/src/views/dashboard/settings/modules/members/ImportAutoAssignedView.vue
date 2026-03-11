@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :save-text="$t('c7fc63b2-81d2-4946-bd69-fc283d99cd95')" @save="() => pop()">
+    <SaveView :title="title" :save-text="$t('83db2c73-38a3-4d13-9984-2f19f95e1329')" @save="() => pop()">
         <h1>{{ title }}</h1>
         <p>{{ description }}</p>
 

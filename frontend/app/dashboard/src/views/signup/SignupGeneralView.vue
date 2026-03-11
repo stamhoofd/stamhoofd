@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition>
         <form v-if="!loadingRegisterCode" id="signup-general-view" class="st-view" @submit.prevent="goNext">
-            <STNavigationBar :title="$t(`cbdd5da3-8752-423d-8adf-00195fac3864`)" />
+            <STNavigationBar :title="$t(`7066aee7-9e51-4767-b288-460646ceca50`)" />
 
             <main>
                 <h1>
@@ -45,7 +45,7 @@
                         <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`b26772a9-019a-4555-a6ca-7eb5200cab8f`)">
                             <Dropdown v-model="type" data-testid="organization-type-select">
                                 <option :value="null" disabled>
-                                    {{ $t('569d1c4a-9389-47dd-9acb-930419271276') }}
+                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
                                 </option>
 
                                 <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
@@ -62,7 +62,7 @@
                         <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`a5f71b13-f443-488a-81a4-62cf2498d9af`)">
                             <Dropdown v-model="umbrellaOrganization" data-testid="organization-umbrella-select">
                                 <option :value="null" disabled>
-                                    {{ $t('569d1c4a-9389-47dd-9acb-930419271276') }}
+                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
                                 </option>
                                 <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                                     {{ item.name }}
@@ -88,7 +88,7 @@
                         {{ $t('90816551-3afb-44d2-b698-bef4a73d36b3') }}
                     </Checkbox>
                     <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" data-testid="acquisition-other-checkbox" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
-                        {{ $t('8f7475aa-c110-49b2-8017-1a6dd0fe72f9') }}
+                        {{ $t('26677608-996f-41a5-8a53-543d6efa7de4') }}
                     </Checkbox>
                 </template>
             </main>

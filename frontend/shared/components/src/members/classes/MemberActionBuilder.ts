@@ -361,7 +361,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`a5cf8db3-5fb8-4a4c-9940-31d758433f23`),
+                name: $t(`3763ba3a-1023-4265-b675-1c2090d4c37b`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -425,7 +425,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`ffe15b57-4e70-4657-9a0b-af860eed503e`),
+                name: $t(`7c6e4f2d-297d-4183-9079-ba123f481eb5`),
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -445,7 +445,7 @@ export class MemberActionBuilder {
         }
 
         return [new InMemoryTableAction({
-            name: $t(`69aaebd1-f031-4237-8150-56e377310cf5`),
+            name: $t(`5ac7a958-ec4d-4e37-b2c0-35b2ada59044`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -460,7 +460,7 @@ export class MemberActionBuilder {
 
     getChargeAction() {
         return new AsyncTableAction({
-            name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
+            name: $t(`4273d00c-7b8b-48ec-906d-80d6feb23655`),
             icon: 'calculator',
             priority: 13,
             groupIndex: 4,
@@ -514,7 +514,7 @@ export class MemberActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: $t(`e8207525-275b-48c4-9282-199f17085175`),
+                name: $t(`208ae3f1-1720-4d79-96fd-5c05d97c9de0`),
                 icon: 'email',
                 priority: 12,
                 groupIndex: 3,
@@ -943,12 +943,12 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
     await present({
         components: [
             new ComponentWithProperties(DeleteView, {
-                title: $t('802581b7-38dd-45c3-815d-b786b6f9136c', { name }),
+                title: $t('63786627-79e7-4ab7-b759-774ef3f856d9', { name }),
                 description: $t(`dfbecccd-b964-4e8b-83e4-553b49d9fcc0`, { name }),
                 confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
-                confirmationPlaceholder: $t(`e4b3d2af-dee8-4f55-88e9-a229513d347c`),
+                confirmationPlaceholder: $t(`3610e3ed-5df6-41d2-b6e6-a5823abcaff7`),
                 confirmationCode: name,
-                checkboxText: $t(`738eb984-4a2e-455d-b6d5-5204173039dc`),
+                checkboxText: $t(`4a1ad6f2-d061-4fe0-8206-8540442ad038`),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     for (const member of members) {

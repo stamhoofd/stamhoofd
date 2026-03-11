@@ -1,6 +1,6 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="group.organizationId" @update="setOrganization">
-        <SaveView :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" :loading="saving" :title="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)" @save="goNext">
+        <SaveView :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" :loading="saving" :title="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)" @save="goNext">
             <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
                 {{ groupOrganization!.name }}
             </p>
@@ -27,7 +27,7 @@
                 </button>
 
                 <button v-else-if="canUnselectAll" class="inline-link" type="button" @click="deselectAllResults">
-                    {{ $t('e1efdf4c-de0b-4c12-ba87-dec739b2186f') }}
+                    {{ $t('d3850361-5954-45cd-8011-7c22f4b838a5') }}
                 </button>
             </p>
 

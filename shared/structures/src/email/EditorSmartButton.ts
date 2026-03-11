@@ -75,7 +75,7 @@ export class EditorSmartButton extends AutoEncoder {
         buttons.push(EditorSmartButton.create({
             id: 'unsubscribeUrl',
             name: $t(`4f7cc2ac-d4ea-44a9-9625-a6316f8db8bd`),
-            text: $t(`69aaebd1-f031-4237-8150-56e377310cf5`),
+            text: $t(`5ac7a958-ec4d-4e37-b2c0-35b2ada59044`),
             hint: $t(`2d48ac49-d265-4e79-b897-5c5db0816dee`),
             type: 'inline',
         }));

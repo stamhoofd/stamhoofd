@@ -63,7 +63,7 @@ const title = computed(() => {
         return props.group.settings.name.toString();
     }
 
-    return $t(`938926c1-cb27-427d-aabd-638c5ec1d14a`);
+    return $t(`3f4c9896-7f02-4b49-ad29-2d363a8af71f`);
 });
 
 const estimatedRows = computed(() => {

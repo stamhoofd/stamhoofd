@@ -40,7 +40,7 @@
                         </p>
 
                         <p v-else-if="pack.alreadyBought" class="style-title-prefix-list">
-                            {{ $t('493f3fc9-ea9e-4b3d-8af6-e15cd3fd2539') }}
+                            {{ $t('079afc7a-6ccb-4c7f-b739-24198b0cfec2') }}
                         </p>
 
                         <h3 class="style-title-list">

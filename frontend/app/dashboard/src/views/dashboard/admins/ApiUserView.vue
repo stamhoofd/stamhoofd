@@ -132,7 +132,7 @@ async function save() {
     if ((name.value?.length ?? 0) < 2) {
         errorGroup.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`769aee89-b291-4c53-90ec-16539bca5a33`),
+            message: $t(`396f75d7-e7d9-42d9-a50e-9ace51c92fe6`),
             field: 'name',
         }));
     }
@@ -240,7 +240,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('545f3db5-ae26-41dd-8771-e123bc2b583e'), $t('f0c89199-09c8-48d4-ad73-bff0ac426df8'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

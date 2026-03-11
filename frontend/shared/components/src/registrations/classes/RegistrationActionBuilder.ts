@@ -232,7 +232,7 @@ export class RegistrationActionBuilder {
 
     private getUnsubscribeAction(): InMemoryTableAction<PlatformRegistration> | null {
         return new InMemoryTableAction({
-            name: $t(`69aaebd1-f031-4237-8150-56e377310cf5`),
+            name: $t(`5ac7a958-ec4d-4e37-b2c0-35b2ada59044`),
             destructive: true,
             priority: 0,
             groupIndex: 7,
@@ -247,7 +247,7 @@ export class RegistrationActionBuilder {
 
     getChargeAction() {
         return new AsyncTableAction({
-            name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
+            name: $t(`4273d00c-7b8b-48ec-906d-80d6feb23655`),
             icon: 'calculator',
             priority: 13,
             groupIndex: 4,
@@ -275,7 +275,7 @@ export class RegistrationActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`a5cf8db3-5fb8-4a4c-9940-31d758433f23`),
+                name: $t(`3763ba3a-1023-4265-b675-1c2090d4c37b`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -433,7 +433,7 @@ export class RegistrationActionBuilder {
         }
 
         return new InMemoryTableAction({
-            name: $t(`ffe15b57-4e70-4657-9a0b-af860eed503e`),
+            name: $t(`7c6e4f2d-297d-4183-9079-ba123f481eb5`),
             priority: 1,
             groupIndex: 1,
             needsSelection: true,

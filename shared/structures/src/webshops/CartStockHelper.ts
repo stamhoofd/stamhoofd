@@ -159,7 +159,7 @@ export class CartStockHelper {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? $t('f9083abe-bb56-4e5d-9af6-f73a91c2666b', { 'product-price-name': productPrice.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`44ba544c-3db6-4f35-b7d1-b63fdcadd9ab`) : (remaining === 0 ? $t(`b1c82354-0aa6-4bef-bef6-84261180919a`) : (remaining < showStockBelow ? $t('bd543e10-ee7c-4207-b6e6-e3a74ea69cee', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            shortText: remainingStock === 0 ? $t(`0100521c-b38e-4925-9484-44d44f3dfa09`) : (remaining === 0 ? $t(`947eb845-90da-43e5-a3bb-78903f7edd72`) : (remaining < showStockBelow ? $t('bd543e10-ee7c-4207-b6e6-e3a74ea69cee', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
         };
     }
 
@@ -236,7 +236,7 @@ export class CartStockHelper {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht` : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`44ba544c-3db6-4f35-b7d1-b63fdcadd9ab`) : (remaining === 0 ? $t(`b1c82354-0aa6-4bef-bef6-84261180919a`) : (remaining < showStockBelow ? $t('bd543e10-ee7c-4207-b6e6-e3a74ea69cee', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            shortText: remainingStock === 0 ? $t(`0100521c-b38e-4925-9484-44d44f3dfa09`) : (remaining === 0 ? $t(`947eb845-90da-43e5-a3bb-78903f7edd72`) : (remaining < showStockBelow ? $t('bd543e10-ee7c-4207-b6e6-e3a74ea69cee', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
         };
     }
 
@@ -377,7 +377,7 @@ export class CartStockHelper {
                 stock: 1,
                 remaining: 0,
                 text: $t(`5a6717be-0f1e-47b3-b9a8-76d6eb0057be`),
-                shortText: $t(`b1c82354-0aa6-4bef-bef6-84261180919a`),
+                shortText: $t(`947eb845-90da-43e5-a3bb-78903f7edd72`),
             };
         }
 

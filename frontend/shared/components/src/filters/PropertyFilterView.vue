@@ -81,7 +81,7 @@ export default class PropertyFilterView extends Mixins(NavigationMixin) {
         if (!this.isChanged()) {
             return true;
         }
-        return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+        return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
     }
 }
 </script>

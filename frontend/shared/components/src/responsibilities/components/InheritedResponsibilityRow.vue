@@ -14,7 +14,7 @@
 
         <h2 class="style-title-list">
             {{ responsibility.name }} <template v-if="group">
-                {{ $t('e9ec956f-3a71-4460-b09d-dfec22a1aaf0') }} {{ group.settings.name }}
+                {{ $t('9ddd7aba-9426-4718-9eb0-673b615efcf4') }} {{ group.settings.name }}
             </template>
         </h2>
         <p class="style-description-small">

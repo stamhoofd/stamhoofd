@@ -75,7 +75,7 @@
                     </STInputBox>
                 </div>
                 <div>
-                    <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('b1ceeb6c-1f84-4534-872c-9b4a23e502a6') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
+                    <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('112b7686-dffc-4ae9-9706-e3efcd34898f') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
                         <DateSelection v-model="paidAt" />
                     </STInputBox>
                 </div>
@@ -91,7 +91,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox error-fields="status" :error-box="errors.errorBox" :title="$t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`)">
+                <STInputBox error-fields="status" :error-box="errors.errorBox" :title="$t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`)">
                     <Dropdown v-model="status">
                         <option v-for="m in availableStatuses" :key="m" :value="m">
                             {{ PaymentStatusHelper.getNameCapitalized(m) }}
@@ -420,7 +420,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 defineExpose({
     shouldNavigateAway,

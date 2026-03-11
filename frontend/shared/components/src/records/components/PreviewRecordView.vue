@@ -18,7 +18,7 @@
         <STToolbar>
             <template #right>
                 <button class="button secundary" type="button" @click="dismiss()">
-                    {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
+                    {{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}
                 </button>
             </template>
         </STToolbar>

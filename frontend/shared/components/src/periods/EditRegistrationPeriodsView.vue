@@ -30,7 +30,7 @@
                 </button>
             </p>
 
-            <hr><h2>{{ $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb') }}</h2>
+            <hr><h2>{{ $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3') }}</h2>
         </template>
 
         <STList>
@@ -90,7 +90,7 @@ const sortedPeriods = computed(() => {
 
 const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : patchedOrganization.value.period.period);
 
-const title = computed(() => $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb'));
+const title = computed(() => $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3'));
 
 async function addPeriod() {
     const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
@@ -235,7 +235,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

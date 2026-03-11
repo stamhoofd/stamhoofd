@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+        <STInputBox v-if="!isForResponsibility" error-fields="name" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
             <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`8edda6d9-057a-4740-89f3-a226b8fd4950`)">
         </STInputBox>
 
@@ -19,7 +19,7 @@
                     <Radio v-model="basePermission" value="None" :disabled="lockedMinimumLevel !== PermissionLevel.None" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
+                    {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
                 </h3>
                 <p v-if="basePermission === 'None'" class="style-description-small">
                     {{ $t('1d66f70e-1a42-4479-9e27-683e3f536ccd') }}
@@ -75,7 +75,7 @@
                 </h2>
 
                 <STList>
-                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('62db60da-ef20-4b61-8b69-4541deb5e8db'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('379d43fb-034f-4280-bb99-ea658eaec729'), type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="group in groups" :key="group.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: group.id, name: group.settings.name + ' ('+(group.settings.period?.nameShort ?? '?')+')', type: PermissionsResourceType.Groups }" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" @patch:role="addPatch" />
 
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Groups, patched, groups)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite]" type="resource" :unlisted="true" @patch:role="addPatch" />
@@ -85,7 +85,7 @@
             <div v-if="senders.length" class="container">
                 <hr>
                 <h2>
-                    {{ $t('a6304a41-8c83-419b-8e7e-c26f4a047c19') }}
+                    {{ $t('7dfd0425-b8ff-4dec-8c6d-257d94eabbe7') }}
                 </h2>
                 <p>{{ $t('78db0e8d-3b1f-4982-baf7-dba7c930db48') }}</p>
                 <p class="info-box">
@@ -156,7 +156,7 @@
             </div>
 
             <template v-if="app !== 'admin' || scope === 'organization'">
-                <hr><h2>{{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }}</h2>
+                <hr><h2>{{ $t('0fc72e2d-5fe5-4ed2-ba5d-1f880790c174') }}</h2>
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationFinanceDirector" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
@@ -176,7 +176,7 @@
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
 
@@ -321,7 +321,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`4d88b931-3fa4-497d-8a23-481f8f58a967`), $t(`25d866b7-3859-4a5d-b875-bc286e69f846`))) {
+    if (!await CenteredMessage.confirm($t(`4d88b931-3fa4-497d-8a23-481f8f58a967`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
         return;
     }
 
@@ -368,7 +368,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`3953d383-4f04-42ea-83cd-bf65478ed4a9`), $t(`4cfb2940-8532-446e-b543-a4c7ba9618a3`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 };
 
 defineExpose({

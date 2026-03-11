@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? $t(`455d581c-bfae-47a1-ac6f-e88068edce26`) : $t(`a6e3fab0-579d-4b68-b411-69ada157d06a`)" :disabled="!hasChanges" @save="save">
+    <SaveView :title="isNew ? $t(`2e3852ef-423e-4fcc-82bb-c886a6c61050`) : $t(`770518af-b094-4fca-bc0a-641f508895ef`)" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
             {{ $t('2e3852ef-423e-4fcc-82bb-c886a6c61050') }}
         </h1>
         <h1 v-else>
-            {{ $t(`a6e3fab0-579d-4b68-b411-69ada157d06a`) }}
+            {{ $t(`770518af-b094-4fca-bc0a-641f508895ef`) }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -43,7 +43,7 @@
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>

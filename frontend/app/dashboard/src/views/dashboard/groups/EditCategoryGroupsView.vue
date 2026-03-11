@@ -50,7 +50,7 @@
         </template>
 
         <template v-if="groups.length > 0 || categories.length === 0">
-            <hr><h2>{{ $t('edfc89fe-a16e-4789-bda9-1529f8a97f7c') }}</h2>
+            <hr><h2>{{ $t('2a033cd8-b9e4-4a92-a8a6-b4a687d87e79') }}</h2>
             <p v-if="categories.length > 0" class="error-box">
                 {{ $t('dbf164b2-e1d2-4c80-8011-a5d5ce3b2221') }}
             </p>

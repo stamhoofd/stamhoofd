@@ -95,7 +95,7 @@ export class Payment extends AutoEncoder {
     get title() {
         if (this.method !== PaymentMethod.Unknown) {
             if (this.type !== PaymentType.Payment) {
-                return $t(`e13af8ee-f442-4a98-b3e6-6f3d84fba30c`) + ' ' + PaymentMethodHelper.getName(this.method);
+                return $t(`bf20a769-772d-46b2-9b48-2ea29c96f113`) + ' ' + PaymentMethodHelper.getName(this.method);
             }
             return PaymentMethodHelper.getNameCapitalized(this.method);
         }

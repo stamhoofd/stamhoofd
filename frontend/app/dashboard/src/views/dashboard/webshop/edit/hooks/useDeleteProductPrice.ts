@@ -9,7 +9,7 @@ export function useDeleteProductPrice() {
             Toast.error($t('fa6b77cc-0591-4611-a4f8-27a33f2eff1d')).show();
             return;
         }
-        const confirmed = await CenteredMessage.confirm($t('7768f0f4-3202-4da2-a65b-7b96bfa721c9'), $t('fd5d1976-55d5-4b6d-80d8-3d847772599e'));
+        const confirmed = await CenteredMessage.confirm($t('7768f0f4-3202-4da2-a65b-7b96bfa721c9'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'));
         if (!confirmed) return;
 
         const patch = Product.patch({ id: product.id });

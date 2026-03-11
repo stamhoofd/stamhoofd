@@ -155,31 +155,31 @@ export class OrdersExcelExport {
         const wsData: RowValue[][] = [
             [
                 $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
-                $t(`97705203-1c2e-4326-83f2-f1a894dda0c9`),
-                $t(`efca0579-0543-4636-a996-384bc9f0527e`),
-                $t(`4a5e438e-08a1-411e-9b66-410eea7ded73`),
+                $t(`5dd11b77-abf6-4449-ac3f-74ac1edb5d65`),
+                $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
+                $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
                 $t(`2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b`),
-                $t(`eee19242-20ee-4e5c-b2ff-ba122ec6fc06`),
+                $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
                 ...answerNames,
-                $t(`8c38d163-c01b-488f-8729-11de8af7d098`),
-                $t(`f085f874-242d-47cb-a404-96eab69662ec`),
+                $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
+                $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
                 $t(`9c07647c-3b5b-4c93-bfd9-e7c07ae51276`),
                 $t(`0d8b9fa2-d70a-434b-817e-c5b2b3861d91`),
-                $t(`e2c09edd-db1b-4196-9fd3-0a7d3c9f230e`),
-                $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
-                $t(`a9c436ef-31e9-43bd-83ea-742ac331380a`),
+                $t(`40939025-cebb-4afb-90e9-847233cb256f`),
+                $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
+                $t(`54e32267-042e-4cfc-a423-63977769a98d`),
                 ...optionNames,
-                $t(`507ba771-0809-4dda-9b5f-9d7f992b329a`),
+                $t(`2a3d1996-17cd-4ef7-827b-63f2f9b5b84a`),
 
                 // Duplicates
                 $t(`402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3`),
                 $t(`444e7f72-6435-4ae7-bb5d-3fc7e5e79dad`),
-                $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
-                $t(`f6f77de7-7691-4512-bf95-e07d12e9a43c`),
-                $t(`f12ffd5b-2138-41b4-8179-ae7ea2ce7621`),
-                $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
-                $t(`d7003b29-cc92-4ef4-b07b-f283193ef2ae`),
-                $t(`e614cfe5-5940-44e8-8093-e4d07e54beda`),
+                $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
+                $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
+                $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
+                $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
+                $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
+                $t(`3697babf-4463-460f-95ee-683a40e5d46d`),
             ],
         ];
 
@@ -316,7 +316,7 @@ export class OrdersExcelExport {
                     order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : '/',
                     order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime) + ' - ' + Formatter.minutes(order.data.timeSlot.endTime) : '/',
                     PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                    order.payment?.paidAt === null ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
+                    order.payment?.paidAt === null ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
                     OrderStatusHelper.getName(order.status),
                     order.data.discountCodes.map(d => d.code).join(', '),
                 ]);
@@ -424,27 +424,27 @@ export class OrdersExcelExport {
         const wsData: RowValue[][] = [
             [
                 $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
-                $t(`97705203-1c2e-4326-83f2-f1a894dda0c9`),
-                $t(`efca0579-0543-4636-a996-384bc9f0527e`),
-                $t(`4a5e438e-08a1-411e-9b66-410eea7ded73`),
+                $t(`5dd11b77-abf6-4449-ac3f-74ac1edb5d65`),
+                $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
+                $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
                 $t(`2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b`),
-                $t(`eee19242-20ee-4e5c-b2ff-ba122ec6fc06`),
+                $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
                 ...answerNames,
-                $t(`8c38d163-c01b-488f-8729-11de8af7d098`),
+                $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
                 $t(`402fe5ff-cf4e-4d31-b0db-1b8f5dcfebe3`),
                 $t(`444e7f72-6435-4ae7-bb5d-3fc7e5e79dad`),
-                $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
-                $t(`f6f77de7-7691-4512-bf95-e07d12e9a43c`),
+                $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
+                $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
                 $t(`26369a8f-8080-4f00-af46-576fdf563ced`),
-                $t(`e2c09edd-db1b-4196-9fd3-0a7d3c9f230e`),
-                $t(`ea422e20-5ab6-45dd-9886-abe5a207260d`),
+                $t(`40939025-cebb-4afb-90e9-847233cb256f`),
+                $t(`482bd766-39fa-4340-91b4-ae22a23d5fa5`),
                 $t(`a0d99100-f225-416f-bcec-e25df9d651ac`),
                 $t(`341172ee-281e-4458-aeb1-64ed5b2cc8bb`),
-                $t(`f12ffd5b-2138-41b4-8179-ae7ea2ce7621`),
-                $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
-                $t(`d7003b29-cc92-4ef4-b07b-f283193ef2ae`),
-                $t(`e614cfe5-5940-44e8-8093-e4d07e54beda`),
-                ...(shouldIncludeSettements ? [$t(`fe56b791-fc88-4301-a59a-b5b185d1f124`), $t(`544a77e9-c915-4f47-afbf-c626396b0308`)] : []),
+                $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
+                $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
+                $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
+                $t(`3697babf-4463-460f-95ee-683a40e5d46d`),
+                ...(shouldIncludeSettements ? [$t(`4ff3b4aa-8668-4287-bce3-b06cde51ddb7`), $t(`02b47907-73e2-4cb2-b398-784f6cbce23a`)] : []),
                 ...itemNames,
             ],
         ];
@@ -531,7 +531,7 @@ export class OrdersExcelExport {
                     format: '€0.00',
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
-                order.pricePaid < order.totalToPay ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`885254e1-4bd2-40be-a1aa-4c60e592b9b9`),
+                order.pricePaid < order.totalToPay ? $t(`04c630cb-ca58-4613-a25e-d69925e55c37`) : $t(`1c1933f1-fee4-4e7d-9c89-57593fd5bed3`),
                 OrderStatusHelper.getName(order.status),
                 order.data.discountCodes.map(d => d.code).join(', '),
                 ...(shouldIncludeSettements
@@ -555,8 +555,8 @@ export class OrdersExcelExport {
         const wsData: RowValue[][] = [
             [
                 $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
-                $t(`dccdacf7-0760-4b17-8e03-fbfcda7a0b4f`),
-                $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`),
+                $t(`136b7ba4-7611-4ee4-a46d-60758869210f`),
+                $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
                 $t(`7733f484-fc0e-46ff-b0a0-7b674d10015d`),
                 $t(`548f0a30-cdd6-4e9a-9a3c-bdcb3afe11e5`),
                 $t(`1e5893d7-5af8-4029-8a1c-da6294078e9d`),
@@ -625,9 +625,9 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                $t(`a9c436ef-31e9-43bd-83ea-742ac331380a`),
+                $t(`54e32267-042e-4cfc-a423-63977769a98d`),
                 $t(`be748ea7-badc-48b6-ae7a-8eca6341dc08`),
-                $t(`f085f874-242d-47cb-a404-96eab69662ec`),
+                $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
             ],
         ];
 
@@ -692,7 +692,7 @@ export class OrdersExcelExport {
             counter.set(code, productData);
 
             for (const price of product.prices) {
-                const name = price.name || $t('e942f245-9e13-427b-960e-5500a2711a05');
+                const name = price.name || $t('e3ef8c27-f909-4725-b97b-2cbbd9f24bb5');
                 const slug = Formatter.slug(name);
                 productData.productPriceCounts.set(name, 0);
 
@@ -724,7 +724,7 @@ export class OrdersExcelExport {
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.productPrice.name) {
-                    const name = item.productPrice.name || $t('e942f245-9e13-427b-960e-5500a2711a05');
+                    const name = item.productPrice.name || $t('e3ef8c27-f909-4725-b97b-2cbbd9f24bb5');
 
                     if (!productPriceColumns.has(Formatter.slug(name))) {
                         productPriceColumns.set(Formatter.slug(name), {

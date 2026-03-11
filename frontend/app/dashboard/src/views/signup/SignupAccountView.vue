@@ -1,6 +1,6 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar :title="$t(`cc49441a-2dba-4263-a93d-23008adac4f8`)" />
+        <STNavigationBar :title="$t(`8b1933de-fb99-4a61-91c0-a80e5d09cef5`)" />
 
         <main>
             <h1>
@@ -21,10 +21,10 @@
                     <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
                         <div class="input-group">
                             <div>
-                                <input v-model="firstName" data-testid="first-name-input" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                                <input v-model="firstName" data-testid="first-name-input" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                             </div>
                             <div>
-                                <input v-model="lastName" data-testid="last-name-input" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                                <input v-model="lastName" data-testid="last-name-input" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                             </div>
                         </div>
                     </STInputBox>
@@ -65,7 +65,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" data-testid="signup-account-button" @click.prevent="goNext">
-                        {{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}
+                        {{ $t('2fd0cda5-225c-4b65-87b1-210c9b54023c') }}
                     </button>
                 </LoadingButton>
             </template>

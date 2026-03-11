@@ -49,7 +49,7 @@ export class MemberEmergencyContactsStep implements EditMemberStep {
             title: $t(`36756394-4c8d-4b0d-bc88-9fe1d58caf1d`),
             member: manager.member,
             component: markRaw(EditEmergencyContactsBox),
-            saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
+            saveText: $t(`2a9075bb-a743-411e-8a3d-94e5e57363f0`),
             markReviewed: ['emergencyContacts'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate)

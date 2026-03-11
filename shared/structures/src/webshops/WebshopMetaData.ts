@@ -170,7 +170,7 @@ export class CheckoutMethodTypeHelper {
             case CheckoutMethodType.OnSite:
                 return $t(`25e67f34-649f-4743-9cdd-d2a81d252daf`);
             case CheckoutMethodType.Takeout:
-                return $t(`edd72e8b-76de-45df-93a0-ecc72efb849a`);
+                return $t(`cca905ff-7d00-4b9d-84c6-bda2bb5ea898`);
             case CheckoutMethodType.Delivery:
                 return $t(`abba46da-6bb8-40cb-88f0-186c2409a0a5`);
         }

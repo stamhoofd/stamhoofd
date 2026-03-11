@@ -81,7 +81,7 @@ export class CenteredMessage {
         }
     }
 
-    addCloseButton(text = $t(`bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b`), action?: (() => Promise<any>)) {
+    addCloseButton(text = $t(`83db2c73-38a3-4d13-9984-2f19f95e1329`), action?: (() => Promise<any>)) {
         this.buttons.push(new CenteredMessageButton(text, { type: 'secundary', action }));
         return this;
     }
@@ -116,7 +116,7 @@ export class CenteredMessage {
                     availabilityDelay: destructive && confirmText !== $t('106b3169-6336-48b8-8544-4512d42c4fd6') ? 1_000 : undefined,
                 },
                 {
-                    text: cancelText ?? $t(`bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b`),
+                    text: cancelText ?? $t(`83db2c73-38a3-4d13-9984-2f19f95e1329`),
                     type: 'secundary',
                     value: false,
                 },

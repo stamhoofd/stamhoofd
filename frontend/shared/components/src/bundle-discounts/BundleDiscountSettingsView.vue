@@ -14,7 +14,7 @@
             <template #item="{item: bundleDiscount}">
                 <STListItem :selectable="true" class="right-description right-stack" @click="() => $navigate(Routes.BundleDiscount, { params: { id: bundleDiscount.id } })">
                     <h3 class="style-title-list">
-                        {{ bundleDiscount.name || $t('0a0f4ac1-1b0e-48f0-9f21-d1c77ec3f008') }}
+                        {{ bundleDiscount.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
                     </h3>
                     <p class="style-description-small">
                         {{ bundleDiscount.humanDescription }}
@@ -167,7 +167,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

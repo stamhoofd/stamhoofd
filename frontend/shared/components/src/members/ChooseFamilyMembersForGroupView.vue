@@ -1,6 +1,6 @@
 <template>
     <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="group.organizationId" @update="setOrganization">
-        <SaveView :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" :title="group.settings.name" @save="goNext">
+        <SaveView :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" :title="group.settings.name" @save="goNext">
             <p v-if="!checkout.isAdminFromSameOrganization" class="style-title-prefix">
                 {{ groupOrganization!.name }}
             </p>

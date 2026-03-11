@@ -249,7 +249,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     }
 
     get stringValue() {
-        return this.selected ? $t(`ff791e99-3fe7-4f02-8219-32bcbeef2ab0`) : $t(`fc34f24a-1821-4ebc-a770-bf3368a98275`);
+        return this.selected ? $t(`d87cdb56-c8a6-4466-a6fd-f32fe59561f5`) : $t(`01b79813-933b-4045-b426-82700f921eaa`);
     }
 
     get objectValue() {
@@ -258,7 +258,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     get excelValues() {
         return [{
-            value: this.selected ? (this.comments ? this.comments : $t(`de05b76e-191f-4c55-900d-5e396c819bc0`)) : $t(`467bcb0a-f89a-4b9c-8ecd-c44a0c951049`),
+            value: this.selected ? (this.comments ? this.comments : $t(`1ae8cbc7-9ef5-43db-b9a3-0117dfa43be1`)) : $t(`08dd4181-69c6-4888-b32a-07224f1c4349`),
             format: null,
         }];
     }
@@ -404,7 +404,7 @@ export class RecordAddressAnswer extends RecordAnswer {
         if (this.settings.required && this.address === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
+                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
                 field: 'input',
             });
         }
@@ -456,7 +456,7 @@ export class RecordDateAnswer extends RecordAnswer {
         if (this.settings.required && this.dateValue === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
+                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
                 field: 'input',
             });
         }
@@ -560,7 +560,7 @@ export class RecordImageAnswer extends RecordAnswer {
         if (this.settings.required && this.image === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
+                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
                 field: 'input',
             });
         }
@@ -591,7 +591,7 @@ export class RecordFileAnswer extends RecordAnswer {
         if (this.settings.required && this.file === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`98b6e6a5-1995-4827-b2cb-e02de0fc9f65`),
+                message: $t(`0169f40b-45fd-4552-979d-095381626df1`),
                 field: 'input',
             });
         }

@@ -19,7 +19,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('fc1cc5ad-1590-422d-96a5-4523f10fcab1') }}
+                        {{ $t('aed41648-b8ad-476d-b98a-0221d387f96a') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('30a87df1-5f18-4639-8f00-6b333f84d87f') }}
@@ -34,7 +34,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/seating-plan.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('6a49e896-3491-4f6e-a947-d180fce6c6e8') }}
+                        {{ $t('5b280bad-2167-42e6-8c4f-177ab1d76c67') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('558631c2-ee72-4b1e-a8d8-b58a3f863f3f') }}
@@ -92,7 +92,7 @@
 
             <template v-if="hasFullPermissions">
                 <hr>
-                <h2>{{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}</h2>
+                <h2>{{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -207,7 +207,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('da5f0578-ebf9-40e1-8caf-baa3a7970b28') }}
+                            {{ $t('d0f49d2a-6b83-4e03-9480-4d0995bbb0a1') }}
                         </h2>
                         <p class="style-description">
                             {{ $t('baad0752-43d1-4bea-9e39-3a9f4b518723') }}
@@ -237,7 +237,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('d5bbcc81-57e1-4941-a70b-7b63e39c8916') }}
+                            {{ $t('1eafb06a-5385-42fd-8f1a-2bbaaf735e53') }}
                         </h2>
                         <p class="style-description">
                             {{ $t('74c25692-65bf-4e25-ae9c-0e8363c0e738') }}
@@ -248,7 +248,7 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('f45871aa-7723-42c3-9781-f4f9b8d7250a') }}</h2>
+                <hr><h2>{{ $t('4a7e3838-f75a-4610-9caa-0f75849ea142') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
@@ -286,7 +286,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
+                            {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
                         </h2>
                         <p class="style-description">
                             {{ $t('d2387560-b2ae-4e44-931b-d3fb20c63563') }}
@@ -297,7 +297,7 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+                <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
                 <STList>
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
@@ -310,7 +310,7 @@
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}</span>
+                                <span>{{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -405,7 +405,7 @@
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

@@ -102,7 +102,7 @@ export class ResourcePermissions extends AutoEncoder {
             let prefix = $t(`5f235a48-96bc-4db1-9de8-a3266b8edede`);
 
             if (resource.level === PermissionLevel.Write) {
-                prefix = $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`);
+                prefix = $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`);
             }
             else if (resource.level === PermissionLevel.Full) {
                 prefix = $t(`d5c41a61-1870-4dff-9422-726f8e2a1227`);
@@ -125,7 +125,7 @@ export class ResourcePermissions extends AutoEncoder {
                 let suffix = ' ' + $t(`5f235a48-96bc-4db1-9de8-a3266b8edede`);
 
                 if (all.level === PermissionLevel.Write) {
-                    suffix = ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`);
+                    suffix = ' ' + $t(`8455850d-829f-412f-bf1f-eedb2caa9f57`);
                 }
                 else if (all.level === PermissionLevel.Full) {
                     prefix = $t(`ef63f5fe-3428-4c1a-b98d-5816bc403e09`) + ' ';

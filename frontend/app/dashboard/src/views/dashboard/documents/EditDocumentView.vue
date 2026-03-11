@@ -10,7 +10,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
             <input v-model="description" class="input" type="text" :placeholder="$t(`fe417724-5dbd-4310-b7a1-232ab6fb63e6`)">
         </STInputBox>
 

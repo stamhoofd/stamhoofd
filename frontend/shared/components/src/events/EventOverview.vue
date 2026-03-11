@@ -60,7 +60,7 @@
 
                     <div v-if="canWriteEvent" class="container">
                         <hr><h2>
-                            {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
+                            {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
                         </h2>
 
                         <STList class="illustration-list">
@@ -99,7 +99,7 @@
                                     <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
+                                    {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
                                 </h2>
                                 <p class="style-description">
                                     {{ $t('7c32440d-6a06-4a53-8522-b84c0227fbfe') }}
@@ -117,7 +117,7 @@
                                     {{ $t('9d7bf734-ef1e-421b-ae0f-3dec3040a360') }}
                                 </h2>
                                 <h2 v-else class="style-title-list">
-                                    {{ webshop.meta.name ?? $t('adb2856b-67d7-4dbf-bf16-e4478250a05d') }}
+                                    {{ webshop.meta.name ?? $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b') }}
                                 </h2>
                                 <p v-if="canEditWebshopHere" class="style-description-small">
                                     {{ $t('485a1995-f06e-4c04-a9cb-8f38a043cf98') }}
@@ -378,7 +378,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`81df09d0-56ee-491d-b474-85173b1401dd`));
+            prefixes.push($t(`33c4f792-005f-4fb1-ad98-397dd92038aa`));
         }
     }
     else {
@@ -391,7 +391,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
+    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
 
     if (groupOrganization.value && props.event.organizationId === null) {
         return `${base} (via ${groupOrganization.value.name})`;

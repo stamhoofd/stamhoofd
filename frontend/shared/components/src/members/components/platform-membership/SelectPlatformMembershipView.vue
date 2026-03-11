@@ -40,7 +40,7 @@
                     </p>
 
                     <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days">
-                        <STInputBox :title="$t('3d3a30bb-3628-413e-8d1a-3864b1dae8e1')" :error-box="errors.errorBox" error-fields="startDate">
+                        <STInputBox :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :error-box="errors.errorBox" error-fields="startDate">
                             <DateSelection v-model="customStartDate" class="option" :min="minimumStartDateForDaysTypes" />
                         </STInputBox>
 
@@ -49,7 +49,7 @@
                         </STInputBox>
                     </div>
                     <div v-else-if="selectedMembershipType.id === type.id">
-                        <STInputBox :title="$t('3d3a30bb-3628-413e-8d1a-3864b1dae8e1')" :error-box="errors.errorBox" error-fields="startDate">
+                        <STInputBox :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :error-box="errors.errorBox" error-fields="startDate">
                             <DateSelection
                                 v-model="customStartDate"
                                 class="option"
@@ -93,7 +93,7 @@ const props = defineProps<{
 
 const title = $t('cb85826e-06fc-473c-95c2-ba338fdbab50');
 const loading = ref(false);
-const saveText = $t(`497e6653-45eb-4e5f-b350-2b3aafd3b62d`);
+const saveText = $t(`36ba68cb-2159-4179-8ded-89e73d47cd87`);
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
@@ -170,7 +170,7 @@ async function save() {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`e009c5b1-ee75-43b3-989a-60b895ee05c1`),
+                    message: $t(`318924c0-7a79-4cfa-b206-ffc27c4d32b7`),
                 }));
             }
 
@@ -289,7 +289,7 @@ function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const priceConfig = periodConfig.getPriceConfigForDate(date);
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`b51dbba5-8e12-4835-bdd7-b9fb7e306d8d`);
+        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`42ac723d-9e5f-4324-a2b9-f14ceeba10d8`);
     }
 
     const tagIds = selectedOrganization.value?.meta.tags ?? [];

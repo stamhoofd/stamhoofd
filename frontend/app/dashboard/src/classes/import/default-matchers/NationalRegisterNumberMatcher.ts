@@ -11,7 +11,7 @@ import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 // should come after birthday
 export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatcher implements BaseColumnMatcher {
     getName(): string {
-        return $t('ff818d9d-658a-42cd-924e-75fc839aa9ea');
+        return $t('00881b27-7501-4c56-98de-55618be2bf11');
     }
 
     get id() {

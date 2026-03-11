@@ -33,7 +33,7 @@ const props = withDefaults(
         items: { name: string; value: T; description?: string }[];
     }>(), {
         nullable: false as any,
-        nullableLabel: () => $t(`4760e3ab-3cb5-4045-b252-ef923dc2bc9d`),
+        nullableLabel: () => $t(`3743b6e2-1c6b-4831-a228-6ef082377e3b`),
     },
 );
 

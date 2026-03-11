@@ -38,15 +38,15 @@
         <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                 </div>
                 <div>
-                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" autocomplete="family-name" :disabled="!canEditDetails" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" autocomplete="family-name" :disabled="!canEditDetails" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                 </div>
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" />
+        <EmailInput v-model="email" :validator="$errors.validator" :required="true" :disabled="!canEditDetails" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" />
 
         <template v-if="getUnloadedPermissions(user)">
             <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
@@ -72,13 +72,13 @@
 
         <template v-if="!isNew && getUnloadedPermissions(user)">
             <hr v-if="!isNew"><h2>
-                {{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}
+                {{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}
             </h2>
             <p>{{ $t('45b52b33-dfa4-4afa-81d2-d598626b2701') }}</p>
 
             <button class="button secundary danger" type="button" @click="doDelete()">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </template>
     </SaveView>
@@ -154,7 +154,7 @@ const save = async () => {
     if ((lastName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`d26a3f0b-667f-463c-ac49-8aab0462c0c3`),
+            message: $t(`bc27bb72-c06d-4a05-8e22-e920d01cc1f4`),
             field: 'lastName',
         }));
     }
@@ -225,7 +225,7 @@ const doDelete = async () => {
         return false;
     }
 
-    if (!await CenteredMessage.confirm($t(`e8b646d5-1377-465e-b29d-163d437e5c02`), $t(`25d866b7-3859-4a5d-b875-bc286e69f846`))) {
+    if (!await CenteredMessage.confirm($t(`e8b646d5-1377-465e-b29d-163d437e5c02`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
         return false;
     }
 
@@ -316,7 +316,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`3953d383-4f04-42ea-83cd-bf65478ed4a9`), $t(`4cfb2940-8532-446e-b543-a4c7ba9618a3`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 };
 
 defineExpose({

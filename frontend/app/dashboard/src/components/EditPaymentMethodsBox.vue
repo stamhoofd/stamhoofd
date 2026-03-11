@@ -8,7 +8,7 @@
                         {{ mollieOrBuckarooName }}
                     </option>
                     <option v-else :value="null">
-                        {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
+                        {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
                     </option>
                     <option v-for="account in stripeAccounts" :key="account.id" :value="account.id">
                         {{ account.meta.settings.dashboard.display_name }} - {{ account.meta.business_profile.name }}, xxxx {{ account.meta.bank_account_last4 }} - {{ account.accountId }}
@@ -18,7 +18,7 @@
             <p v-if="stripeAccountObject && stripeAccountObject.warning" :class="stripeAccountObject.warning.type + '-box'">
                 {{ stripeAccountObject.warning.text }}
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}
+                    {{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}
                 </a>
             </p>
 
@@ -40,7 +40,7 @@
             </STList>
 
             <template v-if="showAdministrationFee">
-                <hr><h2>{{ $t('be98be36-f796-4f96-b054-4d2a09be3d79') }}</h2>
+                <hr><h2>{{ $t('a0d99100-f225-416f-bcec-e25df9d651ac') }}</h2>
                 <p>{{ $t('b091538b-014e-4db2-8241-9ed98e0c51c7') }}</p>
 
                 <div class="split-inputs">
@@ -512,7 +512,7 @@ const transferTypes = computed(() => {
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? $t(`1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07`) : $t(`4d496edf-0203-4df3-a6e9-3e58d226d6c5`),
+            name: props.type === 'registration' ? $t(`1add2f6b-1c51-49f9-9fe3-a9a1ad62ad07`) : $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
         },
         {
             value: TransferDescriptionType.Fixed,

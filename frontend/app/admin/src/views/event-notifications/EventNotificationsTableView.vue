@@ -91,7 +91,7 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'submittedAt',
         name: $t('16c87ee7-27b1-4b87-93e3-221d35038e6a'),
         getValue: e => e.submittedAt,
-        format: d => d ? Formatter.date(d, true) : $t('faf32311-9a1c-4659-8156-e1714071ca68'),
+        format: d => d ? Formatter.date(d, true) : $t('4929b81e-6f1d-4859-889b-3fb016e97286'),
         minimumWidth: 60,
         recommendedWidth: 100,
         index: 0,
@@ -99,7 +99,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'startDate',
-        name: $t('86983e38-4283-4f0a-bd1d-f48f050d3681'),
+        name: $t('300d2935-b578-48cc-b58e-1c0446a68d59'),
         getValue: e => e.startDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -109,7 +109,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'endDate',
-        name: $t('c15040b1-3202-45a8-8d30-030a4e4c5f9c'),
+        name: $t('3c90169c-9776-4d40-bda0-dba27a5bad69'),
         getValue: e => e.endDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -119,7 +119,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'event.name',
-        name: $t('8e2f97c0-0687-4b50-91f1-2b0e266de755'),
+        name: $t('394aafa1-811b-4ed4-bfc6-c12ae59ff9b6'),
         getValue: e => e.events.map(e => e.name).join(', '),
         minimumWidth: 200,
         recommendedWidth: 100,
@@ -130,7 +130,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, EventNotificationStatus>({
         id: 'status',
-        name: $t('fde0cfa6-c279-4eef-ab75-8f62fd4028a8'),
+        name: $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8'),
         getValue: organization => organization.status,
         format: status => Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(status)),
         getStyle: (status) => {
@@ -152,7 +152,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.name',
-        name: $t('87a2582f-6de5-4b59-9395-7c49f8540659'),
+        name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
         getValue: notification => notification.organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -160,7 +160,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.uriPadded',
-        name: $t('5dd0bc69-83ba-4ee7-99e9-141d0cdf5a84'),
+        name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
         getValue: notification => notification.organization.uri,
         minimumWidth: 100,
         recommendedWidth: 200,

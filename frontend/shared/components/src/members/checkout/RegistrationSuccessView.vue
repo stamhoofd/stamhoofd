@@ -25,7 +25,7 @@
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss({ force: true })">
-                    <span>{{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}</span>
+                    <span>{{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}</span>
                     <span class="icon arrow-right" />
                 </button>
             </template>
@@ -86,10 +86,10 @@ const title = computed(() => {
 
     if (names.length > 0) {
         if (names.length > 3) {
-            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
+            t += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
         }
         else if (names.length > 1) {
-            t += Formatter.joinLast(names, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
+            t += Formatter.joinLast(names, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6a96aea2-95ce-4b01-91ff-d0f83333c951`);
         }
         else {
             t += names.join('') + ' ' + $t(`4ca47c6a-ca4e-4f63-b303-b45536072957`);
@@ -98,14 +98,14 @@ const title = computed(() => {
 
     if (waitingListNames.length > 0) {
         if (names.length > 0) {
-            t += ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ';
+            t += ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ';
         }
 
         if (waitingListNames.length > 3) {
-            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
+            t += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`6e6fec93-89e1-4a60-8f96-22936f2f68d7`)], ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
         }
         else if (waitingListNames.length > 1) {
-            t += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
+            t += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + ' ' + $t(`6d897353-bd6c-44cc-8044-5f68cc538b2c`);
         }
         else {
             t += waitingListNames.join('') + ' ' + $t(`59ecd638-c6a3-45b1-80bb-96c4e3bdde05`);

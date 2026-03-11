@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('5d0d0da2-3c50-4ee5-9a44-68f4a65f76b3')" error-fields="notes" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" error-fields="notes" :error-box="errors.errorBox" class="max">
             <input v-model="customName" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="200" :placeholder="patched.name">
         </STInputBox>
 
@@ -15,11 +15,11 @@
         </p>
 
         <div class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`33a674c2-6981-442b-9bd4-01f71da7a159`)">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`300d2935-b578-48cc-b58e-1c0446a68d59`)">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f852932e-380e-4b9a-916b-2bc008d8c08a`)">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`3c90169c-9776-4d40-bda0-dba27a5bad69`)">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :min="startDate" />
             </STInputBox>
         </div>
@@ -112,7 +112,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('ca303b26-d586-4e46-ad0d-af968d252261'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('2e055510-5527-45f9-8ed7-7d8f8cd03a4f'))) {
+    if (!await CenteredMessage.confirm($t('ca303b26-d586-4e46-ad0d-af968d252261'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('2e055510-5527-45f9-8ed7-7d8f8cd03a4f'))) {
         return;
     }
 
@@ -183,7 +183,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

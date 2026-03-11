@@ -269,7 +269,7 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.SignupAlreadyHasAccount: return $t(`afa10626-9a93-4858-8edc-6558e036ca42`);
             case EmailTemplateType.ForgotPasswordButNoAccount: return $t(`29c387e2-6d0f-42d9-aa66-bfdc29b23f96`);
-            case EmailTemplateType.ForgotPassword: return $t(`66176374-df16-49fb-a487-5269b97e7286`);
+            case EmailTemplateType.ForgotPassword: return $t(`0eb7d18f-2fd7-4ac8-acb6-5e1c31482b3c`);
             case EmailTemplateType.DeleteAccountConfirmation: return $t(`79b7a72d-a624-43dd-9650-854cbca7e4b3`);
             case EmailTemplateType.VerifyEmail: return $t(`d9a67643-7954-4738-9078-0621025453ea`);
             case EmailTemplateType.VerifyEmailWithoutCode: return $t(`384b21d8-9ecc-419b-afea-a473a2b8ea0a`);
@@ -314,7 +314,7 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.RegistrationConfirmation:
             case EmailTemplateType.RegistrationTransferDetails:
-                return $t(`95ac7564-3fdd-4427-be59-51fd02606b76`);
+                return $t(`3f4c9896-7f02-4b49-ad29-2d363a8af71f`);
 
             case EmailTemplateType.OrderNotification:
                 return $t(`e38c0b49-b038-4c9c-9653-fe1e4a078226`);
@@ -376,7 +376,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationAccepted:
             case EmailTemplateType.EventNotificationRejected:
             case EmailTemplateType.EventNotificationPartiallyAccepted:
-                return $t('a4658017-52e9-4732-8570-2c60e5d6a5cd');
+                return $t('000be3fe-9354-4c2c-baf1-d0cd4d079830');
         }
     }
 

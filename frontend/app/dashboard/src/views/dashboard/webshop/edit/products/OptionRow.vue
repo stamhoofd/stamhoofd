@@ -9,10 +9,10 @@
             {{ option.name || 'Naamloos' }}
         </h3>
         <p v-if="option.isSoldOut" class="style-description-small">
-            {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
+            {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
         </p>
         <p v-else-if="option.stock" class="style-description-small">
-            {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(option.remainingStock ?? 0, $t('86e03c52-25db-45f7-a129-5f165b289324'), $t('7d5de81e-9ae9-4ec6-86e1-844ca6a75fb1'))}) }}
+            {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(option.remainingStock ?? 0, $t('599ce864-4059-48eb-82f8-9191e9507050'), $t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a'))}) }}
         </p>
 
         <template #right>

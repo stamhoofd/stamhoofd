@@ -2,7 +2,7 @@
     <div class="st-view member-segmented-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
-                <button v-if="hasWrite" v-tooltip="$t('f2eb0c04-0dca-4c8e-b920-7044a65aee6a')" class="button icon edit" type="button" @click="editThisMember" />
+                <button v-if="hasWrite" v-tooltip="$t('28f20fae-6270-4210-b49d-68b9890dbfaf')" class="button icon edit" type="button" @click="editThisMember" />
                 <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('0b44456e-1338-4468-ba71-5aabc171555f')" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('4b09d022-aac5-49da-80c2-9c2dcd2f642c')" @click="goForward" />
                 <button v-long-press="(e: any) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
@@ -78,7 +78,7 @@ const tabs = computed(() => {
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
-            name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
+            name: $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`),
             component: new ComponentWithProperties(MemberPlatformMembershipTab),
         });
     }

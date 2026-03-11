@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`c2cbfcc6-dfdd-4047-b178-76211382d405`)" />
+        <STNavigationBar :title="$t(`1b5413cd-5858-4a73-872b-5b6b26345039`)" />
 
         <main class="center">
             <h1>
@@ -11,11 +11,11 @@
             <div class="input-with-buttons">
                 <div>
                     <div class="split-inputs">
-                        <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`22761311-3065-49fd-82ca-bc60aae3c975`)">
+                        <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`1e43813a-f48e-436c-bb49-e9ebb0f27f58`)">
                             <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" :required="false" :placeholder="$t(`2aa1f986-93d6-410c-9746-70c02fb4f5ea`)" />
                         </STInputBox>
 
-                        <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`feaf0054-1b99-4526-821e-3c63e64574a0`)">
+                        <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f3cc0597-fe12-4cb1-bd41-4c7ce5d59235`)">
                             <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :required="false" :placeholder="$t(`92be5ac5-79f3-4f2c-9525-7c11f173931a`)" />
                         </STInputBox>
                     </div>

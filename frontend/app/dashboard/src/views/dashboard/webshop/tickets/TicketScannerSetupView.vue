@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`66440c5e-e663-4406-b6f0-868e0bb50bab`)" />
+        <STNavigationBar :title="$t(`213bb888-16d4-4cdc-b917-6e6ec8b6fc84`)" />
 
         <main>
             <h1>

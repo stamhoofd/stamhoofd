@@ -5,7 +5,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" @update:model-value="setEmail(n - 1, $event)">
+        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" @update:model-value="setEmail(n - 1, $event)">
             <template #right>
                 <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
                 <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />

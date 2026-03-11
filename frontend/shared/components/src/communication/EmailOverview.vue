@@ -8,7 +8,7 @@
                 <button v-if="email.status === EmailStatus.Draft" v-tooltip="$t('2b799708-dc8a-4ab5-ad15-11c89bfa23da')" type="button" class="button icon send" @click="editEmail" />
                 <button v-else v-tooltip="$t('a7c3d104-58c1-41ac-8a33-febe6f474215')" type="button" class="button icon edit" @click="editEmail" />
                 <LoadingButton v-if="email.status === EmailStatus.Draft && auth.canAccessEmail(email, PermissionLevel.Full)" :loading="isDeletingEmail">
-                    <button v-tooltip="$t('d67c7c61-5387-48a5-b63b-a78682a54fd8')" type="button" class="button icon trash" @click="doDelete" />
+                    <button v-tooltip="$t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689')" type="button" class="button icon trash" @click="doDelete" />
                 </LoadingButton>
             </template>
         </STNavigationBar>
@@ -85,7 +85,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('52961dd4-be19-47a1-abe6-1e3c34e8157c') }}: {{ formatDateTime(email.createdAt) }}
+                        {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }}: {{ formatDateTime(email.createdAt) }}
                     </h2>
                 </STListItem>
 
@@ -180,7 +180,7 @@
 
             <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued && auth.canAccessEmail(email, PermissionLevel.Write)">
                 <hr>
-                <h2>{{ $t('7c093146-6de1-413b-bbda-2ada3fd63dea') }}</h2>
+                <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
                 <STList>
                     <STListItem v-if="email.status === EmailStatus.Failed" :selectable="true" element-name="button" @click="retrySending">
@@ -253,7 +253,7 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('d67c7c61-5387-48a5-b63b-a78682a54fd8') }}
+                            {{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}
                         </h3>
                         <p class="style-description-small">
                             {{ $t('cde18ff3-28ea-40ad-b385-37129f4091c4') }}
@@ -445,7 +445,7 @@ async function doDelete() {
     }
     if (!await CenteredMessage.confirm(
         $t('c3a06b52-d25c-4ec4-afe7-208773e1332e'),
-        $t('eee720f3-5e00-429c-a847-cb3d4e237e4d'),
+        $t('201437e3-f779-47b6-b4de-a0fa00f3863e'),
     )) {
         return;
     }

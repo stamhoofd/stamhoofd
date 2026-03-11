@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`e58db898-16ad-4bb4-840c-2315ca894ff6`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`5a5c1ed2-516e-43a1-9e64-25a7f6190ed3`)" @save="save">
         <h1>
             {{ $t('5a5c1ed2-516e-43a1-9e64-25a7f6190ed3') }}
         </h1>
@@ -17,15 +17,15 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <Checkbox :model-value="!getFeatureFlag('disable-events')" @update:model-value="setFeatureFlag('disable-events', !$event)">
-            {{ $t('d9b4472a-a395-4877-82fd-da6cb0140594') }}
+            {{ $t('60231186-b00f-4d07-a5c7-4a905467e254') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('member-trials')" @update:model-value="setFeatureFlag('member-trials', !!$event)">
-            {{ $t('8273e002-e243-4d43-9085-c0a1e7c2c301') }}
+            {{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
-            {{ $t('caf486c6-818a-4d2b-9fdb-728c6af71481') }}
+            {{ $t('000be3fe-9354-4c2c-baf1-d0cd4d079830') }}
         </Checkbox>
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
             {{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}
@@ -183,7 +183,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

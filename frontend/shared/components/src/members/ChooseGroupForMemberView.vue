@@ -117,7 +117,7 @@ const alreadyRegisteredMessage = computed(() => {
 
     if (groups.length > 0) {
         const firstName = props.member.patchedMember.firstName;
-        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
+        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
         return $t(`fc00001e-5d05-485c-b931-1122504e5d36`, { firstName, groups: groupsString });
     }
 

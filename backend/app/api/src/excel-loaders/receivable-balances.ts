@@ -20,12 +20,12 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.ReceivableBalances, {
     sheets: [
         {
             id: 'receivableBalances',
-            name: $t(`ecacb29b-6be5-4581-a0bd-5c0824b27cb9`),
+            name: $t(`231f28d7-292a-43bc-877b-751012b6ae48`),
             columns: getGeneralColumns(),
         },
         {
             id: 'balanceItems',
-            name: $t(`e023f8a6-a91a-48c0-98fc-863697e1e8c6`),
+            name: $t(`0d735b43-02e4-4846-8aea-a603bdc9f7a4`),
             transform: (data: DetailedReceivableBalance): ReceivableBalanceWithItem[] => data.balanceItems.map(balanceItem => ({
                 receivableBalance: data,
                 balanceItem,
@@ -66,7 +66,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'type',
-            name: $t(`f97ad8c1-31d2-4b61-9e09-3be86eaeba08`),
+            name: $t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`),
             width: 30,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: getBalanceItemTypeName(object.balanceItem.type),
@@ -74,7 +74,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'category',
-            name: $t(`c5d24ab8-a87a-481d-a470-23e9386199f3`),
+            name: $t(`502dc65d-e8d3-4b20-a478-a76ca9084e60`),
             width: 30,
             getValue: (object: ReceivableBalanceWithItem) => {
                 return {
@@ -84,7 +84,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'description',
-            name: $t(`9c4977db-1ce9-424b-92cf-4bbe7f6606fd`),
+            name: $t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`),
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.description,
@@ -92,7 +92,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'amount',
-            name: $t(`f085f874-242d-47cb-a404-96eab69662ec`),
+            name: $t(`697df3e7-fbbf-421d-81c2-9c904dce4842`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.amount,
@@ -105,7 +105,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'unitPrice',
-            name: $t(`7f7fdce2-1fcd-44c9-8c98-856aea11ffc3`),
+            name: $t(`7453643b-fdb2-4aa1-9964-ddd71762c983`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.unitPrice / 1_0000,
@@ -118,7 +118,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'price',
-            name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+            name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.priceWithVAT / 1_0000,
@@ -131,7 +131,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'pricePaid',
-            name: $t(`dc9f65e0-19ce-4908-8830-da48235faa70`),
+            name: $t(`25c803f0-6b45-42aa-9b88-573e3706b8bb`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.pricePaid / 1_0000,
@@ -157,7 +157,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'priceOpen',
-            name: $t(`eb0421f4-6ee9-4d81-b549-2bc4e16c4b63`),
+            name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.priceOpen / 1_0000,
@@ -170,7 +170,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'createdAt',
-            name: $t(`e5902b28-754d-42cd-b245-f403d03b8c56`),
+            name: $t(`10fd24bb-43dd-4174-9a23-db3ac54af9be`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.createdAt,
@@ -196,7 +196,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'status',
-            name: $t(`d7003b29-cc92-4ef4-b07b-f283193ef2ae`),
+            name: $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: getBalanceItemStatusName(object.balanceItem.status),
@@ -242,7 +242,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'name',
-            name: $t(`b9c7a57e-6dc1-48a2-bcba-a26c5f59555e`),
+            name: $t(`72b10926-c8b2-4e8b-8527-43d8286dd9e1`),
             width: 40,
             getValue: (object: ReceivableBalance) => ({
                 value: object.object.name,
@@ -250,7 +250,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'uri',
-            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
+            name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
             width: 16,
             getValue: (object: ReceivableBalance) => ({
                 value: object.object.uri,
@@ -258,7 +258,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'amountOpen',
-            name: $t(`eb0421f4-6ee9-4d81-b549-2bc4e16c4b63`),
+            name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
             width: 10,
             getValue: (object: ReceivableBalance) => ({
                 value: object.amountOpen / 1_0000,

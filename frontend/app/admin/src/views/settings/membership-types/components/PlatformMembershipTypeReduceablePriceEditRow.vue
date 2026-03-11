@@ -22,7 +22,7 @@ const model = defineModel<ReduceablePrice>({ required: true });
 
 const platform = usePlatform();
 const tag = platform.value.config.tags.find(t => t.id === props.tagId);
-const priceTitle = computed(() => format(props.showPricePerDay ? $t(`8e5dfe36-70c4-4011-916f-2b6f0e0b7648`) : $t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`)));
+const priceTitle = computed(() => format(props.showPricePerDay ? $t(`8e5dfe36-70c4-4011-916f-2b6f0e0b7648`) : $t(`1205deb9-498d-435d-a6e1-91ea98371523`)));
 
 function format(base: string) {
     if (!props.tagId) {

@@ -45,7 +45,7 @@ const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);
 
 const saving = ref(false);
 
-const title = $t('de211760-1306-4108-92e3-9301435d8988');
+const title = $t('51850490-5d94-4e0b-a415-9b84e07d86f2');
 
 async function addType() {
     const arr: PatchableArrayAutoEncoder<PlatformEventType> = new PatchableArray();
@@ -122,7 +122,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

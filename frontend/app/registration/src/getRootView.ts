@@ -84,7 +84,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     const calendarTab = new TabBarItem({
         id: 'events',
         icon: 'calendar',
-        name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
+        name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EventsOverview, {}),
         }),
@@ -93,7 +93,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`ac8f8aa5-466f-4552-b658-de017a97839f`),
+        name: $t(`7dfd0425-b8ff-4dec-8c6d-257d94eabbe7`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberCommunicationView, {}),
         }),

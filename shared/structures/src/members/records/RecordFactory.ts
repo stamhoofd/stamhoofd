@@ -16,7 +16,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Privacy',
-                    name: TranslatedString.create($t(`9ce28983-01ef-44bc-bc02-b76575bda1ce`)),
+                    name: TranslatedString.create($t(`36459d6c-1685-463a-829f-bc92f83d1f0f`)),
                 });
 
             case LegacyRecordType.FoodAllergies:
@@ -345,7 +345,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`c6898362-6352-4fe2-94d6-900e4ac10d3f`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`c6898362-6352-4fe2-94d6-900e4ac10d3f`)),
@@ -378,7 +378,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`41a4c3ff-87e7-437e-89fc-65fdf72cbae6`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`41a4c3ff-87e7-437e-89fc-65fdf72cbae6`)),
@@ -392,7 +392,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`051f713e-dd20-44c3-9d68-d3c875641bb6`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`051f713e-dd20-44c3-9d68-d3c875641bb6`)),
@@ -405,7 +405,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`3da1025f-617e-4d73-bf7a-29fb01b99481`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`3da1025f-617e-4d73-bf7a-29fb01b99481`)),
@@ -418,7 +418,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`2c173797-5c56-49e4-8df3-93c975f2604c`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`2c173797-5c56-49e4-8df3-93c975f2604c`)),
@@ -432,7 +432,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`b0073f07-9ec6-4a3b-9a29-b33305e6daaf`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`b0073f07-9ec6-4a3b-9a29-b33305e6daaf`)),
@@ -445,7 +445,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`9cfc8622-6c37-4abb-871c-27c049792509`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`9cfc8622-6c37-4abb-871c-27c049792509`)),
@@ -458,7 +458,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`0a6588e4-d367-4b57-b5a0-76a04bf49e63`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`0a6588e4-d367-4b57-b5a0-76a04bf49e63`)),
@@ -471,7 +471,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`425f3938-b431-406b-90c2-cdbb896ca21b`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`9e0461d2-7439-4588-837c-750de6946287`));
+                record.inputPlaceholder = TranslatedString.create($t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedString.create($t(`425f3938-b431-406b-90c2-cdbb896ca21b`)),
@@ -621,10 +621,10 @@ export class RecordFactory {
         return RecordSettings.create({
             id: 'template-doctor-phone',
             name: TranslatedString.create($t(`da302836-9634-4dc0-9f21-c4743357d6b1`)),
-            inputPlaceholder: TranslatedString.create($t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`)),
+            inputPlaceholder: TranslatedString.create($t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`)),
             type: RecordType.Phone,
             required: true,
-            label: TranslatedString.create($t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`)),
+            label: TranslatedString.create($t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`)),
         });
     }
 

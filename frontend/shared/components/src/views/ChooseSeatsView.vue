@@ -66,7 +66,7 @@ import SeatSelectionBox from './SeatSelectionBox.vue';
         priceChange: Formatter.priceChange.bind(Formatter),
         priceFree: (p: number) => {
             if (p === 0) {
-                return $t(`30e129d7-349d-4369-a8c4-c86b82ce2e01`);
+                return $t(`02f28dc5-b75f-4bfb-9e07-90dfb56b66b4`);
             }
             return Formatter.price(p);
         },
@@ -111,14 +111,14 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
         }
 
         if (this.remainingAmount === this.amount) {
-            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`df624041-eee5-45b1-9cfb-b9ba48793f9e`))}`;
+            return `Kies ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`))}`;
         }
 
-        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`df624041-eee5-45b1-9cfb-b9ba48793f9e`))}`;
+        return `Kies nog ${Formatter.pluralText(this.remainingAmount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`))}`;
     }
 
     get description() {
-        return $t(`91e96a8b-b24b-4c57-a6a7-24bcdeeb1834`) + ' ' + Formatter.pluralText(this.amount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`df624041-eee5-45b1-9cfb-b9ba48793f9e`)) + ' ' + $t(`5bb04c82-7366-4c36-ae04-1d2be15b528a`);
+        return $t(`91e96a8b-b24b-4c57-a6a7-24bcdeeb1834`) + ' ' + Formatter.pluralText(this.amount, $t(`6cf46298-748e-46b3-84ab-646e1e16b3a8`), $t(`a76b6d3c-05a1-4c71-9f88-077261a4e595`)) + ' ' + $t(`5bb04c82-7366-4c36-ae04-1d2be15b528a`);
     }
 
     get seatingPlanSection() {

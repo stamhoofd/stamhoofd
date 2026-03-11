@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1>
-                {{ $t('d9b4472a-a395-4877-82fd-da6cb0140594') }}
+                {{ $t('60231186-b00f-4d07-a5c7-4a905467e254') }}
             </h1>
 
             <div class="input-with-buttons">
@@ -108,7 +108,7 @@ defineRoutes([
                     event: events.results[0],
                 };
             }
-            Toast.error($t(`78228ca9-42e4-4612-a2cd-0d298f10f2a4`)).show();
+            Toast.error($t(`42e0e0d5-b4f9-4774-ad91-bfae7121a29e`)).show();
             throw new Error('Event not found');
         },
 

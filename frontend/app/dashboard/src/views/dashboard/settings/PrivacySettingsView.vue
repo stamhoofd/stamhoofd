@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`36459d6c-1685-463a-829f-bc92f83d1f0f`)" @save="save">
         <h1>
-            {{ $t('9ce28983-01ef-44bc-bc02-b76575bda1ce') }}
+            {{ $t('36459d6c-1685-463a-829f-bc92f83d1f0f') }}
         </h1>
         <p>
             {{ $t('ec02ca17-cd7e-4416-b22f-b63aef41be2a') }}
@@ -12,7 +12,7 @@
         <STInputBox error-fields="privacy" :error-box="errorBox" class="max" :title="$t(`0ea39adf-90dc-43bd-aa66-c95cf1a42cf1`)">
             <RadioGroup>
                 <Radio v-model="selectedPrivacyType" value="none">
-                    {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
+                    {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
                 </Radio>
                 <Radio v-model="selectedPrivacyType" value="website">
                     {{ $t('321a898b-ec70-44e3-a511-f2353061cd66') }}

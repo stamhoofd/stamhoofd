@@ -8,7 +8,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STInputBox v-for="n in names.length" :key="n" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`) + ' '+n">
-            <input class="input" type="text" autocomplete="off" :value="getName(n - 1)" :placeholder="$t(`e0d1cceb-6d03-40a3-bb5c-fe079ae08704`) + ' '+n" @input="setName(n - 1, ($event as any).target.value)"><template #right>
+            <input class="input" type="text" autocomplete="off" :value="getName(n - 1)" :placeholder="$t(`a776afc7-1137-4a80-9144-d65660e8d1b5`) + ' '+n" @input="setName(n - 1, ($event as any).target.value)"><template #right>
                 <button v-if="names.length > 1" class="button icon trash gray" type="button" @click="deleteName(n - 1)" />
             </template>
         </STInputBox>
@@ -18,7 +18,7 @@
             <span>{{ $t('a776afc7-1137-4a80-9144-d65660e8d1b5') }}</span>
         </button>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
             <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`71cc4b35-4bea-4afb-a73f-5cc0c36c6b53`)" />
         </STInputBox>
         <p class="style-description-small">
@@ -44,11 +44,11 @@
 
         <div class="split-inputs">
             <STInputBox error-fields="minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
-                <AgeInput v-model="minAge" :year="startYear" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                <AgeInput v-model="minAge" :year="startYear" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
             </STInputBox>
 
             <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`c0cab705-c129-4a72-8860-c33ef91ec630`)">
-                <AgeInput v-model="maxAge" :year="startYear" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                <AgeInput v-model="maxAge" :year="startYear" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
             </STInputBox>
         </div>
         <p class="style-description-small">
@@ -59,7 +59,7 @@
 
         <div class="split-inputs">
             <STInputBox error-fields="minimumRequiredMembers" :error-box="errors.errorBox" :title="$t(`e2d8174e-0097-45d0-9d81-f553cd7fbcb6`)">
-                <NumberInput v-model="minimumRequiredMembers" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`45ff02db-f404-4d91-853f-738d55c40cb6`)" />
+                <NumberInput v-model="minimumRequiredMembers" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`)" />
             </STInputBox>
         </div>
 
@@ -77,7 +77,7 @@
             </STList>
             <template v-else>
                 <h2 class="style-with-button">
-                    <div>{{ $t('348c29be-b166-497b-be15-d9522a2dc2fb') }}</div>
+                    <div>{{ $t('2a033cd8-b9e4-4a92-a8a6-b4a687d87e79') }}</div>
                     <div>
                         <button type="button" class="button icon trash" @click="organizationTagIds = null" />
                     </div>
@@ -87,7 +87,7 @@
             </template>
         </div>
 
-        <hr><h2>{{ $t('070cf05d-b582-4f6a-b153-48f5f3ecc9fe') }}</h2>
+        <hr><h2>{{ $t('05e6464f-8db4-4c12-9bfe-527afc83d412') }}</h2>
         <p>{{ $t('f9c9433c-24fd-4645-b5df-966f9d076b1b') }}</p>
 
         <InheritedRecordsConfigurationBox :group-level="true" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
@@ -136,7 +136,7 @@ const save = async () => {
         if (names.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('ea9baa7a-c2c8-4207-a300-9de4b145f6ca'),
+                message: $t('9aa8ff59-33ae-4ac4-93b6-97e071b13012'),
                 field: 'name',
             });
         }
@@ -144,7 +144,7 @@ const save = async () => {
         if (names.value[0].length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('ea9baa7a-c2c8-4207-a300-9de4b145f6ca'),
+                message: $t('9aa8ff59-33ae-4ac4-93b6-97e071b13012'),
                 field: 'name',
             });
         }
@@ -168,7 +168,7 @@ const doDelete = async () => {
 
     if (!await CenteredMessage.confirm(
         $t('e5ca0b55-20c6-4523-89b6-1ecba10d95b7'),
-        $t('6e3da050-6679-4475-a858-77b5b02b6fa4'),
+        $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'),
         $t('8997d560-a0c6-422b-a988-6186e8ed64be'),
     )) {
         return;
@@ -261,7 +261,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

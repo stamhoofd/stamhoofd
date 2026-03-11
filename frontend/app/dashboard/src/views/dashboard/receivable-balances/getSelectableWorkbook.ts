@@ -22,17 +22,17 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
         sheets: [
             new SelectableSheet({
                 id: 'receivableBalances',
-                name: $t(`3df2215e-5c13-493d-afc6-4a866150960c`),
+                name: $t(`231f28d7-292a-43bc-877b-751012b6ae48`),
                 description: $t(`6025e62d-b832-47dc-93e8-ad7d5753069f`),
                 columns: [
                     ...getGeneralColumns($t, $feature),
                     new SelectableColumn({
                         id: 'amountOpen',
-                        name: $t(`40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f`),
+                        name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
                     }),
                     new SelectableColumn({
                         id: 'amountPending',
-                        name: $t(`ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8`),
+                        name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
                     }),
                 ],
             }),
@@ -66,7 +66,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'description',
-                        name: $t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`),
+                        name: $t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`),
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -82,12 +82,12 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: $t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`),
+                        name: $t(`7453643b-fdb2-4aa1-9964-ddd71762c983`),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: $t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`),
+                        name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
                     }),
 
                     new SelectableColumn({
@@ -97,27 +97,27 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'pricePending',
-                        name: $t(`ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8`),
+                        name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
                     }),
 
                     new SelectableColumn({
                         id: 'priceOpen',
-                        name: $t(`40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f`),
+                        name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
                     }),
 
                     new SelectableColumn({
                         id: 'createdAt',
-                        name: $t(`b6391640-1e01-47f9-913d-360fb0903b75`),
+                        name: $t(`10fd24bb-43dd-4174-9a23-db3ac54af9be`),
                     }),
 
                     new SelectableColumn({
                         id: 'dueAt',
-                        name: $t(`eae99aeb-eb79-4a91-8e84-5364cbc74364`),
+                        name: $t(`3d586760-01f3-42c3-82be-44cea7ad0820`),
                     }),
 
                     new SelectableColumn({
                         id: 'status',
-                        name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
+                        name: $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
                     }),
                 ],
             }),
@@ -130,7 +130,7 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
         return [
             new SelectableColumn({
                 id: 'id',
-                name: $t(`83b38b3f-6b5d-4c70-9d37-821b80003432`),
+                name: $t(`333e8879-0e98-4233-bc51-93a5c623c75e`),
                 description: $t(`d1ccda9a-6579-4fa6-8f6c-b29997ef8d5d`),
             }),
             new SelectableColumn({
@@ -142,7 +142,7 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
                 ? [
                         new SelectableColumn({
                             id: 'uri',
-                            name: $t('cd798189-d5c8-4b79-98f7-a68786ab288c'),
+                            name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
                             ...options,
                         }),
                     ]

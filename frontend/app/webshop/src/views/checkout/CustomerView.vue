@@ -1,6 +1,6 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" data-submit-last-field :title="$t(`1db407ec-4d25-40f9-92b9-abf820faaf98`)" @save="goNext">
-        <h1>{{ $t('38bea62e-0765-4fbf-a6f3-4e21cc4cc2ef') }}</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" data-submit-last-field :title="$t(`1db407ec-4d25-40f9-92b9-abf820faaf98`)" @save="goNext">
+        <h1>{{ $t('1db407ec-4d25-40f9-92b9-abf820faaf98') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -8,15 +8,15 @@
             <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`603606c2-95ca-4967-814c-53ec3297bf33`)">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)">
                     </div>
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" />
+            <EmailInput v-model="email" name="email" :validator="errors.validator" :placeholder="emailPlaceholder" autocomplete="email" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" />
             <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
         </template>
 

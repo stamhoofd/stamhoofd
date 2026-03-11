@@ -88,13 +88,13 @@ const description = computed(() => {
         if (!props.record.required) {
             return $t(`7213a97f-0de3-4505-87d8-bfd37ab6f427`);
         }
-        return $t(`82f4b6ed-afee-4655-9f07-22802e0e7ad9`);
+        return $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`);
     }
     if (props.record.type === RecordType.Address) {
         if (!props.record.required) {
             return $t(`a3a9dd5a-3b48-413b-9993-dedc389bc26a`);
         }
-        return $t(`2f10996e-ea97-4345-b997-c93198c7d67f`);
+        return $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`);
     }
     if (props.record.type === RecordType.Phone) {
         if (!props.record.required) {
@@ -106,7 +106,7 @@ const description = computed(() => {
         if (!props.record.required) {
             return $t(`2901c477-643b-46f4-918b-393356f5bebb`);
         }
-        return $t(`9ee1052c-9396-4d2d-8247-97dfb45099f6`);
+        return $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`);
     }
 
     if (props.record.type === RecordType.Textarea) {
@@ -127,14 +127,14 @@ const description = computed(() => {
         if (!props.record.required) {
             return $t(`65a518fa-c5f3-4e6b-92b5-871ae31c87ce`);
         }
-        return $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`);
+        return $t(`1205deb9-498d-435d-a6e1-91ea98371523`);
     }
 
     if (props.record.type === RecordType.Image) {
         if (!props.record.required) {
             return $t(`b685fd83-8ab7-490c-866e-c17557804949`);
         }
-        return $t(`f0726317-6979-41b6-bd57-7f6eb3422dc6`);
+        return $t(`31a0612a-b8a3-481d-9738-80be685a8680`);
     }
 
     if (props.record.type === RecordType.File) {

@@ -5,7 +5,7 @@
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon close" @click="setShowSelection(false)" />
                 <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="isAllSelected = !isAllSelected">
                     <template v-if="isAllSelected">
-                        {{ $t('e1efdf4c-de0b-4c12-ba87-dec739b2186f') }}
+                        {{ $t('d3850361-5954-45cd-8011-7c22f4b838a5') }}
                     </template>
                     <template v-else>
                         {{ $t('62d13348-4438-44e4-9ea0-c4fb42c0123b') }}
@@ -114,10 +114,10 @@
             </p>
 
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0 && tableObjectFetcher.objectFetcher.isOffline" class="error-box icon earth-off with-button">
-                {{ $t('5b6de81b-821a-43be-b8dc-be19fc4701f8') }}
+                {{ $t('18e54ffc-b12d-4175-9128-46446334942f') }}
 
                 <button class="button text" type="button" @click="refreshOnline">
-                    {{ $t('891b75ee-e85e-4f9b-9a03-39082d248b87') }}
+                    {{ $t('314810ef-ff16-4b22-b8a5-399d5d820a4a') }}
                 </button>
             </p>
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0" class="info-box">
@@ -570,7 +570,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     if (!showSelection.value) {
         // Add select action
         actions.push(new AsyncTableAction({
-            name: $t(`e017ca18-1f4f-4afe-aca5-8eff19d20dc1`),
+            name: $t(`bbc1d7b9-1b97-426f-b8a6-df946bd50d4d`),
             groupIndex: -1,
             priority: 10,
             needsSelection: false,
@@ -583,7 +583,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
     // Add select all action
     if (!isAllSelected.value) {
         actions.push(new AsyncTableAction({
-            name: $t(`f46e85c5-5ab7-4ab9-97f7-c675bcd6a160`),
+            name: $t(`62d13348-4438-44e4-9ea0-c4fb42c0123b`),
             groupIndex: -1,
             priority: 9,
             needsSelection: false,
@@ -912,7 +912,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         // Only focus this row
         // Add select action
         filteredActions.push(new AsyncTableAction({
-            name: $t(`e017ca18-1f4f-4afe-aca5-8eff19d20dc1`),
+            name: $t(`bbc1d7b9-1b97-426f-b8a6-df946bd50d4d`),
             groupIndex: !showSelection.value ? -1 : 1,
             priority: 10,
             handler: () => {

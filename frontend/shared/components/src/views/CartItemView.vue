@@ -111,7 +111,7 @@
             </template>
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
-                <hr><h2>{{ cartItem.amount < 2 ? $t('e330f60b-d331-49a2-a437-cddc31a878de') : $t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') }}</h2>
+                <hr><h2>{{ cartItem.amount < 2 ? $t('87c1a48c-fef5-44c3-ae56-c83463fcfb84') : $t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') }}</h2>
                 <div v-for="(value, index) in uitpasNumbers" :key="index">
                     <UitpasNumberInput
                         v-model="uitpasNumbers[index].uitpasNumber"
@@ -151,12 +151,12 @@
                     </button>
                     <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
                         <span class="icon basket" />
-                        <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
+                        <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
                     </button>
                     <button v-else class="button primary" type="submit">
                         <span v-if="cartEnabled" class="icon basket" />
                         <span v-if="cartEnabled">{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
-                        <span v-else>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
+                        <span v-else>{{ $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') }}</span>
                         <span v-if="!cartEnabled" class="icon arrow-right" />
                     </button>
                 </LoadingButton>
@@ -542,7 +542,7 @@ const shouldNavigateAway = async () => {
     if (originalUitpasNumbers.length === uitpasNumbers.value.length && originalUitpasNumbers.every((val, index) => val === uitpasNumbers.value[index].uitpasNumber)) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

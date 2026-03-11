@@ -1,7 +1,7 @@
 <template>
     <SaveView :disabled="!hasChanges" :loading="saving" :title="$t(`27bc7f00-1839-4f47-b8e5-7f4c6996fa53`)" @save="save">
         <h1>
-            {{ $t('3936222c-5399-4d5e-9543-e483fa4f058a') }}
+            {{ $t('27bc7f00-1839-4f47-b8e5-7f4c6996fa53') }}
         </h1>
         <p>
             {{ $t('30fe36de-4e4e-42e3-a2f9-7740b028b415') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
@@ -16,12 +16,12 @@
         <hr><h2>{{ $t('b2a56f24-fea4-4874-90be-f2d15e93e862') }}</h2>
         <p>{{ $t('c7dc695c-d0d0-4a3e-9945-51696a8850be') }}</p>
 
-        <STInputBox class="max" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+        <STInputBox class="max" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
             <input v-model="title" class="input" :placeholder="inheritedDataPermission?.title || DataPermissionsSettings.defaultTitle">
         </STInputBox>
 
-        <STInputBox class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
-            <textarea v-model="description" class="input" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
+        <STInputBox class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
+            <textarea v-model="description" class="input" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
         </STInputBox>
 
         <STInputBox class="max" :title="$t(`5886d034-5962-4d4c-99f3-35733367a20b`)">
@@ -121,7 +121,7 @@ const checkboxWarning = computed({
 const checkboxWarningPlaceholder = computed(() => {
     const base = props.inheritedDataPermission?.checkboxWarning || DataPermissionsSettings.defaultCheckboxWarning;
     if (!base) return $t(`9ce75cee-1539-467c-a9de-ce3b9e870df3`);
-    return base + ' ' + $t(`e4f8cf4f-8bb1-4a3c-80e4-7c91338bb413`);
+    return base + ' ' + $t(`49b1c5d0-0511-42f0-a9fe-791572ba96f9`);
 });
 
 async function save() {
@@ -143,7 +143,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 };
 
 defineExpose({

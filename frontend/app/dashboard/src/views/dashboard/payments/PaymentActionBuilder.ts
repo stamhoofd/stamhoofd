@@ -81,7 +81,7 @@ export class PaymentActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t('fb1d3820-b4d3-446b-ab4b-931b16eb5391'),
+                name: $t('b3d75fdd-8231-4a1f-a1b3-5c6401d90a75'),
                 icon: 'canceled',
                 priority: 2,
                 groupIndex: 1,
@@ -94,7 +94,7 @@ export class PaymentActionBuilder {
             }),
             this.getCancelPaymentsAction(),
             new AsyncTableAction({
-                name: $t('f97a138d-13eb-4e33-aee3-489d9787b2c8'),
+                name: $t('60c06238-ad4d-4599-a3d3-ebe856476618'),
                 icon: 'download',
                 priority: 0,
                 groupIndex: 2,
@@ -142,7 +142,7 @@ export class PaymentActionBuilder {
         // only for methods transfer and point of sale, not if any other method
         if (this.methods && this.methods.every(method => method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale)) {
             return new InMemoryTableAction({
-                name: $t('ead8825c-53fc-4968-aa38-8fd402552a17'),
+                name: $t('11d2e292-fd08-4477-bd2a-dac599a9754c'),
                 icon: 'canceled',
                 priority: 1,
                 groupIndex: 4,
@@ -202,7 +202,7 @@ export class PaymentActionBuilder {
                 GlobalEventBus.sendEvent('paymentPatch', paymentResponse).catch(console.error);
             }
 
-            const message = payments.length === 1 ? $t('f7fab124-62ac-432c-80a7-5d594058f3f1') : $t('7fcd4a8a-e9ab-443b-b887-383c6802c644', { count: payments.length });
+            const message = payments.length === 1 ? $t('8076e99d-cac2-4fb6-84e0-d893d9b3c205') : $t('7fcd4a8a-e9ab-443b-b887-383c6802c644', { count: payments.length });
             Toast.success(message).setHide(1000).show();
         }
         catch (e) {

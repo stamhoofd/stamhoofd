@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`fb25fbab-3376-494c-a286-6f0ceef13f87`) : $t(`cbbe2de7-2d23-445c-8d23-48ce8bd3849c`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`40b3b89e-4d82-4d6c-b49d-1e084802ee2e`) : $t(`18d8f60a-ec12-405e-b26a-ed9ba39fefe4`)" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('40b3b89e-4d82-4d6c-b49d-1e084802ee2e') }}
         </h1>
@@ -12,8 +12,8 @@
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`1539d481-12bf-4814-9fe3-3770eaecdda8`)">
         </STInputBox>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
-            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
+            <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
         </STInputBox>
         <p class="style-description-small">
             {{ $t('b230e824-be5c-45a0-b9c4-fc5f7688ec50') }}
@@ -39,7 +39,7 @@
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>

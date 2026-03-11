@@ -4,7 +4,7 @@
             {{ name }}
             <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
         </h3>
-        <p v-if="isSingle && order" class="style-description-small" v-text="$t('1a2a842e-4f98-4818-911b-c9634aca4214')+order.number" />
+        <p v-if="isSingle && order" class="style-description-small" v-text="$t('12be5ac0-8353-43a2-badb-ab3b27d156b3')+order.number" />
         <p v-if="isSingle && order" class="style-description-small" v-text="order.data.customer.name" />
         <p v-if="!isSingle && !cartItem" class="style-description-small">
             <span class="style-tag error">{{ $t('d942f8fe-5c83-4b7f-badf-b6be91762be7') }}</span>
@@ -53,7 +53,7 @@ const auth = useAuth();
 
 const scannedAtDescription = computed(() => {
     if (!props.ticket.scannedAt) {
-        return $t('f7d79766-4bd8-45d5-b895-dc9722afd73a');
+        return $t('aa934a39-f0dd-4e8b-9db8-a7686684a411');
     }
     if (!props.ticket.scannedBy) {
         return $t('230d883d-d4a5-4a8b-a6f5-8caf1c637ea6', { 'date-time': Formatter.dateTime(props.ticket.scannedAt) });
@@ -89,7 +89,7 @@ function openMenu(clickEvent: MouseEvent) {
     const contextMenu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('f42816c2-4aec-4d10-9d86-215358f27e7c'),
+                name: $t('9e85b407-6e12-4003-9847-5b7d277b87ff'),
                 disabled: !hasWrite.value,
                 action: () => {
                     openTicket().catch(console.error);
@@ -127,7 +127,7 @@ function getMarkAsMenu() {
     return new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('7261dad7-c8ba-4dbd-a5c7-b1ad3dd7194a'),
+                name: $t('044f91f3-91b5-4109-ad8d-3fea6c0c92e2'),
                 selected: !!props.ticket.scannedAt,
                 action: () => {
                     props.webshopManager.tickets.putPatch(TicketPrivate.patch({
@@ -140,7 +140,7 @@ function getMarkAsMenu() {
                 },
             }),
             new ContextMenuItem({
-                name: $t('f7d79766-4bd8-45d5-b895-dc9722afd73a'),
+                name: $t('aa934a39-f0dd-4e8b-9db8-a7686684a411'),
                 selected: !props.ticket.scannedAt,
                 action: () => {
                     props.webshopManager.tickets.putPatch(TicketPrivate.patch({
@@ -156,7 +156,7 @@ function getMarkAsMenu() {
     ]);
 }
 
-const statusName = computed(() => props.ticket.scannedAt ? $t('7261dad7-c8ba-4dbd-a5c7-b1ad3dd7194a') : $t('f7d79766-4bd8-45d5-b895-dc9722afd73a'));
+const statusName = computed(() => props.ticket.scannedAt ? $t('044f91f3-91b5-4109-ad8d-3fea6c0c92e2') : $t('aa934a39-f0dd-4e8b-9db8-a7686684a411'));
 const statusColor = computed(() => props.ticket.scannedAt ? '' : 'gray');
 
 async function download() {

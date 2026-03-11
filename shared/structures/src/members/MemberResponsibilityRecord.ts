@@ -42,7 +42,7 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
     getName(member: PlatformMember, includeOrganization = true) {
         let allResponsibilities = member.family.platform.config.responsibilities;
 
-        let suffix = (this.group ? ' ' + $t(`e9ec956f-3a71-4460-b09d-dfec22a1aaf0`) + ' ' + this.group.settings.name : '');
+        let suffix = (this.group ? ' ' + $t(`9ddd7aba-9426-4718-9eb0-673b615efcf4`) + ' ' + this.group.settings.name : '');
 
         if (this.organizationId) {
             const organization = member.family.getOrganization(this.organizationId);

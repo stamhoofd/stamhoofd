@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : (willStartCheckoutFlow ? $t('9639fa42-022e-483f-9969-b893ae79affc') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
+    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : (willStartCheckoutFlow ? $t('7de2e636-dcec-44b1-a681-daeb9cd85316') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
         <p class="style-title-prefix">
             {{ item.organization.name }}
         </p>
@@ -47,12 +47,12 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="$t('a1ae6e8f-dbcd-4a53-a67c-0244d28ccb74')" error-fields="customStartDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('300d2935-b578-48cc-b58e-1c0446a68d59')" error-fields="customStartDate" :error-box="errors.errorBox">
                         <DateSelection v-model="customStartDate" :required="false" :placeholder-date="item.defaultStartDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
                     </STInputBox>
                 </div>
                 <div>
-                    <STInputBox :title="$t('aef10d71-39c4-4cdb-8252-5fd31781abd8')" error-fields="customEndDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('3c90169c-9776-4d40-bda0-dba27a5bad69')" error-fields="customEndDate" :error-box="errors.errorBox">
                         <DateSelection v-model="customEndDate" :required="false" :placeholder-date="item.defaultEndDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
                     </STInputBox>
                 </div>
@@ -67,7 +67,7 @@
 
         <div v-if="item.canHaveTrial || trial" class="container">
             <hr><h2>
-                <span>{{ $t('4d4c0732-2875-4de8-afae-d8b2687ff279') }}</span>
+                <span>{{ $t('1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0') }}</span>
                 <span class="style-tag">{{ Formatter.days(item.group.settings.trialDays) }}</span>
             </h2>
             <p>{{ $t('1b2f2b52-0852-40c3-b1d3-758577b28424', {member: item.member.patchedMember.details.firstName, days: Formatter.days(item.group.settings.trialDays)}) }}</p>
@@ -88,7 +88,7 @@
                     </h4>
 
                     <p v-if="price.getRemainingStock(item) === 0" class="style-description-small">
-                        {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
+                        {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
                     </p>
 
                     <p v-if="admin && getPeriodString(price)" class="style-description-small">
@@ -122,11 +122,11 @@
                     </p>
 
                     <p v-if="option.getRemainingStock(item) && (option.maximum === null || option.getRemainingStock(item)! < option.maximum) && option.allowAmount" class="style-description-small">
-                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: Formatter.pluralText(option.getRemainingStock(item)!, $t('86e03c52-25db-45f7-a129-5f165b289324'), $t('7d5de81e-9ae9-4ec6-86e1-844ca6a75fb1'))}) }}
+                        {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: Formatter.pluralText(option.getRemainingStock(item)!, $t('599ce864-4059-48eb-82f8-9191e9507050'), $t('3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a'))}) }}
                     </p>
 
                     <p v-else-if="option.getRemainingStock(item) === 0" class="style-description-small">
-                        {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
+                        {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
                     </p>
 
                     <template #right>

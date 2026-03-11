@@ -1,9 +1,9 @@
 <template>
     <section class="st-view">
-        <STNavigationBar :title="$t(`de716992-0ce7-45a3-b45b-f269d3d17256`)" />
+        <STNavigationBar :title="$t(`1259b59f-6447-4da8-887e-848f05da346f`)" />
         <main class="center">
             <h1>
-                {{ $t('5e2654f2-6423-47bc-b7e7-054e41bf287f') }}
+                {{ $t('1259b59f-6447-4da8-887e-848f05da346f') }}
             </h1>
 
             <p v-if="cart.price">

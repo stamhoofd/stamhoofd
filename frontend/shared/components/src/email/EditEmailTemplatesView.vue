@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading-view="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? $t('83db2c73-38a3-4d13-9984-2f19f95e1329') : $t('5d9d5777-5ecb-4223-8dc2-973ee3fee4bb')" @save="save">
+    <SaveView :loading-view="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? $t('83db2c73-38a3-4d13-9984-2f19f95e1329') : $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d')" @save="save">
         <h1>{{ viewTitle }}</h1>
         <SegmentedControl v-if="tabItems.length > 1" v-model="tab" :items="tabItems.map(i => i.id)" :labels="tabItems.map(i => i.label)" />
 
@@ -291,7 +291,7 @@ async function addCreateOption() {
 
 async function deleteEmail(emailTemplate: EmailTemplate) {
     if (emailTemplate.id) {
-        if (!await CenteredMessage.confirm($t('9b7756f6-8097-430d-bcee-7248a4bb1c3c'), $t('6e3da050-6679-4475-a858-77b5b02b6fa4'))) {
+        if (!await CenteredMessage.confirm($t('9b7756f6-8097-430d-bcee-7248a4bb1c3c'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'))) {
             return;
         }
         addDelete(emailTemplate.id);
@@ -379,7 +379,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

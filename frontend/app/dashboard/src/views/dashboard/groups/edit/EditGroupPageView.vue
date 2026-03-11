@@ -7,11 +7,11 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <hr><h2 class="style-with-button">
-            <div>{{ $t('b8a111c0-5f3d-480b-833a-6d7f05bf134d') }}</div>
+            <div>{{ $t('17d579e1-518b-4dd4-98d8-f8184b7287be') }}</div>
             <div>
                 <button v-if="coverPhoto" class="button text only-icon-smartphone" type="button" @click="coverPhoto = null">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
                 <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hs" />
             </div>
@@ -28,7 +28,7 @@
             <div>
                 <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
                 <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="hsSquare" />
             </div>

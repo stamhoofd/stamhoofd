@@ -1,6 +1,6 @@
 <template>
-    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('c72a9ab2-98a0-4176-ba9b-86fe009fa755')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`38bea62e-0765-4fbf-a6f3-4e21cc4cc2ef`)" @save="goNext">
-        <h1>{{ $t('f777a982-6f69-41cc-bef1-18d146e870db') }}</h1>
+    <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('2a9075bb-a743-411e-8a3d-94e5e57363f0')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`1db407ec-4d25-40f9-92b9-abf820faaf98`)" @save="goNext">
+        <h1>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h1>
         <p>{{ $t('6bc5d58e-d6e4-44fd-a0b1-6f4477457915') }}</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -25,7 +25,7 @@
                     {{ company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                    {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                 </p>
 
                 <p v-if="company.address" class="style-description-small">
@@ -40,7 +40,7 @@
 
         <p v-if="auth.hasFullAccess()" class="style-button-bar">
             <button v-if="companies.length === 0" type="button" class="button primary" @click="editInvoiceSettings">
-                <span>{{ $t('f624c73d-afc6-4d15-ac75-fc4527dbfef2') }}</span>
+                <span>{{ $t('1310f065-caf5-41e6-a3b8-cf9b39336483') }}</span>
             </button>
             <button v-else type="button" class="button text" @click="editInvoiceSettings">
                 <span class="icon edit" />

@@ -5,7 +5,7 @@
         </template>
 
         <h3 class="style-title-list">
-            {{ category.name || $t('54685a94-1ae2-46f9-aa4b-03f0b3939fd3') }}
+            {{ category.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
         </h3>
         <p v-if="filterDescription" class="style-description-small">
             {{ filterDescription }}
@@ -19,7 +19,7 @@
             </template>
             <span v-if="category.childCategories.length && category.records.length" v-text="' ' + $t('6a156458-b396-4d0f-b562-adb3e38fc51b') + ' '" />
             <template v-if="category.childCategories.length">
-                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? $t("e36359a5-8a89-4a6b-9d7f-ddda3bd448d8") : $t("85d7fbc5-c3e4-4e63-ae61-a5812e3af382") }}
+                {{ category.childCategories.length }} {{ category.childCategories.length === 1 ? $t("079d3877-b607-4f3b-8139-7f5f4463bd19") : $t("85d7fbc5-c3e4-4e63-ae61-a5812e3af382") }}
             </template>
         </p>
 
@@ -69,7 +69,7 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`df8def26-260a-431b-a7fe-09fac12f97e0`),
+                name: $t(`d76e80a1-b717-4002-b40c-1e890e87bf1c`),
                 icon: 'settings',
                 action: () => editCategory(),
             }),
@@ -145,7 +145,7 @@ function showContextMenu(event: MouseEvent) {
 }
 
 async function deleteCategory() {
-    if (!await CenteredMessage.confirm($t(`95557c11-2b92-4a70-8945-99f6c6f7051c`), $t(`faae9011-c50d-4ada-aed0-c1b578782b2a`), $t(`e955be72-7a4e-4a0d-9872-043cf75f1134`))) {
+    if (!await CenteredMessage.confirm($t(`95557c11-2b92-4a70-8945-99f6c6f7051c`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`), $t(`e955be72-7a4e-4a0d-9872-043cf75f1134`))) {
         return;
     }
 

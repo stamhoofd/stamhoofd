@@ -9,7 +9,7 @@ export function getSelectableWorkbook(_platform: Platform) {
         sheets: [
             new SelectableSheet({
                 id: 'organizations',
-                name: $t(`edfc89fe-a16e-4789-bda9-1529f8a97f7c`),
+                name: $t(`2a033cd8-b9e4-4a92-a8a6-b4a687d87e79`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
@@ -21,7 +21,7 @@ export function getSelectableWorkbook(_platform: Platform) {
                     // todo: only if platform?
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
+                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
                         description: $t(`dd5625e0-2997-49b1-be73-21c30e42aafd`),
                     }),
 
@@ -32,12 +32,12 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'tags',
-                        name: $t(`97e1963f-621e-4754-84b7-e874e2c96b04`),
+                        name: $t(`0be39baa-0b8e-47a5-bd53-0feeb14a0f93`),
                     }),
 
                     new SelectableColumn({
                         id: 'address',
-                        name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                        name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
                     }),
                     ...flattenedCategories.flatMap((category) => {
                         return category.getAllRecords().flatMap((record) => {
@@ -54,7 +54,7 @@ export function getSelectableWorkbook(_platform: Platform) {
 
             new SelectableSheet({
                 id: 'responsibilities',
-                name: $t(`fbfaabbf-95d2-49ae-900b-d7b2321907bb`),
+                name: $t(`b0cb950d-856f-4068-bf2f-9636927020f4`),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
@@ -65,13 +65,13 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
+                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
                         description: $t(`dd5625e0-2997-49b1-be73-21c30e42aafd`),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: $t(`6149c3a0-74ee-476d-835f-94a4ac59ba34`),
+                        name: $t(`3eefa3b1-525b-464b-adef-e3b9efd9257f`),
                     }),
 
                     new SelectableColumn({
@@ -81,12 +81,12 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'responsibility.member.firstName',
-                        name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+                        name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.lastName',
-                        name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+                        name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
                     }),
 
                     new SelectableColumn({
@@ -96,13 +96,13 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'responsibility.member.address',
-                        name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                        name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
                     }),
                 ],
             }),
             new SelectableSheet({
                 id: 'premises',
-                name: $t(`eecb4cc5-f807-4325-8083-1fe893756ce4`),
+                name: $t(`7f531562-9609-456e-a8c3-2b373cad3f29`),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
@@ -113,13 +113,13 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
+                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
                         description: $t(`dd5625e0-2997-49b1-be73-21c30e42aafd`),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: $t(`6149c3a0-74ee-476d-835f-94a4ac59ba34`),
+                        name: $t(`3eefa3b1-525b-464b-adef-e3b9efd9257f`),
                     }),
 
                     new SelectableColumn({
@@ -134,7 +134,7 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'premise.address',
-                        name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                        name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
                     }),
                 ],
             }),

@@ -1,7 +1,7 @@
 <template>
     <SaveView id="personalize-settings-view" :loading="saving" :disabled="!hasChanges" :title="$t(`4a7e3838-f75a-4610-9caa-0f75849ea142`)" @save="save">
         <h1>
-            {{ $t('f45871aa-7723-42c3-9781-f4f9b8d7250a') }}
+            {{ $t('4a7e3838-f75a-4610-9caa-0f75849ea142') }}
         </h1>
         <p>{{ $t('ad37ed24-55c8-48a9-8c53-3c2fbba9e8c5') }}</p>
 

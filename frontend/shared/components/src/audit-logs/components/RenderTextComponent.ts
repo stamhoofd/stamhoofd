@@ -93,7 +93,7 @@ export function renderAny(obj: unknown): () => (string | ReturnType<typeof h> | 
                         'overflow': 'hidden',
                     },
                 }),
-                obj.value || $t(`f0726317-6979-41b6-bd57-7f6eb3422dc6`),
+                obj.value || $t(`31a0612a-b8a3-481d-9738-80be685a8680`),
             ]);
         }
 

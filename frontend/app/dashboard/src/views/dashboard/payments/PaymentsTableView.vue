@@ -70,9 +70,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer',
-        name: $t('af509b7e-1810-45d7-ad71-22add73ffc16'),
+        name: $t('17edcdd6-4fb2-4882-adec-d3a4f43a1926'),
         getValue: object => object.customer?.dynamicName ?? '',
-        format: value => value || $t('fe9408c1-4047-4bd3-bccc-096ae1b9bb43'),
+        format: value => value || $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -81,9 +81,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer.name',
-        name: $t('9fb003b3-9fce-49fc-9deb-beb9bbd14715'),
+        name: $t('2a10aac1-e404-4de4-865d-75593b2b5e8d'),
         getValue: object => object.customer?.name ?? '',
-        format: value => value || $t('fe9408c1-4047-4bd3-bccc-096ae1b9bb43'),
+        format: value => value || $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -93,9 +93,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'description',
-        name: $t('6a019ac6-c249-48da-b151-f66ed8477414'),
+        name: $t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c'),
         getValue: object => object.getShortDescription(),
-        format: value => value || $t('fe9408c1-4047-4bd3-bccc-096ae1b9bb43'),
+        format: value => value || $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 350,
@@ -104,7 +104,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, PaymentType>({
         id: 'type',
-        name: $t('97c32bed-6241-48c5-89a8-65ae68d6f562'),
+        name: $t('23671282-34da-4da9-8afd-503811621055'),
         getValue: object => object.type,
         format: value => Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(value)),
         getStyle: (value) => {
@@ -123,7 +123,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'customer.company.name',
         name: $t('67928a02-b3f1-465a-9dd7-569d061599a9'),
-        getValue: object => object.customer?.company ? (object.customer?.company?.name || $t('b815f278-1240-4aba-a99a-222d7f43e407')) : '',
+        getValue: object => object.customer?.company ? (object.customer?.company?.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38')) : '',
         format: value => value || $t('1474bb78-8f01-456a-9e85-c6b1748b76d5'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
@@ -134,7 +134,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string | null>({
         id: 'transferDescription',
-        name: $t('89c6f3c9-8485-4441-9592-0c3ec444df82'),
+        name: $t('136b7ba4-7611-4ee4-a46d-60758869210f'),
         getValue: object => object.transferDescription,
         format: value => value || 'Geen',
         getStyle: value => !value ? 'gray' : '',
@@ -155,12 +155,12 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, PaymentGeneral>({
         id: 'paidAt',
-        name: $t('4681e002-1991-4dfb-bd13-d5eb64996864'),
+        name: $t('297af5d5-1cb0-4862-b8d4-13416bdefa9f'),
         getValue: object => object,
         format: (value, width) => value.paidAt
             ? (width < 150 ? Formatter.dateNumber(value.paidAt) : Formatter.date(value.paidAt, true))
             : (
-                    value.status === PaymentStatus.Failed ? $t('edbf6a36-2c1f-4098-9ccb-108ca37b14d6') : $t('ee6b5533-bea8-481d-9dc7-b7b5baac32a2')
+                    value.status === PaymentStatus.Failed ? $t('72fece9f-e932-4463-9c2b-6e8b22a98f15') : $t('14806378-4cc0-4b16-bd94-82bec5a9572d')
                 ),
         getStyle: value => !value.paidAt ? (value.status === PaymentStatus.Failed ? 'gray' : 'error') : '',
         minimumWidth: 120,
@@ -170,7 +170,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, PaymentGeneral>({
         id: 'method',
-        name: $t('8415e8c8-7c6a-4963-8b41-299d112aa847'),
+        name: $t('07e7025c-0bfb-41be-87bc-1023d297a1a2'),
         getValue: object => object,
         format: (object) => {
             if (object.method === PaymentMethod.Unknown && object.price === 0) {

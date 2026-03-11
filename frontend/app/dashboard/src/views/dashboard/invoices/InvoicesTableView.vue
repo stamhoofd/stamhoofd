@@ -80,7 +80,7 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'customer',
         name: $t('b1ac8856-0f2d-4238-a0f7-1868eebc1df1'),
         getValue: object => object.customer?.company ? (object.customer?.company?.name || '') : (object.customer.name || ''),
-        format: value => value || $t('b815f278-1240-4aba-a99a-222d7f43e407'),
+        format: value => value || $t('0076d594-efee-4ec7-a00a-073a4c689a38'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -89,9 +89,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer.company.VATNumber',
-        name: $t('96091a9b-0e54-4261-aa43-b28171a9ba97'),
+        name: $t('263b7054-d38f-4bb9-be63-84b4e614613d'),
         getValue: object => object.customer?.company ? (object.customer?.company?.VATNumber || '') : '',
-        format: value => value || $t('fbbcf6c9-4cfe-4113-be53-6fc15d350642'),
+        format: value => value || $t('3ef9e622-426f-4913-89a0-0ce08f4542d4'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -101,9 +101,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer.company.companyNumber',
-        name: $t('f475a861-b2fe-4b4c-921c-e27a0c19b8e2'),
+        name: $t('12f64ea7-fb54-4178-8267-9de12bdf70d7'),
         getValue: object => object.customer?.company ? (object.customer?.company?.companyNumber || '') : '',
-        format: value => value || $t('fbbcf6c9-4cfe-4113-be53-6fc15d350642'),
+        format: value => value || $t('3ef9e622-426f-4913-89a0-0ce08f4542d4'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -113,7 +113,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date | null>({
         id: 'invoicedAt',
-        name: $t('61674904-4043-4c58-ae98-58495f9ae89e'),
+        name: $t('112b7686-dffc-4ae9-9706-e3efcd34898f'),
         getValue: object => object.invoicedAt,
         format: (value, width) => value ? (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true)) : $t('fec48d44-7399-4f84-9eec-e57136fa1b3c'),
         minimumWidth: 120,
@@ -156,7 +156,7 @@ const Route = {
 
 const actions: TableAction<ObjectType>[] = [
     /* new AsyncTableAction({
-        name: $t('f97a138d-13eb-4e33-aee3-489d9787b2c8'),
+        name: $t('60c06238-ad4d-4599-a3d3-ebe856476618'),
         icon: 'download',
         priority: 0,
         groupIndex: 2,

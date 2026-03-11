@@ -9,7 +9,7 @@
                     {{ customer.company.companyNumber }} {{ $t('d127a845-d79d-4bd5-9335-a302123f56a0') }}
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                    {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                 </p>
 
                 <p v-if="customer.company.address" class="style-description-small">

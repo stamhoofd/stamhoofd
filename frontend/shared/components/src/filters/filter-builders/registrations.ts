@@ -69,7 +69,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('47754708-6f27-4afd-b9fe-600a209cb980'),
+                    name: $t('3eefa3b1-525b-464b-adef-e3b9efd9257f'),
                     key: 'name',
                     allowCreation: hasPlatformPermissions,
                     wrapper: {
@@ -80,7 +80,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('ec2de613-f06f-4d9a-888a-40f98b6b3727'),
+                    name: $t('0be39baa-0b8e-47a5-bd53-0feeb14a0f93'),
                     multipleChoiceConfiguration: {
                         isSubjectPlural: true,
                     },
@@ -100,7 +100,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t('6705ae0e-8239-4bc0-895d-10128cb5c6c4'),
+                    name: $t('0ef2bbb3-0b3c-411a-8901-a454cff1f839'),
                     options: platform.config.defaultAgeGroups.map((group) => {
                         return new MultipleChoiceUIFilterOption(group.name, group.id);
                     }),

@@ -17,7 +17,7 @@
             <span v-else class="icon file-excel color-excel" />
             <div v-if="!file">
                 <h2 class="style-title-list">
-                    {{ $t('83271a7d-c9c1-4424-92cb-cf059d6a63f5') }}
+                    {{ $t('2e45c772-02e9-431d-8273-79b3d10b0638') }}
                 </h2>
                 <p class="style-description">
                     {{ $t('f21f4f50-f541-4be6-9377-b573d641c227') }}
@@ -39,7 +39,7 @@
             <STInputBox error-fields="sheet" :error-box="errors.errorBox" :title="$t(`1716d997-8d09-4a95-8950-d9dff3b91cbb`)">
                 <Dropdown v-model="sheetKey">
                     <option :value="null" disabled>
-                        {{ $t('e93fa1c0-31bc-4086-b45f-0198b629b207') }}
+                        {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
                     </option>
                     <option v-for="key in sheetSelectionList" :key="key" :value="key">
                         {{ key }}
@@ -74,7 +74,7 @@
                         <td>
                             <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
                                 <option :value="null" disabled>
-                                    {{ $t('e93fa1c0-31bc-4086-b45f-0198b629b207') }}
+                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
                                 </option>
                                 <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
                                     <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
@@ -625,7 +625,7 @@ async function shouldNavigateAway() {
     if (!file.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('334d8433-5ba2-443f-84f7-7a88b06f610b'), $t('6f1154ce-274d-476a-b658-f0d7e82cb9b4'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 }
 
 defineExpose({

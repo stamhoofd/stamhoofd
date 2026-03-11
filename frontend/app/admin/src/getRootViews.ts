@@ -67,7 +67,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const membersTab = new TabBarItem({
         id: 'members',
         icon: 'group',
-        name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
+        name: $t(`19da8d23-acea-43c2-bfdd-742447ca57f1`),
         component: membersTableView,
     });
 
@@ -81,7 +81,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const calendarTab = new TabBarItem({
         id: 'events',
         icon: 'calendar',
-        name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
+        name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ManageEventsView, {}),
         }),
@@ -99,7 +99,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const eventNotificationsTab = new TabBarItem({
         id: 'event-notifications',
         icon: 'notification',
-        name: $t(`caf486c6-818a-4d2b-9fdb-728c6af71481`),
+        name: $t(`000be3fe-9354-4c2c-baf1-d0cd4d079830`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EventNotificationsTableView, {}),
         }),
@@ -117,14 +117,14 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const settingsTab = new TabBarItem({
         id: 'settings',
         icon: 'settings',
-        name: $t(`bab38c80-8ab6-4cb7-80c3-1f607057e45d`),
+        name: $t(`5ca94078-d742-4e17-abf7-957c4721a559`),
         component: settingsView,
     });
 
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`a6304a41-8c83-419b-8e7e-c26f4a047c19`),
+        name: $t(`7dfd0425-b8ff-4dec-8c6d-257d94eabbe7`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(CommunicationView, {}),
         }),

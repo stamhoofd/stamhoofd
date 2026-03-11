@@ -179,7 +179,7 @@ export class AuditLogReplacement extends AutoEncoder {
         }
 
         if (this.type === AuditLogReplacementType.File) {
-            return $t(`6e9064fc-f18e-40c7-b36b-e544a4801b2d`);
+            return $t(`108e2ee2-0c29-4f5e-9c34-b9030dd369b9`);
         }
         return this.value;
     }

@@ -1,7 +1,7 @@
 <template>
     <div class="hover-box container">
         <hr><h2 class="style-with-button">
-            <span class="icon-spacer">{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</span>
+            <span class="icon-spacer">{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</span>
         </h2>
 
         <STList>
@@ -62,7 +62,7 @@ const platformFamilyManager = usePlatformFamilyManager();
 const chooseGroupForMember = useChooseGroupForMember();
 
 async function editMember() {
-    await $editMember(props.member, { title: $t(`2a9646b3-81b0-48b0-af74-06bbc4fd6fae`) });
+    await $editMember(props.member, { title: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`) });
 }
 async function addRegistration() {
     await chooseGroupForMember({ member: props.member, displayOptions: { action: 'show' } });
@@ -77,10 +77,10 @@ async function deleteMember() {
             new ComponentWithProperties(DeleteView, {
                 title: $t(`63786627-79e7-4ab7-b759-774ef3f856d9`, { name }),
                 description: $t(`c4f7d503-ed7f-4526-b082-28dc2ab7cb17`, { name }),
-                confirmationTitle: $t(`cd2aed8f-03e2-4a54-8bc3-100e2643c74a`),
+                confirmationTitle: $t(`c15132d6-f507-46eb-8584-e36e7ce343c5`),
                 confirmationPlaceholder: $t(`3610e3ed-5df6-41d2-b6e6-a5823abcaff7`),
                 confirmationCode: name,
-                checkboxText: $t(`b0427a33-f98d-439d-8625-0727c3cf53c3`),
+                checkboxText: $t(`4a1ad6f2-d061-4fe0-8206-8540442ad038`),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     patch.addDelete(member.id);

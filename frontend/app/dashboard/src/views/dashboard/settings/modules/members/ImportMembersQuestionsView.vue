@@ -15,7 +15,7 @@
             <p v-else-if="existingCount > 0" class="warning-box">
                 {{ $t('be7ebd45-bb3e-49bd-a4b0-6cf32d2977b8', {
                     existingCount,
-                    memberTranslation: existingCount == 1 ? $t('bd4f2ee1-ffd5-4f8b-97d5-49627c55e147') : $t('ad919b4f-2896-4a75-ab97-3916cf6e7796'),
+                    memberTranslation: existingCount == 1 ? $t('146d0874-2f4d-4374-8808-61a4bd953354') : $t('39c566d6-520d-4048-bb1a-53eeea3ccea7'),
                     total: importMemberResults.length
                 }) }}
             </p>
@@ -76,7 +76,7 @@
 
             <template v-if="needsGroupAssignment">
                 <hr>
-                <h2>{{ $t('e47b2390-af43-40a0-a7e3-5cd98b247c40') }}</h2>
+                <h2>{{ $t('877284d7-31b4-4857-a963-405b4139adc2') }}</h2>
 
                 <p class="warning-box">
                     {{ membersNeedingAssignment.length }} {{ $t('4e90f074-fbc4-40d3-aca6-db901e15cbc9') }}
@@ -447,7 +447,7 @@ function getParentDescription(parent: Parent) {
         description.push(type + ': ' + parent.name);
     }
     if (parent.phone) {
-        description.push(type + ' ' + $t(`f956eedf-ca2e-4d8c-925d-434bf3adfd24`) + ': ' + parent.phone);
+        description.push(type + ' ' + $t(`de723a38-6e76-418a-a6f6-52c6ed45c5c8`) + ': ' + parent.phone);
     }
     if (parent.email) {
         description.push(type + ' ' + $t(`9755e27e-7128-4682-af6e-e3a2a5d95a42`) + ': ' + parent.email);
@@ -476,7 +476,7 @@ function openResultView() {
                 let suffix = '';
 
                 if (member.importRegistrationResult.paidPrice !== null) {
-                    suffix = ` (${$t('b53eb56b-1380-4bc5-bc07-9e813c435e69', { price: Formatter.price(member.importRegistrationResult.paidPrice) })})`;
+                    suffix = ` (${$t('72cf6e0c-87b5-47ae-af91-4112e24c13e1', { price: Formatter.price(member.importRegistrationResult.paidPrice) })})`;
                 }
                 else if (member.importRegistrationResult.paid || paid.value) {
                     suffix = ` (${$t('a56aa092-fd87-40b9-9a8c-7822796e6927')})`;
@@ -567,26 +567,26 @@ function openResultView() {
                 const patched = member.patchedDetails;
 
                 if (patched.name) {
-                    description.push($t(`1afb49be-fbdc-4388-9b5a-50a1c7f67b82`) + ': ' + patched.name);
+                    description.push($t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`) + ': ' + patched.name);
                 }
                 if (patched.nationalRegisterNumber) {
-                    description.push($t(`ff818d9d-658a-42cd-924e-75fc839aa9ea`) + ': ' + patched.nationalRegisterNumber.toString());
+                    description.push($t(`00881b27-7501-4c56-98de-55618be2bf11`) + ': ' + patched.nationalRegisterNumber.toString());
                 }
                 if (patched.gender) {
                     description.push($t(`08ef39ff-3431-4975-8c46-8fb68c946432`) + ': ' + getGenderName(patched.gender));
                 }
                 if (patched.email) {
-                    description.push($t(`4f483ae0-74b5-4b48-94c0-d4c4f807009a`) + ': ' + patched.email);
+                    description.push($t(`2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b`) + ': ' + patched.email);
                 }
                 if (patched.phone) {
-                    description.push($t(`e8cc0b81-c481-4c74-bac0-2e110685cd20`) + ': ' + patched.phone);
+                    description.push($t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`) + ': ' + patched.phone);
                 }
                 if (patched.birthDay) {
-                    description.push($t(`50e0222d-8de4-43c4-8489-7879c2f681af`) + ': ' + Formatter.date(patched.birthDay, true));
+                    description.push($t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`) + ': ' + Formatter.date(patched.birthDay, true));
                 }
 
                 if (patched.address) {
-                    description.push($t(`e98ef894-3461-4c12-b38a-80f8c62db915`) + ': ' + patched.address.toString());
+                    description.push($t(`0a37de09-120b-4bea-8d13-6d7ed6823884`) + ': ' + patched.address.toString());
                 }
 
                 if (patched.memberNumber) {
@@ -594,7 +594,7 @@ function openResultView() {
                 }
 
                 if (patched.uitpasNumberDetails) {
-                    description.push($t(`e330f60b-d331-49a2-a437-cddc31a878de`) + ': ' + patched.uitpasNumberDetails.uitpasNumber);
+                    description.push($t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`) + ': ' + patched.uitpasNumberDetails.uitpasNumber);
                 }
 
                 for (const parent of patched.parents) {

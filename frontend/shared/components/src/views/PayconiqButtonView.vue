@@ -91,12 +91,12 @@ export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
 
     helpMe() {
         if (this.getOS() === 'iOS') {
-            new CenteredMessage($t(`99f9efd3-4d2d-4fd8-845c-b690daed606a`), $t(`6f196b46-8ac6-4565-a954-5f68cb6c56f5`))
+            new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`6f196b46-8ac6-4565-a954-5f68cb6c56f5`))
                 .addCloseButton()
                 .show();
         }
         else {
-            new CenteredMessage($t(`99f9efd3-4d2d-4fd8-845c-b690daed606a`), $t(`cbc17197-a98b-4017-aab8-adab5ab38cff`)).addCloseButton().show();
+            new CenteredMessage($t(`809b7c07-e6fb-4d65-806d-7ec52cc8b3b8`), $t(`cbc17197-a98b-4017-aab8-adab5ab38cff`)).addCloseButton().show();
         }
     }
 }

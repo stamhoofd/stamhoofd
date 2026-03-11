@@ -20,7 +20,7 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? $t(`9179fbfd-3a86-4ea3-b191-56baf0344d3f`) : $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`)) : $t(`db49b517-77d1-4260-a22f-d3b94f55f719`)" :validator="internalValidator" :required="false" />
+        <AddressInput v-if="editingAddress || selectedAddress === null" v-model="editAddress" :title="selectedAddress === null ? (addresses.length > 0 ? $t(`9179fbfd-3a86-4ea3-b191-56baf0344d3f`) : $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`)) : $t(`db49b517-77d1-4260-a22f-d3b94f55f719`)" :validator="internalValidator" :required="false" />
         <STErrorsDefault :error-box="errorBox" />
     </div>
 </template>

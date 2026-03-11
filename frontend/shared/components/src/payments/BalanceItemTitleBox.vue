@@ -9,8 +9,8 @@
             <span class="icon undo small" />
         </p>
         <p v-else-if="item.price >= 0 && item.priceOpen < 0" class="style-title-prefix-list">
-            <span v-if="isPayable">{{ $t('bdf22906-037e-4221-8d3e-113bc62da28e') }}</span>
-            <span v-else>{{ $t('c59769e0-b0fa-42f3-b713-82a2d7237a9c') }}</span>
+            <span v-if="isPayable">{{ $t('89bb9c20-d3f5-43ff-846c-47a23517274a') }}</span>
+            <span v-else>{{ $t('38ff3cca-3877-4202-9c71-9437a12fb876') }}</span>
             <span class="icon undo small" />
         </p>
     </template>

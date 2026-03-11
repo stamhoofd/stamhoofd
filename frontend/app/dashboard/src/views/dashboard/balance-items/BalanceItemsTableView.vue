@@ -74,7 +74,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'category',
-        name: $t('c178055f-e24d-4fbf-b95c-3f447721da62'),
+        name: $t('502dc65d-e8d3-4b20-a478-a76ca9084e60'),
         getValue: object => Formatter.capitalizeFirstLetter(object.category),
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -84,7 +84,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'itemTitle',
-        name: $t('55316f2c-4958-45fe-a57b-4fdb9c3a30bb'),
+        name: $t('109b8d55-5b39-47da-92ad-fbdfa0f3d0b0'),
         getValue: object => object.itemTitle,
         minimumWidth: 150,
         recommendedWidth: 300,
@@ -97,7 +97,7 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'itemDescription',
         name: $t('936808bb-97a7-4834-8959-468bbf0610bf'),
         getValue: object => object.itemDescription ?? '',
-        format: (val, width) => val || $t('6fa11f7a-dbd1-4da1-ac9b-c18a23606df1'),
+        format: (val, width) => val || $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598'),
         getStyle: val => !val ? 'gray' : '',
         minimumWidth: 150,
         recommendedWidth: 300,
@@ -106,7 +106,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amount',
-        name: $t('6d6cce57-34e9-4d38-9bbe-d59692f22803'),
+        name: $t('697df3e7-fbbf-421d-81c2-9c904dce4842'),
         getValue: object => object.quantity,
         format: (val, width) => Formatter.integer(val),
         minimumWidth: 50,
@@ -117,7 +117,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'unitPrice',
-        name: $t('ac719e97-a593-41c0-b92a-3db36792c56d'),
+        name: $t('7453643b-fdb2-4aa1-9964-ddd71762c983'),
         getValue: object => object.unitPrice,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -129,7 +129,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'payablePriceWithVAT',
-        name: $t('bf33f977-98e6-4c00-b4ad-f95e816011d3'),
+        name: $t('1205deb9-498d-435d-a6e1-91ea98371523'),
         getValue: object => object.payablePriceWithVAT,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -141,7 +141,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'priceOpen',
-        name: $t('424a738b-6dd6-4200-bf6e-2517f6ef7c1f'),
+        name: $t('18aed6d0-0880-4d06-9260-fe342e6e8064'),
         getValue: object => object.priceOpen,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -152,7 +152,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePaid',
-        name: $t('a314660b-0163-44f2-b329-72f8595d3c69'),
+        name: $t('25c803f0-6b45-42aa-9b88-573e3706b8bb'),
         getValue: object => object.pricePaid,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -164,7 +164,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePending',
-        name: $t('e138c55d-ae66-4be3-ae15-497663ac7fa7'),
+        name: $t('5c75e9bf-1b64-4d28-a435-6e33247d5170'),
         getValue: object => object.pricePending,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -179,7 +179,7 @@ const allColumns: Column<ObjectType, any>[] = [
             id: `balanceItem.relations.${type}`,
             name: getBalanceItemRelationTypeName(type),
             getValue: object => object.relations.get(type)?.name?.toString() || '',
-            format: (val, width) => val || $t('6fa11f7a-dbd1-4da1-ac9b-c18a23606df1'),
+            format: (val, width) => val || $t('3e8d9718-569f-4243-b9ba-ae8f3df6d598'),
             getStyle: val => !val ? 'gray' : '',
             minimumWidth: 150,
             recommendedWidth: 300,
@@ -190,7 +190,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'description',
-        name: $t('d151ed17-b421-4e50-9a6e-db3a09a540d3'),
+        name: $t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c'),
         getValue: object => object.description,
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -200,7 +200,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, BalanceItemStatus>({
         id: 'status',
-        name: $t('f80993dd-16ac-48d6-8be7-09cec1206f8d'),
+        name: $t('66f5134c-9e11-4d36-88f9-526587491ecb'),
         getValue: object => object.status,
         format: val => getBalanceItemStatusName(val),
         getStyle: (val) => {
@@ -261,7 +261,7 @@ const present = usePresent();
 const { getSelectableWorkbook } = useSelectableWorkbook();
 const actions = [
     new AsyncTableAction({
-        name: $t('f97a138d-13eb-4e33-aee3-489d9787b2c8'),
+        name: $t('60c06238-ad4d-4599-a3d3-ebe856476618'),
         icon: 'download',
         priority: 0,
         groupIndex: 2,

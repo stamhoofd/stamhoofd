@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('5dc070ea-ed3e-4684-b0b4-16a9defc4ed4')" :title="$t(`e2351ad3-5e04-41b8-8ec8-124f3d823b75`)" @save="save">
+    <SaveView :loading="saving" :disabled="!canContinue" :save-text="$t('5dc070ea-ed3e-4684-b0b4-16a9defc4ed4')" :title="$t(`5dc070ea-ed3e-4684-b0b4-16a9defc4ed4`)" @save="save">
         <h1>
             {{ $t('48533fc2-71ed-4210-96b6-f27239ebdcc7') }}
         </h1>
@@ -7,11 +7,11 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errorBox" :title="$t(`22761311-3065-49fd-82ca-bc60aae3c975`)">
+            <STInputBox error-fields="startDate" :error-box="errorBox" :title="$t(`1e43813a-f48e-436c-bb49-e9ebb0f27f58`)">
                 <DateSelection v-model="startDate" />
             </STInputBox>
 
-            <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t(`feaf0054-1b99-4526-821e-3c63e64574a0`)">
+            <STInputBox error-fields="endDate" :error-box="errorBox" :title="$t(`f3cc0597-fe12-4cb1-bd41-4c7ce5d59235`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
         </div>
@@ -38,7 +38,7 @@
         </STList>
 
         <template v-if="allPaymentProviders.length">
-            <hr><h2>{{ $t('e8600ed0-ac82-4c0f-8719-bd91173d653f') }}</h2>
+            <hr><h2>{{ $t('46c3ece9-3197-4668-9528-b1258b77e789') }}</h2>
 
             <STList>
                 <STListItem v-for="provider in allPaymentProviders" :key="provider" :selectable="true" element-name="label" class="left-center">

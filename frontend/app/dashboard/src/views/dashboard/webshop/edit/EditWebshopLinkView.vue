@@ -50,7 +50,7 @@
                     {{ $t('fe855268-0b76-47b5-b917-11f68f4407c8') }}
 
                     <button class="button text" type="button">
-                        {{ $t('f624c73d-afc6-4d15-ac75-fc4527dbfef2') }}
+                        {{ $t('1310f065-caf5-41e6-a3b8-cf9b39336483') }}
                     </button>
                 </p>
                 <p v-if="webshop.meta.domainActive && originalWebshop.domain === webshop.domain">

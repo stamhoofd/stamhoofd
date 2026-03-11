@@ -97,7 +97,7 @@ export const MembershipCharger = {
                 const balanceItem = new BalanceItem();
                 balanceItem.unitPrice = membership.price;
                 balanceItem.amount = 1;
-                balanceItem.description = Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`3e515054-91e7-43ed-a9ce-563b626f337d`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
+                balanceItem.description = Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
                 balanceItem.relations = new Map([
                     [
                         BalanceItemRelationType.Member,

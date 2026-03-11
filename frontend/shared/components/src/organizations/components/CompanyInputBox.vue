@@ -1,7 +1,7 @@
 <template>
     <STInputBox class="max">
         <STList>
-            <CheckboxListItem v-model="doesNotHaveCompanyNumber" :description="$t('becc82f0-4195-4a17-b3f5-03f305582e4a')" :label="$t(`594307a3-05b8-47cf-81e2-59fb6254deba`)" />
+            <CheckboxListItem v-model="doesNotHaveCompanyNumber" :description="$t('becc82f0-4195-4a17-b3f5-03f305582e4a')" :label="$t(`1c5b447a-93e8-46da-b6e1-ffc29a2967e8`)" />
             <CheckboxListItem v-if="hasCompanyNumber" v-model="hasVATNumber" :description="$t('f9c27b43-9514-4e18-94b4-d1abd79ce689')" :label="$t(`9e78c772-0f29-4fb0-8ce6-fe98f9886c01`)" />
         </STList>
     </STInputBox>
@@ -16,16 +16,16 @@
             </p>
         </div>
         <div>
-            <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country !== Country.Belgium)" v-model="companyNumber" :country="country" :validator="validator" :required="true" :placeholder="$t(`fb64a034-071e-45d6-8d78-6b5f291ee5f9`)" />
-            <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" :country="country" :validator="validator" :required="true" :title="$t(`4d2a6054-26bf-49ed-b91f-59a8819e6436`)" :placeholder="$t(`4d2a6054-26bf-49ed-b91f-59a8819e6436`)" />
+            <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country !== Country.Belgium)" v-model="companyNumber" :country="country" :validator="validator" :required="true" :placeholder="$t(`12f64ea7-fb54-4178-8267-9de12bdf70d7`)" />
+            <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" :country="country" :validator="validator" :required="true" :title="$t(`263b7054-d38f-4bb9-be63-84b4e614613d`)" :placeholder="$t(`263b7054-d38f-4bb9-be63-84b4e614613d`)" />
         </div>
     </div>
 
     <div class="split-inputs">
         <div>
-            <AddressInput v-model="companyAddress" :required="true" :title="doesNotHaveCompanyNumber ? $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`) : $t(`e49699b5-d1bb-4547-8002-08ed2883997c`)" :validator="validator" />
+            <AddressInput v-model="companyAddress" :required="true" :title="doesNotHaveCompanyNumber ? $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`) : $t(`e49699b5-d1bb-4547-8002-08ed2883997c`)" :validator="validator" />
         </div>
-        <EmailInput v-model="administrationEmail" :validator="validator" :required="false" :title="$t(`e2a0d0fd-b353-4ac1-8872-a4617fe79e2f`)" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)" />
+        <EmailInput v-model="administrationEmail" :validator="validator" :required="false" :title="$t(`e2a0d0fd-b353-4ac1-8872-a4617fe79e2f`)" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)" />
     </div>
 </template>
 

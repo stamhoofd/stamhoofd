@@ -17,7 +17,7 @@ export function getSelectableWorkbook() {
         sheets: [
             new SelectableSheet({
                 id: 'payments',
-                name: $t(`290c7beb-61c7-425d-b35e-333aba83bbc5`),
+                name: $t(`15589562-1e34-4197-8097-5ec5bf1636fb`),
                 description: $t(`5794f2b1-0a86-481b-a3ea-4224c6f68ea8`),
                 columns: [
                     new SelectableColumn({
@@ -28,12 +28,12 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'price',
-                        name: $t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`),
+                        name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
                     }),
 
                     new SelectableColumn({
                         id: 'description',
-                        name: $t(`204f8618-c061-449d-aa74-5085e67b1d24`),
+                        name: $t(`151006be-86c2-48cd-bcd7-7c3bf9b76080`),
                         description: $t(`17c0327e-3206-4f14-a246-d215c97299f5`),
                     }),
 
@@ -70,7 +70,7 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'paymentId',
-                        name: $t(`fe6593de-6156-4021-98b3-c470b7e593f2`),
+                        name: $t(`0601033f-1678-4781-96cd-1653448d689a`),
                         description: $t(`fb8cd9a0-f531-4b1a-9a5c-dfb6b4957e22`),
                     }),
 
@@ -88,17 +88,17 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'balanceItem.description',
-                        name: $t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`),
+                        name: $t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`),
                     }),
 
                     new SelectableColumn({
                         id: 'balanceItem.createdAt',
-                        name: $t(`a6eb80ee-4da2-4b74-ad1b-cd3af3fe5fca`),
+                        name: $t(`10a1cf76-0757-4c92-9923-a19cd77fe24c`),
                     }),
 
                     new SelectableColumn({
                         id: 'balanceItem.dueAt',
-                        name: $t(`eae99aeb-eb79-4a91-8e84-5364cbc74364`),
+                        name: $t(`3d586760-01f3-42c3-82be-44cea7ad0820`),
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -114,12 +114,12 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: $t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`),
+                        name: $t(`7453643b-fdb2-4aa1-9964-ddd71762c983`),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: $t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`),
+                        name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
                     }),
 
                     ...getGeneralColumns({ category: $t(`8ef5c1e5-f960-433c-ae46-07e08fe4c309`) }),
@@ -150,19 +150,19 @@ function getGeneralColumns(options?: { category?: string | null }) {
 
             new SelectableColumn({
                 id: 'provider',
-                name: $t(`7dfb11a0-0064-4d9e-af68-b759d5a52746`),
+                name: $t(`126040d7-3625-45c5-b561-4bf6c5baac12`),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'createdAt',
-                name: $t(`b6391640-1e01-47f9-913d-360fb0903b75`),
+                name: $t(`10fd24bb-43dd-4174-9a23-db3ac54af9be`),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'paidAt',
-                name: $t(`445f778c-5d66-44d3-af4a-84254a4475ea`),
+                name: $t(`297af5d5-1cb0-4862-b8d4-13416bdefa9f`),
                 ...options,
             }),
         ];
@@ -196,13 +196,13 @@ function getStripeColumns() {
     return [
         new SelectableColumn({
             id: 'transferFee',
-            name: $t(`94a93185-574a-415f-9212-32ba95111206`),
+            name: $t(`02754274-677a-4911-9a32-8422a8d9f827`),
             description: $t(`e6fef5f5-3c6a-4879-b2d6-0dfb479cb047`),
             category: $t(`079c3c5d-b816-4adf-9287-6f5352a2cd81`),
         }),
         new SelectableColumn({
             id: 'stripeAccountId',
-            name: $t(`e8ef97dc-5470-4d36-9c4a-a9c2ec92b7e2`),
+            name: $t(`a7f32979-1ee8-47fe-a409-7b17ce9f9d39`),
             description: $t(`cefc0455-9e43-41ef-abe0-dec25b6a9927`),
             category: $t(`079c3c5d-b816-4adf-9287-6f5352a2cd81`),
             enabled: false,
@@ -274,43 +274,43 @@ function getInvoiceColumns() {
             id: 'customer.name',
             name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
             description: $t(`c3fb131c-db42-41f3-935b-b4ce8a83b93d`),
-            category: $t(`f777a982-6f69-41cc-bef1-18d146e870db`),
+            category: $t(`2b09865c-4f3c-44ab-b001-03fc1d5a0ce9`),
         }),
         new SelectableColumn({
             id: 'customer.email',
-            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+            name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
             description: $t(`3242bf11-c6cb-414b-83aa-1087f33348cc`),
-            category: $t(`f777a982-6f69-41cc-bef1-18d146e870db`),
+            category: $t(`2b09865c-4f3c-44ab-b001-03fc1d5a0ce9`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.name',
-            name: $t(`e016131d-770c-45fe-b6e9-5631761cbab2`),
-            category: $t(`f777a982-6f69-41cc-bef1-18d146e870db`),
+            name: $t(`67928a02-b3f1-465a-9dd7-569d061599a9`),
+            category: $t(`2b09865c-4f3c-44ab-b001-03fc1d5a0ce9`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.VATNumber',
-            name: $t(`4d2a6054-26bf-49ed-b91f-59a8819e6436`),
-            category: $t(`f777a982-6f69-41cc-bef1-18d146e870db`),
+            name: $t(`263b7054-d38f-4bb9-be63-84b4e614613d`),
+            category: $t(`2b09865c-4f3c-44ab-b001-03fc1d5a0ce9`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.companyNumber',
-            name: $t(`fb64a034-071e-45d6-8d78-6b5f291ee5f9`),
-            category: $t(`f777a982-6f69-41cc-bef1-18d146e870db`),
+            name: $t(`12f64ea7-fb54-4178-8267-9de12bdf70d7`),
+            category: $t(`2b09865c-4f3c-44ab-b001-03fc1d5a0ce9`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.address',
             name: $t(`317dfe77-2167-4a40-9127-b7321f581327`),
-            category: $t(`f777a982-6f69-41cc-bef1-18d146e870db`),
+            category: $t(`2b09865c-4f3c-44ab-b001-03fc1d5a0ce9`),
         }),
 
         new SelectableColumn({
             id: 'customer.company.administrationEmail',
-            name: $t(`c61fb48a-1ba2-4af4-868e-c11ee25af768`),
-            category: $t(`f777a982-6f69-41cc-bef1-18d146e870db`),
+            name: $t(`8eb5f50e-d00d-444d-979a-f80ae834eb9a`),
+            category: $t(`2b09865c-4f3c-44ab-b001-03fc1d5a0ce9`),
         }),
     ];
 }

@@ -97,12 +97,12 @@ export class EditorSmartVariable extends AutoEncoder {
             }),
             EditorSmartVariable.create({
                 id: 'firstName',
-                name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+                name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
                 deleteMessage: $t(`90f2e835-e3a0-4ea9-bf5d-36d97ccab5f4`),
             }),
             EditorSmartVariable.create({
                 id: 'lastName',
-                name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+                name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
                 deleteMessage: $t(`7e7a5858-0252-45f7-b740-346d81bed6a9`),
             }),
             EditorSmartVariable.create({
@@ -137,7 +137,7 @@ export class EditorSmartVariable extends AutoEncoder {
             }),
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
-                name: $t(`40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f`),
+                name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
                 deleteMessage: $t(`8376c638-2c84-4710-9d85-84f1b0fa8ae9`),
             }),
             EditorSmartVariable.create({
@@ -177,7 +177,7 @@ export class EditorSmartVariable extends AutoEncoder {
         // if (this.orders.length > 0) {
         variables.push(EditorSmartVariable.create({
             id: 'nr',
-            name: $t(`4d496edf-0203-4df3-a6e9-3e58d226d6c5`),
+            name: $t(`17772225-f9c0-4707-9e2a-97f94de4e9d0`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -197,7 +197,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'orderTime',
-            name: $t(`7853cca1-c41a-4687-9502-190849405f76`),
+            name: $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -222,7 +222,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'priceToPay',
-            name: $t(`dcf8ea06-e470-4992-93d9-5fbc4c47a321`),
+            name: $t(`8694e53a-8dc4-42dd-9fbb-c38057ed8403`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -289,7 +289,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'organizationName',
-            name: $t('e07bc7a1-92c0-48fc-91f3-46e12573ee03'),
+            name: $t('8ad6c316-22e5-4fbf-b326-25ce5bf640e1'),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -324,7 +324,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'eventName',
-            name: $t('cb76c693-29ff-4d41-9c45-56106a798818'),
+            name: $t('394aafa1-811b-4ed4-bfc6-c12ae59ff9b6'),
         }));
 
         variables.push(EditorSmartVariable.create({

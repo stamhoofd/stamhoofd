@@ -33,7 +33,7 @@ const props = withDefaults(
 );
 
 const title = computed(() => {
-    return $t('e09c97db-85d7-40b0-8043-65fa24a09a01');
+    return $t('231f28d7-292a-43bc-877b-751012b6ae48');
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
@@ -101,7 +101,7 @@ const allColumns: Column<ObjectType, any>[] = [
         ? [
                 new Column<ObjectType, string | null>({
                     id: 'type',
-                    name: $t('70bf2b13-2ff0-4d64-bcfe-524e89bc4b96'),
+                    name: $t('23671282-34da-4da9-8afd-503811621055'),
                     getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType)),
                     format: value => value || 'Geen',
                     getStyle: value => !value ? 'gray' : '',
@@ -175,11 +175,11 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const memberOptions: RecipientChooseOneOption = {
         type: 'ChooseOne',
-        name: $t('672a6035-da6d-403b-a31e-242cdd92cc5b'),
+        name: $t('19da8d23-acea-43c2-bfdd-742447ca57f1'),
         options: [
             {
                 id: 'accounts',
-                name: $t('bc8a585c-6670-418c-ba88-228157009d44'),
+                name: $t('379d43fb-034f-4280-bb99-ea658eaec729'),
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.ReceivableBalances,

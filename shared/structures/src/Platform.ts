@@ -49,7 +49,7 @@ export function getOrganizationTagTypeName(type: OrganizationTagType): string {
 export function getOrganizationTagTypePluralName(type: OrganizationTagType): string {
     switch (type) {
         case OrganizationTagType.Tag:
-            return $t(`e80487d1-d969-41fe-b2e8-59192e639fbb`);
+            return $t(`ceba695c-105b-49c9-aaa4-bf716c4aec6b`);
         case OrganizationTagType.Verbond:
             return $t(`462860e4-8b8f-42b8-942c-9465e20d24a9`);
         case OrganizationTagType.Gewest:

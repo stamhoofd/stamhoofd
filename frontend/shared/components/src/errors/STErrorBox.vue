@@ -31,7 +31,7 @@ const errorBoxElement = useTemplateRef('error-box');
 
 const errorMessage = computed(() => {
     if (Request.isNetworkError(props.error)) {
-        return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`);
+        return $t(`34b25231-f7d6-41f4-aa83-5d8f973e9890`);
     }
     return props.error.getHuman();
 });

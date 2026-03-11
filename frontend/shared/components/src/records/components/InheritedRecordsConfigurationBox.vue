@@ -5,7 +5,7 @@
                 <Checkbox v-model="dataPermissions.enabled.value" v-tooltip="dataPermissions.locked.value ? $t('cc347bb2-99d1-4320-85d4-943117eb2271') : ''" :disabled="dataPermissions.locked.value" />
             </template>
             <p class="style-title-list">
-                {{ $t('3936222c-5399-4d5e-9543-e483fa4f058a') }}
+                {{ $t('27bc7f00-1839-4f47-b8e5-7f4c6996fa53') }}
             </p>
         </STListItem>
 
@@ -122,7 +122,7 @@ const settings = new RecordEditorSettings({
     exampleValue: new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`fbe32760-d352-4d3d-813c-acd50f3cba50`),
+                firstName: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
                 lastName: $t(`946f5e2e-d92c-4bbd-b64f-115958a04d01`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
@@ -138,7 +138,7 @@ family.members.push(settings.exampleValue);
 
 const properties = [
     buildPropertyRefs('gender', $t(`9e080d96-2c2b-47e3-b56c-d58d993974c9`)),
-    buildPropertyRefs('birthDay', $t(`7d7b5a21-105a-41a1-b511-8639b59024a4`)),
+    buildPropertyRefs('birthDay', $t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`)),
     buildPropertyRefs(
         'nationalRegisterNumber', $t(`00881b27-7501-4c56-98de-55618be2bf11`), {
             description: $t('e4603a61-7e45-4ca4-99b2-4e4208f127d1'),
@@ -335,7 +335,7 @@ function buildRefForInheritedCategory(categoryId: string) {
     const configuration = computed(() => enabled.value ? (patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? PropertyFilter.createDefault()) : null);
 
     return ref({
-        title: category.value?.name ?? $t(`efd71f7c-05d3-4bdc-ae46-13024d6527f0`),
+        title: category.value?.name ?? $t(`0076d594-efee-4ec7-a00a-073a4c689a38`),
         enabled,
         locked,
         configuration,

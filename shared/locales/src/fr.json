@@ -12,7 +12,6 @@
   "29360811-3663-496c-8d8f-c9fdf9467a74": "ID",
   "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": "URI",
   "2f92cf37-00f5-41fe-bf7a-f309c38eed10": "Père",
-  "33adbc14-dd1a-43a7-a015-98a3322b58c5": "Info",
   "340f1829-3bb9-419d-8646-ba3b34eea958": "email",
   "405a811e-ebb1-4948-84cd-8fb5860104e6": "Stamhoofd",
   "43f4f751-2752-4ecc-9d78-136853852b43": "LGBTQ+",
@@ -61,7 +60,6 @@
   "b40d200c-4265-4d58-a7f4-7c2498b062b9": "Tickets",
   "b6ca6bd6-3ba1-445c-aefa-396efead493b": "Hockey",
   "b8cf0b1f-04c4-4a85-9a19-027a5326fd11": "Mollie",
-  "b96a2898-7229-4397-99f1-2ffd761982f3": "Bancontact",
   "bf20a769-772d-46b2-9b48-2ea29c96f113": "Via",
   "bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a": "1",
   "c8f1e4d4-669c-4ccb-a9d9-30584f6c2d55": "Via {organization}",
@@ -75,11 +73,8 @@
   "de971042-551d-43d2-ab47-e76132156887": "Ticket",
   "e0a54e0c-03b3-43c6-b4ca-962c5b1d6772": "Minimum",
   "e1193431-b95a-4a8a-94b2-8659005dcb77": "TabBarController",
-  "e13af8ee-f442-4a98-b3e6-6f3d84fba30c": "Via",
   "e79825e3-975a-4da9-8425-77beac42a41f": "Portugal",
   "ef6ac7e5-de7e-4e2e-802f-de730294f05d": "+ 0 euro",
-  "f4b5c997-f9ed-4ba9-aabd-ac1d5fa37dfb": "Document",
   "f5fc5d6b-49ef-4b3d-80b7-90e1f81220fa": "Buckaroo",
-  "f97ad8c1-31d2-4b61-9e09-3be86eaeba08": "Type",
   "43cf58c2-2263-4c99-87d2-71d61e8b95fe": "Total"
 }

@@ -1,6 +1,6 @@
 <template>
     <div id="settings-view" class="st-view">
-        <STNavigationBar :title="$t(`e8340220-a719-4ab8-82ff-627fce627235`)" />
+        <STNavigationBar :title="$t(`5faa331e-0104-4711-a394-4d8c449187b0`)" />
 
         <main>
             <h1>
@@ -71,11 +71,11 @@
             <template #right>
                 <button v-if="isAlreadySet" class="button secundary" type="button" @click="deleteMe">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" type="button" @click="save">
-                        {{ $t('cbdf865f-5921-4c3d-9e81-b889c929e5c6') }}
+                        {{ $t('a3ea7b14-204b-44b9-abb5-8ced5fc847d1') }}
                     </button>
                 </LoadingButton>
             </template>

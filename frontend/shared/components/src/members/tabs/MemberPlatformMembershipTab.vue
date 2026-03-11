@@ -29,13 +29,13 @@
                             </template>
 
                             <p v-if="membership.isTrial" class="style-title-prefix-list theme-secundary">
-                                <span>{{ $t('4d4c0732-2875-4de8-afae-d8b2687ff279') }}</span>
+                                <span>{{ $t('1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0') }}</span>
                             </p>
                             <h3 class="style-title-list">
                                 <span>{{ getMembershipType(membership).name }}</span>
 
                                 <span v-if="membership.freeAmount" class="style-tag discount inline-first">
-                                    {{ $t('577e6929-3751-47ae-9653-e43e10978119', {days: Formatter.pluralText(membership.freeAmount, $t('a6279389-a070-49c9-a085-bb312555e419'), $t('fca0ce20-d696-4966-a50c-441f54f046c4'))}) }}
+                                    {{ $t('577e6929-3751-47ae-9653-e43e10978119', {days: Formatter.pluralText(membership.freeAmount, $t('1ea8c630-af92-4cba-bfdc-acc0b0f67fae'), $t('6cb97c70-db56-4883-a2b3-87b65506d4f9'))}) }}
                                 </span>
                             </h3>
                             <p v-tooltip="$t('af4f2898-e5a5-4f08-a6c3-62c389e793e9', {date: formatDate(membership.createdAt, true)})" class="style-description-small style-tooltip">
@@ -184,7 +184,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`4ab30ed5-3e8e-43ca-b87e-dddf8dd8b5fe`), $t(`3e204a5f-3198-4125-ac32-fcf973e144b2`))) {
+    if (!await CenteredMessage.confirm($t(`4ab30ed5-3e8e-43ca-b87e-dddf8dd8b5fe`), $t(`201437e3-f779-47b6-b4de-a0fa00f3863e`))) {
         return;
     }
 
@@ -249,7 +249,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
 function getMembershipType(membership: MemberPlatformMembership) {
     return platform.value.config.membershipTypes.find(t => t.id === membership.membershipTypeId) ?? PlatformMembershipType.create({
         id: membership.membershipTypeId,
-        name: $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+        name: $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`),
     });
 }
 </script>

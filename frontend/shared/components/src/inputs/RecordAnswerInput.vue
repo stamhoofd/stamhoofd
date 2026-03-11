@@ -169,7 +169,7 @@ const inputPlaceholder = computed(() => {
             }
             return $t(`b2933d54-b2ec-4fde-965c-7d62de768a1e`) + ' ' + answer.value.settings.inputPlaceholder;
         }
-        return $t(`6b886749-1039-4c0b-b239-fbae9fd5f291`);
+        return $t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`);
     }
     return answer.value.settings.inputPlaceholder.length ? answer.value.settings.inputPlaceholder : answer.value.settings.name;
 });

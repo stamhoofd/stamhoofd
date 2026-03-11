@@ -58,7 +58,7 @@ function createMembersSummaryStack({ members, selectableColumn }: MembersSummary
         if (grid === null) {
             return new VerticalStack([
                 title,
-                new DefaultText($t('6b6d6629-eefa-4d53-b669-7a7c0e7d7e12'), { fillColor: colorDark }),
+                new DefaultText($t('2035a033-bd26-492b-8d91-473b2a033029'), { fillColor: colorDark }),
                 spacing,
             ], stackOptions);
         }

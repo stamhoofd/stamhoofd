@@ -20,7 +20,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     groupColumns.push(
                         new SelectableColumn({
                             id: `optionMenu.${menu.id}.${option.id}.amount`,
-                            name: menu.name + ' → ' + option.name + ' → ' + $t('ed55e67d-1dce-46b2-8250-948c7cd616c2'),
+                            name: menu.name + ' → ' + option.name + ' → ' + $t('697df3e7-fbbf-421d-81c2-9c904dce4842'),
                             category: group.settings.name.toString(),
                         }),
                     );
@@ -73,49 +73,49 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'member.memberNumber',
-            name: $t(`7c4ca473-3c49-45fb-bdd2-b87399a69e62`),
+            name: $t(`123be534-a0be-4a6e-b03f-021659e1d8ba`),
         }),
         new SelectableColumn({
             id: 'member.firstName',
-            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+            name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
         }),
         new SelectableColumn({
             id: 'member.lastName',
-            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+            name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
         }),
         new SelectableColumn({
             id: 'member.birthDay',
-            name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
+            name: $t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`),
         }),
         new SelectableColumn({
             id: 'member.age',
-            name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
+            name: $t(`8c1f264f-3b0b-49b9-8a29-9ceb2dfd7754`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.gender',
-            name: $t(`3048ad16-fd3b-480e-b458-10365339926b`),
+            name: $t(`08ef39ff-3431-4975-8c46-8fb68c946432`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.phone',
-            name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+            name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.email',
-            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+            name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.address',
-            name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+            name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
             description: $t(`01e99208-dce7-4109-8cf2-3cc74c4df45c`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.securityCode',
-            name: $t(`ba5f8036-1788-408a-8c44-1db80a53c087`),
+            name: $t(`0fa4253f-1cfd-4394-93b4-dfba8da04738`),
             enabled: false,
             description: $t(`aa45000f-8cff-4cb6-99b2-3202eb64c4a8`),
         }),
@@ -126,7 +126,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }), [AccessRight.MemberReadFinancialData]),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.uitpasNumber',
-            name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
+            name: $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`),
             enabled: false,
         }), [AccessRight.MemberReadFinancialData]),
         new SelectableColumn({
@@ -136,12 +136,12 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.nationalRegisterNumber',
-            name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
+            name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
             enabled: false,
         }), [AccessRight.MemberManageNRN]),
         new SelectableColumn({
             id: 'member.membership',
-            name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
+            name: $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`),
             enabled: false,
         }),
         groups.some(group => group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization)
@@ -154,7 +154,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         groups.some(group => group.settings.trialDays)
             ? new SelectableColumn({
                 id: 'trialUntil',
-                name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
+                name: $t(`1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0`),
                 enabled: false,
             })
             : null,
@@ -164,13 +164,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             ? [
                     new SelectableColumn({
                         id: 'organization',
-                        name: hasEvent ? $t('ee0da6c3-0032-40c1-9679-b96294e62b6e') : $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
+                        name: hasEvent ? $t('55e86a73-d637-4ca0-82ac-abd27d60705f') : $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
                         description: $t('517e056d-b0f7-4103-b717-5550c0c38cff'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'uri',
-                        name: hasEvent ? $t('33baaf22-e844-4de1-960e-fc2dec76b5f1') : $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
+                        name: hasEvent ? $t('33baaf22-e844-4de1-960e-fc2dec76b5f1') : $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
                         description: $t('983d267c-b44b-40bd-b0b6-565032ab01a9'),
                         enabled: false,
                     }),
@@ -192,18 +192,18 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             ? [
                     new SelectableColumn({
                         id: 'defaultAgeGroup',
-                        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
+                        name: $t(`0ef2bbb3-0b3c-411a-8901-a454cff1f839`),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'group',
-                        name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
+                        name: $t(`0c230001-c3be-4a8e-8eab-23dc3fd96e52`),
                         enabled: false,
                     }),
                     groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
                         ? new SelectableColumn({
                             id: 'group.type',
-                            name: $t('4fda497f-b2d8-43ef-b08c-a3e4e0b472b4'),
+                            name: $t('23671282-34da-4da9-8afd-503811621055'),
                             enabled: false,
                         })
                         : null,
@@ -213,7 +213,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         organization !== null
             ? new SelectableColumn({
                 id: 'outstandingBalance',
-                name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+                name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
                 description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
                 enabled: false,
             })
@@ -221,7 +221,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         // price
         new SelectableColumn({
             id: 'priceName',
-            name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
+            name: $t(`a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc`),
         }),
         new SelectableColumn({
             id: 'price',
@@ -229,22 +229,22 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'toPay',
-            name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
+            name: $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`),
             description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
         }),
         new SelectableColumn({
             id: 'registeredAt',
-            name: $t(`8bec8990-4632-40b0-93f3-f27a3f2ddbdb`),
+            name: $t(`8895f354-658f-48bd-9d5d-2e0203ca2a36`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'startDate',
-            name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
+            name: $t(`300d2935-b578-48cc-b58e-1c0446a68d59`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'endDate',
-            name: $t(`aef10d71-39c4-4cdb-8252-5fd31781abd8`),
+            name: $t(`3c90169c-9776-4d40-bda0-dba27a5bad69`),
             enabled: false,
         }),
         new SelectableColumn({
@@ -274,38 +274,38 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                 }),
                 new SelectableColumn({
                     id: getId('firstName'),
-                    name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+                    name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('lastName'),
-                    name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+                    name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('phone'),
-                    name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+                    name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('email'),
-                    name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+                    name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('address'),
-                    name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                    name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
                     category,
                     enabled,
 
                 }),
                 returnNullIfNoAccessRight(new SelectableColumn({
                     id: getId('nationalRegisterNumber'),
-                    name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
+                    name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
                     category,
                     enabled,
                 }), [AccessRight.MemberManageNRN]),
@@ -321,7 +321,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'member.unverifiedEmails',
-            name: $t(`7766ee8a-cd92-4d6f-a3fa-f79504fbcdda`),
+            name: $t(`1363c0ee-0f4b-43f8-a9ee-a2a6091e5d96`),
             category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
             enabled: false,
         }),

@@ -7,8 +7,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
-                <input v-model="name" class="input" type="text" :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') ">
+            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
+                <input v-model="name" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') ">
             </STInputBox>
             <STInputBox error-fields="behaviour" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
                 <Dropdown v-model="behaviour">
@@ -22,8 +22,8 @@
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('3db64326-c892-4fdb-8293-3d713453383a')" autocomplete="off" />
+        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
+            <textarea v-model="description" class="input" type="text" :placeholder="$t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f')" autocomplete="off" />
         </STInputBox>
 
         <hr><h2>{{ $t('3754b38e-3938-4589-801a-450ba0844990') }}</h2>
@@ -43,7 +43,7 @@
             </button>
         </p>
 
-        <hr><h2>{{ $t("db085652-c3d0-4d2c-aa4b-53ef4234d480") }}</h2>
+        <hr><h2>{{ $t("6ada0ff0-3976-41f7-aa65-7af870964ebc") }}</h2>
 
         <Checkbox v-model="requiredTagIdsEnabled">
             {{ $t("5fe7a400-8c6a-42ba-b920-c8518e60e091") }}
@@ -169,7 +169,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('866219fd-b946-4a96-b84b-3c2d26850cfa'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('b101058a-6b13-4df7-81ef-1f5c925bbf71'))) {
+    if (!await CenteredMessage.confirm($t('866219fd-b946-4a96-b84b-3c2d26850cfa'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('b101058a-6b13-4df7-81ef-1f5c925bbf71'))) {
         return;
     }
 
@@ -327,7 +327,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

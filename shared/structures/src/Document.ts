@@ -23,7 +23,7 @@ export class DocumentStatusHelper {
             case DocumentStatus.Draft: return $t(`a4b33491-0ace-4b39-aba6-79371659fd51`);
             case DocumentStatus.MissingData: return $t(`21b3891d-7c0e-49ca-ae35-d77d54e9f0c3`);
             case DocumentStatus.Published: return $t(`362f9b8f-9f87-49bc-8dda-d6014ab9de3f`);
-            case DocumentStatus.Deleted: return $t(`fb738914-5429-4d24-9eac-564caa299996`);
+            case DocumentStatus.Deleted: return $t(`94337d0a-0522-43be-b337-73ddcf7fdd45`);
         }
     }
 

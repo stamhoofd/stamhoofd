@@ -1,22 +1,22 @@
 <template>
-    <SaveView :title="isNew ? $t(`b08ae26a-874b-40cd-adb9-98bdccaa99e0`) : $t(`0b100742-cfe5-4a3a-b0ee-18c278c5d617`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? $t(`72b723a2-72c5-4d56-8129-519ea281c6b7`) : $t(`0b100742-cfe5-4a3a-b0ee-18c278c5d617`)" :disabled="!hasChanges && !isNew" class="product-edit-view" @save="save">
         <h1 v-if="isNew">
             {{ $t('72b723a2-72c5-4d56-8129-519ea281c6b7') }}
         </h1>
         <h1 v-else>
-            {{ $t('82b145c8-177b-4073-8e28-3781fc902b15') }}
+            {{ $t('0b100742-cfe5-4a3a-b0ee-18c278c5d617') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
-        <hr><h2>{{ $t('f177a8e3-ae76-4894-af0a-56936b79100f') }}</h2>
+        <hr><h2>{{ $t('40939025-cebb-4afb-90e9-847233cb256f') }}</h2>
         <p v-if="discounts.length > 1">
             {{ $t("91c71d21-b5bc-4b91-bc08-5ac39db87b95") }}
         </p>
 
         <div v-for="(d, index) in discounts" :key="d.id">
-            <STInputBox :title="discounts.length === 1 ? $t(`fdbec5b0-6fb0-4f0b-9efa-4e4a394605d0`) : $t(`bffce456-034e-4768-bd64-e0c1061e685a`) + ' '+(index+1)+$t(`9e90b5f1-bac8-4e6e-b171-d679b3959197`) + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' ' + $t(`049a16f3-a8dd-485e-9696-afa9fdb511b8`) : '')" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="discounts.length === 1 ? $t(`40939025-cebb-4afb-90e9-847233cb256f`) : $t(`bffce456-034e-4768-bd64-e0c1061e685a`) + ' '+(index+1)+$t(`9e90b5f1-bac8-4e6e-b171-d679b3959197`) + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' ' + $t(`049a16f3-a8dd-485e-9696-afa9fdb511b8`) : '')" :error-box="errors.errorBox" class="max">
                 <template v-if="discounts.length > 1" #right>
                     <button class="button icon trash gray" type="button" @click="removeDiscount(d)" />
                 </template>
@@ -32,7 +32,7 @@
                                 {{ $t('dd61d33b-367e-4e40-8ac6-84c286b931bc') }}
                             </option>
                             <option value="discountPerPiece">
-                                {{ $t('a023893e-ab2c-4215-9981-76ec16336911') }}
+                                {{ $t('43ca079c-2af8-4bde-9f68-abeca3c3a7d0') }}
                             </option>
                         </Dropdown>
                     </div>
@@ -94,7 +94,7 @@
         <p>{{ $t("8914f29c-dd1f-4750-8ae5-3ce6ea28e1b5") }}</p>
 
         <STInputBox error-fields="cartLabel" :error-box="errors.errorBox" :title="$t(`f64ba2c0-b20e-4aa5-94d2-ff2a3173ee51`)">
-            <input v-model="cartLabel" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
+            <input v-model="cartLabel" class="input" type="text" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)">
         </STInputBox>
 
         <hr>
@@ -112,7 +112,7 @@
 
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>

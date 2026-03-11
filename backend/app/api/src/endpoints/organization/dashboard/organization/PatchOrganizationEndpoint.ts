@@ -427,7 +427,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set has not started yet',
-                            human: $t('e0fff936-3f3c-46b8-adcf-c723c33907a2'),
+                            human: $t('2655c006-55af-47e6-959c-16acdb1917dc'),
                             field: 'period',
                         });
                     }

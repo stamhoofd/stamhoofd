@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`d0f49d2a-6b83-4e03-9480-4d0995bbb0a1`)" @save="save">
         <h1>
-            {{ $t('da5f0578-ebf9-40e1-8caf-baa3a7970b28') }}
+            {{ $t('d0f49d2a-6b83-4e03-9480-4d0995bbb0a1') }}
         </h1>
         <p>{{ $t('422c4fca-4c1d-44f4-8e08-b8044c869b7f') }}</p>
 
@@ -27,7 +27,7 @@
         <h2>{{ $t('ec8efff4-e2cf-4755-b8fb-a47f686be173') }}</h2>
 
         <p>
-            {{ $t('86161523-8879-4092-a332-567bf55e0f52') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
+            {{ $t('86161523-8879-4092-a332-567bf55e0f52') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
         </p>
 
         <EditRecordCategoriesBox :categories="categories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />

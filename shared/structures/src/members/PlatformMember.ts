@@ -573,7 +573,7 @@ export class PlatformRegistration extends Registration {
         }
 
         if (!details.address && member.isPropertyRequired('address', scope)) {
-            base.push($t(`ca287035-d735-4eaa-bbb3-ae0db435b4ea`));
+            base.push($t(`38f3e042-b8a7-4bba-bf2a-d7c391f23268`));
         }
 
         if (!details.birthDay && member.isPropertyRequired('birthDay', scope)) {
@@ -581,7 +581,7 @@ export class PlatformRegistration extends Registration {
         }
 
         if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
-            base.push($t(`e7a21ff5-4f90-4518-8279-ea4fb747fb66`));
+            base.push($t(`cd5d00db-1fcc-4079-bbe3-36dc001e93d4`));
         }
         else {
             if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
@@ -1233,7 +1233,7 @@ export class PlatformMember implements ObjectWithRecords {
     get registrationDescription() {
         const groups = this.groups;
         if (groups.length === 0) {
-            return $t('57109b34-1238-4e62-84a0-14a81d7c2bfa');
+            return $t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
         }
         return groups.map(g => g.settings.name).join(', ');
     }

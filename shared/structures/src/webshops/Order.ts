@@ -43,12 +43,12 @@ export enum OrderStatus {
 export class OrderStatusHelper {
     static getName(status: OrderStatus): string {
         switch (status) {
-            case OrderStatus.Created: return $t(`e69989bf-c310-49b4-aff1-b9c84cfe5760`);
+            case OrderStatus.Created: return $t(`38d60a73-e301-4ab2-87ff-6eda04117f2f`);
             case OrderStatus.Prepared: return $t(`a31b162c-b97b-48f5-b020-8152277f7522`);
             case OrderStatus.Collect: return $t(`cdeb4790-0e33-402d-9276-5f0e34873877`);
             case OrderStatus.Completed: return $t(`1e1637ef-4133-4f30-973d-bd913387961e`);
             case OrderStatus.Canceled: return $t(`72fece9f-e932-4463-9c2b-6e8b22a98f15`);
-            case OrderStatus.Deleted: return $t(`fb738914-5429-4d24-9eac-564caa299996`);
+            case OrderStatus.Deleted: return $t(`94337d0a-0522-43be-b337-73ddcf7fdd45`);
         }
     }
 
@@ -238,7 +238,7 @@ export class Order extends AutoEncoder {
 
         const data = [
             {
-                title: $t('4d496edf-0203-4df3-a6e9-3e58d226d6c5'),
+                title: $t('17772225-f9c0-4707-9e2a-97f94de4e9d0'),
                 value: '' + (this.number ?? '?'),
             },
             {
@@ -269,7 +269,7 @@ export class Order extends AutoEncoder {
                 (this.data.checkoutMethod?.type === CheckoutMethodType.Takeout || this.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((this.data.checkoutMethod as any)?.address)
                     ? [
                             {
-                                title: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                                title: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
                                 value: ((order) => {
                                     return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
                                 })(this),
@@ -278,11 +278,11 @@ export class Order extends AutoEncoder {
                     : []
             ),
             {
-                title: $t(`40aabd99-0331-4267-9b6a-a87c06b3f7fe`),
+                title: $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
                 value: Formatter.capitalizeFirstLetter(this.data.timeSlot?.dateString() ?? ''),
             },
             {
-                title: $t(`7853cca1-c41a-4687-9502-190849405f76`),
+                title: $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
                 value: this.data.timeSlot?.timeRangeString() ?? '',
             },
             {
@@ -292,7 +292,7 @@ export class Order extends AutoEncoder {
             ...(this.data.customer.phone
                 ? [
                         {
-                            title: $t(`feea3664-9353-4bd4-b17d-aff005d3e265`),
+                            title: $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
                             value: this.data.customer.phone,
                         },
                     ]

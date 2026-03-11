@@ -26,7 +26,7 @@
                     </p>
                     <p v-else-if="hadNetworkError">
                         {{ $t('711b7638-be3d-4723-821e-cedef94c8782') }}<br><span class="style-description-small">{{ $t('5c9f4609-ebf3-44eb-bf7a-06399a87fc90') }} {{ lastUpdatedText }}</span><br><button class="button text" type="button" @click="updateTickets">
-                            {{ $t('bccb094f-12eb-40d0-9a24-843832b0cdb7') }}
+                            {{ $t('314810ef-ff16-4b22-b8a5-399d5d820a4a') }}
                         </button>
                     </p>
                     <p v-else>

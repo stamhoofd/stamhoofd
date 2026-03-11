@@ -10,8 +10,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')" error-fields="name" :error-box="errors.errorBox">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('c0a0c0f7-1282-40be-85fc-320d136d34ab')" autocomplete="off" enterkeyhint="next">
+            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" error-fields="name" :error-box="errors.errorBox">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" autocomplete="off" enterkeyhint="next">
             </STInputBox>
 
             <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
@@ -26,7 +26,7 @@
             {{ type.description }}
         </p>
 
-        <STInputBox :title="$t('561e9ebb-ae0c-48f3-a10d-921c2a59d5a4')" error-fields="meta.description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="meta.description" :error-box="errors.errorBox" class="max">
             <WYSIWYGTextInput v-model="description" :placeholder="$t('2cb56415-5e16-4a75-9012-8971be8dbc6a')" />
         </STInputBox>
 
@@ -37,21 +37,21 @@
         </Checkbox>
 
         <div class="split-inputs">
-            <STInputBox :title="multipleDays ? $t(`33a674c2-6981-442b-9bd4-01f71da7a159`) : $t(`40aabd99-0331-4267-9b6a-a87c06b3f7fe`)" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="multipleDays ? $t(`300d2935-b578-48cc-b58e-1c0446a68d59`) : $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`)" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
-            <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
+            <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" />
         </div>
 
         <div class="split-inputs">
-            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f852932e-380e-4b9a-916b-2bc008d8c08a`)">
+            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`3c90169c-9776-4d40-bda0-dba27a5bad69`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
-            <TimeInput v-else v-model="startDate" :title="$t('5dd84548-b16f-415b-8dbd-d96aeecedc3e')" :validator="errors.validator" />
-            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`91310731-bddd-4ad3-b5fb-182237699f20`)" />
+            <TimeInput v-else v-model="startDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :validator="errors.validator" />
+            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`68860bdb-dad1-40d5-9130-6219c83fe977`)" />
         </div>
 
-        <hr><h2>{{ $t('bf2af52c-de5d-4089-b46d-9be48594cdb4') }}</h2>
+        <hr><h2>{{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}</h2>
 
         <STList>
             <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
@@ -110,7 +110,7 @@
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('9af957c4-5dea-47ee-a30f-1ef5802a9437') }}</div>
+                <div>{{ $t('24682ea8-b3c6-4372-9a63-5385520888ff') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteDefaultAgeGroupRestriction" />
                 </div>
@@ -123,7 +123,7 @@
 
         <JumpToContainer :visible="groups !== null">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('efeed776-7b4a-4f06-b755-04b1c615ff2d') }}</div>
+                <div>{{ $t('5271f407-ec58-4802-ac69-7f357bc3cfc7') }}</div>
                 <div>
                     <button v-if="!hasGroupRestrictions" type="button" class="button icon trash" @click="deleteGroupsRestriction" />
                 </div>
@@ -139,7 +139,7 @@
 
         <JumpToContainer :visible="!!location">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('8922afd5-4566-4998-9c6f-d7a6143f29a2') }}</div>
+                <div>{{ $t('7eec15d0-4d60-423f-b860-4f3824271578') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteLocation" />
                 </div>
@@ -158,7 +158,7 @@
                 <div>
                     <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
                         <span class="icon trash" />
-                        <span>{{ $t('ffef2405-f472-416b-b8fa-372fdf694797') }}</span>
+                        <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                     </button>
                     <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`b7c71a71-9523-4748-a6cd-80b9314b05b2`) : $t(`5be27263-6804-4f1c-92b0-f20cdacc141b`)" :resolutions="resolutions" />
                 </div>
@@ -173,11 +173,11 @@
 
             <div class="split-inputs">
                 <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
-                    <AgeInput v-model="minAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                    <AgeInput v-model="minAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
                 </STInputBox>
 
                 <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`c0cab705-c129-4a72-8860-c33ef91ec630`)">
-                    <AgeInput v-model="maxAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                    <AgeInput v-model="maxAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
                 </STInputBox>
             </div>
             <p class="style-description-small">
@@ -758,7 +758,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

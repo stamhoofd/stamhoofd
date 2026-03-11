@@ -1,7 +1,7 @@
 <template>
     <SaveView class="auto" data-submit-last-field save-icon="lock" :title="$t(`b33f433c-0957-4411-a0d6-0f41cf5caa63`)" @save="submit">
         <h1 v-if="$context.user?.hasPassword">
-            {{ $t('cc1728cb-e600-4888-ad64-6ee498da11e0') }}
+            {{ $t('b33f433c-0957-4411-a0d6-0f41cf5caa63') }}
         </h1>
         <h1 v-else>
             {{ $t('2dd603e2-2caf-4573-8d8b-6ce8ff1dfda6') }}
@@ -70,7 +70,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         if (this.password.length < 8) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: '',
-                message: $t(`f904f18b-4b7b-461d-9468-44d54443187c`),
+                message: $t(`bac8adfa-0bd1-4180-9143-767f24efa111`),
             }));
             return;
         }

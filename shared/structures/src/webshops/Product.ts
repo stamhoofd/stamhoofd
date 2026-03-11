@@ -453,13 +453,13 @@ export class Product extends AutoEncoder {
         }
 
         if (this.type === ProductType.Ticket) {
-            return stock + ' ' + $t(`8096d9e3-1bb3-4015-911d-9e13388e8bfd`);
+            return stock + ' ' + $t(`390d335e-98c4-4c60-92fc-f1616096c875`);
         }
 
         if (this.type === ProductType.Person) {
-            return stock + ' ' + $t(`b78c8455-7e28-47b2-b2fd-ba6a82302976`);
+            return stock + ' ' + $t(`414f837c-b446-41c4-b522-3e6b473d5b5d`);
         }
-        return stock + ' ' + $t(`7d5de81e-9ae9-4ec6-86e1-844ca6a75fb1`);
+        return stock + ' ' + $t(`3ee3c7fa-db00-4aa3-94eb-046a6af0cc9a`);
     }
 
     get stockText(): string | null {
@@ -468,7 +468,7 @@ export class Product extends AutoEncoder {
         }
 
         if (this.remainingStockWithOptions === 0) {
-            return $t(`44ba544c-3db6-4f35-b7d1-b63fdcadd9ab`);
+            return $t(`0100521c-b38e-4925-9484-44d44f3dfa09`);
         }
 
         return $t(`07f945bf-649b-4138-a91e-9306a9a96955`) + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
@@ -485,7 +485,7 @@ export class Product extends AutoEncoder {
 
         if (this.enableInFuture && this.enableAfter) {
             if (this.disableAfter) {
-                return $t(`84df66e6-0c41-4116-bdca-ebfe6c052f2c`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`3e515054-91e7-43ed-a9ce-563b626f337d`) + ' ' + Formatter.dateTime(this.disableAfter);
+                return $t(`84df66e6-0c41-4116-bdca-ebfe6c052f2c`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`347113ec-87a8-4dd9-88ea-c151e3f066f0`) + ' ' + Formatter.dateTime(this.disableAfter);
             }
             return $t(`84df66e6-0c41-4116-bdca-ebfe6c052f2c`) + ' ' + Formatter.dateTime(this.enableAfter);
         }

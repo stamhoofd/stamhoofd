@@ -392,7 +392,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty number',
-                    human: $t(`6b72f8bd-cd5b-423f-a556-be102d3c22e9`),
+                    human: $t(`382fab7a-2276-4aac-a785-7dac7dcc2b20`),
                     field: 'event_required',
                 });
             }
@@ -432,7 +432,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
                     human: $t(`04ff85c0-eb98-46b8-975b-8fd136ddc49a`, {
                         name: type.name,
-                        days: Formatter.pluralText(type.minimumDays, $t(`a6279389-a070-49c9-a085-bb312555e419`), $t(`fca0ce20-d696-4966-a50c-441f54f046c4`)),
+                        days: Formatter.pluralText(type.minimumDays, $t(`1ea8c630-af92-4cba-bfdc-acc0b0f67fae`), $t(`6cb97c70-db56-4883-a2b3-87b65506d4f9`)),
                     }),
                     field: 'startDate',
                 });
@@ -444,7 +444,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
                     human: $t(`a7d005aa-ceaa-4323-8fac-a02fce174023`, {
                         name: type.name,
-                        days: Formatter.pluralText(type.maximumDays, $t(`a6279389-a070-49c9-a085-bb312555e419`), $t(`fca0ce20-d696-4966-a50c-441f54f046c4`)),
+                        days: Formatter.pluralText(type.maximumDays, $t(`1ea8c630-af92-4cba-bfdc-acc0b0f67fae`), $t(`6cb97c70-db56-4883-a2b3-87b65506d4f9`)),
                     }),
                     field: 'startDate',
                 });

@@ -76,7 +76,7 @@
         <p>
             <button class="button text" type="button" @click="addDiscountCode">
                 <span class="icon add" />
-                <span>{{ $t('46a3962f-7d21-4cf4-b3a9-bfec8007e68a') }}</span>
+                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }}</span>
             </button>
         </p>
     </SaveView>

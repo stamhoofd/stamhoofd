@@ -1,12 +1,12 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') : saveText" data-testid="member-step" @save="save">
+    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('2a9075bb-a743-411e-8a3d-94e5e57363f0') : saveText" data-testid="member-step" @save="save">
         <template v-if="isDuplicate">
             <h1>{{ $t('f59ba68b-d007-40f2-9b87-fc5605ec55ea', {member: cloned.patchedMember.details.firstName}) }}</h1>
             <p>{{ $t('9474f01d-e447-4a95-986e-247917765ecb', {member: cloned.patchedMember.details.firstName}) }}</p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`ba5f8036-1788-408a-8c44-1db80a53c087`)">
+            <STInputBox error-fields="code" :error-box="errors.errorBox" class="max" :title="$t(`0fa4253f-1cfd-4394-93b4-dfba8da04738`)">
                 <CodeInput v-model="code" :code-length="16" :space-length="4" :numbers-only="false" @complete="save" />
             </STInputBox>
 
@@ -73,7 +73,7 @@ const props = withDefaults(
         markReviewed?: string[];
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
-        saveText: () => $t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`),
+        saveText: () => $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
         saveHandler: null,
         markReviewed: () => [],
     },
@@ -198,7 +198,7 @@ async function modifyAddress(from: Address, to: Address) {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`), $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`), from.shortString() + ' ' + $t(`acebb7f5-73f6-448c-842b-361da931462f`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') + $t(`f5962c80-7c80-4d05-a4fe-8a842270d280`) + ' ' + to.shortString() + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
+    if (!await CenteredMessage.confirm($t(`14a6da51-a82f-43b5-9e6a-2d679985d41a`), $t(`4d5e0d3f-688a-4c8b-bad7-818d976166bf`), from.shortString() + ' ' + $t(`acebb7f5-73f6-448c-842b-361da931462f`) + ' ' + Formatter.joinLast(occurrences, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') + $t(`f5962c80-7c80-4d05-a4fe-8a842270d280`) + ' ' + to.shortString() + '.', $t(`fe636d8c-6506-4c8b-bb79-9c20fb1bc54d`), false)) {
         return;
     }
 
@@ -213,7 +213,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`c9111e95-2f59-4164-b0af-9fbf434bf6dd`), $t(`de41b0f3-1297-4058-b390-3bfb99e3d4e0`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 }
 
 defineExpose({

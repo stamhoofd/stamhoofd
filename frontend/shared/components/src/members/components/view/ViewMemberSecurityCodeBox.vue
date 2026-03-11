@@ -1,7 +1,7 @@
 <template>
     <div v-if="securityCode" class="hover-box container">
         <hr><h2 class="style-with-button">
-            <div>{{ $t('ba5f8036-1788-408a-8c44-1db80a53c087') }}</div>
+            <div>{{ $t('0fa4253f-1cfd-4394-93b4-dfba8da04738') }}</div>
             <div v-if="shouldShowResetSecurityCode">
                 <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />
             </div>

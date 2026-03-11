@@ -45,7 +45,7 @@ withDefaults(
         resource: { id: string; name: string; type: PermissionsResourceType };
         configurableAccessRights?: AccessRight[] | null;
     }>(), {
-        title: () => $t(`d51b7cc1-ce3d-45ad-9be0-105e97d0e4b9`),
+        title: () => $t(`70c5edd2-3550-447e-8a36-b43d7833fe1c`),
         description: '',
         configurableAccessRights: null,
     });
@@ -104,7 +104,7 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: $t(`5f37ed88-8822-44bb-8f06-7f527c5d00fe`),
+            title: $t(`20d0f420-edec-4c9f-9584-990258dcf1bf`),
             roles: groupedOrganizationResponsibilities,
         });
     }
@@ -162,7 +162,7 @@ function patchResponsibilityRole(patch: AutoEncoderPatchType<PermissionRoleForRe
 
 const save = async () => {
     await rawSave(async () => {
-        new Toast($t(`89360094-8856-4b28-8921-e3d561ef824c`), 'success green').show();
+        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
         await pop({ force: true });
     });
 };

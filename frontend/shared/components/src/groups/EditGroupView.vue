@@ -44,7 +44,7 @@
                 </div>
             </template>
 
-            <TTextarea v-model="description" :placeholder="$t(`706063e0-e92f-4fdd-8b88-8dea252a55cc`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" />
+            <TTextarea v-model="description" :placeholder="$t(`706063e0-e92f-4fdd-8b88-8dea252a55cc`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)" />
             <p v-if="patchedGroup.type === GroupType.EventRegistration" class="style-description-small">
                 {{ $t('a20a78e9-60c4-425b-a416-5874d0ec4b11') }}
             </p>
@@ -61,14 +61,14 @@
 
                     <template v-if="hasCustomDates">
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('bf07a716-4f44-4534-81a9-a278532b7632')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('300d2935-b578-48cc-b58e-1c0446a68d59')" error-fields="settings.startDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
                             </STInputBox>
                             <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6')" />
                         </div>
 
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('78e69db3-b94b-47b7-8398-940a204f485e')" error-fields="settings.endDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('3c90169c-9776-4d40-bda0-dba27a5bad69')" error-fields="settings.endDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
                             </STInputBox>
                             <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6')" />
@@ -124,7 +124,7 @@
                             </h3>
 
                             <p class="style-description-small">
-                                {{ $t('52bff8d2-52af-4d3f-b092-96bcfa4c0d03') }}: {{ formatPrice(price.price.price) }}
+                                {{ $t('1205deb9-498d-435d-a6e1-91ea98371523') }}: {{ formatPrice(price.price.price) }}
                             </p>
 
                             <p v-if="price.price.reducedPrice !== null" class="style-description-small">
@@ -143,14 +143,14 @@
                             </p>
 
                             <p v-if="price.isSoldOut(patchedGroup)" class="style-description-small">
-                                {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
+                                {{ $t('0100521c-b38e-4925-9484-44d44f3dfa09') }}
                             </p>
                             <p v-else-if="price.stock" class="style-description-small">
                                 {{ $t('dceceb1c-6d55-4a93-bf8f-85ba041786f4', {stock: pluralText(price.getRemainingStock(patchedGroup) ?? 0, 'stuk', 'stuks')}) }}
                             </p>
 
                             <template #right>
-                                <span v-if="price.hidden" :v-tooltip="$t('aff982ed-0f1a-4838-af79-9e00cd53131b')" class="icon gray eye-off" />
+                                <span v-if="price.hidden" :v-tooltip="$t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5')" class="icon gray eye-off" />
                                 <span class="button icon drag gray" @click.stop @contextmenu.stop />
                                 <span class="icon arrow-right-small gray" />
                             </template>
@@ -250,11 +250,11 @@
                 <template v-if="isPropertyEnabled('birthDay')">
                     <div class="split-inputs">
                         <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
-                            <AgeInput v-model="minAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                            <AgeInput v-model="minAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
                         </STInputBox>
 
                         <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`c0cab705-c129-4a72-8860-c33ef91ec630`)">
-                            <AgeInput v-model="maxAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                            <AgeInput v-model="maxAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`104dca1f-f6eb-4193-ae27-5e5f96e4e481`)" />
                         </STInputBox>
                     </div>
                     <p class="style-description-small">
@@ -307,7 +307,7 @@
             </div>
 
             <div v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers" class="container">
-                <hr><h2>{{ $t('bf2af52c-de5d-4089-b46d-9be48594cdb4') }}</h2>
+                <hr><h2>{{ $t('6ada0ff0-3976-41f7-aa65-7af870964ebc') }}</h2>
                 <STList>
                     <template v-if="isMultiOrganization">
                         <STListItem :selectable="true" element-name="label">
@@ -392,7 +392,7 @@
             </div>
 
             <div v-if="type === GroupType.Membership || type === GroupType.EventRegistration || waitingList" class="container">
-                <hr><h2>{{ $t('a56bcf08-214d-421b-9cc0-336d2b5ab0ea') }}</h2>
+                <hr><h2>{{ $t('565a7968-e547-411e-aaff-6f936c128d5f') }}</h2>
                 <p>{{ $t('fb860b93-1b92-43ba-9e3d-1f6573725f23') }}</p>
                 <p class="style-description-block">
                     {{ $t('bb4aa0a1-3f9e-4ce6-9ef6-f775577967c9') }}
@@ -520,7 +520,7 @@
                                     <DateSelection v-model="preRegistrationsDate" />
                                 </STInputBox>
 
-                                <TimeInput v-model="preRegistrationsDate" :validator="errors.validator" :title="$t(`22761311-3065-49fd-82ca-bc60aae3c975`)" />
+                                <TimeInput v-model="preRegistrationsDate" :validator="errors.validator" :title="$t(`1e43813a-f48e-436c-bb49-e9ebb0f27f58`)" />
                             </div>
 
                             <Checkbox v-model="priorityForFamily">
@@ -544,7 +544,7 @@
                     <hr><h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
                     <p>{{ $t('89a760d7-8995-458c-9635-da104971e95c') }}</p>
 
-                    <STInputBox :title="$t('f0ceba51-bad2-4454-9a9b-4b12f0983c82')" error-fields="settings.trialDays" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('31d7f684-a6e1-4df5-8ac7-c971e5919cc7')" error-fields="settings.trialDays" :error-box="errors.errorBox">
                         <NumberInput v-model="trialDays" :suffix="$t('6cb97c70-db56-4883-a2b3-87b65506d4f9')" :suffix-singular="$t('1ea8c630-af92-4cba-bfdc-acc0b0f67fae')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
                     </STInputBox>
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
@@ -757,7 +757,7 @@ const availableWaitingLists = computed(() => {
 
     return base.map((list) => {
         const usedByGroups = patchedPeriod.value.groups.filter(g => g.waitingList?.id === list.id);
-        let d = usedByGroups?.length ? $t(`4f6627be-b20b-48b0-a2f7-8fc68d2465b2`, { groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }) : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`);
+        let d = usedByGroups?.length ? $t(`4f6627be-b20b-48b0-a2f7-8fc68d2465b2`, { groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ') }) : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`);
         if (list.periodId !== patchedPeriod.value.period.id && list.settings.period) {
             d = list.settings.period.nameShort + '\n' + d;
         }
@@ -1216,7 +1216,7 @@ async function deleteMe() {
             }),
         );
         if (props.showToasts) {
-            Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
+            Toast.success($t('94337d0a-0522-43be-b337-73ddcf7fdd45')).show();
         }
         await pop({ force: true });
     }
@@ -1233,7 +1233,7 @@ async function addGroupPrice() {
 
     if (isValid) {
         const price = GroupPrice.create({
-            name: TranslatedString.create($t('9b0aebaf-d119-49df-955b-eb57654529e5')),
+            name: TranslatedString.create($t('0076d594-efee-4ec7-a00a-073a4c689a38')),
             price: patchedGroup.value.settings.prices[0]?.price?.clone(),
         });
 
@@ -1289,7 +1289,7 @@ async function editGroupPrice(price: GroupPrice) {
 
 async function addGroupOptionMenu() {
     const optionMenu = GroupOptionMenu.create({
-        name: $t('9b0aebaf-d119-49df-955b-eb57654529e5'),
+        name: $t('0076d594-efee-4ec7-a00a-073a4c689a38'),
         options: [
             GroupOption.create({
                 name: $t('82b0f786-db14-4a2c-8514-3ca3b28ac65f'),
@@ -1404,7 +1404,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 function getAgeGroupAgeString(ageGroup: DefaultAgeGroup): string {
@@ -1454,7 +1454,7 @@ const recordEditorSettings = computed(() => {
     const exampleMember = new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`fbe32760-d352-4d3d-813c-acd50f3cba50`),
+                firstName: $t(`38e2c1aa-13f6-4339-8cfd-68c2603beb51`),
                 lastName: $t(`946f5e2e-d92c-4bbd-b64f-115958a04d01`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),

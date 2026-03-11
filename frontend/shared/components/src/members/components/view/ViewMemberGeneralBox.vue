@@ -9,7 +9,7 @@
             </template>
 
             <template v-if="member.patchedMember.details.memberNumber">
-                <dt>{{ $t('ee10afe3-2dd4-4fa1-98bc-0e1372903fed') }}</dt>
+                <dt>{{ $t('123be534-a0be-4a6e-b03f-021659e1d8ba') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">{{ member.patchedMember.details.memberNumber }}</span>
                 </dd>
@@ -37,21 +37,21 @@
             </template>
 
             <template v-if="member.patchedMember.details.email">
-                <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ member.patchedMember.details.alternativeEmails.length ? '1' : '' }}</dt>
+                <dt>{{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }} {{ member.patchedMember.details.alternativeEmails.length ? '1' : '' }}</dt>
                 <dd>
                     <EmailAddress :email="props.member.patchedMember.details.email" />
                 </dd>
             </template>
 
             <template v-for="(email, index) of member.patchedMember.details.alternativeEmails" :key="index">
-                <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ index + 2 }}</dt>
+                <dt>{{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }} {{ index + 2 }}</dt>
                 <dd>
                     <EmailAddress :email="email" />
                 </dd>
             </template>
 
             <template v-if="member.patchedMember.details.address">
-                <dt>{{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}</dt>
+                <dt>{{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">
                         {{ member.patchedMember.details.address.street }} {{ member.patchedMember.details.address.number }}<br>
@@ -64,21 +64,21 @@
             </template>
 
             <template v-if="member.patchedMember.details.uitpasNumberDetails">
-                <dt>{{ $t('d70f2a7f-d8b4-4846-8dc0-a8e978765b9d') }}</dt>
+                <dt>{{ $t('87c1a48c-fef5-44c3-ae56-c83463fcfb84') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">{{ member.patchedMember.details.uitpasNumberDetails.uitpasNumber }}</span>
                 </dd>
             </template>
 
             <template v-if="member.patchedMember.details.nationalRegisterNumber && member.patchedMember.details.nationalRegisterNumber !== NationalRegisterNumberOptOut">
-                <dt>{{ $t('439176a5-dd35-476b-8c65-3216560cac2f') }}</dt>
+                <dt>{{ $t('00881b27-7501-4c56-98de-55618be2bf11') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">{{ member.patchedMember.details.nationalRegisterNumber }}</span>
                 </dd>
             </template>
 
             <template v-if="member.member.createdAt">
-                <dt>{{ $t('c38e774e-e8ab-4549-b119-4eed380c626c') }}</dt>
+                <dt>{{ $t('6711ac76-e8c7-482b-b6b4-635ba3d16f60') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">{{ formatDate(member.member.createdAt, true) }}</span>
                 </dd>

@@ -55,7 +55,7 @@ export class MemberParentsStep implements EditMemberStep {
             title: $t(`00306f91-9f66-4cc3-9c8e-36c08f9964d7`),
             member: manager.member,
             component: markRaw(EditMemberParentsBox),
-            saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
+            saveText: $t(`2a9075bb-a743-411e-8a3d-94e5e57363f0`),
             markReviewed: ['parents'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

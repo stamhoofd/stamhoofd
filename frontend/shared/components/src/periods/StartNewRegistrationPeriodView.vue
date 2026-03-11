@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`b66376fb-238e-42dd-aec6-f48b9ee2e215`)" />
+        <STNavigationBar :title="$t(`1929850b-e0ad-4b35-b3e5-6652dd4774e2`)" />
 
         <main>
             <h1>{{ $t('480abc28-3803-4d24-b5ad-4f8fb1a44471', {'year-2025-2026': period.name}) }}</h1>

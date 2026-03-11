@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar v-if="!popup" :title="$t('bf9ff30d-258f-4ba3-8dd7-c27595e32da2')" />
+        <STNavigationBar v-if="!popup" :title="$t('13c04b8f-80f5-4274-9ea1-badb0f88a091')" />
 
         <main>
             <STGrid>
@@ -12,7 +12,7 @@
                     </template>
 
                     <template #right>
-                        {{ $t('bf9ff30d-258f-4ba3-8dd7-c27595e32da2') }}
+                        {{ $t('13c04b8f-80f5-4274-9ea1-badb0f88a091') }}
                     </template>
                 </STGridItem>
 

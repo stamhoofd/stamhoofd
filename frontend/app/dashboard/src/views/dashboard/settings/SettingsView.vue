@@ -1,10 +1,10 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`88136719-d85f-499f-8c5f-252519947c03`)" />
+        <STNavigationBar :title="$t(`5ca94078-d742-4e17-abf7-957c4721a559`)" />
 
         <main class="center">
             <h1>
-                {{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}
+                {{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}
             </h1>
 
             <BillingWarningBox />
@@ -13,7 +13,7 @@
                 {{ stripeWarning.text }}
 
                 <a :href="$domains.getDocs('documenten-stripe-afgekeurd')" target="_blank" class="button text">
-                    {{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}
+                    {{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}
                 </a>
             </p>
 
@@ -38,7 +38,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/palette.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('f45871aa-7723-42c3-9781-f4f9b8d7250a') }}
+                        {{ $t('4a7e3838-f75a-4610-9caa-0f75849ea142') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('d07dd246-d0b6-4941-a015-a7d305fd8e1c') }}
@@ -128,7 +128,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('eecb4cc5-f807-4325-8083-1fe893756ce4') }}
+                        {{ $t('7f531562-9609-456e-a8c3-2b373cad3f29') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('52f90401-117a-42e7-b500-f13db35f23a4') }}
@@ -279,7 +279,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
+                        {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('ba4eeb34-6c93-4537-92ac-ea4f30c28fbb') }}

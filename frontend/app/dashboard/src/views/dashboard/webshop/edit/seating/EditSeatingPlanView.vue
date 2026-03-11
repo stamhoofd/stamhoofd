@@ -72,7 +72,7 @@
         </p>
 
         <template v-if="!isNew">
-            <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+            <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="downloadSettings">

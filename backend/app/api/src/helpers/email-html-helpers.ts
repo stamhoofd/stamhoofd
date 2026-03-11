@@ -7,7 +7,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
 
     const data = [
         {
-            title: $t('4d496edf-0203-4df3-a6e9-3e58d226d6c5'),
+            title: $t('17772225-f9c0-4707-9e2a-97f94de4e9d0'),
             value: '' + (order.number ?? '?'),
         },
         {
@@ -38,7 +38,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
             (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout || order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((order.data.checkoutMethod as any)?.address)
                 ? [
                         {
-                            title: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                            title: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
                             value: ((order) => {
                                 return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
                             })(order),
@@ -47,11 +47,11 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
                 : []
         ),
         {
-            title: $t(`40aabd99-0331-4267-9b6a-a87c06b3f7fe`),
+            title: $t(`112b7686-dffc-4ae9-9706-e3efcd34898f`),
             value: Formatter.capitalizeFirstLetter(order.data.timeSlot?.dateString() ?? ''),
         },
         {
-            title: $t(`7853cca1-c41a-4687-9502-190849405f76`),
+            title: $t(`5a3e25de-683f-4a20-b02e-ebcc3aca89f6`),
             value: order.data.timeSlot?.timeRangeString() ?? '',
         },
         {
@@ -61,7 +61,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
         ...(order.data.customer.phone
             ? [
                     {
-                        title: $t(`feea3664-9353-4bd4-b17d-aff005d3e265`),
+                        title: $t(`3174ba16-f035-4afd-a69f-74865e64ef34`),
                         value: order.data.customer.phone,
                     },
                 ]

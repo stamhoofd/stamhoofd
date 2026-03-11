@@ -7,11 +7,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('a656bc79-940d-4cfd-a7f8-4700cd95a4f3')" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('300d2935-b578-48cc-b58e-1c0446a68d59')" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox :title="$t('7955066a-93c8-4872-8ac7-e7ccdc7f61f9')" error-fields="endDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('3c90169c-9776-4d40-bda0-dba27a5bad69')" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
             </STInputBox>
         </div>
@@ -19,7 +19,7 @@
             {{ $t('ec5437dc-5d11-4092-8ab7-e9090af1f71a') }}
         </p>
 
-        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('b0215bc3-b94d-47de-99d2-4dcb9f59b299')" error-fields="expireDate" :error-box="errors.errorBox">
+        <STInputBox v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" :title="$t('92c75f77-9120-424a-83f5-39e26623c1ad')" error-fields="expireDate" :error-box="errors.errorBox">
             <DateSelection v-model="expireDate" :required="false" :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')" :time="{hours: 23, minutes: 59, seconds: 59}" />
         </STInputBox>
         <p v-if="type.behaviour === PlatformMembershipTypeBehaviour.Period" class="style-description-small">
@@ -36,7 +36,7 @@
         </p>
 
         <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`7a010291-3eac-4690-b6d8-2972d3ab8e58`)">
-            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`45ff02db-f404-4d91-853f-738d55c40cb6`)" />
+            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`)" />
         </STInputBox>
 
         <template v-if="$feature('member-trials')">
@@ -130,7 +130,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('0d0147f0-f42e-4f6b-bf04-16c21fb8ae7d'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'))) {
+    if (!await CenteredMessage.confirm($t('0d0147f0-f42e-4f6b-bf04-16c21fb8ae7d'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'))) {
         return;
     }
 
@@ -181,7 +181,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 function patchPrice(priceConfig: PlatformMembershipTypeConfigPrice, patch: AutoEncoderPatchType<PlatformMembershipTypeConfigPrice>) {

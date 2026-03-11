@@ -31,7 +31,7 @@ const priceBreakdown = computed(() => {
 
     const all = [
         {
-            name: $t(`6f03ce44-b9bb-476a-91ae-32d325406d80`),
+            name: $t(`057ffcea-70b1-44a9-ad01-c60f6fbd7393`),
             price: balance.pricePaid + laterBalance.pricePaid,
         },
         {
@@ -42,7 +42,7 @@ const priceBreakdown = computed(() => {
 
     if (all.length > 0) {
         all.unshift({
-            name: $t(`c38e102e-a16b-4a02-a05f-e282eaead461`),
+            name: $t(`8dfbd01b-feb1-4b7e-a1f1-2daf19fb2775`),
             price: balance.payablePriceWithVAT + laterBalance.payablePriceWithVAT,
         });
     }
@@ -57,7 +57,7 @@ const priceBreakdown = computed(() => {
     return [
         ...all,
         {
-            name: balance.priceOpen < 0 ? (isPayable ? $t(`89bb9c20-d3f5-43ff-846c-47a23517274a`) : $t(`38ff3cca-3877-4202-9c71-9437a12fb876`)) : (laterBalance.priceOpen !== 0 ? $t(`35337319-2bc6-41d6-9427-c1974d8a37ae`) : $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`)),
+            name: balance.priceOpen < 0 ? (isPayable ? $t(`89bb9c20-d3f5-43ff-846c-47a23517274a`) : $t(`38ff3cca-3877-4202-9c71-9437a12fb876`)) : (laterBalance.priceOpen !== 0 ? $t(`35337319-2bc6-41d6-9427-c1974d8a37ae`) : $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`)),
             price: Math.abs(balance.priceOpen),
         },
     ];

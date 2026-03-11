@@ -1,16 +1,16 @@
 <template>
     <div>
         <div class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`33a674c2-6981-442b-9bd4-01f71da7a159`)">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`300d2935-b578-48cc-b58e-1c0446a68d59`)">
                 <DateSelection v-model="startDate" />
             </STInputBox>
             <TimeInput v-model="startDate" :validator="errors.validator" :title="$t(`eb8ecd08-c062-41e1-8e60-27cdf9a4f269`)" />
         </div>
         <div class="split-inputs">
-            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f852932e-380e-4b9a-916b-2bc008d8c08a`)">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`3c90169c-9776-4d40-bda0-dba27a5bad69`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
-            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`d79d562c-022a-4502-bc96-88704f68d583`)" />
+            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`1617abfe-8657-4a9f-9fe3-6e6d896c4ef6`)" />
         </div>
     </div>
 </template>

@@ -62,7 +62,7 @@ const actions = computed(() => {
 
     const results = [
         new InMemoryTableAction({
-            name: $t('f42816c2-4aec-4d10-9d86-215358f27e7c'),
+            name: $t('9e85b407-6e12-4003-9847-5b7d277b87ff'),
             icon: 'eye',
             priority: 0,
             groupIndex: 1,

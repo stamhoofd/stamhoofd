@@ -5,7 +5,7 @@
 
             <main class="center">
                 <h1>
-                    {{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }}
+                    {{ $t('0fc72e2d-5fe5-4ed2-ba5d-1f880790c174') }}
                 </h1>
 
                 <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
@@ -18,7 +18,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('bcc00835-8af6-4b3a-ad77-691c724af03d') }}
+                            {{ $t('77e1bb0a-166c-4d37-9dd6-c5ad10a9d91b') }}
                         </h2>
                         <p class="style-description">
                             {{ $t("64633f7b-2d6e-4ad2-abb1-e9dd77d9a81f") }}
@@ -33,10 +33,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/bank.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('bf002215-26cc-4f43-9bf7-3cca60d50a10') }}
+                            {{ $t('35f1db1d-e8bd-4a0c-8141-97b8c716ec17') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('d40fa481-cb6d-44ab-bacb-ad8e6fe00cdc') }}
+                            {{ $t('143d3f17-d547-47ff-9b83-f8587bcbc16c') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -48,10 +48,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('9365e40e-8b00-4b24-8e15-6312aa624fbb') }}
+                            {{ $t('2e0554e5-f223-4618-942e-53ec88f26e19') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('8a2e0bd7-27ea-455b-945a-445d91f0ebea') }}
+                            {{ $t('67433a1e-efe1-48a1-9b4c-84dea499c5b9') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -63,7 +63,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('3df2215e-5c13-493d-afc6-4a866150960c') }}
+                            {{ $t('231f28d7-292a-43bc-877b-751012b6ae48') }}
                         </h2>
                         <p class="style-description">
                             {{ $t('d74d7aec-8fd5-489a-b93d-89d56ca8ae34', {organization: organization!.name}) }}
@@ -121,7 +121,7 @@
                                 <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f') }}
+                                {{ $t('28c2bc66-231f-44f3-9249-c1981b871a1f') }}
                             </h2>
                             <p class="style-description">
                                 {{ $t('ef30fb68-251e-410b-8e95-df01fa30359e') }}

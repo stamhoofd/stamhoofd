@@ -11,7 +11,7 @@ export class UitpasNumberColumnMatcher implements ColumnMatcher {
     readonly id = 'UiTPAS-nummer';
 
     getName(): string {
-        return $t('e330f60b-d331-49a2-a437-cddc31a878de');
+        return $t('87c1a48c-fef5-44c3-ae56-c83463fcfb84');
     }
 
     doesMatch(columnName: string, _examples: string[]): boolean {

@@ -68,7 +68,7 @@ const levelPrefix = computed(() => {
             prefixes.push(...tagNames);
         }
         else {
-            prefixes.push($t(`81df09d0-56ee-491d-b474-85173b1401dd`));
+            prefixes.push($t(`33c4f792-005f-4fb1-ad98-397dd92038aa`));
         }
     }
     else {
@@ -83,7 +83,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
 });
 
 const prefix = computed(() => {
@@ -103,7 +103,7 @@ const prefix = computed(() => {
             prefixes.push(group.name);
         }
     }
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
 });
 
 </script>

@@ -32,45 +32,45 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // todo: only if platform?
         new SelectableColumn({
             id: 'memberNumber',
-            name: $t(`7c4ca473-3c49-45fb-bdd2-b87399a69e62`),
+            name: $t(`123be534-a0be-4a6e-b03f-021659e1d8ba`),
         }),
         new SelectableColumn({
             id: 'firstName',
-            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+            name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
         }),
         new SelectableColumn({
             id: 'lastName',
-            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+            name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
         }),
         new SelectableColumn({
             id: 'birthDay',
-            name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
+            name: $t(`00650ac3-eb78-4c8b-b7ec-d892772837a1`),
         }),
         new SelectableColumn({
             id: 'age',
-            name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
+            name: $t(`8c1f264f-3b0b-49b9-8a29-9ceb2dfd7754`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'gender',
-            name: $t(`3048ad16-fd3b-480e-b458-10365339926b`),
+            name: $t(`08ef39ff-3431-4975-8c46-8fb68c946432`),
         }),
         new SelectableColumn({
             id: 'phone',
-            name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+            name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
         }),
         new SelectableColumn({
             id: 'email',
-            name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+            name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
         }),
         new SelectableColumn({
             id: 'address',
-            name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+            name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
             description: $t(`01e99208-dce7-4109-8cf2-3cc74c4df45c`),
         }),
         new SelectableColumn({
             id: 'securityCode',
-            name: $t(`ba5f8036-1788-408a-8c44-1db80a53c087`),
+            name: $t(`0fa4253f-1cfd-4394-93b4-dfba8da04738`),
             enabled: false,
             description: $t(`aa45000f-8cff-4cb6-99b2-3202eb64c4a8`),
         }),
@@ -81,7 +81,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         }), [AccessRight.MemberReadFinancialData]),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'uitpasNumber',
-            name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
+            name: $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`),
         }), [AccessRight.MemberReadFinancialData]),
         new SelectableColumn({
             id: 'notes',
@@ -90,7 +90,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         }),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'nationalRegisterNumber',
-            name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
+            name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
         }), [AccessRight.MemberManageNRN]),
 
         // group
@@ -104,33 +104,33 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     }),
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
+                        name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
                         enabled: false,
                     }),
                 ]
             : []),
         new SelectableColumn({
             id: 'defaultAgeGroup',
-            name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
+            name: $t(`0ef2bbb3-0b3c-411a-8901-a454cff1f839`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'group',
-            name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
+            name: $t(`0c230001-c3be-4a8e-8eab-23dc3fd96e52`),
             enabled: false,
         }),
         // will always be 0 if organization is null
         organization !== null
             ? new SelectableColumn({
                 id: 'outstandingBalance',
-                name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+                name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
                 description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
                 enabled: false,
             })
             : null,
         new SelectableColumn({
             id: 'createdAt',
-            name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+            name: $t('6711ac76-e8c7-482b-b6b4-635ba3d16f60'),
             enabled: false,
         }),
 
@@ -149,38 +149,38 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                 }),
                 new SelectableColumn({
                     id: getId('firstName'),
-                    name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+                    name: $t(`603606c2-95ca-4967-814c-53ec3297bf33`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('lastName'),
-                    name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+                    name: $t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('phone'),
-                    name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+                    name: $t(`856aaa1c-bc62-4e45-9ae5-4c7e7dca23ab`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('email'),
-                    name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+                    name: $t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('address'),
-                    name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                    name: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`),
                     category,
                     enabled,
 
                 }),
                 returnNullIfNoAccessRight(new SelectableColumn({
                     id: getId('nationalRegisterNumber'),
-                    name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
+                    name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
                     category,
                     enabled,
                 }), [AccessRight.MemberManageNRN]),
@@ -196,7 +196,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         }),
         new SelectableColumn({
             id: 'unverifiedEmails',
-            name: $t(`7766ee8a-cd92-4d6f-a3fa-f79504fbcdda`),
+            name: $t(`1363c0ee-0f4b-43f8-a9ee-a2a6091e5d96`),
             category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
             enabled: false,
         }),
@@ -233,7 +233,7 @@ export function getSelectableGroupColumns(groups: Group[] = []) {
             groupColumns.push(
                 new SelectableColumn({
                     id: `groups.${group.id}.price`,
-                    name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
+                    name: $t(`a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc`),
                     category: group.settings.name.toString(),
                 }),
             );
@@ -253,7 +253,7 @@ export function getSelectableGroupColumns(groups: Group[] = []) {
                     groupColumns.push(
                         new SelectableColumn({
                             id: `groups.${group.id}.optionMenu.${menu.id}.${option.id}.amount`,
-                            name: menu.name + ' → ' + option.name + ' → ' + $t('ed55e67d-1dce-46b2-8250-948c7cd616c2'),
+                            name: menu.name + ' → ' + option.name + ' → ' + $t('697df3e7-fbbf-421d-81c2-9c904dce4842'),
                             category: group.settings.name.toString(),
                         }),
                     );
@@ -290,7 +290,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         sheets: [
             new SelectableSheet({
                 id: 'members',
-                name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
+                name: $t(`19da8d23-acea-43c2-bfdd-742447ca57f1`),
                 columns: getAllSelectableColumns({ platform, organization, groups, auth }),
             }),
         ],

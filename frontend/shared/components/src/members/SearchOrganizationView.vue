@@ -1,6 +1,6 @@
 <template>
     <div class="st-view search-organization-view">
-        <STNavigationBar :title="$t('857e22fa-a4ac-4306-a631-d5133b6c8834')" />
+        <STNavigationBar :title="$t('01e2b860-7045-4a0c-84ca-2303346d14b2')" />
 
         <main>
             <h1>{{ title }}</h1>
@@ -8,7 +8,7 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`d510896c-f601-4eb6-973e-5bd494a5c207`)" data-testid="organization-search-input">
+                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`89b3f7fe-d2b2-4194-a971-886b0665a0df`)" data-testid="organization-search-input">
             </form>
 
             <Spinner v-if="loadingResults" class="gray center" />
@@ -48,7 +48,7 @@ const props = withDefaults(
         description?: string;
         selectOrganization: (organization: Organization, navigation: NavigationActions) => Promise<void> | void;
     }>(), {
-        title: () => $t(`f049ea7d-4411-4860-bd6f-d7c57863c39d`),
+        title: () => $t(`01e2b860-7045-4a0c-84ca-2303346d14b2`),
         description: '',
     },
 );

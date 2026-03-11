@@ -80,7 +80,7 @@ const groupedDraggableResponsibilites = computed(() => {
 
     const organizationResponsibiities = {
         id: 'organization',
-        title: organization.value ? $t('f4fef92e-cb28-408b-ada2-cf8b0da0fbfd') : $t('fcf09121-af79-4d3f-90e7-31dec01ebb98'),
+        title: organization.value ? $t('20d0f420-edec-4c9f-9584-990258dcf1bf') : $t('fcf09121-af79-4d3f-90e7-31dec01ebb98'),
         description: organization.value ? $t('aad47217-df26-43ce-a43c-896697d5fbd4') : $t('e6da382b-6acc-4a77-ab74-ece7ea002d5f'),
         responsibilities: [] as MemberResponsibility[],
     };
@@ -198,7 +198,7 @@ async function save() {
     await rawSave(async () => {
         reload();
         await reloadPromise();
-        new Toast($t('53a2f29c-ee8c-42da-b49a-c0ce07544b99'), 'success green').show();
+        new Toast($t('17017abf-c2e0-4479-86af-300ad37347aa'), 'success green').show();
         await pop({ force: true });
     });
 }
@@ -207,7 +207,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

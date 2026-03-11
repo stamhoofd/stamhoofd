@@ -71,7 +71,7 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`f1755667-e6d5-4532-95a9-019c04c509bc`),
+                message: $t(`9aa8ff59-33ae-4ac4-93b6-97e071b13012`),
                 field: 'name',
             });
         }
@@ -94,7 +94,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`a1f2fa4d-10a4-4b67-af10-0fafda4b0246`), $t(`63af93aa-df6a-4937-bce8-9e799ff5aebd`))) {
+    if (!await CenteredMessage.confirm($t(`a1f2fa4d-10a4-4b67-af10-0fafda4b0246`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
         return;
     }
 
@@ -139,7 +139,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

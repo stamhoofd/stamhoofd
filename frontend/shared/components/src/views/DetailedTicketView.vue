@@ -28,7 +28,7 @@
                 {{ name }}
                 <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
             </h1>
-            <p v-if="isSingle && order" class="description" v-text="$t('1a2a842e-4f98-4818-911b-c9634aca4214')+order.number" />
+            <p v-if="isSingle && order" class="description" v-text="$t('12be5ac0-8353-43a2-badb-ab3b27d156b3')+order.number" />
             <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
             <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
             <p v-if="changedSeatString" class="warning-box">
@@ -75,7 +75,7 @@
 
                 <STListItem v-if="price">
                     <h3 class="style-definition-label">
-                        {{ $t('52bff8d2-52af-4d3f-b092-96bcfa4c0d03') }}
+                        {{ $t('1205deb9-498d-435d-a6e1-91ea98371523') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatPrice(price) }}
@@ -88,7 +88,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="download">
                     <span class="icon download" />
-                    <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
+                    <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
                 </button>
             </template>
         </STToolbar>

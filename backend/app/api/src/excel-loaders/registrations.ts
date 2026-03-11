@@ -11,7 +11,7 @@ import { baseMemberColumns } from './members.js';
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
     id: 'registrations',
-    name: $t('938926c1-cb27-427d-aabd-638c5ec1d14a'),
+    name: $t('3f4c9896-7f02-4b49-ad29-2d363a8af71f'),
     columns: [
         {
             id: 'id',
@@ -23,7 +23,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'priceName',
-            name: $t(`dcc53f25-f0e9-4e3e-9f4f-e8cfa4e88755`),
+            name: $t(`a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc`),
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {
@@ -33,7 +33,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'price',
-            name: $t(`dcc53f25-f0e9-4e3e-9f4f-e8cfa4e88755`),
+            name: $t(`a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc`),
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {
@@ -49,7 +49,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         {
             id: 'toPay',
             width: 30,
-            name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
+            name: $t(`18aed6d0-0880-4d06-9260-fe342e6e8064`),
             getValue: (registration: PlatformRegistration) => {
                 return {
                     value: registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0) / 1_0000,
@@ -64,7 +64,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'outstandingBalance',
-            name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+            name: $t(`28c2bc66-231f-44f3-9249-c1981b871a1f`),
             width: 30,
             getValue: (v) => {
                 return {
@@ -80,7 +80,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'registeredAt',
-            name: $t(`8bec8990-4632-40b0-93f3-f27a3f2ddbdb`),
+            name: $t(`8895f354-658f-48bd-9d5d-2e0203ca2a36`),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.registeredAt,
@@ -93,7 +93,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'startDate',
-            name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
+            name: $t(`300d2935-b578-48cc-b58e-1c0446a68d59`),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.startDate,
@@ -106,7 +106,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'endDate',
-            name: $t(`aef10d71-39c4-4cdb-8252-5fd31781abd8`),
+            name: $t(`3c90169c-9776-4d40-bda0-dba27a5bad69`),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.endDate,
@@ -137,18 +137,18 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             getValue: (registration: PlatformRegistration) => {
                 const organization = registration.member.family.getOrganization(registration.group.organizationId);
                 return ({
-                    value: organization?.name ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
+                    value: organization?.name ?? $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b'),
                 });
             },
         },
         {
             id: 'uri',
-            name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
+            name: $t('05723781-9357-41b2-9fb8-cb4f80dde7f9'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 const organization = registration.member.family.getOrganization(registration.group.organizationId);
                 return ({
-                    value: organization?.uri ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
+                    value: organization?.uri ?? $t('49e90fda-d262-4fe7-a2e2-d6b48abc8e2b'),
                 });
             },
         },
@@ -161,10 +161,10 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
 
                 if (registration.payingOrganizationId) {
                     const organization = registration.member.organizations.find(o => o.id === registration.payingOrganizationId);
-                    value = organization ? organization.name : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`);
+                    value = organization ? organization.name : $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`);
                 }
                 else {
-                    value = $t(`b8b730fb-f1a3-4c13-8ec4-0aebe08a1449`);
+                    value = $t(`08dd4181-69c6-4888-b32a-07224f1c4349`);
                 }
 
                 return ({
@@ -241,7 +241,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 return [
                     {
                         id: `optionMenu.${menuId}`,
-                        name: $t(`99e37a95-6a68-4921-a8db-08fb136f87dd`),
+                        name: $t(`792ebf47-4ad3-4d9c-a4ab-f315b715e70e`),
                         width: 30,
                         getValue: (registration: PlatformRegistration) => {
                             const options = registration.options.filter(o => o.optionMenu.id === menuId);
@@ -305,7 +305,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'uri',
-            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
+            name: $t(`05723781-9357-41b2-9fb8-cb4f80dde7f9`),
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {
@@ -341,7 +341,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'group.type',
-            name: $t('4fda497f-b2d8-43ef-b08c-a3e4e0b472b4'),
+            name: $t('23671282-34da-4da9-8afd-503811621055'),
             width: 20,
             getValue: (registration: PlatformRegistration) => {
                 return {

@@ -5,7 +5,7 @@
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="emits('delete')">
                     <span class="icon trash" />
-                    <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                    <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                 </button>
             </div>
         </h2>

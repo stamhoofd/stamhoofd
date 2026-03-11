@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="viewModel.type.title" :prefer-large-button="true" :loading="saving" :save-text="viewModel.isNew ? $t('90ff0271-716d-4e8f-aebd-037986391293') : $t('a103aa7c-4693-4bd2-b903-d14b70bfd602')" save-icon-right="arrow-right" @save="save">
+    <SaveView :title="viewModel.type.title" :prefer-large-button="true" :loading="saving" :save-text="viewModel.isNew ? $t('90ff0271-716d-4e8f-aebd-037986391293') : $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d')" save-icon-right="arrow-right" @save="save">
         <h1>
             {{ viewModel.type.title }}
         </h1>
@@ -70,7 +70,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

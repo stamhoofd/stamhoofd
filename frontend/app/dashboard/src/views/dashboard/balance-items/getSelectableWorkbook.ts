@@ -39,17 +39,17 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'description',
-                        name: $t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`),
+                        name: $t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`),
                     }),
 
                     new SelectableColumn({
                         id: 'createdAt',
-                        name: $t(`a6eb80ee-4da2-4b74-ad1b-cd3af3fe5fca`),
+                        name: $t(`10a1cf76-0757-4c92-9923-a19cd77fe24c`),
                     }),
 
                     new SelectableColumn({
                         id: 'dueAt',
-                        name: $t(`eae99aeb-eb79-4a91-8e84-5364cbc74364`),
+                        name: $t(`3d586760-01f3-42c3-82be-44cea7ad0820`),
                     }),
 
                     ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -65,12 +65,12 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: $t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`),
+                        name: $t(`7453643b-fdb2-4aa1-9964-ddd71762c983`),
                     }),
 
                     new SelectableColumn({
                         id: 'payablePriceWithVAT',
-                        name: $t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`),
+                        name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
                     }),
 
                     new SelectableColumn({

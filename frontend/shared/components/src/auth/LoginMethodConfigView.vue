@@ -9,16 +9,16 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="fullName" :error-box="errors.errorBox" :title="$t(`e4b3d2af-dee8-4f55-88e9-a229513d347c`)">
-            <input ref="firstInput" v-model="fullName" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
+        <STInputBox error-fields="fullName" :error-box="errors.errorBox" :title="$t(`3610e3ed-5df6-41d2-b6e6-a5823abcaff7`)">
+            <input ref="firstInput" v-model="fullName" class="input" type="text" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)">
         </STInputBox>
 
         <STInputBox error-fields="shortName" :error-box="errors.errorBox" :title="$t(`8bc9dc7d-7dba-4712-9e4d-c3a64c43cb26`)">
-            <input ref="firstInput" v-model="shortName" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
+            <input ref="firstInput" v-model="shortName" class="input" type="text" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)">
         </STInputBox>
 
         <STInputBox error-fields="loginButtonText" :error-box="errors.errorBox" :title="$t(`6fa093d9-7a49-4007-8b73-446d04d3fd12`)">
-            <input ref="firstInput" v-model="loginButtonText" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
+            <input ref="firstInput" v-model="loginButtonText" class="input" type="text" autocomplete="off" :placeholder="$t(`07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f`)">
         </STInputBox>
 
         <ArrayInput v-model="allowlist" :default-value="() => ''" :title="$t(`0999529a-9b4f-417a-95da-120f5daabf24`)">
@@ -136,7 +136,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

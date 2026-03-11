@@ -18,21 +18,21 @@
             </template>
 
             <template v-if="parent.email">
-                <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ parent.alternativeEmails.length ? '1' : '' }}</dt>
+                <dt>{{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }} {{ parent.alternativeEmails.length ? '1' : '' }}</dt>
                 <dd>
                     <EmailAddress :email="parent.email" />
                 </dd>
             </template>
 
             <template v-for="(email, index) of parent.alternativeEmails" :key="index">
-                <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ index + 2 }}</dt>
+                <dt>{{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }} {{ index + 2 }}</dt>
                 <dd>
                     <EmailAddress :email="email" />
                 </dd>
             </template>
 
             <template v-if="parent.address">
-                <dt>{{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}</dt>
+                <dt>{{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">
                         {{ parent.address.street }} {{ parent.address.number }}<br>
@@ -45,7 +45,7 @@
             </template>
 
             <template v-if="parent.nationalRegisterNumber && parent.nationalRegisterNumber !== NationalRegisterNumberOptOut">
-                <dt>{{ $t('439176a5-dd35-476b-8c65-3216560cac2f') }}</dt>
+                <dt>{{ $t('00881b27-7501-4c56-98de-55618be2bf11') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">{{ parent.nationalRegisterNumber }}</span>
                 </dd>

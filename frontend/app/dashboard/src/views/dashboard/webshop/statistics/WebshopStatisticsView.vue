@@ -12,7 +12,7 @@
             </div>
 
             <hr><div class="stats-grid">
-                <STInputBox :title="$t(`fc1cc5ad-1590-422d-96a5-4523f10fcab1`)">
+                <STInputBox :title="$t(`aed41648-b8ad-476d-b98a-0221d387f96a`)">
                     <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : totalOrders }}
@@ -66,7 +66,7 @@
                 </STList>
             </div>
 
-            <hr><h2>{{ $t('33adbc14-dd1a-43a7-a015-98a3322b58c5') }}</h2>
+            <hr><h2>{{ $t('0456ef2e-5e86-48fa-835c-fd8ec1921f5e') }}</h2>
             <p>{{ $t('16d29c4e-f292-4a77-a995-c4fa9ae76200') }}</p>
         </main>
     </div>

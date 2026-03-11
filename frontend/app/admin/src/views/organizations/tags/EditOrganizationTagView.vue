@@ -6,11 +6,11 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`cbe7db4a-b65b-452b-a5d2-d369182fd28f`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`)">
             <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`3446a6ac-5bda-4564-a268-5c7a66d74ff9`)">
         </STInputBox>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
+        <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c`)">
             <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`8d767b75-7a76-4cb7-b4b1-36d596f1848c`)" />
         </STInputBox>
         <div class="container">
@@ -41,7 +41,7 @@
 
             <button class="button secundary danger" type="button" @click="doDelete">
                 <span class="icon trash" />
-                <span>{{ $t('5bb7b4d5-def0-431d-ba3c-e34ffc7ee777') }}</span>
+                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
             </button>
         </div>
     </SaveView>
@@ -111,7 +111,7 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`f1755667-e6d5-4532-95a9-019c04c509bc`),
+                message: $t(`9aa8ff59-33ae-4ac4-93b6-97e071b13012`),
                 field: 'name',
             });
         }
@@ -131,7 +131,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`c05ea3d6-e656-4ede-a87e-7f46b0598663`), $t(`63af93aa-df6a-4937-bce8-9e799ff5aebd`))) {
+    if (!await CenteredMessage.confirm($t(`c05ea3d6-e656-4ede-a87e-7f46b0598663`), $t(`14f2d606-a7c9-4cdf-9ee9-aca38beb9689`))) {
         return;
     }
 
@@ -218,7 +218,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`4f0d330f-f2d2-4fbf-a4b4-267d939db1ee`), $t(`335dc08b-97e1-4f01-9356-b47f741225e4`));
+    return await CenteredMessage.confirm($t(`1cb53933-ed06-45ae-9240-dd389298823c`), $t(`106b3169-6336-48b8-8544-4512d42c4fd6`));
 };
 
 defineExpose({

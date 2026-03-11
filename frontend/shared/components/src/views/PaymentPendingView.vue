@@ -23,7 +23,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="retry">
-                        <span>{{ $t('bccb094f-12eb-40d0-9a24-843832b0cdb7') }}</span>
+                        <span>{{ $t('314810ef-ff16-4b22-b8a5-399d5d820a4a') }}</span>
                     </button>
                 </LoadingButton>
             </template>

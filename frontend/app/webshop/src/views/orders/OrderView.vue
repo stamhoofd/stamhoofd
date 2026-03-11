@@ -56,7 +56,7 @@
                                 <div class="hover-show">
                                     <button v-if="!loadingTickets" class="button text limit-space" type="button" @click="downloadAllTickets">
                                         <span class="icon download" />
-                                        <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
+                                        <span>{{ $t('14abcd1e-7e65-4e84-be4c-ab2e162ae44d') }}</span>
                                     </button>
                                 </div>
                             </h2>
@@ -127,7 +127,7 @@
                         <STList class="info">
                             <STListItem>
                                 <h3 class="style-definition-label">
-                                    {{ $t('d41226a0-e877-4874-8333-25c0dcf96001') }}
+                                    {{ $t('52aadb14-e175-4efe-bdf9-b88a632b6926') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -136,7 +136,7 @@
                             </STListItem>
                             <STListItem v-if="order.number && !isDeleted" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('4d496edf-0203-4df3-a6e9-3e58d226d6c5') }}
+                                    {{ $t('17772225-f9c0-4707-9e2a-97f94de4e9d0') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -154,7 +154,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.email" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
+                                    {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -198,7 +198,7 @@
 
                             <STListItem class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
+                                    {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -227,7 +227,7 @@
                                 </STListItem>
                                 <STListItem v-if="(order.data.checkoutMethod as any).address" class="right-description">
                                     <h3 class="style-definition-label">
-                                        {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
+                                        {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
                                     </h3>
 
                                     <p class="style-definition-text">
@@ -272,7 +272,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.administrationFee > 0" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('be98be36-f796-4f96-b054-4d2a09be3d79') }}
+                                    {{ $t('a0d99100-f225-416f-bcec-e25df9d651ac') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -281,7 +281,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.totalPrice || !webshop.isAllFree" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('e67d0122-6f15-46c6-af94-92a79268710a') }}
+                                    {{ $t('341172ee-281e-4458-aeb1-64ed5b2cc8bb') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -308,7 +308,7 @@
 
                         <template v-if="!hasTickets || hasSingleTicket || !isPaid">
                             <hr><p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                                <span>{{ $t('46a3962f-7d21-4cf4-b3a9-bfec8007e68a') }} <span class="style-discount-code">{{ code.code }}</span></span>
+                                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }} <span class="style-discount-code">{{ code.code }}</span></span>
                             </p>
 
                             <STList>

@@ -1,6 +1,6 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar :title="$t(`d1c4153d-1ee3-4f7b-a95c-ebb6f010a76a`)" />
+        <STNavigationBar :title="$t(`56c85b34-a9f3-46ac-a77c-991a0f463c73`)" />
 
         <main>
             <h1>
@@ -18,7 +18,7 @@
         <STToolbar>
             <template #right>
                 <button class="button primary" type="button" @click="dismiss()">
-                    {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
+                    {{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}
                 </button>
             </template>
         </STToolbar>

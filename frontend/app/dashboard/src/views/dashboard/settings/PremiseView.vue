@@ -5,15 +5,15 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e')" error-fields="name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926')" error-fields="name" :error-box="errors.errorBox">
                 <input id="premise-name" v-model="name" class="input" type="text" :placeholder="$t('8505e377-cc4d-4551-98d3-60a70d8b2c7b')" autocomplete="off">
             </STInputBox>
 
-            <STInputBox :title="$t('1c338881-0940-429b-a47e-7c9d3055f533')" error-fields="description" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox" class="max">
                 <textarea id="premise-description" v-model="description" class="input" type="text" :placeholder="$t('13650793-84d9-407a-b477-79b40011441d')" autocomplete="off" />
             </STInputBox>
 
-            <AddressInput v-model="address" :title="$t('622c0dd7-cddd-4417-9bfd-5f6aca2480f5')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
+            <AddressInput v-model="address" :title="$t('0a37de09-120b-4bea-8d13-6d7ed6823884')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
 
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
                 <hr><h2>{{ $t('6c9d45e5-c9f6-49c8-9362-177653414c7e') }}</h2>

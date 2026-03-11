@@ -79,7 +79,7 @@
                 <p v-if="canCreate" class="style-button-bar">
                     <button class="button text" type="button" @click="createGroup">
                         <span class="icon add" />
-                        <span>{{ $t('f52db2d7-c0f5-4f9c-b567-62f657787339') }}</span>
+                        <span>{{ $t('877284d7-31b4-4857-a963-405b4139adc2') }}</span>
                     </button>
                 </p>
             </template>

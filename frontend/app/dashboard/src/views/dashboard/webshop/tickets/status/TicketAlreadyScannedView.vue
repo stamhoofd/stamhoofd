@@ -1,6 +1,6 @@
 <template>
     <div ref="root" class="st-view ticket-already-scanned-view">
-        <STNavigationBar :title="$t(`69919e1e-89c6-44d7-beb1-c7b243c5a316`)" />
+        <STNavigationBar :title="$t(`4ac91a6b-7e0d-4ebc-9698-2543ef654b63`)" />
 
         <main>
             <h1>
@@ -17,7 +17,7 @@
             <STList class="info">
                 <STListItem v-if="ticket.scannedAt">
                     <h3 class="style-definition-label">
-                        {{ $t('7853cca1-c41a-4687-9502-190849405f76') }}
+                        {{ $t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDateTime(ticket.scannedAt) }}

@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading="saving" :title="$t(`9120db75-8638-4cab-9dca-8bd81390149e`)" @save="save">
         <h1>
-            {{ $t('f6de6c56-6326-42b2-b586-2bf607e058a7') }}
+            {{ $t('9120db75-8638-4cab-9dca-8bd81390149e') }}
         </h1>
 
         <hr><h2>{{ $t('e909e3d1-516f-4284-8923-0390c95ae290') }}</h2>
@@ -112,7 +112,7 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
 
         try {
             await this.saveChannel();
-            new Toast($t(`5d614fe0-ec0d-47af-92bc-8c50f09717e2`), 'success').show();
+            new Toast($t(`1e6b16bd-ca6e-49e2-9792-f8864a140d7b`), 'success').show();
             this.dismiss({ force: true });
         }
         catch (e) {

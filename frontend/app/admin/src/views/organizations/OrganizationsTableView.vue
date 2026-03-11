@@ -50,7 +50,7 @@ const title = computed(() => {
             return props.tag.name;
         }
     }
-    return $t('d4a9ca3f-72c9-4418-90fa-5d648b23ee7e');
+    return $t('4835dfd4-10b0-4e91-b581-d1b3eefa73f7');
 });
 
 const estimatedRows = computed(() => {
@@ -130,9 +130,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, boolean>({
         id: 'status',
-        name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
+        name: $t(`6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8`),
         getValue: organization => organization.active,
-        format: active => active ? $t(`1bb1402a-c26b-4516-bbe1-08aff32ee3e8`) : $t(`ddfa1e2d-bb72-4781-8754-d5002249f30d`),
+        format: active => active ? $t(`079afc7a-6ccb-4c7f-b739-24198b0cfec2`) : $t(`33906077-a1d8-4daa-9914-ce129538f68c`),
         getStyle: active => active ? 'success' : 'error',
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -143,17 +143,17 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'city',
-        name: $t(`54b992a4-20e1-4232-8d2e-93c9353c6af3`),
+        name: $t(`3f4f6c6a-e2c5-4bee-83a3-77d8e55a1e60`),
         getValue: organization => organization.address.city,
         minimumWidth: 100,
         recommendedWidth: 200,
     }),
     new Column<ObjectType, string[]>({
         id: 'tags',
-        name: $t(`b1dd12f9-89d8-446b-8005-6be3a812a2b2`),
+        name: $t(`5f8c1ac5-a650-4046-80b6-0fe37fa12439`),
         allowSorting: false,
         getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)),
-        format: tags => tags.length === 0 ? $t(`45ff02db-f404-4d91-853f-738d55c40cb6`) : tags.join(', '),
+        format: tags => tags.length === 0 ? $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`) : tags.join(', '),
         getStyle: tags => tags.length === 0 ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -166,7 +166,7 @@ const allColumns: Column<ObjectType, any>[] = [
         format: (progress) => {
             const { completed, total } = progress;
             if (total === 0) {
-                return $t(`45ff02db-f404-4d91-853f-738d55c40cb6`);
+                return $t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`);
             }
             if (completed >= total) {
                 return $t(`1e1637ef-4133-4f30-973d-bd913387961e`);

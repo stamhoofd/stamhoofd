@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <STInputBox v-if="STAMHOOFD.userMode === 'platform'" :title="$t('4c61c43e-ed3c-418e-8773-681d19323520')" error-fields="uri" :error-box="errors.errorBox">
+                <STInputBox v-if="STAMHOOFD.userMode === 'platform'" :title="$t('05723781-9357-41b2-9fb8-cb4f80dde7f9')" error-fields="uri" :error-box="errors.errorBox">
                     <input id="organization-uri" :value="uri" class="input" type="text" disabled>
                 </STInputBox>
 
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <hr><h2>{{ $t('f777a982-6f69-41cc-bef1-18d146e870db') }}</h2>
+        <hr><h2>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h2>
         <p>{{ $t('ca923d49-c9c1-4c39-9e52-96b88a0223ed') }}</p>
 
         <p v-if="draggableCompanies.length === 0" class="info-box">
@@ -56,7 +56,7 @@
                         {{ company.companyNumber }}
                     </p>
                     <p v-else class="style-description-small">
-                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                        {{ $t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8') }}
                     </p>
 
                     <p v-if="company.address" class="style-description-small">
@@ -72,7 +72,7 @@
 
                     <template #right>
                         <span v-if="index === 0" class="style-tag">
-                            {{ $t('b67ee618-6873-4dfe-84b6-faa51f37d661') }}
+                            {{ $t('40c0b334-e007-4fc1-88e5-b38707175d45') }}
                         </span>
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
@@ -266,7 +266,7 @@ const shouldNavigateAway = async () => {
     if (!hasSomeChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

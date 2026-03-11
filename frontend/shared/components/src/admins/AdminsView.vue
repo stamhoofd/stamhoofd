@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition>
         <div v-if="!loading" class="st-view background">
-            <STNavigationBar :title="$t(`844333d1-ba08-4d37-bdf3-eae024c87ff3`)" />
+            <STNavigationBar :title="$t(`05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9`)" />
 
             <main class="center">
                 <h1>{{ $t('05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9') }}</h1>

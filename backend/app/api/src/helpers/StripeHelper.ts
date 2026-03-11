@@ -280,7 +280,7 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact' | 'ideal',
                 billing_details: {
-                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`)),
+                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`49e90fda-d262-4fe7-a2e2-d6b48abc8e2b`)),
                     email: payment.customer?.dynamicEmail || customer.email,
                     address: payment.customer?.company?.address
                         ? {

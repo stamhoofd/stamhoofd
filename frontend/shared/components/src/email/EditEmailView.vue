@@ -8,14 +8,14 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`a3e11da3-1894-4519-99a8-ac5fb32c555d`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`23302106-6c68-4b4a-8d48-6a7c0debdeb8`)">
         </STInputBox>
         <p class="style-description-small">
             {{ $t('9b4f3b56-e869-4442-bb5f-156c2b9271b0') }}
         </p>
 
-        <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`70c99ed2-97be-4252-b7c4-6cd46d5c9513`)" />
+        <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)" :placeholder="$t(`70c99ed2-97be-4252-b7c4-6cd46d5c9513`)" />
 
         <STInputBox class="max">
             <STList>
@@ -251,7 +251,7 @@ async function deleteMe() {
     if (saving.value) {
         return;
     }
-    if (!await CenteredMessage.confirm($t('6c837cc0-1832-4bb4-830f-838ebf9911f6'), $t('eee720f3-5e00-429c-a847-cb3d4e237e4d'), $t('2c9ef19d-3838-4e9a-bb9b-e5f9a714fe4c'))) {
+    if (!await CenteredMessage.confirm($t('6c837cc0-1832-4bb4-830f-838ebf9911f6'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'), $t('2c9ef19d-3838-4e9a-bb9b-e5f9a714fe4c'))) {
         return;
     }
     saving.value = true;
@@ -395,7 +395,7 @@ const shouldNavigateAway = async () => {
     if (!hasChangesFull.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

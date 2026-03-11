@@ -5,7 +5,7 @@
                 {{ record.name }}
             </h3>
             <p v-if="!answer" class="style-definition-text">
-                <span>{{ $t('e9f2788a-72fe-43d4-b4e3-0191af2ea090') }}</span>
+                <span>{{ $t('e420367f-7ce9-4dd3-95b7-c24d0649cb59') }}</span>
             </p>
             <template v-else-if="recordCheckboxAnswer">
                 <p class="style-definition-text">
@@ -42,7 +42,7 @@
             <p v-if="recordCheckboxAnswer?.comments" v-copyable class="style-description-small pre-wrap" v-text="recordCheckboxAnswer.comments" />
         </template>
         <p v-if="recordsWithAnswers.filter(({recordCheckboxAnswer}) => recordCheckboxAnswer?.selected).length === 0" class="style-description">
-            {{ $t('45ff02db-f404-4d91-853f-738d55c40cb6') }}
+            {{ $t('3ef9e622-426f-4913-89a0-0ce08f4542d4') }}
         </p>
     </template>
 

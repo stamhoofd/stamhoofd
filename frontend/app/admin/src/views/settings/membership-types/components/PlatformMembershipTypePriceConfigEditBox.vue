@@ -8,7 +8,7 @@
                 <div>
                     <button class="button text" type="button" @click="emits('delete')">
                         <span class="icon trash" />
-                        <span class="hide-smartphone">{{ $t('838cae8b-92a5-43d2-82ba-01b8e830054b') }}</span>
+                        <span class="hide-smartphone">{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                     </button>
                 </div>
             </h2>
@@ -17,7 +17,7 @@
             </h2>
         </template>
 
-        <STInputBox v-if="showStartDate || startDate" :title="$t('d93bd297-5794-4588-8bfb-17fb2074a364')" :error-box="errorBox">
+        <STInputBox v-if="showStartDate || startDate" :title="$t('1e43813a-f48e-436c-bb49-e9ebb0f27f58')" :error-box="errorBox">
             <DateSelection v-model="startDate" :required="true" :min="config.startDate" :max="config.endDate" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t('f19516b2-0c37-4dce-86f4-46690ec3dfc9')" />
         </STInputBox>
 

@@ -53,8 +53,8 @@
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('a56bcf08-214d-421b-9cc0-336d2b5ab0ea') }}
-                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('f6c28298-1b38-4794-988e-f8c8eb496acf') }}</span>
+                        {{ $t('565a7968-e547-411e-aaff-6f936c128d5f') }}
+                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('ae8d3a27-6a56-4ae8-ada6-c843f01625b0') }}</span>
                         <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('22703e89-376e-453d-9fc6-c449193be678') }}</span>
                     </h2>
                     <p class="style-description">
@@ -85,7 +85,7 @@
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr><h2>{{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}</h2>
+                <hr><h2>{{ $t('5ca94078-d742-4e17-abf7-957c4721a559') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -138,7 +138,7 @@
                             <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('f0b50a39-d4fd-4f97-802d-a599b00030fd') }}
+                            {{ $t('dc8dddba-1aae-49ad-bdda-68d3e88a1964') }}
                         </h2>
                         <p class="style-description">
                             {{ $t('dd3b8b5f-0f31-4b70-99fa-cc4ed29e70aa') }}
@@ -149,7 +149,7 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+                <hr><h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
 
                 <STList>
                     <STListItem v-if="!isArchive && !isOpen" :selectable="true" @click="openGroup()">
@@ -178,7 +178,7 @@
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon power" />
-                                <span>{{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}</span>
+                                <span>{{ $t('83db2c73-38a3-4d13-9984-2f19f95e1329') }}</span>
                             </button>
                             <button type="button" class="button icon power only-smartphone" />
                         </template>
@@ -194,7 +194,7 @@
                         <template #right>
                             <button type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon trash" />
-                                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                                <span>{{ $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689') }}</span>
                             </button>
                             <button type="button" class="button icon trash only-smartphone" />
                         </template>

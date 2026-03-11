@@ -145,7 +145,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Other,
-                name: $t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`),
+                name: $t(`26677608-996f-41a5-8a53-543d6efa7de4`),
             },
         ];
     }
@@ -292,7 +292,7 @@ export class OrganizationTypeHelper {
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
+                            name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
                         }),
                         categoryIds: activities.map(c => c.id),
                     }),
@@ -323,7 +323,7 @@ export class OrganizationTypeHelper {
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
+                            name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
                         }),
                         categoryIds: activities.map(c => c.id),
                     }),
@@ -354,7 +354,7 @@ export class OrganizationTypeHelper {
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
+                        name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
                     }),
                     categoryIds: activities.map(c => c.id),
                 }),
@@ -371,7 +371,7 @@ export class OrganizationTypeHelper {
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
+                        name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
                     }),
                 }),
             ];
@@ -387,7 +387,7 @@ export class OrganizationTypeHelper {
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
+                        name: $t(`60231186-b00f-4d07-a5c7-4a905467e254`),
                     }),
                 }),
             ];

@@ -2,7 +2,7 @@
     <div>
         <dl class="details-grid dns-records" :class="{ success: record.status === 'Valid' }">
             <template v-if="record.optional">
-                <dt>{{ $t('9e0461d2-7439-4588-837c-750de6946287') }}</dt>
+                <dt>{{ $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f') }}</dt>
                 <dd>{{ $t('9abb03cf-d76c-4f97-afea-76982042b1ad') }}</dd>
             </template>
 

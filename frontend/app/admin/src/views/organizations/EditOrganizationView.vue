@@ -49,10 +49,10 @@
         </div>
 
         <template v-if="auth.hasFullPlatformAccess()">
-            <hr><h2>{{ $t('97475ade-4e97-4989-b2f4-fecd534db3c4') }}</h2>
+            <hr><h2>{{ $t('079afc7a-6ccb-4c7f-b739-24198b0cfec2') }}</h2>
 
             <STList>
-                <CheckboxListItem v-model="active" :label="$t('97475ade-4e97-4989-b2f4-fecd534db3c4')" :description="$t(`3f4fbe8a-bd28-432e-a54f-04067e5f83d5`)" />
+                <CheckboxListItem v-model="active" :label="$t('079afc7a-6ccb-4c7f-b739-24198b0cfec2')" :description="$t(`3f4fbe8a-bd28-432e-a54f-04067e5f83d5`)" />
             </STList>
         </template>
     </SaveView>
@@ -194,7 +194,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 function tagIdsToTags(ids: string[]) {

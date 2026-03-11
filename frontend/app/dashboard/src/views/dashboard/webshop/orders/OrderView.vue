@@ -1,6 +1,6 @@
 <template>
     <div class="st-view order-view">
-        <STNavigationBar :title="$t(`e0f1bd7f-332f-4c99-adab-35a7e7481cf9`) + order.number">
+        <STNavigationBar :title="$t(`12be5ac0-8353-43a2-badb-ab3b27d156b3`) + order.number">
             <template #right>
                 <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('bd66e295-2748-40da-a8e9-0e6e48584033')" @click="goBack" />
                 <button v-if="hasNextOrder || hasPreviousOrder" type="button" class="button icon arrow-down" :disabled="!hasNextOrder" :v-tooltip="$t('4428ee36-a994-468c-b8a1-22ed6e8bde58')" @click="goNext" />
@@ -9,7 +9,7 @@
         </STNavigationBar>
         <main>
             <h1>
-                {{ $t('1a2a842e-4f98-4818-911b-c9634aca4214') }}{{ order.number }}
+                {{ $t('12be5ac0-8353-43a2-badb-ab3b27d156b3') }}{{ order.number }}
             </h1>
 
             <div v-if="hasWarnings" class="hover-box container">
@@ -52,7 +52,7 @@
 
                 <STListItem v-long-press="(e: MouseEvent) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     <h3 :class="'style-definition-label '+statusColor">
-                        {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
+                        {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>
@@ -101,7 +101,7 @@
                             {{ $t('044f91f3-91b5-4109-ad8d-3fea6c0c92e2') }}
                         </span>
                         <span v-else-if="hasSingleTickets && tickets.length === 1 && scannedCount === 0">
-                            {{ $t('c1bb5197-b80f-482e-aac8-db8f08e37108') }}
+                            {{ $t('aa934a39-f0dd-4e8b-9db8-a7686684a411') }}
                         </span>
                         <span v-else>
                             {{ scannedCount }} / {{ tickets.length }} {{ $t('c22c23f8-54d9-4116-8ad0-8766aeb46bea') }}
@@ -129,7 +129,7 @@
 
             <template v-if="order.data.checkoutMethod">
                 <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
-                    {{ $t('edd72e8b-76de-45df-93a0-ecc72efb849a') }}
+                    {{ $t('cca905ff-7d00-4b9d-84c6-bda2bb5ea898') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
                     {{ $t('acde7540-a0b2-4eaf-88af-2d92851f73de') }}
@@ -161,7 +161,7 @@
                     </STListItem>
                     <STListItem v-if="(order.data.checkoutMethod as WebshopTakeoutMethod).address" class="right-description">
                         <h3 class="style-definition-label">
-                            {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
+                            {{ $t('0a37de09-120b-4bea-8d13-6d7ed6823884') }}
                         </h3>
 
                         <p class="style-definition-text">
@@ -206,7 +206,7 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('f4d00d5c-77c9-41dd-9689-a447c7977449') }}</h2>
+            <hr><h2>{{ $t('120012bf-f877-46de-b6d9-55ea46f3f2ce') }}</h2>
 
             <STList class="info">
                 <STListItem>
@@ -220,7 +220,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
+                        {{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}
                     </h3>
                     <p class="style-definition-text">
                         <EmailAddress :email="order.data.customer.email" />
@@ -279,7 +279,7 @@
             </div>
 
             <hr><p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
-                <span>{{ $t('46a3962f-7d21-4cf4-b3a9-bfec8007e68a') }} <span class="style-discount-code">{{ code.code }}</span></span>
+                <span>{{ $t('3697babf-4463-460f-95ee-683a40e5d46d') }} <span class="style-discount-code">{{ code.code }}</span></span>
             </p>
 
             <STList>

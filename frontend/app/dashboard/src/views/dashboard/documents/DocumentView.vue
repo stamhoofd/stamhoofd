@@ -9,7 +9,7 @@
         </STNavigationBar>
         <main>
             <h1>
-                {{ $t('f4b5c997-f9ed-4ba9-aabd-ac1d5fa37dfb') }}
+                {{ $t('9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d') }}
             </h1>
 
             <p v-if="unlinkedAnswers.length" class="info-box">
@@ -41,7 +41,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d') }}
+                        {{ $t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.description }}
@@ -59,7 +59,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('b6391640-1e01-47f9-913d-360fb0903b75') }}
+                        {{ $t('10fd24bb-43dd-4174-9a23-db3ac54af9be') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ capitalizeFirstLetter(formatDateTime(document.createdAt)) }}
@@ -68,7 +68,7 @@
 
                 <STListItem>
                     <h3 :class="'style-definition-label '+statusColor">
-                        {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
+                        {{ $t('6b4b9fb3-ca24-43cd-9f7b-a5f597b943d8') }}
                     </h3>
                     <p class="style-definition-text">
                         <span>{{ statusName }}</span>

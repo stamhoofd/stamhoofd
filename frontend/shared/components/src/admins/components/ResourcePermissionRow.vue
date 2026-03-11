@@ -5,7 +5,7 @@
         </template>
         <template v-if="type === 'resource'">
             <h2 class="style-title-list">
-                {{ resource.name || $t('55f226d4-6147-4af7-9dc9-f3b55d4e506a') }}
+                {{ resource.name || $t('0076d594-efee-4ec7-a00a-073a4c689a38') }}
             </h2>
             <p v-if="resource.description" class="style-description-small">
                 {{ resource.description }}
@@ -252,7 +252,7 @@ const levelText = computed(() => {
             if (accessRights.length) {
                 return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(' + ');
             }
-            return $t(`5c7bd1da-78a7-428c-9c93-2be66c44ff6c`); // Special translation
+            return $t(`31d1b160-113c-41b8-88c1-47ff191c52f1`); // Special translation
         }
         case PermissionLevel.Read: {
             const rights = [getPermissionLevelName(PermissionLevel.Read, props.resource.type)];

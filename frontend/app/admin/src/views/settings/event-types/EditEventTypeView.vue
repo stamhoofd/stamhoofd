@@ -7,17 +7,17 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') " error-fields="name" :error-box="errors.errorBox">
+            <STInputBox :title="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') " error-fields="name" :error-box="errors.errorBox">
                 <input
                     v-model="name"
                     class="input"
                     type="text"
-                    :placeholder="$t('9ffdbf7d-83b1-45e3-8ad5-db07b4a22d1e') "
+                    :placeholder="$t('17edcdd6-4fb2-4882-adec-d3a4f43a1926') "
                 >
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('688fc9a3-68af-4aa3-ae6c-7d35a5f954ad')" error-fields="description" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('11d6f2fc-c72d-4c18-aa6d-b8118c2aaa5c')" error-fields="description" :error-box="errors.errorBox" class="max">
             <textarea
                 v-model="description"
                 class="input"
@@ -31,7 +31,7 @@
         <h2>{{ $t('1d742718-992d-4487-9c5e-a4ac46841a27') }}</h2>
 
         <STInputBox :title="$t('f9c5b001-dd96-4a70-82c7-505246f7be8c')" error-fields="maximum" :error-box="errors.errorBox">
-            <NumberInput v-model="maximum" :placeholder="$t('e41660ea-180a-45ef-987c-e780319c4331')" :required="false" />
+            <NumberInput v-model="maximum" :placeholder="$t('3ef9e622-426f-4913-89a0-0ce08f4542d4')" :required="false" />
         </STInputBox>
         <p class="style-description-small">
             {{ $t('f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc') }}
@@ -39,7 +39,7 @@
 
         <div class="split-inputs">
             <STInputBox :title="$t('93210fca-b5c6-431c-b109-736fe32b90ac')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="minimumDays" :placeholder="$t('e41660ea-180a-45ef-987c-e780319c4331')" :required="false" />
+                <NumberInput v-model="minimumDays" :placeholder="$t('3ef9e622-426f-4913-89a0-0ce08f4542d4')" :required="false" />
             </STInputBox>
 
             <STInputBox :title="$t('08e038ea-805b-42bf-8755-6f6875aae836')" error-fields="maximumDays" :error-box="errors.errorBox">
@@ -103,7 +103,7 @@ const doDelete = async () => {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t('24cdd0db-df35-4ef2-8230-7cade040fcfc'), $t('838cae8b-92a5-43d2-82ba-01b8e830054b'), $t('dc8871b4-8d65-4247-9c2b-56e183cdf052'))) {
+    if (!await CenteredMessage.confirm($t('24cdd0db-df35-4ef2-8230-7cade040fcfc'), $t('14f2d606-a7c9-4cdf-9ee9-aca38beb9689'), $t('dc8871b4-8d65-4247-9c2b-56e183cdf052'))) {
         return;
     }
 
@@ -154,7 +154,7 @@ const shouldNavigateAway = async () => {
         return true;
     }
 
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

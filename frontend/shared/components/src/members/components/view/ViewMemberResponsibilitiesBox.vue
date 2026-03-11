@@ -1,7 +1,7 @@
 <template>
     <div v-if="hasResponsibilities && (sortedResponsibilities.length || auth.hasFullAccess())" class="hover-box container">
         <hr><h2 class="style-with-button">
-            <div>{{ $t('fbfaabbf-95d2-49ae-900b-d7b2321907bb') }}</div>
+            <div>{{ $t('b0cb950d-856f-4068-bf2f-9636927020f4') }}</div>
             <div class="hover-show">
                 <button v-if="auth.hasFullAccess()" type="button" class="button icon edit gray" @click.prevent="editResponsibilities" />
             </div>

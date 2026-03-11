@@ -7,7 +7,7 @@
             </button>
         </p>
         <hr v-if="isEnteringDiscountCode"><form v-if="isEnteringDiscountCode" data-submit-last-field @submit.prevent="addEnteredCode">
-            <STInputBox error-fields="code" :error-box="errorBox" class="max" :title="$t(`46a3962f-7d21-4cf4-b3a9-bfec8007e68a`)">
+            <STInputBox error-fields="code" :error-box="errorBox" class="max" :title="$t(`3697babf-4463-460f-95ee-683a40e5d46d`)">
                 <div class="split-inputs">
                     <input v-model="code" autofocus enterkeyhint="go" class="input" type="text" autocomplete="off" :placeholder="$t(`1bc69456-3b92-4744-905d-8dd06a219f0e`)" @blur="cleanCode"><LoadingButton :loading="loading">
                         <button class="button primary" type="submit">

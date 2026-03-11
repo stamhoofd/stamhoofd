@@ -122,7 +122,7 @@ function getReplacements() {
         }),
         organizationName: Replacement.create({
             token: 'organizationName',
-            value: $t('aeace79f-c772-4944-8d1d-f92eb519267f'),
+            value: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
         }),
         platformOrOrganizationName: Replacement.create({
             token: 'platformOrOrganizationName',
@@ -223,7 +223,7 @@ function getReplacements() {
         }),
         transferBankCreditor: Replacement.create({
             token: 'transferBankCreditor',
-            value: $t('aeace79f-c772-4944-8d1d-f92eb519267f'),
+            value: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
         }),
         overviewContext: Replacement.create({
             token: 'overviewContext',

@@ -26,7 +26,7 @@
                 <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" :v-tooltip="$t('85ebbd8d-0585-4621-bed9-0d3cacb138a8')" @click="editor.chain().focus().toggleItalic().run()" />
                 <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" :v-tooltip="$t('c69c6268-44cb-41a3-9a22-01c0828cb87a')" @click="editor.chain().focus().toggleUnderline().run()" />
 
-                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" :v-tooltip="$t('cbe7db4a-b65b-452b-a5d2-d369182fd28f')" @click="openTextStyles" />
+                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" :v-tooltip="$t('109b8d55-5b39-47da-92ad-fbdfa0f3d0b0')" @click="openTextStyles" />
                 <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
                 <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click.prevent.stop="openLinkEditor()" @mousedown.stop />
             </div>
@@ -184,7 +184,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             return;
         }
         if (!this.editor!.isActive('link') && this.editor!.state.selection.empty) {
-            new Toast($t(`930cb01b-7877-45e6-99dc-7cb148f13cc9`), 'info').show();
+            new Toast($t(`1a4e5a36-80ae-4858-a16b-a430c806ee8f`), 'info').show();
             return;
         }
         this.editLink = this.editor!.getAttributes('link')?.href ?? '';
@@ -200,7 +200,7 @@ export default class WYSIWYGTextInput extends VueComponent {
         const menu = new ContextMenu([
             [
                 new ContextMenuItem({
-                    name: $t(`3337b645-929a-4c29-ba80-1898dead623d`),
+                    name: $t(`109b8d55-5b39-47da-92ad-fbdfa0f3d0b0`),
                     icon: 'h1',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel }),
                     action: () => {
@@ -209,7 +209,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`73de3c97-dee4-4944-97ab-4ffd438ff9c4`),
+                    name: $t(`5d0d84fe-2ddb-4962-b104-337abbeeaa1f`),
                     icon: 'h2',
                     selected: this.editor.isActive('heading', { level: this.headingStartLevel + 1 }),
                     action: () => {
@@ -238,7 +238,7 @@ export default class WYSIWYGTextInput extends VueComponent {
             ],
             [
                 new ContextMenuItem({
-                    name: $t(`edf611b8-a969-4861-956f-522c47a948fb`),
+                    name: $t(`277573b6-5edd-46bc-bd1b-c40f6935dd38`),
                     icon: 'ul',
                     selected: this.editor.isActive('bulletList'),
                     action: () => {
@@ -247,7 +247,7 @@ export default class WYSIWYGTextInput extends VueComponent {
                     },
                 }),
                 new ContextMenuItem({
-                    name: $t(`ec732e97-237c-4271-a890-77f18e2b006f`),
+                    name: $t(`8d17be46-de96-4e84-af15-6bd18e8b4b17`),
                     icon: 'ol',
                     selected: this.editor.isActive('orderedList'),
                     action: () => {

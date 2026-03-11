@@ -8,7 +8,7 @@ export class XlsxTransformerColumnHelper {
         }
 
         if (value === false) {
-            return $t(`b8b730fb-f1a3-4c13-8ec4-0aebe08a1449`);
+            return $t(`08dd4181-69c6-4888-b32a-07224f1c4349`);
         }
 
         return '';
@@ -48,7 +48,7 @@ export class XlsxTransformerColumnHelper {
         return [
             {
                 id: getId('type'),
-                name: getName($t(`f97ad8c1-31d2-4b61-9e09-3be86eaeba08`)),
+                name: getName($t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)),
                 width: 20,
                 getValue: (member: PlatformMember) => {
                     const parent = getParent(member);
@@ -60,7 +60,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('firstName'),
-                name: getName($t(`efca0579-0543-4636-a996-384bc9f0527e`)),
+                name: getName($t(`603606c2-95ca-4967-814c-53ec3297bf33`)),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.firstName ?? '',
@@ -68,7 +68,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('lastName'),
-                name: getName($t(`4a5e438e-08a1-411e-9b66-410eea7ded73`)),
+                name: getName($t(`033780e9-417d-4f0a-9aba-7ddfdf655d22`)),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.lastName ?? '',
@@ -84,7 +84,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('email'),
-                name: getName($t(`82f4b6ed-afee-4655-9f07-22802e0e7ad9`)),
+                name: getName($t(`237d0720-13f0-4029-8bf2-4de7e0a9a358`)),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.email ?? '',
@@ -115,7 +115,7 @@ export class XlsxTransformerColumnHelper {
                         {
                             id: getId('street'),
                             name: `Straat`,
-                            defaultCategory: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`), // Ignore this name
+                            defaultCategory: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`), // Ignore this name
                             width: 40,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -126,8 +126,8 @@ export class XlsxTransformerColumnHelper {
                         },
                         {
                             id: getId('number'),
-                            name: $t(`cc1cf4a7-0bd2-4fa7-8ff2-0a12470a738d`),
-                            defaultCategory: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`), // Ignore this name
+                            name: $t(`89eafa94-6447-4608-a71e-84752eab10c8`),
+                            defaultCategory: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -138,8 +138,8 @@ export class XlsxTransformerColumnHelper {
                         },
                         {
                             id: getId('postalCode'),
-                            name: $t(`dafc7b04-dfb2-4dbc-8bcf-f7e9c6356442`),
-                            defaultCategory: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`), // Ignore this name
+                            name: $t(`28b0f035-cb44-48b7-b60f-093f6adc26fb`),
+                            defaultCategory: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -151,7 +151,7 @@ export class XlsxTransformerColumnHelper {
                         {
                             id: getId('city'),
                             name: $t(`3d538399-3585-4be6-b03d-c12afa7183e8`),
-                            defaultCategory: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`), // Ignore this name
+                            defaultCategory: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -162,8 +162,8 @@ export class XlsxTransformerColumnHelper {
                         },
                         {
                             id: getId('country'),
-                            name: $t(`cce830e0-6c05-405f-a800-4c217dc3235f`),
-                            defaultCategory: $t(`2f10996e-ea97-4345-b997-c93198c7d67f`), // Ignore this name
+                            name: $t(`b1064996-ca77-48d0-b178-4bbd6af44e8e`),
+                            defaultCategory: $t(`0a37de09-120b-4bea-8d13-6d7ed6823884`), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);

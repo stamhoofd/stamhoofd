@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="$t(`7038dda8-b702-4a80-9846-e12440291620`)" @save="save">
         <h1>
-            {{ $t('ac0594f0-af79-465b-84d5-568da90af8b6') }}
+            {{ $t('4539b2ba-71f8-4839-aee8-60da1189b520') }}
         </h1>
 
         <p>{{ $t('ed98b821-ac81-47ab-8149-10cb71119bbb') }}</p>
@@ -26,7 +26,7 @@
 
         <template v-if="enabled">
             <div v-if="(patched.privateMeta?.emails ?? []).length" class="container">
-                <hr><h2>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}</h2>
+                <hr><h2>{{ $t('237d0720-13f0-4029-8bf2-4de7e0a9a358') }}</h2>
                 <p>{{ $t('fbe87ec5-37fa-46c7-9ae4-fd9b43de8e96') }}</p>
 
                 <STList>
@@ -214,7 +214,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+    return await CenteredMessage.confirm($t('1cb53933-ed06-45ae-9240-dd389298823c'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
 
 defineExpose({

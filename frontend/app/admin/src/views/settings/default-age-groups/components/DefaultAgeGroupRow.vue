@@ -13,7 +13,7 @@
         </p>
 
         <p v-if="!group.defaultMembershipTypeId" class="style-description">
-            {{ $t('c3bc8e44-f842-4bff-9aa0-d89028f6427a') }}
+            {{ $t('10df6cbf-4609-4677-8791-4ffa38e31699') }}
         </p>
 
         <p v-if="group.minimumRequiredMembers" class="style-description">
