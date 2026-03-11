@@ -9,8 +9,8 @@ export function fixDoubleTranslations() {
     
     manager.iterateNonDefaultLocalesWithNamespace((locale, namespace) => {
         if(namespace !== globals.DEFAULT_NAMESPACE) {
-            const defaultNamespaceDict = manager.readMachineTranslationDictionary(globals.TRANSLATOR, locale, globals.DEFAULT_NAMESPACE);
-            const dict = manager.readMachineTranslationDictionary(globals.TRANSLATOR, locale, namespace);
+            const defaultNamespaceDict = manager.readMachineTranslationDictionary(locale, globals.DEFAULT_NAMESPACE);
+            const dict = manager.readMachineTranslationDictionary(locale, namespace);
             const filteredDictionary = {};
     
             for(const [key, value] of Object.entries(dict)) {
@@ -22,7 +22,6 @@ export function fixDoubleTranslations() {
             }
     
             manager.setMachineTranslationDictionary(filteredDictionary, {
-                translator: globals.TRANSLATOR,
                 locale,
                 namespace,
             })  

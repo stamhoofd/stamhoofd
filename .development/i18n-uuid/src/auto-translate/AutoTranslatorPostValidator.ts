@@ -18,14 +18,13 @@ export class AutoTranslatorPostValidator {
         console.log(chalk.blue('Start filter invalid translations (dryRun: ' + !!dryRun + ')'));
 
         this.manager.iterateNonDefaultLocalesWithNamespace((locale, namespace) => {
-            const dict = this.manager.readMachineTranslationDictionary(globals.TRANSLATOR, locale, namespace);
+            const dict = this.manager.readMachineTranslationDictionary(locale, namespace);
             const {filteredDictionary, errors} = this.filterDictionary(dict);
             if(errors > 0) {
                 console.error(chalk.red(`Found ${errors} errors in auto translations (locale: ${locale}, namespace: ${namespace})`));
 
                 if(!dryRun) {
                     this.manager.setMachineTranslationDictionary(filteredDictionary, {
-                        translator: globals.TRANSLATOR,
                         locale,
                         namespace,
                     });
@@ -40,7 +39,7 @@ export class AutoTranslatorPostValidator {
         console.log(chalk.blue('Start loop invalid translations (dryRun: ' + !!dryRun + ')'));
 
         await this.manager.iterateNonDefaultLocalesWithNamespaceAsync(async (locale, namespace) => {
-            const dict = this.manager.readMachineTranslationDictionary(globals.TRANSLATOR, locale, namespace);
+            const dict = this.manager.readMachineTranslationDictionary(locale, namespace);
 
             const total = Object.entries(dict).filter(([, value]) => {
                 const errorMessage = this.validateDictionaryValue(value);
@@ -77,10 +76,10 @@ ${current}/${total}`));
                         switch(promptResult) {
                             case YesNoOrDoubt.Yes:
                                 this.manager.setSourceTranslation({key, value: value.translation, locale, namespace});
-                                this.manager.removeFromMachineTranslationDictionary({translator: globals.TRANSLATOR, locale, namespace, key});
+                                this.manager.removeFromMachineTranslationDictionary({locale, namespace, key});
                                 break;
                             case YesNoOrDoubt.No:
-                                this.manager.removeFromMachineTranslationDictionary({translator: globals.TRANSLATOR, locale, namespace, key});
+                                this.manager.removeFromMachineTranslationDictionary({locale, namespace, key});
                                 break;
                             case YesNoOrDoubt.Doubt:
                                 // do nothing

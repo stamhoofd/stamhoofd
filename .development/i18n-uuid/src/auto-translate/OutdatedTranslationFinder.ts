@@ -54,7 +54,6 @@ export class OutdatedTranslationFinder {
 
                 const machineTranslationDictionary =
                     this.translationManager.readMachineTranslationDictionary(
-                        translator,
                         locale,
                         namespace,
                     );
@@ -80,7 +79,6 @@ export class OutdatedTranslationFinder {
                     this.translationManager.setMachineTranslationDictionary(
                         filteredDictionary,
                         {
-                            translator,
                             locale,
                             namespace,
                         },

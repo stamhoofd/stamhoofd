@@ -50,7 +50,6 @@ export class MachineTranslationComparer {
 
                 for (const translatorType of Object.values(TranslatorType)) {
                     const translations = this.translationManager.readMachineTranslations(
-                        translatorType,
                         otherLocale,
                         namespace,
                     )

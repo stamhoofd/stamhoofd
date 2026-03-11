@@ -293,7 +293,6 @@ export class AutoTranslator {
                     );
 
                     this.manager.addMachineTranslationDictionary(dict, {
-                        translator: this.type,
                         locale: args.locale,
                         namespace: args.namespace,
                     });
@@ -325,7 +324,6 @@ export class AutoTranslator {
                         );
 
                         this.manager.addMachineTranslationDictionary(dict, {
-                            translator: this.type,
                             locale: args.locale,
                             namespace: args.namespace,
                         });
@@ -339,7 +337,6 @@ export class AutoTranslator {
         const sourceTranslations = this.manager.readSource(locale, namespace);
 
         const machineTranslations = this.manager.readMachineTranslations(
-            this.type,
             locale,
             namespace,
         );

@@ -1,4 +1,5 @@
 import { validate as uuidValidate } from "uuid";
+import { TranslationManager } from "../auto-translate/TranslationManager";
 import { getTranslationsWithPath } from "./get-translations-with-path";
 import { replaceOccurrences } from "./replace-keys-with-uuid";
 import { writeTranslation } from "./write-translations";
@@ -72,6 +73,27 @@ export function compressUuids() {
     replaceOccurrences(merge)
     replaceOccurrences(merge)
 
+    // Replace machine translations
+    const manager = new TranslationManager();
+    manager.iterateNonDefaultLocalesWithNamespace((locale, namespace) => {
+        const dict = manager.readMachineTranslationDictionary(locale, namespace);
+        const filteredDictionary = {};
+
+        for(const [key, value] of Object.entries(dict)) {
+            const k = merge.get(key);
+            if (k) {
+                filteredDictionary[k] = value;
+            } else {
+                filteredDictionary[key] = value;
+
+            }
+        }
+
+        manager.setMachineTranslationDictionary(filteredDictionary, {
+            locale,
+            namespace,
+        })  
+    });
 }
 
 function isMapEqual(a: Map<string, string>, b: Map<string, string>) {
