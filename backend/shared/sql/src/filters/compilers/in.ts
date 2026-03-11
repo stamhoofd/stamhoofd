@@ -23,14 +23,13 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
                 human: $t('%1HH', { count: filter.length }),
             });
         }
-
-        const column = normalizeColumn(originalColumn);
-        const values = filter.map(val => normalizeCompareValue(assertFilterCompareValue(val), column.type));
-
-        if (values.length === 0) {
+        if (filter.length === 0) {
             // Return always false
             return new SQLWhereOr([]);
         }
+
+        const column = normalizeColumn(originalColumn, assertFilterCompareValue(filter.find(f => f !== null) ?? null));
+        const values = filter.map(val => normalizeCompareValue(assertFilterCompareValue(val), column.type));
 
         const valuesWithoutNulls = values.filter(val => val !== null);
         const hasNull = values.length !== valuesWithoutNulls.length;

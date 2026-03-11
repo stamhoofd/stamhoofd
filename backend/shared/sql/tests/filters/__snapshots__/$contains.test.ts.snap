@@ -117,12 +117,219 @@ exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Quer
 }
 `;
 
+exports[`$contains MySQL behaviour JSON scalars Booleans are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"true"}} 1`] = `
+{
+  "params": [
+    "%true%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Booleans are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"0"}} 1`] = `
+{
+  "params": [
+    "%0%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Booleans are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
+{
+  "params": [
+    "%1%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for filter: {"settings.scalar":{"$contains":"%"}} 1`] = `
+{
+  "params": [
+    "%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for filter: {"settings.scalar":{"$contains":"0%"}} 1`] = `
+{
+  "params": [
+    "%0\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for filter: {"settings.scalar":{"$contains":"50%"}} 1`] = `
+{
+  "params": [
+    "%50\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for not match filter: {"settings.scalar":{"$contains":"%%"}} 1`] = `
+{
+  "params": [
+    "%\\%\\%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for not match filter: {"settings.scalar":{"$contains":"%50"}} 1`] = `
+{
+  "params": [
+    "%\\%50%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"-"}} 1`] = `
+{
+  "params": [
+    "%-%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"-1"}} 1`] = `
+{
+  "params": [
+    "%-1%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"-15"}} 1`] = `
+{
+  "params": [
+    "%-15%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
+{
+  "params": [
+    "%1%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"5"}} 1`] = `
+{
+  "params": [
+    "%5%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
+{
+  "params": [
+    "%15%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"2"}} 1`] = `
+{
+  "params": [
+    "%2%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"151"}} 1`] = `
+{
+  "params": [
+    "%151%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Null fields do not match: SQL Query for not match filter: {"settings.scalar":{"$contains":""}} 1`] = `
+{
+  "params": [
+    "%%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Null fields do not match: SQL Query for not match filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
+{
+  "params": [
+    "%15%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
+{
+  "params": [
+    "%1%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"5"}} 1`] = `
+{
+  "params": [
+    "%5%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
+{
+  "params": [
+    "%15%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"2"}} 1`] = `
+{
+  "params": [
+    "%2%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
+exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"151"}} 1`] = `
+{
+  "params": [
+    "%151%",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+}
+`;
+
 exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for filter: {"settings.name":{"$contains":"%"}} 1`] = `
 {
   "params": [
     "%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -131,7 +338,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
   "params": [
     "%0\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -140,7 +347,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
   "params": [
     "%50\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -149,7 +356,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
   "params": [
     "%\\%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -158,7 +365,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
   "params": [
     "%\\%50%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -167,7 +374,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
   "params": [
     "%\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -176,7 +383,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
   "params": [
     "%\\_doe%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -185,7 +392,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
   "params": [
     "%john\\_doe%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -194,7 +401,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
   "params": [
     "%\\_\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -203,7 +410,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
   "params": [
     "%john\\_\\_doe%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -212,7 +419,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
   "params": [
     "%\\\\%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -221,7 +428,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
   "params": [
     "%\\\\\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -230,7 +437,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
   "params": [
     "%\\\\\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -239,7 +446,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
   "params": [
     "%\\\\\\\\%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -248,7 +455,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
   "params": [
     "%\\\\\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -257,7 +464,7 @@ exports[`$contains MySQL behaviour JSON strings Does not return values without %
   "params": [
     "%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -266,7 +473,7 @@ exports[`$contains MySQL behaviour JSON strings Does not return values without _
   "params": [
     "%\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 
@@ -275,7 +482,7 @@ exports[`$contains MySQL behaviour JSON strings Does not return values without _
   "params": [
     "%john\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
 }
 `;
 

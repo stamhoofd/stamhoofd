@@ -729,5 +729,227 @@ describe('$contains', () => {
                 });
             });
         });
+
+        describe('JSON scalars', () => {
+            const tableDefinition: TableDefinition = {
+                settings: {
+                    type: 'json',
+                    nullable: true,
+                },
+            };
+            const filters = {
+                ...baseSQLFilterCompilers,
+                'settings.scalar': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true }),
+            };
+
+            it('Can actually search strings for %', async () => {
+                await testMatch({
+                    tableDefinition,
+                    filters,
+                    rows: [
+                        {
+                            settings: {
+                                scalar: 'This contains 50% more',
+                            },
+                        },
+                    ],
+                    doMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '50%',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '0%',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '%',
+                            },
+                        },
+                    ],
+                    doNotMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '%%',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '%50',
+                            },
+                        },
+                    ],
+                });
+            });
+
+            it('Null fields do not match', async () => {
+                await testMatch({
+                    tableDefinition,
+                    filters,
+                    rows: [
+                        {
+                            settings: {
+                                scalar: null,
+                            },
+                        },
+                        {
+                            settings: {
+                                other: 15,
+                            },
+                        },
+                    ],
+                    doMatch: [],
+                    doNotMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '15',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '',
+                            },
+                        },
+                    ],
+                });
+            });
+
+            it('Number fields are converted to strings', async () => {
+                await testMatch({
+                    tableDefinition,
+                    filters,
+                    rows: [
+                        {
+                            settings: {
+                                scalar: 15,
+                            },
+                        },
+                    ],
+                    doMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '1',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '5',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '15',
+                            },
+                        },
+                    ],
+                    doNotMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '2',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '151',
+                            },
+                        },
+                    ],
+                });
+            });
+
+            it('Negative number fields are converted to strings', async () => {
+                await testMatch({
+                    tableDefinition,
+                    filters,
+                    rows: [
+                        {
+                            settings: {
+                                scalar: -15,
+                            },
+                        },
+                    ],
+                    doMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '1',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '5',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '-',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '15',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '-15',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '-1',
+                            },
+                        },
+                    ],
+                    doNotMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '2',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '151',
+                            },
+                        },
+                    ],
+                });
+            });
+
+            it('Booleans are converted to strings', async () => {
+                await testMatch({
+                    tableDefinition,
+                    filters,
+                    rows: [
+                        {
+                            settings: {
+                                scalar: true,
+                            },
+                        },
+                    ],
+                    doMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: 'true',
+                            },
+                        },
+                    ],
+                    doNotMatch: [
+                        {
+                            'settings.scalar': {
+                                $contains: '1',
+                            },
+                        },
+                        {
+                            'settings.scalar': {
+                                $contains: '0',
+                            },
+                        },
+                    ],
+                });
+            });
+        });
     });
 });

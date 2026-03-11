@@ -5,7 +5,7 @@ exports[`$gte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Que
   "params": [
     -9,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -14,7 +14,7 @@ exports[`$gte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Que
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -23,7 +23,7 @@ exports[`$gte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Que
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -32,7 +32,7 @@ exports[`$gte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Que
   "params": [
     9,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -41,7 +41,7 @@ exports[`$gte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Que
   "params": [
     10,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -50,7 +50,7 @@ exports[`$gte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Que
   "params": [
     12,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -59,7 +59,7 @@ exports[`$gte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Que
   "params": [
     20,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -68,7 +68,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -77,7 +77,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "alic",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -86,7 +86,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -95,7 +95,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "a",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -104,7 +104,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -113,7 +113,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "alic",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -122,7 +122,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -131,7 +131,7 @@ exports[`$gte MySQL Behaviour Comparing JSON string values is case insensitive: 
   "params": [
     "b",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -282,7 +282,7 @@ exports[`$gte MySQL Behaviour NULL values are always the smallest for JSON numbe
   "params": [
     -1000,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -291,7 +291,7 @@ exports[`$gte MySQL Behaviour NULL values are always the smallest for JSON numbe
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) >= ?",
 }
 `;
 
@@ -307,7 +307,7 @@ exports[`$gte MySQL Behaviour NULL values are always the smallest for JSON strin
   "params": [
     "",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 
@@ -316,7 +316,7 @@ exports[`$gte MySQL Behaviour NULL values are always the smallest for JSON strin
   "params": [
     "aaaa",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) >= ?",
 }
 `;
 

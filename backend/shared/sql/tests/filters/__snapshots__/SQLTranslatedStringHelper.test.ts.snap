@@ -6,7 +6,7 @@ exports[`SQLTranslatedStringHelper Different languages should select the correct
     "STRING",
     "juist",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -16,7 +16,7 @@ exports[`SQLTranslatedStringHelper Different languages should select the correct
     "STRING",
     "fout",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -26,7 +26,7 @@ exports[`SQLTranslatedStringHelper Different languages should select the correct
     "STRING",
     "juist",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -36,7 +36,7 @@ exports[`SQLTranslatedStringHelper Different languages should select the correct
     "STRING",
     "fout",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -46,7 +46,7 @@ exports[`SQLTranslatedStringHelper Different languages should select the correct
     "STRING",
     "juist",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -56,7 +56,7 @@ exports[`SQLTranslatedStringHelper Different languages should select the correct
     "STRING",
     "fout",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -66,7 +66,7 @@ exports[`SQLTranslatedStringHelper Empty json value should not match filter: SQL
     "STRING",
     "",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -76,7 +76,7 @@ exports[`SQLTranslatedStringHelper Empty json value should not match filter: SQL
     "STRING",
     "test",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -86,7 +86,7 @@ exports[`SQLTranslatedStringHelper Missing language value should select the next
     "STRING",
     "juist",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -96,7 +96,7 @@ exports[`SQLTranslatedStringHelper Missing language value should select the next
     "STRING",
     "fout",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -106,7 +106,7 @@ exports[`SQLTranslatedStringHelper Missing language value should select the next
     "STRING",
     "juist",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -116,7 +116,7 @@ exports[`SQLTranslatedStringHelper Missing language value should select the next
     "STRING",
     "fout",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -126,7 +126,7 @@ exports[`SQLTranslatedStringHelper Missing language value should select the next
     "STRING",
     "juist",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -136,7 +136,7 @@ exports[`SQLTranslatedStringHelper Missing language value should select the next
     "STRING",
     "fout",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -146,7 +146,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is ca
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -156,7 +156,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is ca
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -166,7 +166,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is ca
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -176,7 +176,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is ca
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -186,7 +186,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is ca
     "STRING",
     "alic",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -196,7 +196,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is ca
     "STRING",
     "b",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -206,7 +206,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string an
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -216,7 +216,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string an
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -226,7 +226,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string an
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -236,7 +236,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string an
     "STRING",
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -246,7 +246,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string an
     "STRING",
     "alic",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -256,7 +256,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string an
     "STRING",
     "b",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <=> ?",
 }
 `;
 
@@ -266,7 +266,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "STRING",
     "test a",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) > ?",
 }
 `;
 
@@ -276,7 +276,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "STRING",
     "test b",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) >= ?",
 }
 `;
 
@@ -287,7 +287,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "test c",
     "STRING",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) IS NULL",
 }
 `;
 
@@ -298,7 +298,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "test b",
     "STRING",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <= ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <= ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) IS NULL",
 }
 `;
 
@@ -308,7 +308,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "STRING",
     "test b",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) > ?",
 }
 `;
 
@@ -318,7 +318,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "STRING",
     "test c",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) > ?",
 }
 `;
 
@@ -328,7 +328,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "STRING",
     "test c",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) >= ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) >= ?",
 }
 `;
 
@@ -339,7 +339,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "test a",
     "STRING",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) IS NULL",
 }
 `;
 
@@ -350,7 +350,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "test b",
     "STRING",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) IS NULL",
 }
 `;
 
@@ -361,7 +361,7 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "test b",
     "STRING",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) IS NULL",
 }
 `;
 
@@ -372,6 +372,6 @@ exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte
     "test a",
     "STRING",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <= ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) <= ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR))) IS NULL",
 }
 `;

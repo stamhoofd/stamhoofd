@@ -1,5 +1,6 @@
 import { StamhoofdCompareValue } from '@stamhoofd/structures';
 import { SQLValueType } from '../SQLFilter.js';
+import { isJSONType } from './isJSONColumn.js';
 
 /**
  * Prepares a compare value so we can compare it, given a certain column type.
@@ -26,7 +27,7 @@ export function normalizeCompareValue(val: StamhoofdCompareValue, againstType: S
     }
 
     if (typeof val === 'string') {
-        if (againstType === SQLValueType.String || againstType === SQLValueType.JSONString) {
+        if (againstType === SQLValueType.String) {
             return val.toLocaleLowerCase();
         }
 

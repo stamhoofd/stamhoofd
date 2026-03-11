@@ -8,8 +8,9 @@ import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
 
 export function $equalsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
     return (originalColumn: SQLCurrentColumn) => {
-        const column = normalizeColumn(originalColumn);
-        const value = normalizeCompareValue(assertFilterCompareValue(filter), column.type);
+        const v = assertFilterCompareValue(filter);
+        const column = normalizeColumn(originalColumn, v);
+        const value = normalizeCompareValue(v, column.type);
         /**
          * Special case, checking for equality with a JSON array.
          * This should return true if the JSON array contains the value exactly.

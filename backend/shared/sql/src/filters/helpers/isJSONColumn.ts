@@ -8,6 +8,7 @@ export function isJSONType(type: SQLValueType): boolean {
     return type === SQLValueType.JSONString
         || type === SQLValueType.JSONBoolean
         || type === SQLValueType.JSONNumber
+        || type === SQLValueType.JSONScalar
         || type === SQLValueType.JSONArray
         || type === SQLValueType.JSONObject;
 }

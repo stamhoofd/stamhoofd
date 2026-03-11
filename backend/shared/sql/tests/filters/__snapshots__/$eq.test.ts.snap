@@ -1,11 +1,140 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for filter: {"settings.scalar":0} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for filter: {"settings.scalar":1} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for filter: {"settings.scalar":false} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for filter: {"settings.scalar":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for filter: {"settings.scalar":true} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":0} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":0} 2`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":1} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":1} 2`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":false} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":false} 2`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":null} 2`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":true} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans as scalars: SQL Query for not match filter: {"settings.scalar":true} 2`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
 exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":0} 1`] = `
 {
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -14,7 +143,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enab
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -23,14 +152,14 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enab
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
 exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) IS NULL",
 }
 `;
 
@@ -39,7 +168,25 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enab
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":0} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":1} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -48,7 +195,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -57,21 +204,21 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
 exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) IS NULL",
 }
 `;
 
 exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"settings.enabled":null} 2`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) IS NULL",
 }
 `;
 
@@ -80,7 +227,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -89,21 +236,89 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
 exports[`$eq JSON Can check if a json number is null: SQL Query for filter: {"settings.age":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) IS NULL",
 }
 `;
 
 exports[`$eq JSON Can check if a json string is null: SQL Query for filter: {"settings.name":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for filter: {"settings.scalar":10} 1`] = `
+{
+  "params": [
+    10,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for filter: {"settings.scalar":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for filter: {"settings.scalar":null} 2`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for not match filter: {"settings.scalar":-5} 1`] = `
+{
+  "params": [
+    -5,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for not match filter: {"settings.scalar":0} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for not match filter: {"settings.scalar":1} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for not match filter: {"settings.scalar":9} 1`] = `
+{
+  "params": [
+    9,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers as scalars: SQL Query for not match filter: {"settings.scalar":11} 1`] = `
+{
+  "params": [
+    11,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -112,21 +327,30 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.age
   "params": [
     10,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
 exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.age":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) IS NULL",
 }
 `;
 
-exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.enabled":null} 1`] = `
+exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.age":null} 2`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.age":-5} 1`] = `
+{
+  "params": [
+    -5,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -135,7 +359,16 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.age":1} 1`] = `
+{
+  "params": [
+    1,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -144,7 +377,7 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     9,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -153,39 +386,28 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     11,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
-}
-`;
-
-exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.enabled":false} 1`] = `
-{
-  "params": [
-    0,
-  ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
-}
-`;
-
-exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"settings.enabled":true} 1`] = `
-{
-  "params": [
-    1,
-  ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ?",
 }
 `;
 
 exports[`$eq JSON Can differentiate 0 number vs json null when comparing to null: SQL Query for not match filter: {"settings.age":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Can differentiate null scalar vs json null when comparing to null: SQL Query for not match filter: {"settings.scalar":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
 }
 `;
 
 exports[`$eq JSON Can differentiate null string vs json null when comparing to null: SQL Query for not match filter: {"settings.name":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IS NULL",
 }
 `;
 
@@ -450,10 +672,85 @@ exports[`$eq JSON Can search strings in a string array: SQL Query for not match 
 }
 `;
 
+exports[`$eq JSON Cannot convert alpabetical string scalar to number for compare: SQL Query for not match filter: {"settings.scalar":-15} 1`] = `
+{
+  "params": [
+    -15,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Cannot convert alpabetical string scalar to number for compare: SQL Query for not match filter: {"settings.scalar":0} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Cannot convert alpabetical string scalar to number for compare: SQL Query for not match filter: {"settings.scalar":150} 1`] = `
+{
+  "params": [
+    150,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Cannot convert alpabetical string scalar to number for compare: SQL Query for not match filter: {"settings.scalar":false} 1`] = `
+{
+  "params": [
+    0,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING UNSIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Cannot convert alpabetical string scalar to number for compare: SQL Query for not match filter: {"settings.scalar":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Cannot convert boolean scalar to string for compare: SQL Query for not match filter: {"settings.scalar":"Hello world"} 1`] = `
+{
+  "params": [
+    "hello world",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Cannot convert boolean scalar to string for compare: SQL Query for not match filter: {"settings.scalar":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$eq JSON Cannot convert number scalar to string for compare: SQL Query for not match filter: {"settings.scalar":"Hello world"} 1`] = `
+{
+  "params": [
+    "hello world",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Cannot convert number scalar to string for compare: SQL Query for not match filter: {"settings.scalar":null} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
 exports[`$eq JSON Checking a json value for null also matches if the key does not exist: SQL Query for filter: {"settings.name":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IS NULL",
 }
 `;
 
@@ -475,12 +772,129 @@ exports[`$eq JSON Checking a json value for null also matches if the key does no
 }
 `;
 
+exports[`$eq JSON Converts number scalar to string for compare: SQL Query for filter: {"settings.scalar":"1"} 1`] = `
+{
+  "params": [
+    "1",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Converts number scalar to string for compare: SQL Query for not match filter: {"settings.scalar":"0"} 1`] = `
+{
+  "params": [
+    "0",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Converts number scalar to string for compare: SQL Query for not match filter: {"settings.scalar":"1 "} 1`] = `
+{
+  "params": [
+    "1 ",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Converts string scalar to number for compare: SQL Query for filter: {"settings.scalar":15} 1`] = `
+{
+  "params": [
+    15,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Converts string scalar to number for compare: SQL Query for not match filter: {"settings.scalar":14} 1`] = `
+{
+  "params": [
+    14,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON Converts string scalar to number for compare: SQL Query for not match filter: {"settings.scalar":150} 1`] = `
+{
+  "params": [
+    150,
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON JSON scalars match case insensitive and whole string: SQL Query for filter: {"settings.scalar":"John Doe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON JSON scalars match case insensitive and whole string: SQL Query for filter: {"settings.scalar":"jOhn dOe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON JSON scalars match case insensitive and whole string: SQL Query for filter: {"settings.scalar":"john doe"} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON JSON scalars match case insensitive and whole string: SQL Query for filter: {"settings.scalar":{"$eq":"John Doe"}} 1`] = `
+{
+  "params": [
+    "john doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON JSON scalars match case insensitive and whole string: SQL Query for not match filter: {"settings.scalar":"Jane Doe"} 1`] = `
+{
+  "params": [
+    "jane doe",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON JSON scalars match case insensitive and whole string: SQL Query for not match filter: {"settings.scalar":"John"} 1`] = `
+{
+  "params": [
+    "john",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$eq JSON JSON scalars match case insensitive and whole string: SQL Query for not match filter: {"settings.scalar":"john"} 1`] = `
+{
+  "params": [
+    "john",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
 exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Query for filter: {"settings.name":"John Doe"} 1`] = `
 {
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) = ?",
 }
 `;
 
@@ -489,7 +903,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) = ?",
 }
 `;
 
@@ -498,7 +912,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) = ?",
 }
 `;
 
@@ -507,7 +921,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) = ?",
 }
 `;
 
@@ -516,7 +930,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "jane doe",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) = ?",
 }
 `;
 
@@ -525,7 +939,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) = ?",
 }
 `;
 
@@ -534,7 +948,7 @@ exports[`$eq JSON JSON strings match case insensitive and whole string: SQL Quer
   "params": [
     "john",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) = ?",
 }
 `;
 
@@ -595,27 +1009,27 @@ exports[`$eq JSON can check if a JSON array column is null: SQL Query for not ma
 exports[`$eq JSON can check if a json object column is null: SQL Query for filter: {"settings":{"$eq":null}} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" NULL ON ERROR) IS NULL",
 }
 `;
 
 exports[`$eq JSON can check if a json object column is null: SQL Query for filter: {"settings":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" NULL ON ERROR) IS NULL",
 }
 `;
 
 exports[`$eq JSON can check if a json object column is null: SQL Query for not match filter: {"settings":{"$eq":null}} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" NULL ON ERROR) IS NULL",
 }
 `;
 
 exports[`$eq JSON can check if a json object column is null: SQL Query for not match filter: {"settings":null} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" ERROR ON ERROR) IS NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$" NULL ON ERROR) IS NULL",
 }
 `;

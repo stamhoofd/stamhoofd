@@ -1,13 +1,13 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { compileFilter, FilterCompiler, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
+import { compileFilter, FilterCompiler, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, type StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
+import { SQLSafeValue } from '../SQLExpressions.js';
 import { SQLJoin } from '../SQLJoin.js';
 import { SQLJsonValue } from '../SQLJsonExpressions.js';
 import { SQLSelect } from '../SQLSelect.js';
 import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere.js';
-import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers/index.js';
 import { $containsSQLFilterCompiler } from './compilers/contains.js';
-import { SQLSafeValue } from '../SQLExpressions.js';
+import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers/index.js';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
@@ -34,8 +34,12 @@ export enum SQLValueType {
     /** True or false in JSON */
     JSONBoolean = 'JSONBoolean',
     JSONString = 'JSONString',
-
     JSONNumber = 'JSONNumber',
+
+    /**
+     * Either boolean, string, number or null (if nullable). Only use this if you cannot determine the type at compile time.
+     */
+    JSONScalar = 'JSONScalar',
 
     /** [...] */
     JSONArray = 'JSONArray',
@@ -244,8 +248,8 @@ export async function compileToSQLFilter(filter: StamhoofdFilter, filters: SQLFi
 /**
  * Casts json strings, numbers and booleans to native MySQL types. This includes json null to mysql null.
  */
-export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
-    if (column.type === SQLValueType.JSONString) {
+export function normalizeColumn(column: SQLCurrentColumn, hint?: StamhoofdCompareValue): SQLCurrentColumn {
+    if (column.type === SQLValueType.JSONString || (column.type === SQLValueType.JSONScalar && typeof hint === 'string')) {
         return {
             expression: new SQLJsonValue(column.expression, 'CHAR'),
             type: SQLValueType.String,
@@ -253,7 +257,15 @@ export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
         };
     }
 
-    if (column.type === SQLValueType.JSONBoolean) {
+    if (column.type === SQLValueType.JSONNumber || (column.type === SQLValueType.JSONScalar && typeof hint === 'number')) {
+        return {
+            expression: new SQLJsonValue(column.expression, 'SIGNED'),
+            type: SQLValueType.Number,
+            nullable: column.nullable,
+        };
+    }
+
+    if (column.type === SQLValueType.JSONBoolean || (column.type === SQLValueType.JSONScalar && typeof hint === 'boolean')) {
         return {
             expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
             type: SQLValueType.Boolean,
@@ -261,12 +273,5 @@ export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
         };
     }
 
-    if (column.type === SQLValueType.JSONNumber) {
-        return {
-            expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
-            type: SQLValueType.Number,
-            nullable: column.nullable,
-        };
-    }
     return column;
 }

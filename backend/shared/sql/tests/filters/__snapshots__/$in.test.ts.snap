@@ -8,7 +8,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
       "other",
     ],
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IN (?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IN (?)",
 }
 `;
 
@@ -21,7 +21,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
       "other",
     ],
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) IN (?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IN (?)",
 }
 `;
 
@@ -30,7 +30,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
   "params": [
     "apple",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
 }
 `;
 
@@ -327,5 +327,133 @@ exports[`$in JSON Including null will also check on key existence for json array
     "["apple"]",
   ],
   "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_OVERLAPS(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.randomValues"),?)",
+}
+`;
+
+exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for filter: {"settings.scalar":{"$in":["Hello world"]}} 1`] = `
+{
+  "params": [
+    "hello world",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for filter: {"settings.scalar":{"$in":["hello world"]}} 1`] = `
+{
+  "params": [
+    "hello world",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+}
+`;
+
+exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for not match filter: {"settings.scalar":{"$in":["hello","world"]}} 1`] = `
+{
+  "params": [
+    [
+      "hello",
+      "world",
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IN (?)",
+}
+`;
+
+exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for not match filter: {"settings.scalar":{"$in":[null]}} 1`] = `
+{
+  "params": [],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
+}
+`;
+
+exports[`$in JSON scalars Can compare with null: SQL Query for filter: {"settings.scalar":{"$in":[5,6,7,null]}} 1`] = `
+{
+  "params": [
+    [
+      5,
+      6,
+      7,
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IS NULL OR JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IN (?)",
+}
+`;
+
+exports[`$in JSON scalars Can compare with null: SQL Query for filter: {"settings.scalar":{"$in":[null,5,6,7]}} 1`] = `
+{
+  "params": [
+    [
+      5,
+      6,
+      7,
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IS NULL OR JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IN (?)",
+}
+`;
+
+exports[`$in JSON scalars Can compare with null: SQL Query for not match filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
+{
+  "params": [
+    [
+      5,
+      6,
+      7,
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IN (?)",
+}
+`;
+
+exports[`$in JSON scalars Can compare with number scalars: SQL Query for filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
+{
+  "params": [
+    [
+      5,
+      6,
+      7,
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IN (?)",
+}
+`;
+
+exports[`$in JSON scalars Can compare with number scalars: SQL Query for not match filter: {"settings.scalar":{"$in":[4,6,7]}} 1`] = `
+{
+  "params": [
+    [
+      4,
+      6,
+      7,
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IN (?)",
+}
+`;
+
+exports[`$in JSON scalars Converts column to first provided value type (number): SQL Query for filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
+{
+  "params": [
+    [
+      5,
+      6,
+      7,
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IN (?)",
+}
+`;
+
+exports[`$in JSON scalars Converts column to first provided value type (number): SQL Query for not match filter: {"settings.scalar":{"$in":[-5,-6,-7]}} 1`] = `
+{
+  "params": [
+    [
+      -5,
+      -6,
+      -7,
+    ],
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING SIGNED NULL ON ERROR) IN (?)",
 }
 `;

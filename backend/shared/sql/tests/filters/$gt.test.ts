@@ -107,7 +107,7 @@ describe('$gt', () => {
             },
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) > ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?',
                 params: ['alice'],
             },
         });
@@ -476,6 +476,190 @@ describe('$gt', () => {
                     {
                         name: {
                             $gt: null,
+                        },
+                    },
+                ],
+            });
+        });
+    });
+
+    describe('JSON scalars', () => {
+        const tableDefinition: TableDefinition = {
+            settings: {
+                type: 'json',
+                nullable: true,
+            },
+        };
+        const filters = {
+            ...baseSQLFilterCompilers,
+            'settings.scalar': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true }),
+        };
+
+        it('Can compare with number scalars', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 5,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: 4,
+                        },
+                    },
+                    {
+                        'settings.scalar': {
+                            $gt: -4,
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: 5,
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Ignores null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: null,
+                        },
+                    },
+                    {
+                        settings: {
+                            other: 6,
+                        },
+                    },
+                    {
+                        settings: null,
+                    },
+                ],
+                doMatch: [],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: 5,
+                        },
+                    },
+                    {
+                        'settings.scalar': {
+                            $gt: -1,
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Ignores string values that cannot convert to numbers', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: '15a',
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: 'a15',
+                        },
+                    },
+                ],
+                doMatch: [],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: 5,
+                        },
+                    },
+                    {
+                        'settings.scalar': {
+                            $gt: -1,
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Mathes string values that can convert to numbers', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: '15',
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: '015',
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: -1,
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: 15,
+                        },
+                    },
+                    {
+                        'settings.scalar': {
+                            $gt: 16,
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Matches booleans', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: false,
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: true,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: -1,
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $gt: 1,
                         },
                     },
                 ],

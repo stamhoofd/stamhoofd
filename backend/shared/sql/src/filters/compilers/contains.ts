@@ -8,8 +8,9 @@ import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
 
 export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
     return (originalColumn: SQLCurrentColumn) => {
-        const column = normalizeColumn(originalColumn);
-        const value = normalizeCompareValue(assertFilterCompareValue(filter), column.type);
+        const v = assertFilterCompareValue(filter);
+        const column = normalizeColumn(originalColumn, v);
+        const value = normalizeCompareValue(v, column.type);
 
         if (typeof value !== 'string') {
             throw new SimpleError({

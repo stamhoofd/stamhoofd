@@ -617,4 +617,195 @@ describe('$in', () => {
             });
         });
     });
+
+    describe('JSON scalars', () => {
+        const tableDefinition: TableDefinition = {
+            settings: {
+                type: 'json',
+                nullable: true,
+            },
+        };
+        const filters = {
+            ...baseSQLFilterCompilers,
+            'settings.scalar': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true }),
+        };
+
+        it('Can compare with number scalars', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 5,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: [5, 6, 7],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: [4, 6, 7],
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Can compare case insensitive with string scalars', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 'Hello world',
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: ['hello world'],
+                        },
+                    },
+                    {
+                        'settings.scalar': {
+                            $in: ['Hello world'],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: ['hello', 'world'],
+                        },
+                    },
+                    {
+                        'settings.scalar': {
+                            $in: [null],
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Can compare with null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: null,
+                        },
+                    },
+                    {
+                        settings: {
+                            other: 5,
+                        },
+                    },
+                    {
+                        settings: null,
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: [5, 6, 7, null],
+                        },
+                    },
+                    {
+                        'settings.scalar': {
+                            // regression: when first
+                            $in: [null, 5, 6, 7],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: [5, 6, 7],
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Converts column to first provided value type (number)', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: '5',
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: '6',
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: '07',
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: [5, 6, 7],
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': {
+                            $in: [-5, -6, -7],
+                        },
+                    },
+                ],
+            });
+        });
+
+        it('Throws when mixing types', async () => {
+            await testError({
+                filter: {
+                    'settings.scalar': {
+                        $in: [18, 'hello'],
+                    },
+                },
+                filters,
+                error: 'Cannot compare a string with a non-string column',
+            });
+
+            await testError({
+                filter: {
+                    'settings.scalar': {
+                        $in: [18, '17'],
+                    },
+                },
+                filters,
+                error: 'Cannot compare a string with a non-string column',
+            });
+
+            await testError({
+                filter: {
+                    'settings.scalar': {
+                        $in: ['hello', 18],
+                    },
+                },
+                filters,
+                error: 'Cannot compare a number with a non-number column',
+            });
+        });
+    });
 });

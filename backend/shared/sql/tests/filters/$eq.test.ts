@@ -439,7 +439,50 @@ describe('$eq', () => {
             'settings': createColumnFilter({ expression: SQL.column('settings'), type: SQLValueType.JSONObject, nullable: true }),
             'settings.enabled': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.enabled'), type: SQLValueType.JSONBoolean, nullable: true }),
             'settings.age': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
+
+            'settings.scalar': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true }),
         };
+
+        it('JSON scalars match case insensitive and whole string', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 'John Doe',
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': 'John Doe',
+                    },
+                    {
+                        'settings.scalar': {
+                            $eq: 'John Doe',
+                        },
+                    },
+                    {
+                        'settings.scalar': 'john doe',
+                    },
+                    {
+                        'settings.scalar': 'jOhn dOe',
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 'Jane Doe',
+                    },
+                    {
+                        'settings.scalar': 'John',
+                    },
+                    {
+                        'settings.scalar': 'john',
+                    },
+                ],
+            });
+        });
 
         it('JSON strings match case insensitive and whole string', async () => {
             await testMatch({
@@ -694,6 +737,9 @@ describe('$eq', () => {
                         'settings.enabled': false,
                     },
                     {
+                        'settings.enabled': 0,
+                    },
+                    {
                         'settings.enabled': null,
                     },
                 ],
@@ -720,6 +766,9 @@ describe('$eq', () => {
                 doNotMatch: [
                     {
                         'settings.enabled': true,
+                    },
+                    {
+                        'settings.enabled': 1,
                     },
                     {
                         'settings.enabled': null,
@@ -757,6 +806,120 @@ describe('$eq', () => {
                     },
                     {
                         'settings.enabled': false,
+                    },
+                ],
+            });
+        });
+
+        it('Can check JSON booleans as scalars', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: true,
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: 1,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': true,
+                    },
+                    {
+                        'settings.scalar': 1,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': false,
+                    },
+                    {
+                        'settings.scalar': 0,
+                    },
+                    {
+                        'settings.scalar': null,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: false,
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: 0,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': false,
+                    },
+                    {
+                        'settings.scalar': 0,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': true,
+                    },
+                    {
+                        'settings.scalar': 1,
+                    },
+                    {
+                        'settings.scalar': null,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: null,
+                        },
+                    },
+                    {
+                        settings: {},
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: 'null',
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': null,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': true,
+                    },
+                    {
+                        'settings.scalar': false,
+                    },
+                    {
+                        'settings.scalar': 1,
+                    },
+                    {
+                        'settings.scalar': 0,
                     },
                 ],
             });
@@ -825,7 +988,7 @@ describe('$eq', () => {
                 rows: [
                     {
                         settings: {
-                            enabled: null,
+                            age: null,
                         },
                     },
                     {
@@ -840,15 +1003,107 @@ describe('$eq', () => {
                 ],
                 doMatch: [
                     {
-                        'settings.enabled': null,
+                        'settings.age': null,
                     },
                 ],
                 doNotMatch: [
                     {
-                        'settings.enabled': true,
+                        'settings.age': 1,
                     },
                     {
-                        'settings.enabled': false,
+                        'settings.age': -5,
+                    },
+                ],
+            });
+        });
+
+        it('Can compare JSON numbers as scalars', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 10,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': 10,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 11,
+                    },
+                    {
+                        'settings.scalar': 9,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: null,
+                        },
+                    },
+                    {
+                        settings: { },
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: 'null',
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': null,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 0,
+                    },
+                ],
+            });
+
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: null,
+                        },
+                    },
+                    {
+                        settings: {},
+                    },
+                    {
+                        settings: null,
+                    },
+                    {
+                        settings: 'null',
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': null,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 1,
+                    },
+                    {
+                        'settings.scalar': -5,
                     },
                 ],
             });
@@ -989,6 +1244,40 @@ describe('$eq', () => {
             });
         });
 
+        it('Can differentiate null scalar vs json null when comparing to null', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 0,
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: '',
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: 'null',
+                        },
+                    },
+                    {
+                        settings: {
+                            scalar: false,
+                        },
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': null,
+                    },
+                ],
+            });
+        });
+
         it('can check if a json object column is null', async () => {
             await testMatch({
                 tableDefinition,
@@ -1098,6 +1387,138 @@ describe('$eq', () => {
                         'settings.randomValues': {
                             $neq: null,
                         },
+                    },
+                ],
+            });
+        });
+
+        it('Converts number scalar to string for compare', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 1,
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': '1',
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': '0',
+                    },
+                    {
+                        'settings.scalar': '1 ',
+                    },
+                ],
+            });
+        });
+
+        it('Converts string scalar to number for compare', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: '15',
+                        },
+                    },
+                ],
+                doMatch: [
+                    {
+                        'settings.scalar': 15,
+                    },
+                ],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 14,
+                    },
+                    {
+                        'settings.scalar': 150,
+                    },
+                ],
+            });
+        });
+
+        it('Cannot convert alpabetical string scalar to number for compare', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 'Hello world',
+                        },
+                    },
+                ],
+                doMatch: [],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 0,
+                    },
+                    {
+                        'settings.scalar': false,
+                    },
+                    {
+                        'settings.scalar': null,
+                    },
+                    {
+                        'settings.scalar': 150,
+                    },
+                    {
+                        'settings.scalar': -15,
+                    },
+                ],
+            });
+        });
+
+        it('Cannot convert number scalar to string for compare', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: 150,
+                        },
+                    },
+                ],
+                doMatch: [],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 'Hello world',
+                    },
+                    {
+                        'settings.scalar': null,
+                    },
+                ],
+            });
+        });
+
+        it('Cannot convert boolean scalar to string for compare', async () => {
+            await testMatch({
+                tableDefinition,
+                filters,
+                rows: [
+                    {
+                        settings: {
+                            scalar: false,
+                        },
+                    },
+                ],
+                doMatch: [],
+                doNotMatch: [
+                    {
+                        'settings.scalar': 'Hello world',
+                    },
+                    {
+                        'settings.scalar': null,
                     },
                 ],
             });
