@@ -1218,26 +1218,38 @@ async function loadColumnConfiguration() {
         if (json !== null) {
             const parsed = new ObjectData(JSON.parse(json), { version: Version });
             const decoded = (new VersionBoxDecoder(ColumnConfiguration as Decoder<ColumnConfiguration>).decode(parsed)).data;
+            let valid = true;
 
-            for (const col of reactiveColumns) {
-                const i = decoded.columns.findIndex(c => c.id === col.id);
-                if (i === -1) {
-                    col.enabled = false;
-                }
-                else {
-                    const config = decoded.columns[i];
-                    col.enabled = true;
-                    col.width = config.width;
-                    col.renderWidth = Math.floor(col.width);
-                    col.index = i;
+            for (const d of decoded.columns) {
+                // Invalid config, restore to defaults.
+                const v = !!reactiveColumns.find(c => c.id === d.id);
+                if (!v) {
+                    valid = false;
+                    break;
                 }
             }
 
-            if (decoded.sortColumnId) {
-                const _sort = reactiveColumns.find(c => c.id === decoded.sortColumnId);
-                if (_sort) {
-                    sortBy.value = _sort;
-                    sortDirection.value = decoded.sortDirection ?? SortItemDirection.ASC;
+            if (valid) {
+                for (const col of reactiveColumns) {
+                    const i = decoded.columns.findIndex(c => c.id === col.id);
+                    if (i === -1) {
+                        col.enabled = false;
+                    }
+                    else {
+                        const config = decoded.columns[i];
+                        col.enabled = true;
+                        col.width = config.width;
+                        col.renderWidth = Math.floor(col.width);
+                        col.index = i;
+                    }
+                }
+
+                if (decoded.sortColumnId) {
+                    const _sort = reactiveColumns.find(c => c.id === decoded.sortColumnId);
+                    if (_sort) {
+                        sortBy.value = _sort;
+                        sortDirection.value = decoded.sortDirection ?? SortItemDirection.ASC;
+                    }
                 }
             }
         }
