@@ -311,6 +311,7 @@ function onKey(event: KeyboardEvent) {
 
         + p {
             @extend .style-description;
+            white-space: pre-wrap;
         }
     }
 }
