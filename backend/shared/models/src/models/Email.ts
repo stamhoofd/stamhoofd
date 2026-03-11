@@ -1162,7 +1162,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'organization_not_found',
                     message: 'Organization not found',
-                    human: $t(`f3c6e2b1-2f3a-4e2f-8f7a-1e5f3d3c8e2a`),
+                    human: $t(`Er ging iets mis bij het ophalen van de vereniging`),
                 });
             }
             const platform = await Platform.getSharedPrivateStruct();
