@@ -7,9 +7,9 @@
     "scripts": {
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
         "dev:build": "yarn -s build",
-        "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
         "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
-        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build",
+        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
         "check-types": "vue-tsc --noEmit"
     },
     "files": [
