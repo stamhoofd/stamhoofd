@@ -137,9 +137,6 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                             inlineDynamicImports: true, // This is needed to make sure that the dynamic imports are inlined
                         },
                     },
-                    watch: {
-                        buildDelay: 1000,
-                    },
                     cssCodeSplit: false,
                 }
             : (options.name === 'calculator'
