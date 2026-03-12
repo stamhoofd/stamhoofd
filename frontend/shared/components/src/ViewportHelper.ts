@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 
 export class ViewportHelper {
     static currentVh: number | null = null;
