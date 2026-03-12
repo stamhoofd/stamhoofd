@@ -1,4 +1,4 @@
-import { SessionContext } from '@stamhoofd/networking';
+import { type SessionContext } from '@stamhoofd/networking/SessionContext';
 import { inject, Ref, toRef } from 'vue';
 
 export function useContext(): Ref<SessionContext> {
