@@ -56,12 +56,19 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, GeneralSettingsView, NavigationActions, STErrorsDefault, useAuth, useErrors, useNavigationActions, useOrganization, useUser } from '@stamhoofd/components';
-import { PaymentCustomer, RegisterCheckout } from '@stamhoofd/structures';
+import { PaymentCustomer, type RegisterCheckout, type Checkoutable } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
+import { useAuth } from '#hooks/useAuth';
+import { useErrors } from '#errors/useErrors';
+import { ErrorBox } from '#errors/ErrorBox';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import { NavigationActions, useNavigationActions } from '#types/NavigationActions';
+import { useOrganization } from '#hooks/useOrganization';
+import { useUser } from '#hooks/useUser';
+import GeneralSettingsView from '#organizations/GeneralSettingsView.vue';
 
 const props = defineProps<{
-    checkout: RegisterCheckout;
+    checkout: RegisterCheckout | Checkoutable<unknown>;
     saveHandler: (navigate: NavigationActions) => Promise<void>;
 }>();
 
