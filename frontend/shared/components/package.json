@@ -9,8 +9,7 @@
         ".": "./index.ts",
         "./*": "./src/*.ts",
         "./*.ts": "./src/*.ts",
-        "./*.vue": "./src/*.vue",
-        "./auth/RedirectView.vue": "./src/auth/RedirectView.vue"
+        "./*.vue": "./src/*.vue"
     },
     "imports": {
         "#*.vue": "./src/*.vue",
