@@ -169,7 +169,10 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                 ],
             },
         },
-        optimizeDeps: { exclude: ['fsevents'] },
+        optimizeDeps: {
+            exclude: ['fsevents'],
+            include: ['@stamhoofd/structures'],
+        },
         css: {
             postcss: {
                 plugins: [
