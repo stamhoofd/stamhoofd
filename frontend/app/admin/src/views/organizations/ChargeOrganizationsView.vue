@@ -12,8 +12,8 @@
 import ChargeView from '@stamhoofd/components/views/ChargeView.vue';
 import { StamhoofdFilter } from '@stamhoofd/structures';
 
-defineProps<{ 
-    filter: StamhoofdFilter 
+defineProps<{
+    filter: StamhoofdFilter;
 }>();
 
 function getDescription({ count }: { count: number }) {
