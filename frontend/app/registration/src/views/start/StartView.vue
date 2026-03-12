@@ -162,7 +162,14 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { MemberIcon, QuickActionsBox, Toast, useAddMember, useChooseGroupForMember, useContext, useRegistrationQuickActions, useUser } from '@stamhoofd/components';
+import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
+import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useAddMember } from '@stamhoofd/components/members/hooks/useAddMember.ts';
+import { useChooseGroupForMember } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { useRegistrationQuickActions } from '@stamhoofd/components/quick-actions/hooks/useRegistrationQuickActions.ts';
+import { useUser } from '@stamhoofd/components/hooks/useUser';
 import { downloadDocument } from '@stamhoofd/document-helper';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';

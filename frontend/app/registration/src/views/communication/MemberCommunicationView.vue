@@ -46,7 +46,15 @@
 <script setup lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useEmailFilterBuilders, useInfiniteObjectFetcher, usePositionableSheet, useUserEmailsObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
+import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
+import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+import { useEmailFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
+import { useUserEmailsObjectFetcher } from '@stamhoofd/components/fetchers/useUserEmailsObjectFetcher.ts';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { EmailWithRecipients, isEmptyFilter, LimitedFilteredRequest, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';

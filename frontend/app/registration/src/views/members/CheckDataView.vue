@@ -94,7 +94,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditParentView, MemberIcon, NavigationActions, useEditMember, usePlatformFamilyManager } from '@stamhoofd/components';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
+import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
+import EditParentView from '@stamhoofd/components/members/components/edit/EditParentView.vue';
+import { useEditMember } from '@stamhoofd/components/members/hooks/useEditMember';
+import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager';
 import { useMemberManager } from '@stamhoofd/networking';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';

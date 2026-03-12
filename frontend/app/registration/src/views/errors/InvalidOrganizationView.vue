@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 
 defineProps<{
     errorBox: ErrorBox | null;

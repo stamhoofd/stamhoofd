@@ -36,7 +36,9 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { LoadingViewTransition, Spinner, STNavigationBar } from '@stamhoofd/components';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 
 import { UpdateStatus } from './UpdateStatus';
 

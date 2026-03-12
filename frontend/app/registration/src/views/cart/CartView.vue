@@ -42,7 +42,14 @@
 </template>
 
 <script setup lang="ts">
-import { BalanceItemCartItemRow, ErrorBox, PriceBreakdownBox, RegisterItemRow, startCheckout, useContext, useErrors, useNavigationActions } from '@stamhoofd/components';
+import BalanceItemCartItemRow from '@stamhoofd/components/members/components/group/BalanceItemCartItemRow.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
+import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
+import RegisterItemRow from '@stamhoofd/components/members/components/group/RegisterItemRow.vue';
+import { startCheckout } from '@stamhoofd/components/members/checkout/startCheckout.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useMemberManager } from '@stamhoofd/networking';
 import { computed, onActivated, onMounted, ref } from 'vue';
 

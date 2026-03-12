@@ -37,7 +37,20 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, EventView, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useEventUIFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
+import EventView from '@stamhoofd/components/events/EventView.vue';
+import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
+import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
+import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
+import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { useMemberManager } from '@stamhoofd/networking';
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
