@@ -4,7 +4,7 @@ import { RequestResult } from '@simonbackx/simple-networking';
 import { CreateOrganization, NewUser, Organization, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
-import { SessionContext } from './SessionContext';
+import { type SessionContext } from './SessionContext';
 import { SessionManager } from './SessionManager';
 
 export class LoginHelper {

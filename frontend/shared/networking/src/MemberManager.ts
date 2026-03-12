@@ -1,5 +1,6 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { SessionContext, Storage } from '@stamhoofd/networking';
+import { Storage } from './Storage';
+import { SessionContext } from './SessionContext';
 import { BalanceItem, DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
 import { inject, reactive, watch } from 'vue';
 

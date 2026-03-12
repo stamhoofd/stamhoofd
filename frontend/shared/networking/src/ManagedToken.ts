@@ -1,7 +1,7 @@
 import { Request, Server } from '@simonbackx/simple-networking';
 import { Token } from '@stamhoofd/structures';
 
-import { NetworkManager } from './NetworkManager';
+import { waitForNetworkOnline } from './utility/waitForNetworkOnline';
 
 /**
  * A token that can get saved and refreshed
@@ -9,11 +9,11 @@ import { NetworkManager } from './NetworkManager';
 export class ManagedToken {
     token: Token;
     private refreshPromise?: Promise<void>;
-    onChange: () => Promise<void>|void
+    onChange: () => Promise<void> | void;
 
-    constructor(token: Token, onChange: () => Promise<void>|void) {
+    constructor(token: Token, onChange: () => Promise<void> | void) {
         this.token = token;
-        this.onChange = onChange
+        this.onChange = onChange;
     }
 
     /**
@@ -21,26 +21,26 @@ export class ManagedToken {
      */
     private async doRefresh(server: Server): Promise<void> {
         const result = await server.request({
-            method: "POST",
-            path: "/oauth/token",
+            method: 'POST',
+            path: '/oauth/token',
             body: {
-                grant_type: "refresh_token",
-                refresh_token: this.token.refreshToken
+                grant_type: 'refresh_token',
+                refresh_token: this.token.refreshToken,
             },
             decoder: Token,
-            shouldRetry: false
-        })
+            shouldRetry: false,
+        });
 
-        this.token = result.data
-        await this.onChange()
+        this.token = result.data;
+        await this.onChange();
     }
 
     needsRefresh(): boolean {
-        return this.token.needsRefresh()
+        return this.token.needsRefresh();
     }
 
     isRefreshing(): boolean {
-        return this.refreshPromise !== undefined
+        return this.refreshPromise !== undefined;
     }
 
     /**
@@ -50,30 +50,32 @@ export class ManagedToken {
     async refresh(server: Server, shouldRetry?: () => boolean): Promise<void> {
         try {
             if (this.refreshPromise) {
-                return this.refreshPromise
+                return this.refreshPromise;
             }
 
             try {
-                this.refreshPromise = this.doRefresh(server)
-                await this.refreshPromise
-            } finally {
-                this.refreshPromise = undefined
+                this.refreshPromise = this.doRefresh(server);
+                await this.refreshPromise;
             }
-        } catch (e) {
+            finally {
+                this.refreshPromise = undefined;
+            }
+        }
+        catch (e) {
             if (shouldRetry && Request.isNetworkError(e)) {
-                const should = shouldRetry()
+                const should = shouldRetry();
                 if (!should) {
                     throw e;
                 }
-                console.log("Retry token refresh due to network error")
-                await NetworkManager.networkOnlinePromise(7000)
+                console.log('Retry token refresh due to network error');
+                await waitForNetworkOnline(7000);
 
                 // Check again, the value could have changed
-                const should2 = shouldRetry()
+                const should2 = shouldRetry();
                 if (!should2) {
                     throw e;
                 }
-                return await this.refresh(server, shouldRetry)
+                return await this.refresh(server, shouldRetry);
             }
             throw e;
         }

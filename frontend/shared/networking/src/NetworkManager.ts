@@ -6,6 +6,7 @@ import { Version } from '@stamhoofd/structures';
 
 import { AppManager } from './AppManager';
 import { UrlHelper } from './UrlHelper';
+import { waitForNetworkOnline } from './utility/waitForNetworkOnline';
 
 export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -57,27 +58,6 @@ export class NetworkManagerStatic implements RequestMiddleware {
         return Promise.resolve();
     }
 
-    /**
-     * Wait 10 seconds or shorter if the network becomes online in those 10 seconds
-     */
-    networkOnlinePromise(timeout = 10000): Promise<void> {
-        return new Promise((resolve) => {
-            let resolved = false;
-            const listener = function () {
-                if (resolved) {
-                    return;
-                }
-                resolved = true;
-
-                // Self reference to always remote the listener
-                window.removeEventListener('online', listener);
-                resolve();
-            };
-            window.addEventListener('online', listener);
-            setTimeout(listener, timeout);
-        });
-    }
-
     async shouldRetryNetworkError(request: Request<any>, error: Error): Promise<boolean> {
         console.error('network error', error);
         if (!(request as any).isRetrying) {
@@ -97,7 +77,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
         }
         else {
             // Wait for network or 10 seconds (the fastest one)
-            await this.networkOnlinePromise(10000);
+            await waitForNetworkOnline(10000);
             return Promise.resolve(true);
         }
     }

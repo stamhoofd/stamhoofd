@@ -1,16 +1,15 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking';
-import { Toast } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { LoginProviderType, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
-
-import { SessionManager, UrlHelper } from '..';
 import { ContextPermissions } from './ContextPermissions';
 import { ManagedToken } from './ManagedToken';
 import { NetworkManager } from './NetworkManager';
-import { Storage } from './Storage';
 import { QueueHandler } from './QueueHandler';
+import { Storage } from './Storage';
+import { UrlHelper } from './UrlHelper';
 
 type AuthenticationStateListener = (changed: 'user' | 'organization' | 'token' | 'preventComplete') => void;
 
@@ -955,8 +954,8 @@ export class SessionContext implements RequestMiddleware {
     async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
         if ((error.hasCode('invalid_organization') || error.hasCode('archived')) && this.organization) {
             // Clear from session storage
-            await SessionManager.removeOrganizationFromStorage(this.organization.id);
             this.setLoadingError(error);
+            this.callListeners('organization');
             window.location.reload();
             return false;
         }

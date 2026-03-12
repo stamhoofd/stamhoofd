@@ -7,7 +7,7 @@ import { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
 import { isReactive } from 'vue';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Toast } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -210,7 +210,12 @@ export class SessionManagerStatic {
 
         session.addListener(this, (changed: 'user' | 'organization' | 'token' | 'preventComplete') => {
             if (session.organization) {
-                this.addOrganizationToStorage(session.organization).catch(console.error);
+                if (session.loadingError && (isSimpleErrors(session.loadingError) || isSimpleError(session.loadingError)) && (session.loadingError.hasCode('invalid_organization') || session.loadingError.hasCode('archived'))) {
+                    this.removeOrganizationFromStorage(session.organization.id).catch(console.error);
+                }
+                else {
+                    this.addOrganizationToStorage(session.organization).catch(console.error);
+                }
             }
             this.callListeners(changed);
         });

@@ -1,4 +1,4 @@
-import { SessionContext } from './SessionContext';
+import { type SessionContext } from './SessionContext';
 
 // TODO: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
 type PermissionState = 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied';
