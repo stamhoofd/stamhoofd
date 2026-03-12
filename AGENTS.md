@@ -20,8 +20,11 @@ yarn dev:stamhoofd  # Start all services in development mode for stamhoofd (orga
 yarn dev:keeo       # Start all services in development mode for keeo (platform mode)
 
 # Building
-yarn build:shared         # Build all shared packages
+yarn build:shared         # Build all shared packages except frontend packages (frontend shared packages are not compiled separately but together with app)
 yarn build:global:shared  # Build global shared packages only
+
+# Frontend type checking
+yarn frontend:types
 ```
 
 ### Single Test Execution
