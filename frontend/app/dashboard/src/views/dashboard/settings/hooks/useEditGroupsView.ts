@@ -2,7 +2,8 @@ import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, OrganizationTypeHelper } from '@stamhoofd/structures';
 
-import { PromiseComponent, useOrganization } from '@stamhoofd/components';
+import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useLoadRecentPeriods, usePatchOrganizationPeriods } from '@stamhoofd/networking';
 import EditCategoryGroupsView from '../../groups/EditCategoryGroupsView.vue';
 

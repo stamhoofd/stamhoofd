@@ -32,7 +32,8 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem } from '@stamhoofd/components';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Sponsor, SponsorConfig } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

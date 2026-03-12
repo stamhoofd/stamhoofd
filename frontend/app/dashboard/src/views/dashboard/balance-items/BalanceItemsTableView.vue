@@ -8,7 +8,16 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, EditBalanceItemView, getBalanceItemsUIFilterBuilders, GlobalEventBus, ModernTableView, useBalanceItemsFetcher, useContext, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
+import EditBalanceItemView from '@stamhoofd/components/payments/EditBalanceItemView.vue';
+import { getBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanceItemsObjectFetcher.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

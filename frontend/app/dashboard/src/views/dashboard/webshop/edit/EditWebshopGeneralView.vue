@@ -161,7 +161,18 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Checkbox, DateSelection, NumberInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, useContext } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

@@ -1,5 +1,11 @@
 import { ComponentWithProperties, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ForgotPasswordResetView, GlobalEventBus, NavigationActions, PaymentPendingView, RegistrationSuccessView, useContext } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import ForgotPasswordResetView from '@stamhoofd/components/auth/ForgotPasswordResetView.vue';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import PaymentPendingView from '@stamhoofd/components/views/PaymentPendingView.vue';
+import RegistrationSuccessView from '@stamhoofd/components/members/checkout/RegistrationSuccessView.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
 
 let didCheckGlobalRoutes = false;

@@ -158,7 +158,27 @@
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CartItemRow, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, FillRecordCategoryBox, PaymentSelectionList, PhoneInput, PriceBreakdownBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
+import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
+import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
+import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
+import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
+import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager } from '@stamhoofd/networking';
 import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PatchAnswers, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, ValidatedAddress, Version, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';

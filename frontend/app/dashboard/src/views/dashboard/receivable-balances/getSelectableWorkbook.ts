@@ -1,4 +1,4 @@
-import { useFeatureFlag } from '@stamhoofd/components';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';

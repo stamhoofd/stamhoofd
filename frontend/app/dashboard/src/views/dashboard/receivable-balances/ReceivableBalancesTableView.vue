@@ -8,7 +8,19 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, EmailView, getCachedOutstandingBalanceUIFilterBuilders, GlobalEventBus, ModernTableView, ReceivableBalanceView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, useFeatureFlag, useOrganization, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
+import EmailView, { type RecipientChooseOneOption, type RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
+import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import ReceivableBalanceView from '@stamhoofd/components/payments/ReceivableBalanceView.vue';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetchers/useReceivableBalancesObjectFetcher.ts';
+import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';

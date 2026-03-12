@@ -115,7 +115,19 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, GeneralSettingsView, RadioListItem, CategorizedView, useAuth, useErrors, usePatch, useRequiredOrganization, PaymentCustomerSelectionBox, CategorizedBox, useContext, Toast } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+import RadioListItem from '@stamhoofd/components/inputs/RadioListItem.vue';
+import CategorizedView from '@stamhoofd/components/layout/categorized-view/CategorizedView.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import PaymentCustomerSelectionBox from '@stamhoofd/components/payments/components/PaymentCustomerSelectionBox.vue';
+import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Company, Invoice, PaymentCustomer } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';

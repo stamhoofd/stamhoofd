@@ -30,7 +30,8 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { STErrorsDefault, useErrors } from '@stamhoofd/components';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { ref } from 'vue';
 import { ImportError } from '../../../../../classes/import/ImportError';
 

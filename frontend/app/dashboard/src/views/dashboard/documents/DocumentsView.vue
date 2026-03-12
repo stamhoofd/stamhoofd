@@ -18,7 +18,13 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, getDocumentsUIFilterBuilders, ModernTableView, UIFilterBuilders, useContext, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { getDocumentsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 

@@ -36,7 +36,16 @@ import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonb
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, ErrorBox, FileInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import FileInput from '@stamhoofd/components/inputs/FileInput.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { File, Organization, OrganizationMetaData, Version } from '@stamhoofd/structures';
 
 @Component({

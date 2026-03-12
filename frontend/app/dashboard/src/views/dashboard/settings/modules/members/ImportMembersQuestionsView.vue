@@ -180,7 +180,20 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { Dropdown, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { getGenderName, Group, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

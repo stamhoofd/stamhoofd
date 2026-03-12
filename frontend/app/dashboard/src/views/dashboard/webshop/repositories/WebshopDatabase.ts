@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Toast } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Version } from '@stamhoofd/structures';
 import { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 

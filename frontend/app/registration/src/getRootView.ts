@@ -1,6 +1,11 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
-import { AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseView, TabBarController, TabBarItem } from '@stamhoofd/components';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
+import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
+import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { getNonAutoLoginRoot, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking';

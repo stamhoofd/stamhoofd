@@ -44,7 +44,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
-import { Checkbox, STList, STListItem } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';

@@ -379,7 +379,24 @@
 </template>
 
 <script lang="ts" setup>
-import { AdminsView, BundleDiscountSettingsView, EditEmailTemplatesView, EditRegistrationPeriodsView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
+import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
+import BundleDiscountSettingsView from '@stamhoofd/components/bundle-discounts/BundleDiscountSettingsView.vue';
+import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
+import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
+import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
+import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.ts';
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';

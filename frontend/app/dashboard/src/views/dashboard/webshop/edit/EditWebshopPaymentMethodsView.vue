@@ -11,7 +11,9 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SaveView, STErrorsDefault, useOrganization } from '@stamhoofd/components';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

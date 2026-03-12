@@ -101,7 +101,17 @@
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, STErrorsDefault, STInputBox, useErrors, useMembersObjectFetcher, usePlatform, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembersObjectFetcher.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { Address, LimitedFilteredRequest, OrganizationRegistrationPeriod, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { computed, Ref, ref, watch } from 'vue';

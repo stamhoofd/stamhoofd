@@ -80,7 +80,18 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, MultipleChoiceInput, NumberInput, SaveView, STErrorsDefault, STList, STListItem, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import MultipleChoiceInput from '@stamhoofd/components/inputs/MultipleChoiceInput.vue';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { BalanceNotificationSettings, FilterWrapperMarker, OrganizationPrivateMetaData, unwrapFilter } from '@stamhoofd/structures';
 
 import { useTranslate } from '@stamhoofd/frontend-i18n';

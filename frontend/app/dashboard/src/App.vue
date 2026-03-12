@@ -9,7 +9,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
-import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
+import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';

@@ -32,7 +32,15 @@
 </template>
 
 <script setup lang="ts">
-import { useAppContext, useEditMember, ViewMemberAccountsBox, ViewMemberActionsBox, ViewMemberEmergencyContactsBox, ViewMemberGeneralBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox } from '@stamhoofd/components';
+import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
+import { useEditMember } from '@stamhoofd/components/members/hooks/useEditMember.ts';
+import ViewMemberAccountsBox from '@stamhoofd/components/members/components/view/ViewMemberAccountsBox.vue';
+import ViewMemberActionsBox from '@stamhoofd/components/members/components/view/ViewMemberActionsBox.vue';
+import ViewMemberEmergencyContactsBox from '@stamhoofd/components/members/components/view/ViewMemberEmergencyContactsBox.vue';
+import ViewMemberGeneralBox from '@stamhoofd/components/members/components/view/ViewMemberGeneralBox.vue';
+import ViewMemberParentsBox from '@stamhoofd/components/members/components/view/ViewMemberParentsBox.vue';
+import ViewMemberRecordCategoriesBox from '@stamhoofd/components/members/components/view/ViewMemberRecordCategoriesBox.vue';
+import ViewMemberRegistrationsBox from '@stamhoofd/components/members/components/view/ViewMemberRegistrationsBox.vue';
 import { Gender, PlatformMember } from '@stamhoofd/structures';
 
 const props = defineProps<{

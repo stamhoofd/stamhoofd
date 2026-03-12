@@ -139,7 +139,13 @@
 </template>
 
 <script lang="ts" setup>
-import { PriceBreakdownBox, STErrorsDefault, STList, STListItem, STNavigationBar, useBackForward, useErrors } from '@stamhoofd/components';
+import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { Invoice, InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import { Sorter } from '@stamhoofd/utility';

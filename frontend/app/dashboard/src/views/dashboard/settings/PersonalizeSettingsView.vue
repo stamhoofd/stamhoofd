@@ -99,7 +99,15 @@ import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContains
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, SaveView, STErrorsDefault, Toast, Validator } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { Image, Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 
 import DNSRecordsView from './DNSRecordsView.vue';

@@ -104,7 +104,16 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, MembersTableView, RegistrationsTableView, STErrorsDefault, STList, STListItem, STNavigationBar, useErrors } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 

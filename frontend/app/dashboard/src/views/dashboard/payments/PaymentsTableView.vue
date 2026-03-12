@@ -7,7 +7,14 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, ComponentExposed, getPaymentsUIFilterBuilders, ModernTableView, PaymentView, useFeatureFlag, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
+import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import PaymentView from '@stamhoofd/components/payments/PaymentView.vue';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { usePaymentsObjectFetcher } from '@stamhoofd/components/fetchers/usePaymentsObjectFetcher.ts';
+import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref } from 'vue';

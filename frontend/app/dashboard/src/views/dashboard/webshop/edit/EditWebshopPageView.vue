@@ -146,7 +146,23 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, ColorInput, DetailedTicketView, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, UploadButton, useAuth, useFeatureFlag, useOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
+import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
 import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

@@ -30,7 +30,11 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { EmailInput, getInvalidEmailDescription as getInvalidEmailDescriptionHelper, SaveView, STErrorsDefault, useContext } from '@stamhoofd/components';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import { getInvalidEmailDescription as getInvalidEmailDescriptionHelper } from '@stamhoofd/components/helpers/getInvalidEmailDescription.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import { useOrganizationManager } from '@stamhoofd/networking';

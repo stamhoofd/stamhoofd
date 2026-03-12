@@ -44,7 +44,14 @@
 </template>
 
 <script lang="ts" setup>
-import { CompanyInputBox, EmailInput, ErrorBox, PhoneInput, RadioListItem, STInputBox, useEmitPatch, Validator } from '@stamhoofd/components';
+import CompanyInputBox from '@stamhoofd/components/organizations/components/CompanyInputBox.vue';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
+import RadioListItem from '@stamhoofd/components/inputs/RadioListItem.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { useEmitPatch } from '@stamhoofd/components/hooks/useEmitPatch.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { Company, PaymentCustomer } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

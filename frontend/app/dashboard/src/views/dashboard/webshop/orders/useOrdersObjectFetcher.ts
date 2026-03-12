@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ObjectFetcher } from '@stamhoofd/components';
+import { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';

@@ -14,7 +14,8 @@
 
 <script lang="ts" setup>
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { SaveView, STErrorsDefault } from '@stamhoofd/components';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { PrivateWebshop, WebshopField, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

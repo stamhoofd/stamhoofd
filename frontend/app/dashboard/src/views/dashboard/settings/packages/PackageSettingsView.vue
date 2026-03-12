@@ -90,7 +90,12 @@
 
 <script lang="ts" setup>
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, IconContainer, Toast, useContext, useErrors, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { PackageCheckout, PackagePurchases, PaymentMethod, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from '@stamhoofd/structures';

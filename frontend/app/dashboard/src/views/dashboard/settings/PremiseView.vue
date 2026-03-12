@@ -57,7 +57,11 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { AddressInput, SaveView, useEditPopup, useErrors, usePlatform } from '@stamhoofd/components';
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { useEditPopup } from '@stamhoofd/components/hooks/useEditPopup.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformPremiseType, Premise } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

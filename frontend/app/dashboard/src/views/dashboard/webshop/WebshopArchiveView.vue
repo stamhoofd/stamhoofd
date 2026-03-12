@@ -23,7 +23,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
-import { LoadComponent, STList, STListItem, STNavigationBar, useOrganization } from '@stamhoofd/components';
+import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';

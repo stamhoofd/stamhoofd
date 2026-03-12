@@ -89,7 +89,18 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, useAuth, useDraggableArrayIds, useErrors, usePatchArray } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useDraggableArrayIds } from '@stamhoofd/components/hooks/useDraggableArray.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
 import { computed, getCurrentInstance, ref } from 'vue';

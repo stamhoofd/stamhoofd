@@ -39,7 +39,12 @@
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { GroupAvatar, Spinner, STList, STListItem, STNavigationBar, Toast } from '@stamhoofd/components';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

@@ -28,7 +28,14 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, TooltipDirective } from '@stamhoofd/components';
+import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
 
 @Component({
     components: {

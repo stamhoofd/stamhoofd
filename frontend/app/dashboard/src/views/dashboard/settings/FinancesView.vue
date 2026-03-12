@@ -163,7 +163,13 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingViewTransition, PayableBalanceCollectionView, useAuth, useContext, useErrors, useOrganization } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import PayableBalanceCollectionView from '@stamhoofd/components/payments/PayableBalanceCollectionView.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, BalanceItem, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';

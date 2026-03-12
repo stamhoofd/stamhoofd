@@ -16,7 +16,8 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem } from '@stamhoofd/components';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 
 defineProps<{
     title: string;

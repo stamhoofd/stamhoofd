@@ -1,6 +1,7 @@
 import { ArrayDecoder, Decoder, ObjectData, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EventBus, fetchAll, ObjectFetcher } from '@stamhoofd/components';
+import { EventBus } from '@stamhoofd/components/EventBus.ts';
+import { fetchAll, ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { SessionContext } from '@stamhoofd/networking';
 import { compileToInMemoryFilter, CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';

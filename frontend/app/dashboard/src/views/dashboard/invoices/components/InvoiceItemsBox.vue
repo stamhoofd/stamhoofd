@@ -43,7 +43,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { IconContainer, PriceBreakdownBox, STGrid, STGridItem, usePositionableSheet } from '@stamhoofd/components';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
+import STGrid from '@stamhoofd/components/layout/STGrid.vue';
+import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import { Invoice } from '@stamhoofd/structures';
 import { default as InvoiceVATDetailsBox } from './InvoiceVATDetailsBox.vue';
 

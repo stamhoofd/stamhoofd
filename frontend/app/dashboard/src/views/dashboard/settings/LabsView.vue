@@ -162,7 +162,18 @@ import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-err
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, Checkbox, ErrorBox, InputSheet, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import InputSheet from '@stamhoofd/components/overlays/InputSheet.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

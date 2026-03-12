@@ -63,7 +63,19 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { InfiniteObjectFetcherEnd, ScrollableSegmentedControl, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useDocumentTemplatesObjectFetcher, useGlobalEventListener, useInfiniteObjectFetcher, usePositionableSheet, useRequiredOrganization } from '@stamhoofd/components';
+import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
+import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
+import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
+import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
+import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { DocumentTemplatePrivate, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 

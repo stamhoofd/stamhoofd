@@ -422,7 +422,23 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, Dropdown, NavigationActions, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, useFeatureFlag, usePatch, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
 import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';

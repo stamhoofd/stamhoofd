@@ -68,7 +68,19 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, ImageComponent, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, UrlInput, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
+import UrlInput from '@stamhoofd/components/inputs/UrlInput.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { Image, ResolutionRequest, Sponsor } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

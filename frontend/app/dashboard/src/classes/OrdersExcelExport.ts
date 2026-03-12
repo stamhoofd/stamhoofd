@@ -1,4 +1,4 @@
-import { Toast } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { AppManager } from '@stamhoofd/networking';
 import { CartItem, CartItemOption, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

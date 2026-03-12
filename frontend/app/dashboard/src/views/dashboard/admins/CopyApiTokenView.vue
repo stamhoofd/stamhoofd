@@ -39,7 +39,10 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, STInputBox, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { ApiUserWithToken } from '@stamhoofd/structures';
 
 @Component({

@@ -111,7 +111,14 @@
 import { ref, computed } from 'vue';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { OrganizationMetaData, UitpasOrganizerResponse, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasEventResponse } from '@stamhoofd/structures';
-import { NavigationActions, SearchUitpasOrganizerView, SetUitpasClientCredentialsView, IconContainer, ProgressIcon, usePatch, SearchUitpasEventView, useNavigationActions } from '@stamhoofd/components';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import SearchUitpasOrganizerView from '@stamhoofd/components/organizations/components/SearchUitpasOrganizerView.vue';
+import SetUitpasClientCredentialsView from '@stamhoofd/components/organizations/components/SetUitpasClientCredentialsView.vue';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import ProgressIcon from '@stamhoofd/components/icons/ProgressIcon.vue';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import SearchUitpasEventView from '@stamhoofd/components/organizations/components/SearchUitpasEventView.vue';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { I18nComponent } from '@stamhoofd/frontend-i18n';
 

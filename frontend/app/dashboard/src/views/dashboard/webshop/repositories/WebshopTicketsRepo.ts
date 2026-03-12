@@ -1,7 +1,8 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { EventBus, fetchAll, ObjectFetcher } from '@stamhoofd/components';
+import { EventBus } from '@stamhoofd/components/EventBus.ts';
+import { fetchAll, ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { SessionContext } from '@stamhoofd/networking';
 import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version } from '@stamhoofd/structures';
 import { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';

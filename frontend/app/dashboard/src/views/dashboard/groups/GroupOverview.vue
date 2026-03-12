@@ -208,7 +208,25 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, GlobalEventBus, MemberCountSpan, MembersTableView, PromiseView, RegistrationsTableView, STList, STListItem, STNavigationBar, Toast, useAuth, useContext, useFeatureFlag, useOrganization, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useGetGroups, useGetPeriods, useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, NamedObject, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, PlatformEventType, RegistrationPeriod, RichText, TranslatedString } from '@stamhoofd/structures';
 

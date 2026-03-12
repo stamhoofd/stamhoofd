@@ -18,7 +18,15 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilders, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
+import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
+import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';

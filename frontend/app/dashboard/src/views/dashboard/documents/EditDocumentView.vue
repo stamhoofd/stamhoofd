@@ -27,7 +27,15 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, useContext, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import RecordAnswerInput from '@stamhoofd/components/inputs/RecordAnswerInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Document, DocumentData, DocumentTemplatePrivate, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ComputedRef, ref } from 'vue';

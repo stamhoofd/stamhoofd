@@ -36,7 +36,14 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, FileInput, Radio, RadioGroup, STInputBox, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import FileInput from '@stamhoofd/components/inputs/FileInput.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { File, Policy } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

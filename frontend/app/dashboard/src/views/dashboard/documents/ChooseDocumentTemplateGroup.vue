@@ -90,7 +90,26 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { EventRow, GroupAvatar, InfiniteObjectFetcherEnd, NavigationActions, SegmentedControl, Spinner, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useEventUIFilterBuilders, useInfiniteObjectFetcher, useNavigationActions, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
+import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import SegmentedControl from '@stamhoofd/components/inputs/SegmentedControl.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
+import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
+import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
+import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { DocumentTemplateGroup, Event, Group, GroupType, isEmptyFilter, NamedObject, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { Dropdown } from '@stamhoofd/components';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';

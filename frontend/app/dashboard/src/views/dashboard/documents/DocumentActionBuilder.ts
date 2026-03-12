@@ -1,6 +1,11 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, CenteredMessage, EmailView, InMemoryTableAction, LoadComponent, NavigationActions, RecipientChooseOneOption, TableAction, TableActionSelection, Toast } from '@stamhoofd/components';
+import { AsyncTableAction, InMemoryTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import EmailView, { type RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
+import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { downloadDocuments } from '@stamhoofd/document-helper';
 import { SessionContext } from '@stamhoofd/networking';
 import { DocumentData, DocumentStatus, Document as DocumentStruct, DocumentTemplatePrivate, EmailRecipientFilterType, EmailRecipientSubfilter } from '@stamhoofd/structures';

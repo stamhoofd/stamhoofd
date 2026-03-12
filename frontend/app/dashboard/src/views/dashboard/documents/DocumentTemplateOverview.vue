@@ -160,7 +160,17 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, FillRecordCategoryView, GlobalEventBus, IconContainer, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';

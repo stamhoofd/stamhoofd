@@ -39,7 +39,15 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

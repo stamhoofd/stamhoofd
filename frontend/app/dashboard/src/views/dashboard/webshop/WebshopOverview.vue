@@ -420,7 +420,18 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSettingsView, CenteredMessage, EditEmailTemplatesView, EditResourceRolesView, PromiseView, STList, STListItem, STNavigationBar, Toast, useAuth, useContext, useOrganization } from '@stamhoofd/components';
+import AccountSettingsView from '@stamhoofd/components/views/AccountSettingsView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { AccessRight, EmailTemplate, EmailTemplateType, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';

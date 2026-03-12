@@ -1,6 +1,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, GlobalEventBus, Toast, useContext, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { PermissionLevel, PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { computed, readonly, Ref, ref } from 'vue';

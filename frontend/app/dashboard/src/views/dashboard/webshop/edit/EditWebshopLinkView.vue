@@ -118,7 +118,16 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { Dropdown, PrefixInput, SaveView, Spinner, STErrorsDefault, STInputBox, Toast, Tooltip, useContext, useOrganization } from '@stamhoofd/components';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import PrefixInput from '@stamhoofd/components/inputs/PrefixInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import Tooltip from '@stamhoofd/components/overlays/Tooltip.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 

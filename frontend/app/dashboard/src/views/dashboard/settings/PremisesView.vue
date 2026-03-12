@@ -42,7 +42,18 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, ReviewCheckbox, STErrorsDefault, SaveView, Toast, useCountry, useDraggableArray, useErrors, usePatchArray, usePlatform, useReview } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import ReviewCheckbox from '@stamhoofd/components/ReviewCheckbox.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useCountry } from '@stamhoofd/components/hooks/useCountry.ts';
+import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useReview } from '@stamhoofd/components/useReview.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise, SetupStepType } from '@stamhoofd/structures';

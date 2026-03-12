@@ -1,7 +1,8 @@
 import { STPackage, STPackageType } from '@stamhoofd/structures';
 import { ref, Ref } from 'vue';
 import { useOrganizationPackages } from './useOrganizationPackages';
-import { Toast, useContext } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 
 /**

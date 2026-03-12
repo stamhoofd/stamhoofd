@@ -85,7 +85,15 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, SaveView, Spinner, STErrorsDefault, STList, STListItem, Toast, useContext, usePatchArray } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { Discount, DiscountCode, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 import EditDiscountCodeView from './discounts/EditDiscountCodeView.vue';
 import EditDiscountView from './discounts/EditDiscountView.vue';

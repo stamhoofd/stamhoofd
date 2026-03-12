@@ -83,7 +83,15 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, useBackForward, useContext, useNavigationActions, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
+import type { TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

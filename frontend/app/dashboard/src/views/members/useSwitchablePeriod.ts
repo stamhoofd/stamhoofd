@@ -1,5 +1,10 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, StartNewRegistrationPeriodView, Toast, useOrganization, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import StartNewRegistrationPeriodView from '@stamhoofd/components/periods/StartNewRegistrationPeriodView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';

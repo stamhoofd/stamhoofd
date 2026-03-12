@@ -43,7 +43,12 @@
 </template>
 
 <script lang="ts">
-import { SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton } from '@stamhoofd/components';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import { GroupSettings, Image, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 

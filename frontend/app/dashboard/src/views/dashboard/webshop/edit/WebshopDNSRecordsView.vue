@@ -47,7 +47,14 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, Toast, useContext, useErrors } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { DNSRecordStatus, PrivateWebshop } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';

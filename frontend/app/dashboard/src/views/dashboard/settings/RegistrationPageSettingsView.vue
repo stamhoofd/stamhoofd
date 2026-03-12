@@ -47,7 +47,15 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, LoadingButton, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from '@stamhoofd/components';
+import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import Tooltip from '@stamhoofd/components/overlays/Tooltip.vue';
+import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
 import { OrganizationType } from '@stamhoofd/structures';
 
 @Component({

@@ -41,7 +41,15 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, TooltipDirective } from '@stamhoofd/components';
+import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
 import { Organization, OrganizationDomains } from '@stamhoofd/structures';
 
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';

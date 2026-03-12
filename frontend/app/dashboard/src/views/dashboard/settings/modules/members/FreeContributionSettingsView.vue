@@ -51,7 +51,15 @@ import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonb
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, Checkbox, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
 
 @Component({

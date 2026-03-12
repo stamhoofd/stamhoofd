@@ -1,5 +1,6 @@
 import { Product, ProductPrice } from '@stamhoofd/structures';
-import { CenteredMessage, Toast } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 
 export function useDeleteProductPrice() {

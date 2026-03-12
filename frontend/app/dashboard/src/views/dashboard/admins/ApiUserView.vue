@@ -78,7 +78,15 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EditUserPermissionsBox, ErrorBox, SaveView, Toast, useAuth, useContext, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import EditUserPermissionsBox from '@stamhoofd/components/admins/components/EditUserPermissionsBox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { ApiUser, ApiUserRateLimits, ApiUserWithToken, UserMeta } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import CopyApiTokenView from './CopyApiTokenView.vue';

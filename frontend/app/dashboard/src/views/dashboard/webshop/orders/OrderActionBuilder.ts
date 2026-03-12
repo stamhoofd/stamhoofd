@@ -1,5 +1,10 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { AsyncTableAction, CenteredMessage, EmailView, GlobalEventBus, InMemoryTableAction, LoadComponent, MenuTableAction, RecipientChooseOneOption, TableAction, TableActionSelection, Toast } from '@stamhoofd/components';
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import EmailView, { type RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { OrganizationManager } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from '@stamhoofd/structures';
 

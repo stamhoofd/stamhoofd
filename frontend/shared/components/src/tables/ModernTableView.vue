@@ -157,7 +157,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Component, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from 'vue';
 
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
-import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from './classes';
+import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from '#tables/classes/index.ts';
 import ColumnSelectorContextMenu from './ColumnSelectorContextMenu.vue';
 import ColumnSortingContextMenu from './ColumnSortingContextMenu.vue';
 import { useShallowMap } from './hooks/useShallowMap';
