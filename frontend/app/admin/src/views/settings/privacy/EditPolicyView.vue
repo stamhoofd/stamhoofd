@@ -42,7 +42,14 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ErrorBox, SaveView, UploadFileButton, useErrors, usePatch, WYSIWYGTextInput } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import UploadFileButton from '@stamhoofd/components/inputs/UploadFileButton.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformPolicy } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

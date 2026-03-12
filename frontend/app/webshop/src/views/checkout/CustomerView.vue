@@ -27,7 +27,16 @@
 </template>
 
 <script lang="ts" setup>
-import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, useContext, useErrors, useNavigationActions } from '@stamhoofd/components';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
+import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';

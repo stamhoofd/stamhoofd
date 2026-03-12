@@ -83,7 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import { NumberInput } from '@stamhoofd/components';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { CalculationInput } from './classes/CalculationInput';

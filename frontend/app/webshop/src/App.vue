@@ -10,7 +10,15 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
+import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
+import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { I18nController, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { DarkMode, GetWebshopFromDomainResult, Language } from '@stamhoofd/structures';

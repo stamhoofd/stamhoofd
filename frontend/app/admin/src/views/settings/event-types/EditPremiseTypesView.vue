@@ -10,7 +10,13 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatchArray, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { Platform, PlatformConfig } from '@stamhoofd/structures';

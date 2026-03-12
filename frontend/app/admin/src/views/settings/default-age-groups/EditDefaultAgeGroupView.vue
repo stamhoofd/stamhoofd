@@ -98,7 +98,17 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AgeInput, CenteredMessage, Dropdown, ErrorBox, InheritedRecordsConfigurationBox, NumberInput, SaveView, TagIdsInput, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import AgeInput from '@stamhoofd/components/inputs/AgeInput.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import InheritedRecordsConfigurationBox from '@stamhoofd/components/records/components/InheritedRecordsConfigurationBox.vue';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import TagIdsInput from '@stamhoofd/components/inputs/TagIdsInput.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { DefaultAgeGroup, OrganizationRecordsConfiguration, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

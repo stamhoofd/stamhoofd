@@ -42,7 +42,10 @@
 
 <script lang="ts" setup>
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem, STNavigationBar, usePlatform } from '@stamhoofd/components';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { OrganizationTag, OrganizationTagType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';

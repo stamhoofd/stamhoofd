@@ -7,7 +7,10 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CenteredMessageView, ModalStackEventBus, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
+import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
+import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 
 import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import CalculatorView from './CalculatorView.vue';

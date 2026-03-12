@@ -1,5 +1,13 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuditLogsView, AuthenticatedView, CommunicationView, ManageEventsView, manualFeatureFlag, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
+import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
+import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
+import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
+import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';

@@ -77,7 +77,15 @@
 <script lang="ts" setup>
 import { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CheckboxListItem, ErrorBox, LoginMethodConfigView, Toast, useErrors, useIsRootAdmin, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import LoginMethodConfigView from '@stamhoofd/components/auth/LoginMethodConfigView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useIsRootAdmin } from '@stamhoofd/components/hooks/useIsRootAdmin.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';

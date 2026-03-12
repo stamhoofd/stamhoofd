@@ -2,7 +2,8 @@ import { BundleInfo, CapacitorUpdater } from '@capgo/capacitor-updater';
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ModalStackEventBus, Toast, ToastButton } from '@stamhoofd/components';
+import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
+import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import { Storage, UpdateOptions } from '@stamhoofd/networking';
 import { sleep } from '@stamhoofd/utility';
 

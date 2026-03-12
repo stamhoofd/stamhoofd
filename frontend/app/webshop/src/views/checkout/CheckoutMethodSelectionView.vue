@@ -29,7 +29,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';

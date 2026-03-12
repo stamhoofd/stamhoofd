@@ -29,7 +29,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, Logo, STErrorsDefault } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import Logo from '@stamhoofd/components/icons/Logo.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 
 withDefaults(defineProps<{
     errorBox: ErrorBox | null;

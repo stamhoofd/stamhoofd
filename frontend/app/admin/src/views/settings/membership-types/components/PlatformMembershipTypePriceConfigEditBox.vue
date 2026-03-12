@@ -53,7 +53,12 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { DateSelection, ErrorBox, OrganizationTagSelectorView, PriceInput, useEmitPatch, Validator } from '@stamhoofd/components';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import OrganizationTagSelectorView from '@stamhoofd/components/organizations/OrganizationTagSelectorView.vue';
+import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import { useEmitPatch } from '@stamhoofd/components/hooks/useEmitPatch.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { OrganizationTag, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import PlatformMembershipTypeReduceablePriceEditRow from './PlatformMembershipTypeReduceablePriceEditRow.vue';

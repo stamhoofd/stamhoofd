@@ -36,7 +36,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { CheckoutMethodType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 

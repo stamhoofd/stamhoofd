@@ -90,7 +90,20 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, ImageInput, LogoEditor, NumberInput, STInputBox, Toast, UploadButton, useErrors, usePatch, usePlatform, WYSIWYGTextInput } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
+import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
+import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { DarkMode, Image, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';

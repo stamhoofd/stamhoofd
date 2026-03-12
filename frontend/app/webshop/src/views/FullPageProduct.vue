@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { CartItemView } from '@stamhoofd/components';
+import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
 import { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 

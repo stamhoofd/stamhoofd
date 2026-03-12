@@ -83,7 +83,17 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, DefaultAgeGroupIdsInput, Dropdown, ErrorBox, JumpToContainer, SaveView, TagIdsInput, Toast, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import DefaultAgeGroupIdsInput from '@stamhoofd/components/inputs/DefaultAgeGroupIdsInput.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import JumpToContainer from '@stamhoofd/components/containers/JumpToContainer.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import TagIdsInput from '@stamhoofd/components/inputs/TagIdsInput.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

@@ -47,7 +47,8 @@
 
 <script setup lang="ts">
 import { Route, defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
-import { useAuth, usePlatform } from '@stamhoofd/components';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useCollapsed } from '@stamhoofd/dashboard/src/hooks/useCollapsed';
 import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

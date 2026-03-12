@@ -37,7 +37,12 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, NumberInput, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformPremiseType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

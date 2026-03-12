@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import { Organization, RecordCategory } from '@stamhoofd/structures';
 
 defineProps<{

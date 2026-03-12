@@ -4,7 +4,8 @@
 // Load icon font
 import 'virtual:vite-svg-2-webfont.css';
 
-import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
+import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
+import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
 import { createApp } from 'vue';

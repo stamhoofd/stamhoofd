@@ -25,7 +25,12 @@
 </template>
 
 <script lang="ts" setup>
-import { AddressInput, ErrorBox, SaveView, STErrorsDefault, useErrors, useNavigationActions } from '@stamhoofd/components';
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

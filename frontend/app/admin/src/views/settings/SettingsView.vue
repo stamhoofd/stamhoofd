@@ -391,7 +391,17 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditRegistrationPeriodsView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
+import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
+import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
+import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
+import EditResponsibilitiesView from '@stamhoofd/components/responsibilities/EditResponsibilitiesView.vue';
+import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
+import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
+import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
+import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';

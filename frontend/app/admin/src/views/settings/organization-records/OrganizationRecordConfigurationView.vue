@@ -19,7 +19,15 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, getOrganizationUIFilterBuildersForTags, RecordEditorSettings, RecordEditorType, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { getOrganizationUIFilterBuildersForTags } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Address, Country, Organization, OrganizationLevelRecordsConfiguration, OrganizationPrivateMetaData, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

@@ -1,5 +1,5 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ColorHelper } from '@stamhoofd/components';
+import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { NetworkManager, SessionContext } from '@stamhoofd/networking';
 import { DarkMode, Platform, Webshop } from '@stamhoofd/structures';
 

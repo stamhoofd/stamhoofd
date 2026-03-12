@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePlatform } from '@stamhoofd/components';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { Organization } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ViewOrganizationRecordCategoryBox from './ViewOrganizationRecordCategoryBox.vue';

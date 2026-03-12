@@ -35,7 +35,11 @@
 </template>
 
 <script lang="ts" setup>
-import { LoadingViewTransition, MetaKey, OrganizationLogo, STNavigationBar, useContext, useMetaInfo } from '@stamhoofd/components';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
+import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { UrlHelper } from '@stamhoofd/networking';
 import { LoginProviderType } from '@stamhoofd/structures';
 

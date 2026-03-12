@@ -21,7 +21,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { DetailedTicketView, STListItem } from '@stamhoofd/components';
+import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Order, Organization, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

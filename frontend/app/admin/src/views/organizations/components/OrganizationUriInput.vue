@@ -26,7 +26,12 @@
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ErrorBox, PrefixInput, Spinner, Validator, useErrors, useValidation } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import PrefixInput from '@stamhoofd/components/inputs/PrefixInput.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { ref, watch } from 'vue';

@@ -65,7 +65,19 @@
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, type useDismiss, type usePopup, usePresent } from '@simonbackx/vue-app-navigation';
-import { CategoryBox, CenteredMessage, GlobalEventBus, injectCustomCode, LegalFooter, MetaKey, NavigationActions, OrganizationLogo, PaymentPendingView, ProductGrid, STNavigationBar, Toast, useContext, useMetaInfo } from '@stamhoofd/components';
+import CategoryBox from '@stamhoofd/components/views/CategoryBox.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { injectCustomCode } from '@stamhoofd/components/helpers/injectCustomCode.ts';
+import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
+import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
+import PaymentPendingView from '@stamhoofd/components/views/PaymentPendingView.vue';
+import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, LoginProviderType, Payment, PaymentStatus } from '@stamhoofd/structures';
 

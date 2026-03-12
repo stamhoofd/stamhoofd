@@ -339,7 +339,21 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, setUrl, usePop, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
-import { CartItemRow, CenteredMessage, DetailedTicketView, LoadingViewTransition, Logo, OrganizationLogo, PriceBreakdownBox, STList, STListItem, STNavigationBar, STToolbar, Spinner, Toast, TransferPaymentView, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import Logo from '@stamhoofd/components/icons/Logo.vue';
+import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
+import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import TransferPaymentView from '@stamhoofd/components/views/TransferPaymentView.vue';
+import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import { Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Ref, computed, onMounted, ref, watch } from 'vue';
 

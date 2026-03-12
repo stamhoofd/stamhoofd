@@ -21,7 +21,15 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, EmailView, ModernTableView, TableAction, TableActionSelection, useEventNotificationBackendFilterBuilders, useEventNotificationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
+import EmailView from '@stamhoofd/components/email/EmailView.vue';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { useEventNotificationBackendFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useEventNotificationsObjectFetcher } from '@stamhoofd/components/fetchers/useEventNotificationsObjectFetcher.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { EventNotificationViewModel } from '@stamhoofd/components/event-notifications/classes/EventNotificationViewModel.ts';
 import EventNotificationView from '@stamhoofd/components/event-notifications/EventNotificationView.vue';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';

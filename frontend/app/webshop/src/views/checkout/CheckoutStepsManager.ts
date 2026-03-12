@@ -1,6 +1,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, Toast } from '@stamhoofd/components';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '@stamhoofd/components';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 
 const auth = useAuth();
 </script>

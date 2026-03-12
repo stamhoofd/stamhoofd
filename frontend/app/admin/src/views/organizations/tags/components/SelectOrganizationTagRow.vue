@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useEmitPatch } from '@stamhoofd/components';
+import { useEmitPatch } from '@stamhoofd/components/hooks/useEmitPatch.ts';
 import { Organization, OrganizationMetaData, OrganizationTag } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

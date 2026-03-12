@@ -58,7 +58,18 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EditRecordCategoriesBox, ErrorBox, EventTypeIdsInput, MultipleChoiceInput, RecordEditorSettings, RecordEditorType, SaveView, useCountry, useErrors, useEventNotificationInMemoryFilterBuilders, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import EventTypeIdsInput from '@stamhoofd/components/inputs/EventTypeIdsInput.vue';
+import MultipleChoiceInput from '@stamhoofd/components/inputs/MultipleChoiceInput.vue';
+import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { useCountry } from '@stamhoofd/components/hooks/useCountry.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useEventNotificationInMemoryFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

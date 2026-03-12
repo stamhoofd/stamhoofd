@@ -81,7 +81,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { NumberInput, PriceInput } from '@stamhoofd/components';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import CalculationOutputBox from './CalculationOutputBox.vue';

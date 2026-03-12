@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController } from '@simonbackx/vue-app-navigation';
-import { AuthenticatedView } from '@stamhoofd/components';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import { SessionContext } from '@stamhoofd/networking';
 import { Webshop, WebshopAuthType } from '@stamhoofd/structures';
 

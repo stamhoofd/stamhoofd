@@ -25,7 +25,15 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, useNavigationController, usePopup, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, NavigationActions, PaymentHandler, PaymentSelectionList, SaveView, STErrorsDefault, Toast, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler.ts';
+import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 

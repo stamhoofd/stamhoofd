@@ -52,7 +52,12 @@
 </template>
 
 <script lang="ts" setup>
-import { LegalFooter, MetaKey, OrganizationLogo, STList, STListItem, STNavigationBar, useMetaInfo } from '@stamhoofd/components';
+import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
+import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
+import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Organization, WebshopPreview } from '@stamhoofd/structures';
 
 const props = defineProps<{

@@ -1,7 +1,7 @@
 // import 'core-js/stable'; // only needed for entry or 'false' useBuiltIns
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
-import { VueGlobalHelper } from '@stamhoofd/components';
+import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { AppManager } from '@stamhoofd/networking';
 import { defineCustomElement } from 'vue';
 

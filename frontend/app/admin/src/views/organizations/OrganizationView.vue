@@ -183,7 +183,15 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useBackForward, useContext, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
+import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { appToUri, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

@@ -22,7 +22,9 @@
 
 <script setup lang="ts">
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
-import { MembersTableView, RegistrationsTableView, usePlatform } from '@stamhoofd/components';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 
 enum Routes {
     Members = 'members',

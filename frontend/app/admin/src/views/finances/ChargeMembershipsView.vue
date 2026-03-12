@@ -271,7 +271,17 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, ErrorBox, LoadingViewTransition, OrganizationAvatar, Toast, useContext, useErrors, useExternalOrganization, useInterval, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import OrganizationAvatar from '@stamhoofd/components/context/OrganizationAvatar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useExternalOrganization } from '@stamhoofd/components/groups/hooks/useExternalOrganization.ts';
+import { useInterval } from '@stamhoofd/components/hooks/useInterval.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { appToUri, ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, onActivated, Ref, ref } from 'vue';

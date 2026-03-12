@@ -24,7 +24,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Logo, MetaKey, useMetaInfo } from '@stamhoofd/components';
+import Logo from '@stamhoofd/components/icons/Logo.vue';
+import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
 
 const props = defineProps<{
     location: string;

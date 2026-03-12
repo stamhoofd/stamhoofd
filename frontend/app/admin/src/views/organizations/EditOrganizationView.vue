@@ -62,7 +62,17 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, CheckboxListItem, ErrorBox, FillRecordCategoryBox, JumpToContainer, UrlInput, useAuth, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
+import JumpToContainer from '@stamhoofd/components/containers/JumpToContainer.vue';
+import UrlInput from '@stamhoofd/components/inputs/UrlInput.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTag, PatchAnswers, TagHelper } from '@stamhoofd/structures';
