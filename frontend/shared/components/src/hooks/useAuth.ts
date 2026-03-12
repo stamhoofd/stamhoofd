@@ -1,7 +1,7 @@
-import { ContextPermissions } from "@stamhoofd/networking";
-import { useContext } from "./useContext";
+import { ContextPermissions } from '@stamhoofd/networking';
+import { useContext } from '#hooks/useContext';
 
 export function useAuth(): ContextPermissions {
-    const context = useContext()
+    const context = useContext();
     return context.value.auth;
 }
