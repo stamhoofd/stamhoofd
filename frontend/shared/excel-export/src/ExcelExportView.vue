@@ -40,7 +40,12 @@
 <script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { DataSelector, ErrorBox, ScrollableSegmentedControl, Toast, ToastButton, useContext, useErrors } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import DataSelector from '@stamhoofd/components/export/DataSelector.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
+import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
+import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast';
 import { AppManager, Storage } from '@stamhoofd/networking';
 import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelWorkbookFilter, LimitedFilteredRequest, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
