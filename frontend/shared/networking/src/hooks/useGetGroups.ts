@@ -1,5 +1,5 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { Group, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { useRequestOwner } from './useRequestOwner';
