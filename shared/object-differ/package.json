@@ -22,7 +22,6 @@
         "build": "yarn -s build-cjs && yarn -s build-esm",
         "build-cjs": "tsc -p . --declaration",
         "build-esm": "cd esm && tsc -p . --declaration",
-        "test": "jest",
         "lint": "eslint"
     },
     "devDependencies": {

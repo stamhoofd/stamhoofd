@@ -25,7 +25,6 @@
     ],
     "scripts": {
         "build": " tsc -b . esm",
-        "test": "jest",
         "lint": "eslint ."
     },
     "publishConfig": {

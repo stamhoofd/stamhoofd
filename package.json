@@ -20,6 +20,7 @@
   },
   "license": "AGPL-3.0-only",
   "scripts": {
+    "dev:build": "yarn -s build:shared && STAMHOOFD_ENV=stamhoofd lerna run dev:build",
     "dev:watch-env": "npx nodemon --quiet --signal SIGTERM --watch shared/build-development-env --ignore './shared/build-development-env/dist/' --ignore './shared/build-development-env/esm/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s dev || exit 0'",
     "dev:watch-env:full": "npx nodemon --quiet --signal SIGTERM --watch shared/build-development-env --ignore './shared/build-development-env/dist/' --ignore './shared/build-development-env/esm/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s dev:full || exit 0'",
     "dev": "concurrently -r 'yarn -s dev:init' 'yarn -s build:shared:watch' 'wait-on shared/locales/esm/dist/index.d.ts && lerna run dev --stream --parallel'",
@@ -32,7 +33,7 @@
     "dev:jambo": "STAMHOOFD_ENV=jambo yarn -s dev:watch-env",
     "dev:init": "wait-on shared/build-development-env/dist/src/init.js && node shared/build-development-env/dist/src/init.js",
     "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
-    "test": "lerna run test -- --passWithNoTests",
+    "test": "lerna run test",
     "test:playwright": "yarn -s build:shared && cd backend/app/api && yarn build && cd ../../.. && cd tests/playwright && yarn -s test",
     "lint": "lerna run lint",
     "vitest": "NODE_ENV=test vitest",

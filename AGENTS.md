@@ -1,95 +1,11 @@
 # AGENTS.md
 
-Consult the documentation pages relevant for your tasks before starting.
-
-https://www.notion.so/Getting-started-20cc403f36798075b190c84c2c21d1ec
-
 ## Project Overview
 
-Stamhoofd is a monorepo with:
+Stamhoofd is a yarn monorepo with:
 - **Backend**: Node.js + TypeScript with custom routing (not Express)
 - **Frontend**: Vue.js 3 + TypeScript + Vite + Capacitor (mobile)
-- **Shared**: Common packages (structures, utility, locales, etc.)
-
-## Build Commands
-
-### Root Commands
-```bash
-yarn install        # Install all dependencies
-yarn dev:stamhoofd  # Start all services in development mode for stamhoofd (organization mode - no shared members and users)
-yarn dev:keeo       # Start all services in development mode for keeo (platform mode)
-
-# Building
-yarn build:shared         # Build all shared packages except frontend packages (frontend shared packages are not compiled separately but together with app)
-yarn build:global:shared  # Build global shared packages only
-
-# Frontend type checking
-yarn frontend:types
-```
-
-### Single Test Execution
-
-```bash
-# From package root (e.g., backend/app/api, shared/structures)
-yarn test --testPathPattern="FileName.test"
-yarn test --testNamePattern="test name"
-```
-
-### Linting
-Use eslint, and do lint and fix all files that are altered. You should ignore linting errors that take a long time or many files to fix and were already present before the change.
-
----
-
-## Code Style Guidelines
-
-### General Rules
-- **Indentation**: 4 spaces (not tabs)
-- **Quotes**: Single quotes, except when avoiding escape (`"it's"`)
-- **Semicolons**: Always required
-- **Line length**: No hard limit, but prefer shorter lines
-
-### ESLint Configuration
-
-### TypeScript Conventions
-
-1. **Always use explicit types** for function parameters and return types
-2. **Use `strict: true`** in tsconfig (enabled by default)
-3. **Avoid `any`** - use `unknown` when type is truly unknown
-4. **Use interfaces** for object shapes, types for unions/intersections
-5. **Mark properties as nullable** with `| null` not `undefined`
-
-### Naming Conventions
-- **Classes**: PascalCase (`MemberDetails`, `InvoiceItem`)
-- **Functions/variables**: camelCase (`getUser`, `decodeData`)
-- **Constants**: UPPER_SNAKE_CASE for compile-time constants
-- **Files**: kebab-case (`member-details.ts`, `my-component.vue`)
-- **Tests**: `*.test.ts` pattern
-
-### Imports
-
-- Avoid creating new, extending or referencing barrel files
-- Use #foldername/file.vue to import a file from the same package located higher in the folder tree.
-- Use @stamhoofd/package-name/foldername/file.vue to import a dependencies from other packages (note: the 'src' folder is skipped in the path and file extensions only required for vue, not ts*)
-    
-    *Add this to package.json of a package if missing, when using these imports.
-    ```
-    "exports": {
-        ".": "./index.ts",
-        "./*": "./src/*.ts",
-        "./*.ts": "./src/*.ts",
-        "./*.vue": "./src/*.vue"
-    },
-    "imports": {
-        "#*.vue": "./src/*.vue",
-        "#*.ts": "./src/*.ts",
-        "#*": "./src/*.ts"
-    }
-    ```
-- Add `.js` extension when importing `.ts` files.
-
----
-
-## Project Structure
+- **Shared**: Common packages
 
 ```
 stamhoofd/
@@ -120,7 +36,78 @@ stamhoofd/
     └── playwright/       # E2E tests
 ```
 
+## Rules
+
+- Always list all pages in the documentation in Notion (https://www.notion.so/Getting-started-20cc403f36798075b190c84c2c21d1ec
+) and read the ones relevant for your goal/project.
+- Refer to the documentation if something is unclear, do not guess. Ask if not present in the documentation.
+- Never change package.json files. Avoid it, you are probably on the wrong track if you think this is required.
+- When making changes in frontend apps: run `yarn frontend:types` periodically. 
+- When making changes in frontend shared packages: run `yarn frontend:types` periodically.
+- When making changes in backend apps: run `yarn dev:build --scope @stamhoofd/<backend package name>` (e.g. `yarn dev:build --scope @stamhoofd/backend-backup`) periodically. Fix any errors.
+- When making changes in shared packages (global or backend): build the package periodically. When also adjusting dependencies make sure to run `yarn build:shared` instead.
+- Validation flow: Run when ready with your project or goal (start over every time when changes were made):
+    - run `yarn dev:build` to build the whole project and fix any build errors first.
+    - run `yarn lint` to report linting errors and fix them
+    - run `yarn test --ignore @stamhoofd/playwright` to run all tests project wide except Playwright tests
+    - run `yarn test --scope @stamhoofd/playwright` to run only the Playwright tests only when everything else succeeded.
+
+### Commands
+```bash
+yarn install        # Install all dependencies
+yarn dev:build      # Builds everything: all dependencies and all backends and frontends
+
+# Single app (examples, replace with package you need to build)
+yarn dev:build --scope @stamhoofd/backend    # Builds the api backend
+yarn dev:build --scope @stamhoofd/dashboard    # Builds the dashboard frontend
+
+# Building
+yarn build:shared         # Build all shared packages that require building
+yarn build:global:shared  # Build global shared packages only (no backend shared packages)
+
+# Frontend type checking
+yarn frontend:types
+```
+
+Run tests of individual packages using:
+
+```bash
+cd backend/app/api
+yarn test --testPathPatterns="GetGroupsEndpoint.test.js"
+yarn test --testNamePattern="test name"
+```
+
+---
+
+## Code Style Guidelines
+
+### General Rules
+- **Indentation**: 4 spaces (not tabs)
+- **Quotes**: Single quotes, except when avoiding escape (`"it's"`)
+- **Semicolons**: Always required
+
+### Naming Conventions
+- **Classes**: PascalCase (`MemberDetails`, `InvoiceItem`)
+- **Functions/variables**: camelCase (`getUser`, `decodeData`)
+- **Vue Components**: PascalCase (`HelloWorldView.vue`)
+    - For componentst that are views add the 'View' suffix. Refer to https://www.notion.so/Views-and-navigation-Vue-App-Navigation-20cc403f367980219dede4fb44a4251f
+- **Tests**: `*.test.ts` pattern
+
+### Localization
+- When inserting user facing strings, use `$t('Hallo wereld')` and `$t('Welkom {firstName},', {firstName: user.firstName})`. Always create user facing strings in Dutch. 
+- Our build system will replace all strings with `$t('%ABC')` (don't do this yourself). You can look up the translation in `shared/locales/src/nl.json` if you want to know what the %XYZ means you come across.
+- SimpleError.message should be in English and not translated using $t
+- SimpleError.human should use $t.
+
+### Imports
+
+- Avoid creating new, extending or referencing barrel files
+- Use #foldername/file.vue to import a file from the same package located higher in the folder tree.
+- Use @stamhoofd/package-name/foldername/file.vue to import a dependencies from other packages (note: the 'src' folder is skipped in the path and file extensions only required for vue, not ts*)
+- Add `.js` extension when importing `.ts` files.
+
+---
+
 ## Common Issues
 
 1. **Build errors**: Run `yarn build:shared` after modifying shared packages
-2. **Import errors**: Check that shared packages are built
