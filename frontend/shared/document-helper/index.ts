@@ -1,7 +1,9 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { Toast } from '@stamhoofd/components';
-import { AppManager, NetworkManager, SessionContext } from '@stamhoofd/networking';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Document } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
