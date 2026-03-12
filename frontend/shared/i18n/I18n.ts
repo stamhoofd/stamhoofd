@@ -1,4 +1,4 @@
-import { Country, CountryCode } from '@stamhoofd/structures';
+import { Country, type CountryCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { App } from 'vue';
 

@@ -1,4 +1,4 @@
-import { I18nController } from '.';
+import { I18nController } from './I18nController';
 import { appToUri } from '@stamhoofd/structures';
 
 export class LocalizedDomains {

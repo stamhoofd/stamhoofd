@@ -4,5 +4,16 @@
     "private": true,
     "main": "index.ts",
     "sideEffects": false,
-    "type": "module"
+    "type": "module",
+    "exports": {
+        ".": "./index.ts",
+        "./*": "./src/*.ts",
+        "./*.ts": "./src/*.ts",
+        "./*.vue": "./src/*.vue"
+    },
+    "imports": {
+        "#*.vue": "./src/*.vue",
+        "#*.ts": "./src/*.ts",
+        "#*": "./src/*.ts"
+    }
 }

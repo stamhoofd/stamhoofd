@@ -1,5 +1,5 @@
 // I18n.ts
-import { computed, defineComponent, h, VNode } from 'vue';
+import { computed, defineComponent, h } from 'vue';
 
 type ParsedPart =
     | { type: 'text'; content: string }
