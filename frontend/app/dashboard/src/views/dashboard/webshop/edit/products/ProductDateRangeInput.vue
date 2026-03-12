@@ -17,7 +17,13 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { DateSelection, ErrorBox, STInputBox, TimeInput, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { ProductDateRange } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

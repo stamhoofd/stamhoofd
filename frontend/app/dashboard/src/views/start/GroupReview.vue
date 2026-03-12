@@ -23,7 +23,10 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupIconWithWaitingList, STListItemGrid, STListItemGridRow, usePlatform } from '@stamhoofd/components';
+import GroupIconWithWaitingList from '@stamhoofd/components/members/components/group/GroupIconWithWaitingList.vue';
+import STListItemGrid from '@stamhoofd/components/layout/STListItemGrid.vue';
+import STListItemGridRow from '@stamhoofd/components/layout/STListItemGridRow.vue';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { Group, GroupGenderType, GroupStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';

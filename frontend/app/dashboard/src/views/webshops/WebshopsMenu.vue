@@ -45,7 +45,8 @@
 
 <script setup lang="ts">
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
-import { useAuth, useOrganization } from '@stamhoofd/components';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import {
     AccessRight,
     PrivateWebshop,

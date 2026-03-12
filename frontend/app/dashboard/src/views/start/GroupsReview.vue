@@ -21,7 +21,11 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditGroupView, PromiseView, Toast, useAuth, useOrganization } from '@stamhoofd/components';
+import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { Group, GroupStatus, OrganizationRegistrationPeriod, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';

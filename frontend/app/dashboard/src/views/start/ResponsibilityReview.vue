@@ -38,7 +38,11 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupIcon, IconContainer, ProgressIcon, STListItem, useMemberActions } from '@stamhoofd/components';
+import GroupIcon from '@stamhoofd/components/members/components/group/GroupIcon.vue';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import ProgressIcon from '@stamhoofd/components/icons/ProgressIcon.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { useMemberActions } from '@stamhoofd/components/members/classes/MemberActionBuilder.ts';
 import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

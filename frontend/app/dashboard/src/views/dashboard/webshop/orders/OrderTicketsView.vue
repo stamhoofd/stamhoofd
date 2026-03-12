@@ -26,7 +26,10 @@
 </template>
 
 <script lang="ts" setup>
-import { STList, STNavigationBar, STToolbar, useOrganization } from '@stamhoofd/components';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

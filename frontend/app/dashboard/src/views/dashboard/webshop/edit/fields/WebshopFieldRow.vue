@@ -15,7 +15,7 @@
 <script lang="ts" setup>
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { STListItem } from '@stamhoofd/components';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { WebshopField } from '@stamhoofd/structures';
 
 import EditWebshopFieldView from './EditWebshopFieldView.vue';

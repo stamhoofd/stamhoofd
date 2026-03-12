@@ -8,7 +8,7 @@
 
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { STList } from '@stamhoofd/components';
+import STList from '@stamhoofd/components/layout/STList.vue';
 import { WebshopField } from '@stamhoofd/structures';
 
 import WebshopFieldRow from './WebshopFieldRow.vue';

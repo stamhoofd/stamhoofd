@@ -27,7 +27,8 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, STListItem } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 
 import EditProductPriceView from './EditProductPriceView.vue';

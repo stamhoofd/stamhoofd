@@ -19,7 +19,9 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, VersionBox } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, Toast, useIsMac } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useIsMac } from '@stamhoofd/components/hooks/useIsMac.ts';
 import { Option, OptionMenu, Product, Version } from '@stamhoofd/structures';
 
 import { ref, watch } from 'vue';

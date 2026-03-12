@@ -42,7 +42,10 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { LoadingButton, STList, STListItem, useContext } from '@stamhoofd/components';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';

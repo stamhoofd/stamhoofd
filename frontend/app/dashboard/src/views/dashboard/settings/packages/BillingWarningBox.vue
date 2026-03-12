@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useOrganization } from '@stamhoofd/components';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { STPackageBundle } from '@stamhoofd/structures';
 
 const props = withDefaults(

@@ -369,7 +369,19 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncPaymentView, CartItemRow, ColorHelper, EditPaymentView, GlobalEventBus, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, useAuth, useContext, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
+import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
+import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
+import EditPaymentView from '@stamhoofd/components/payments/EditPaymentView.vue';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
+import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
 import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

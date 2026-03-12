@@ -45,7 +45,9 @@
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
-import { Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager, PluginListenerHandle } from '@stamhoofd/networking';
 import { Order, OrderStatus, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';

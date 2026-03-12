@@ -36,7 +36,13 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, LoadingViewTransition, SeatSelectionBox, STNavigationBar, Toast, useAuth, useIsMobile } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import SeatSelectionBox from '@stamhoofd/components/views/SeatSelectionBox.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import { PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';

@@ -30,7 +30,12 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { LoadingViewTransition, useAuth, useContext, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';

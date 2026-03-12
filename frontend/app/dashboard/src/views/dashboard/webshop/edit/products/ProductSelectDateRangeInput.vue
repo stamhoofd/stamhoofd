@@ -29,7 +29,14 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, Radio, STErrorsDefault, STList, STListItem, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { ProductDateRange } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

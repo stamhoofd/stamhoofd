@@ -11,7 +11,10 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ReviewCheckbox, useOrganization, useReview, useSetupStepTranslations } from '@stamhoofd/components';
+import ReviewCheckbox from '@stamhoofd/components/ReviewCheckbox.vue';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { useReview } from '@stamhoofd/components/useReview.ts';
+import { useSetupStepTranslations } from '@stamhoofd/components/hooks/useSetupStepTranslations.ts';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

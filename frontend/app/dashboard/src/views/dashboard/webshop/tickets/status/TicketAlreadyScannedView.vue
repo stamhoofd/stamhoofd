@@ -50,7 +50,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, useShow } from '@simonbackx/vue-app-navigation';
-import { ColorHelper, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { PrivateOrder, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

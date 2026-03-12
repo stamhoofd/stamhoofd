@@ -75,7 +75,14 @@
 <script setup lang="ts">
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import { GroupAvatar, MembersTableView, PromiseComponent, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useLoadRecentPeriods, useOrganizationManager, usePatchOrganizationPeriods } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

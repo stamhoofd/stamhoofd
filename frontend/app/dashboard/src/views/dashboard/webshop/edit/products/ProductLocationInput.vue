@@ -9,7 +9,12 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput, ErrorBox, STInputBox, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { Address, ProductLocation } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

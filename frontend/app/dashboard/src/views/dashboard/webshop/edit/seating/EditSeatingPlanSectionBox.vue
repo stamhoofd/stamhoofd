@@ -80,7 +80,13 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ContextMenu, ContextMenuItem, ErrorBox, STErrorsDefault, useErrors, useIsMobile, useValidation, Validator } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings, SeatType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';

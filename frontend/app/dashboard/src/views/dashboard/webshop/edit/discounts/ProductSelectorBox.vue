@@ -66,7 +66,16 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInputBox, STList, STListItem, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { Option, OptionMenu, OptionSelectionRequirement, OptionSelectionRequirementHelper, PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ChooseProductView from './ChooseProductView.vue';

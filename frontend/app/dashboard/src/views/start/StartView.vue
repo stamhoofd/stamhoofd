@@ -34,7 +34,9 @@
 </template>
 
 <script setup lang="ts">
-import { QuickActionsBox, useAuth, useRequiredOrganization } from '@stamhoofd/components';
+import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useDashboardQuickActions } from '@stamhoofd/components/quick-actions/hooks/useDashboardQuickActions.ts';
 import SetupStepsView from './SetupStepsView.vue';
 

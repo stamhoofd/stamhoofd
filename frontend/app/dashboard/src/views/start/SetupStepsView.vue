@@ -24,7 +24,14 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EmailSettingsView, GeneralSettingsView, GlobalEventBus, SetupStepRows, TransitionFade, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
+import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
+import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';
+import TransitionFade from '@stamhoofd/components/transitions/TransitionFade.vue';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed, onActivated, ref } from 'vue';

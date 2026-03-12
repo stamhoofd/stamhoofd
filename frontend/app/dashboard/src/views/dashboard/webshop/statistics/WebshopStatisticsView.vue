@@ -73,7 +73,14 @@
 </template>
 
 <script lang="ts" setup>
-import { DateOption, GraphView, STInputBox, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
+import { DateOption } from '@stamhoofd/components/views/DateRange.ts';
+import GraphView from '@stamhoofd/components/views/GraphView.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
 import { AppManager } from '@stamhoofd/networking';
 import { Category, Graph, GraphData, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';

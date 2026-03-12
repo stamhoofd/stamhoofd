@@ -81,7 +81,17 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, ObjectData, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, LoadingButton, Radio, SaveView, STErrorsDefault, STList, STListItem, Toast, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, WebshopMetaData } from '@stamhoofd/structures';
 import { sleep, Sorter } from '@stamhoofd/utility';
 

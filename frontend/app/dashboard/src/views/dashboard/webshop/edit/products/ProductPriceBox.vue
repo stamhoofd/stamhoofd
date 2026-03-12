@@ -105,7 +105,18 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, useFeatureFlag, LoadingInputBox, NavigationActions } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import LoadingInputBox from '@stamhoofd/components/navigation/LoadingInputBox.vue';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/uitpas/useGetOfficialUitpasSocialTariff.ts';

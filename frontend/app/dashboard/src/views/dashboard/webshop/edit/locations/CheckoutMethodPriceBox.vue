@@ -22,7 +22,10 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, PriceInput, STInputBox } from '@stamhoofd/components';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { CheckoutMethodPrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

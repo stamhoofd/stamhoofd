@@ -19,7 +19,8 @@
 </template>
 
 <script lang="ts" setup>
-import { useCountry, usePlatform } from '@stamhoofd/components';
+import { useCountry } from '@stamhoofd/components/hooks/useCountry.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CountryHelper, Premise } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';

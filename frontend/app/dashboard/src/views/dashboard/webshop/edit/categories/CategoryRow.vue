@@ -24,7 +24,9 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, STListItem } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Category, PrivateWebshop } from '@stamhoofd/structures';
 
 import EditCategoryView from './EditCategoryView.vue';

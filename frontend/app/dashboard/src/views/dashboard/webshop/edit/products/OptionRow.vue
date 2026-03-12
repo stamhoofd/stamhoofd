@@ -26,7 +26,11 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Radio, STListItem } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Option, OptionMenu } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
