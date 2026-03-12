@@ -148,7 +148,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, UIFilter, UIFilterBuilders, useDeviceWidth, useIsIOS, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { BackButton, Checkbox, STButtonToolbar, STNavigationBar, Toast, useDeviceWidth, useIsIOS, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { UIFilter, UIFilterBuilders } from '#filters/UIFilter';
 import { Storage } from '@stamhoofd/networking';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
