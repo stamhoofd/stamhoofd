@@ -56,7 +56,8 @@
     "translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn start",
     "frontend:types": "wait-on shared/locales/esm/dist/index.d.ts && cd frontend/app/dashboard && yarn -s check-types",
     "prepare": "husky",
-    "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
+    "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
+    "install-vscode-extensions": "code --install-extension ./.vscode/extensions/vue.volar-2.2.10.vsix --force"
   },
   "dependencies": {
     "@simonbackx/simple-encoding": "2.23.1",
@@ -122,7 +123,7 @@
     "vite-svg-2-webfont": "^4.0.0",
     "vitest": "^3.2.4",
     "vitest-browser-vue": "^1.0.0",
-    "vue-tsc": "^2.0.14",
+    "vue-tsc": "2.2.10",
     "wait-on": "^8.0.3"
   },
   "resolutions": {
