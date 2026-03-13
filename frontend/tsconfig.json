@@ -24,7 +24,16 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "strictPropertyInitialization": false,
-        "noImplicitAny": false
+        "noImplicitAny": false,
+        "paths": {
+            // There is an issue in vue-tsc that it resolves *.vue files through node_modules, while TypeScript doesn't. This causes type differences
+            // Because TypeScript read a type from /absolute/frontend/shared/components/folder/type.ts
+            // and vue-tsc via /absolute/node_modules/@stamhoofd/components/folder/type.ts
+            "@stamhoofd/components": ["./shared/components/index.ts"],
+            "@stamhoofd/components/*.vue": ["./shared/components/src/*.vue"],
+            "@stamhoofd/components/*.ts": ["./shared/components/src/*.ts"],
+            "@stamhoofd/components/*": ["./shared/components/src/*"],
+        }
     },
     "include": [
         "../*.d.ts",
