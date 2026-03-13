@@ -3,7 +3,8 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import {
     OrganizationRegistrationPeriod,
     SetupStep,

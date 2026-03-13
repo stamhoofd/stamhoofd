@@ -114,7 +114,8 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, Decoder, encodeObject, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { AppManager, useRequestOwner } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, sleep, throttle } from '@stamhoofd/utility';
 import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue';

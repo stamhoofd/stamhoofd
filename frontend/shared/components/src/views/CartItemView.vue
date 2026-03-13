@@ -173,7 +173,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { computed, onMounted, ref, Ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';

@@ -39,7 +39,8 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { Toast } from '#overlays/Toast.ts';
 import TooltipDirective from '#directives/Tooltip.ts';
-import { AppManager, Storage } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { Storage } from '@stamhoofd/networking/Storage';
 
 @Component({
     components: {

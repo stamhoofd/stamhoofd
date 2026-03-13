@@ -117,7 +117,7 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { computed, ref } from 'vue';
 import EditSeatingPlanCategoryView from './EditSeatingPlanCategoryView.vue';
 import EditSeatingPlanSectionBox from './EditSeatingPlanSectionBox.vue';

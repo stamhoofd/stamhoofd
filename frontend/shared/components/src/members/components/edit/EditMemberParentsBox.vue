@@ -103,7 +103,7 @@ import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditParentView from './EditParentView.vue';
 import Title from './Title.vue';
 import { useAuth } from '../../../hooks';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 defineOptions({
     inheritAttrs: false,

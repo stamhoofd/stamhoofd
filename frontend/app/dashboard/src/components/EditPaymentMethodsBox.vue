@@ -91,7 +91,7 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AdministrationFeeSettings, Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';

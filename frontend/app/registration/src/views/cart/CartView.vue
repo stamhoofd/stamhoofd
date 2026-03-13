@@ -50,7 +50,7 @@ import { startCheckout } from '@stamhoofd/components/members/checkout/startCheck
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { useMemberManager } from '@stamhoofd/networking';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { computed, onActivated, onMounted, ref } from 'vue';
 
 const memberManager = useMemberManager();

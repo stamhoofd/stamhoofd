@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { OrganizationPackagesStatus } from '@stamhoofd/structures';
 import { onMounted, Ref, ref } from 'vue';
 

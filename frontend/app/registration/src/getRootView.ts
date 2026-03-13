@@ -7,8 +7,10 @@ import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { getNonAutoLoginRoot, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { Country, Language, Organization, uriToApp } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

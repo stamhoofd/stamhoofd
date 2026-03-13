@@ -90,7 +90,10 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { LoginHelper, SessionContext, SessionManager, Storage } from '@stamhoofd/networking';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { Storage } from '@stamhoofd/networking/Storage';
 import { Organization } from '@stamhoofd/structures';
 
 import { getScopedAutoRoot } from '../../getRootViews';

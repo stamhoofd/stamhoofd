@@ -7,7 +7,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { PermissionLevel, PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { computed, readonly, Ref, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';

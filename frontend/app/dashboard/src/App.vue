@@ -15,8 +15,13 @@ import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/o
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager, LoginHelper, NetworkManager, SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { Storage } from '@stamhoofd/networking/Storage';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { Country, EmailAddressSettings, Language, Platform, uriToApp } from '@stamhoofd/structures';
 import { nextTick, onMounted, Ref, ref } from 'vue';

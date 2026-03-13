@@ -34,7 +34,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';

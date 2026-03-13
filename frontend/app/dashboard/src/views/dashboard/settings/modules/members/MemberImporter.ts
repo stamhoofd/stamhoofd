@@ -2,7 +2,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { PlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { startSilentRegister } from '@stamhoofd/components/members/checkout/startCheckout.ts';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { BalanceItem, BalanceItemPaymentDetailed, DetailedReceivableBalance, Group, GroupPrice, GroupType, Organization, OrganizationRegistrationPeriod, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, Platform, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';

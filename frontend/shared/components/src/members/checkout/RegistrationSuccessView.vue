@@ -37,7 +37,7 @@
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import STToolbar from '#navigation/STToolbar.vue';
 import { useContext } from '#hooks/useContext.ts';
-import { useMemberManager } from '@stamhoofd/networking';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { BalanceItemRelationType, GroupType, PaymentGeneral, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted } from 'vue';

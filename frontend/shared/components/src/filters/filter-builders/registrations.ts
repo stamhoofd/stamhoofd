@@ -1,4 +1,5 @@
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePlatform, useUser } from '../../hooks';

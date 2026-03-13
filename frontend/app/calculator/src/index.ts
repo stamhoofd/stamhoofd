@@ -2,12 +2,12 @@
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { defineCustomElement } from 'vue';
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Country } from '@stamhoofd/structures';
 import App from './App.ce.vue';
 

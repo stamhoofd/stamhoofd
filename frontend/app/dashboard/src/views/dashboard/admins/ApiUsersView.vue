@@ -76,7 +76,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
-import { SessionManager } from '@stamhoofd/networking';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { ApiUser, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 

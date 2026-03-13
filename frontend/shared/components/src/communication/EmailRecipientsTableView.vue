@@ -59,7 +59,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useEmailRecipientsObjectFetcher } from '../fetchers/useEmailRecipientsObjectFetcher';
 import EmailRecipientView from './EmailRecipientView.vue';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { isSoftEmailRecipientError } from '@stamhoofd/structures';
 
 type ObjectType = EmailRecipient;

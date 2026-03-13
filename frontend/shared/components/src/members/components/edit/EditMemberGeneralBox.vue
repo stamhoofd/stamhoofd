@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { Gender, NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';

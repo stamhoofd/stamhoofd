@@ -112,7 +112,7 @@ import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { NavigationActions, useNavigationActions } from '../../../types/NavigationActions';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(defineProps<{
     member?: PlatformMember | null;

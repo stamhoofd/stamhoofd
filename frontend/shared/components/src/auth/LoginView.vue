@@ -94,7 +94,8 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { AppManager, LoginHelper } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { computed, onMounted, ref } from 'vue';
 
 import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';

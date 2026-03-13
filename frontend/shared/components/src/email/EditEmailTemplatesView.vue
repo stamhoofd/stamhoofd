@@ -95,7 +95,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';

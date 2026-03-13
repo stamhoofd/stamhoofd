@@ -27,7 +27,7 @@ import { useEditorLanguage } from './hooks/useEditorLanguage';
 import { registerTranslateableComponent } from './hooks/useEditorContext';
 import TInputButton from './TInputButton.vue';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import SuffixInput from './SuffixInput.vue';
 
 const value = defineModel<TranslatedString>({ required: true });

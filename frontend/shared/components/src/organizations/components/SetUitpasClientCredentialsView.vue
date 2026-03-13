@@ -37,7 +37,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
 import { UitpasClientIdAndSecret } from '@stamhoofd/structures';
 import { ref, onMounted, watch } from 'vue';

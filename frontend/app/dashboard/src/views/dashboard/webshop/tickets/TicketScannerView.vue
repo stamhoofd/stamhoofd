@@ -48,7 +48,7 @@ import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-ap
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { AppManager, PluginListenerHandle } from '@stamhoofd/networking';
+import { AppManager, PluginListenerHandle } from '@stamhoofd/networking/AppManager';
 import { Order, OrderStatus, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 // QR-scanner worker

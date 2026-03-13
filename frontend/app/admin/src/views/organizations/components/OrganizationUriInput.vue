@@ -32,7 +32,8 @@ import Spinner from '@stamhoofd/components/Spinner.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
-import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { ref, watch } from 'vue';
 

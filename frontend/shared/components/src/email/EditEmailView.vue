@@ -138,7 +138,10 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useOrganizationManager, usePatchOrganizationPeriod, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, PermissionsResourceType, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
 

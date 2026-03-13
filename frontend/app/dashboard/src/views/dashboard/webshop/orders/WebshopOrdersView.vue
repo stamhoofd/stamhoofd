@@ -31,7 +31,8 @@ import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, Pay
 
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount } from 'vue';
 import { WebshopManager } from '../WebshopManager';

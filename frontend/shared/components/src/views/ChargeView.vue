@@ -64,7 +64,7 @@ import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.t
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useValidation } from '#errors/useValidation.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { ChargeRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';

@@ -1,4 +1,4 @@
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Country } from '@stamhoofd/structures';
 import { Ref, computed } from 'vue';
 

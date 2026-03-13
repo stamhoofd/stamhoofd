@@ -1,5 +1,5 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
-import { ContextPermissions } from '@stamhoofd/networking';
+import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import { AccessRight, FinancialSupportSettings, Group, GroupType, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {

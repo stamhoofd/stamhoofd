@@ -7,8 +7,8 @@ import 'virtual:vite-svg-2-webfont.css';
 // Continue
 import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager } from '@stamhoofd/networking';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { createApp } from 'vue';
 
 import App from './src/App.vue';

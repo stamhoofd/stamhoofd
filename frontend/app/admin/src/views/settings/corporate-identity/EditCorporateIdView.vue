@@ -104,7 +104,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
-import { usePlatformManager } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { DarkMode, Image, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

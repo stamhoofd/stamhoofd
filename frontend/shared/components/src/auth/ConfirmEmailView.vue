@@ -54,7 +54,7 @@ import STInputBox from '#inputs/STInputBox.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { Toast } from '#overlays/Toast.ts';
-import { LoginHelper } from '@stamhoofd/networking';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({

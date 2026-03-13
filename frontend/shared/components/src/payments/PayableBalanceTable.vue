@@ -31,7 +31,7 @@ import { Toast } from '#overlays/Toast.ts';
 import { useAppContext } from '#context/appContext.ts';
 import { useOrganizationCart } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useMemberManager } from '@stamhoofd/networking';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { BalanceItem, BalanceItemCartItem, BalanceItemPaymentDetailed, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalancePriceBreakdown from './BalancePriceBreakdown.vue';

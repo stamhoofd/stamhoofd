@@ -22,7 +22,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from '@simonbackx/simple-networking';
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Address, Country, CountryHelper, ValidatedAddress } from '@stamhoofd/structures';
 
 import { ErrorBox } from '../errors/ErrorBox';

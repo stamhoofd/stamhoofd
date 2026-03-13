@@ -11,8 +11,11 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager, SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { Storage } from '@stamhoofd/networking/Storage';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { InAppReview } from '@capacitor-community/in-app-review';
 import { createApp } from 'vue';
 

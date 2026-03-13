@@ -5,7 +5,7 @@ import EmailView, { type RecipientChooseOneOption } from '@stamhoofd/components/
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { OrganizationManager } from '@stamhoofd/networking';
+import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';

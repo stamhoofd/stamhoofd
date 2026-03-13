@@ -400,7 +400,9 @@ import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.t
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, StripeAccount } from '@stamhoofd/structures';
 import { ComponentOptions, Ref, computed, ref } from 'vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';

@@ -6,7 +6,7 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Payment, PaymentGeneral } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
 import { LoadingViewTransition } from '../containers';

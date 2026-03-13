@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { computed, ref, Ref, unref, watchEffect } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';

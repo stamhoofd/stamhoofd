@@ -1,5 +1,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { SessionContext, useMemberManager, useRequestOwner } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, Platform, PlatformFamily, PlatformMember, SortItemDirection, StamhoofdFilter, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, onMounted, ref, Ref } from 'vue';

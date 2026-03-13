@@ -13,7 +13,8 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { AppManager, NetworkManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 
 const nativeVersion = AppManager.shared.nativeVersion ? ('App ' + AppManager.shared.nativeVersion) : 'web';
 const version = STAMHOOFD.VERSION || '0.0.0';

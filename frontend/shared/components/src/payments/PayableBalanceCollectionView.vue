@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';

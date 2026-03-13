@@ -179,8 +179,8 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager } from '@stamhoofd/networking';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PatchAnswers, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, ValidatedAddress, Version, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';

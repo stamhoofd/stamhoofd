@@ -1,6 +1,7 @@
 import { AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
+import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, SortItem, StamhoofdFilter, Version, WebshopPreview } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from './IndexBox';
 import { OrderIndexedDBIndex } from './ordersIndexedDBSorters';

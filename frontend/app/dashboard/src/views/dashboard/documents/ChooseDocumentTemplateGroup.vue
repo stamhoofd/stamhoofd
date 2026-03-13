@@ -110,7 +110,8 @@ import { useNavigationActions } from '@stamhoofd/components/types/NavigationActi
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { DocumentTemplateGroup, Event, Group, GroupType, isEmptyFilter, NamedObject, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref, watchEffect } from 'vue';

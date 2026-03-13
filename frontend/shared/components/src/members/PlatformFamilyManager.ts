@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { useAppContext } from '#context/appContext.ts';
 import { useContext } from '#hooks/useContext.ts';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { AppType, MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, PlatformMember, Registration, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';
 import { updateContextFromMembersBlob } from './helpers/updateContextFromMembersBlob';

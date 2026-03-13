@@ -207,7 +207,7 @@
 import { bounceErrorToHuman, EmailAddressSettings, EmailPreview, EmailRecipient, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { useAuth, useBackForward, useContext } from '../hooks';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { LoadingViewTransition, PromiseView } from '../containers';
 import { MemberSegmentedView } from '../members';
@@ -215,7 +215,7 @@ import { Toast } from '../overlays/Toast';
 import { useEmailRecipientsObjectFetcher, useMembersObjectFetcher } from '../fetchers';
 import { computed, onMounted, Ref, ref } from 'vue';
 import { Decoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import IconContainer from '../icons/IconContainer.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 

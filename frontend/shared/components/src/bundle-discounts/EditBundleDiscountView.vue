@@ -142,7 +142,7 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import { useContext } from '#hooks/useContext.ts';
 import EditGroupView from '#groups/EditGroupView.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 

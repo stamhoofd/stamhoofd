@@ -51,7 +51,7 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
-import { useMemberManager } from '@stamhoofd/networking';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, onActivated, ref, Ref, watchEffect } from 'vue';

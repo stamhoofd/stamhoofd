@@ -1,6 +1,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogsView } from '../../audit-logs';

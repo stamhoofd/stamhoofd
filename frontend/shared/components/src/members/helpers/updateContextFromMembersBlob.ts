@@ -1,4 +1,4 @@
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { MembersBlob, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 
 /**

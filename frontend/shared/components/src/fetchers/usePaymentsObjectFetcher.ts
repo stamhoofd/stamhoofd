@@ -2,7 +2,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { useContext } from '../hooks';
 import { ObjectFetcher } from '../tables';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Ref } from 'vue';
 
 type ObjectType = PaymentGeneral;

@@ -418,7 +418,7 @@ import { BalanceItem, BalanceItemWithPayments, Company, Invoice, Payment, Paymen
 
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';

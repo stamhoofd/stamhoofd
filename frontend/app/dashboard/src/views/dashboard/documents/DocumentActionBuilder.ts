@@ -7,7 +7,7 @@ import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.t
 import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { downloadDocuments } from '@stamhoofd/document-helper';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { DocumentData, DocumentStatus, Document as DocumentStruct, DocumentTemplatePrivate, EmailRecipientFilterType, EmailRecipientSubfilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -17,7 +17,7 @@ import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/cl
 
 import { ErrorBox } from '../errors/ErrorBox';
 import LoadingViewTransition from './LoadingViewTransition.vue';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 
 @Component({
     components: {

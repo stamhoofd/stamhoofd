@@ -105,7 +105,8 @@
 <script lang="ts" setup>
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { GroupType, MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

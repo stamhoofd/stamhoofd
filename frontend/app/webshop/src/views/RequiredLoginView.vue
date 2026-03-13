@@ -40,7 +40,7 @@ import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.
 import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { UrlHelper } from '@stamhoofd/networking';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { LoginProviderType } from '@stamhoofd/structures';
 
 import { computed, onMounted, ref } from 'vue';

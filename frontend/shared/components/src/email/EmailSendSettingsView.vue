@@ -64,7 +64,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { Formatter } from '@stamhoofd/utility';
 import { ErrorBox } from '../errors/ErrorBox';
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 
 const props = withDefaults(defineProps<{
     editEmail: EmailPreview;

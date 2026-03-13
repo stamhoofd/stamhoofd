@@ -227,7 +227,10 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useGetGroups, useGetPeriods, useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
+import { useGetGroups } from '@stamhoofd/networking/hooks/useGetGroups';
+import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, NamedObject, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, PlatformEventType, RegistrationPeriod, RichText, TranslatedString } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';

@@ -158,7 +158,7 @@ import { useIsIOS } from '#hooks/useIsIOS.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
 import { UIFilter, UIFilterBuilders } from '#filters/UIFilter.ts';
-import { Storage } from '@stamhoofd/networking';
+import { Storage } from '@stamhoofd/networking/Storage';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';

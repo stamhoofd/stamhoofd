@@ -2,7 +2,9 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { AppManager, SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';

@@ -1,5 +1,5 @@
 /// <reference types="@vitest/browser/providers/playwright" />
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Country, Language } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { userEvent } from '@vitest/browser/context';

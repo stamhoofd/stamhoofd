@@ -1,4 +1,5 @@
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import { computed, ComputedRef, Ref, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';

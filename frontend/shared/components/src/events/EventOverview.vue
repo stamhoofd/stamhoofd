@@ -248,7 +248,9 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
+import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
+import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, appToUri, EmailTemplate, EmailTemplateType, Event, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, Organization, OrganizationRegistrationPeriod, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, nextTick, onMounted, Ref, ref, watch } from 'vue';

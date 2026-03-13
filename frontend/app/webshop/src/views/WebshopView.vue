@@ -78,7 +78,7 @@ import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { UrlHelper } from '@stamhoofd/networking';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { CartItem, LoginProviderType, Payment, PaymentStatus } from '@stamhoofd/structures';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';

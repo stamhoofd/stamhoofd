@@ -12,7 +12,7 @@
 import { LanguageHelper } from '@stamhoofd/structures';
 import { useEditorLanguage } from './hooks/useEditorLanguage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 import { useEditorContext } from './hooks/useEditorContext';
 import { computed } from 'vue';

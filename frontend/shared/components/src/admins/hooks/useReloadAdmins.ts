@@ -2,7 +2,8 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { OrganizationManager, usePlatformManager } from '@stamhoofd/networking';
+import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { getCurrentInstance } from 'vue';
 
 const reloadPromises = new Map<null | string, Promise<unknown>>();

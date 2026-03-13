@@ -32,7 +32,7 @@ import TransitionFade from '@stamhoofd/components/transitions/TransitionFade.vue
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed, onActivated, ref } from 'vue';
 import PremisesView from '../../views/dashboard/settings/PremisesView.vue';

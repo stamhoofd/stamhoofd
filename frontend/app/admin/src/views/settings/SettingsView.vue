@@ -402,7 +402,7 @@ import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfi
 import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { usePlatformManager } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';

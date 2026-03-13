@@ -19,8 +19,14 @@ import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { MemberManager } from '@stamhoofd/networking/MemberManager';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { AccessRight, AppType, Organization, PermissionLevel, PermissionsResourceType, Webshop } from '@stamhoofd/structures';
 import { computed, markRaw, onUnmounted, reactive, ref } from 'vue';
 

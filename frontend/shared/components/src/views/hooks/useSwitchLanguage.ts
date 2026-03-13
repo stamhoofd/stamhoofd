@@ -1,4 +1,4 @@
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LanguageHelper } from '@stamhoofd/structures';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 

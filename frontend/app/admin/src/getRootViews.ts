@@ -10,7 +10,8 @@ import TabBarController from '@stamhoofd/components/containers/TabBarController.
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { type useTranslate } from '@stamhoofd/frontend-i18n/I18nController';
-import { SessionContext, SessionManager } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';

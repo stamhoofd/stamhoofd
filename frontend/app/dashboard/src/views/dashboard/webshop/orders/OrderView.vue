@@ -315,7 +315,7 @@ import { AccessRight, BalanceItemWithPrivatePayments, LimitedFilteredRequest, Or
 import { Formatter } from '@stamhoofd/utility';
 import OrderView from './OrderView.vue';
 
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { computed, ComputedRef, onBeforeUnmount, ref, watch } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';

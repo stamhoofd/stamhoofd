@@ -86,7 +86,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useIsRootAdmin } from '@stamhoofd/components/hooks/useIsRootAdmin.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { usePlatformManager } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';
 

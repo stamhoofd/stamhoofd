@@ -6,7 +6,7 @@ import { Country, Language, Organization, Version } from '@stamhoofd/structures'
 import { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
 import { isReactive } from 'vue';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 class SessionStorage extends AutoEncoder {

@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Address, Country, CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GeneralMemberDetailsMatcher } from '../GeneralMemberDetailsMatcher';

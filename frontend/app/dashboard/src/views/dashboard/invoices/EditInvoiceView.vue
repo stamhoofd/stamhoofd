@@ -133,7 +133,7 @@ import { Company, Invoice, PaymentCustomer } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { InvoiceItemsBox } from './components';
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 const props = withDefaults(
     defineProps<{

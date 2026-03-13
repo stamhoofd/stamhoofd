@@ -67,7 +67,9 @@ import STInputBox from '#inputs/STInputBox.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { Validator } from '#errors/Validator.ts';
-import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { NewUser, Token } from '@stamhoofd/structures';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 

@@ -3,7 +3,7 @@ import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/
 
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useContext } from '../hooks';
 
 export function useGetUitpasNumberDetails() {

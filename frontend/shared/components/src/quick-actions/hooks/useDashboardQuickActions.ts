@@ -1,5 +1,5 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, onMounted, ref, Ref, unref } from 'vue';

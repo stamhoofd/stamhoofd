@@ -150,7 +150,8 @@ import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetcher
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { AppManager, useRequestOwner } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { CountFilteredRequest, Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';

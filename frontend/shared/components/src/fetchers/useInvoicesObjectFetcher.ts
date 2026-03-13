@@ -1,5 +1,5 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { assertSort, CountFilteredRequest, CountResponse, Invoice, LimitedFilteredRequest, PaginatedResponseDecoder, SortList } from '@stamhoofd/structures';
 import { Ref } from 'vue';
 import { useContext } from '../hooks';

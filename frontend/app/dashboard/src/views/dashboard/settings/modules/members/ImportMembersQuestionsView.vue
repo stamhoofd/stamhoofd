@@ -194,7 +194,7 @@ import { useNavigationActions } from '@stamhoofd/components/types/NavigationActi
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { getGenderName, Group, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';

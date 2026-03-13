@@ -125,8 +125,9 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, Storage } from '@stamhoofd/networking';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { Storage } from '@stamhoofd/networking/Storage';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 

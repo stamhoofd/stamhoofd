@@ -10,7 +10,7 @@ import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Organization, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, Platform } from '@stamhoofd/structures';
 import { ComputedRef, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';

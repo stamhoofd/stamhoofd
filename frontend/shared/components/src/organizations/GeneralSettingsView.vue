@@ -110,7 +110,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useReview } from '#useReview.ts';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Company, OrganizationMetaData, OrganizationPrivateMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';

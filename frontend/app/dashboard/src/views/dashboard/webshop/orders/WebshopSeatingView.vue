@@ -45,7 +45,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import { PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
 
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { computed, onBeforeUnmount, Ref, ref } from 'vue';
 import EditSeatingPlanView from '../edit/seating/EditSeatingPlanView.vue';
 import { WebshopManager } from '../WebshopManager';

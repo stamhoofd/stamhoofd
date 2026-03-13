@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
 import { PdfDocWrapper } from './PdfDocWrapper';

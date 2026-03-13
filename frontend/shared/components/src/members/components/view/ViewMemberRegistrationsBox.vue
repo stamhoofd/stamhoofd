@@ -40,7 +40,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { useOrganizationManager, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { LimitedFilteredRequest, PermissionLevel, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';

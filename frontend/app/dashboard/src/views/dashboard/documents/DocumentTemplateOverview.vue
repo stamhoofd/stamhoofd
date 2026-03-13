@@ -175,11 +175,13 @@ import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
 
-import { AppManager, useRequestOwner } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import DocumentsView from './DocumentsView.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 import { fiscal } from './definitions/fiscal';
-import { I18nComponent, LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = defineProps<{
     template: DocumentTemplatePrivate;

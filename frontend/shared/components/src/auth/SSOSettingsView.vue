@@ -42,7 +42,7 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
 

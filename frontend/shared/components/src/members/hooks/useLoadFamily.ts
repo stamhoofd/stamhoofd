@@ -1,6 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { useContext } from '#hooks/useContext.ts';
-import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { MembersBlob, PlatformMember } from '@stamhoofd/structures';
 import { updateContextFromMembersBlob } from '../helpers';
 

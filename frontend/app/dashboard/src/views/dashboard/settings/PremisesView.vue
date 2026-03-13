@@ -54,7 +54,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ReviewCheckbox from '@stamhoofd/components/ReviewCheckbox.vue';
 import { useReview } from '@stamhoofd/components/useReview.ts';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import PremiseRow from './PremiseRow.vue';

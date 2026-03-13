@@ -157,7 +157,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
 import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { BalanceItemWithPayments, BaseOrganization, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';

@@ -4,7 +4,8 @@ import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
-import { Storage, UpdateOptions } from '@stamhoofd/networking';
+import { Storage } from '@stamhoofd/networking/Storage';
+import { UpdateOptions } from '@stamhoofd/networking/AppManager';
 import { sleep } from '@stamhoofd/utility';
 
 import CheckUpdateView from './CheckUpdateView.vue';

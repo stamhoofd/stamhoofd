@@ -1,4 +1,4 @@
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Event, EventNotification, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { ref, Ref } from 'vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';

@@ -86,7 +86,7 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Country, ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StamhoofdFilter, StripeAccount } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

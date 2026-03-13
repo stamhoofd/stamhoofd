@@ -434,7 +434,8 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { AccessRight, EmailTemplate, EmailTemplateType, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { computed, onBeforeUnmount, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';

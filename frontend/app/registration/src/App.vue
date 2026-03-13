@@ -19,8 +19,12 @@ import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEve
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { LoginHelper, NetworkManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { Language, Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 

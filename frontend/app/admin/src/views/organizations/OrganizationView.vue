@@ -192,7 +192,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { appToUri, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';

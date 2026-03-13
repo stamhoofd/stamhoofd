@@ -3,7 +3,7 @@ import { ref, Ref } from 'vue';
 import { useOrganizationPackages } from './useOrganizationPackages';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 /**
  * Not sure if still required

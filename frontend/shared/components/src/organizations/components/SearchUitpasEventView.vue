@@ -57,10 +57,10 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import DateBox from '#icons/DateBox.vue';
 import { UitpasEventResponse, UitpasEventsResponse } from '@stamhoofd/structures';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { throttle } from '@stamhoofd/utility';
 import { Ref, ref, watch } from 'vue';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(
     defineProps<{

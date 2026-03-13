@@ -40,7 +40,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Address, Country, ProductLocation } from '@stamhoofd/structures';
 
 import { computed, onMounted, ref, watch } from 'vue';

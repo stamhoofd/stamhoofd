@@ -5,7 +5,8 @@ import StartNewRegistrationPeriodView from '@stamhoofd/components/periods/StartN
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
 

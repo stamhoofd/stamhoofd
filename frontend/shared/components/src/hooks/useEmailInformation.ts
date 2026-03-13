@@ -1,5 +1,5 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { computed, ComputedRef, onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, unref, watch } from 'vue';

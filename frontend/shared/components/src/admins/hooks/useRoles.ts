@@ -3,7 +3,8 @@ import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useOrganizationManager, usePlatformManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { Group, MemberResponsibility, Organization, OrganizationPrivateMetaData, PermissionRoleDetailed, PermissionRoleForResponsibility, Platform, PlatformConfig, PlatformPrivateConfig, Version } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 

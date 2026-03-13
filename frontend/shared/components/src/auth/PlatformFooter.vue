@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LanguageHelper } from '@stamhoofd/structures';
 import { usePlatform } from '../hooks';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';

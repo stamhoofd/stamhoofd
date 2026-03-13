@@ -1,5 +1,5 @@
 import { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { PackageCheckout } from '@stamhoofd/structures';
 import { DisplayOptions, NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { InvoiceStep } from './steps/InvoiceStep';

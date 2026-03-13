@@ -1,5 +1,5 @@
 import { reactive } from 'vue';
-import { Storage } from '@stamhoofd/networking';
+import { Storage } from '@stamhoofd/networking/Storage';
 
 export function useCollapsed(globalIdentifier: string) {
     const collapsedSections = reactive(new Set<string>());

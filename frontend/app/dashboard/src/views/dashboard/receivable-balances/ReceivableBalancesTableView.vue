@@ -22,7 +22,7 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetchers/useReceivableBalancesObjectFetcher.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';

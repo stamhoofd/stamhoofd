@@ -1,5 +1,5 @@
 import { useContext } from './useContext';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { computed, Ref } from 'vue';
 
 function checkRootAdmin(context: SessionContext): boolean {

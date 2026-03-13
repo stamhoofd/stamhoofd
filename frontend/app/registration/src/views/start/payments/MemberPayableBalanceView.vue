@@ -11,7 +11,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import PayableBalanceCollectionView from '@stamhoofd/components/payments/PayableBalanceCollectionView.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
 

@@ -4,7 +4,8 @@ import { GroupCategory, GroupCategorySettings, GroupCategoryTree, OrganizationRe
 
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { useLoadRecentPeriods, usePatchOrganizationPeriods } from '@stamhoofd/networking';
+import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
+import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import EditCategoryGroupsView from '../../groups/EditCategoryGroupsView.vue';
 
 // You can declare mixins as the same style as components.

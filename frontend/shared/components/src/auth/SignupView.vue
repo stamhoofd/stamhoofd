@@ -51,7 +51,7 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { LoginHelper } from '@stamhoofd/networking';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';

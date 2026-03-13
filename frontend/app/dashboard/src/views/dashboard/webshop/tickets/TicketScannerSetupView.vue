@@ -67,7 +67,7 @@ import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { computed, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import TicketScannerView from './TicketScannerView.vue';

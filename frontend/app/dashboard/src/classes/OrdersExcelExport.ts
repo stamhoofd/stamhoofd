@@ -1,5 +1,5 @@
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { CartItem, CartItemOption, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';

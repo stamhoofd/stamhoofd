@@ -9,7 +9,7 @@ import { LanguageHelper, TranslatedString } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useEditorLanguage } from './hooks/useEditorLanguage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 
 const value = defineModel<TranslatedString>({ required: true });

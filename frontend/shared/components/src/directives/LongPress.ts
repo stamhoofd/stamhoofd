@@ -1,4 +1,4 @@
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { ObjectDirective } from 'vue';
 
 function getScrollElement(element: HTMLElement): HTMLElement {

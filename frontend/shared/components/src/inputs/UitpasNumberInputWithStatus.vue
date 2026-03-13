@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';

@@ -35,7 +35,7 @@ import STInputBox from '#inputs/STInputBox.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { Validator } from '#errors/Validator.ts';
-import { LoginHelper } from '@stamhoofd/networking';
+import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 
 @Component({
     components: {

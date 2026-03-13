@@ -112,7 +112,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembersObjectFetcher.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { Address, LimitedFilteredRequest, OrganizationRegistrationPeriod, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { computed, Ref, ref, watch } from 'vue';
 import XLSX from 'xlsx';

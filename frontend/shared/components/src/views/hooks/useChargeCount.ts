@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { useContext } from '#hooks/useContext.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { CountResponse, StamhoofdFilter } from '@stamhoofd/structures';
 
 export function useChargeCount(path: string) {

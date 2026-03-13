@@ -1,6 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Group, GroupType, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { ChooseGroupForMemberView, loadFamilyIfNeeded } from '..';
 import { useAppContext } from '../../context/appContext';

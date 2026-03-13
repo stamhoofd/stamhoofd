@@ -16,7 +16,9 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-
 import { Toast } from '#overlays/Toast.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import { Validator } from '#errors/Validator.ts';
-import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
+import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
+import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { EmailTemplate, EmailTemplateType, Group, GroupPrivateSettings, Organization, OrganizationRegistrationPeriod, RegisterCheckout } from '@stamhoofd/structures';
 import { onMounted, Ref, ref } from 'vue';
 import { useContext } from '../hooks';

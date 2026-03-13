@@ -1,5 +1,5 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export';
-import { ContextPermissions } from '@stamhoofd/networking';
+import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import { AccessRight, FinancialSupportSettings, getGenderName, Group, GroupType, Organization, Parent, ParentTypeHelper, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';

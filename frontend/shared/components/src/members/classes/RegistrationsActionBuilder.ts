@@ -1,5 +1,6 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
-import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { appToUri, Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
 import { useContext, useOrganization } from '../../hooks';

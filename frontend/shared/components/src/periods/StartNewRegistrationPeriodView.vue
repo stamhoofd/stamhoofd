@@ -36,7 +36,7 @@ import { ErrorBox } from '#errors/ErrorBox.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePatchOrganizationPeriods } from '@stamhoofd/networking';
+import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { ref } from 'vue';
 

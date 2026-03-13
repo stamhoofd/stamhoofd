@@ -36,7 +36,7 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Document, DocumentData, DocumentTemplatePrivate, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import { computed, ComputedRef, ref } from 'vue';
 

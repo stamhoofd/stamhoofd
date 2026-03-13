@@ -99,7 +99,7 @@ import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue'
 import EditParentView from '@stamhoofd/components/members/components/edit/EditParentView.vue';
 import { useEditMember } from '@stamhoofd/components/members/hooks/useEditMember';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager';
-import { useMemberManager } from '@stamhoofd/networking';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

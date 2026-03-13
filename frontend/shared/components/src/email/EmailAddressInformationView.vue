@@ -116,8 +116,9 @@
 </template>
 
 <script setup lang="ts">
-import { I18nComponent, LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import { useRequestOwner } from '@stamhoofd/networking';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { EmailInformation } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import IconContainer from '../icons/IconContainer.vue';

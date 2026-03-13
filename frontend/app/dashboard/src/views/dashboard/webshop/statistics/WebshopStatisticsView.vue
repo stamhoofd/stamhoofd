@@ -82,7 +82,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
-import { AppManager } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Category, Graph, GraphData, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

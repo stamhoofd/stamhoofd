@@ -67,7 +67,7 @@
 import { usePopup } from '@simonbackx/vue-app-navigation';
 import { computed, onMounted, Ref, shallowRef } from 'vue';
 
-import { SessionManager } from '@stamhoofd/networking';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { PromiseComponent } from '../containers/AsyncComponent';
 import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
 import { useAppData } from './appContext';

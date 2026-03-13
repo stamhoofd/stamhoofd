@@ -385,7 +385,7 @@ import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/componen
 import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { OrderActionBuilder } from '../../orders/OrderActionBuilder';
 import OrderView from '../../orders/OrderView.vue';

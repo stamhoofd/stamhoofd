@@ -131,7 +131,7 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 
-import { useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { computed, onMounted, ref } from 'vue';
 import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 import WebshopDNSRecordsView from './WebshopDNSRecordsView.vue';

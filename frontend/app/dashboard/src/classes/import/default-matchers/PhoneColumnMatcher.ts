@@ -1,5 +1,5 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Country, countryCodes } from '@stamhoofd/structures';
 import { PhoneNumber } from 'libphonenumber-js';
 import XLSX from 'xlsx';

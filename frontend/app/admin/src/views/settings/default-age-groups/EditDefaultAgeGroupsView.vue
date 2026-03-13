@@ -32,7 +32,7 @@ import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { usePlatformManager } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { DefaultAgeGroup, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import DefaultAgeGroupRow from './components/DefaultAgeGroupRow.vue';

@@ -282,7 +282,8 @@ import { useExternalOrganization } from '@stamhoofd/components/groups/hooks/useE
 import { useInterval } from '@stamhoofd/components/hooks/useInterval.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { appToUri, ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, onActivated, Ref, ref } from 'vue';
 

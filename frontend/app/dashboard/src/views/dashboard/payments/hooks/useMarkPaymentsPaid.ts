@@ -3,7 +3,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { SessionContext } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 
 export function useMarkPaymentsPaid() {

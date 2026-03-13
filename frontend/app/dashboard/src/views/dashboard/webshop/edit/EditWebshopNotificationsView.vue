@@ -37,7 +37,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { computed, onMounted, ref } from 'vue';
 import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 

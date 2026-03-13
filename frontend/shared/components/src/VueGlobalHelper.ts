@@ -1,11 +1,13 @@
 import { Request } from '@simonbackx/simple-networking';
 import { injectHooks, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
-import { AppManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { type App } from 'vue';
 
-import { I18nComponent, LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext, ViewportHelper } from '..';
 import PromiseView from './containers/PromiseView.vue';
 import { ColorDirective } from './directives/ColorDirective';

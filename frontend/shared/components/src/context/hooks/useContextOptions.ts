@@ -1,4 +1,6 @@
-import { SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { appToUri, AppType, Organization, User, UserWithMembers } from '@stamhoofd/structures';
 
 import { PromiseComponent } from '../../containers/AsyncComponent';

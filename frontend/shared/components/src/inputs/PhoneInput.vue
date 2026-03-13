@@ -34,7 +34,7 @@ import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
 import { Validator } from '../errors/Validator';
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js/max';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Country, CountryCode, countryCodes, CountryHelper } from '@stamhoofd/structures';
 
 const props = withDefaults(
