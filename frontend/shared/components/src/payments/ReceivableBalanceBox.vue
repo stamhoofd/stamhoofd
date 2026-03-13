@@ -141,7 +141,22 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, Toast, useContext, useErrors, useExternalOrganization, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
+import BalancePriceBreakdown from '#payments/BalancePriceBreakdown.vue';
+import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+import EditPaymentView from '#payments/EditPaymentView.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { GlobalEventBus } from '#EventBus.ts';
+import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
+import IconContainer from '#icons/IconContainer.vue';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import PaymentRow from '#payments/components/PaymentRow.vue';
+import SegmentedControl from '#inputs/SegmentedControl.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
+import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItemWithPayments, BaseOrganization, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

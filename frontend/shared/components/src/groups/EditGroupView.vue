@@ -590,7 +590,22 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AgeInput, AuditLogsView, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders, useValidation } from '@stamhoofd/components';
+import EditGroupView from './EditGroupView.vue';
+import AgeInput from '#inputs/AgeInput.vue';
+import AuditLogsView from '#audit-logs/AuditLogsView.vue';
+import DateSelection from '#inputs/DateSelection.vue';
+import Dropdown from '#inputs/Dropdown.vue';
+import EditRecordCategoriesBox from '#records/components/EditRecordCategoriesBox.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import GroupIdsInput from '#inputs/GroupIdsInput.vue';
+import InheritedRecordsConfigurationBox from '#records/components/InheritedRecordsConfigurationBox.vue';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
+import NumberInput from '#inputs/NumberInput.vue';
+import OrganizationAvatar from '#context/OrganizationAvatar.vue';
+import { RecordEditorSettings, RecordEditorType } from '#records/RecordEditorSettings.ts';
+import TimeInput from '#inputs/TimeInput.vue';
+import { useRegisterItemFilterBuilders } from '#filters/filterBuilders.ts';
+import { useValidation } from '#errors/useValidation.ts';
 import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, TranslatedString, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

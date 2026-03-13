@@ -23,7 +23,11 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { ErrorBox, LoadingButton, STInputBox, STList, STListItem } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
 import { Formatter } from '@stamhoofd/utility';
 
 @Component({

@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePlatform } from '@stamhoofd/components';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { LoadedPermissions, MemberResponsibility, PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

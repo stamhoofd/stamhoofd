@@ -124,7 +124,15 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { MemberSegmentedView, PromiseView, Toast, useBackForward, useExternalOrganization, useMembersObjectFetcher, LoadingViewTransition, OrganizationLogo, OrganizationAvatar } from '@stamhoofd/components';
+import MemberSegmentedView from '#members/MemberSegmentedView.vue';
+import PromiseView from '#containers/PromiseView.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useBackForward } from '#hooks/useBackForward.ts';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
+import OrganizationLogo from '#context/OrganizationLogo.vue';
+import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { getReceivableBalanceTypeName, LimitedFilteredRequest, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ReceivableBalanceBox from './ReceivableBalanceBox.vue';

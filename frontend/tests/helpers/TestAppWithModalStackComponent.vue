@@ -11,7 +11,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CenteredMessageView, ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
+import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { onMounted, Ref, ref } from 'vue';
 
 withDefaults(defineProps<{

@@ -48,7 +48,11 @@
 </template>
 
 <script lang="ts" setup>
-import { CenteredMessage, Dropdown, STInputBox, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import Dropdown from '#inputs/Dropdown.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
 import { Customer, Member } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 

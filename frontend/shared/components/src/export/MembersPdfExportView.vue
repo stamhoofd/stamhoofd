@@ -24,7 +24,10 @@
 
 <script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { ErrorBox, ScrollableSegmentedControl, useAuth, useErrors } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useErrors } from '#errors/useErrors.ts';
 import { Storage } from '@stamhoofd/networking';
 import { Group, Organization, Platform, PlatformMember, SelectablePdfDocumentFilter, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';

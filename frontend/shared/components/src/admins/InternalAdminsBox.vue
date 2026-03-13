@@ -60,7 +60,11 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { MemberSegmentedView, PromiseView, useMembersObjectFetcher, useOrganization, useUser } from '@stamhoofd/components';
+import MemberSegmentedView from '#members/MemberSegmentedView.vue';
+import PromiseView from '#containers/PromiseView.vue';
+import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { LimitedFilteredRequest, MemberAdmin, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

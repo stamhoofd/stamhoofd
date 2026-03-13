@@ -1,7 +1,8 @@
 import { Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
-import { useAppContext, useContext } from '@stamhoofd/components';
+import { useAppContext } from '#context/appContext.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { SessionContext } from '@stamhoofd/networking';
 import { AppType, MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, PlatformMember, Registration, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';

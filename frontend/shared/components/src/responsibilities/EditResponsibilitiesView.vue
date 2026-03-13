@@ -50,7 +50,10 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Toast, useDraggableArray, useOrganization } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, MemberResponsibility, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';

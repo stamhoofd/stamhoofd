@@ -45,7 +45,14 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch, usePlatform, useValidation } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import DateSelection from '#inputs/DateSelection.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import SaveView from '#navigation/SaveView.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useValidation } from '#errors/useValidation.ts';
 import { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

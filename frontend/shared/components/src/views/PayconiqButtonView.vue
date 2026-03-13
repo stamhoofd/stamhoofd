@@ -27,7 +27,12 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, EmailInput, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import EmailInput from '#inputs/EmailInput.vue';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
 
 import PayconiqBannerView from './PayconiqBannerView.vue';
 

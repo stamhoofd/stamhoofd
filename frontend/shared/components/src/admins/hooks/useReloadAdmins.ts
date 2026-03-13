@@ -1,5 +1,7 @@
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Toast, useContext, useOrganization } from '@stamhoofd/components';
+import { Toast } from '#overlays/Toast.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { OrganizationManager, usePlatformManager } from '@stamhoofd/networking';
 import { getCurrentInstance } from 'vue';
 

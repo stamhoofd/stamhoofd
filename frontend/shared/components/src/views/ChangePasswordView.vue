@@ -25,7 +25,16 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { ErrorBox, LoadingButton, PasswordStrength, SaveView, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import PasswordStrength from '#inputs/PasswordStrength.vue';
+import SaveView from '#navigation/SaveView.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STFloatingFooter from '#navigation/STFloatingFooter.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { Validator } from '#errors/Validator.ts';
 import { LoginHelper } from '@stamhoofd/networking';
 
 @Component({

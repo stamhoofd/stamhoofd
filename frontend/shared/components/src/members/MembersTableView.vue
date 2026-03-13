@@ -13,7 +13,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useRequiredRegistrationsFilter, useTableObjectFetcher } from '@stamhoofd/components';
+import type { ComponentExposed } from '#VueGlobalHelper.ts';
+import { InMemoryTableAction, TableAction, type TableActionSelection } from '#tables/classes/TableAction.ts';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
+import ModernTableView from '#tables/ModernTableView.vue';
+import { useAppContext } from '#context/appContext.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';

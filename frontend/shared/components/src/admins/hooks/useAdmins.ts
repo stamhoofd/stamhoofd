@@ -1,5 +1,8 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { GlobalEventBus, useGlobalEventListener, useOrganization, usePlatform } from '@stamhoofd/components';
+import { GlobalEventBus } from '#EventBus.ts';
+import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { ContextPermissions, useRequestOwner } from '@stamhoofd/networking';
 import { ApiUser, LoadedPermissions, MemberAdmin, Permissions, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

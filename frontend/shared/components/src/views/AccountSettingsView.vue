@@ -202,7 +202,23 @@
 <script lang="ts" setup>
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ChangePasswordView, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, Toast, useContext, useErrors, useLoginMethod, useLoginMethodEnabled, usePatch, usePlatform, useUser, useValidation } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import ChangePasswordView from '#views/ChangePasswordView.vue';
+import ConfirmEmailView from '#auth/ConfirmEmailView.vue';
+import EmailInput from '#inputs/EmailInput.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useLoginMethod, useLoginMethodEnabled } from '#hooks/useLoginMethods.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useUser } from '#hooks/useUser.ts';
+import { useValidation } from '#errors/useValidation.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper } from '@stamhoofd/networking';
 import { LanguageHelper, LoginMethod, LoginProviderType, NewUser, UserMeta } from '@stamhoofd/structures';

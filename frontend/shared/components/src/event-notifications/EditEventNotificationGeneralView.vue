@@ -15,7 +15,11 @@
 
 <script setup lang="ts">
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, NavigationActions, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import { ref } from 'vue';
 import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 

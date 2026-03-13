@@ -22,7 +22,8 @@
 </template>
 
 <script setup lang="ts">
-import { useIsMobile, useLoadFamily } from '@stamhoofd/components';
+import { useIsMobile } from '#hooks/useIsMobile.ts';
+import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
 import { PlatformMember } from '@stamhoofd/structures';
 import { onMounted } from 'vue';
 import { ViewMemberAccountsBox, ViewMemberEmergencyContactsBox, ViewMemberFamilyBox, ViewMemberGeneralBox, ViewMemberNotesBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox, ViewMemberSecurityCodeBox, ViewMemberUnverifiedBox, ViewMemberWarningsBox } from '../components/view';

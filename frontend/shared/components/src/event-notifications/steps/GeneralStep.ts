@@ -1,6 +1,6 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { type ViewStepsManager } from '#steps/ViewStepsManager';
-import { type ViewStep } from '#steps/ViewStep';
+import { type ViewStepsManager } from '#steps/ViewStepsManager.ts';
+import { type ViewStep } from '#steps/ViewStep.ts';
 import { EventNotificationViewModel } from '../classes/EventNotificationViewModel';
 import EditEventNotificationGeneralView from '../EditEventNotificationGeneralView.vue';
 import { NavigationActions } from '../../types/NavigationActions';

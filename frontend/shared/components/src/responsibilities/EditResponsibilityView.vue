@@ -166,7 +166,17 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DefaultAgeGroupIdsInput, EditRoleView, ErrorBox, JumpToContainer, NumberInput, SaveView, TagIdsInput, useAppContext, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import DefaultAgeGroupIdsInput from '#inputs/DefaultAgeGroupIdsInput.vue';
+import EditRoleView from '#admins/EditRoleView.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import JumpToContainer from '#containers/JumpToContainer.vue';
+import NumberInput from '#inputs/NumberInput.vue';
+import SaveView from '#navigation/SaveView.vue';
+import TagIdsInput from '#inputs/TagIdsInput.vue';
+import { useAppContext } from '#context/appContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
 import { MemberResponsibility, PermissionLevel, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 

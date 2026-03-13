@@ -14,7 +14,12 @@
 
 <script setup lang="ts">
 import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, FillRecordCategoryBox, NavigationActions, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

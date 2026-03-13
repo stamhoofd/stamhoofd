@@ -132,7 +132,16 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { GroupAvatar, LoadingBoxTransition, CenteredMessage, ErrorBox, GroupPriceDiscountsInput, useErrors, usePatch, useValidation, useContext, EditGroupView } from '@stamhoofd/components';
+import GroupAvatar from '#GroupAvatar.vue';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import { useContext } from '#hooks/useContext.ts';
+import EditGroupView from '#groups/EditGroupView.vue';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';

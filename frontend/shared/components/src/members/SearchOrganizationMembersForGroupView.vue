@@ -42,7 +42,15 @@
 <script setup lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, ExternalOrganizationContainer, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useErrors, useInfiniteObjectFetcher, usePositionableSheet } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
+import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { UIFilter } from '#filters/UIFilter.ts';
+import UIFilterEditor from '#filters/UIFilterEditor.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { assertSort, Group, isEmptyFilter, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { computed, Ref, ref, watchEffect } from 'vue';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';

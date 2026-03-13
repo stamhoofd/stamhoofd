@@ -69,7 +69,13 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, PermyriadInput, PriceBreakdownBox, STErrorsDefault, Toast, useErrors } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import PermyriadInput from '#inputs/PermyriadInput.vue';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useErrors } from '#errors/useErrors.ts';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout, useAddMember, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem } from '.';

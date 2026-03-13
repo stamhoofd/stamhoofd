@@ -123,7 +123,21 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, EditResourceRolesView, EmailInput, ErrorBox, IconContainer, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, useOrganization, usePatchArray, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import Checkbox from '#inputs/Checkbox.vue';
+import EditResourceRolesView from '#admins/EditResourceRolesView.vue';
+import EmailInput from '#inputs/EmailInput.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import IconContainer from '#icons/IconContainer.vue';
+import SaveView from '#navigation/SaveView.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatchArray } from '#hooks/usePatchArray.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager, usePatchOrganizationPeriod, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, PermissionsResourceType, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';

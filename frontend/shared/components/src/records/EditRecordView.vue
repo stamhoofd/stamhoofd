@@ -223,7 +223,20 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, GroupUIFilterBuilder, PropertyFilterInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, SaveView, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import Checkbox from '#inputs/Checkbox.vue';
+import Dropdown from '#inputs/Dropdown.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { GroupUIFilterBuilder } from '#filters/GroupUIFilter.ts';
+import PropertyFilterInput from '#filters/PropertyFilterInput.vue';
+import Radio from '#inputs/Radio.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import SaveView from '#navigation/SaveView.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
 import { FileType, ObjectWithRecords, PermissionLevel, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

@@ -217,7 +217,18 @@
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, EventOverview, IconContainer, InputSheet, PatchListText, ProgressIcon, useAppContext, useAuth, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ContextMenu } from '#overlays/ContextMenu.ts';
+import { ContextMenuItem } from '#overlays/ContextMenu.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import EventOverview from '#events/EventOverview.vue';
+import InputSheet from '#overlays/InputSheet.vue';
+import PatchListText from '#audit-logs/components/PatchListText.vue';
+import { useAppContext } from '#context/appContext.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import ViewRecordCategoryAnswersBox from '#records/components/ViewRecordCategoryAnswersBox.vue';
+import IconContainer from '#icons/IconContainer.vue';
+import ProgressIcon from '#icons/ProgressIcon.vue';
 import { ObjectDiffer } from '@stamhoofd/object-differ';
 import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

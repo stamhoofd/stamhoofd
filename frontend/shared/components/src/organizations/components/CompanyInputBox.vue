@@ -31,7 +31,14 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AddressInput, CheckboxListItem, CompanyNumberInput, EmailInput, ErrorBox, useValidation, Validator, VATNumberInput } from '@stamhoofd/components';
+import AddressInput from '#inputs/AddressInput.vue';
+import CheckboxListItem from '#inputs/CheckboxListItem.vue';
+import CompanyNumberInput from '#inputs/CompanyNumberInput.vue';
+import EmailInput from '#inputs/EmailInput.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import { Validator } from '#errors/Validator.ts';
+import VATNumberInput from '#inputs/VATNumberInput.vue';
 import { Company, Country } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../../errors/useErrors';

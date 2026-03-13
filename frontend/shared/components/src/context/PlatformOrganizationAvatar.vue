@@ -8,7 +8,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ImageComponent, Logo, usePlatform } from '@stamhoofd/components';
+import ImageComponent from '#views/ImageComponent.vue';
+import Logo from '#icons/Logo.vue';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { computed } from 'vue';
 
 const platform = usePlatform();

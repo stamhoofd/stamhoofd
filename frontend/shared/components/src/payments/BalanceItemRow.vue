@@ -46,7 +46,10 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { EditBalanceItemView, GlobalEventBus, STGridItem, useContext } from '@stamhoofd/components';
+import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+import { GlobalEventBus } from '#EventBus.ts';
+import STGridItem from '#layout/STGridItem.vue';
+import { useContext } from '#hooks/useContext.ts';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, GroupedBalanceItems } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalanceItemIcon from './BalanceItemIcon.vue';

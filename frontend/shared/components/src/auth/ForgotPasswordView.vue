@@ -20,7 +20,15 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, EmailInput, ErrorBox, LoadingButton, STErrorsDefault, STFloatingFooter, STNavigationBar, Toast, Validator } from '@stamhoofd/components';
+import BackButton from '#navigation/BackButton.vue';
+import EmailInput from '#inputs/EmailInput.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STFloatingFooter from '#navigation/STFloatingFooter.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { Validator } from '#errors/Validator.ts';
 import { ForgotPasswordRequest } from '@stamhoofd/structures';
 
 @Component({

@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { ImageComponent } from '@stamhoofd/components';
+import ImageComponent from '#views/ImageComponent.vue';
 import { GroupType, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

@@ -1,5 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, Toast, useContext, useOrganization } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import {
     OrganizationRegistrationPeriod,

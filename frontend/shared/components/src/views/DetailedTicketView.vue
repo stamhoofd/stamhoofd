@@ -97,7 +97,13 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { ImageComponent, OrganizationLogo, ShowSeatsView, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import ImageComponent from '#views/ImageComponent.vue';
+import OrganizationLogo from '#context/OrganizationLogo.vue';
+import ShowSeatsView from '#views/ShowSeatsView.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
 import { Order, Organization, ProductDateRange, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';

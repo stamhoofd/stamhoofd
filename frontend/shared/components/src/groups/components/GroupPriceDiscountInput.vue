@@ -15,7 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import { PriceOrPercentageInput, PriceInput, PermyriadInput } from '@stamhoofd/components';
+import PriceInput from '#inputs/PriceInput.vue';
+import PermyriadInput from '#inputs/PermyriadInput.vue';
+import PriceOrPercentageInput from '#inputs/PriceOrPercentageInput.vue';
 import { Group, GroupPriceDiscount, GroupPriceDiscountType, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useFinancialSupportSettings } from '../hooks';

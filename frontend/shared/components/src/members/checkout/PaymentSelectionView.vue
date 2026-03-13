@@ -36,7 +36,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, LoadingButton, NavigationActions, PaymentSelectionList, PriceBreakdownBox, STErrorsDefault, STNavigationBar, STToolbar, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import PaymentSelectionList from '#views/PaymentSelectionList.vue';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import { RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 

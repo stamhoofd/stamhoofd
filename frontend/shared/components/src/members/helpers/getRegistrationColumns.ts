@@ -1,4 +1,4 @@
-import { Column } from '@stamhoofd/components';
+import { Column } from '#tables/classes/Column.ts';
 import { ContextPermissions } from '@stamhoofd/networking';
 import { AppType, ContinuousMembershipStatus, getGroupTypeName, Group, GroupCategoryTree, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

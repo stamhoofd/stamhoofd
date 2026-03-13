@@ -38,7 +38,16 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { BackButton, ErrorBox, NumberInput, Radio, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import BackButton from '#navigation/BackButton.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import NumberInput from '#inputs/NumberInput.vue';
+import Radio from '#inputs/Radio.vue';
+import StepperInput from '#inputs/StepperInput.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
 import { Cart, CartItem, CartReservedSeat, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

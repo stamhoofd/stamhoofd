@@ -41,7 +41,19 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, Checkbox, CodeInput, EmailInput, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import Checkbox from '#inputs/Checkbox.vue';
+import CodeInput from '#inputs/CodeInput.vue';
+import EmailInput from '#inputs/EmailInput.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import Spinner from '#Spinner.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STFloatingFooter from '#navigation/STFloatingFooter.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
+import { Toast } from '#overlays/Toast.ts';
 import { LoginHelper } from '@stamhoofd/networking';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation

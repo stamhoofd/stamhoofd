@@ -42,7 +42,9 @@
 
 <script setup lang="ts">
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, TransitionFade, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import TransitionFade from '#transitions/TransitionFade.vue';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { OrganizationTag } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

@@ -52,7 +52,9 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { DateSelection, useOrganization, useVisibilityChange } from '@stamhoofd/components';
+import DateSelection from '#inputs/DateSelection.vue';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
 import { AuditLog, isEmptyFilter, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onActivated, ref, Ref, watch } from 'vue';

@@ -1,5 +1,8 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ErrorBox, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager, usePlatformManager } from '@stamhoofd/networking';
 import { Group, MemberResponsibility, Organization, OrganizationPrivateMetaData, PermissionRoleDetailed, PermissionRoleForResponsibility, Platform, PlatformConfig, PlatformPrivateConfig, Version } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';

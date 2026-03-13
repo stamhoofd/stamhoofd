@@ -33,7 +33,8 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EditResponsibilitiesView, LoadingViewTransition } from '@stamhoofd/components';
+import EditResponsibilitiesView from '#responsibilities/EditResponsibilitiesView.vue';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { ComponentOptions } from 'vue';
 import ExternalAdminsBox from './ExternalAdminsBox.vue';
 import { useAdmins } from './hooks/useAdmins';

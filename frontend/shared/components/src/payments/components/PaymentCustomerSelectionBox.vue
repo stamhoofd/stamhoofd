@@ -50,7 +50,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, RadioListItem, useEmitPatch, Validator } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import RadioListItem from '#inputs/RadioListItem.vue';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
+import { Validator } from '#errors/Validator.ts';
 import { PaymentCustomer } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import PaymentCustomerInput from './PaymentCustomerInput.vue';

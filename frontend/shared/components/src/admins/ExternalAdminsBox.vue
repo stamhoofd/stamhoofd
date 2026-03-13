@@ -73,7 +73,8 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { useOrganization, useUser } from '@stamhoofd/components';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { PermissionLevel, Permissions, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import { computed, ref } from 'vue';

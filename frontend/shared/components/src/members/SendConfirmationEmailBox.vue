@@ -13,7 +13,9 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { Toast, useValidation, Validator } from '@stamhoofd/components';
+import { Toast } from '#overlays/Toast.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import { Validator } from '#errors/Validator.ts';
 import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Group, GroupPrivateSettings, Organization, OrganizationRegistrationPeriod, RegisterCheckout } from '@stamhoofd/structures';
 import { onMounted, Ref, ref } from 'vue';

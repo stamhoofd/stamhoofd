@@ -125,7 +125,15 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { BundleDiscountSettingsView, DateSelection, ErrorBox, GroupPriceDiscountsInput, NumberInput, STInputBox, TimeInput, useValidation, Validator } from '@stamhoofd/components';
+import BundleDiscountSettingsView from '#bundle-discounts/BundleDiscountSettingsView.vue';
+import DateSelection from '#inputs/DateSelection.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
+import NumberInput from '#inputs/NumberInput.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import TimeInput from '#inputs/TimeInput.vue';
+import { useValidation } from '#errors/useValidation.ts';
+import { Validator } from '#errors/Validator.ts';
 import { BundleDiscount, BundleDiscountGroupPriceSettings, Group, GroupPrice, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';

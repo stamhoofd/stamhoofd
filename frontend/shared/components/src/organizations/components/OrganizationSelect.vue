@@ -8,7 +8,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, SearchOrganizationView } from '@stamhoofd/components';
+import { NavigationActions } from '#types/NavigationActions.ts';
+import SearchOrganizationView from '#members/SearchOrganizationView.vue';
 import { Organization } from '@stamhoofd/structures';
 
 const model = defineModel<Organization | null>({

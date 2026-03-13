@@ -43,7 +43,12 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useDraggableArray, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { Toast } from '#overlays/Toast.ts';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
 import { BundleDiscount, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { ref } from 'vue';
 

@@ -16,10 +16,10 @@
 </template>
 
 <script setup lang="ts">
-import { ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import ViewRecordCategoryAnswersBox from '#records/components/ViewRecordCategoryAnswersBox.vue';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useErrors } from '#errors/useErrors';
+import { useErrors } from '#errors/useErrors.ts';
 import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 
 const props = withDefaults(

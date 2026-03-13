@@ -7,7 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import { ImageComponent, OrganizationAvatar } from '@stamhoofd/components';
+import ImageComponent from '#views/ImageComponent.vue';
+import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { Group, Organization } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

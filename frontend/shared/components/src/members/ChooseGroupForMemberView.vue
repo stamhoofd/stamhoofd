@@ -45,7 +45,13 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useOrganization, useUninheritedPermissions } from '@stamhoofd/components';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useAppContext } from '#context/appContext.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
 import { Group, GroupCategoryTree, GroupType, Organization, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';

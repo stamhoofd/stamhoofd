@@ -86,7 +86,15 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useAuth, useContext, useErrors, useOrganization, usePatchArray } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import SegmentedControl from '#inputs/SegmentedControl.vue';
+import { useAppContext } from '#context/appContext.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatchArray } from '#hooks/usePatchArray.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

@@ -35,7 +35,12 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
-import { LoadingButton, NavigationActions, Spinner, STNavigationBar, STToolbar, useNavigationActions } from '@stamhoofd/components';
+import LoadingButton from '#navigation/LoadingButton.vue';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import Spinner from '#Spinner.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 

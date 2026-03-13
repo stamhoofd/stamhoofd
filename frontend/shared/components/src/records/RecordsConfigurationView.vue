@@ -58,7 +58,12 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, useAppContext, useErrors, useOrganization, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useAppContext } from '#context/appContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePatch } from '#hooks/usePatch.ts';
 import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePlatformMemberFilterBuilders } from '../filters/filter-builders/members';

@@ -272,7 +272,16 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useAuth, useInterval, useOrganization, useUser } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import EmailView from '#email/EmailView.vue';
+import IconContainer from '#icons/IconContainer.vue';
+import ProgressRing from '#icons/ProgressRing.vue';
+import Spinner from '#Spinner.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useInterval } from '#hooks/useInterval.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useUser } from '#hooks/useUser.ts';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus, PermissionLevel } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import MembersTableView from '../members/MembersTableView.vue';

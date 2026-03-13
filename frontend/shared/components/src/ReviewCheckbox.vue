@@ -19,7 +19,9 @@
 </template>
 
 <script lang="ts" setup>
-import { TransitionFade, useSetupStepReviewDescription, useSetupStepTranslations } from '@stamhoofd/components';
+import TransitionFade from '#transitions/TransitionFade.vue';
+import { useSetupStepReviewDescription } from '#composables/useSetupStepReviewDescription.ts';
+import { useSetupStepTranslations } from '#hooks/useSetupStepTranslations.ts';
 import { computed } from 'vue';
 import { ReviewCheckboxData } from './useReview';
 

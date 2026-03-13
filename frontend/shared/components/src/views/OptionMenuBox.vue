@@ -30,7 +30,14 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Checkbox, ErrorBox, Radio, STList, STListItem, STNavigationBar, STToolbar, STErrorsInput } from '@stamhoofd/components';
+import Checkbox from '#inputs/Checkbox.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import Radio from '#inputs/Radio.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
+import STErrorsInput from '#errors/STErrorsInput.vue';
 import { Cart, CartItem, CartItemOption, CartStockHelper, Option, OptionMenu, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';

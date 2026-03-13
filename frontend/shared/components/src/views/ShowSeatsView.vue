@@ -27,7 +27,11 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
 import { Order, TicketPublic, Webshop } from '@stamhoofd/structures';
 
 import SeatSelectionBox from './SeatSelectionBox.vue';

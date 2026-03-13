@@ -17,7 +17,8 @@
 <script lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import STListItem from '#layout/STListItem.vue';
 import { RecordChoice, RecordSettings } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 

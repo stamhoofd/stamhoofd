@@ -50,7 +50,20 @@
 <script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useAppContext, useContext, useErrors, useExternalOrganization, useOrganization, usePlatform, useValidation } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import DateSelection from '#inputs/DateSelection.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import NumberInput from '#inputs/NumberInput.vue';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import PriceInput from '#inputs/PriceInput.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useAppContext } from '#context/appContext.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useValidation } from '#errors/useValidation.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { ChargeRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

@@ -1,5 +1,5 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components';
+import { useContext } from '#hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Email, EmailPreview } from '@stamhoofd/structures';
 

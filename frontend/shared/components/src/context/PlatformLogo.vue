@@ -9,7 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import { ImageComponent, Logo, useDeviceWidth, usePlatform } from '@stamhoofd/components';
+import ImageComponent from '#views/ImageComponent.vue';
+import Logo from '#icons/Logo.vue';
+import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { computed } from 'vue';
 
 const isPlatform = STAMHOOFD.userMode === 'platform';

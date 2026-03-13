@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { PriceBreakdownBox } from '@stamhoofd/components';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import { BalanceItem, DetailedPayableBalance, DetailedReceivableBalance } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

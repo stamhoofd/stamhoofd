@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { useEmitPatch } from '@stamhoofd/components';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { ApiUser, PermissionLevel, PermissionRole, Permissions, User } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import RolesView from '../RolesView.vue';

@@ -200,7 +200,7 @@
 
 <script lang="ts" setup>
 import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import { NavigationActions } from '@stamhoofd/components';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 
 import { LocalizedDomains, useTranslate } from '@stamhoofd/frontend-i18n';

@@ -98,7 +98,15 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import Radio from '#inputs/Radio.vue';
+import SaveView from '#navigation/SaveView.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import { Validator } from '#errors/Validator.ts';
 import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, TranslatedString, Version } from '@stamhoofd/structures';
 
 @Component({

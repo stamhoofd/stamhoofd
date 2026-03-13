@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePlatform } from '@stamhoofd/components';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { computed } from 'vue';
 import MultipleChoiceInput from './MultipleChoiceInput.vue';
 

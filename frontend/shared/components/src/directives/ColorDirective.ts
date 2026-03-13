@@ -1,4 +1,4 @@
-import { ColorHelper } from '@stamhoofd/components';
+import { ColorHelper } from '../ColorHelper.ts';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import type { ObjectDirective } from "vue";
 

@@ -48,7 +48,14 @@
 <script setup lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ErrorBox, NavigationActions, Spinner, Toast, useContext, useErrors, useNavigationActions, DateBox } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { NavigationActions } from '#types/NavigationActions.ts';
+import Spinner from '#Spinner.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import DateBox from '#icons/DateBox.vue';
 import { UitpasEventResponse, UitpasEventsResponse } from '@stamhoofd/structures';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { throttle } from '@stamhoofd/utility';

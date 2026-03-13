@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { NumberInput } from '@stamhoofd/components';
+import NumberInput from '#inputs/NumberInput.vue';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, GroupOption, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

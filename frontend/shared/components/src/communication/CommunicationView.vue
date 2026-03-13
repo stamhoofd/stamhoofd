@@ -51,7 +51,15 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAdminEmailFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { UIFilter } from '#filters/UIFilter.ts';
+import UIFilterEditor from '#filters/UIFilterEditor.vue';
+import { useAdminEmailFilterBuilders } from '#filters/filterBuilders.ts';
+import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
+import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
 import { useEmailsObjectFetcher } from '#fetchers/useEmailsObjectFetcher.ts';
 import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, PlatformMember, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

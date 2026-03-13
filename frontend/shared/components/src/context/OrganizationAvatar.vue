@@ -13,7 +13,7 @@
 import { BaseOrganization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { ImageComponent } from '@stamhoofd/components';
+import ImageComponent from '#views/ImageComponent.vue';
 import { computed } from 'vue';
 const props = defineProps<{
     organization: BaseOrganization;

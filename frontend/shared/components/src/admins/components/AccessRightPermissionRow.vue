@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { useEmitPatch } from '@stamhoofd/components';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { AccessRight, AccessRightHelper, PermissionRoleDetailed, Permissions, getPermissionLevelNumber } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

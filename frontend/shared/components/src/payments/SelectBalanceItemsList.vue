@@ -34,7 +34,9 @@
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PriceBreakdownBox, PriceInput, STInputBox } from '@stamhoofd/components';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import PriceInput from '#inputs/PriceInput.vue';
+import STInputBox from '#inputs/STInputBox.vue';
 import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';

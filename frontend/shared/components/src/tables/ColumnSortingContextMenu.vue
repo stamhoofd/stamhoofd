@@ -15,7 +15,10 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView } from "@stamhoofd/components";
+import Checkbox from '#inputs/Checkbox.vue';
+import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
+import ContextMenuLine from '#overlays/ContextMenuLine.vue';
+import ContextMenuView from '#overlays/ContextMenuView.vue';
 
 import { SortItemDirection } from "@stamhoofd/structures";
 import { Column } from "./classes";

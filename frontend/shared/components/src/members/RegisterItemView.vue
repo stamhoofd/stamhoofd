@@ -156,7 +156,17 @@
 <script setup lang="ts">
 import { patchObject } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CheckboxListItem, DateSelection, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
+import CheckboxListItem from '#inputs/CheckboxListItem.vue';
+import DateSelection from '#inputs/DateSelection.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import ImageComponent from '#views/ImageComponent.vue';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import NumberInput from '#inputs/NumberInput.vue';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import STList from '#layout/STList.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { GroupOption, GroupOptionMenu, GroupPrice, GroupType, PatchAnswers, PriceBreakdown, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';

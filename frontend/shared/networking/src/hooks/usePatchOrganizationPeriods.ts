@@ -1,5 +1,6 @@
 import { ArrayDecoder, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { useContext, useOrganization } from '@stamhoofd/components';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { useRequestOwner } from './useRequestOwner';
 

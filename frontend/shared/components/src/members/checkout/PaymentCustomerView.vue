@@ -58,13 +58,13 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { PaymentCustomer, type RegisterCheckout, type Checkoutable } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
-import { useAuth } from '#hooks/useAuth';
-import { useErrors } from '#errors/useErrors';
-import { ErrorBox } from '#errors/ErrorBox';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import { NavigationActions, useNavigationActions } from '#types/NavigationActions';
-import { useOrganization } from '#hooks/useOrganization';
-import { useUser } from '#hooks/useUser';
+import { NavigationActions, useNavigationActions } from '#types/NavigationActions.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useUser } from '#hooks/useUser.ts';
 import GeneralSettingsView from '#organizations/GeneralSettingsView.vue';
 
 const props = defineProps<{

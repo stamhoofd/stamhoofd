@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ViewStepsManager } from '#steps/ViewStepsManager';
+import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import { SessionContext } from '@stamhoofd/networking';
 import { PaymentStatus, PlatformFamily, PlatformMember, RegisterCheckout, RegisterResponse } from '@stamhoofd/structures';
 import { updateContextFromMembersBlob } from '../';

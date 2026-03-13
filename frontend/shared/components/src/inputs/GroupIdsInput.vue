@@ -45,7 +45,10 @@
 </template>
 
 <script setup lang="ts">
-import { ContextMenu, ContextMenuItem, LoadingBoxTransition, useOrganization, usePlatform } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { GroupType, NamedObject, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

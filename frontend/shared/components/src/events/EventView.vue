@@ -71,7 +71,14 @@
 
 <script setup lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { EventInfoTable, ExternalOrganizationContainer, ImageComponent, useChooseFamilyMembersForGroup, useContext, useExternalOrganization, useOrganization, usePlatform } from '@stamhoofd/components';
+import EventInfoTable from '#events/components/EventInfoTable.vue';
+import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
+import ImageComponent from '#views/ImageComponent.vue';
+import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
 import { Event, Organization, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

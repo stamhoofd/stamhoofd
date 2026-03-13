@@ -97,7 +97,19 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, ErrorBox, FillRecordCategoryBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, usePlatform, useReview } from '@stamhoofd/components';
+import AddressInput from '#inputs/AddressInput.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
+import SaveView from '#navigation/SaveView.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import UrlInput from '#inputs/UrlInput.vue';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useReview } from '#useReview.ts';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { Company, OrganizationMetaData, OrganizationPrivateMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';

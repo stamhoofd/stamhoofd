@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends string | string[]">
-import { Spinner } from '@stamhoofd/components';
+import Spinner from '#Spinner.vue';
 import { computed, ref } from 'vue';
 const props = defineProps<{label?: string, value: T, icon: string, color?: string, loading?: boolean, onClick?: () => Promise<void>}>();
 const emits = defineEmits<{(e: 'clickButton'): void}>();

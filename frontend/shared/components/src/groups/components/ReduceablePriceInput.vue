@@ -25,7 +25,13 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { PriceInput, STErrorsDefault, useErrors, useOrganization, usePlatform, useValidation, Validator } from '@stamhoofd/components';
+import PriceInput from '#inputs/PriceInput.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import { Validator } from '#errors/Validator.ts';
 import { Group, Organization, ReduceablePrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';

@@ -22,7 +22,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ContextMenu, ContextMenuItem, Spinner, Toast } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import Spinner from '#Spinner.vue';
+import { Toast } from '#overlays/Toast.ts';
 import { Graph } from '@stamhoofd/structures';
 import {
     CategoryScale,

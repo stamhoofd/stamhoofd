@@ -24,7 +24,11 @@
 </template>
 
 <script setup lang="ts">
-import { IconContainer, ProgressIcon, STListItem, useSetupStepReviewDescription, useSetupStepTranslations } from '@stamhoofd/components';
+import IconContainer from '#icons/IconContainer.vue';
+import ProgressIcon from '#icons/ProgressIcon.vue';
+import STListItem from '#layout/STListItem.vue';
+import { useSetupStepReviewDescription } from '#composables/useSetupStepReviewDescription.ts';
+import { useSetupStepTranslations } from '#hooks/useSetupStepTranslations.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SetupStep, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';

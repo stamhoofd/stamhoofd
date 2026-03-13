@@ -32,7 +32,9 @@
 </template>
 
 <script lang="ts" setup>
-import { Radio, STList, STListItem } from '@stamhoofd/components';
+import Radio from '#inputs/Radio.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
 import { Country, Organization, PaymentConfiguration, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentType } from '@stamhoofd/structures';
 import { computed, onMounted } from 'vue';
 import PaymentMethodIcon from '../payments/components/PaymentMethodIcon.vue';

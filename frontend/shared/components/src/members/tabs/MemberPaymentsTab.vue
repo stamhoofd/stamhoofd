@@ -11,7 +11,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ReceivableBalanceBox, useAuth, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
+import ReceivableBalanceBox from '#payments/ReceivableBalanceBox.vue';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import { PermissionLevel, PlatformMember, ReceivableBalance, ReceivableBalanceObject, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

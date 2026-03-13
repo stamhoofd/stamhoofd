@@ -29,7 +29,15 @@
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { RecordAnswerInput, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from '@stamhoofd/components';
+import RecordAnswerInput from '#inputs/RecordAnswerInput.vue';
+import Spinner from '#Spinner.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
+import { Validator } from '#errors/Validator.ts';
 import { PatchAnswers, RecordAnswer, RecordSettings, Version } from '@stamhoofd/structures';
 
 @Component({

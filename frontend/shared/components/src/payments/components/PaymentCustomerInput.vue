@@ -70,7 +70,12 @@
 </template>
 
 <script lang="ts" setup>
-import { CompanyInputBox, EmailInput, ErrorBox, PhoneInput, STInputBox, useEmitPatch, Validator } from '@stamhoofd/components';
+import EmailInput from '#inputs/EmailInput.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import PhoneInput from '#inputs/PhoneInput.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
+import { Validator } from '#errors/Validator.ts';
 import { Company, PaymentCustomer } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

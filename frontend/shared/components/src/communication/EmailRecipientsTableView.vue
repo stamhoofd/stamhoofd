@@ -48,7 +48,12 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, ComponentExposed, ModernTableView, TableAction, useEmailRecipientsFilterBuilders, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column } from '#tables/classes/Column.ts';
+import type { ComponentExposed } from '#VueGlobalHelper.ts';
+import ModernTableView from '#tables/ModernTableView.vue';
+import { TableAction } from '#tables/classes/TableAction.ts';
+import { useEmailRecipientsFilterBuilders } from '#filters/filterBuilders.ts';
+import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import { EmailPreview, EmailRecipient, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';

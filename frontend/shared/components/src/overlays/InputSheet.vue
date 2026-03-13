@@ -32,7 +32,9 @@
 
 <script lang="ts" setup>
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, useErrors } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(

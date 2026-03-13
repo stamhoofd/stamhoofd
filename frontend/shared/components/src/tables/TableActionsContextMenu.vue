@@ -22,7 +22,11 @@
 <script lang="ts">
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from '@stamhoofd/components';
+import Checkbox from '#inputs/Checkbox.vue';
+import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
+import ContextMenuLine from '#overlays/ContextMenuLine.vue';
+import ContextMenuView from '#overlays/ContextMenuView.vue';
+import { Toast } from '#overlays/Toast.ts';
 
 import { TableAction, TableActionSelection } from './classes';
 

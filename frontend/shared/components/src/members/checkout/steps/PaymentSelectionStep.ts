@@ -1,6 +1,6 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { type ViewStep } from '#steps/ViewStep';
-import { type ViewStepsManager } from '#steps/ViewStepsManager';
+import { type ViewStep } from '#steps/ViewStep.ts';
+import { type ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import { RegisterCheckout } from '@stamhoofd/structures';
 import { NavigationActions } from '../../../types/NavigationActions';
 import PaymentSelectionView from '../PaymentSelectionView.vue';

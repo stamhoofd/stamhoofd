@@ -1,5 +1,9 @@
 import { Product, UitpasClientCredentialsStatus, UitpasEventResponse } from '@stamhoofd/structures';
-import { CenteredMessage, NavigationActions, SearchUitpasEventView, Toast, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { NavigationActions } from '#types/NavigationActions.ts';
+import SearchUitpasEventView from '#organizations/components/SearchUitpasEventView.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import UitpasSettingsView from '@stamhoofd/dashboard/src/views/dashboard/settings/UitpasSettingsView.vue';
 import { useSetUitpasEvent } from './useSetUitpasEvent';

@@ -9,7 +9,11 @@
 
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ErrorBox, useErrors, usePlatform, useValidation, Validator } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import { Validator } from '#errors/Validator.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { computed } from 'vue';
 import MultipleChoiceInput from './MultipleChoiceInput.vue';

@@ -12,7 +12,11 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, Toast, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { Toast } from '#overlays/Toast.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Company } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

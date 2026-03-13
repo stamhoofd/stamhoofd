@@ -35,7 +35,13 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ErrorBox, NavigationActions, OrganizationAvatar, Spinner, Toast, useErrors, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import OrganizationAvatar from '#context/OrganizationAvatar.vue';
+import Spinner from '#Spinner.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';

@@ -1,6 +1,6 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { useContext } from '@stamhoofd/components';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import { useRequestOwner } from './useRequestOwner';
 

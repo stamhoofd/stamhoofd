@@ -33,7 +33,12 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { Radio, SaveView, STList, STListItem, Toast, TooltipDirective } from '@stamhoofd/components';
+import Radio from '#inputs/Radio.vue';
+import SaveView from '#navigation/SaveView.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import { Toast } from '#overlays/Toast.ts';
+import TooltipDirective from '#directives/Tooltip.ts';
 import { AppManager, Storage } from '@stamhoofd/networking';
 
 @Component({

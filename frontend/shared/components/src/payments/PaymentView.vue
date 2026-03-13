@@ -394,7 +394,26 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { AuditLogsView, CenteredMessage, EditBalanceItemView, EmailAddress, GlobalEventBus, IconContainer, STErrorsDefault, STGrid, STGridItem, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
+import AuditLogsView from '#audit-logs/AuditLogsView.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+import EmailAddress from '#email/EmailAddress.vue';
+import { GlobalEventBus } from '#EventBus.ts';
+import IconContainer from '#icons/IconContainer.vue';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import STGrid from '#layout/STGrid.vue';
+import STGridItem from '#layout/STGridItem.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { Toast } from '#overlays/Toast.ts';
+import { useAppContext } from '#context/appContext.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useBackForward } from '#hooks/useBackForward.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { BalanceItem, BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';

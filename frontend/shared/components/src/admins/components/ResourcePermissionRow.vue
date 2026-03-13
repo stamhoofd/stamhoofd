@@ -40,7 +40,9 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
-import { ContextMenu, ContextMenuItem, useAuth, useEmitPatch } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
 import { Ref, computed } from 'vue';
 

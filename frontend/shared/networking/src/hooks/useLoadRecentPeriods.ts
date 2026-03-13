@@ -1,4 +1,4 @@
-import { Toast } from '@stamhoofd/components';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Sorter } from '@stamhoofd/utility';
 import { useOrganizationManager } from '../OrganizationManager';
 import { useRequestOwner } from './useRequestOwner';

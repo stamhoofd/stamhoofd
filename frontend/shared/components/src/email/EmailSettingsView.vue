@@ -47,7 +47,13 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { IconContainer, STList, STListItem, STNavigationBar, STToolbar, useOrganization, usePlatform } from '@stamhoofd/components';
+import IconContainer from '#icons/IconContainer.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { OrganizationEmail } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

@@ -15,7 +15,19 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useRequiredRegistrationsFilter, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column } from '#tables/classes/Column.ts';
+import type { ComponentExposed } from '#VueGlobalHelper.ts';
+import { InMemoryTableAction, TableAction } from '#tables/classes/TableAction.ts';
+import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
+import ModernTableView from '#tables/ModernTableView.vue';
+import { useAppContext } from '#context/appContext.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, mergeFilters, Organization, PlatformRegistration, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';

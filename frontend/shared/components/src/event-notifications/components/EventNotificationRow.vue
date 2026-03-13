@@ -28,7 +28,7 @@ import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '
 import { Event, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { usePlatform } from '../../hooks';
-import { ViewStepsManager } from '#steps/ViewStepsManager';
+import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import { Toast } from '../../overlays/Toast';
 import { useNavigationActions } from '../../types/NavigationActions';
 import EventNotificationView from '../EventNotificationView.vue';
