@@ -78,8 +78,6 @@ const props = withDefaults(
     },
 );
 
-
-
 const title = computed(() => props.isNew ? $t('%5z') : $t('%60'));
 const errors = useErrors();
 const platform$ = usePlatform();

@@ -84,7 +84,6 @@ function addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<LoginMethodC
 const errors = useErrors();
 const pop = usePop();
 
-
 const saving = ref(false);
 
 const loginButtonText = computed({
