@@ -12,9 +12,9 @@
         "./*.vue": "./src/*.vue"
     },
     "imports": {
+        "#*": "./src/*.ts",
         "#*.vue": "./src/*.vue",
-        "#*.ts": "./src/*.ts",
-        "#*": "./src/*.ts"
+        "#*.ts": "./src/*.ts"
     },
     "dependencies": {
         "@stamhoofd/structures": "*",

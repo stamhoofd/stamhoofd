@@ -28,9 +28,15 @@
     "@capacitor/share": "^7.0.0",
     "@capacitor/status-bar": "^7.0.0",
     "@capgo/capacitor-updater": "7.22.0",
-    "@stamhoofd/assets": "1.0.0",
-    "@stamhoofd/components": "1.0.0",
-    "@stamhoofd/scss": "1.0.0",
+    "@stamhoofd/assets": "*",
+    "@stamhoofd/components": "*",
+    "@stamhoofd/document-helper": "*",
+    "@stamhoofd/frontend-excel-export": "*",
+    "@stamhoofd/frontend-i18n": "*",
+    "@stamhoofd/frontend-pdf-builder": "*",
+    "@stamhoofd/ticket-builder": "*",
+    "@stamhoofd/networking": "*",
+    "@stamhoofd/scss": "*",
     "@stamhoofd/structures": "*"
   },
   "devDependencies": {
