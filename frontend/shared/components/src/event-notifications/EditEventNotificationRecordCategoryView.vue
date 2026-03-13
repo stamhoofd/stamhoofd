@@ -13,14 +13,13 @@
 </template>
 
 <script setup lang="ts">
-import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
-import { useNavigationActions } from '#types/NavigationActions.ts';
-import type { NavigationActions } from '#types/NavigationActions.ts';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { EventNotificationViewModel } from './classes/EventNotificationViewModel';

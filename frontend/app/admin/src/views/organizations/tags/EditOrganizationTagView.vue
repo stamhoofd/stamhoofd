@@ -51,12 +51,11 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import { useDraggableArrayIds } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { useDraggableArrayIds } from '@stamhoofd/components/hooks/useDraggableArray.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { getOrganizationTagTypeName, OrganizationTag } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref } from 'vue';

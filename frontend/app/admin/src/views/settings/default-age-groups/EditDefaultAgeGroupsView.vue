@@ -23,21 +23,20 @@
 </template>
 
 <script lang="ts" setup>
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { computed, ref } from 'vue';
-import EditDefaultAgeGroupView from './EditDefaultAgeGroupView.vue';
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { DefaultAgeGroup, Platform, PlatformConfig } from '@stamhoofd/structures';
-import DefaultAgeGroupRow from './components/DefaultAgeGroupRow.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { DefaultAgeGroup, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
+import DefaultAgeGroupRow from './components/DefaultAgeGroupRow.vue';
+import EditDefaultAgeGroupView from './EditDefaultAgeGroupView.vue';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();

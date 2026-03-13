@@ -73,14 +73,13 @@
 </template>
 
 <script setup lang="ts">
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
+import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
+import { Toast } from '#overlays/Toast.ts';
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
-import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import { Toast } from '#overlays/Toast.ts';
-import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMember, PlatformMembershipType, PlatformMembershipTypeBehaviour, RegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

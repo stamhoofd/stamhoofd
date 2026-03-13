@@ -16,7 +16,6 @@
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
@@ -34,7 +33,6 @@ const props = defineProps<{
 const auth = useAuth();
 const isRenewingSecurityCode = ref(false);
 const platformFamilyManager = usePlatformFamilyManager();
-
 
 const shouldShowResetSecurityCode = computed(() => {
     return auth.canAccessPlatformMember(props.member, PermissionLevel.Full);

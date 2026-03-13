@@ -10,14 +10,13 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { Toast } from '#overlays/Toast.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { Company } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import CompanyInputBox from './CompanyInputBox.vue';
@@ -27,18 +26,17 @@ const props = withDefaults(
         company: Company;
         isNew: boolean;
         saveHandler: (group: AutoEncoderPatchType<Company>) => Promise<void>;
-        deleteHandler?: (() => Promise<void>)|null;
+        deleteHandler?: (() => Promise<void>) | null;
     }>(),
     {
-        deleteHandler: null
-    }
+        deleteHandler: null,
+    },
 );
 
-const {patched, hasChanges, addPatch, patch} = usePatch(props.company);
+const { patched, hasChanges, addPatch, patch } = usePatch(props.company);
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
-
 
 const pop = usePop();
 
@@ -53,16 +51,18 @@ async function save() {
 
     saving.value = true;
     try {
-        errors.errorBox = null
+        errors.errorBox = null;
         if (!await errors.validator.validate()) {
             saving.value = false;
             return;
         }
         await props.saveHandler(patch.value);
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
-    } finally {
+    }
+    finally {
         saving.value = false;
     }
 }
@@ -78,10 +78,12 @@ async function deleteMe() {
     deleting.value = true;
     try {
         await props.deleteHandler();
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         deleting.value = false;
     }
 }
@@ -90,12 +92,11 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('%A0'), $t('%4X'))
-}
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
-
+    shouldNavigateAway,
+});
 
 </script>

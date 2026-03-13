@@ -25,14 +25,13 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { Platform, PlatformConfig, PlatformPolicy, PrivacySettings } from '@stamhoofd/structures';
 import { ref } from 'vue';

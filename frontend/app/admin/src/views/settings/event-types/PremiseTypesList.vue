@@ -19,7 +19,6 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PlatformPremiseType } from '@stamhoofd/structures';
 import EditBuildingTypeView from './EditPremiseTypeView.vue';
 import PremiseTypeRow from './components/PremiseTypeRow.vue';

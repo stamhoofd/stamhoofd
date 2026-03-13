@@ -90,7 +90,6 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, GroupOption, GroupOptionMenu, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '../../errors/useErrors';

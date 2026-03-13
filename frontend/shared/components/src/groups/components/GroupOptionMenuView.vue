@@ -12,7 +12,6 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Group, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
@@ -28,16 +27,16 @@ const props = withDefaults(
         group: Group;
         isNew: boolean;
         saveHandler: (price: AutoEncoderPatchType<GroupOptionMenu>) => Promise<void>;
-        deleteHandler?: (() => Promise<void>)|null,
-        showToasts?: boolean
+        deleteHandler?: (() => Promise<void>) | null;
+        showToasts?: boolean;
     }>(),
     {
         deleteHandler: null,
-        showToasts: true
-    }
+        showToasts: true,
+    },
 );
 
-const {patched, hasChanges, addPatch, patch} = usePatch(props.optionMenu);
+const { patched, hasChanges, addPatch, patch } = usePatch(props.optionMenu);
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
@@ -56,10 +55,12 @@ async function save() {
     saving.value = true;
     try {
         await props.saveHandler(patch.value);
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         saving.value = false;
     }
 }
@@ -78,25 +79,25 @@ async function deleteMe() {
         if (props.showToasts) {
             await Toast.success($t('%1FX')).show();
         }
-        await pop({force: true})
-    } catch (e) {
+        await pop({ force: true });
+    }
+    catch (e) {
         Toast.fromError(e).show();
-    } finally {
+    }
+    finally {
         deleting.value = false;
     }
 }
-
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('%A0'), $t('%4X'))
-}
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
+};
 
 defineExpose({
-    shouldNavigateAway
-})
-
+    shouldNavigateAway,
+});
 
 </script>

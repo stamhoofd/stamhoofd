@@ -40,9 +40,8 @@ import { useReview } from '@stamhoofd/components/useReview.ts';
 import { useSetupStepTranslations } from '@stamhoofd/components/hooks/useSetupStepTranslations.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, SetupStepType, Version } from '@stamhoofd/structures';
-
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
+
 @Component({
     components: {
         SaveView,
@@ -68,7 +67,6 @@ export default class RegistrationPaymentSettingsView extends Mixins(NavigationMi
     saving = false;
     temp_organization = this.$organization;
     loadingMollie = false;
-    $t = useTranslate();
     setupTranslations = useSetupStepTranslations();
     title = '';
 

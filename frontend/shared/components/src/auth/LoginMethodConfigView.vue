@@ -54,14 +54,13 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, ConvertArrayToPatchableArray, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import ArrayInput from '#inputs/ArrayInput.vue';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatchMap } from '#hooks/usePatchMap.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import ArrayInput from '#inputs/ArrayInput.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { AutoEncoderPatchType, ConvertArrayToPatchableArray, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { LoginMethod, LoginMethodConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

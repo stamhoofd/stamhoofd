@@ -120,15 +120,14 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import IBANInput from '@stamhoofd/components/inputs/IBANInput.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentMethodSettings, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

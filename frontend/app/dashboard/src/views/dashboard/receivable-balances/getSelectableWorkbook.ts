@@ -1,6 +1,6 @@
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { type useTranslate } from '@stamhoofd/frontend-i18n/I18nController';
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -9,7 +9,6 @@ import { Formatter } from '@stamhoofd/utility';
  * -> a hook is better suited for this
  */
 export function useSelectableWorkbook() {
-    
     const $feature = useFeatureFlag();
 
     return {

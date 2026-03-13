@@ -26,13 +26,12 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import { Validator } from '#errors/Validator.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { OrganizationTag } from '@stamhoofd/structures';
 import { computed, ref, watch, watchEffect } from 'vue';
 
@@ -52,7 +51,6 @@ const props = withDefaults(
 const model = defineModel<string[] | null>({ required: true });
 const platform = usePlatform();
 const errors = useErrors({ validator: props.validator });
-
 
 const tags = computed(() => platform.value.config.tags);
 const lastCachedValue = ref<string[] | null>(null);

@@ -9,7 +9,7 @@ import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue'
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { type useTranslate } from '@stamhoofd/frontend-i18n/I18nController';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';

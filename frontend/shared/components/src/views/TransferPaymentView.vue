@@ -199,11 +199,11 @@
 </template>
 
 <script lang="ts" setup>
-import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 import type { NavigationActions } from '#types/NavigationActions.ts';
+import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 
-import { LocalizedDomains, useTranslate } from '@stamhoofd/frontend-i18n';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';

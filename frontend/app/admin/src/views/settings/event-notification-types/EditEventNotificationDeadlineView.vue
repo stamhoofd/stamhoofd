@@ -46,14 +46,13 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { EventNotificationDeadline } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

@@ -48,13 +48,12 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { Toast } from '#overlays/Toast.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { Group, MemberResponsibility, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditRoleView from '../admins/EditRoleView.vue';

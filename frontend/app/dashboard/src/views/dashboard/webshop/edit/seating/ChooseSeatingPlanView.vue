@@ -81,21 +81,19 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, ObjectData, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import Radio from '@stamhoofd/components/inputs/Radio.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, WebshopMetaData } from '@stamhoofd/structures';
 import { sleep, Sorter } from '@stamhoofd/utility';
-
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { computed, ref } from 'vue';
 import EditSeatingPlanView from './EditSeatingPlanView.vue';
 
@@ -110,7 +108,6 @@ const errors = useErrors();
 const organization = useOrganization();
 const pop = usePop();
 const present = usePresent();
-
 
 const importingSeatingPlan = ref(false);
 

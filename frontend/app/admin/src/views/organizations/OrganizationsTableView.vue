@@ -20,21 +20,21 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, InMemoryTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import EmailView, { type RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers/useOrganizationsObjectFetcher.ts';
+import { useGetOrganizationUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/organizations.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useGetOrganizationUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/organizations.ts';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
-import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers/useOrganizationsObjectFetcher.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { AsyncTableAction, InMemoryTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationPrivateMetaData, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
