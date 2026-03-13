@@ -7,13 +7,13 @@
     "type": "module",
     "exports": {
         ".": "./index.ts",
-        "./*": "./src/*.ts",
-        "./*.ts": "./src/*.ts",
-        "./*.vue": "./src/*.vue"
+        "./*": "./*.ts",
+        "./*.ts": "./*.ts",
+        "./*.vue": "./*.vue"
     },
     "imports": {
-        "#*.vue": "./src/*.vue",
-        "#*.ts": "./src/*.ts",
-        "#*": "./src/*.ts"
+        "#*.vue": "./*.vue",
+        "#*.ts": "./*.ts",
+        "#*": "./*.ts"
     }
 }

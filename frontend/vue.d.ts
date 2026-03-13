@@ -28,14 +28,14 @@ declare module 'vue' {
         $isMac: boolean;
         $isMobile: boolean;
         $isStamhoofd: boolean;
-        $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
-        $feature: ReturnType<typeof import('@stamhoofd/components').useFeatureFlag>;
+        $t: typeof import('@stamhoofd/frontend-i18n/I18n').I18n.prototype.$t;
+        $feature: ReturnType<typeof import('@stamhoofd/components/hooks/useFeatureFlag').useFeatureFlag>;
 
         /**
          * @deprecated
          * Only used for legacy code
          */
-        $patchOrganizationPeriod: ReturnType<typeof import('@stamhoofd/networking').usePatchOrganizationPeriod>;
+        $patchOrganizationPeriod: ReturnType<typeof import('@stamhoofd/networking/hooks/usePatchOrganizationPeriod').usePatchOrganizationPeriod>;
 
         $context: SessionContext;
         $organization: Organization;
@@ -43,26 +43,26 @@ declare module 'vue' {
         $user: User | null;
         $organizationManager: OrganizationManager;
         $memberManager: MemberManager;
-        $app: ReturnType<typeof import('@stamhoofd/components').useAppContext>;
+        $app: ReturnType<typeof import('@stamhoofd/components/context/appContext').useAppContext>;
         STAMHOOFD: FrontendEnvironment;
         $domains: typeof LocalizedDomains;
 
         // Global components
-        readonly STList: typeof import('@stamhoofd/components').STList;
-        readonly STListItem: typeof import('@stamhoofd/components').STListItem;
-        readonly STNavigationBar: typeof import('@stamhoofd/components').STNavigationBar;
-        readonly STInputBox: typeof import('@stamhoofd/components').STInputBox;
-        readonly STErrorsDefault: typeof import('@stamhoofd/components').STErrorsDefault;
-        readonly SaveView: typeof import('@stamhoofd/components').SaveView;
-        readonly Checkbox: typeof import('@stamhoofd/components').Checkbox;
-        readonly Radio: typeof import('@stamhoofd/components').Radio;
-        readonly LoadingView: typeof import('@stamhoofd/components').LoadingView;
-        readonly Spinner: typeof import('@stamhoofd/components').Spinner;
-        readonly LoadingButton: typeof import('@stamhoofd/components').LoadingButton;
-        readonly STToolbar: typeof import('@stamhoofd/components').STToolbar;
-        readonly TTextarea: typeof import('@stamhoofd/components').TTextarea;
-        readonly TInput: typeof import('@stamhoofd/components').TInput;
-        readonly I18nComponent: typeof import('@stamhoofd/frontend-i18n').I18nComponent;
+        readonly STList: typeof import('@stamhoofd/components/layout/STList.vue');
+        readonly STListItem: typeof import('@stamhoofd/components/layout/STListItem.vue');
+        readonly STNavigationBar: typeof import('@stamhoofd/components/navigation/STNavigationBar.vue');
+        readonly STInputBox: typeof import('@stamhoofd/components/inputs/STInputBox.vue');
+        readonly STErrorsDefault: typeof import('@stamhoofd/components/errors/STErrorsDefault.vue');
+        readonly SaveView: typeof import('@stamhoofd/components/navigation/SaveView.vue');
+        readonly Checkbox: typeof import('@stamhoofd/components/inputs/Checkbox.vue');
+        readonly Radio: typeof import('@stamhoofd/components/inputs/Radio.vue');
+        readonly LoadingView: typeof import('@stamhoofd/components/containers/LoadingView.vue');
+        readonly Spinner: typeof import('@stamhoofd/components/Spinner.vue');
+        readonly LoadingButton: typeof import('@stamhoofd/components/navigation/LoadingButton.vue');
+        readonly STToolbar: typeof import('@stamhoofd/components/navigation/STToolbar.vue');
+        readonly TTextarea: typeof import('@stamhoofd/components/inputs/TTextarea.vue');
+        readonly TInput: typeof import('@stamhoofd/components/inputs/TInput.vue');
+        readonly I18nComponent: typeof import('@stamhoofd/frontend-i18n/I18nComponent');
 
         // Formatters
         formatPrice: typeof Formatter.price;
@@ -89,7 +89,7 @@ declare module 'vue' {
 // Make sure VueComponent from '@simonbackx/vue-app-navigation/classes' has a property named $t
 declare module '@simonbackx/vue-app-navigation/classes' {
     interface VueComponent {
-        $t: typeof import('@stamhoofd/frontend-i18n').I18n.prototype.$t;
+        $t: typeof import('@stamhoofd/frontend-i18n/I18n').I18n.prototype.$t;
         $attrs: any;
         $props: any;
         $: any;
