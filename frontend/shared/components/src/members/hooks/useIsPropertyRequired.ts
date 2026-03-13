@@ -1,6 +1,5 @@
-import { MemberProperty, PermissionLevel } from '@stamhoofd/structures';
+import { MemberProperty, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { Ref, computed } from 'vue';
-import { PlatformMember } from '../../../../../../shared/structures/esm/dist/src/members/PlatformMember';
 import { useAppContext } from '../../context/appContext';
 import { useAuth, useContext } from '../../hooks';
 
