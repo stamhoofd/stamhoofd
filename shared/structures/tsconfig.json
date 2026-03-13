@@ -12,7 +12,9 @@
         "strictNullChecks": true,
         "declaration": true,
         "declarationMap": true,
-        "outDir": "dist",
+        "composite": true,
+        "outDir": "./dist",
+        "rootDir": "./",
         "resolveJsonModule": true,
         "noErrorTruncation": true,
         "lib": [
@@ -22,11 +24,11 @@
         "types": [
             "node",
             "jest"
-        ]
+        ],
     },
     "include": [
         "index.ts",
-        "tets/*.ts",
+        "tests/*.ts",
         "src/**/*.ts",
         "tests/**/*.ts",
         "../../*.d.ts",
