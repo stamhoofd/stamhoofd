@@ -10,9 +10,6 @@
       "backend/shared/*",
       "shared/*",
       "tests/*"
-    ],
-    "nohoist": [
-      "@simonbackx/simple-encoding"
     ]
   },
   "engines": {
