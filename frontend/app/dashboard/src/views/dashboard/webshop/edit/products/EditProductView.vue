@@ -9,6 +9,10 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <p v-if="!nameWarning && seatingWarning" class="error-box">
+            {{ seatingWarning }}
+        </p>
+
         <button v-if="!patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" type="button" class="warning-box with-button selectable" @click="openUitpasEventSearch()">
             {{ $t('%1Bx') }}
 
@@ -27,6 +31,9 @@
         <div class="split-inputs">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
                 <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`%Gq`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
+                <p v-if="nameWarning" class="warning-box">
+                    {{ nameWarning }}
+                </p>
             </STInputBox>
             <STInputBox v-if="isTicket" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="type">
@@ -422,23 +429,23 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
-import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
+import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
 import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';
@@ -579,6 +586,36 @@ const name = computed({
     set: (name: string) => {
         addProductPatch({ name });
     },
+});
+
+const nameWarning = computed(() => {
+    if (!name.value) {
+        return null;
+    }
+    const lowerName = name.value.toLowerCase().trim();
+    for (const p of patchedWebshop.value.products) {
+        if (p.id !== props.product.id && p.name && p.name.toLowerCase().trim() === lowerName) {
+            return $t('Er bestaat al een artikel met dezelfde naam in deze webshop, je gebruikt best unieke namen.');
+        }
+    }
+    return null;
+});
+
+const seatingWarning = computed(() => {
+    if (!patchedProduct.value.seatingPlanId) {
+        return null;
+    }
+    if (!patchedProduct.value.dateRange) {
+        return null;
+    }
+
+    for (const p of patchedWebshop.value.products) {
+        if (p.id !== props.product.id && p.seatingPlanId === patchedProduct.value.seatingPlanId && p.dateRange && p.dateRange.toString() === patchedProduct.value.dateRange.toString()) {
+            return $t("Er bestaat al een ander ticket met hetzelfde zaalplan maar een andere datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.");
+        }
+    }
+
+    return null;
 });
 
 const location = computed({
