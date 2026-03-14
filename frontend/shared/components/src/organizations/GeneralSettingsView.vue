@@ -16,7 +16,7 @@
                     <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
                 </STInputBox>
 
-                <AddressInput v-model="address" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" />
+                <AddressInput v-model="address" :optional-except-city="true" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" />
             </div>
 
             <div>
@@ -146,7 +146,7 @@ const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.c
 
 watch(draggableCompanies, (companies) => {
     overrideIsDone.value = companies.length > 0;
-}, {immediate: true});
+}, { immediate: true });
 
 const name = computed({
     get: () => patched.value.name,

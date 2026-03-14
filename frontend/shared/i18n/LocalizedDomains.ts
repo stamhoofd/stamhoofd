@@ -1,5 +1,5 @@
-import { I18nController } from './I18nController';
 import { appToUri } from '@stamhoofd/structures';
+import { I18nController } from './I18nController';
 
 export class LocalizedDomains {
     static getDomain(localizedDomain: LocalizedDomain) {
@@ -16,6 +16,10 @@ export class LocalizedDomains {
 
     static get marketing() {
         return this.getDomain(STAMHOOFD.domains.marketing);
+    }
+
+    static get marketingUrl() {
+        return 'https://' + this.marketing;
     }
 
     static get documentation() {
