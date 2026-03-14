@@ -1,8 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>{{ $t('%Qf') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('%OH') }}</a>.</p>
-
+        <p>Op <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">deze pagina</a> vind je hoe elke betaalmethode werkt en hoe je die instelt.</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
@@ -11,9 +10,9 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
