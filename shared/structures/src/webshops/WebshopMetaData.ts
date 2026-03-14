@@ -583,6 +583,17 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 374 })
     customCode: string | null = null;
 
+    /**
+     * Returns whether the webshop is event/ticketing based - regardless whether scanners are used or not
+     */
+    get isTicketBased() {
+        return this.type === WebshopType.Event || this.type === WebshopType.Performance || this.ticketType === WebshopTicketType.Tickets;
+    }
+
+    get isRegistrations() {
+        return this.type === WebshopType.Registrations;
+    }
+
     get hasTickets() {
         return this.ticketType === WebshopTicketType.SingleTicket || this.ticketType === WebshopTicketType.Tickets;
     }

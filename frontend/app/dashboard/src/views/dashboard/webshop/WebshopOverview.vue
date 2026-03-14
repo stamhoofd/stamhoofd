@@ -1,6 +1,13 @@
 <template>
     <div id="webshop-overview" class="st-view background">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
+            <template #right>
+                <button type="button" class="button text selected" @click="openWebshopUrl()">
+                    <span>{{ $t('Bekijk shop') }}</span>
+                    <span class="icon external" />
+                </button>
+            </template>
+        </STNavigationBar>
 
         <main class="center">
             <h1 class="style-navigation-title with-icons">
@@ -10,6 +17,42 @@
                 <span v-else-if="isArchive" class="icon archive" />
                 <span v-else class="icon dot red" />
             </h1>
+
+            <template v-if="hasFullPermissions && todoList.length > 0 && webshop">
+                <div class="style-onboarding-checklist" :class="{closed: !openTodoList}">
+                    <h2 class="button" @click="toggleTodoList">
+                        <button type="button" class="button icon" :class="{'arrow-down-small': openTodoList, 'arrow-right-small': !openTodoList}" />
+                        <span>{{ $t('Stappenplan') }}</span>
+                    </h2>
+
+                    <div v-if="openTodoList">
+                        <STList>
+                            <STListItem v-for="(item, index) in todoList" :key="index" :selectable="true" :class="{'theme-success': item.done, 'theme-secundary': !item.done}" @click="item.action()">
+                                <template #left>
+                                    <figure class="style-image-with-icon">
+                                        <figure><span :class="'icon ' + item.icon" /></figure>
+                                        <aside v-if="item.done">
+                                            <span class="icon small success" />
+                                        </aside>
+                                        <aside v-else-if="item.subIcon">
+                                            <span :class="'icon small ' + item.subIcon" />
+                                        </aside>
+                                    </figure>
+                                </template>
+                                <h3 class="style-title-list smaller">
+                                    {{ item.title }}
+                                </h3>
+                                <p class="style-description-smaller">
+                                    {{ item.description }}
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+                        </STList>
+                    </div>
+                </div>
+            </template>
 
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
@@ -140,21 +183,6 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/bike.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Pj') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Pk') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
                     <STListItem :selectable="true" class="left-center" @click="editPaymentMethods(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
@@ -164,21 +192,6 @@
                         </h2>
                         <p class="style-description">
                             {{ $t('%Pl') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Pm') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Pn') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -211,6 +224,36 @@
                         </h2>
                         <p class="style-description">
                             {{ $t('%Pp') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/bike.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%Pj') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('%Pk') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editDiscounts(true)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%Pm') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('%Pn') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -419,25 +462,27 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, NavigationController, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import AccountSettingsView from '@stamhoofd/components/views/AccountSettingsView.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+import { ComponentWithProperties, NavigationController, useCanDismiss, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { AccessRight, EmailTemplate, EmailTemplateType, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import AccountSettingsView from '@stamhoofd/components/views/AccountSettingsView.vue';
+import { AccessRight, Country, EmailTemplate, EmailTemplateType, PaymentMethod, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
+import PackageSettingsView from '../settings/packages/PackageSettingsView.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopDiscountsView from './edit/EditWebshopDiscountsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
@@ -457,15 +502,17 @@ import { WebshopManager } from './WebshopManager';
 const props = defineProps<{ preview: WebshopPreview }>();
 const context = useContext();
 const organizationManager = useOrganizationManager();
-const organization = useOrganization();
+const organization = useRequiredOrganization();
 const show = useShow();
 const present = usePresent();
 const pop = usePop();
 const canPop = useCanPop();
+const canDismiss = useCanDismiss();
 const splitViewController = useSplitViewController();
 const owner = useRequestOwner();
 
 const loading = ref(false);
+const openTodoList = ref(true);
 
 const webshopManager = ref(new WebshopManager(context.value, props.preview));
 const webshop = computed(() => webshopManager.value.webshop);
@@ -498,6 +545,45 @@ const hasScanPermissions = computed(() => auth.canAccessWebshopTickets(props.pre
 const isTicketsOnly = computed(() => webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets);
 const hasTickets = computed(() => webshopManager.value.preview.meta.ticketType !== WebshopTicketType.None);
 const hasSeating = computed(() => webshopManager.value.preview.meta.seatingPlans.length > 0 && (!webshop.value || !!webshop.value?.products?.find(p => p.seatingPlanId !== null)));
+
+function openPackages() {
+    if (!auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
+        new CenteredMessage('Enkel voor hoofdbeheerders', 'Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.').addCloseButton().show();
+        return;
+    }
+
+    present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(PackageSettingsView),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    }).catch(console.error);
+}
+
+function openWebshopUrl() {
+    window.open('https://' + webshopUrl.value, '_blank');
+}
+
+function openSeatDocs() {
+    window.open('https://' + LocalizedDomains.marketing + '/docs/zaalplan/', '_blank');
+}
+
+function toggleTodoList() {
+    openTodoList.value = !openTodoList.value;
+    try {
+        if (!openTodoList.value) {
+            localStorage.setItem('hideWebshopOnboarding', 'true');
+        }
+        else {
+            localStorage.removeItem('hideWebshopOnboarding');
+        }
+    }
+    catch (e) {
+        console.error('Could not write to localStorage', e);
+    }
+}
 
 function openOrders(animated = true) {
     show({
@@ -857,6 +943,126 @@ async function deleteWebshop() {
         Toast.fromError(e).show();
     }
 }
+
+const todoList = computed(() => {
+    const list: {
+        icon: string;
+        subIcon?: string;
+        title: string;
+        description: string;
+        action: () => Promise<void> | void;
+        done: boolean;
+    }[] = [];
+
+    if (webshopManager.value.preview.meta.status === WebshopStatus.Archived) {
+        // Archived webshops should not show a todo list
+        return list;
+    }
+
+    list.push({
+        icon: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'ticket' : 'box',
+        subIcon: 'add',
+        title: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Voeg tickets toe aan je webshop' : 'Voeg artikels toe aan je webshop',
+        description: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.' : 'Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.',
+        action: () => editProducts(),
+        done: !!webshop.value?.products && webshop.value.products.length > 0,
+    });
+
+    if (webshopManager.value.preview.meta.type === WebshopType.Performance) {
+        list.push({
+            icon: 'seat',
+            title: 'Koppel een zaalplan',
+            description: 'Lees de gids door hoe je een zaalplan instelt.',
+            action: () => openSeatDocs(),
+            done: !!webshop.value?.products && webshop.value.products.some(p => p.seatingPlanId !== null),
+        });
+    }
+
+    if (webshopManager.value.preview.meta.type === WebshopType.TakeawayAndDelivery) {
+        list.push({
+            icon: 'location',
+            subIcon: 'add',
+            title: 'Stel afhaal of leveringsmethodes in',
+            description: 'Stel in hoe, waar en wanneer bestellers hun bestelling kunnen afhalen of geleverd krijgen.',
+            action: () => editCheckoutMethods(),
+            done: webshopManager.value.preview.meta.checkoutMethods.length > 0,
+        });
+    }
+
+    if (webshopManager.value.preview.meta.type === WebshopType.TakeawayAndDelivery) {
+        list.push({
+            icon: 'image',
+            title: 'Stel een omslagfoto, logo, kleur en beschrijving in',
+            description: 'Maak je webshop helemaal professioneel door deze in te stellen.',
+            action: () => editPage(),
+            done: webshopManager.value.preview.meta.description.text.length > 0
+                || !!webshopManager.value.preview.meta.useLogo
+                || !!webshopManager.value.preview.meta.color
+                || !!webshopManager.value.preview.meta.title,
+        });
+    }
+
+    list.push({
+        icon: 'bank',
+        title: 'Stel online betalingen in',
+        description: organization.value.address?.country === Country.Netherlands ? 'Zorg dat bestellers via iDEAL of creditcard kunnen betalen.' : 'Zorg dat bestellers via Bancontact, Payconiq of creditcard kunnen betalen.',
+        action: () => editPaymentMethods(),
+        done: webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.CreditCard)
+            || webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.iDEAL)
+            || webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Bancontact)
+            || webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Payconiq)
+            || webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.Transfer),
+    });
+
+    if (webshopManager.value.preview.meta.status !== WebshopStatus.Open) {
+        list.push({
+            icon: 'clock',
+            title: 'Open je webshop als je er klaar voor bent',
+            description: 'Je kan je webshop openen op een bepaald tijdstip, of manueel via de knop onderaan.',
+            action: () => editGeneral(),
+            done: false,
+        });
+    }
+
+    if (organization.value.meta.packages.isWebshopsTrial) {
+        list.push({
+            icon: 'power',
+            title: 'Activeer Stamhoofd als je wilt beginnen verkopen',
+            description: 'Beëindig je proefperiode en ga van start',
+            action: () => openPackages(),
+            done: false,
+        });
+    }
+
+    // If all done, return empty list
+    if (list.every(i => i.done)) {
+        return [];
+    }
+
+    // Sort by moving all done items to the end
+    list.sort((a, b) => {
+        if (a.done && !b.done) {
+            return 1;
+        }
+        if (!a.done && b.done) {
+            return -1;
+        }
+        return 0;
+    });
+
+    return list;
+});
+
+onMounted(() => {
+    try {
+        if (localStorage.getItem('hideWebshopOnboarding') === 'true') {
+            openTodoList.value = false;
+        }
+    }
+    catch (e) {
+        console.error('Could not read from localStorage', e);
+    }
+});
 
 onBeforeUnmount(() => {
     // Clear all pending requests
