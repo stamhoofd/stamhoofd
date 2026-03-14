@@ -798,3 +798,13 @@ defineExpose({
     shouldNavigateAway,
 });
 </script>
+
+<style lang="scss" scoped>
+.illustration-radio-container {
+
+// todo: change in inputs.scss?
+        &:has(> :last-child:nth-child(2)) { /* 2 elements */
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+</style>

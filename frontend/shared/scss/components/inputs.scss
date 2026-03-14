@@ -196,6 +196,10 @@ select.input {
         max-width: none;
     }
 
+    .max > div > & {
+        max-width: none;
+    }
+
     & > * {
         flex-grow: 1;
         margin: 0 5px;
