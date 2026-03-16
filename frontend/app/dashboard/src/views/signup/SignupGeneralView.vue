@@ -91,7 +91,7 @@
                 </template>
             </main>
 
-            <STToolbar :sticky="isComplete" class="center">
+            <STToolbar class="center">
                 <template #right>
                     <LoadingButton :loading="loading" class="max">
                         <button class="button primary" type="submit" data-testid="signup-next-button" @click.prevent="goNext">
