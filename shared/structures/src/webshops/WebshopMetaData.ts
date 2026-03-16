@@ -397,9 +397,11 @@ export class WebshopMetaData extends AutoEncoder {
      */
     @field({
         decoder: new EnumDecoder(WebshopType),
-        optional: true,
-        version: 247,
+        ...NextVersion,
         upgrade: function (this: WebshopMetaData) {
+            if (this.type) {
+                return this.type;
+            }
             if (this.ticketType === WebshopTicketType.Tickets && this.seatingPlans.length > 0) {
                 return WebshopType.Performance;
             }
@@ -410,7 +412,6 @@ export class WebshopMetaData extends AutoEncoder {
             return WebshopType.Webshop;
         },
     })
-    // todo: add seed for platform webshops
     type: WebshopType = WebshopType.Webshop;
 
     @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
