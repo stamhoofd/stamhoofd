@@ -186,7 +186,7 @@
             <hr><h2>{{ $t('%O7') }}</h2>
             <p>{{ $t('%Qf') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('%OH') }}</a>.</p>
 
-            <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" :show-administration-fee="false" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
+            <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
         </div>
 
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
