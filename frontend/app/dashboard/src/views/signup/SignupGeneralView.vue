@@ -28,21 +28,21 @@
                     {{ $t('%4F') }}
                 </p>
 
-                <STErrorsDefault :error-box="errorBox" />
+                <STErrorsDefault :error-box="errors.errorBox" />
                 <div class="split-inputs">
                     <div>
-                        <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errorBox">
+                        <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox">
                             <input id="organization-name" ref="firstInput" v-model="name" data-testid="organization-name-input" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
                         </STInputBox>
 
-                        <AddressInput v-model="address" :title="$t('%8a')" :validator="validator" :link-country-to-locale="true" />
+                        <AddressInput v-model="address" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" />
                         <p class="style-description-small">
                             {{ $t('%Wb') }}
                         </p>
                     </div>
 
                     <div>
-                        <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`%Wj`)">
+                        <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%Wj`)">
                             <Dropdown v-model="type" data-testid="organization-type-select">
                                 <option :value="null" disabled>
                                     {{ $t('%1Fq') }}
@@ -59,7 +59,7 @@
                             {{ $t('%Wc') }}
                         </p>
 
-                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`%Wk`)">
+                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errors.errorBox" :title="$t(`%Wk`)">
                             <Dropdown v-model="umbrellaOrganization" data-testid="organization-umbrella-select">
                                 <option :value="null" disabled>
                                     {{ $t('%1Fq') }}
@@ -106,387 +106,365 @@
     </LoadingViewTransition>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
-import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
-import Slider from '@stamhoofd/components/inputs/Slider.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
+import { MetaKey, useErrors, useMetaInfo } from '@stamhoofd/components';
+import { computed, onMounted, ref } from 'vue';
 import SignupAccountView from './SignupAccountView.vue';
 
-@Component({
-    components: {
-        STToolbar,
-        STNavigationBar,
-        Slider,
-        STErrorsDefault,
-        STInputBox,
-        BackButton,
-        AddressInput,
-        LoadingButton,
-        Checkbox,
-        Dropdown,
-        LoadingViewTransition,
+useMetaInfo({
+    title: 'Sluit jouw vereniging aan | Stamhoofd',
+    options: {
+        key: MetaKey.Routing,
     },
-    metaInfo() {
-        return {
-            title: 'Sluit jouw vereniging aan | Stamhoofd',
-            meta: [
-                {
-                    vmid: 'description',
-                    name: 'description',
-                    content: 'Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.',
-                },
-            ],
-        };
-    },
-    navigation: {
-        title: 'Sluit jouw vereniging aan | Stamhoofd',
-    },
-})
-export default class SignupGeneralView extends Mixins(NavigationMixin) {
-    name = '';
-    validator = new Validator();
-    errorBox: ErrorBox | null = null;
-    address: Address | null = null;
-    acquisitionTypes: AcquisitionType[] = [];
+    meta: [
+        {
+            id: 'description',
+            name: 'description',
+            content: 'Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.',
+        },
+    ],
+});
 
-    @Prop({ default: false })
-    visitViaUrl!: boolean;
+const props = withDefaults(defineProps<{
+    visitViaUrl: boolean;
+    initialRegisterCode: { code: string; organization: string } | null;
+}>(), {
+    visitViaUrl: false,
+    initialRegisterCode: null,
 
-    @Prop({ default: null })
-    initialRegisterCode!: { code: string; organization: string } | null;
+});
 
-    registerCode = this.initialRegisterCode;
+const name = ref('');
+const errors = useErrors();
+const show = useShow();
+const dismiss = useDismiss();
 
-    validatedRegisterCode: null | RegisterCode = null;
+const address = ref<Address | null>(null);
+const acquisitionTypes = ref<AcquisitionType[]>([]);
 
-    reuseRegisterCode = false;
+let registerCode = props.initialRegisterCode;
 
-    loading = false;
-    loadingRegisterCode = true;
+const validatedRegisterCode = ref<null | RegisterCode>(null);
 
-    // Make reactive
-    I18nController = I18nController.shared;
+const reuseRegisterCode = ref(false);
 
-    type: OrganizationType | null = null;
-    umbrellaOrganization: UmbrellaOrganization | null = null;
+const loading = ref(false);
+const loadingRegisterCode = ref(true);
 
-    mounted() {
-        this.loadRegisterCode().catch((e) => {
-            console.error(e);
-        });
-    }
+const type = ref<OrganizationType | null>(null);
+const umbrellaOrganization = ref<UmbrellaOrganization | null>(null);
 
-    async loadRegisterCode() {
-        this.loadingRegisterCode = true;
+onMounted(() => {
+    loadRegisterCode().catch(console.error);
+});
 
-        if (this.initialRegisterCode) {
-            try {
-                await Storage.keyValue.setItem('savedRegisterCode', JSON.stringify(this.initialRegisterCode));
-                await Storage.keyValue.setItem('savedRegisterCodeDate', new Date().getTime() + '');
-            }
-            catch (e) {
-                console.error(e);
-            }
-        }
+async function loadRegisterCode() {
+    loadingRegisterCode.value = true;
+
+    if (props.initialRegisterCode) {
         try {
-            const currentCount = await Storage.keyValue.getItem('what-is-new');
-            const saved = await Storage.keyValue.getItem('savedRegisterCode');
-            const dString = await Storage.keyValue.getItem('savedRegisterCodeDate');
-
-            if (saved !== null && dString !== null) {
-                const d = parseInt(dString);
-                if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.code && parsed.organization) {
-                        if (currentCount === null) {
-                            this.registerCode = JSON.parse(saved);
-                        }
-                        else {
-                            this.reuseRegisterCode = true;
-                            this.registerCode = null;
-                        }
-                    }
-                }
-                else {
-                    // Expired or invalid
-                    await Storage.keyValue.removeItem('savedRegisterCode');
-                    await Storage.keyValue.removeItem('savedRegisterCodeDate');
-                    this.registerCode = null;
-                }
-            }
-            else {
-                await Storage.keyValue.removeItem('savedRegisterCode');
-                await Storage.keyValue.removeItem('savedRegisterCodeDate');
-                this.registerCode = null;
-            }
+            await Storage.keyValue.setItem('savedRegisterCode', JSON.stringify(props.initialRegisterCode));
+            await Storage.keyValue.setItem('savedRegisterCodeDate', new Date().getTime() + '');
         }
         catch (e) {
             console.error(e);
         }
-
-        if (this.registerCode) {
-            try {
-                await this.validateCode();
-            }
-            catch (e) {
-                this.errorBox = new ErrorBox(e);
-                this.registerCode = null;
-                await Storage.keyValue.removeItem('savedRegisterCode');
-                await Storage.keyValue.removeItem('savedRegisterCodeDate');
-            }
-        }
-        this.loadingRegisterCode = false;
     }
+    try {
+        const currentCount = await Storage.keyValue.getItem('what-is-new');
+        const saved = await Storage.keyValue.getItem('savedRegisterCode');
+        const dString = await Storage.keyValue.getItem('savedRegisterCodeDate');
 
-    get isBelgium() {
-        return I18nController.shared.countryCode === Country.Belgium && (!this.address || this.address.country === Country.Belgium);
-    }
-
-    get AcquisitionType() {
-        return AcquisitionType;
-    }
-
-    async validateCode() {
-        // Check register code
-        if (this.registerCode) {
-            try {
-                const response = await NetworkManager.server.request({
-                    method: 'GET',
-                    path: '/register-code/' + encodeURIComponent(this.registerCode.code.toUpperCase()),
-                    decoder: RegisterCode as Decoder<RegisterCode>,
-                });
-                this.validatedRegisterCode = response.data;
-                this.acquisitionTypes = [AcquisitionType.Recommended];
-            }
-            catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    if (e.hasCode('invalid_code')) {
-                        throw new SimpleError({
-                            code: 'invalid_code',
-                            message: 'De gebruikte doorverwijzingslink is niet meer geldig. Je kan verder met registereren, maar je ontvangt geen tegoed.',
-                            field: 'registerCode',
-                        });
+        if (saved !== null && dString !== null) {
+            const d = parseInt(dString);
+            if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
+                const parsed = JSON.parse(saved);
+                if (parsed.code && parsed.organization) {
+                    if (currentCount === null) {
+                        registerCode = JSON.parse(saved);
+                    }
+                    else {
+                        reuseRegisterCode.value = true;
+                        registerCode = null;
                     }
                 }
-                throw e;
             }
+            else {
+                // Expired or invalid
+                await Storage.keyValue.removeItem('savedRegisterCode');
+                await Storage.keyValue.removeItem('savedRegisterCodeDate');
+                registerCode = null;
+            }
+        }
+        else {
+            await Storage.keyValue.removeItem('savedRegisterCode');
+            await Storage.keyValue.removeItem('savedRegisterCodeDate');
+            registerCode = null;
         }
     }
+    catch (e) {
+        console.error(e);
+    }
 
-    async goNext() {
-        if (this.loading) {
-            return;
-        }
-
+    if (registerCode) {
         try {
-            if (this.name.length === 0) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: '',
-                    human: 'Vul de naam van jouw vereniging in',
-                    field: 'name',
-                });
-            }
-            if (this.name.length < 4) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: '',
-                    human: 'De naam van jouw vereniging is te kort',
-                    field: 'name',
-                });
-            }
+            await validateCode();
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+            registerCode = null;
+            await Storage.keyValue.removeItem('savedRegisterCode');
+            await Storage.keyValue.removeItem('savedRegisterCodeDate');
+        }
+    }
+    loadingRegisterCode.value = false;
+}
 
-            if (this.type === null) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Maak een keuze',
-                    field: 'type',
-                });
-            }
+const isBelgium = computed(() => I18nController.shared.countryCode === Country.Belgium && (!address.value || address.value.country === Country.Belgium));
 
-            if (this.type === OrganizationType.Youth && this.isBelgium) {
-                if (this.umbrellaOrganization === null) {
+async function validateCode() {
+    // Check register code
+    if (registerCode) {
+        try {
+            const response = await NetworkManager.server.request({
+                method: 'GET',
+                path: '/register-code/' + encodeURIComponent(registerCode.code.toUpperCase()),
+                decoder: RegisterCode as Decoder<RegisterCode>,
+            });
+            validatedRegisterCode.value = response.data;
+            acquisitionTypes.value = [AcquisitionType.Recommended];
+        }
+        catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                if (e.hasCode('invalid_code')) {
                     throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'Maak een keuze',
-                        field: 'umbrellaOrganization',
+                        code: 'invalid_code',
+                        message: 'De gebruikte doorverwijzingslink is niet meer geldig. Je kan verder met registereren, maar je ontvangt geen tegoed.',
+                        field: 'registerCode',
                     });
                 }
             }
-            else {
-                this.umbrellaOrganization = null;
-            }
-
-            this.loading = true;
-            this.errorBox = null;
-
-            if (!await this.validator.validate() || !this.address) {
-                this.loading = false;
-                return;
-            }
-
-            // Check register code
-            try {
-                await this.validateCode();
-            }
-            catch (e) {
-                this.errorBox = new ErrorBox(e);
-                this.loading = false;
-                return;
-            }
-
-            const defaultStartDate = new Date();
-            defaultStartDate.setMonth(defaultStartDate.getMonth() + 1);
-            defaultStartDate.setDate(1);
-
-            const defaultEndDate = new Date(defaultStartDate.getTime());
-            defaultEndDate.setFullYear(defaultStartDate.getFullYear() + 1);
-
-            const organization = Organization.create({
-                name: this.name,
-                uri: '', // ignored by backend for now
-                meta: OrganizationMetaData.create({
-                    type: this.type,
-                    umbrellaOrganization: this.umbrellaOrganization,
-                    recordsConfiguration: RecordConfigurationFactory.create(this.type, this.address.country),
-                    defaultStartDate,
-                    defaultEndDate,
-                }),
-                privateMeta: OrganizationPrivateMetaData.create({
-                    acquisitionTypes: this.acquisitionTypes,
-                }),
-                address: this.address,
-            });
-
-            this.loading = false;
-            this.errorBox = null;
-            this.show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: this.registerCode }));
-            plausible('signupGeneral');
-        }
-        catch (e) {
-            this.loading = false;
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-            plausible('signupGeneralError');
-
-            if (STAMHOOFD.environment === 'development' && this.name.length === 0) {
-                console.log('Autofill for development mode enabled. Filling in default values...');
-                // Autofill all
-                this.name = 'Testvereniging ' + Math.floor(Math.random() * 100000);
-                this.address = Address.create({
-                    street: 'Teststraat',
-                    number: '1',
-                    postalCode: '9000',
-                    city: 'Gent',
-                    country: Country.Belgium,
-                });
-                this.type = OrganizationType.Other;
-            }
-            return;
-        }
-    }
-
-    get availableTypes() {
-        const types = OrganizationTypeHelper.getList().sort((a, b) =>
-            Sorter.stack(
-                Sorter.byBooleanValue(
-                    !a.name.toLowerCase().startsWith('andere'),
-                    !b.name.toLowerCase().startsWith('andere'),
-                ),
-                Sorter.byStringProperty(a, b, 'name'),
-            ),
-        );
-
-        // Group by category
-        const map = new Map<string, {
-            value: OrganizationType;
-            name: string;
-        }[]>();
-
-        for (const type of types) {
-            const cat = OrganizationTypeHelper.getCategory(type.value);
-            if (!map.has(cat)) {
-                map.set(cat, [type]);
-            }
-            else {
-                map.get(cat)!.push(type);
-            }
-        }
-
-        const keys = Array.from(map.keys()).sort(Sorter.byStringValue);
-
-        return keys.map((key) => {
-            const types = map.get(key)!;
-            return {
-                name: key,
-                types,
-            };
-        });
-    }
-
-    get availableUmbrellaOrganizations() {
-        return UmbrellaOrganizationHelper.getList().sort((a, b) =>
-            Sorter.stack(
-                Sorter.byBooleanValue(
-                    !a.name.toLowerCase().startsWith('andere'),
-                    !b.name.toLowerCase().startsWith('andere'),
-                ),
-                Sorter.byStringProperty(a, b, 'name'),
-            ),
-        );
-    }
-
-    async shouldNavigateAway() {
-        if (this.name === '' && this.address === null && this.type === null) {
-            return true;
-        }
-        if (await CenteredMessage.confirm('Ben je zeker dat je dit venster wilt sluiten?', 'Sluiten')) {
-            plausible('closeSignup');
-            return true;
-        }
-        plausible('cancelCloseSignup');
-        return false;
-    }
-
-    // Helpers ---
-
-    getBooleanType(type: AcquisitionType) {
-        return !!this.acquisitionTypes.find(r => r === type);
-    }
-
-    setBooleanType(type: AcquisitionType, enabled: boolean) {
-        const index = this.acquisitionTypes.findIndex(r => r === type);
-        if ((index !== -1) === enabled) {
-            return;
-        }
-
-        if (enabled) {
-            this.acquisitionTypes.push(type);
-        }
-        else {
-            this.acquisitionTypes.splice(index, 1);
+            throw e;
         }
     }
 }
+
+async function goNext() {
+    if (loading.value) {
+        return;
+    }
+
+    try {
+        if (name.value.length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: '',
+                human: 'Vul de naam van jouw vereniging in',
+                field: 'name',
+            });
+        }
+        if (name.value.length < 4) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: '',
+                human: 'De naam van jouw vereniging is te kort',
+                field: 'name',
+            });
+        }
+
+        if (type.value === null) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Maak een keuze',
+                field: 'type',
+            });
+        }
+
+        if (type.value === OrganizationType.Youth && isBelgium.value) {
+            if (umbrellaOrganization.value === null) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Maak een keuze',
+                    field: 'umbrellaOrganization',
+                });
+            }
+        }
+        else {
+            umbrellaOrganization.value = null;
+        }
+
+        loading.value = true;
+        errors.errorBox = null;
+
+        if (!await errors.validator.validate() || !address.value) {
+            loading.value = false;
+            return;
+        }
+
+        // Check register code
+        try {
+            await validateCode();
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+            loading.value = false;
+            return;
+        }
+
+        const defaultStartDate = new Date();
+        defaultStartDate.setMonth(defaultStartDate.getMonth() + 1);
+        defaultStartDate.setDate(1);
+
+        const defaultEndDate = new Date(defaultStartDate.getTime());
+        defaultEndDate.setFullYear(defaultStartDate.getFullYear() + 1);
+
+        const organization = Organization.create({
+            name: name.value,
+            uri: '', // ignored by backend for now
+            meta: OrganizationMetaData.create({
+                type: type.value,
+                umbrellaOrganization: umbrellaOrganization.value,
+                recordsConfiguration: RecordConfigurationFactory.create(type.value, address.value.country),
+                defaultStartDate,
+                defaultEndDate,
+            }),
+            privateMeta: OrganizationPrivateMetaData.create({
+                acquisitionTypes: acquisitionTypes.value,
+            }),
+            address: address.value,
+        });
+
+        loading.value = false;
+        errors.errorBox = null;
+        show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: registerCode })).catch(console.error);
+        plausible('signupGeneral');
+    }
+    catch (e) {
+        loading.value = false;
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        plausible('signupGeneralError');
+
+        if (STAMHOOFD.environment === 'development' && name.value.length === 0) {
+            console.log('Autofill for development mode enabled. Filling in default values...');
+            // Autofill all
+            name.value = 'Testvereniging ' + Math.floor(Math.random() * 100000);
+            address.value = Address.create({
+                street: 'Teststraat',
+                number: '1',
+                postalCode: '9000',
+                city: 'Gent',
+                country: Country.Belgium,
+            });
+            type.value = OrganizationType.Other;
+        }
+        return;
+    }
+}
+
+const availableTypes = computed(() => {
+    const types = OrganizationTypeHelper.getList().sort((a, b) =>
+        Sorter.stack(
+            Sorter.byBooleanValue(
+                !a.name.toLowerCase().startsWith('andere'),
+                !b.name.toLowerCase().startsWith('andere'),
+            ),
+            Sorter.byStringProperty(a, b, 'name'),
+        ),
+    );
+
+    // Group by category
+    const map = new Map<string, {
+        value: OrganizationType;
+        name: string;
+    }[]>();
+
+    for (const type of types) {
+        const cat = OrganizationTypeHelper.getCategory(type.value);
+        if (!map.has(cat)) {
+            map.set(cat, [type]);
+        }
+        else {
+            map.get(cat)!.push(type);
+        }
+    }
+
+    const keys = Array.from(map.keys()).sort(Sorter.byStringValue);
+
+    return keys.map((key) => {
+        const types = map.get(key)!;
+        return {
+            name: key,
+            types,
+        };
+    });
+});
+
+const availableUmbrellaOrganizations = computed(() => {
+    return UmbrellaOrganizationHelper.getList().sort((a, b) =>
+        Sorter.stack(
+            Sorter.byBooleanValue(
+                !a.name.toLowerCase().startsWith('andere'),
+                !b.name.toLowerCase().startsWith('andere'),
+            ),
+            Sorter.byStringProperty(a, b, 'name'),
+        ),
+    );
+});
+
+async function shouldNavigateAway() {
+    if (name.value === '' && address.value === null && type.value === null) {
+        return true;
+    }
+    if (await CenteredMessage.confirm('Ben je zeker dat je dit venster wilt sluiten?', 'Sluiten')) {
+        plausible('closeSignup');
+        return true;
+    }
+    plausible('cancelCloseSignup');
+    return false;
+}
+
+// Helpers ---
+
+function getBooleanType(type: AcquisitionType) {
+    return !!acquisitionTypes.value.find(r => r === type);
+}
+
+function setBooleanType(type: AcquisitionType, enabled: boolean) {
+    const index = acquisitionTypes.value.findIndex(r => r === type);
+    if ((index !== -1) === enabled) {
+        return;
+    }
+
+    if (enabled) {
+        acquisitionTypes.value.push(type);
+    }
+    else {
+        acquisitionTypes.value.splice(index, 1);
+    }
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
