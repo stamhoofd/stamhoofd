@@ -1,21 +1,28 @@
 <template>
     <LoadingViewTransition>
-        <form v-if="!loadingRegisterCode" id="signup-general-view" class="st-view" @submit.prevent="goNext">
-            <STNavigationBar :title="$t(`%3E`)" />
+        <form v-if="!loadingRegisterCode" id="signup-general-view" ref="formEl" class="st-view" :class="{complete: isComplete}" @submit.prevent="goNext">
+            <STNavigationBar title="Registreren">
+                <template #left>
+                    <BackButton @click="onPop" />
+                </template>
 
-            <main>
+                <template #right>
+                    <button v-if="isComplete" type="button" class="button text selected" @click.prevent="goNext">
+                        Volgende
+                    </button>
+                </template>
+            </STNavigationBar>
+
+            <main class="center small">
+                <aside class="style-title-prefix">
+                    {{ $t('STAP {current} / {total}', {current: 1, total: 2}) }}
+                </aside>
                 <h1>
                     {{ $t("%5W") }}
                 </h1>
                 <p>
                     {{ $t('%WY') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("%5V") }}</a>
                 </p>
-                <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss()">
-                    {{ $t('%5S') }}
-                    <span class="button text" type="button">
-                        {{ $t('%WZ') }}
-                    </span>
-                </button>
 
                 <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
                     {{ $t('%Wa', {value: formatPrice(validatedRegisterCode.value), organization: validatedRegisterCode.organizationName ?? ''}) }}
@@ -29,48 +36,39 @@
                 </p>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
-                <div class="split-inputs">
-                    <div>
-                        <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox">
-                            <input id="organization-name" ref="firstInput" v-model="name" data-testid="organization-name-input" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
-                        </STInputBox>
 
-                        <AddressInput v-model="address" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" />
-                        <p class="style-description-small">
-                            {{ $t('%Wb') }}
-                        </p>
+                <STInputBox :title="$t(`Wat voor vereniging?`)" error-fields="type" :error-box="errors.errorBox" class="max">
+                    <div class="illustration-radio-container">
+                        <label v-for="{value, title, imgSrc} in typeOptions" :key="value" class="illustration-radio-box">
+                            <div>
+                                <Radio v-model="type" :value="value" />
+                            </div>
+                            <figure>
+                                <img :src="imgSrc">
+                            </figure>
+                            <h3>{{ title }}</h3>
+                        </label>
                     </div>
+                </STInputBox>
 
-                    <div>
-                        <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%Wj`)">
-                            <Dropdown v-model="type" data-testid="organization-type-select">
-                                <option :value="null" disabled>
-                                    {{ $t('%1Fq') }}
-                                </option>
+                <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox">
+                    <input
+                        id="organization-name"
+                        ref="firstInput"
+                        v-model="name"
+                        data-testid="organization-name-input"
+                        class="input"
+                        type="text"
+                        :placeholder="$t('%8C')"
+                        autocomplete="off"
+                        enterkeyhint="next"
+                    >
+                </STInputBox>
 
-                                <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
-                                    <option v-for="_type in group.types" :key="_type.value" :value="_type.value">
-                                        {{ _type.name }}
-                                    </option>
-                                </optgroup>
-                            </Dropdown>
-                        </STInputBox>
-                        <p class="style-description-small">
-                            {{ $t('%Wc') }}
-                        </p>
-
-                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errors.errorBox" :title="$t(`%Wk`)">
-                            <Dropdown v-model="umbrellaOrganization" data-testid="organization-umbrella-select">
-                                <option :value="null" disabled>
-                                    {{ $t('%1Fq') }}
-                                </option>
-                                <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
-                                    {{ item.name }}
-                                </option>
-                            </Dropdown>
-                        </STInputBox>
-                    </div>
-                </div>
+                <AddressInput v-model="address" enterkeyhint="done" :city-only="true" class="max" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" />
+                <p class="style-description-small">
+                    {{ $t('%Wb') }}
+                </p>
 
                 <template v-if="!validatedRegisterCode">
                     <hr><h2>{{ $t('%Wd') }}</h2>
@@ -93,11 +91,12 @@
                 </template>
             </main>
 
-            <STToolbar>
+            <STToolbar :sticky="isComplete" class="center">
                 <template #right>
-                    <LoadingButton :loading="loading">
+                    <LoadingButton :loading="loading" class="max">
                         <button class="button primary" type="submit" data-testid="signup-next-button" @click.prevent="goNext">
-                            {{ $t('%Wi') }}
+                            <span>{{ $t("%19q") }}</span>
+                            <span class="icon arrow-right" />
                         </button>
                     </LoadingButton>
                 </template>
@@ -109,26 +108,32 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import bikeIllustration from '@stamhoofd/assets/images/illustrations/bike.svg';
+import charityIllustration from '@stamhoofd/assets/images/illustrations/charity.svg';
+import educationIllustration from '@stamhoofd/assets/images/illustrations/education.svg';
+import stageIllustration from '@stamhoofd/assets/images/illustrations/stage.svg';
+import teamIllustration from '@stamhoofd/assets/images/illustrations/team.svg';
+import tentIllustration from '@stamhoofd/assets/images/illustrations/tent.svg';
+import { MetaKey, useErrors, useMetaInfo } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/networking/Storage';
-import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
-
-import { MetaKey, useErrors, useMetaInfo } from '@stamhoofd/components';
-import { computed, onMounted, ref } from 'vue';
+import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import SignupAccountView from './SignupAccountView.vue';
 
 useMetaInfo({
@@ -154,10 +159,15 @@ const props = withDefaults(defineProps<{
 
 });
 
+const formEl = useTemplateRef<HTMLElement>('formEl');
 const name = ref('');
 const errors = useErrors();
 const show = useShow();
 const dismiss = useDismiss();
+const canPop = useCanPop();
+const canDismiss = useCanDismiss();
+const pop = usePop();
+const owner = useRequestOwner();
 
 const address = ref<Address | null>(null);
 const acquisitionTypes = ref<AcquisitionType[]>([]);
@@ -174,9 +184,99 @@ const loadingRegisterCode = ref(true);
 const type = ref<OrganizationType | null>(null);
 const umbrellaOrganization = ref<UmbrellaOrganization | null>(null);
 
+let checkCount = 0;
+
+async function checkName() {
+    if (name.value.length === 0) {
+        return false;
+    }
+
+    const uri = Formatter.slug(name.value);
+
+    if (uri.length > 100) {
+        throw new SimpleError({
+            code: 'invalid_field',
+            message: '',
+            human: 'De naam van jouw vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.',
+            field: 'name',
+        });
+    }
+
+    checkCount++;
+    const c = checkCount;
+    const nameCopy = name.value;
+
+    try {
+        Request.cancelAll(owner);
+
+        const registrationDomains = STAMHOOFD.domains.registration;
+        if (!registrationDomains) {
+            throw new Error('No registration domains in env');
+        }
+
+        await NetworkManager.server.request({
+            method: 'GET',
+            path: '/organization-from-domain',
+            query: {
+                domain: uri + '.' + registrationDomains[''],
+            },
+            owner,
+            shouldRetry: true,
+        });
+        if (checkCount !== c || name.value !== nameCopy) {
+            // Discard
+            return;
+        }
+        return true;
+    }
+    catch (e) {
+        if (checkCount !== c || name.value !== nameCopy) {
+            // Discard
+            return;
+        }
+        if (isSimpleError(e) || isSimpleErrors(e)) {
+            if (e.hasCode('unknown_organization')) {
+                return false;
+            }
+        }
+        throw e;
+    }
+}
+
 onMounted(() => {
     loadRegisterCode().catch(console.error);
 });
+
+watch(formEl, (el) => {
+    if (el) {
+        el.querySelectorAll('input, textarea, select').forEach((el) => {
+            el.addEventListener('focus', () => {
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
+                }, 300); // wait for keyboard animation
+            });
+        });
+    }
+});
+
+const isComplete = computed(() => name.value.length > 2 && address.value !== null && type.value !== null && address.value.city.length >= 3);
+
+function onPop() {
+    if (canPop.value) {
+        pop()?.catch(console.error);
+    }
+    if (canDismiss.value) {
+        dismiss().catch(console.error);
+    }
+    // Go back using the history API
+    else if (window.history.length > 1) {
+        window.history.back();
+    }
+    else {
+        // Go to marketing site
+        window.location.href = 'https://' + LocalizedDomains.marketing;
+    }
+}
 
 async function loadRegisterCode() {
     loadingRegisterCode.value = true;
@@ -240,8 +340,6 @@ async function loadRegisterCode() {
     loadingRegisterCode.value = false;
 }
 
-const isBelgium = computed(() => I18nController.shared.countryCode === Country.Belgium && (!address.value || address.value.country === Country.Belgium));
-
 async function validateCode() {
     // Check register code
     if (registerCode) {
@@ -300,21 +398,18 @@ async function goNext() {
             });
         }
 
-        if (type.value === OrganizationType.Youth && isBelgium.value) {
-            if (umbrellaOrganization.value === null) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Maak een keuze',
-                    field: 'umbrellaOrganization',
-                });
-            }
-        }
-        else {
-            umbrellaOrganization.value = null;
-        }
-
         loading.value = true;
         errors.errorBox = null;
+
+        const check = await checkName();
+        if (check === true || check === undefined) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: '',
+                human: 'Er bestaat al een vereniging met deze naam. Probeer de naam wat te wijzigen (mogelijks bestaan er meerdere verenigingen met dezelfde naam) of kijk na of jouw vereniging niet al is geregistreerd.',
+                field: 'name',
+            });
+        }
 
         if (!await errors.validator.validate() || !address.value) {
             loading.value = false;
@@ -382,55 +477,38 @@ async function goNext() {
     }
 }
 
-const availableTypes = computed(() => {
-    const types = OrganizationTypeHelper.getList().sort((a, b) =>
-        Sorter.stack(
-            Sorter.byBooleanValue(
-                !a.name.toLowerCase().startsWith('andere'),
-                !b.name.toLowerCase().startsWith('andere'),
-            ),
-            Sorter.byStringProperty(a, b, 'name'),
-        ),
-    );
+const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] = [
+    {
+        value: OrganizationType.Sport,
+        title: $t('Sport'),
+        imgSrc: bikeIllustration,
+    },
+    {
+        value: OrganizationType.Culture,
+        title: $t(`%mR`),
+        imgSrc: stageIllustration,
+    }, {
+        value: OrganizationType.Youth,
+        title: $t('Jeugd'),
+        imgSrc: tentIllustration,
+    },
+    {
+        value: OrganizationType.School,
+        title: $t(`%p`),
+        imgSrc: educationIllustration,
+    },
+    {
+        value: OrganizationType.GoodCause,
+        title: $t('Goed doel'),
+        imgSrc: charityIllustration,
+    },
+    {
+        value: OrganizationType.Other,
+        title: $t(`%1JG`),
+        imgSrc: teamIllustration,
+    },
 
-    // Group by category
-    const map = new Map<string, {
-        value: OrganizationType;
-        name: string;
-    }[]>();
-
-    for (const type of types) {
-        const cat = OrganizationTypeHelper.getCategory(type.value);
-        if (!map.has(cat)) {
-            map.set(cat, [type]);
-        }
-        else {
-            map.get(cat)!.push(type);
-        }
-    }
-
-    const keys = Array.from(map.keys()).sort(Sorter.byStringValue);
-
-    return keys.map((key) => {
-        const types = map.get(key)!;
-        return {
-            name: key,
-            types,
-        };
-    });
-});
-
-const availableUmbrellaOrganizations = computed(() => {
-    return UmbrellaOrganizationHelper.getList().sort((a, b) =>
-        Sorter.stack(
-            Sorter.byBooleanValue(
-                !a.name.toLowerCase().startsWith('andere'),
-                !b.name.toLowerCase().startsWith('andere'),
-            ),
-            Sorter.byStringProperty(a, b, 'name'),
-        ),
-    );
-});
+];
 
 async function shouldNavigateAway() {
     if (name.value === '' && address.value === null && type.value === null) {

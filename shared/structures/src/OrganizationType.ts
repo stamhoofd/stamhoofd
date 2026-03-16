@@ -28,6 +28,7 @@ export enum OrganizationType {
     LGBTQ = 'LGBTQ',
     Politics = 'Politics',
     Union = 'Union',
+    GoodCause = 'GoodCause',
     Other = 'Other',
 }
 
@@ -140,6 +141,10 @@ export class OrganizationTypeHelper {
                 name: $t(`%mT`),
             },
             {
+                value: OrganizationType.GoodCause,
+                name: $t('Goed doel'),
+            },
+            {
                 value: OrganizationType.School,
                 name: $t(`%p`),
             },
@@ -184,6 +189,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.Nature:
             case OrganizationType.Professional:
             case OrganizationType.Neighborhood:
+            case OrganizationType.GoodCause:
             case OrganizationType.School:
                 return $t(`%mV`);
         }
