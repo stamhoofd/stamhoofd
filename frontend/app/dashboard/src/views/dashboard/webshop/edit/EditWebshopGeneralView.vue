@@ -90,7 +90,7 @@
 
         <!-- ticket access control -->
         <template v-if="accessControlList.length > 1">
-            <STInputBox :title="accessControlLabel" error-fields="type" :error-box="errors.errorBox" class="max">
+            <STInputBox :title="accessControlLabel" error-fields="type" :error-box="errors.errorBox">
                 <div class="illustration-radio-container">
                     <label v-for="option in accessControlList" :key="option.value" class="illustration-radio-box">
                         <div>
@@ -798,13 +798,3 @@ defineExpose({
     shouldNavigateAway,
 });
 </script>
-
-<style lang="scss" scoped>
-.illustration-radio-container {
-
-// todo: change in inputs.scss?
-        &:has(> :last-child:nth-child(2)) { /* 2 elements */
-        grid-template-columns: 1fr 1fr 1fr;
-    }
-}
-</style>
