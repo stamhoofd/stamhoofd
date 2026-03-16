@@ -5,6 +5,15 @@
         </h1>
         <p>{{ $t('%Rk') }}</p>
 
+        <p v-if="webshop.meta.isTicketBased" class="info-box">
+            {{ $t(`Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.
+            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.`) }}
+        </p>
+        <p v-else-if="webshop.meta.isRegistrations" class="info-box">
+            {{ $t(`Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.
+            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.`) }}
+        </p>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr>
@@ -13,6 +22,28 @@
         <p>{{ $t('%48') }}</p>
 
         <STList>
+            <STListItem element-name="label" :selectable="false">
+                <template #left>
+                    <Checkbox :checked="true" :disabled="true" />
+                </template>
+                <p class="style-title-list">
+                    {{ $t('Naam') }}
+                </p>
+                <p class="style-description-small">
+                    {{ $t('Deze is altijd verplicht per bestelling.') }}
+                </p>
+            </STListItem>
+            <STListItem element-name="label" :selectable="false">
+                <template #left>
+                    <Checkbox :checked="true" :disabled="true" />
+                </template>
+                <p class="style-title-list">
+                    {{ $t('E-mailadres') }}
+                </p>
+                <p class="style-description-small">
+                    {{ $t('Hierop ontvangen bestellers hun bestelbevestiging. Deze is altijd verplicht per bestelling.') }}
+                </p>
+            </STListItem>
             <STListItem element-name="label" :selectable="true">
                 <template #left>
                     <Checkbox v-model="phoneEnabled" />
@@ -36,15 +67,15 @@
 
 <script lang="ts" setup>
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
-import { GroupUIFilterBuilder } from '@stamhoofd/components/filters/GroupUIFilter.ts';
-import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { GroupUIFilterBuilder } from '@stamhoofd/components/filters/GroupUIFilter.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import { useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
+import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import { Checkout, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';

@@ -3,7 +3,7 @@
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
         <STInputBox error-fields="meta.title" :error-box="errors.errorBox" :title="$t(`%vC`)">
-            <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="$t(`%Rb`)">
+            <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="webshop.meta.name">
         </STInputBox>
 
         <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)">
@@ -54,23 +54,6 @@
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
         </figure>
 
-        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="errors.validator" :error-box="errors.errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
-
-        <hr><h2 class="style-with-button">
-            <div>{{ $t('%RN') }}</div>
-            <div>
-                <button type="button" class="button icon add" @click="addPolicy" />
-            </div>
-        </h2>
-        <p>{{ $t('%RO') }}</p>
-
-        <p v-if="policies.length === 0" class="info-box">
-            {{ $t('%RP') }}
-        </p>
-        <p v-if="policies.length > 0 && (organization?.meta.privacyPolicyFile || organization?.meta.privacyPolicyUrl)" class="warning-box">
-            {{ $t('%RQ') }}
-        </p>
-
         <hr><h2>{{ $t('%RR') }}</h2>
         <p>
             {{ $t('%RS') }}
@@ -119,6 +102,23 @@
             </p>
         </template>
 
+        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="errors.validator" :error-box="errors.errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
+
+        <hr><h2 class="style-with-button">
+            <div>{{ $t('%RN') }}</div>
+            <div>
+                <button type="button" class="button icon add" @click="addPolicy" />
+            </div>
+        </h2>
+        <p>{{ $t('%RO') }}</p>
+
+        <p v-if="policies.length === 0" class="info-box">
+            {{ $t('%RP') }}
+        </p>
+        <p v-if="policies.length > 0 && (organization?.meta.privacyPolicyFile || organization?.meta.privacyPolicyUrl)" class="warning-box">
+            {{ $t('%RQ') }}
+        </p>
+
         <template v-if="STAMHOOFD.platformName === 'stamhoofd'">
             <hr><h2>{{ $t("%q") }}</h2>
             <p>
@@ -146,23 +146,23 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
-import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
-import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
-import Radio from '@stamhoofd/components/inputs/Radio.vue';
-import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
+import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
 import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

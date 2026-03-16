@@ -3,6 +3,7 @@
         <h1 class="style-navigation-title">
             {{ viewTitle }}
         </h1>
+        <p>{{ description }}</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="webshop.categories.length > 0">
@@ -75,6 +76,10 @@ const present = usePresent();
 
 const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
+});
+
+const description = computed(() => {
+    return webshop.value.meta.ticketType === WebshopTicketType.Tickets ? $t('Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.') : $t('Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.');
 });
 
 const viewTitle = computed(() => {

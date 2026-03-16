@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PartialWithoutMethods, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,10 +18,10 @@ import { Policy } from '../Policy.js';
 import { RichText } from '../RichText.js';
 import { SeatingPlan } from '../SeatingPlan.js';
 import { SponsorConfig } from '../SponsorConfig.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { Discount } from './Discount.js';
 import { TransferSettings } from './TransferSettings.js';
 import { WebshopField } from './WebshopField.js';
-import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum WebshopLayout {
     Default = 'Default',
@@ -395,24 +395,9 @@ export class WebshopMetaData extends AutoEncoder {
     /**
      * Serves as a hint in the UI for better suggestions and UX.
      */
-    /* @field({
-        decoder: new EnumDecoder(WebshopType),
-        optional: true,
-        version: 247,
-        upgrade: function (this: WebshopMetaData) {
-            if (this.ticketType === WebshopTicketType.Tickets && this.seatingPlans.length > 0) {
-                return WebshopType.Performance;
-            }
-
-            if (this.ticketType === WebshopTicketType.Tickets) {
-                return WebshopType.Event;
-            }
-            return WebshopType.Webshop;
-        },
-    })
     @field({
         decoder: new EnumDecoder(WebshopType),
-        <--todo version!!-->
+        ...NextVersion,
         upgrade: function (this: WebshopMetaData) {
             if (this.type) {
                 return this.type;
@@ -427,19 +412,7 @@ export class WebshopMetaData extends AutoEncoder {
             return WebshopType.Webshop;
         },
     })
-    type: WebshopType; */ // do not set a default here, the upgrade will break otherwise. Set one in the create method
-
-    /*
-    static override create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<WebshopMetaData>): WebshopMetaData {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        const o = super.create({
-            type: WebshopType.Webshop,
-            ...object,
-        } as any) as WebshopMetaData;
-
-        return o;
-    }
-    */
+    type: WebshopType = WebshopType.Webshop;
 
     @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
     ticketType = WebshopTicketType.None;
@@ -610,6 +583,17 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 374 })
     customCode: string | null = null;
+
+    /**
+     * Returns whether the webshop is event/ticketing based - regardless whether scanners are used or not
+     */
+    get isTicketBased() {
+        return this.type === WebshopType.Event || this.type === WebshopType.Performance || this.ticketType === WebshopTicketType.Tickets;
+    }
+
+    get isRegistrations() {
+        return this.type === WebshopType.Registrations;
+    }
 
     get hasTickets() {
         return this.ticketType === WebshopTicketType.SingleTicket || this.ticketType === WebshopTicketType.Tickets;
