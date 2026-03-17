@@ -1,5 +1,5 @@
 <template>
-    <STInputBox :title="title" error-fields="password" :error-box="errors.errorBox">
+    <STInputBox :title="title" error-fields="password" :error-box="errorBox ?? errors.errorBox" data-testId="password-box">
         <template #right>
             <button v-tooltip="visible ? 'Verberg wachtwoord' : 'Toon wachtwoord'" class="button icon small" :class="visible ? 'eye-off enabled' : 'eye'" type="button" tabindex="-1" @click.prevent="visible = !visible" />
         </template>
@@ -18,10 +18,10 @@
 </template>
 
 <script lang="ts" setup>
-import { STInputBox, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import { ErrorBox, STInputBox, useErrors, useValidation, Validator } from '@stamhoofd/components';
 import { onMounted, ref, watch } from 'vue';
 
-const props = withDefaults(defineProps<{ title?: string; validator?: Validator | null; required?: boolean;
+const props = withDefaults(defineProps<{ title?: string; validator?: Validator | null; errorBox?: ErrorBox | null; required?: boolean;
     /**
      * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
      * Only used if required = false
@@ -29,6 +29,7 @@ const props = withDefaults(defineProps<{ title?: string; validator?: Validator |
     nullable?: boolean; disabled?: boolean; }>(), {
     title: 'Wachtwoord',
     validator: null,
+    errorBox: null,
     required: true,
     nullable: false,
     disabled: false,
@@ -40,9 +41,7 @@ const passwordRaw = ref('');
 
 const errors = useErrors({ validator: props.validator });
 
-if (props.validator) {
-    useValidation(props.validator, validate);
-}
+useValidation(errors.validator, validate);
 
 watch(model, (val: string | null) => {
     if (val === null) {

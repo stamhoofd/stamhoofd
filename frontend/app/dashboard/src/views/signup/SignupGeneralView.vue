@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <form v-if="!loadingRegisterCode" id="signup-general-view" ref="formEl" class="st-view" :class="{complete: isComplete}" @submit.prevent="goNext">
+        <form v-if="!loadingRegisterCode" id="signup-general-view" ref="formEl" class="st-view" :class="{complete: isComplete}" data-testid="signup-form" @submit.prevent="goNext">
             <STNavigationBar title="Registreren">
                 <template #left>
                     <BackButton @click="onPop" />
@@ -24,7 +24,7 @@
                     {{ $t('%WY') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("%5V") }}</a>
                 </p>
 
-                <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
+                <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift" data-testid="referrer-success-message">
                     {{ $t('%Wa', {value: formatPrice(validatedRegisterCode.value), organization: validatedRegisterCode.organizationName ?? ''}) }}
                 </p>
                 <p v-else-if="validatedRegisterCode" class="success-box icon gift">
@@ -51,7 +51,7 @@
                     </div>
                 </STInputBox>
 
-                <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox">
+                <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox" data-testid="name-box">
                     <input
                         id="organization-name"
                         ref="firstInput"
@@ -71,21 +71,23 @@
                 </p>
 
                 <template v-if="!validatedRegisterCode">
-                    <hr><h2>{{ $t('%Wd') }}</h2>
+                    <hr><h2 data-testid="acquisition-title">
+                        {{ $t('%Wd') }}
+                    </h2>
 
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" data-testid="acquisition-recommended-checkbox" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" data-testid="acquisition-Recommended" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
                         {{ $t('%We') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" data-testid="acquisition-seen-checkbox" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" data-testid="acquisition-Seen" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
                         {{ $t('%Wf') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" data-testid="acquisition-social-media-checkbox" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" data-testid="acquisition-SocialMedia" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
                         {{ $t('%Wg') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" data-testid="acquisition-search-checkbox" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" data-testid="acquisition-Search" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
                         {{ $t('%Wh') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" data-testid="acquisition-other-checkbox" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" data-testid="acquisition-Other" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
                         {{ $t('%1JG') }}
                     </Checkbox>
                 </template>
