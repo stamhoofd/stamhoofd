@@ -27,38 +27,35 @@ test.describe('Onboarding', () => {
         // fill in first signup screen
         const organizationName = 'vereniging';
         await page.getByTestId('organization-name-input').click();
+
+        // select type youth
+        await page
+            .getByTestId('organization-type-option')
+            .filter({ hasText: 'Jeugd' })
+            .click();
+
+        // name
         await page
             .getByTestId('organization-name-input')
             .fill(organizationName);
-        await page
-            .getByTestId('organization-type-select')
-            .selectOption('Youth');
-        await page
-            .getByTestId('organization-umbrella-select')
-            .selectOption('Other');
 
-        await page.getByTestId('street-address-input').click();
-        await page.getByTestId('street-address-input').fill('straat 1');
-        await page.getByTestId('postal-code-input').click();
-        await page.getByTestId('postal-code-input').fill('9230');
-        await page.getByTestId('city-input').click();
-        await page.getByTestId('city-input').fill('Wetteren');
-        await page.getByTestId('acquisition-recommended-checkbox').click();
+        // city
+        await page.getByTestId('city-only-input').fill('Wetteren');
+
+        // choose country
+        await page.getByTestId('country-select').selectOption('BE');
+
+        // check recommended by other organization
+        await page.getByTestId('acquisition-recommended-checkbox').check();
 
         // next
         await page.getByTestId('signup-next-button').click();
 
         // fill in second signup screen
-        await page.getByTestId('email-input').click();
-        await page.getByTestId('email-input').fill('test@test.be');
-        await page.getByTestId('first-name-input').click();
         await page.getByTestId('first-name-input').fill('voornaam');
-        await page.getByTestId('last-name-input').click();
         await page.getByTestId('last-name-input').fill('achternaam');
-        await page.getByTestId('password-input').click();
+        await page.getByTestId('email-input').fill('test@test.be');
         await page.getByTestId('password-input').fill('Stamhoofd');
-        await page.getByTestId('password-repeat-input').click();
-        await page.getByTestId('password-repeat-input').fill('Stamhoofd');
         await page.getByTestId('accept-privacy-input').click();
         await page.getByTestId('accept-terms-input').click();
         await page.getByTestId('accept-data-agreement-input').click();

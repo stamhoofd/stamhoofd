@@ -39,7 +39,7 @@
 
                 <STInputBox :title="$t(`Wat voor vereniging?`)" error-fields="type" :error-box="errors.errorBox" class="max">
                     <div class="illustration-radio-container">
-                        <label v-for="{value, title, imgSrc} in typeOptions" :key="value" class="illustration-radio-box">
+                        <label v-for="{value, title, imgSrc} in typeOptions" :key="value" class="illustration-radio-box" data-testid="organization-type-option">
                             <div>
                                 <Radio v-model="type" :value="value" />
                             </div>
@@ -131,7 +131,7 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/networking/Storage';
-import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization } from '@stamhoofd/structures';
+import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import SignupAccountView from './SignupAccountView.vue';
@@ -181,7 +181,6 @@ const loading = ref(false);
 const loadingRegisterCode = ref(true);
 
 const type = ref<OrganizationType | null>(null);
-const umbrellaOrganization = ref<UmbrellaOrganization | null>(null);
 
 let checkCount = 0;
 
@@ -437,7 +436,6 @@ async function goNext() {
             uri: '', // ignored by backend for now
             meta: OrganizationMetaData.create({
                 type: type.value,
-                umbrellaOrganization: umbrellaOrganization.value,
                 recordsConfiguration: RecordConfigurationFactory.create(type.value, address.value.country),
                 defaultStartDate,
                 defaultEndDate,

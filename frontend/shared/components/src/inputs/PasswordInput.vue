@@ -10,6 +10,7 @@
             placeholder="Kies een wachtwoord"
             autocomplete="new-password"
             :type="visible ? 'text' : 'password'"
+            data-testId="password-input"
             @input="onInput"
             @change="onChange"
         >

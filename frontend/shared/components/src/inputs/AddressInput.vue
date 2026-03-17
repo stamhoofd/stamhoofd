@@ -1,8 +1,8 @@
 <template>
     <STInputBox :title="title" error-fields="address" :error-box="errorBox">
         <div v-if="cityOnly" class="input-group">
-            <input v-model="city" :enterkeyhint="enterkeyhint" class="input" type="text" :placeholder="$t('Gemeente')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
-            <Dropdown v-model="country" autocomplete="country" name="country" data-skip-enter-focus @change="updateAddress" @focus="onFocus" @blur="onBlur">
+            <input v-model="city" :enterkeyhint="enterkeyhint" class="input" type="text" :placeholder="$t('Gemeente')" name="city" autocomplete="address-level2" data-testid="city-only-input" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+            <Dropdown v-model="country" autocomplete="country" name="country" data-skip-enter-focus data-testid="country-select" @change="updateAddress" @focus="onFocus" @blur="onBlur">
                 <option v-for="country in countries" :key="country.value" :value="country.value">
                     {{ country.text }}
                 </option>
