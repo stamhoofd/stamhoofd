@@ -7,4 +7,8 @@ export class DashboardPage {
     async goto() {
         await this.page.goto(WorkerData.urls.dashboard);
     }
+
+    async startSignup() {
+        await this.page.getByTestId('signup-link').click();
+    }
 }

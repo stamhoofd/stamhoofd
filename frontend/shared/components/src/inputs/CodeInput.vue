@@ -1,6 +1,6 @@
 <template>
     <div class="code-input">
-        <div :class="{small: codeLength > 6}">
+        <div :class="{small: codeLength > 6}" data-testId="code-input">
             <!-- Name incluses 'search' to disable safari autocomplete, who tries to autocomplete an email in a number input?! -->
             <template v-for="index in codeLength" :key="index">
                 <input
