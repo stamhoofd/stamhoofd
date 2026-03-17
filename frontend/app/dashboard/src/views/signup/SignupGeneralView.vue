@@ -156,7 +156,6 @@ const props = withDefaults(defineProps<{
 }>(), {
     visitViaUrl: false,
     initialRegisterCode: null,
-
 });
 
 const formEl = useTemplateRef<HTMLElement>('formEl');

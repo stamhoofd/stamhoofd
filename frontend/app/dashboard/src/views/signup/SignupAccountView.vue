@@ -2,7 +2,10 @@
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
         <STNavigationBar :title="$t(`%WQ`)" />
 
-        <main>
+        <main class="center small">
+            <aside class="style-title-prefix">
+                {{ $t('STAP {current} / {total}', {current: 2, total: 2}) }}
+            </aside>
             <h1>
                 {{ $t('%WQ') }}
             </h1>
@@ -12,39 +15,19 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <div class="split-inputs">
-                <div>
-                    <EmailInput v-model="email" data-testid="email-input" name="username" :validator="errors.validator" autocomplete="username" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
+            <STInputBox :title="$t(`%Uy`)" error-fields="firstName,lastName" :error-box="errors.errorBox" class="max">
+                <div class="input-group">
+                    <div>
+                        <input v-model="firstName" data-testid="first-name-input" enterkeyhint="next" name="given-name" class="input" type="text" :placeholder="$t(`%1MT`)" autocomplete="given-name">
+                    </div>
+                    <div>
+                        <input v-model="lastName" data-testid="last-name-input" enterkeyhint="next" name="family-name" class="input" type="text" :placeholder="$t(`%1MU`)" autocomplete="family-name">
+                    </div>
                 </div>
+            </STInputBox>
+            <EmailInput v-model="email" class="max" enterkeyhint="next" data-testid="email-input" name="username" :validator="errors.validator" autocomplete="username" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
 
-                <div>
-                    <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="firstName" data-testid="first-name-input" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
-                            </div>
-                            <div>
-                                <input v-model="lastName" data-testid="last-name-input" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`%1MU`)">
-                            </div>
-                        </div>
-                    </STInputBox>
-                </div>
-            </div>
-
-            <div class="split-inputs">
-                <div>
-                    <STInputBox error-fields="password" :error-box="errors.errorBox" :title="$t(`%WU`)">
-                        <input v-model="password" data-testid="password-input" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%WV`)">
-                    </STInputBox>
-                    <STInputBox error-fields="passwordRepeat" :error-box="errors.errorBox" :title="$t(`%WW`)">
-                        <input v-model="passwordRepeat" data-testid="password-repeat-input" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%WX`)">
-                    </STInputBox>
-                </div>
-
-                <div>
-                    <PasswordStrength v-model="password" />
-                </div>
-            </div>
+            <PasswordInput v-model="password" :nullable="false" enterkeyhint="next" class="max" title="Wachtwoord" :validator="errors.validator" />
 
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text" data-testid="accept-privacy-input">
@@ -59,17 +42,18 @@
                     {{ $t('%Ji') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('%Jl') }}</a> {{ $t('%Jk') }}
                 </Checkbox>
             </div>
-        </main>
 
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="loading">
+            <hr>
+
+            <div class="style-button-bar">
+                <LoadingButton :loading="loading" class="max">
                     <button class="button primary" type="button" data-testid="signup-account-button" @click.prevent="goNext">
-                        {{ $t('%ur') }}
+                        <span>{{ $t('%ur') }}</span>
+                        <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
-            </template>
-        </STToolbar>
+            </div>
+        </main>
     </form>
 </template>
 
@@ -82,16 +66,14 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
-import PasswordStrength from '@stamhoofd/components/inputs/PasswordStrength.vue';
+import PasswordInput from '@stamhoofd/components/inputs/PasswordInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { Storage } from '@stamhoofd/networking/Storage';
 import { Organization } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import { getScopedAutoRoot } from '../../getRootViews';
@@ -105,7 +87,6 @@ const errors = useErrors();
 const dismiss = useDismiss();
 
 const password = ref('');
-const passwordRepeat = ref('');
 const email = ref('');
 const firstName = ref('');
 const lastName = ref('');
@@ -145,15 +126,6 @@ async function goNext() {
             }));
         }
         simpleErrors.throwIfNotEmpty();
-
-        if (password.value !== passwordRepeat.value) {
-            plausible('passwordsNotMatching'); // track how many people try to create a sorter one (to reevaluate this restriction)
-            throw new SimpleError({
-                code: 'password_do_not_match',
-                message: 'De ingevoerde wachtwoorden komen niet overeen',
-                field: 'passwordRepeat',
-            });
-        }
 
         if (password.value.length < 8) {
             plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
@@ -201,11 +173,10 @@ async function goNext() {
         loading.value = false;
 
         try {
-            Storage.keyValue.removeItem('savedRegisterCode').catch(console.error);
-            Storage.keyValue.removeItem('savedRegisterCodeDate').catch(console.error);
+            await SessionManager.addOrganizationToStorage(props.organization);
         }
         catch (e) {
-            console.error(e);
+            console.error('Failed to add organization to storage', e);
         }
 
         const session = new SessionContext(props.organization);
@@ -216,7 +187,6 @@ async function goNext() {
                     components: [
                         new ComponentWithProperties(ConfirmEmailView, { token, email: email.value }),
                     ],
-                    modalDisplayStyle: 'popup',
                 },
             ],
         });
@@ -236,7 +206,6 @@ async function goNext() {
             // Autofill all
             email.value = 'simon@stamhoofd.be';
             password.value = 'stamhoofd';
-            passwordRepeat.value = 'stamhoofd';
             firstName.value = 'Test';
             lastName.value = 'Gebruiker';
             acceptPrivacy.value = true;
