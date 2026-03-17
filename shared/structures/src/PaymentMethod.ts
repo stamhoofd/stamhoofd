@@ -21,7 +21,7 @@ export enum PaymentMethodV150 {
 }
 
 export function isBancontactPay() {
-    return new Date() > new Date(2026, 3 + 1, 16) //|| STAMHOOFD.environment === 'development'
+    return new Date() > new Date(2026, 3 - 1, 16) //|| STAMHOOFD.environment === 'development'
 }
 
 export function downgradePaymentMethodV150(newerValue: PaymentMethod): PaymentMethodV150 {
