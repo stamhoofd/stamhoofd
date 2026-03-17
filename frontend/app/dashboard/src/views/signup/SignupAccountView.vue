@@ -10,15 +10,15 @@
                 {{ $t('%WR') }}
             </p>
 
-            <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" data-testid="email-input" name="username" :validator="validator" autocomplete="username" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
+                    <EmailInput v-model="email" data-testid="email-input" name="username" :validator="errors.validator" autocomplete="username" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
                 </div>
 
                 <div>
-                    <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`%Uy`)">
+                    <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" data-testid="first-name-input" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
@@ -33,10 +33,10 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox error-fields="password" :error-box="errorBox" :title="$t(`%WU`)">
+                    <STInputBox error-fields="password" :error-box="errors.errorBox" :title="$t(`%WU`)">
                         <input v-model="password" data-testid="password-input" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%WV`)">
                     </STInputBox>
-                    <STInputBox error-fields="passwordRepeat" :error-box="errorBox" :title="$t(`%WW`)">
+                    <STInputBox error-fields="passwordRepeat" :error-box="errors.errorBox" :title="$t(`%WW`)">
                         <input v-model="passwordRepeat" data-testid="password-repeat-input" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`%WX`)">
                     </STInputBox>
                 </div>
@@ -73,203 +73,177 @@
     </form>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { ComponentWithProperties, useDismiss } from '@simonbackx/vue-app-navigation';
+import { useErrors } from '@stamhoofd/components';
 import ConfirmEmailView from '@stamhoofd/components/auth/ConfirmEmailView.vue';
-import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import PasswordStrength from '@stamhoofd/components/inputs/PasswordStrength.vue';
-import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import PasswordStrength from '@stamhoofd/components/inputs/PasswordStrength.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { Organization } from '@stamhoofd/structures';
-
+import { ref } from 'vue';
 import { getScopedAutoRoot } from '../../getRootViews';
 
-@Component({
-    components: {
-        STToolbar,
-        STNavigationBar,
-        STErrorsDefault,
-        STInputBox,
-        LoadingButton,
-        BackButton,
-        EmailInput,
-        Checkbox,
-        PasswordStrength,
-    },
-})
-export default class SignupAccountView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
+const props = defineProps<{
     organization: Organization;
-
-    @Prop({ required: true })
     registerCode: { code: string; organization: string } | null;
+}>();
 
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
+const errors = useErrors();
+const dismiss = useDismiss();
 
-    password = '';
-    passwordRepeat = '';
-    email = '';
-    firstName = '';
-    lastName = '';
+const password = ref('');
+const passwordRepeat = ref('');
+const email = ref('');
+const firstName = ref('');
+const lastName = ref('');
 
-    loading = false;
-    acceptPrivacy = false;
-    acceptTerms = false;
-    acceptDataAgreement = false;
+const loading = ref(false);
+const acceptPrivacy = ref(false);
+const acceptTerms = ref(false);
+const acceptDataAgreement = ref(false);
 
-    async goNext() {
-        console.error('playwright debug - start goNext');
-        if (this.loading) {
+async function goNext() {
+    if (loading.value) {
+        return;
+    }
+
+    try {
+        // TODO: validate details
+
+        // Generate keys
+        loading.value = true;
+        errors.errorBox = null;
+
+        const valid = await errors.validator.validate();
+
+        const simpleErrors = new SimpleErrors();
+        if (firstName.value.length < 2) {
+            simpleErrors.addError(new SimpleError({
+                code: 'invalid_field',
+                message: 'Vul jouw voornaam in',
+                field: 'firstName',
+            }));
+        }
+        if (lastName.value.length < 2) {
+            simpleErrors.addError(new SimpleError({
+                code: 'invalid_field',
+                message: 'Vul jouw achternaam in',
+                field: 'lastName',
+            }));
+        }
+        simpleErrors.throwIfNotEmpty();
+
+        if (password.value !== passwordRepeat.value) {
+            plausible('passwordsNotMatching'); // track how many people try to create a sorter one (to reevaluate this restriction)
+            throw new SimpleError({
+                code: 'password_do_not_match',
+                message: 'De ingevoerde wachtwoorden komen niet overeen',
+                field: 'passwordRepeat',
+            });
+        }
+
+        if (password.value.length < 8) {
+            plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
+            throw new SimpleError({
+                code: 'password_too_short',
+                message: 'Jouw wachtwoord moet uit minstens 8 karakters bestaan.',
+                field: 'password',
+            });
+        }
+
+        if (!acceptPrivacy.value) {
+            plausible('termsNotAccepted'); // track how many people try to create a sorter one (to reevaluate this restriction)
+            throw new SimpleError({
+                code: 'read_privacy',
+                message: 'Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken.',
+            });
+        }
+
+        if (!acceptTerms.value) {
+            plausible('termsNotAccepted');
+            throw new SimpleError({
+                code: 'read_privacy',
+                message: 'Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken.',
+            });
+        }
+
+        if (!acceptDataAgreement.value) {
+            plausible('termsNotAccepted');
+            throw new SimpleError({
+                code: 'read_privacy',
+                message: 'Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken.',
+            });
+        }
+        props.organization.meta.lastSignedTerms = new Date();
+
+        if (!valid) {
+            loading.value = false;
+            errors.errorBox = null;
             return;
         }
+
+        const token = await LoginHelper.signUpOrganization(props.organization, email.value, password.value, firstName.value, lastName.value, props.registerCode?.code);
+        plausible('signup');
+
+        loading.value = false;
 
         try {
-            // TODO: validate details
-
-            // Generate keys
-            this.loading = true;
-            this.errorBox = null;
-
-            const valid = await this.validator.validate();
-
-            const errors = new SimpleErrors();
-            if (this.firstName.length < 2) {
-                errors.addError(new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Vul jouw voornaam in',
-                    field: 'firstName',
-                }));
-            }
-            if (this.lastName.length < 2) {
-                errors.addError(new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Vul jouw achternaam in',
-                    field: 'lastName',
-                }));
-            }
-            errors.throwIfNotEmpty();
-
-            if (this.password !== this.passwordRepeat) {
-                plausible('passwordsNotMatching'); // track how many people try to create a sorter one (to reevaluate this restriction)
-                throw new SimpleError({
-                    code: 'password_do_not_match',
-                    message: 'De ingevoerde wachtwoorden komen niet overeen',
-                    field: 'passwordRepeat',
-                });
-            }
-
-            if (this.password.length < 8) {
-                plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
-                throw new SimpleError({
-                    code: 'password_too_short',
-                    message: 'Jouw wachtwoord moet uit minstens 8 karakters bestaan.',
-                    field: 'password',
-                });
-            }
-
-            if (!this.acceptPrivacy) {
-                plausible('termsNotAccepted'); // track how many people try to create a sorter one (to reevaluate this restriction)
-                throw new SimpleError({
-                    code: 'read_privacy',
-                    message: 'Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken.',
-                });
-            }
-
-            if (!this.acceptTerms) {
-                plausible('termsNotAccepted');
-                throw new SimpleError({
-                    code: 'read_privacy',
-                    message: 'Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken.',
-                });
-            }
-
-            if (!this.acceptDataAgreement) {
-                plausible('termsNotAccepted');
-                throw new SimpleError({
-                    code: 'read_privacy',
-                    message: 'Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken.',
-                });
-            }
-            this.organization.meta.lastSignedTerms = new Date();
-
-            if (!valid) {
-                this.loading = false;
-                this.errorBox = null;
-                return;
-            }
-
-            console.error('playwright debug - get token - start');
-            const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code);
-            console.error('playwright debug - get token - done');
-            plausible('signup');
-
-            this.loading = false;
-
-            try {
-                Storage.keyValue.removeItem('savedRegisterCode').catch(console.error);
-                Storage.keyValue.removeItem('savedRegisterCodeDate').catch(console.error);
-            }
-            catch (e) {
-                console.error(e);
-            }
-
-            console.error('playwright debug - new session');
-            const session = new SessionContext(this.organization);
-            console.error('playwright debug - prepare session');
-            await SessionManager.prepareSessionForUsage(session, true);
-            console.error('playwright debug - dasbboard context');
-            const dashboardContext = await getScopedAutoRoot(session, {
-                initialPresents: [
-                    {
-                        components: [
-                            new ComponentWithProperties(ConfirmEmailView, { token, email: this.email }),
-                        ],
-                        modalDisplayStyle: 'popup',
-                    },
-                ],
-            });
-            console.error('playwright debug - dismiss');
-            await this.dismiss({ force: true });
-            console.error('playwright debug - send event');
-            await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
-
-            // Show popup to confirm e-mail
+            Storage.keyValue.removeItem('savedRegisterCode').catch(console.error);
+            Storage.keyValue.removeItem('savedRegisterCodeDate').catch(console.error);
         }
         catch (e) {
-            this.loading = false;
             console.error(e);
-            this.errorBox = new ErrorBox(e);
-            plausible('signupAccountError');
-
-            if (STAMHOOFD.environment === 'development' && this.email.length === 0) {
-                console.log('Autofill for development mode enabled. Filling in default values...');
-                // Autofill all
-                this.email = 'simon@stamhoofd.be';
-                this.password = 'stamhoofd';
-                this.passwordRepeat = 'stamhoofd';
-                this.firstName = 'Test';
-                this.lastName = 'Gebruiker';
-                this.acceptPrivacy = true;
-                this.acceptTerms = true;
-                this.acceptDataAgreement = true;
-            }
-            return;
         }
+
+        const session = new SessionContext(props.organization);
+        await SessionManager.prepareSessionForUsage(session, true);
+        const dashboardContext = await getScopedAutoRoot(session, {
+            initialPresents: [
+                {
+                    components: [
+                        new ComponentWithProperties(ConfirmEmailView, { token, email: email.value }),
+                    ],
+                    modalDisplayStyle: 'popup',
+                },
+            ],
+        });
+        await dismiss({ force: true });
+        await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
+
+        // Show popup to confirm e-mail
+    }
+    catch (e) {
+        loading.value = false;
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        plausible('signupAccountError');
+
+        if (STAMHOOFD.environment === 'development' && email.value.length === 0) {
+            console.log('Autofill for development mode enabled. Filling in default values...');
+            // Autofill all
+            email.value = 'simon@stamhoofd.be';
+            password.value = 'stamhoofd';
+            passwordRepeat.value = 'stamhoofd';
+            firstName.value = 'Test';
+            lastName.value = 'Gebruiker';
+            acceptPrivacy.value = true;
+            acceptTerms.value = true;
+            acceptDataAgreement.value = true;
+        }
+        return;
     }
 }
 </script>
