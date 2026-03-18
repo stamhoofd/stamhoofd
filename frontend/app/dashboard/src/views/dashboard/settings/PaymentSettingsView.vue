@@ -6,7 +6,7 @@
 
         <p>{{ $t('%NY') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('%K') }}</a> {{ $t('%GT') }} <a class="inline-link" :href="$domains.getDocs('payconiq')" target="_blank">{{ $t('%1Q') }}</a>  {{ $t('%NZ') }} <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">{{ $t('%19t') }}</a>.</p>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="isBuckarooActive">
             <hr><h2>
@@ -157,7 +157,7 @@
                 {{ $t('%Nr') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('%19t') }}</a>
             </p>
 
-            <STInputBox error-fields="payconiqApiKey" :error-box="errorBox" class="max" :title="$t(`%K9`)">
+            <STInputBox error-fields="payconiqApiKey" :error-box="errors.errorBox" class="max" :title="$t(`%K9`)">
                 <input v-model="payconiqApiKey" class="input" type="text" :placeholder="$t(`%O8`)">
             </STInputBox>
             <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
@@ -219,7 +219,7 @@
                     </button>
                 </p>
 
-                <STInputBox v-if="mollieProfiles.length > 1" error-fields="mollieProfile" :error-box="errorBox" class="max" :title="$t(`%O9`)">
+                <STInputBox v-if="mollieProfiles.length > 1" error-fields="mollieProfile" :error-box="errors.errorBox" class="max" :title="$t(`%O9`)">
                     <STList>
                         <STListItem v-for="profile in mollieProfiles" :key="profile.id" element-name="label" :selectable="true">
                             <template #left>
@@ -262,7 +262,7 @@
 
             <div v-if="enableBuckaroo" class="split-inputs">
                 <div>
-                    <STInputBox error-fields="buckarooSettings.key" :error-box="errorBox" class="max" :title="$t(`%2G`)">
+                    <STInputBox error-fields="buckarooSettings.key" :error-box="errors.errorBox" class="max" :title="$t(`%2G`)">
                         <input v-model="buckarooKey" class="input" type="text" :placeholder="$t(`%2G`)">
                     </STInputBox>
                     <p class="style-description-small">
@@ -270,7 +270,7 @@
                     </p>
                 </div>
                 <div>
-                    <STInputBox error-fields="buckarooSettings.secret" :error-box="errorBox" class="max" :title="$t(`%Y`)">
+                    <STInputBox error-fields="buckarooSettings.secret" :error-box="errors.errorBox" class="max" :title="$t(`%Y`)">
                         <input v-model="buckarooSecret" class="input" type="text" :placeholder="$t(`%Y`)">
                     </STInputBox>
                     <p class="style-description-small">
@@ -284,161 +284,113 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, PatchableArray, patchContainsChanges, StringDecoder } from '@simonbackx/simple-encoding';
+<script lang="ts" setup>
+import { ArrayDecoder, AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import { useDismiss, useUrl } from '@simonbackx/vue-app-navigation';
+import { useContext, useErrors, useFeatureFlag, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import IBANInput from '@stamhoofd/components/inputs/IBANInput.vue';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import Radio from '@stamhoofd/components/inputs/Radio.vue';
-import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import Spinner from '@stamhoofd/components/Spinner.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from '@stamhoofd/structures';
+import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        RadioGroup,
-        Radio,
-        LoadingButton,
-        IBANInput,
-        STList,
-        STListItem,
-        Checkbox,
-        EditPaymentMethodsBox,
-        Spinner,
-    },
-    directives: {
-        tooltip: TooltipDirective,
-    },
-})
-export default class PaymentSettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null;
-    validator = new Validator();
-    saving = false;
-    temp_organization = this.$organization;
-    loadingMollie = false;
-    loadingStripeAccounts = true;
-    creatingStripeAccount = false;
-    stripeAccounts: StripeAccount[] = [];
-    mollieProfiles: MollieProfile[] = [];
+const errors = useErrors();
+const saving = ref(false);
+    const loadingMollie = ref(false);
+    const loadingStripeAccounts = ref(true);
+    const creatingStripeAccount = ref(false);
+    const stripeAccounts = ref<StripeAccount[]>([]);
+   const mollieProfiles = ref<MollieProfile[]>([]);
+   const organization = useRequiredOrganization();
+   const organizationManager = useOrganizationManager();
+   const owner = useRequestOwner();
+   const featureFlag = useFeatureFlag();
+   const context = useContext();
+   const dismiss = useDismiss();
+   const url = useUrl();
 
-    organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = Organization.patch({});
+    const {patched: patchedOrganization, patch: organizationPatch, hasChanges, addPatch, reset: resetPatch} = usePatch(organization);
 
-    created() {
-        this.organizationPatch.id = this.$organization.id;
-    }
-
-    get organization() {
-        return this.$organization.patch(this.organizationPatch);
-    }
-
-    get selectedMollieProfile() {
-        return this.organization.privateMeta?.mollieProfile?.id ?? null;
-    }
-
-    set selectedMollieProfile(id: string | null) {
-        const profile = this.mollieProfiles.find(p => p.id === id);
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
+    const selectedMollieProfile = computed({
+        get: () => patchedOrganization.value.privateMeta?.mollieProfile?.id ?? null,
+        set: (id: string | null) => {
+            const profile = mollieProfiles.value.find(p => p.id === id);
+            addPatch({
+                privateMeta: OrganizationPrivateMetaData.patch({
                 mollieProfile: profile ?? null,
             }),
-        });
-    }
+            });
+        }
+    });
 
-    get canCreateMultipleStripeAccounts() {
+    const canCreateMultipleStripeAccounts = computed(() => {
         // Check if all current stripe accounts are connected
-        return this.stripeAccounts.every(a => (a.meta.charges_enabled && a.meta.payouts_enabled) || (a.meta.details_submitted));
-    }
+        return stripeAccounts.value.every(a => (a.meta.charges_enabled && a.meta.payouts_enabled) || (a.meta.details_submitted));
+    })
 
-    get isBelgium() {
-        return this.organization.address.country === Country.Belgium;
-    }
+    const isBelgium = computed(() => {
+        return patchedOrganization.value.address.country === Country.Belgium;
+    });
 
-    get isStamhoofd() {
-        return this.$organizationManager.user.email.endsWith('@stamhoofd.be') || this.$organizationManager.user.email.endsWith('@stamhoofd.nl');
-    }
+    const isStamhoofd = computed(() => organizationManager.value.user.email.endsWith('@stamhoofd.be') || organizationManager.value.user.email.endsWith('@stamhoofd.nl'));
 
-    formatDateUnix(date: number) {
-        return Formatter.date(new Date(date * 1000));
-    }
-
-    patchBuckarooPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                buckarooSettings: BuckarooSettings.patch({
-                    paymentMethods: patch,
-                }),
-            }),
-        });
-    }
-
-    formatJson(blob: any) {
+    function formatJson(blob: any) {
         return JSON.stringify(blob, null, 2);
     }
 
-    get enableMemberModule() {
-        return this.organization.meta.modules.useMembers;
-    }
+    const enableMemberModule = computed(() => {
+        return patchedOrganization.value.meta.modules.useMembers;
+    });
 
-    get payconiqAccount() {
-        return this.organization.privateMeta?.payconiqAccounts[0] ?? null;
-    }
+    const payconiqAccount = computed(() => {
+        return patchedOrganization.value.privateMeta?.payconiqAccounts[0] ?? null;
+    });
 
-    get payconiqApiKey() {
-        return this.organization.privateMeta?.payconiqApiKey ?? '';
-    }
-
-    set payconiqApiKey(payconiqApiKey: string) {
-        if (this.payconiqApiKey && payconiqApiKey.length === 0) {
-            this.forcePayconiq = true;
+    const payconiqApiKey = computed({get: () => {
+        return patchedOrganization.value.privateMeta?.payconiqApiKey ?? '';
+    },
+set:(value: string) => {
+        if (payconiqApiKey.value && value.length === 0) {
+            forcePayconiq.value = true;
         }
 
-        this.organizationPatch = this.organizationPatch.patch({
+        addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
-                payconiqAccounts: (payconiqApiKey.length === 0 ? [] : [PayconiqAccount.create({ apiKey: payconiqApiKey })]) as any,
+                payconiqAccounts: (value.length === 0 ? [] : [PayconiqAccount.create({ apiKey: value })]) as any,
             }),
         });
     }
+});
 
-    get enableBuckaroo() {
-        return (this.organization.privateMeta?.buckarooSettings ?? null) !== null;
-    }
-
-    set enableBuckaroo(enable: boolean) {
-        this.organizationPatch = this.organizationPatch.patch({
+const enableBuckaroo = computed({
+    get: () => (patchedOrganization.value.privateMeta?.buckarooSettings ?? null) !== null,
+    set: (enable: boolean) => {
+        addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 buckarooSettings: enable ? BuckarooSettings.create({}) : null,
             }),
         });
     }
+})
 
-    get buckarooKey() {
-        return this.organization.privateMeta?.buckarooSettings?.key ?? '';
-    }
-
-    set buckarooKey(key: string) {
-        this.organizationPatch = this.organizationPatch.patch({
+const buckarooKey = computed({
+    get: () => patchedOrganization.value.privateMeta?.buckarooSettings?.key ?? '',
+    set: (key: string) => {
+         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 buckarooSettings: BuckarooSettings.patch({
                     key,
@@ -446,13 +398,12 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             }),
         });
     }
+})
 
-    get buckarooSecret() {
-        return this.organization.privateMeta?.buckarooSettings?.secret ?? '';
-    }
-
-    set buckarooSecret(secret: string) {
-        this.organizationPatch = this.organizationPatch.patch({
+const buckarooSecret = computed({
+    get: () => patchedOrganization.value.privateMeta?.buckarooSettings?.secret ?? '',
+    set: (secret: string) => {
+          addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 buckarooSettings: BuckarooSettings.patch({
                     secret,
@@ -460,135 +411,118 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             }),
         });
     }
+})
 
-    get forceMollie() {
-        return this.organization.privateMeta?.featureFlags.includes('forceMollie') ?? false;
-    }
-
-    set forceMollie(forceMollie: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== 'forceMollie') ?? [];
+const forceMollie = computed({
+    get: () => patchedOrganization.value.privateMeta?.featureFlags.includes('forceMollie') ?? false,
+    set: (forceMollie: boolean) => {
+        const featureFlags = patchedOrganization.value.privateMeta?.featureFlags.filter(f => f !== 'forceMollie') ?? [];
         if (forceMollie) {
             featureFlags.push('forceMollie');
         }
-        this.organizationPatch = this.organizationPatch.patch({
+        addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 featureFlags: featureFlags as any,
             }),
         });
     }
+})
 
-    get forcePayconiq() {
-        return this.getFeatureFlag('forcePayconiq') || this.isBelgium;
+const forcePayconiq = computed({
+    get: () => featureFlag('forcePayconiq') || isBelgium.value,
+    set: (forcePayconiq: boolean) => {
+        setFeatureFlag('forcePayconiq', forcePayconiq);
     }
+})
 
-    set forcePayconiq(forcePayconiq: boolean) {
-        this.setFeatureFlag('forcePayconiq', forcePayconiq);
-    }
-
-    getFeatureFlag(flag: string) {
-        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false;
-    }
-
-    setFeatureFlag(flag: string, value: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
+    function setFeatureFlag(flag: string, value: boolean) {
+        const featureFlags = patchedOrganization.value.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
         if (value) {
             featureFlags.push(flag);
         }
-        this.organizationPatch = this.organizationPatch.patch({
+        addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 featureFlags: featureFlags as any,
             }),
         });
     }
+    
 
-    get payconiqActive() {
-        return (this.$organization.privateMeta?.payconiqApiKey ?? '').length > 0;
-    }
+    const payconiqActive = computed(() =>  (patchedOrganization.value.privateMeta?.payconiqApiKey ?? '').length > 0);
 
-    get isBuckarooActive() {
-        return this.enableBuckaroo && (this.$organization.privateMeta?.buckarooSettings?.key ?? '').length > 0 && (this.$organization.privateMeta?.buckarooSettings?.secret ?? '').length > 0;
-    }
+    const isBuckarooActive = computed(() => enableBuckaroo.value && (patchedOrganization.value.privateMeta?.buckarooSettings?.key ?? '').length > 0 && (patchedOrganization.value.privateMeta?.buckarooSettings?.secret ?? '').length > 0);
 
-    get buckarooPaymentMethodsString() {
-        let methods = this.buckarooPaymentMethods;
+    const buckarooPaymentMethodsString = computed(() => {
+        let methods = buckarooPaymentMethods.value;
 
-        if (this.payconiqActive) {
+        if (payconiqActive.value) {
             // Remove Payconiq if has direct link
             methods = methods.filter(m => m !== PaymentMethod.Payconiq);
         }
         return Formatter.joinLast(methods, ', ', ' en ');
-    }
+    });
 
-    get buckarooPaymentMethods() {
-        return this.organization.privateMeta?.buckarooSettings?.paymentMethods ?? [];
-    }
+    const buckarooPaymentMethods = computed(() => {
+        return patchedOrganization.value.privateMeta?.buckarooSettings?.paymentMethods ?? [];
+    });
 
-    get buckarooAvailableMethods() {
-        return [PaymentMethod.Bancontact, PaymentMethod.CreditCard, PaymentMethod.iDEAL, PaymentMethod.Payconiq];
-    }
-
-    get useTestPayments() {
-        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production';
-    }
-
-    set useTestPayments(useTestPayments: boolean) {
-        this.organizationPatch = this.organizationPatch.patch({
+    const useTestPayments = computed({
+        get: () => patchedOrganization.value.privateMeta?.useTestPayments ?? STAMHOOFD.environment !== 'production',
+        set: (useTestPayments: boolean) => {
+        addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 // Only save non default value
                 useTestPayments: STAMHOOFD.environment !== 'production' === useTestPayments ? null : useTestPayments,
             }),
         });
     }
+    });
 
-    async save() {
-        if (this.saving) {
+    async function save() {
+        if (saving.value) {
             return;
         }
 
-        const errors = new SimpleErrors();
+        const simpleErrors = new SimpleErrors();
 
         let valid = false;
 
-        if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors);
+        if (simpleErrors.errors.length > 0) {
+            errors.errorBox = new ErrorBox(errors);
         }
         else {
-            this.errorBox = null;
+            errors.errorBox = null;
             valid = true;
         }
-        valid = valid && await this.validator.validate();
+        valid = valid && await errors.validator.validate();
 
         if (!valid) {
             return;
         }
 
-        this.saving = true;
+        saving.value = true;
 
         try {
-            await this.$organizationManager.patch(this.organizationPatch);
-            this.organizationPatch = Organization.patch({ id: this.$organization.id });
+            await organizationManager.value.patch(organizationPatch.value);
+            resetPatch();
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
-            this.dismiss({ force: true });
+            dismiss({ force: true }).catch(console.error);
         }
         catch (e) {
-            this.errorBox = new ErrorBox(e);
+            errors.errorBox = new ErrorBox(e);
         }
 
-        this.saving = false;
+        saving.value = false;
     }
 
-    get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, this.$organization, { version: Version });
-    }
-
-    async shouldNavigateAway() {
-        if (!this.hasChanges) {
+    async function shouldNavigateAway() {
+        if (!hasChanges.value) {
             return true;
         }
         return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
     }
 
-    async linkMollie() {
+    async function linkMollie() {
         // Start oauth flow
         const client_id = STAMHOOFD.MOLLIE_CLIENT_ID;
         if (!client_id) {
@@ -608,18 +542,18 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         window.location.href = url;
     }
 
-    async disconnectMollie() {
+    async function disconnectMollie() {
         if (await CenteredMessage.confirm('Ben je zeker dat je Mollie wilt loskoppelen?', 'Ja, loskoppelen', 'Jouw Mollie account blijft behouden en kan je later terug koppelen als je dat wilt.')) {
             try {
-                const response = await this.$context.authenticatedServer.request({
+                const response = await context.value.authenticatedServer.request({
                     method: 'POST',
                     path: '/mollie/disconnect',
                     decoder: Organization as Decoder<Organization>,
-                    owner: this,
+                    owner,
                     shouldRetry: false,
                 });
 
-                this.$context.updateOrganization(response.data);
+                context.value.updateOrganization(response.data);
                 new Toast('Mollie is losgekoppeld', 'success green').show();
             }
             catch (e) {
@@ -628,7 +562,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async doLinkMollie(code: string, state: string) {
+    async function doLinkMollie(code: string, state: string) {
         const toast = new Toast('Koppelen...', 'spinner').setHide(null).show();
 
         try {
@@ -637,21 +571,21 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 throw new SimpleError({
                     code: 'state_verification_failed',
                     message: 'State is not the same',
-                    human: 'Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via ' + this.$t('%2a') + ' als je Mollie probeert te koppelen en het blijft mislukken.',
+                    human: 'Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via ' + $t('%2a') + ' als je Mollie probeert te koppelen en het blijft mislukken.',
                 });
             }
-            const response = await this.$context.authenticatedServer.request({
+            const response = await context.value.authenticatedServer.request({
                 method: 'POST',
                 path: '/mollie/connect',
                 body: {
                     code,
                 },
                 decoder: Organization as Decoder<Organization>,
-                owner: this,
+                owner,
                 shouldRetry: false,
             });
 
-            this.$context.updateOrganization(response.data);
+            context.value.updateOrganization(response.data);
             toast.hide();
             new Toast('Mollie is gekoppeld', 'success green').show();
             await Storage.keyValue.removeItem('mollie-saved-state');
@@ -663,80 +597,80 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             new Toast('Koppelen mislukt', 'error red').show();
         }
 
-        this.updateMollie().catch(console.error);
+        updateMollie().catch(console.error);
     }
 
-    lastAddedStripeAccount: string | null = null;
+    let lastAddedStripeAccount: string | null = null;
 
-    mounted() {
+    onMounted(() => {
         const urlParams = UrlHelper.shared.getSearchParams();
 
-        const mollieMatch = this.$url.match('/oauth/mollie');
+        const mollieMatch = url.match('/oauth/mollie');
         if (mollieMatch) {
             const code = mollieMatch.query.get('code');
             const state = mollieMatch.query.get('state');
 
             if (code && state) {
-                this.doLinkMollie(code, state).catch(console.error);
+                doLinkMollie(code, state).catch(console.error);
             }
             else {
                 const error = mollieMatch.query.get('error') ?? '';
                 if (error) {
                     new Toast('Koppelen mislukt', 'error red').show();
                 }
-                this.updateMollie().catch(console.error);
+                updateMollie().catch(console.error);
             }
         }
         else {
-            if ((this.organization.privateMeta && this.organization.privateMeta.mollieOnboarding) || this.forceMollie) {
-                this.updateMollie().catch(console.error);
+            if ((patchedOrganization.value.privateMeta && patchedOrganization.value.privateMeta.mollieOnboarding) || forceMollie.value) {
+                updateMollie().catch(console.error);
             }
         }
-        this.lastAddedStripeAccount = urlParams.get('recheck-stripe-account');
-        this.doRefresh();
-        this.refreshOnReturn();
+        lastAddedStripeAccount = urlParams.get('recheck-stripe-account');
+        doRefresh();
+        refreshOnReturn();
+    });
+
+    function doRefresh() {
+        loadStripeAccounts(lastAddedStripeAccount).catch(console.error);
     }
 
-    doRefresh() {
-        this.loadStripeAccounts(this.lastAddedStripeAccount).catch(console.error);
+    function refreshOnReturn() {
+        document.addEventListener('visibilitychange', doRefresh);
     }
 
-    refreshOnReturn() {
-        document.addEventListener('visibilitychange', this.doRefresh);
-    }
-
-    async loadStripeAccounts(recheckStripeAccount: string | null) {
+    async function loadStripeAccounts(recheckStripeAccount: string | null) {
         try {
-            this.loadingStripeAccounts = true;
+            loadingStripeAccounts.value = true;
             if (recheckStripeAccount) {
                 try {
-                    await this.$context.authenticatedServer.request({
+                    await context.value.authenticatedServer.request({
                         method: 'POST',
                         path: '/stripe/accounts/' + encodeURIComponent(recheckStripeAccount),
                         decoder: StripeAccount as Decoder<StripeAccount>,
-                        owner: this,
+                        owner,
                     });
                 }
                 catch (e) {
                     console.error(e);
                 }
             }
-            const response = await this.$context.authenticatedServer.request({
+            const response = await context.value.authenticatedServer.request({
                 method: 'GET',
                 path: '/stripe/accounts',
                 decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
-                owner: this,
+                owner,
             });
-            this.stripeAccounts = response.data;
+            stripeAccounts.value = response.data;
 
             if (!recheckStripeAccount) {
-                for (const account of this.stripeAccounts) {
+                for (const account of stripeAccounts.value) {
                     try {
-                        const response = await this.$context.authenticatedServer.request({
+                        const response = await context.value.authenticatedServer.request({
                             method: 'POST',
                             path: '/stripe/accounts/' + encodeURIComponent(account.id),
                             decoder: StripeAccount as Decoder<StripeAccount>,
-                            owner: this,
+                            owner,
                         });
                         account.deepSet(response.data);
                     }
@@ -749,24 +683,24 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         catch (e) {
             console.error(e);
         }
-        this.loadingStripeAccounts = false;
+        loadingStripeAccounts.value = false;
     }
 
-    get hasDuplicateNames() {
-        for (const account of this.stripeAccounts) {
-            if (this.stripeAccounts.find(a => a.id !== account.id && a.meta.settings.dashboard.display_name === account.meta.settings.dashboard.display_name)) {
+    const hasDuplicateNames = computed(() => {
+        for (const account of stripeAccounts.value) {
+            if (stripeAccounts.value.find(a => a.id !== account.id && a.meta.settings.dashboard.display_name === account.meta.settings.dashboard.display_name)) {
                 return true;
             }
         }
         return false;
-    }
+    })
 
-    editStripeAccount(account: StripeAccount) {
+    function editStripeAccount(account: StripeAccount) {
         new CenteredMessage('Stripe Dashboard', 'Je kan alle gegevens wijzigen via je Stripe Dashboard. Bovenaan klik je daar op het gebruikersicoontje > Platforminstellingen om gegevens aan te passen.')
             .addButton(
                 new CenteredMessageButton('Openen', {
                     action: async () => {
-                        await this.loginStripeAccount(account.id);
+                        await loginStripeAccount(account.id);
                     },
                 }),
             )
@@ -774,37 +708,37 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             .show();
     }
 
-    async createStripeAccount() {
-        if (this.isBelgium && (!await CenteredMessage.confirm('Waarschuwing!', 'Ja, gelezen', 'Selecteer de juiste bedrijfsvorm in Stripe. Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen, en spaart dus veel problemen uit. Lees ook zeker de documentatie.'))) {
+    async function createStripeAccount() {
+        if (isBelgium.value && (!await CenteredMessage.confirm('Waarschuwing!', 'Ja, gelezen', 'Selecteer de juiste bedrijfsvorm in Stripe. Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen, en spaart dus veel problemen uit. Lees ook zeker de documentatie.'))) {
             return;
         }
 
         let tab: Window | null = null;
         try {
             tab = tab ?? (AppManager.shared.isNative ? null : window.open('about:blank'));
-            this.creatingStripeAccount = true;
-            const response = await this.$context.authenticatedServer.request({
+            creatingStripeAccount.value = true;
+            const response = await context.value.authenticatedServer.request({
                 method: 'POST',
                 path: '/stripe/connect',
                 decoder: StripeAccount as Decoder<StripeAccount>,
                 shouldRetry: false,
-                owner: this,
+                owner,
             });
             const account = response.data;
-            this.stripeAccounts.push(account);
+            stripeAccounts.value.push(account);
 
             // Open connect url
-            await this.openStripeAccountLink(account.id, tab);
+            await openStripeAccountLink(account.id, tab);
         }
         catch (e) {
             console.error(e);
             Toast.fromError(e).show();
             tab?.close();
         }
-        this.creatingStripeAccount = false;
+        creatingStripeAccount.value = false;
     }
 
-    async openStripeAccountLink(accountId: string, initialTab?: Window | null) {
+    async function openStripeAccountLink(accountId: string, initialTab?: Window | null) {
         let tab: Window | null = initialTab ?? null;
         try {
             tab = tab ?? (AppManager.shared.isNative ? null : window.open('about:blank'));
@@ -813,15 +747,15 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             helper.getSearchParams().append('recheck-stripe-account', accountId);
 
             // Override domain (required for native app)
-            helper.setDomain(this.organization.dashboardDomain);
-            this.lastAddedStripeAccount = accountId;
+            helper.setDomain(patchedOrganization.value.dashboardDomain);
+            lastAddedStripeAccount = accountId;
 
             class ResponseBody extends AutoEncoder {
                 @field({ decoder: StringDecoder })
                 url: string;
             }
 
-            const response = await this.$context.authenticatedServer.request({
+            const response = await context.value.authenticatedServer.request({
                 method: 'POST',
                 body: {
                     accountId: accountId,
@@ -830,7 +764,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 },
                 path: '/stripe/account-link',
                 decoder: ResponseBody as Decoder<ResponseBody>,
-                owner: this,
+                owner,
             });
 
             if (tab) {
@@ -848,7 +782,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async deleteStripeAccount(accountId: string) {
+    async function deleteStripeAccount(accountId: string) {
         if (!(await CenteredMessage.confirm('Dit account verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
             return;
         }
@@ -858,12 +792,12 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
 
         try {
-            await this.$context.authenticatedServer.request({
+            await context.value.authenticatedServer.request({
                 method: 'DELETE',
                 path: '/stripe/accounts/' + encodeURIComponent(accountId),
-                owner: this,
+                owner,
             });
-            this.stripeAccounts = this.stripeAccounts.filter(a => a.id !== accountId);
+            stripeAccounts.value = stripeAccounts.value.filter(a => a.id !== accountId);
         }
         catch (e) {
             console.error(e);
@@ -871,7 +805,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async loginStripeAccount(accountId: string) {
+    async function loginStripeAccount(accountId: string) {
         let tab: Window | null = null;
         try {
             // Immediately open a new tab (otherwise blocked!)
@@ -882,14 +816,14 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 url: string;
             }
 
-            const response = await this.$context.authenticatedServer.request({
+            const response = await context.value.authenticatedServer.request({
                 method: 'POST',
                 body: {
                     accountId: accountId,
                 },
                 path: '/stripe/login-link',
                 decoder: ResponseBody as Decoder<ResponseBody>,
-                owner: this,
+                owner,
             });
 
             if (tab) {
@@ -907,18 +841,18 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async updateMollie() {
+    async function updateMollie() {
         try {
-            const response = await this.$context.authenticatedServer.request({
+            const response = await context.value.authenticatedServer.request({
                 method: 'POST',
                 path: '/mollie/check',
                 decoder: CheckMollieResponse as Decoder<CheckMollieResponse>,
                 shouldRetry: false,
-                owner: this,
+                owner,
             });
 
-            this.mollieProfiles = response.data.profiles;
-            this.$context.updateOrganization(response.data.organization);
+            mollieProfiles.value = response.data.profiles;
+            context.value.updateOrganization(response.data.organization);
         }
         catch (e) {
             console.error(e);
@@ -926,26 +860,26 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    async mollieDashboard() {
-        if (this.loadingMollie) {
+    async function mollieDashboard() {
+        if (loadingMollie.value) {
             return;
         }
-        this.loadingMollie = true;
+        loadingMollie.value = true;
 
         const tab = (AppManager.shared.isNative ? null : window.open('about:blank'));
 
         if (!tab && !AppManager.shared.isNative) {
-            this.loadingMollie = false;
+            loadingMollie.value = false;
             new Toast('Kon geen scherm openen', 'error red').show();
             return;
         }
 
         try {
-            const url = await this.$context.authenticatedServer.request({
+            const url = await context.value.authenticatedServer.request({
                 method: 'GET',
                 path: '/mollie/dashboard',
                 shouldRetry: false,
-                owner: this,
+                owner,
             });
 
             if (AppManager.shared.isNative) {
@@ -957,17 +891,19 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             }
         }
         catch (e) {
-            await this.updateMollie();
+            await updateMollie();
             tab?.close();
-            this.errorBox = new ErrorBox(e);
+            errors.errorBox = new ErrorBox(e);
         }
 
-        this.loadingMollie = false;
+        loadingMollie.value = false;
     }
 
-    beforeUnmount() {
-        Request.cancelAll(this);
-        document.removeEventListener('visibilitychange', this.doRefresh);
-    }
-}
+    onBeforeUnmount(() => {
+        document.removeEventListener('visibilitychange', doRefresh);
+    })
+
+    defineExpose({
+        shouldNavigateAway,
+    });
 </script>
