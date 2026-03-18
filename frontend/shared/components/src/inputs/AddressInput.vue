@@ -1,19 +1,30 @@
 <template>
     <STInputBox :title="title" error-fields="address" :error-box="errorBox">
-        <input v-model="addressLine1" data-testid="street-address-input" class="input" type="text" name="street-address" autocomplete="street-address" :placeholder="$t(`%dQ`)" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"><div class="input-group">
-            <div>
-                <input v-model="postalCode" data-testid="postal-code-input" class="input" type="text" name="postal-code" autocomplete="postal-code" :placeholder="$t(`%c5`)" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
-            </div>
-            <div>
-                <input v-model="city" data-testid="city-input" class="input" type="text" :placeholder="$t('%CQ')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"><!-- name needs to be city for safari autocomplete -->
-            </div>
+        <div v-if="cityOnly" class="input-group">
+            <input v-model="city" :enterkeyhint="enterkeyhint" class="input" type="text" :placeholder="$t('Gemeente')" name="city" autocomplete="address-level2" data-testid="city-only-input" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+            <Dropdown v-model="country" autocomplete="country" name="country" data-skip-enter-focus data-testid="country-select" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+                <option v-for="country in countries" :key="country.value" :value="country.value">
+                    {{ country.text }}
+                </option>
+            </Dropdown>
         </div>
 
-        <Dropdown v-model="country" autocomplete="country" name="country" @update:model-value="updateAddress" @focus="onFocus" @blur="onBlur">
-            <option v-for="country in countries" :key="country.value" :value="country.value">
-                {{ country.text }}
-            </option>
-        </Dropdown>
+        <template v-else>
+            <input v-model="addressLine1" enterkeyhint="next" class="input" type="text" placeholder="Straat en nummer" name="street-address" autocomplete="street-address" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
+            <div class="input-group">
+                <div>
+                    <input v-model="postalCode" enterkeyhint="next" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
+                </div>
+                <div>
+                    <input v-model="city" :enterkeyhint="enterkeyhint" class="input" type="text" :placeholder="$t('Gemeente')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+                </div>
+            </div>
+            <Dropdown v-model="country" autocomplete="country" name="country" data-skip-enter-focus @change="updateAddress" @focus="onFocus" @blur="onBlur">
+                <option v-for="country in countries" :key="country.value" :value="country.value">
+                    {{ country.text }}
+                </option>
+            </Dropdown>
+        </template>
     </STInputBox>
 </template>
 
@@ -40,6 +51,12 @@ import STInputBox from './STInputBox.vue';
 export default class AddressInput extends VueComponent {
     @Prop({ default: '' })
     title: string;
+
+    @Prop({ default: false })
+    cityOnly: boolean;
+
+    @Prop({ default: false })
+    optionalExceptCity: boolean;
 
     /**
      * Assign a validator if you want to offload the validation to components
@@ -76,6 +93,9 @@ export default class AddressInput extends VueComponent {
 
     @Prop({ default: false })
     linkCountryToLocale: boolean;
+
+    @Prop({ default: null })
+    enterkeyhint: string | null;
 
     getDefaultCountry() {
         return I18nController.shared?.countryCode ?? Country.Belgium;
@@ -198,7 +218,19 @@ export default class AddressInput extends VueComponent {
         let address: Address;
 
         try {
-            address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country);
+            if (!this.addressLine1 && (this.optionalExceptCity || this.cityOnly)) {
+                address = Address.create({
+                    street: '',
+                    number: '',
+                    postalCode: this.postalCode ?? '',
+                    city: this.city,
+                    country: this.country,
+                });
+                address.cleanData();
+            }
+            else {
+                address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country);
+            }
 
             if (!this.modelValue || (this.validateServer && !(this.modelValue instanceof ValidatedAddress) && !silent && isFinal) || address.toString() !== this.modelValue.toString()) {
                 // Do we need to validate on the server?

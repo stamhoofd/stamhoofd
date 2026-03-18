@@ -1,5 +1,5 @@
-import { I18nController } from './I18nController';
 import { appToUri } from '@stamhoofd/structures';
+import { I18nController } from './I18nController';
 
 export class LocalizedDomains {
     static getDomain(localizedDomain: LocalizedDomain) {
@@ -20,6 +20,13 @@ export class LocalizedDomains {
 
     static get documentation() {
         return this.getDomain(STAMHOOFD.domains.documentation ?? STAMHOOFD.domains.marketing);
+    }
+
+    static get registration() {
+        if (STAMHOOFD.domains.registration) {
+            return this.getDomain(STAMHOOFD.domains.registration);
+        }
+        return undefined;
     }
 
     static getDocs(path: string) {

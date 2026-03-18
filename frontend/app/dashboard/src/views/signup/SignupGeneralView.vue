@@ -1,23 +1,30 @@
 <template>
     <LoadingViewTransition>
-        <form v-if="!loadingRegisterCode" id="signup-general-view" class="st-view" @submit.prevent="goNext">
-            <STNavigationBar :title="$t(`%3E`)" />
+        <form v-if="!loadingRegisterCode" id="signup-general-view" ref="formEl" class="st-view" :class="{complete: isComplete}" data-testid="signup-form" @submit.prevent="goNext">
+            <STNavigationBar title="Registreren">
+                <template #left>
+                    <BackButton @click="onPop" />
+                </template>
 
-            <main>
+                <template #right>
+                    <button v-if="isComplete" type="button" class="button text selected" @click.prevent="goNext">
+                        Volgende
+                    </button>
+                </template>
+            </STNavigationBar>
+
+            <main class="center small">
+                <aside class="style-title-prefix">
+                    {{ $t('STAP {current} / {total}', {current: 1, total: 2}) }}
+                </aside>
                 <h1>
                     {{ $t("%5W") }}
                 </h1>
                 <p>
                     {{ $t('%WY') }} <a v-if="validatedRegisterCode" :href="'https://'+ $domains.marketing" target="_blank" class="inline-link">{{ $t("%5V") }}</a>
                 </p>
-                <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss()">
-                    {{ $t('%5S') }}
-                    <span class="button text" type="button">
-                        {{ $t('%WZ') }}
-                    </span>
-                </button>
 
-                <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
+                <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift" data-testid="referrer-success-message">
                     {{ $t('%Wa', {value: formatPrice(validatedRegisterCode.value), organization: validatedRegisterCode.organizationName ?? ''}) }}
                 </p>
                 <p v-else-if="validatedRegisterCode" class="success-box icon gift">
@@ -28,76 +35,70 @@
                     {{ $t('%4F') }}
                 </p>
 
-                <STErrorsDefault :error-box="errorBox" />
-                <div class="split-inputs">
-                    <div>
-                        <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errorBox">
-                            <input id="organization-name" ref="firstInput" v-model="name" data-testid="organization-name-input" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization">
-                        </STInputBox>
+                <STErrorsDefault :error-box="errors.errorBox" />
 
-                        <AddressInput v-model="address" :title="$t('%8a')" :validator="validator" :link-country-to-locale="true" />
-                        <p class="style-description-small">
-                            {{ $t('%Wb') }}
-                        </p>
+                <STInputBox :title="$t(`Wat voor vereniging?`)" error-fields="type" :error-box="errors.errorBox" class="max">
+                    <div class="illustration-radio-container">
+                        <label v-for="{value, title, imgSrc} in typeOptions" :key="value" class="illustration-radio-box" data-testid="organization-type-option">
+                            <div>
+                                <Radio v-model="type" :value="value" />
+                            </div>
+                            <figure>
+                                <img :src="imgSrc">
+                            </figure>
+                            <h3>{{ title }}</h3>
+                        </label>
                     </div>
+                </STInputBox>
 
-                    <div>
-                        <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`%Wj`)">
-                            <Dropdown v-model="type" data-testid="organization-type-select">
-                                <option :value="null" disabled>
-                                    {{ $t('%1Fq') }}
-                                </option>
+                <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox" data-testid="name-box">
+                    <input
+                        id="organization-name"
+                        ref="firstInput"
+                        v-model="name"
+                        data-testid="organization-name-input"
+                        class="input"
+                        type="text"
+                        :placeholder="$t('%8C')"
+                        autocomplete="off"
+                        enterkeyhint="next"
+                    >
+                </STInputBox>
 
-                                <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
-                                    <option v-for="_type in group.types" :key="_type.value" :value="_type.value">
-                                        {{ _type.name }}
-                                    </option>
-                                </optgroup>
-                            </Dropdown>
-                        </STInputBox>
-                        <p class="style-description-small">
-                            {{ $t('%Wc') }}
-                        </p>
-
-                        <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`%Wk`)">
-                            <Dropdown v-model="umbrellaOrganization" data-testid="organization-umbrella-select">
-                                <option :value="null" disabled>
-                                    {{ $t('%1Fq') }}
-                                </option>
-                                <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
-                                    {{ item.name }}
-                                </option>
-                            </Dropdown>
-                        </STInputBox>
-                    </div>
-                </div>
+                <AddressInput v-model="address" enterkeyhint="done" :city-only="true" class="max" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" />
+                <p class="style-description-small">
+                    {{ $t('%Wb') }}
+                </p>
 
                 <template v-if="!validatedRegisterCode">
-                    <hr><h2>{{ $t('%Wd') }}</h2>
+                    <hr><h2 data-testid="acquisition-title">
+                        {{ $t('%Wd') }}
+                    </h2>
 
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" data-testid="acquisition-recommended-checkbox" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" data-testid="acquisition-Recommended" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
                         {{ $t('%We') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" data-testid="acquisition-seen-checkbox" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" data-testid="acquisition-Seen" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
                         {{ $t('%Wf') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" data-testid="acquisition-social-media-checkbox" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" data-testid="acquisition-SocialMedia" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
                         {{ $t('%Wg') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" data-testid="acquisition-search-checkbox" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" data-testid="acquisition-Search" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
                         {{ $t('%Wh') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" data-testid="acquisition-other-checkbox" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" data-testid="acquisition-Other" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
                         {{ $t('%1JG') }}
                     </Checkbox>
                 </template>
             </main>
 
-            <STToolbar>
+            <STToolbar class="center">
                 <template #right>
-                    <LoadingButton :loading="loading">
+                    <LoadingButton :loading="loading" class="max">
                         <button class="button primary" type="submit" data-testid="signup-next-button" @click.prevent="goNext">
-                            {{ $t('%Wi') }}
+                            <span>{{ $t("%19q") }}</span>
+                            <span class="icon arrow-right" />
                         </button>
                     </LoadingButton>
                 </template>
@@ -106,387 +107,442 @@
     </LoadingViewTransition>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
-import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@simonbackx/vue-app-navigation';
+import bikeIllustration from '@stamhoofd/assets/images/illustrations/bike.svg';
+import charityIllustration from '@stamhoofd/assets/images/illustrations/charity.svg';
+import educationIllustration from '@stamhoofd/assets/images/illustrations/education.svg';
+import stageIllustration from '@stamhoofd/assets/images/illustrations/stage.svg';
+import teamIllustration from '@stamhoofd/assets/images/illustrations/team.svg';
+import tentIllustration from '@stamhoofd/assets/images/illustrations/tent.svg';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
-import Slider from '@stamhoofd/components/inputs/Slider.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo';
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/networking/Storage';
-import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
-
+import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import SignupAccountView from './SignupAccountView.vue';
 
-@Component({
-    components: {
-        STToolbar,
-        STNavigationBar,
-        Slider,
-        STErrorsDefault,
-        STInputBox,
-        BackButton,
-        AddressInput,
-        LoadingButton,
-        Checkbox,
-        Dropdown,
-        LoadingViewTransition,
+useMetaInfo({
+    title: 'Sluit jouw vereniging aan | Stamhoofd',
+    options: {
+        key: MetaKey.Routing,
     },
-    metaInfo() {
-        return {
-            title: 'Sluit jouw vereniging aan | Stamhoofd',
-            meta: [
-                {
-                    vmid: 'description',
-                    name: 'description',
-                    content: 'Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.',
-                },
-            ],
-        };
-    },
-    navigation: {
-        title: 'Sluit jouw vereniging aan | Stamhoofd',
-    },
-})
-export default class SignupGeneralView extends Mixins(NavigationMixin) {
-    name = '';
-    validator = new Validator();
-    errorBox: ErrorBox | null = null;
-    address: Address | null = null;
-    acquisitionTypes: AcquisitionType[] = [];
+    meta: [
+        {
+            id: 'description',
+            name: 'description',
+            content: 'Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.',
+        },
+    ],
+});
 
-    @Prop({ default: false })
-    visitViaUrl!: boolean;
+const props = withDefaults(defineProps<{
+    visitViaUrl: boolean;
+    initialRegisterCode: { code: string; organization: string } | null;
+}>(), {
+    visitViaUrl: false,
+    initialRegisterCode: null,
+});
 
-    @Prop({ default: null })
-    initialRegisterCode!: { code: string; organization: string } | null;
+const formEl = useTemplateRef<HTMLElement>('formEl');
+const name = ref('');
+const errors = useErrors();
+const show = useShow();
+const dismiss = useDismiss();
+const canPop = useCanPop();
+const canDismiss = useCanDismiss();
+const pop = usePop();
+const owner = useRequestOwner();
 
-    registerCode = this.initialRegisterCode;
+const address = ref<Address | null>(null);
+const acquisitionTypes = ref<AcquisitionType[]>([]);
 
-    validatedRegisterCode: null | RegisterCode = null;
+let registerCode = props.initialRegisterCode;
 
-    reuseRegisterCode = false;
+const validatedRegisterCode = ref<null | RegisterCode>(null);
 
-    loading = false;
-    loadingRegisterCode = true;
+const reuseRegisterCode = ref(false);
 
-    // Make reactive
-    I18nController = I18nController.shared;
+const loading = ref(false);
+const loadingRegisterCode = ref(true);
 
-    type: OrganizationType | null = null;
-    umbrellaOrganization: UmbrellaOrganization | null = null;
+const type = ref<OrganizationType | null>(null);
 
-    mounted() {
-        this.loadRegisterCode().catch((e) => {
-            console.error(e);
-        });
-    }
+let checkCount = 0;
 
-    async loadRegisterCode() {
-        this.loadingRegisterCode = true;
-
-        if (this.initialRegisterCode) {
-            try {
-                await Storage.keyValue.setItem('savedRegisterCode', JSON.stringify(this.initialRegisterCode));
-                await Storage.keyValue.setItem('savedRegisterCodeDate', new Date().getTime() + '');
-            }
-            catch (e) {
-                console.error(e);
-            }
-        }
-        try {
-            const currentCount = await Storage.keyValue.getItem('what-is-new');
-            const saved = await Storage.keyValue.getItem('savedRegisterCode');
-            const dString = await Storage.keyValue.getItem('savedRegisterCodeDate');
-
-            if (saved !== null && dString !== null) {
-                const d = parseInt(dString);
-                if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.code && parsed.organization) {
-                        if (currentCount === null) {
-                            this.registerCode = JSON.parse(saved);
-                        }
-                        else {
-                            this.reuseRegisterCode = true;
-                            this.registerCode = null;
-                        }
-                    }
-                }
-                else {
-                    // Expired or invalid
-                    await Storage.keyValue.removeItem('savedRegisterCode');
-                    await Storage.keyValue.removeItem('savedRegisterCodeDate');
-                    this.registerCode = null;
-                }
-            }
-            else {
-                await Storage.keyValue.removeItem('savedRegisterCode');
-                await Storage.keyValue.removeItem('savedRegisterCodeDate');
-                this.registerCode = null;
-            }
-        }
-        catch (e) {
-            console.error(e);
-        }
-
-        if (this.registerCode) {
-            try {
-                await this.validateCode();
-            }
-            catch (e) {
-                this.errorBox = new ErrorBox(e);
-                this.registerCode = null;
-                await Storage.keyValue.removeItem('savedRegisterCode');
-                await Storage.keyValue.removeItem('savedRegisterCodeDate');
-            }
-        }
-        this.loadingRegisterCode = false;
-    }
-
-    get isBelgium() {
-        return I18nController.shared.countryCode === Country.Belgium && (!this.address || this.address.country === Country.Belgium);
-    }
-
-    get AcquisitionType() {
-        return AcquisitionType;
-    }
-
-    async validateCode() {
-        // Check register code
-        if (this.registerCode) {
-            try {
-                const response = await NetworkManager.server.request({
-                    method: 'GET',
-                    path: '/register-code/' + encodeURIComponent(this.registerCode.code.toUpperCase()),
-                    decoder: RegisterCode as Decoder<RegisterCode>,
-                });
-                this.validatedRegisterCode = response.data;
-                this.acquisitionTypes = [AcquisitionType.Recommended];
-            }
-            catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    if (e.hasCode('invalid_code')) {
-                        throw new SimpleError({
-                            code: 'invalid_code',
-                            message: 'De gebruikte doorverwijzingslink is niet meer geldig. Je kan verder met registereren, maar je ontvangt geen tegoed.',
-                            field: 'registerCode',
-                        });
-                    }
-                }
-                throw e;
-            }
-        }
-    }
-
-    async goNext() {
-        if (this.loading) {
-            return;
-        }
-
-        try {
-            if (this.name.length === 0) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: '',
-                    human: 'Vul de naam van jouw vereniging in',
-                    field: 'name',
-                });
-            }
-            if (this.name.length < 4) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: '',
-                    human: 'De naam van jouw vereniging is te kort',
-                    field: 'name',
-                });
-            }
-
-            if (this.type === null) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Maak een keuze',
-                    field: 'type',
-                });
-            }
-
-            if (this.type === OrganizationType.Youth && this.isBelgium) {
-                if (this.umbrellaOrganization === null) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'Maak een keuze',
-                        field: 'umbrellaOrganization',
-                    });
-                }
-            }
-            else {
-                this.umbrellaOrganization = null;
-            }
-
-            this.loading = true;
-            this.errorBox = null;
-
-            if (!await this.validator.validate() || !this.address) {
-                this.loading = false;
-                return;
-            }
-
-            // Check register code
-            try {
-                await this.validateCode();
-            }
-            catch (e) {
-                this.errorBox = new ErrorBox(e);
-                this.loading = false;
-                return;
-            }
-
-            const defaultStartDate = new Date();
-            defaultStartDate.setMonth(defaultStartDate.getMonth() + 1);
-            defaultStartDate.setDate(1);
-
-            const defaultEndDate = new Date(defaultStartDate.getTime());
-            defaultEndDate.setFullYear(defaultStartDate.getFullYear() + 1);
-
-            const organization = Organization.create({
-                name: this.name,
-                uri: '', // ignored by backend for now
-                meta: OrganizationMetaData.create({
-                    type: this.type,
-                    umbrellaOrganization: this.umbrellaOrganization,
-                    recordsConfiguration: RecordConfigurationFactory.create(this.type, this.address.country),
-                    defaultStartDate,
-                    defaultEndDate,
-                }),
-                privateMeta: OrganizationPrivateMetaData.create({
-                    acquisitionTypes: this.acquisitionTypes,
-                }),
-                address: this.address,
-            });
-
-            this.loading = false;
-            this.errorBox = null;
-            this.show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: this.registerCode }));
-            plausible('signupGeneral');
-        }
-        catch (e) {
-            this.loading = false;
-            console.error(e);
-            this.errorBox = new ErrorBox(e);
-            plausible('signupGeneralError');
-
-            if (STAMHOOFD.environment === 'development' && this.name.length === 0) {
-                console.log('Autofill for development mode enabled. Filling in default values...');
-                // Autofill all
-                this.name = 'Testvereniging ' + Math.floor(Math.random() * 100000);
-                this.address = Address.create({
-                    street: 'Teststraat',
-                    number: '1',
-                    postalCode: '9000',
-                    city: 'Gent',
-                    country: Country.Belgium,
-                });
-                this.type = OrganizationType.Other;
-            }
-            return;
-        }
-    }
-
-    get availableTypes() {
-        const types = OrganizationTypeHelper.getList().sort((a, b) =>
-            Sorter.stack(
-                Sorter.byBooleanValue(
-                    !a.name.toLowerCase().startsWith('andere'),
-                    !b.name.toLowerCase().startsWith('andere'),
-                ),
-                Sorter.byStringProperty(a, b, 'name'),
-            ),
-        );
-
-        // Group by category
-        const map = new Map<string, {
-            value: OrganizationType;
-            name: string;
-        }[]>();
-
-        for (const type of types) {
-            const cat = OrganizationTypeHelper.getCategory(type.value);
-            if (!map.has(cat)) {
-                map.set(cat, [type]);
-            }
-            else {
-                map.get(cat)!.push(type);
-            }
-        }
-
-        const keys = Array.from(map.keys()).sort(Sorter.byStringValue);
-
-        return keys.map((key) => {
-            const types = map.get(key)!;
-            return {
-                name: key,
-                types,
-            };
-        });
-    }
-
-    get availableUmbrellaOrganizations() {
-        return UmbrellaOrganizationHelper.getList().sort((a, b) =>
-            Sorter.stack(
-                Sorter.byBooleanValue(
-                    !a.name.toLowerCase().startsWith('andere'),
-                    !b.name.toLowerCase().startsWith('andere'),
-                ),
-                Sorter.byStringProperty(a, b, 'name'),
-            ),
-        );
-    }
-
-    async shouldNavigateAway() {
-        if (this.name === '' && this.address === null && this.type === null) {
-            return true;
-        }
-        if (await CenteredMessage.confirm('Ben je zeker dat je dit venster wilt sluiten?', 'Sluiten')) {
-            plausible('closeSignup');
-            return true;
-        }
-        plausible('cancelCloseSignup');
+async function checkName() {
+    if (name.value.length === 0) {
         return false;
     }
 
-    // Helpers ---
+    const uri = Formatter.slug(name.value);
 
-    getBooleanType(type: AcquisitionType) {
-        return !!this.acquisitionTypes.find(r => r === type);
+    if (uri.length > 100) {
+        throw new SimpleError({
+            code: 'invalid_field',
+            message: '',
+            human: 'De naam van jouw vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.',
+            field: 'name',
+        });
     }
 
-    setBooleanType(type: AcquisitionType, enabled: boolean) {
-        const index = this.acquisitionTypes.findIndex(r => r === type);
-        if ((index !== -1) === enabled) {
-            return;
+    checkCount++;
+    const c = checkCount;
+    const nameCopy = name.value;
+
+    try {
+        Request.cancelAll(owner);
+
+        const registrationDomains = STAMHOOFD.domains.registration;
+        if (!registrationDomains) {
+            throw new Error('No registration domains in env');
         }
 
-        if (enabled) {
-            this.acquisitionTypes.push(type);
+        await NetworkManager.server.request({
+            method: 'GET',
+            path: '/organization-from-domain',
+            query: {
+                domain: uri + '.' + registrationDomains[''],
+            },
+            owner,
+            shouldRetry: true,
+        });
+        if (checkCount !== c || name.value !== nameCopy) {
+            // Discard
+            return;
+        }
+        return true;
+    }
+    catch (e) {
+        if (checkCount !== c || name.value !== nameCopy) {
+            // Discard
+            return;
+        }
+        if (isSimpleError(e) || isSimpleErrors(e)) {
+            if (e.hasCode('unknown_organization')) {
+                return false;
+            }
+        }
+        throw e;
+    }
+}
+
+onMounted(() => {
+    loadRegisterCode().catch(console.error);
+});
+
+watch(formEl, (el) => {
+    if (el) {
+        el.querySelectorAll('input, textarea, select').forEach((el) => {
+            el.addEventListener('focus', () => {
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'start' });
+                }, 300); // wait for keyboard animation
+            });
+        });
+    }
+});
+
+const isComplete = computed(() => name.value.length > 2 && address.value !== null && type.value !== null && address.value.city.length >= 3);
+
+function onPop() {
+    if (canPop.value) {
+        pop()?.catch(console.error);
+    }
+    if (canDismiss.value) {
+        dismiss().catch(console.error);
+    }
+    // Go back using the history API
+    else if (window.history.length > 1) {
+        window.history.back();
+    }
+    else {
+        // Go to marketing site
+        window.location.href = 'https://' + LocalizedDomains.marketing;
+    }
+}
+
+async function loadRegisterCode() {
+    loadingRegisterCode.value = true;
+
+    if (props.initialRegisterCode) {
+        try {
+            await Storage.keyValue.setItem('savedRegisterCode', JSON.stringify(props.initialRegisterCode));
+            await Storage.keyValue.setItem('savedRegisterCodeDate', new Date().getTime() + '');
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+    try {
+        const currentCount = await Storage.keyValue.getItem('what-is-new');
+        const saved = await Storage.keyValue.getItem('savedRegisterCode');
+        const dString = await Storage.keyValue.getItem('savedRegisterCodeDate');
+
+        if (saved !== null && dString !== null) {
+            const d = parseInt(dString);
+            if (!isNaN(d) && d > new Date().getTime() - 24 * 60 * 60 * 1000) {
+                const parsed = JSON.parse(saved);
+                if (parsed.code && parsed.organization) {
+                    if (currentCount === null) {
+                        registerCode = JSON.parse(saved);
+                    }
+                    else {
+                        reuseRegisterCode.value = true;
+                        registerCode = null;
+                    }
+                }
+            }
+            else {
+                // Expired or invalid
+                await Storage.keyValue.removeItem('savedRegisterCode');
+                await Storage.keyValue.removeItem('savedRegisterCodeDate');
+                registerCode = null;
+            }
         }
         else {
-            this.acquisitionTypes.splice(index, 1);
+            await Storage.keyValue.removeItem('savedRegisterCode');
+            await Storage.keyValue.removeItem('savedRegisterCodeDate');
+            registerCode = null;
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+
+    if (registerCode) {
+        try {
+            await validateCode();
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+            registerCode = null;
+            await Storage.keyValue.removeItem('savedRegisterCode');
+            await Storage.keyValue.removeItem('savedRegisterCodeDate');
+        }
+    }
+    loadingRegisterCode.value = false;
+}
+
+async function validateCode() {
+    // Check register code
+    if (registerCode) {
+        try {
+            const response = await NetworkManager.server.request({
+                method: 'GET',
+                path: '/register-code/' + encodeURIComponent(registerCode.code.toUpperCase()),
+                decoder: RegisterCode as Decoder<RegisterCode>,
+            });
+            validatedRegisterCode.value = response.data;
+            acquisitionTypes.value = [AcquisitionType.Recommended];
+        }
+        catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                if (e.hasCode('invalid_code')) {
+                    throw new SimpleError({
+                        code: 'invalid_code',
+                        message: 'De gebruikte doorverwijzingslink is niet meer geldig. Je kan verder met registereren, maar je ontvangt geen tegoed.',
+                        field: 'registerCode',
+                    });
+                }
+            }
+            throw e;
         }
     }
 }
+
+async function goNext() {
+    if (loading.value) {
+        return;
+    }
+
+    try {
+        if (name.value.length === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: '',
+                human: 'Vul de naam van jouw vereniging in',
+                field: 'name',
+            });
+        }
+        if (name.value.length < 4) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: '',
+                human: 'De naam van jouw vereniging is te kort',
+                field: 'name',
+            });
+        }
+
+        if (type.value === null) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Maak een keuze',
+                field: 'type',
+            });
+        }
+
+        loading.value = true;
+        errors.errorBox = null;
+
+        const check = await checkName();
+        if (check === true || check === undefined) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: '',
+                human: 'Er bestaat al een vereniging met deze naam. Probeer de naam wat te wijzigen (mogelijks bestaan er meerdere verenigingen met dezelfde naam) of kijk na of jouw vereniging niet al is geregistreerd.',
+                field: 'name',
+            });
+        }
+
+        if (!await errors.validator.validate() || !address.value) {
+            loading.value = false;
+            return;
+        }
+
+        // Check register code
+        try {
+            await validateCode();
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+            loading.value = false;
+            return;
+        }
+
+        const defaultStartDate = new Date();
+        defaultStartDate.setMonth(defaultStartDate.getMonth() + 1);
+        defaultStartDate.setDate(1);
+
+        const defaultEndDate = new Date(defaultStartDate.getTime());
+        defaultEndDate.setFullYear(defaultStartDate.getFullYear() + 1);
+
+        const organization = Organization.create({
+            name: name.value,
+            uri: '', // ignored by backend for now
+            meta: OrganizationMetaData.create({
+                type: type.value,
+                recordsConfiguration: RecordConfigurationFactory.create(type.value, address.value.country),
+                defaultStartDate,
+                defaultEndDate,
+            }),
+            privateMeta: OrganizationPrivateMetaData.create({
+                acquisitionTypes: acquisitionTypes.value,
+            }),
+            address: address.value,
+        });
+
+        loading.value = false;
+        errors.errorBox = null;
+        show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: registerCode })).catch(console.error);
+        plausible('signupGeneral');
+    }
+    catch (e) {
+        loading.value = false;
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+        plausible('signupGeneralError');
+
+        if (STAMHOOFD.environment === 'development' && name.value.length === 0) {
+            console.log('Autofill for development mode enabled. Filling in default values...');
+            // Autofill all
+            name.value = 'Testvereniging ' + Math.floor(Math.random() * 100000);
+            address.value = Address.create({
+                street: 'Teststraat',
+                number: '1',
+                postalCode: '9000',
+                city: 'Gent',
+                country: Country.Belgium,
+            });
+            type.value = OrganizationType.Other;
+        }
+        return;
+    }
+}
+
+const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] = [
+    {
+        value: OrganizationType.Sport,
+        title: $t('Sport'),
+        imgSrc: bikeIllustration,
+    },
+    {
+        value: OrganizationType.Culture,
+        title: $t(`%mR`),
+        imgSrc: stageIllustration,
+    }, {
+        value: OrganizationType.Youth,
+        title: $t('Jeugd'),
+        imgSrc: tentIllustration,
+    },
+    {
+        value: OrganizationType.School,
+        title: $t(`%p`),
+        imgSrc: educationIllustration,
+    },
+    {
+        value: OrganizationType.GoodCause,
+        title: $t('Goed doel'),
+        imgSrc: charityIllustration,
+    },
+    {
+        value: OrganizationType.Other,
+        title: $t(`%1JG`),
+        imgSrc: teamIllustration,
+    },
+
+];
+
+async function shouldNavigateAway() {
+    if (name.value === '' && address.value === null && type.value === null) {
+        return true;
+    }
+    if (await CenteredMessage.confirm('Ben je zeker dat je dit venster wilt sluiten?', 'Sluiten')) {
+        plausible('closeSignup');
+        return true;
+    }
+    plausible('cancelCloseSignup');
+    return false;
+}
+
+// Helpers ---
+
+function getBooleanType(type: AcquisitionType) {
+    return !!acquisitionTypes.value.find(r => r === type);
+}
+
+function setBooleanType(type: AcquisitionType, enabled: boolean) {
+    const index = acquisitionTypes.value.findIndex(r => r === type);
+    if ((index !== -1) === enabled) {
+        return;
+    }
+
+    if (enabled) {
+        acquisitionTypes.value.push(type);
+    }
+    else {
+        acquisitionTypes.value.splice(index, 1);
+    }
+}
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

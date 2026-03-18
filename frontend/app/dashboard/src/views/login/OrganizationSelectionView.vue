@@ -84,18 +84,17 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import ContextLogo from '@stamhoofd/components/context/ContextLogo.vue';
-import { Option } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
-import PlatformFooter from '@stamhoofd/components/auth/PlatformFooter.vue';
-import PlatformLogo from '@stamhoofd/components/context/PlatformLogo.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
-import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useAppData } from '@stamhoofd/components/context/appContext.ts';
-import { useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import PlatformFooter from '@stamhoofd/components/auth/PlatformFooter.vue';
+import ContextLogo from '@stamhoofd/components/context/ContextLogo.vue';
+import PlatformLogo from '@stamhoofd/components/context/PlatformLogo.vue';
 import VersionFooter from '@stamhoofd/components/context/VersionFooter.vue';
+import { useAppData } from '@stamhoofd/components/context/appContext.ts';
+import { Option, useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -293,7 +292,6 @@ defineRoutes([
                 visitViaUrl: !!query,
             };
         },
-        present: 'popup',
     },
 ]);
 </script>
