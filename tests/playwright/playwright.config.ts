@@ -11,7 +11,7 @@ export default defineConfig({
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-    retries: process.env.CI ? 0 : 0,
+    retries: process.env.CI ? 1 : 0,
     /* Opt out of parallel tests on CI. */
     workers: process.env.CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -25,7 +25,7 @@ export default defineConfig({
         trace: "on-first-retry",
 
         // todo
-        headless: process.env.CI ? true : false,
+        headless: true,
         // ignoreHTTPSErrors: true,
         launchOptions: {
             args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
