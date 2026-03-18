@@ -23,7 +23,7 @@ export class I18n {
                 throw new Error('STAMHOOFD.translationNamespace is not set');
             }
 
-            const directory = path.dirname(require.resolve('@stamhoofd/locales')) + '/' + STAMHOOFD.translationNamespace;
+            const directory = path.dirname(require.resolve('@stamhoofd/locales')) + '/../locales/' + STAMHOOFD.translationNamespace;
             const files = (await fs.readdir(directory, { withFileTypes: true }))
                 .filter(dirent => !dirent.isDirectory());
 

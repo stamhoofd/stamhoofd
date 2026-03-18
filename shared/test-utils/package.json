@@ -1,30 +1,31 @@
 {
     "name": "@stamhoofd/test-utils",
     "version": "2.119.0",
-    "main": "./dist/index.js",
-    "module": "./esm/dist/index.js",
-    "types": "./dist/index.d.ts",
+    "type": "module",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts",
     "exports": {
         ".": {
-            "import": "./esm/dist/index.js",
-            "require": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js",
+            "types": "./dist/esm/index.d.ts"
         },
         "./cjs": {
-            "import": "./dist/index.js",
-            "require": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "import": "./dist/cjs/index.js",
+            "require": "./dist/cjs/index.js",
+            "types": "./dist/cjs/index.d.ts"
         }
     },
+    "files": [
+        "dist/cjs",
+        "dist/esm",
+        "package.json"
+    ],
     "license": "UNLICENCED",
     "sideEffects": false,
-    "files": [
-        "dist",
-        "esm/dist",
-        "esm/package.json"
-    ],
     "scripts": {
-        "build": " tsc -b . esm",
+        "build": "tsc --build tsconfig.cjs.json tsconfig.esm.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
         "lint": "eslint ."
     },
     "publishConfig": {

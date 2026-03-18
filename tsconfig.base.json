@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "commonjs",
+        "jsx": "preserve",
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "declaration": true,
+        "declarationMap": true,
+        "composite": true,
+        "resolveJsonModule": true,
+        "noErrorTruncation": true,
+        "forceConsistentCasingInFileNames": true,
+        "lib": [
+            "es2019",
+            "dom"
+        ],
+        "types": [
+            "node"
+        ],
+    }
+}

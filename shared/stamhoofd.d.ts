@@ -1,3 +1,4 @@
+/// <reference path="../environment.d.ts" />
 
 export {};
 

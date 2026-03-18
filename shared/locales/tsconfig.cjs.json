@@ -1,0 +1,17 @@
+{
+    // File used when building the package.
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "./dist/cjs",
+        "rootDir": "./src"
+    },
+    "include": [
+        "./src/**/*.ts",
+        "../stamhoofd.d.ts"
+    ],
+    "exclude": [
+        // Tests are excluded (only included in tsconfig.test.json)
+        "src/**/*.spec.ts", 
+        "src/**/*.test.ts"
+    ]
+}

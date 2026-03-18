@@ -1,27 +1,26 @@
 {
     "name": "@stamhoofd/object-differ",
     "version": "2.119.0",
-    "main": "./dist/index.js",
-    "module": "./esm/dist/index.js",
-    "types": "./dist/index.d.ts",
+    "type": "module",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts",
     "exports": {
         ".": {
-            "import": "./esm/dist/index.js",
-            "require": "./dist/index.js",
-            "types": "./dist/index.d.ts"
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js",
+            "types": "./dist/esm/index.d.ts"
         }
     },
+    "files": [
+        "dist/cjs",
+        "dist/esm",
+        "package.json"
+    ],
     "license": "UNLICENCED",
     "sideEffects": [],
-    "files": [
-        "dist",
-        "esm/dist",
-        "esm/dist/package.json"
-    ],
     "scripts": {
-        "build": "yarn -s build-cjs && yarn -s build-esm",
-        "build-cjs": "tsc -p . --declaration",
-        "build-esm": "cd esm && tsc -p . --declaration",
+        "build": "tsc --build tsconfig.cjs.json tsconfig.esm.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
         "lint": "eslint"
     },
     "devDependencies": {

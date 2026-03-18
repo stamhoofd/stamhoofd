@@ -9,10 +9,11 @@ module.exports = {
         './src/',
     ],
     transform: {
-        '\\.[jt]s?$': [
+        '\\.ts?$': [
             'ts-jest',
             {
                 useESM: true,
+                tsconfig: 'tsconfig.test.json',
             },
         ],
     },

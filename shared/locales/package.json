@@ -2,23 +2,26 @@
     "name": "@stamhoofd/locales",
     "version": "2.119.0",
     "license": "UNLICENCED",
-    "main": "./dist/index.js",
-    "module": "./esm/dist/index.js",
-    "types": "./dist/index.d.ts",
-    "sideEffects": false,
-    "files": [
-        "dist",
-        "esm/dist",
-        "esm/package.json"
-    ],
+    "type": "module",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts",
     "exports": {
         ".": {
-            "import": "./esm/dist/index.js",
-            "require": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-        }
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js",
+            "types": "./dist/esm/index.d.ts"
+        },
+        "./locales": "./dist/locales"
     },
+    "files": [
+        "dist/cjs",
+        "dist/esm",
+        "dist/locales",
+        "package.json"
+    ],
+    "sideEffects": false,
     "scripts": {
-        "build": "tsc -b . esm && node build.mjs"
+        "build": "tsc --build tsconfig.cjs.json tsconfig.esm.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json && node build.mjs"
     }
 }

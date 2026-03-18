@@ -1,0 +1,11 @@
+{
+    // File used when building the package.
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "types": ["jest"]
+    },
+    "references": [],
+    "include": [
+        "./jest-extended.d.ts",
+    ]
+}

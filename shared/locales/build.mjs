@@ -1,6 +1,6 @@
 // Loop all locales
 import { promises as fs } from 'fs';
-import { languages } from './dist/index.js';
+import { languages } from './dist/esm/index.js';
 
 const validLocales = {
     ['BE']: ['nl', 'fr', 'en'],
@@ -21,10 +21,7 @@ async function fileExists(file) {
 const namespaces = ['stamhoofd', 'digit', 'keeo', 'jamboree'];
 
 for (const namespace of namespaces) {
-    // await fs.rm("./dist/"+namespace, { recursive: true, force: true })
-    // await fs.rm("./esm/dist/"+namespace, { recursive: true, force: true })
-    await fs.mkdir('./dist/' + namespace, { recursive: true });
-    await fs.mkdir('./esm/dist/' + namespace, { recursive: true });
+    await fs.mkdir('./dist/locales/' + namespace, { recursive: true });
 }
 
 function mergeObjects(into, from, missingOnly = false) {
@@ -237,18 +234,15 @@ for (const country of Object.keys(validLocales)) {
             const data = JSON.stringify(json);
 
             try {
-                const existingData = await fs.readFile('./dist/' + namespace + '/' + locale + '.json', { encoding: 'utf8' });
-                const existingDataEsm = await fs.readFile('./esm/dist/' + namespace + '/' + locale + '.json', { encoding: 'utf8' });
+                const existingData = await fs.readFile('./dist/locales/' + namespace + '/' + locale + '.json', { encoding: 'utf8' });
 
-                if (existingData !== data || existingDataEsm !== data) {
+                if (existingData !== data) {
                     console.log(namespace + '/' + locale + ' has changed');
-                    await fs.writeFile('./dist/' + namespace + '/' + locale + '.json', data);
-                    await fs.writeFile('./esm/dist/' + namespace + '/' + locale + '.json', data);
+                    await fs.writeFile('./dist/locales/' + namespace + '/' + locale + '.json', data);
                 }
             }
             catch (e) {
-                await fs.writeFile('./dist/' + namespace + '/' + locale + '.json', data);
-                await fs.writeFile('./esm/dist/' + namespace + '/' + locale + '.json', data);
+                await fs.writeFile('./dist/locales/' + namespace + '/' + locale + '.json', data);
             }
         }
     }

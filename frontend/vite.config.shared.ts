@@ -29,7 +29,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
         }
         else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
             console.log('Building for development...', process.env.NODE_ENV);
-            const builder = await import('@stamhoofd/build-development-env');
+            const builder = await import('@stamhoofd/build-development-env/cjs');
             const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
                 frontend: options.name,
             });

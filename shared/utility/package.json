@@ -1,18 +1,26 @@
 {
     "name": "@stamhoofd/utility",
     "version": "2.119.0",
-    "main": "./dist/index.js",
-    "module": "./esm/dist/index.js",
-    "types": "./dist/index.d.ts",
+    "type": "module",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/esm/index.js",
+            "require": "./dist/cjs/index.js",
+            "types": "./dist/esm/index.d.ts"
+        }
+    },
+    "files": [
+        "dist/cjs",
+        "dist/esm",
+        "package.json"
+    ],
     "license": "UNLICENCED",
     "sideEffects": false,
-    "files": [
-        "dist",
-        "esm/dist",
-        "esm/package.json"
-    ],
     "scripts": {
-        "build": " tsc -b . esm",
+        "build": "tsc --build tsconfig.cjs.json tsconfig.esm.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
         "test": "jest",
         "lint": "eslint ."
     },
