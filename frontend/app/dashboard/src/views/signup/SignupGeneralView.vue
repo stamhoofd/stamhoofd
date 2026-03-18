@@ -118,10 +118,11 @@ import educationIllustration from '@stamhoofd/assets/images/illustrations/educat
 import stageIllustration from '@stamhoofd/assets/images/illustrations/stage.svg';
 import teamIllustration from '@stamhoofd/assets/images/illustrations/team.svg';
 import tentIllustration from '@stamhoofd/assets/images/illustrations/tent.svg';
-import { MetaKey, useErrors, useMetaInfo } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';

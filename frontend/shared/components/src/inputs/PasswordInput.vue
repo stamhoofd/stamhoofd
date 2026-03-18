@@ -18,8 +18,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox, STInputBox, useErrors, useValidation, Validator } from '@stamhoofd/components';
+import { ErrorBox } from '#errors/ErrorBox';
+import { useErrors } from '#errors/useErrors';
+import { useValidation } from '#errors/useValidation';
+import { Validator } from '#errors/Validator';
 import { onMounted, ref, watch } from 'vue';
+import STInputBox from './STInputBox.vue';
 
 const props = withDefaults(defineProps<{ title?: string; validator?: Validator | null; errorBox?: ErrorBox | null; required?: boolean;
     /**

@@ -60,10 +60,10 @@
 <script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss } from '@simonbackx/vue-app-navigation';
-import { useErrors } from '@stamhoofd/components';
 import ConfirmEmailView from '@stamhoofd/components/auth/ConfirmEmailView.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import PasswordInput from '@stamhoofd/components/inputs/PasswordInput.vue';
