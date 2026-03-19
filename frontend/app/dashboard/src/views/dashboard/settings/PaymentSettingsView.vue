@@ -152,16 +152,16 @@
             </p>
 
             <div class="style-button-bar">
-                <a class="button primary" :href="$domains.getDocs('stripe')" target="_blank">
-                    <span>{{ $t('%No') }}</span>
-                    <span class="icon arrow-right" />
-                </a>
-
                 <LoadingButton :loading="creatingStripeAccount">
-                    <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
+                    <button type="button" class="button primary" :disabled="creatingStripeAccount" @click="createStripeAccount">
                         <span>{{ $t('%Np') }}</span>
                     </button>
                 </LoadingButton>
+
+                <a class="button secundary" :href="$domains.getDocs('stripe')" target="_blank">
+                    <span>{{ $t('%No') }}</span>
+                    <span class="icon book" />
+                </a>
             </div>
         </div>
 
@@ -187,14 +187,14 @@
                 </p>
 
                 <div class="style-button-bar">
-                    <a class="button primary" :href="$domains.getDocs('mollie')" target="_blank">
-                        <span>{{ $t('%No') }}</span>
-                        <span class="icon arrow-right" />
-                    </a>
-
-                    <button type="button" class="button secundary" @click="linkMollie">
+                    <button type="button" class="button primary" @click="linkMollie">
                         <span>{{ $t('Aansluiten bij Mollie') }}</span>
                     </button>
+
+                    <a class="button secundary" :href="$domains.getDocs('mollie')" target="_blank">
+                        <span>{{ $t('%No') }}</span>
+                        <span class="icon book" />
+                    </a>
                 </div>
             </template>
             <template v-else>
@@ -217,7 +217,7 @@
 
                 <p class="style-button-bar">
                     <LoadingButton :loading="loadingMollie">
-                        <button class="button text" type="button" @click="mollieDashboard">
+                        <button class="button secundary" type="button" :disabled="loadingMollie" @click="mollieDashboard">
                             <span class="icon external" />
                             <span>{{ $t('%O0') }}</span>
                         </button>
