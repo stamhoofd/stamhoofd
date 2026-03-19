@@ -67,7 +67,7 @@
     "i18n-ally.keepFulfilled": false,
     "i18n-ally.keystyle": "flat",
     "i18n-ally.localesPaths": [
-        "shared/locales/dist/keeo"
+        "shared/locales/dist/locales/keeo"
     ],
     "i18n-ally.annotationInPlace": false,
     "i18n-ally.extract.keyMaxLength": 1000,
