@@ -30,195 +30,179 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
 
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
 import StepperInput from './StepperInput.vue';
 
-@Component({
-    components: {
-        StepperInput,
-    },
-    emits: ['update:modelValue'],
-})
-export default class NumberInput extends VueComponent {
+const props = withDefaults(defineProps<{
     /** Price in cents */
-    @Prop({ default: 0 })
-    min!: number | null;
-
+    min?: number | null;
     /** Price in cents */
-    @Prop({ default: null })
-    max!: number | null;
+    max?: number | null;
+    stepper?: boolean;
+    required?: boolean;
+    disabled?: boolean;
+    suffix?: string;
+    suffixSingular?: string | null;
+    placeholder?: string;
+    floatingPoint?: boolean; // In cents if floating point, never returns floats!
+}>(), {
+    min: null,
+    max: null,
+    stepper: false,
+    required: true,
+    disabled: false,
+    suffix: '',
+    suffixSingular: null,
+    placeholder: '',
+    floatingPoint: false,
 
-    @Prop({ default: false })
-    stepper!: boolean;
+});
 
-    valueString = '';
-    valid = true;
+const inputEl = useTemplateRef<HTMLInputElement>('input');
 
-    /** Price in cents */
-    @Prop({ default: true })
-    required!: boolean;
+const valueString = ref('');
+const valid = ref(true);
 
-    @Prop({ default: false })
-    disabled!: boolean;
+/** Price in cents */
+const model = defineModel<number | null>({ default: 0 });
 
-    /** Price in cents */
-    @Prop({ default: 0 })
-    modelValue!: number | null;
+watch(model, () => {
+    clean();
+}, { immediate: true });
 
-    @Prop({ default: '' })
-    suffix: string;
-
-    @Prop({ default: null })
-    suffixSingular: string | null;
-
-    @Prop({ default: '' })
-    placeholder!: string;
-
-    @Prop({ default: false })
-    floatingPoint!: boolean; // In cents if floating point, never returns floats!
-
-    @Watch('modelValue')
-    onValueChange() {
-        this.clean();
-    }
-
-    get internalValue() {
-        return this.modelValue;
-    }
-
-    set internalValue(val: number | null) {
-        if (val === this.modelValue) {
+const internalValue = computed({
+    get: () => model.value,
+    set: (val: number | null) => {
+        if (val === model.value) {
             return;
         }
-        this.$emit('update:modelValue', val);
-    }
+        model.value = val;
+    },
+});
 
-    get stepperValue() {
-        return this.modelValue ?? this.min ?? 0;
-    }
+const stepperValue = computed({
+    get: () => model.value ?? props.min ?? 0,
+    set: (val: number) => {
+        model.value = val;
 
-    set stepperValue(val: number) {
-        this.$emit('update:modelValue', val);
-        this.$nextTick(() => {
-            this.clean();
-        });
-    }
+        // todo: is this necesary?
+        nextTick(() => {
+            clean();
+        }).catch(console.error);
+    },
+});
 
-    mounted() {
-        this.clean();
-    }
+// onMounted(() => {
+//     clean();
+// })
 
-    @Watch('valueString')
-    onValueChanged(value: string, _oldValue: string) {
-        // We need the value string here! Vue does some converting to numbers automatically
-        // but for our placeholder system we need exactly the same string
-        if (value === '') {
-            if (this.required) {
-                this.valid = true;
-                this.internalValue = Math.max(0, this.min ?? 0);
-            }
-            else {
-                this.valid = true;
-                this.internalValue = null;
-            }
+watch(valueString, (value: string) => {
+    // We need the value string here! Vue does some converting to numbers automatically
+    // but for our placeholder system we need exactly the same string
+    if (value === '') {
+        if (props.required) {
+            valid.value = true;
+            internalValue.value = Math.max(0, props.min ?? 0);
         }
         else {
-            if (!value.includes('.')) {
-                // We do this for all locales since some browsers report the language locale instead of the formatting locale
-                value = value.replace(',', '.');
-            }
-            const v = parseFloat(value);
-            if (isNaN(v)) {
-                this.valid = false;
-                this.internalValue = this.min ?? 0;
-            }
-            else {
-                this.valid = true;
-
-                // Remove extra decimals
-                this.internalValue = this.constrain(Math.round(v * (this.floatingPoint ? 100 : 1)));
-            }
+            valid.value = true;
+            internalValue.value = null;
         }
     }
+    else {
+        if (!value.includes('.')) {
+            // We do this for all locales since some browsers report the language locale instead of the formatting locale
+            value = value.replace(',', '.');
+        }
+        const v = parseFloat(value);
+        if (isNaN(v)) {
+            valid.value = false;
+            internalValue.value = props.min ?? 0;
+        }
+        else {
+            valid.value = true;
 
-    /// Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
-    whatDecimalSeparator(): string {
-        const n = 1.1;
-        const str = n.toLocaleString().substring(1, 2);
-        return str;
+            // Remove extra decimals
+            internalValue.value = constrain(Math.round(v * (props.floatingPoint ? 100 : 1)));
+        }
+    }
+});
+
+/// Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
+function whatDecimalSeparator(): string {
+    const n = 1.1;
+    const str = n.toLocaleString().substring(1, 2);
+    return str;
+}
+
+// Restore invalid input, make the input value again
+// And set valueString
+function clean() {
+    if (!valid.value || (model.value === null && props.required)) {
+        return;
     }
 
-    // Restore invalid input, make the input value again
-    // And set valueString
-    clean() {
-        if (!this.valid || (this.modelValue === null && this.required)) {
-            return;
-        }
-
-        // Only update valuestring if input not focused
-        // otherwise this gives glitchs when typing when minimum > 0
-        const inputElement = this.$refs.input as HTMLInputElement;
+    // Only update valuestring if input not focused
+    // otherwise this gives glitchs when typing when minimum > 0
+    const inputElement = inputEl.value;
+    if (inputElement) {
         const activeElement = (('getRootNode' in inputElement ? (inputElement.getRootNode() ?? document) : document) as any).activeElement as HTMLElement;
 
         if (inputElement === activeElement) {
             return;
         }
-
-        let value = this.modelValue;
-        if (value === null) {
-            if (!this.required) {
-                this.valueString = '';
-                return;
-            }
-            value = this.min ?? 0;
-        }
-
-        // Check if has decimals
-        const float = value / (this.floatingPoint ? 100 : 1);
-        const decimals = float % 1;
-        const abs = Math.abs(float);
-
-        if (decimals !== 0) {
-            // Include decimals
-            this.valueString
-                = (float < 0 ? '-' : '')
-                    + Math.floor(abs)
-                    + this.whatDecimalSeparator()
-                    + ('' + Math.round(Math.abs(decimals) * (this.floatingPoint ? 100 : 1))).padStart(2, '0');
-        }
-        else {
-            // Hide decimals
-            this.valueString = float + '';
-        }
     }
 
-    // Limit value to bounds
-    constrain(value: number): number {
-        if (this.min !== null && value < this.min) {
-            value = this.min;
-        }
-        else if (this.max !== null && value > this.max) {
-            value = this.max;
-        }
-        return value;
-    }
-
-    step(add: number) {
-        if (!this.valid) {
+    let value = model.value;
+    if (value === null) {
+        if (!props.required) {
+            valueString.value = '';
             return;
         }
-        const v = this.constrain((this.internalValue ?? this.min ?? 0) + add);
-        this.internalValue = v;
-        this.$nextTick(() => {
-            this.clean();
-        });
+        value = props.min ?? 0;
     }
 
-    focus() {
-        // (this.$refs["input"] as any).focus()
+    // Check if has decimals
+    const float = value / (props.floatingPoint ? 100 : 1);
+    const decimals = float % 1;
+    const abs = Math.abs(float);
+
+    if (decimals !== 0) {
+        // Include decimals
+        valueString.value
+                = (float < 0 ? '-' : '')
+                    + Math.floor(abs)
+                    + whatDecimalSeparator()
+                    + ('' + Math.round(Math.abs(decimals) * (props.floatingPoint ? 100 : 1))).padStart(2, '0');
     }
+    else {
+        // Hide decimals
+        valueString.value = float + '';
+    }
+}
+
+// Limit value to bounds
+function constrain(value: number): number {
+    if (props.min !== null && value < props.min) {
+        value = props.min;
+    }
+    else if (props.max !== null && value > props.max) {
+        value = props.max;
+    }
+    return value;
+}
+
+function step(add: number) {
+    if (!valid.value) {
+        return;
+    }
+    const v = constrain((internalValue.value ?? props.min ?? 0) + add);
+    internalValue.value = v;
+    nextTick(() => {
+        clean();
+    }).catch(console.error);
 }
 </script>
 
