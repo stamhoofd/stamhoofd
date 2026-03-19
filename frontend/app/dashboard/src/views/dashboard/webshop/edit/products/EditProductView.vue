@@ -332,7 +332,7 @@
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                                <NumberInput v-model="stock" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
+                                <DeprecatedNumberInput v-model="stock" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -352,7 +352,7 @@
 
                         <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="showStockBelow" :error-box="showStockBelow">
-                                <NumberInput v-model="showStockBelow" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
+                                <DeprecatedNumberInput v-model="showStockBelow" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -368,7 +368,7 @@
 
                         <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="usedStock" :error-box="errors.errorBox">
-                                <NumberInput v-model="usedStock" />
+                                <DeprecatedNumberInput v-model="usedStock" />
                             </STInputBox>
                         </div>
 
@@ -392,7 +392,7 @@
 
                         <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="maxPerOrder" :error-box="errors.errorBox">
-                                <NumberInput v-model="maxPerOrder" :min="1" />
+                                <DeprecatedNumberInput v-model="maxPerOrder" :min="1" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -436,8 +436,8 @@ import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';

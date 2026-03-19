@@ -11,7 +11,7 @@
         <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
         <STInputBox error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`%M4`)">
-            <NumberInput v-model="amount" :min="1" :stepper="true" />
+            <DeprecatedNumberInput v-model="amount" :min="1" :stepper="true" />
         </STInputBox>
 
         <div v-if="!isNew" class="container">
@@ -31,13 +31,13 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PrivateWebshop, ProductsSelector } from '@stamhoofd/structures';
 import { DiscountRequirement } from '@stamhoofd/structures';
 

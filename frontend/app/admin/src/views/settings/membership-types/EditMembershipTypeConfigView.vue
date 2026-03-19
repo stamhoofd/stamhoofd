@@ -36,12 +36,12 @@
         </p>
 
         <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%I3`)">
-            <NumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`%1FW`)" />
+            <DeprecatedNumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`%1FW`)" />
         </STInputBox>
 
         <template v-if="$feature('member-trials')">
             <STInputBox :title="$t('%CG')+ '*'" error-fields="trialDays" :error-box="errors.errorBox">
-                <NumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" />
+                <DeprecatedNumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" />
             </STInputBox>
             <p class="style-description-small">
                 * {{ $t('%I2') }}
@@ -59,7 +59,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PlatformMembershipType, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';

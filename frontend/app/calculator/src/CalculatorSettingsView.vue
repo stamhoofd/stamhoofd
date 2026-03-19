@@ -7,7 +7,7 @@
             </h1>
 
             <STInputBox :title="module === ModuleType.Members ? 'Gemiddeld aantal inschrijvingen per bestelling' : (module === ModuleType.Webshops ? 'Gemiddeld aantal stuks per bestelling' : 'Gemiddeld aantal tickets per bestelling')" error-fields="averageAmountPerOrder">
-                <NumberInput v-model="averageAmountPerOrder" :min="100" :placeholder="Formatter.float(input.suggestedAverageAmountPerOrder)" :floating-point="true" :required="false" />
+                <DeprecatedNumberInput v-model="averageAmountPerOrder" :min="100" :placeholder="Formatter.float(input.suggestedAverageAmountPerOrder)" :floating-point="true" :required="false" />
             </STInputBox>
             <p v-if="module === ModuleType.Members" class="style-description-small">
                 Mensen kunnen meerdere inschrijven per bestelling uitvoeren (bv. broers en zussen, meerdere kampen...). Dat drukt bepaalde kosten, zoals bv. transactiekosten. Gemiddeld kan je rekenen op 1,3 inschrijvingen per bestelling.
@@ -83,15 +83,16 @@
 </template>
 
 <script lang="ts" setup>
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+
 import type { CalculationInput } from './classes/CalculationInput';
-import { calculatePaymentMethodUsage, getPaymentMethodDescription, getPaymentMethodName, PaymentMethod } from './classes/PaymentMethod';
-import { StamhoofdTariffs } from './classes/tariffs/stamhoofd';
-import { ModuleType } from './classes/ModuleType';
 import { Country } from './classes/Country';
+import { ModuleType } from './classes/ModuleType';
+import { calculatePaymentMethodUsage, getPaymentMethodDescription, getPaymentMethodName, PaymentMethod } from './classes/PaymentMethod';
 import type { TransactionFee } from './classes/TariffDefinition';
+import { StamhoofdTariffs } from './classes/tariffs/stamhoofd';
 
 const props = defineProps<{
     input: CalculationInput;

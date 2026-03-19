@@ -104,7 +104,7 @@
                 <hr><h2>{{ $t('%M4') }}</h2>
 
                 <STInputBox class="max">
-                    <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
+                    <DeprecatedNumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
                 </STInputBox>
 
                 <p v-if="stockText" class="style-description-small" v-text="stockText" />
@@ -181,7 +181,7 @@ import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
 import { useContext } from '../hooks';
-import NumberInput from '../inputs/NumberInput.vue';
+import DeprecatedNumberInput from '../inputs/DeprecatedNumberInput.vue';
 import Radio from '../inputs/Radio.vue';
 import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';
 import STList from '../layout/STList.vue';

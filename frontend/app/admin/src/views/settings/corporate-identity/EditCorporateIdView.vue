@@ -69,7 +69,7 @@
         <p>{{ $t('%HZ') }}</p>
 
         <STInputBox :title="$t(`%Hg`)">
-            <NumberInput v-model="coverBottomLeftOverlayWidth" :validator="errors.validator" :min="10" suffix="px" :title="$t(`%Hh`)" />
+            <DeprecatedNumberInput v-model="coverBottomLeftOverlayWidth" :validator="errors.validator" :min="10" suffix="px" :title="$t(`%Hh`)" />
         </STInputBox>
 
         <ImageComponent v-if="coverBottomLeftOverlayImage" :image="coverBottomLeftOverlayImage" :auto-height="true" :style="'width: ' + coverBottomLeftOverlayWidth + 'px'" />
@@ -95,8 +95,8 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';

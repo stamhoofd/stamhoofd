@@ -49,7 +49,7 @@
 
                 <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
                     <STInputBox error-fields="maximum" :error-box="errors.errorBox" :title="$t(`%dN`)">
-                        <NumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('%6A')" :min="2" />
+                        <DeprecatedNumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('%6A')" :min="2" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -65,7 +65,7 @@
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <NumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
+                        <DeprecatedNumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import NumberInput from '#inputs/NumberInput.vue';
+import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { Group, GroupOption, GroupOptionMenu } from '@stamhoofd/structures';

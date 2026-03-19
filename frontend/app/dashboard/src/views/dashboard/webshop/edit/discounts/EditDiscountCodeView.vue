@@ -40,7 +40,7 @@
 
                 <div v-if="useMaximumUsage" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <NumberInput v-model="maximumUsage" />
+                        <DeprecatedNumberInput v-model="maximumUsage" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -92,18 +92,19 @@ import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PrivateWebshop } from '@stamhoofd/structures';
 import { Discount, DiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

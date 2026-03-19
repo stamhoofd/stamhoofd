@@ -132,7 +132,7 @@
                     <template #right>
                         <template v-if="option.allowAmount">
                             <template v-if="getOptionSelected(menu, option)">
-                                <NumberInput :model-value="getOptionAmount(menu, option)" suffix="stuks" suffix-singular="stuk" :max="option.getMaximumSelection(item)" :min="1" :stepper="true" @update:model-value="setOptionAmount(menu, option, $event)" />
+                                <DeprecatedNumberInput :model-value="getOptionAmount(menu, option)" suffix="stuks" suffix-singular="stuk" :max="option.getMaximumSelection(item)" :min="1" :stepper="true" @update:model-value="setOptionAmount(menu, option, $event)" />
                             </template>
                         </template>
                         <span v-else-if="option.price.forMember(item.member)" class="style-price-base">
@@ -154,23 +154,23 @@
 </template>
 
 <script setup lang="ts">
-import { patchObject } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
 import CheckboxListItem from '#inputs/CheckboxListItem.vue';
 import DateSelection from '#inputs/DateSelection.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import ImageComponent from '#views/ImageComponent.vue';
-import type { NavigationActions } from '#types/NavigationActions.ts';
-import NumberInput from '#inputs/NumberInput.vue';
-import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import STList from '#layout/STList.vue';
-import { useErrors } from '#errors/useErrors.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import type { GroupOption, GroupOptionMenu, GroupPrice, PatchAnswers, PriceBreakdown, RegisterItem} from '@stamhoofd/structures';
+import ImageComponent from '#views/ImageComponent.vue';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import { patchObject } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import type { GroupOption, GroupOptionMenu, GroupPrice, PatchAnswers, PriceBreakdown, RegisterItem } from '@stamhoofd/structures';
 import { GroupType, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
 import SendConfirmationEmailBox from './SendConfirmationEmailBox.vue';
@@ -269,7 +269,7 @@ function getOptionAmount(menu: GroupOptionMenu, option: GroupOption) {
     return props.item.options.find(o => o.optionMenu.id === menu.id && o.option.id === option.id)?.amount ?? 0;
 }
 
-function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: number) {
+function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: number | null) {
     if (!option.allowAmount && (amount !== 0 && amount !== 1)) {
         amount = amount !== 0 ? 1 : 0;
     }
@@ -280,7 +280,7 @@ function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: num
 
     let filteredOptions: RegisterItemOption[];
 
-    if (!menu.multipleChoice && amount > 0) {
+    if (!menu.multipleChoice && amount !== null && amount > 0) {
         // Clear all options from this menu
         filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id);
     }
@@ -289,7 +289,7 @@ function setOptionAmount(menu: GroupOptionMenu, option: GroupOption, amount: num
         filteredOptions = props.item.options.filter(o => o.optionMenu.id !== menu.id || o.option.id !== option.id);
     }
 
-    if (amount > 0) {
+    if (amount !== null && amount > 0) {
         filteredOptions.push(
             RegisterItemOption.create({
                 optionMenu: menu,

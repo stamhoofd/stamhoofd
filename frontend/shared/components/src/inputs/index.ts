@@ -15,7 +15,7 @@ export { default as FileInput } from './FileInput.vue';
 export { default as IBANInput } from './IBANInput.vue';
 export { default as ImageInput } from './ImageInput.vue';
 export { default as MultiSelectInput } from './MultiSelectInput.vue';
-export { default as NumberInput } from './NumberInput.vue';
+export { default as DeprecatedNumberInput } from './DeprecatedNumberInput.vue';
 export { default as PasswordStrength } from './PasswordStrength.vue';
 export { default as PermyriadInput } from './PermyriadInput.vue';
 export { default as PhoneInput } from './PhoneInput.vue';

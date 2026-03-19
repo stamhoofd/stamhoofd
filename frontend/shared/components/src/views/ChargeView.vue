@@ -26,7 +26,7 @@
                 <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null" />
             </STInputBox>
             <STInputBox :title="$t('%M4')" error-fields="amount" :error-box="errors.errorBox">
-                <NumberInput v-model="amount" :title="$t('%M4')" :validator="errors.validator" :min="1" :stepper="true" />
+                <DeprecatedNumberInput v-model="amount" :title="$t('%M4')" :validator="errors.validator" :min="1" :stepper="true" />
             </STInputBox>
         </div>
 
@@ -48,22 +48,22 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import DateSelection from '#inputs/DateSelection.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import NumberInput from '#inputs/NumberInput.vue';
-import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
-import PriceInput from '#inputs/PriceInput.vue';
-import { Toast } from '#overlays/Toast.ts';
 import { useAppContext } from '#context/appContext.ts';
-import { useContext } from '#hooks/useContext.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { useValidation } from '#errors/useValidation.ts';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useValidation } from '#errors/useValidation.ts';
+import DateSelection from '#inputs/DateSelection.vue';
+import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
+import PriceInput from '#inputs/PriceInput.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { ChargeRequest } from '@stamhoofd/structures';

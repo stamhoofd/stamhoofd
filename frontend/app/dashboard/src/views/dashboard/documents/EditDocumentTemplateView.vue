@@ -20,7 +20,7 @@
         </STInputBox>
 
         <STInputBox :title="$t('%1Ic')" error-fields="year" :error-box="errors.errorBox">
-            <NumberInput v-model="year" :title="$t('%1Ic')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
+            <DeprecatedNumberInput v-model="year" :title="$t('%1Ic')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
         </STInputBox>
         <p v-if="hasGroups" class="style-description-small">
             {{ $t('%1Id') }}
@@ -77,7 +77,7 @@
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
                 <hr><h2>{{ $t('%Ku') }}</h2>
                 <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`%L2`)">
-                    <NumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`%1FW`)" />
+                    <DeprecatedNumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`%1FW`)" />
                 </STInputBox>
             </template>
 
@@ -124,7 +124,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
@@ -138,9 +138,9 @@ import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganiza
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import MultiSelectInput from '@stamhoofd/components/inputs/MultiSelectInput.vue';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import RecordAnswerInput from '@stamhoofd/components/inputs/RecordAnswerInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -153,7 +153,7 @@ import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCate
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { DocumentTemplateGroup, PatchAnswers, RecordAnswer} from '@stamhoofd/structures';
+import type { DocumentTemplateGroup, PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
 import { CountFilteredRequest, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { Country } from "@stamhoofd/types/Country";
 import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/utility';

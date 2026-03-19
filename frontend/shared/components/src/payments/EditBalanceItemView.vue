@@ -60,7 +60,7 @@
             </div>
 
             <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`%M4`)">
-                <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`%20`)" />
+                <DeprecatedNumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`%20`)" />
             </STInputBox>
         </div>
 
@@ -260,30 +260,30 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
-import DateSelection from '#inputs/DateSelection.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import IconContainer from '#icons/IconContainer.vue';
-import NumberInput from '#inputs/NumberInput.vue';
-import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
-import PriceInput from '#inputs/PriceInput.vue';
-import { Toast } from '#overlays/Toast.ts';
-import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import IconContainer from '#icons/IconContainer.vue';
+import DateSelection from '#inputs/DateSelection.vue';
+import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
+import PriceInput from '#inputs/PriceInput.vue';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import { Toast } from '#overlays/Toast.ts';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { usePop } from '@simonbackx/vue-app-navigation';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { BalanceItem, BalanceItemRelation} from '@stamhoofd/structures';
+import type { BalanceItem, BalanceItemRelation } from '@stamhoofd/structures';
 import { BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import PaymentRow from './components/PaymentRow.vue';

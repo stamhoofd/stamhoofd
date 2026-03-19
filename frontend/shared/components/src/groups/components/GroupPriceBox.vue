@@ -35,7 +35,7 @@
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <NumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
+                        <DeprecatedNumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -122,18 +122,18 @@
 </template>
 
 <script setup lang="ts">
+import BundleDiscountSettingsView from '#bundle-discounts/BundleDiscountSettingsView.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import type { Validator } from '#errors/Validator.ts';
+import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
+import DateSelection from '#inputs/DateSelection.vue';
+import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import TimeInput from '#inputs/TimeInput.vue';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import BundleDiscountSettingsView from '#bundle-discounts/BundleDiscountSettingsView.vue';
-import DateSelection from '#inputs/DateSelection.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
-import NumberInput from '#inputs/NumberInput.vue';
-import STInputBox from '#inputs/STInputBox.vue';
-import TimeInput from '#inputs/TimeInput.vue';
-import { useValidation } from '#errors/useValidation.ts';
-import type { Validator } from '#errors/Validator.ts';
 import type { BundleDiscount, Group, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { BundleDiscountGroupPriceSettings, GroupPrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

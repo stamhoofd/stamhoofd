@@ -30,21 +30,16 @@
         <hr>
         <h2>{{ $t('%4R') }}</h2>
 
-        <STInputBox :title="$t('%4T')" error-fields="maximum" :error-box="errors.errorBox">
-            <NumberInput v-model="maximum" :placeholder="$t('%1FW')" :required="false" />
-        </STInputBox>
+        <NumberInputBox v-model="maximum" :title="$t('%4T')" error-fields="maximum" :validator="errors.validator" :error-box="errors.errorBox" :placeholder="$t('%1FW')" :required="false" />
+
         <p class="style-description-small">
             {{ $t('%5m') }}
         </p>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('%4V')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="minimumDays" :placeholder="$t('%1FW')" :required="false" />
-            </STInputBox>
+            <NumberInputBox v-model="minimumDays" :title="$t('%4V')" error-fields="minimumDays" :validator="errors.validator" :error-box="errors.errorBox" :placeholder="$t('%1FW')" :required="false" />
 
-            <STInputBox :title="$t('%4U')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="maximumDays" :placeholder="$t('%4a')" :required="false" />
-            </STInputBox>
+            <NumberInputBox v-model="maximumDays" :title="$t('%4U')" error-fields="maximumDays" :validator="errors.validator" :error-box="errors.errorBox" :placeholder="$t('%4a')" :required="false" :min="minimumDays ? minimumDays + 1 : null" />
         </div>
 
         <Checkbox v-model="isLocationRequired">
@@ -63,7 +58,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PlatformEventType } from '@stamhoofd/structures';
@@ -90,6 +85,10 @@ const save = async () => {
     }
     saving.value = true;
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
         await props.saveHandler(patch.value);
         await pop({ force: true });
     }

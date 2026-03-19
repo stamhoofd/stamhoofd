@@ -173,7 +173,7 @@
                 </STList>
 
                 <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`%Qt`)">
-                    <NumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
+                    <DeprecatedNumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
                 </STInputBox>
                 <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
                     {{ $t('%Qe') }}
@@ -236,7 +236,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';

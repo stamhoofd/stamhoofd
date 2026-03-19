@@ -23,11 +23,11 @@
 
             <div class="split-inputs">
                 <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)">
-                    <NumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" />
+                    <DeprecatedNumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" />
                 </STInputBox>
 
                 <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%jY`)">
-                    <NumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" />
+                    <DeprecatedNumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" />
                 </STInputBox>
             </div>
         </template>
@@ -163,21 +163,21 @@
 </template>
 
 <script setup lang="ts">
+import EditRoleView from '#admins/EditRoleView.vue';
+import JumpToContainer from '#containers/JumpToContainer.vue';
+import { useAppContext } from '#context/appContext.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import DefaultAgeGroupIdsInput from '#inputs/DefaultAgeGroupIdsInput.vue';
+import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
+import TagIdsInput from '#inputs/TagIdsInput.vue';
+import SaveView from '#navigation/SaveView.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import DefaultAgeGroupIdsInput from '#inputs/DefaultAgeGroupIdsInput.vue';
-import EditRoleView from '#admins/EditRoleView.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import JumpToContainer from '#containers/JumpToContainer.vue';
-import NumberInput from '#inputs/NumberInput.vue';
-import SaveView from '#navigation/SaveView.vue';
-import TagIdsInput from '#inputs/TagIdsInput.vue';
-import { useAppContext } from '#context/appContext.ts';
-import { useErrors } from '#errors/useErrors.ts';
-import { usePatch } from '#hooks/usePatch.ts';
-import type { MemberResponsibility} from '@stamhoofd/structures';
+import type { MemberResponsibility } from '@stamhoofd/structures';
 import { PermissionLevel, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 

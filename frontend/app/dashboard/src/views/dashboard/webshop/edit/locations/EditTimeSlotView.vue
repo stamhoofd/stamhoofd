@@ -17,14 +17,14 @@
         <TimeMinutesInput v-model="endTime" :validator="errors.validator" :title="$t(`%ze`)" />
 
         <STInputBox error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`%TB`)">
-            <NumberInput v-model="maxOrders" :required="false" :placeholder="$t(`%TC`)" />
+            <DeprecatedNumberInput v-model="maxOrders" :required="false" :placeholder="$t(`%TC`)" />
         </STInputBox>
         <p v-if="remainingOrders !== null && remainingOrders !== maxOrders" class="style-description">
             {{ $t('%T8', {orders: remainingOrders === 0 ? '0' : remainingOrders?.toString() ?? ''}) }}
         </p>
 
         <STInputBox error-fields="maxPersons" :error-box="errors.errorBox" :title="$t(`%TD`)">
-            <NumberInput v-model="maxPersons" :required="false" :placeholder="$t(`%TC`)" />
+            <DeprecatedNumberInput v-model="maxPersons" :required="false" :placeholder="$t(`%TC`)" />
         </STInputBox>
         <p v-if="remainingPersons !== null && remainingPersons !== maxPersons" class="style-description">
             {{ $t('%T9', {persons: remainingPersons === 0 ? '0' : remainingPersons?.toString() ?? ''}) }}
@@ -43,17 +43,17 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import TimeMinutesInput from '@stamhoofd/components/inputs/TimeMinutesInput.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import type { PrivateWebshop, WebshopTimeSlot} from '@stamhoofd/structures';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import TimeMinutesInput from '@stamhoofd/components/inputs/TimeMinutesInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import type { PrivateWebshop, WebshopTimeSlot } from '@stamhoofd/structures';
 import { ProductType, WebshopTimeSlots } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

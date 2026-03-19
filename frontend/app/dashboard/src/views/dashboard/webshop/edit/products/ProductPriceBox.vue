@@ -36,7 +36,7 @@
                     </STInputBox>
 
                     <STInputBox error-fields="discountAmount" :error-box="errorBox" :title="$t(`%UB`)">
-                        <NumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`%1Mn`)" />
+                        <DeprecatedNumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`%1Mn`)" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -69,7 +69,7 @@
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="stock" :error-box="errorBox">
-                        <NumberInput v-model="stock" />
+                        <DeprecatedNumberInput v-model="stock" />
                     </STInputBox>
                 </div>
             </STListItem>
@@ -105,22 +105,22 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import LoadingInputBox from '@stamhoofd/components/navigation/LoadingInputBox.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { Product, ProductPrice } from '@stamhoofd/structures';
-import { computed, onMounted, ref, watch } from 'vue';
 import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/uitpas/useGetOfficialUitpasSocialTariff.ts';
 import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';
+import { Product, ProductPrice } from '@stamhoofd/structures';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const { getOfficialUitpasSocialTariff } = useGetOfficialUitpasSocialTariff();
 

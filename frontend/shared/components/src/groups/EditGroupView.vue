@@ -381,7 +381,7 @@
                         </h3>
                         <div v-if="enableMaxMembers" class="option" @click.stop.prevent>
                             <STInputBox title="" error-fields="maxMembers" :error-box="errors.errorBox">
-                                <NumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
+                                <DeprecatedNumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
                             </STInputBox>
                             <p class="style-description-small">
                                 {{ $t('%cf') }}
@@ -545,7 +545,7 @@
                     <p>{{ $t('%7s') }}</p>
 
                     <STInputBox :title="$t('%CG')" error-fields="settings.trialDays" :error-box="errors.errorBox">
-                        <NumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
+                        <DeprecatedNumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
                     </STInputBox>
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
                         {{ $t('%7t', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
@@ -596,9 +596,9 @@ import { useValidation } from '#errors/useValidation.ts';
 import { useRegisterItemFilterBuilders } from '#filters/filterBuilders.ts';
 import AgeInput from '#inputs/AgeInput.vue';
 import DateSelection from '#inputs/DateSelection.vue';
+import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import Dropdown from '#inputs/Dropdown.vue';
 import GroupIdsInput from '#inputs/GroupIdsInput.vue';
-import NumberInput from '#inputs/NumberInput.vue';
 import TimeInput from '#inputs/TimeInput.vue';
 import EditRecordCategoriesBox from '#records/components/EditRecordCategoriesBox.vue';
 import InheritedRecordsConfigurationBox from '#records/components/InheritedRecordsConfigurationBox.vue';
@@ -606,9 +606,8 @@ import { RecordEditorSettings, RecordEditorType } from '#records/RecordEditorSet
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import type { DefaultAgeGroup, RecordCategory} from '@stamhoofd/structures';
-import { BooleanStatus, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, TranslatedString, WaitingListType  } from '@stamhoofd/structures';
-import type {MemberProperty} from '@stamhoofd/structures';
+import type { DefaultAgeGroup, MemberProperty, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { Country } from "@stamhoofd/types/Country";
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

@@ -51,7 +51,7 @@
         <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
         <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
         <STInputBox v-else-if="answer.settings.type === RecordType.Integer" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <NumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
+            <DeprecatedNumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
 
         <p v-else class="error-box">
@@ -87,10 +87,10 @@ import STListItem from '../layout/STListItem.vue';
 import AddressInput from './AddressInput.vue';
 import Checkbox from './Checkbox.vue';
 import DateSelection from './DateSelection.vue';
+import DeprecatedNumberInput from './DeprecatedNumberInput.vue';
 import EmailInput from './EmailInput.vue';
 import FileInput from './FileInput.vue';
 import ImageInput from './ImageInput.vue';
-import NumberInput from './NumberInput.vue';
 import PhoneInput from './PhoneInput.vue';
 import PriceInput from './PriceInput.vue';
 import Radio from './Radio.vue';

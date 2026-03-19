@@ -24,11 +24,11 @@
 
         <div class="split-inputs">
             <STInputBox :title="$t('%5s')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="min" :placeholder="$t('%1FW')" :required="false" />
+                <DeprecatedNumberInput v-model="min" :placeholder="$t('%1FW')" :required="false" />
             </STInputBox>
 
             <STInputBox :title="$t('%dN')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <NumberInput v-model="max" :placeholder="$t('%4a')" :required="false" />
+                <DeprecatedNumberInput v-model="max" :placeholder="$t('%4a')" :required="false" />
             </STInputBox>
         </div>
     </SaveView>
@@ -40,7 +40,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PlatformPremiseType } from '@stamhoofd/structures';

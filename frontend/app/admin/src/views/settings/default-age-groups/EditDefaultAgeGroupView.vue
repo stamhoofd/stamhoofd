@@ -59,7 +59,7 @@
 
         <div class="split-inputs">
             <STInputBox error-fields="minimumRequiredMembers" :error-box="errors.errorBox" :title="$t(`%Ho`)">
-                <NumberInput v-model="minimumRequiredMembers" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`%1FW`)" />
+                <DeprecatedNumberInput v-model="minimumRequiredMembers" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`%1FW`)" />
             </STInputBox>
         </div>
 
@@ -103,8 +103,8 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import AgeInput from '@stamhoofd/components/inputs/AgeInput.vue';
+import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import TagIdsInput from '@stamhoofd/components/inputs/TagIdsInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
