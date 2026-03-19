@@ -37,7 +37,7 @@
             </p>
 
             <STList>
-                <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)" :class="{'left-center': !(getPaymentMethod(method) && (getDescription(method) || getSettingsDescription(method)))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
+                <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(getPaymentMethod(method) && (getDescription(method) || getSettingsDescription(method)))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
                     <template #left>
                         <Checkbox :model-value="getPaymentMethod(method)" :disabled="!canEnablePaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
                     </template>
