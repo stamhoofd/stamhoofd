@@ -4,7 +4,7 @@
             {{ $t('%40') }}
         </h1>
 
-        <p>{{ $t('%NY') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('%K') }}</a> {{ $t('%GT') }} <a class="inline-link" :href="$domains.getDocs('mollie')" target="_blank">{{ $t('Mollie') }}</a>  {{ $t('%NZ') }} <a class="inline-link" :href="$domains.getDocs('tag/betaalmethodes')" target="_blank">{{ $t('%19t') }}</a>.</p>
+        <p>{{ $t('%NY') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('%K') }}</a> {{ $t('%GT') }} <a class="inline-link" :href="$domains.getDocs('mollie')" target="_blank">{{ $t('Mollie') }}</a>  {{ $t('%NZ') }} <a class="inline-link" :href="$domains.getDocs('bancontact')" target="_blank">{{ $t('%19t') }}</a>.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -61,7 +61,7 @@
                         {{ $t('%1D') }}
                     </h3>
                     <p class="style-definition-text">
-                        xxxx {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
+                        •••• {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
                     </p>
                 </STListItem>
 
@@ -455,7 +455,7 @@ const buckarooSecret = computed({
 });
 
 const forcePayconiq = computed({
-    get: () => featureFlag('forcePayconiq') || isBelgium.value,
+    get: () => featureFlag('forcePayconiq'),
     set: (forcePayconiq: boolean) => {
         setFeatureFlag('forcePayconiq', forcePayconiq);
     },

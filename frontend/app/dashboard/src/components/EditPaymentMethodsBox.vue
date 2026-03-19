@@ -22,6 +22,20 @@
                 </a>
             </p>
 
+            <p v-if="!getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
+                {{ $t("We raden het gebruik van Payconiq af. Het is tijd om over te schakelen en Bancontact te gebruiken. Dit is veel stabieler en geeft minder problemen.") }}
+                <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
+                    {{ $t('%19t') }}
+                </a>
+            </p>
+
+            <p v-if="getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
+                {{ $t("Je kan Payconiq (nu Bancontact Pay | Wero) niet langer combineren met Bancontact. Bancontact is nu voldoende.") }}
+                <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
+                    {{ $t('%19t') }}
+                </a>
+            </p>
+
             <STList>
                 <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)" :class="{'left-center': !(getPaymentMethod(method) && (getDescription(method) || getSettingsDescription(method)))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
                     <template #left>
@@ -276,7 +290,7 @@ const sortedPaymentMethods = computed(() => {
     r.push(PaymentMethod.Bancontact);
 
     // Force a given ordering
-    if ((country.value == Country.Belgium && canEnablePaymentMethod(PaymentMethod.Payconiq)) || getPaymentMethod(PaymentMethod.Payconiq)) {
+    if ((country.value === Country.Belgium && canEnablePaymentMethod(PaymentMethod.Payconiq)) || getPaymentMethod(PaymentMethod.Payconiq)) {
         // Disable Payconiq if Bancontact is enabled
         if (!canEnablePaymentMethod(PaymentMethod.Bancontact) || getPaymentMethod(PaymentMethod.Payconiq)) {
             // Only allowed as legacy fallover

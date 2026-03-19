@@ -13,18 +13,14 @@
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod === 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">{{ $t('%kQ') }}</span>
+                    <span v-if="paymentMethod === 'Payconiq' && hasNonBancontact" class="style-tag inline-first">{{ $t('%kQ') }}</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}
                 </p>
 
-                <div v-if="paymentMethod === 'Payconiq'" class="payment-app-banner">
-                    <img class="payment-app-logo" src="@stamhoofd/assets/images/partners/payconiq/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/kbc/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/ing/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/belfius/app.svg"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/bnp/app.png"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/hello-bank/app.png"><img class="payment-app-logo" src="@stamhoofd/assets/images/partners/argenta/app.png">
-                </div>
-
                 <template #right>
-                    <PaymentMethodIcon v-if="(!$isMobile || paymentMethod !== 'Payconiq')" :method="paymentMethod" :type="PaymentType.Payment" />
+                    <PaymentMethodIcon :method="paymentMethod" :type="PaymentType.Payment" />
                 </template>
             </STListItem>
         </STList>
@@ -61,23 +57,21 @@ const sortedPaymentMethods = computed(() => {
     const r: PaymentMethod[] = [];
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country === Country.Netherlands) {
+    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country == Country.Netherlands) {
         r.push(PaymentMethod.iDEAL);
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.Payconiq)) {
-        r.push(PaymentMethod.Payconiq);
-    }
-
-    // Force a given ordering
-    if (methods.includes(PaymentMethod.Bancontact)) {
+    if (methods.includes(PaymentMethod.Bancontact) && props.organization.address.country != Country.Netherlands) {
         r.push(PaymentMethod.Bancontact);
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country !== Country.Netherlands) {
-        r.push(PaymentMethod.iDEAL);
+    if (methods.includes(PaymentMethod.Payconiq)) {
+        if (!methods.includes(PaymentMethod.Bancontact)) {
+            // Don't add it
+            r.push(PaymentMethod.Payconiq);
+        }
     }
 
     // Force a given ordering
@@ -86,12 +80,22 @@ const sortedPaymentMethods = computed(() => {
     }
 
     // Force a given ordering
+    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country != Country.Netherlands) {
+        r.push(PaymentMethod.iDEAL);
+    }
+
+    // Force a given ordering
+    if (methods.includes(PaymentMethod.Bancontact) && props.organization.address.country == Country.Netherlands) {
+        r.push(PaymentMethod.Bancontact);
+    }
+
+    // Force a given ordering
     if (methods.includes(PaymentMethod.Transfer)) {
         r.push(PaymentMethod.Transfer);
     }
 
     // Others
-    r.push(...methods.filter(p => p !== PaymentMethod.Payconiq && p !== PaymentMethod.Bancontact && p !== PaymentMethod.iDEAL && p !== PaymentMethod.CreditCard && p !== PaymentMethod.Transfer));
+    r.push(...methods.filter(p => p != PaymentMethod.Payconiq && p != PaymentMethod.Bancontact && p != PaymentMethod.iDEAL && p != PaymentMethod.CreditCard && p != PaymentMethod.Transfer));
 
     return r;
 });
@@ -102,7 +106,7 @@ onMounted(() => {
     }
 });
 
-const hasNonPayconiq = computed(() => {
+const hasNonBancontact = computed(() => {
     const hasTransfer = paymentMethods.value.includes(PaymentMethod.Transfer) ? 1 : 0;
     const hasPOS = paymentMethods.value.includes(PaymentMethod.PointOfSale) ? 1 : 0;
     return paymentMethods.value.length > 1 || !!hasTransfer || !!hasPOS;
@@ -110,7 +114,7 @@ const hasNonPayconiq = computed(() => {
 
 function getName(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
-        case PaymentMethod.Payconiq: return 'Payconiq by Bancontact';
+        case PaymentMethod.Payconiq: return $t('"Bancontact Pay | Wero"');
         case PaymentMethod.Transfer: return $t(`%12j`);
         case PaymentMethod.DirectDebit: return $t(`%12k`);
     }
@@ -119,9 +123,14 @@ function getName(paymentMethod: PaymentMethod): string {
 
 function getDescription(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
-        case PaymentMethod.Payconiq: return $t(`%12l`);
+        case PaymentMethod.Payconiq: {
+            if (paymentMethods.value.includes(PaymentMethod.Bancontact)) {
+                return '';
+            }
+            return $t(`%12l`);
+        }
         case PaymentMethod.Transfer: return $t(`%12m`);
-        case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? '' : '';
+        case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? $t('Betaal met je Bancontact-app of met je bankapp die Bancontact-betalingen ondersteunt') : '';
         case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? $t(`%12n`) : '';
         case PaymentMethod.Unknown: return '';
         case PaymentMethod.DirectDebit: return $t(`%12o`);

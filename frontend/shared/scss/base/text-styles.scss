@@ -1207,6 +1207,19 @@
         }
     }
 
+    &.white {
+        color: $color-dark;
+        
+        figure {
+            background: $color-background;
+            color: $color-dark;
+        }
+    
+        >aside {
+            color: $color-dark;
+        }
+    }
+
     &.tertiary {
         color: $color-tertiary-dark;
         figure {
@@ -1324,6 +1337,12 @@
 
         > img {
             display: block;
+        }
+    }
+
+    &.dual {
+        figure {
+            width: 60px;
         }
     }
 
