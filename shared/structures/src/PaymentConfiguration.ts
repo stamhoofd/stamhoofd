@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PaymentMethod } from './PaymentMethod.js';
-import { TransferSettings } from './webshops/TransferSettings.js';
 import { PaymentCustomer } from './PaymentCustomer.js';
+import { PaymentMethod } from './PaymentMethod.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
+import { TransferSettings } from './webshops/TransferSettings.js';
 
 export class PayconiqAccount extends AutoEncoder {
     /**
@@ -30,6 +30,12 @@ export class PayconiqAccount extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     callbackUrl: string | null = null;
+
+    /**
+     * Temorary stored whether this payconiq API key is probably still on the old system
+     */
+    @field({ decoder: BooleanDecoder, optional: true })
+    legacyApi: boolean = false;
 
     getDiffName() {
         if (this.name && this.iban) {

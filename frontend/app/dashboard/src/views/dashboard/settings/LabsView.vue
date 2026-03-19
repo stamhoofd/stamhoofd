@@ -63,21 +63,12 @@
 
         <hr><h2>{{ $t('%NR') }}</h2>
 
-        <STList>
-            <STListItem v-if="!enableBuckaroo && ($isStamhoofd || STAMHOOFD.environment === 'development')" :selectable="true" element-name="label">
-                <template #left>
-                    <Checkbox v-model="forceMollie" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ $t('%NS') }}
-                </h3>
-
-                <p class="style-description-small">
-                    {{ $t('%NT') }} <a :href="$domains.getDocs('transactiekosten')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
-                </p>
-            </STListItem>
-        </STList>
+        <Checkbox key="payconiq" v-model="forcePayconiq">
+            {{ $t('Payconiq API-key gebruiken') }}
+        </Checkbox>
+        <p class="style-description-small">
+            {{ $t('Lees ') }}<a :href="$domains.getDocs('payconiq')" class="inline-link" target="_blank">{{ $t('de gids') }}</a>{{ $t(' door voor meer informatie.') }}
+        </p>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr><h2>
@@ -162,18 +153,18 @@ import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-err
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import InputSheet from '@stamhoofd/components/overlays/InputSheet.vue';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import InputSheet from '@stamhoofd/components/overlays/InputSheet.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -225,22 +216,6 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
     get enableBuckaroo() {
         return (this.organization.privateMeta?.buckarooSettings ?? null) !== null;
-    }
-
-    get forceMollie() {
-        return this.organization.privateMeta?.featureFlags.includes('forceMollie') ?? false;
-    }
-
-    set forceMollie(forceMollie: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== 'forceMollie') ?? [];
-        if (forceMollie) {
-            featureFlags.push('forceMollie');
-        }
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                featureFlags: featureFlags as any,
-            }),
-        });
     }
 
     get forcePayconiq() {

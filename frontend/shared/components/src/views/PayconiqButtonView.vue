@@ -1,9 +1,9 @@
 <template>
     <div class="st-view payconiq-button-view">
-        <STNavigationBar :title="$t(`%1k`)" />
+        <STNavigationBar :title="$t(`Bancontact Pay`)" />
 
         <main>
-            <h1>{{ $t('%kG') }}</h1>
+            <h1>{{ $t('Betaal met Bancontact Pay') }}</h1>
             <p class="style-description">
                 {{ $t('%kH') }}
             </p>
@@ -26,13 +26,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import EmailInput from '#inputs/EmailInput.vue';
 import LoadingButton from '#navigation/LoadingButton.vue';
-import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import PayconiqBannerView from './PayconiqBannerView.vue';
 
@@ -109,8 +109,6 @@ export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
 
 <style lang="scss">
 .payconiq-button-view {
-    --color-primary: #FF4785;
-
     .payment-app-logo {
         height: 28px;
     }

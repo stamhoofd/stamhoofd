@@ -1,13 +1,14 @@
 <template>
     <div class="toast-view-container">
-        <component class="toast-view" :class="(toast.icon ?? '') + (toast.button && toast.forceButtonClick ? ' button' : '')" @click="clicked" @mousedown.prevent :is="!toast.button || !toast.forceButtonClick ? 'div' : (toast.button.href ? 'a' : 'button')"  :href="toast.forceButtonClick ? (toast.button?.href ?? undefined) : undefined" :download="toast.forceButtonClick ? (toast.button?.download ?? undefined) : undefined">
+        <component :is="!toast.button || !toast.forceButtonClick ? 'div' : (toast.button.href ? 'a' : 'button')" class="toast-view" :class="(toast.icon ?? '') + (toast.button && toast.forceButtonClick ? ' button' : '')" :href="toast.forceButtonClick ? (toast.button?.href ?? undefined) : undefined" :download="toast.forceButtonClick ? (toast.button?.download ?? undefined) : undefined" @click="clicked" @mousedown.prevent>
             <div v-if="toast.progress !== null" class="progress" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon === 'spinner'" />
             <span v-else-if="toast.icon" class="first icon" :class="toast.icon" />
             <div>
                 <div>{{ message }}</div>
-                <component v-if="toast.button" :is="toast.forceButtonClick ? 'span' : (toast.button.href ? 'a' : 'button')" :href="toast.button.href ?? undefined" :download="toast.button.download ?? undefined" class="button text increase-click-area" type="button" @click.stop="clickedButton">
-                    {{ toast.button.text }}
+                <component :is="toast.forceButtonClick ? 'span' : (toast.button.href ? 'a' : 'button')" v-if="toast.button" :href="toast.button.href ?? undefined" :download="toast.button.download ?? undefined" class="button text increase-click-area" type="button" @click.stop="clickedButton">
+                    <span v-if="toast.button.icon" :class="'icon ' + toast.button.icon" />
+                    <span>{{ toast.button.text }}</span>
                 </component>
             </div>
             <span v-if="toast.action" class="icon arrow-right" />
@@ -16,8 +17,8 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import Spinner from '../Spinner.vue';
 import { Toast } from './Toast';
@@ -27,42 +28,42 @@ import { Toast } from './Toast';
 */
 @Component({
     components: {
-        Spinner
-    }
+        Spinner,
+    },
 })
 export default class ToastView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-        toast: Toast
+    toast: Toast;
 
     get message() {
-        return this.toast.message
+        return this.toast.message;
     }
 
-    isClosing = false
+    isClosing = false;
 
-    @Prop({default: null})
-        onClose: (() => void) | null
+    @Prop({ default: null })
+    onClose: (() => void) | null;
 
     mounted() {
         if (this.toast.autohideAfter) {
             window.setTimeout(() => {
                 this.close();
-            }, this.toast.autohideAfter)
+            }, this.toast.autohideAfter);
         }
         this.toast.doHide = () => {
-            this.close()
-        }
+            this.close();
+        };
     }
 
     clicked() {
         if (this.toast.forceButtonClick) {
-            return this.clickedButton()
+            return this.clickedButton();
         }
 
         this.close();
-        
+
         if (this.toast.action) {
-            this.toast.action()
+            this.toast.action();
         }
     }
 
@@ -70,13 +71,13 @@ export default class ToastView extends Mixins(NavigationMixin) {
         if (this.onClose && !this.isClosing) {
             this.onClose();
         }
-        this.isClosing = true
+        this.isClosing = true;
         this.pop();
     }
 
     clickedButton() {
-        this.toast.button!.action()
-        this.close()
+        this.toast.button!.action();
+        this.close();
     }
 }
 </script>
@@ -110,7 +111,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
     @extend .style-input-shadow;
     background: $color-primary-background;
     border-radius: $border-radius-modals;
-    pointer-events:all;   
+    pointer-events:all;
 
     display: flex;
     flex-direction: row;

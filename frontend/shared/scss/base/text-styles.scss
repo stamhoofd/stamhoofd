@@ -863,16 +863,12 @@
     display: flex;
     flex-direction: row;
     gap: 15px;
-    margin-top: 10px;
+    margin-top: 15px;
     align-items: center;
     flex-wrap: wrap;
 
     &.right-align {
         justify-content: flex-end;
-    }
-
-    &> *.primary:first-child {
-        margin-right: 10px;
     }
 
     hr + & {
@@ -1211,6 +1207,19 @@
         }
     }
 
+    &.white {
+        color: $color-dark;
+        
+        figure {
+            background: $color-background;
+            color: $color-dark;
+        }
+    
+        >aside {
+            color: $color-dark;
+        }
+    }
+
     &.tertiary {
         color: $color-tertiary-dark;
         figure {
@@ -1328,6 +1337,12 @@
 
         > img {
             display: block;
+        }
+    }
+
+    &.dual {
+        figure {
+            width: 60px;
         }
     }
 

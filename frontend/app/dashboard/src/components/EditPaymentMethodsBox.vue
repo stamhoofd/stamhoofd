@@ -22,10 +22,24 @@
                 </a>
             </p>
 
+            <p v-if="!getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
+                {{ $t("We raden het gebruik van Payconiq af. Het is tijd om over te schakelen en Bancontact te gebruiken. Dit is veel stabieler en geeft minder problemen.") }}
+                <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
+                    {{ $t('%19t') }}
+                </a>
+            </p>
+
+            <p v-if="getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
+                {{ $t("Je kan Payconiq (nu Bancontact Pay | Wero) niet langer combineren met Bancontact. Bancontact is nu voldoende.") }}
+                <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
+                    {{ $t('%19t') }}
+                </a>
+            </p>
+
             <STList>
-                <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
+                <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(getPaymentMethod(method) && (getDescription(method) || getSettingsDescription(method)))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
                     <template #left>
-                        <Checkbox :model-value="getPaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
+                        <Checkbox :model-value="getPaymentMethod(method)" :disabled="!canEnablePaymentMethod(method)" @update:model-value="setPaymentMethod(method, $event)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ getName(method) }}
@@ -33,8 +47,11 @@
                     <p v-if="getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)" />
                     <p v-if="getPaymentMethod(method) && getSettingsDescription(method)" class="style-description-small pre-wrap" v-text="getSettingsDescription(method)" />
 
-                    <template #right>
-                        <button v-if="getPaymentMethod(method)" class="icon button settings" type="button" @click="editPaymentMethodSettings(method)" />
+                    <template v-if="!canEnablePaymentMethod(method)" #right>
+                        <button class="button text selected" type="button" @click.stop="openPaymentSettings">
+                            <span>{{ $t('Activeren') }}</span>
+                            <span class="icon arrow-right-small" />
+                        </button>
                     </template>
                 </STListItem>
             </STList>
@@ -73,7 +90,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import LoadingBoxTransition from '@stamhoofd/components/containers/LoadingBoxTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -90,12 +107,12 @@ import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AdministrationFeeSettings, Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
-import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
+import PaymentSettingsView from '../views/dashboard/settings/PaymentSettingsView.vue';
 
 const props = withDefaults(defineProps<{
     type: 'registration' | 'webshop';
@@ -158,16 +175,12 @@ function patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
     emit('patch:config', patch);
 }
 
-async function editPaymentMethodSettings(paymentMethod: PaymentMethod) {
+async function openPaymentSettings() {
     await present({
         components: [
-            new ComponentWithProperties(EditPaymentMethodSettingsView, {
-                type: props.type,
-                paymentMethod,
-                configuration: props.config,
-                saveHandler: async (configuration: AutoEncoderPatchType<PaymentConfiguration>) => {
-                    patchConfig(configuration);
-                },
+            // todo: test
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(PaymentSettingsView, {}),
             }),
         ],
         modalDisplayStyle: 'popup',
@@ -188,6 +201,12 @@ async function loadStripeAccounts() {
         if (!hasMollieOrBuckaroo.value && !stripeAccountObject.value) {
             stripeAccountId.value = stripeAccounts.value[0]?.id ?? null;
         }
+        else {
+            if (stripeAccountId.value && stripeAccounts.value.length === 0) {
+                stripeAccountId.value = null;
+            }
+        }
+
         nextTick().finally(() => {
             setDefaultSelection();
         }).catch(console.error);
@@ -207,11 +226,19 @@ function setDefaultSelection() {
             PaymentMethod.PointOfSale,
         ];
 
+        let found = false;
+
         // Check if online payments are enabled
         for (const p of sortedPaymentMethods.value) {
             if (!ignore.includes(p) && canEnablePaymentMethod(p)) {
                 setPaymentMethod(p, true);
+                found = true;
             }
+        }
+
+        if (!found) {
+            // Enable point of sale
+            setPaymentMethod(PaymentMethod.PointOfSale, true);
         }
     }
     else {
@@ -260,22 +287,22 @@ const sortedPaymentMethods = computed(() => {
     }
 
     // Force a given ordering
-    if (country.value === Country.Belgium || getPaymentMethod(PaymentMethod.Payconiq)) {
-        r.push(PaymentMethod.Payconiq);
-    }
-
-    // Force a given ordering
     r.push(PaymentMethod.Bancontact);
 
     // Force a given ordering
-    if (country.value !== Country.Netherlands) {
-        r.push(PaymentMethod.iDEAL);
+    if ((country.value === Country.Belgium && canEnablePaymentMethod(PaymentMethod.Payconiq)) || getPaymentMethod(PaymentMethod.Payconiq)) {
+        // Disable Payconiq if Bancontact is enabled
+        if (!canEnablePaymentMethod(PaymentMethod.Bancontact) || getPaymentMethod(PaymentMethod.Payconiq)) {
+            // Only allowed as legacy fallover
+            r.push(PaymentMethod.Payconiq);
+        }
     }
 
     r.push(PaymentMethod.CreditCard);
 
-    if (canEnablePaymentMethod(PaymentMethod.DirectDebit) || getPaymentMethod(PaymentMethod.DirectDebit)) {
-        r.push(PaymentMethod.DirectDebit);
+    // Force a given ordering
+    if (country.value != Country.Netherlands) {
+        r.push(PaymentMethod.iDEAL);
     }
 
     r.push(PaymentMethod.Transfer);
@@ -388,7 +415,13 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
     if (enabled) {
         const errorMessage = getEnableErrorMessage(method);
         if (!force && props.choices === null && errorMessage) {
-            new Toast(errorMessage, 'error red').setHide(15 * 1000).show();
+            const toast = new Toast(errorMessage, 'error red');
+
+            toast.setButton(new ToastButton('Open instellingen', () => {
+                openPaymentSettings().catch(console.error);
+            }, 'settings'));
+
+            toast.setHide(15 * 1000).show();
             return;
         }
         arr.addPut(method);
@@ -405,11 +438,6 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
     patchConfig(PaymentConfiguration.patch({
         paymentMethods: arr,
     }));
-
-    if (enabled && method === PaymentMethod.Transfer) {
-        // Open dialog
-        editPaymentMethodSettings(method).catch(console.error);
-    }
 }
 
 function canEnablePaymentMethod(method: PaymentMethod) {
@@ -454,7 +482,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
         case PaymentMethod.DirectDebit:
         case PaymentMethod.Bancontact: {
             if (stripeAccountObject.value) {
-                return $t(`%14e`, {paymentMethod: PaymentMethodHelper.getNameCapitalized(paymentMethod)});
+                return $t(`%14e`, { paymentMethod: PaymentMethodHelper.getNameCapitalized(paymentMethod) });
             }
             break;
         }
