@@ -187,14 +187,14 @@
                 </p>
 
                 <div class="style-button-bar">
-                    <button type="button" class="button primary" @click="linkMollie">
+                    <a class="button primary" :href="$domains.getDocs('mollie')" target="_blank">
+                        <span>{{ $t('%No') }}</span>
+                        <span class="icon arrow-right" />
+                    </a>
+
+                    <button type="button" class="button secundary" @click="linkMollie">
                         <span>{{ $t('Aansluiten bij Mollie') }}</span>
                     </button>
-
-                    <a class="button secundary" :href="$domains.getDocs('mollie')" target="_blank">
-                        <span class="icon book" />
-                        <span>{{ $t('Lees gids') }}</span>
-                    </a>
                 </div>
             </template>
             <template v-else>
