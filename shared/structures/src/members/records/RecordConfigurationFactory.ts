@@ -1,9 +1,9 @@
-import { Country } from '../../addresses/CountryDecoder.js';
+import { Country } from '@stamhoofd/types/Country';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { OrganizationType } from '../../OrganizationType.js';
 import { OrganizationRecordsConfiguration } from '../OrganizationRecordsConfiguration.js';
 import { LegacyRecordType } from './LegacyRecordType.js';
-import { RecordCategory } from './RecordCategory.js';
+import type { RecordCategory } from './RecordCategory.js';
 import { RecordFactory } from './RecordFactory.js';
 
 export class RecordConfigurationFactory {

@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import Logo from '@stamhoofd/components/icons/Logo.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 

@@ -1,11 +1,10 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { ApiUser, ApiUserRateLimits } from '@stamhoofd/structures';
+import { ApiUser } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
-import { RateLimiter } from '../helpers/RateLimiter.js';
-import { User } from './index.js';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { User } from './User.js';
 
 export type TokenWithUser = Token & { user: User };
 
@@ -25,7 +24,7 @@ export class Token extends QueryableModel {
     static table = 'tokens';
     static MAX_DEVICES = 15;
 
-    @column({ type: 'string', foreignKey: Token.user })
+    @column({ type: 'string' })
     userId: string;
 
     // Columns
@@ -63,7 +62,7 @@ export class Token extends QueryableModel {
     })
     updatedAt: Date;
 
-    static user = new ManyToOneRelation(User, 'user');
+    static user: ManyToOneRelation<'user', User>;
 
     isAccessTokenExpired(): boolean {
         return this.accessTokenValidUntil < new Date() || this.refreshTokenValidUntil < new Date();

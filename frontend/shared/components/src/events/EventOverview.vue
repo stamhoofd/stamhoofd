@@ -246,14 +246,18 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { AccessRight, appToUri, EmailTemplate, EmailTemplateType, Event, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, Organization, OrganizationRegistrationPeriod, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { AccessRight, appToUri, EmailTemplate, EmailTemplateType, Event, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
+import type { Ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { LoadComponent, PromiseView } from '../containers';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { EditEmailTemplatesView } from '../email';
@@ -271,7 +275,6 @@ import { useInfiniteObjectFetcher } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
-import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
 
 const props = defineProps<{
@@ -334,7 +337,7 @@ async function loadWebshop() {
     if (didLoadWebshop) {
         return;
     }
-    let loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? organization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
+    const loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? organization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
     if (loaded) {
         console.error('Webshop already loaded', loaded);
         loadedWebshop.value = loaded;
@@ -428,7 +431,7 @@ function getCountFilter(g: Group) {
 
 defineRoutes([{
     url: Routes.Registrations,
-    component: RegistrationsTableView as ComponentOptions,
+    component: RegistrationsTableView,
     paramsToProps: () => {
         if (!props.event.group) {
             throw new Error('No group found');
@@ -446,7 +449,7 @@ defineRoutes([{
 },
 {
     url: Routes.WaitingList,
-    component: MembersTableView as ComponentOptions,
+    component: MembersTableView,
     paramsToProps: () => {
         if (!props.event.group || !props.event.group.waitingList) {
             throw new Error('No waiting list found');
@@ -458,7 +461,7 @@ defineRoutes([{
 },
 {
     url: Routes.Edit,
-    component: EditEventView as ComponentOptions,
+    component: EditEventView,
     present: 'popup',
     paramsToProps: () => {
         return {
@@ -469,7 +472,7 @@ defineRoutes([{
 },
 {
     url: Routes.EditGroup,
-    component: EditGroupView as ComponentOptions,
+    component: EditGroupView,
     present: 'popup',
     paramsToProps: async () => {
         if (!props.event.group) {
@@ -509,7 +512,7 @@ defineRoutes([{
 },
 {
     url: Routes.EditEmails,
-    component: EditEmailTemplatesView as ComponentOptions,
+    component: EditEmailTemplatesView,
     present: 'popup',
     paramsToProps: () => {
         if (!props.event.group) {

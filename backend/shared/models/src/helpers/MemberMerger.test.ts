@@ -1,7 +1,6 @@
 import {
     Address,
     BooleanStatus,
-    Country,
     EmergencyContact,
     Gender,
     MemberDetails,
@@ -15,6 +14,7 @@ import {
     UitpasSocialTariff,
     UitpasSocialTariffStatus,
 } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 import { Member } from '../models/index.js';
 import { mergeMemberDetails, selectBaseMember } from './MemberMerger.js';

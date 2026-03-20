@@ -13,14 +13,16 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, injectHooks, usePop } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { injectHooks, usePop } from '@simonbackx/vue-app-navigation';
 
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { ViewportHelper } from '../ViewportHelper';
-import ContextMenuItemView from './ContextMenuItemView.vue';
+import type ContextMenuItemView from './ContextMenuItemView.vue';
+import type { ComponentPublicInstance } from 'vue';
 
-function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
-    let det = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+function triangleContains(ax: number, ay: number, bx: number, by: number, cx: number, cy: number, x: number, y: number) {
+    const det = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
 
     return det * ((bx - ax) * (y - ay) - (by - ay) * (x - ax)) >= 0
         && det * ((cx - bx) * (y - by) - (cy - by) * (x - bx)) >= 0
@@ -101,10 +103,10 @@ export default class ContextMenuView extends VueComponent {
 
     disableHoverChildMenus = false;
 
-    created(this: any) {
+    created(this: ComponentPublicInstance) {
         // we cannot use setup in mixins, but we want to avoid having to duplicate the 'use' hooks logic.
         // so this is a workaround
-        const definitions: any = {
+        const definitions = {
             parentPop: usePop(),
         };
 
@@ -366,7 +368,7 @@ export default class ContextMenuView extends VueComponent {
                         item.childContextMenu.properties.parentMenu = this;
                         item.childContextMenu.properties.wrapWidth = el.clientWidth;
 
-                        this.setChildMenu(item.childContextMenu);
+                        this.setChildMenu(item.childContextMenu as ComponentWithProperties);
                         item.present(item.childContextMenu.setDisplayStyle('overlay'));
                     }
                 }, 150);
@@ -390,7 +392,7 @@ export default class ContextMenuView extends VueComponent {
         item.isHovered = false;
     }
 
-    onClickItem(item: ContextMenuItemView, event) {
+    onClickItem(item: ContextMenuItemView, event: Event) {
         if (item.clicked) {
             return;
         }
@@ -452,7 +454,7 @@ export default class ContextMenuView extends VueComponent {
         }
     }
 
-    calculateHoverTriangle(mouseX, mouseY) {
+    calculateHoverTriangle(mouseX: number, mouseY: number) {
         if (!this.childMenu) {
             return;
         }
@@ -493,7 +495,7 @@ export default class ContextMenuView extends VueComponent {
         }
     }
 
-    updateHoverTriangle(mouseX, mouseY) {
+    updateHoverTriangle(mouseX: number, mouseY: number) {
         const triangle = this.calculateHoverTriangle(mouseX, mouseY);
         if (triangle) {
             this.ignoreHoverTriangle = triangle;
@@ -508,7 +510,7 @@ export default class ContextMenuView extends VueComponent {
         );
     }
 
-    onMouseMove(event) {
+    onMouseMove(event: MouseEvent) {
         if (!this.childMenu) {
             // Wait for timer to end
             return;
@@ -580,7 +582,7 @@ export default class ContextMenuView extends VueComponent {
 
     isInsideMenu(x: number, y: number): boolean {
         // Check which one is hovered, and manually add a hover state to it
-        let selectedElement = document.elementFromPoint(x, y);
+        const selectedElement = document.elementFromPoint(x, y);
 
         if (selectedElement && selectedElement.closest('.context-menu')) {
             return true;
@@ -618,7 +620,7 @@ export default class ContextMenuView extends VueComponent {
         event.preventDefault();
     }
 
-    onTouchUp(event) {
+    onTouchUp(event: TouchEvent) {
         if (this.isPopped) {
             // We're already popped, so we don't need to do anything
             return;
@@ -680,7 +682,7 @@ export default class ContextMenuView extends VueComponent {
         document.removeEventListener('keydown', this.onKey);
     }
 
-    onKey(event) {
+    onKey(event: KeyboardEvent) {
         if (event.defaultPrevented || event.repeat) {
             return;
         }

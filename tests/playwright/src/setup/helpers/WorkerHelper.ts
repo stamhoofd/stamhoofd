@@ -1,10 +1,11 @@
-import { WorkerInfo } from '@playwright/test';
+import type { WorkerInfo } from '@playwright/test';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { WorkerData } from '../../helpers/worker/WorkerData';
-import { ApiService } from './ApiService';
-import { CaddyConfigHelper } from './CaddyConfigHelper';
-import { FrontendProjectName, FrontendService } from './FrontendService';
-import { ServiceProcess } from './ServiceHelper';
+import { WorkerData } from '../../helpers/worker/WorkerData.js';
+import { ApiService } from './ApiService.js';
+import { CaddyConfigHelper } from './CaddyConfigHelper.js';
+import type { FrontendProjectName} from './FrontendService.js';
+import { FrontendService } from './FrontendService.js';
+import type { ServiceProcess } from './ServiceHelper.js';
 
 class WorkerHelperInstance {
     private _isInitialized = false;
@@ -58,6 +59,7 @@ class WorkerHelperInstance {
         return {
             teardown: async () => {
                 // kill processes
+                // eslint-disable-next-line @typescript-eslint/await-thenable
                 await Promise.all(allProcesses.map(p => p.kill?.()));
             },
         };

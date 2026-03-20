@@ -56,7 +56,7 @@
 <script lang="ts" setup>
 import { ModuleType } from './classes/ModuleType';
 
-const props = defineProps<{
+defineProps<{
     module: ModuleType;
 }>();
 

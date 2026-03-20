@@ -34,10 +34,11 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
-import { ApiUser, PermissionLevel, PermissionRole, Permissions, User } from '@stamhoofd/structures';
+import type { ApiUser, PermissionRole, User } from '@stamhoofd/structures';
+import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import RolesView from '../RolesView.vue';
 import { useAdmins } from '../hooks/useAdmins';

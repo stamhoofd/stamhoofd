@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import { CalculationInput } from './CalculationInput';
+import type { CalculationInput } from './CalculationInput';
 import { ModuleType } from './ModuleType';
 import { Country } from './Country';
 

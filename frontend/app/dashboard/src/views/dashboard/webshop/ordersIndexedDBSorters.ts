@@ -1,6 +1,7 @@
 import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { PrivateOrder, SortDefinitions } from '@stamhoofd/structures';
-import { IndexBox, IndexedDbIndexValue } from './IndexBox';
+import type { PrivateOrder, SortDefinitions } from '@stamhoofd/structures';
+import type { IndexedDbIndexValue } from './IndexBox';
+import { IndexBox } from './IndexBox';
 
 export enum OrderIndexedDBIndex {
     Number = 'number',

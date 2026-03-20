@@ -71,7 +71,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin) {
                 shouldRetry: false,
             });
 
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
             new Toast($t(`%v0`), 'success').show();
         }
         catch (e) {

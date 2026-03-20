@@ -81,7 +81,8 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import Spinner from '@stamhoofd/components/Spinner.vue';
@@ -90,7 +91,8 @@ import ContextLogo from '@stamhoofd/components/context/ContextLogo.vue';
 import PlatformLogo from '@stamhoofd/components/context/PlatformLogo.vue';
 import VersionFooter from '@stamhoofd/components/context/VersionFooter.vue';
 import { useAppData } from '@stamhoofd/components/context/appContext.ts';
-import { Option, useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
+import type { Option} from '@stamhoofd/components/context/hooks/useContextOptions.ts';
+import { useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -100,7 +102,8 @@ import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
-import { computed, onMounted, reactive, Ref, ref, shallowRef, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 const isNative = ref(AppManager.shared.isNative);
 const loadingResults = ref(false);

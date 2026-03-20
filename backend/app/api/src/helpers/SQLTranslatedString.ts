@@ -1,5 +1,6 @@
-import { SQLColumnExpression, SQLExpression, SQLExpressionOptions, SQLQuery, SQLTranslatedStringHelper } from '@stamhoofd/sql';
-import { Language } from '@stamhoofd/structures';
+import type { SQLColumnExpression, SQLExpression, SQLExpressionOptions, SQLQuery } from '@stamhoofd/sql';
+import { SQLTranslatedStringHelper } from '@stamhoofd/sql';
+import { Language } from '@stamhoofd/types/Language';
 
 export class SQLTranslatedString implements SQLExpression {
     private helper: SQLTranslatedStringHelper;

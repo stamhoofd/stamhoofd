@@ -1,10 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator } from '@stamhoofd/utility';
-import XLSX from 'xlsx';
-import { BaseColumnMatcher } from '../ColumnMatcher';
+import type XLSX from 'xlsx';
+import type { BaseColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberBaseResult } from '../ImportMemberBaseResult';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type { ImportMemberBaseResult } from '../ImportMemberBaseResult';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 

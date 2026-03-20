@@ -1,4 +1,4 @@
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance } from 'vue';
 
 export function useIsAndroid(): boolean {
     const app = getCurrentInstance()!;

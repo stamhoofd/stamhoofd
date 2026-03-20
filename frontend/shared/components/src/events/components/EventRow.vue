@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { Event } from '@stamhoofd/structures';
+import type { Event } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useAppContext } from '../../context';

@@ -3,19 +3,19 @@ import { ThrottledQueue } from './ThrottledQueue.js';
 describe('ThrottledQueue', () => {
     // Mock timers for controlling setTimeout
     beforeEach(() => {
-        jest.useFakeTimers();
+        vitest.useFakeTimers();
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        vitest.useRealTimers();
     });
 
     afterAll(() => {
-        jest.clearAllMocks();
+        vitest.clearAllMocks();
     });
 
     it('should create an instance with the provided handler', () => {
-        const handler = jest.fn();
+        const handler = vitest.fn();
         const queue = new ThrottledQueue(handler);
 
         expect(queue.handler).toBe(handler);
@@ -24,7 +24,7 @@ describe('ThrottledQueue', () => {
     });
 
     it('should add items to the queue', () => {
-        const handler = jest.fn();
+        const handler = vitest.fn();
         const queue = new ThrottledQueue(handler);
 
         queue.addItem(1);
@@ -33,7 +33,7 @@ describe('ThrottledQueue', () => {
     });
 
     it('should add multiple items to the queue', () => {
-        const handler = jest.fn();
+        const handler = vitest.fn();
         const queue = new ThrottledQueue(handler);
 
         queue.addItems([1, 2, 3]);
@@ -44,12 +44,12 @@ describe('ThrottledQueue', () => {
     });
 
     it('should flush automatically when reaching maxBatchSize', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new ThrottledQueue(handler);
         queue.maxBatchSize = 3;
 
         // Spy on flushAll to check if it's called
-        const flushAllSpy = jest.spyOn(queue, 'flushAll');
+        const flushAllSpy = vitest.spyOn(queue, 'flushAll');
 
         queue.addItems([1, 2]);
         expect(flushAllSpy).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe('ThrottledQueue', () => {
     });
 
     it('should process items in batches when exceeding maxBatchSize', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new ThrottledQueue(handler);
         queue.maxBatchSize = 3;
 
@@ -88,9 +88,9 @@ describe('ThrottledQueue', () => {
     });
 
     it('should call emptyHandler when queue becomes empty', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new ThrottledQueue(handler);
-        const emptyHandler = jest.fn();
+        const emptyHandler = vitest.fn();
         queue.emptyHandler = emptyHandler;
 
         queue.maxBatchSize = 3;
@@ -101,9 +101,9 @@ describe('ThrottledQueue', () => {
     });
 
     it('should not call emptyHandler when queue is filled during processing', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new ThrottledQueue(handler);
-        const emptyHandler = jest.fn();
+        const emptyHandler = vitest.fn();
         queue.emptyHandler = emptyHandler;
 
         queue.maxBatchSize = 3;
@@ -120,11 +120,11 @@ describe('ThrottledQueue', () => {
 
     it('should not fail if handler throws an error', async () => {
         const error = new Error('Test error');
-        const handler = jest.fn().mockRejectedValue(error);
+        const handler = vitest.fn().mockRejectedValue(error);
         const queue = new ThrottledQueue(handler);
 
         // Spy on console.error
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = vitest.spyOn(console, 'error').mockImplementation(() => {});
 
         queue.addItem(1);
         await queue.flushAndWait();
@@ -137,7 +137,7 @@ describe('ThrottledQueue', () => {
     });
 
     it('should handle flushAndWait when queue is empty', async () => {
-        const handler = jest.fn();
+        const handler = vitest.fn();
         const queue = new ThrottledQueue(handler);
 
         await queue.flushAndWait();
@@ -160,7 +160,7 @@ describe('ThrottledQueue', () => {
     });
 
     it('should handle startTimeout and stopTimeout correctly', async () => {
-        const handler = jest.fn();
+        const handler = vitest.fn();
         const queue = new ThrottledQueue(handler);
         queue.maxDelay = 1000; // Set a max delay for the timeout
 
@@ -172,19 +172,19 @@ describe('ThrottledQueue', () => {
     });
 
     it('should automatically flush after maxDelay', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new ThrottledQueue(handler);
         queue.maxDelay = 1000; // Set a max delay for the timeout
 
         queue.addItem(1);
         expect(queue.timeout).not.toBeNull();
 
-        jest.advanceTimersByTime(500);
+        vitest.advanceTimersByTime(500);
         await queue.wait();
         expect(handler).not.toHaveBeenCalled();
 
         // Fast-forward time
-        jest.advanceTimersByTime(500);
+        vitest.advanceTimersByTime(500);
 
         await queue.wait();
         expect(handler).toHaveBeenCalledWith([1]);

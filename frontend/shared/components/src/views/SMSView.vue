@@ -53,7 +53,7 @@ import Dropdown from '#inputs/Dropdown.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { Customer, Member } from '@stamhoofd/structures';
+import type { Customer, Member } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -87,7 +87,7 @@ onMounted(() => {
 });
 
 function getOS(): 'android' | 'macOS-old' | 'iOS' | 'macOS' | 'windows' | 'unknown' {
-    var userAgent = navigator.userAgent || navigator.vendor;
+    const userAgent = navigator.userAgent || navigator.vendor;
 
     if (/android/i.test(userAgent)) {
         return 'android';

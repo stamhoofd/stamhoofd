@@ -1,5 +1,7 @@
-import { FinancialSupportSettings, Group, Organization, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
-import { computed, Ref, unref } from 'vue';
+import type { Group, Organization} from '@stamhoofd/structures';
+import { FinancialSupportSettings, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, unref } from 'vue';
 import { useAppContext } from '../../context';
 import { useOrganization, usePlatform } from '../../hooks';
 

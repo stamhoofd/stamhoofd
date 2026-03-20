@@ -46,12 +46,12 @@ export default class PrefixInput extends VueComponent {
 
     focussed = false;
 
-    onFocus(event) {
+    onFocus(event: Event) {
         this.focussed = true;
         this.$emit('focus', event);
     }
 
-    onBlur(event) {
+    onBlur(event: Event) {
         this.focussed = false;
         this.$emit('blur', event);
     }

@@ -41,7 +41,8 @@
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import EmailPreviewBox from '@stamhoofd/components/communication/components/EmailPreviewBox.vue';
 import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
-import { EmailStatus, EmailWithRecipients } from '@stamhoofd/structures';
+import type { EmailWithRecipients } from '@stamhoofd/structures';
+import { EmailStatus } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{

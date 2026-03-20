@@ -12,15 +12,18 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Toast } from '#overlays/Toast.ts';
 import { useValidation } from '#errors/useValidation.ts';
-import { Validator } from '#errors/Validator.ts';
+import type { Validator } from '#errors/Validator.ts';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { EmailTemplate, EmailTemplateType, Group, GroupPrivateSettings, Organization, OrganizationRegistrationPeriod, RegisterCheckout } from '@stamhoofd/structures';
-import { onMounted, Ref, ref } from 'vue';
+import type { Organization, RegisterCheckout } from '@stamhoofd/structures';
+import { EmailTemplate, EmailTemplateType, Group, GroupPrivateSettings, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { onMounted, ref } from 'vue';
 import { useContext } from '../hooks';
 import CheckboxListItem from '../inputs/CheckboxListItem.vue';
 

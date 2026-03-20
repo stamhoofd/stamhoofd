@@ -37,24 +37,26 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
 import EventView from '@stamhoofd/components/events/EventView.vue';
-import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
-import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
-import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import { useEventsObjectFetcher } from '@stamhoofd/components/fetchers/useEventsObjectFetcher.ts';
 import { useEventUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
-import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
+import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, onActivated, ref, Ref, watchEffect } from 'vue';
+import type { Ref } from 'vue';
+import { computed, onActivated, ref, watchEffect } from 'vue';
 
 type ObjectType = Event;
 
@@ -98,7 +100,7 @@ defineRoutes([
     {
         name: Routes.Event,
         url: '@year/@slug/@id',
-        component: EventView as ComponentOptions,
+        component: EventView,
         params: {
             year: Number,
             slug: String,

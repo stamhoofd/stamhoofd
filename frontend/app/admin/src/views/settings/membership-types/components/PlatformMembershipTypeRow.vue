@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PlatformMembershipType } from '@stamhoofd/structures';
+import type { PlatformMembershipType } from '@stamhoofd/structures';
 
 defineProps<{
     type: PlatformMembershipType;

@@ -5,8 +5,8 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import CalculationGroupBox from './CalculationGroupBox.vue';
-import { CalculationInput } from './classes/CalculationInput';
-import { CalculationOutput } from './classes/CalculationOutput';
+import type { CalculationInput } from './classes/CalculationInput';
+import type { CalculationOutput } from './classes/CalculationOutput';
 import { ModuleType } from './classes/ModuleType';
 
 const props = defineProps<{

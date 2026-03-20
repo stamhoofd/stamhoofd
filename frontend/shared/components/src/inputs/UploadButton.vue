@@ -19,7 +19,7 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import { Toast } from '../overlays/Toast';
 import STInputBox from './STInputBox.vue';
@@ -52,8 +52,12 @@ export default class UploadButton extends Mixins(NavigationMixin) {
         Request.cancelAll(this);
     }
 
-    changedFile(event) {
-        if (!event.target.files || event.target.files.length !== 1) {
+    changedFile(event: Event) {
+        if (!(event.target instanceof HTMLInputElement)) {
+            return;
+        }
+        const target = event.target
+        if (!target.files || target.files.length !== 1) {
             return;
         }
         if (this.uploading) {
@@ -61,7 +65,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
         }
         Request.cancelAll(this);
 
-        const file = event.target.files[0];
+        const file = target.files[0];
 
         if (file.size > 5 * 1024 * 1024) {
             const error = new SimpleError({
@@ -104,7 +108,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
                 this.uploading = false;
 
                 // Clear selection
-                event.target.value = null;
+                target.value = '';
             });
     }
 }

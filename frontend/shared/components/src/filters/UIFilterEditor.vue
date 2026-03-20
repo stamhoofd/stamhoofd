@@ -34,7 +34,7 @@ import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { UIFilter } from './UIFilter';
+import type { UIFilter } from './UIFilter';
 
 @Component({
     components: {
@@ -74,16 +74,16 @@ export default class UIFilterEditor extends Mixins(NavigationMixin) {
         this.filterComponent = this.clonedFilter.getComponent();
     }
 
-    applyFilter() {
+    async applyFilter() {
         if (!this.saveHandler) {
-            this.pop({ force: true });
+            await this.pop({ force: true });
             return;
         }
 
         this.saveHandler(this.clonedFilter!);
 
-        this.$nextTick(() => {
-            this.pop({ force: true });
+        await this.$nextTick(async () => {
+            await this.pop({ force: true });
         });
     }
 
@@ -91,14 +91,14 @@ export default class UIFilterEditor extends Mixins(NavigationMixin) {
         return !!this.deleteHandler;
     }
 
-    deleteFilter() {
+    async deleteFilter() {
         if (!this.deleteHandler) {
             return;
         }
         this.deleteHandler();
 
-        this.$nextTick(() => {
-            this.pop({ force: true });
+        await this.$nextTick(async () => {
+            await this.pop({ force: true });
         });
     }
 

@@ -11,7 +11,7 @@ import { computed, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
 const props = withDefaults(defineProps<{
@@ -43,7 +43,7 @@ const model = defineModel<number | null>({ default: null, set: (value: number | 
 const timeRawCache = ref(formatMinutes(model.value));
 
 watch(model, (value) => {
-    if(value === null) {
+    if (value === null) {
         return;
     }
     
@@ -62,7 +62,7 @@ const errors = useErrors();
 useValidation(errors.validator, validate);
 
 function formatMinutes(minutes: number | null): string {
-    if(minutes === null) {
+    if (minutes === null) {
         return '';
     }
 

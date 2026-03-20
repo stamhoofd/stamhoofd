@@ -1,7 +1,9 @@
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import type { Group} from '@stamhoofd/structures';
+import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import { useRequestOwner } from './useRequestOwner';
 
 export function useFetchOrganizationPeriodForGroup() {

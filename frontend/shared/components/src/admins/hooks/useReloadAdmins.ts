@@ -36,8 +36,7 @@ export function useReloadAdmins() {
         }
         if (organization.value) {
             const manager = new OrganizationManager($context.value!);
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            setReloadPromise(
+            return setReloadPromise(
                 manager.loadAdmins(force, true, instance?.proxy).catch((e) => {
                     Toast.fromError(e).show();
                     pop({ force: true })?.catch(console.error);
@@ -45,8 +44,7 @@ export function useReloadAdmins() {
             );
         }
         else {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            setReloadPromise(
+            return setReloadPromise(
                 platformManager.value.loadAdmins(force, true, instance?.proxy).catch((e) => {
                     Toast.fromError(e).show();
                     pop({ force: true })?.catch(console.error);

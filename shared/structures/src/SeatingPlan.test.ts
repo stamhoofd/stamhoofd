@@ -87,7 +87,6 @@ describe('SeatingPlan', () => {
             }
         }
 
-        // eslint-disable-next-line jest/expect-expect
         test('Seats move to the left is needed', () => {
             expectAdjustedSeats(
                 '-XX-----',
@@ -131,7 +130,6 @@ describe('SeatingPlan', () => {
             );
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test('Seats remaing the same if needed', () => {
             expectAdjustedSeats(
                 '-XXR---',
@@ -192,7 +190,6 @@ describe('SeatingPlan', () => {
             );
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test('Seats move to the right if needed', () => {
             expectAdjustedSeats(
                 '------X-',
@@ -218,7 +215,6 @@ describe('SeatingPlan', () => {
             );
         });
 
-        // eslint-disable-next-line jest/expect-expect
         test('Combination of multiple moves in the same row', () => {
             expectAdjustedSeats(
                 '-X-----X-',

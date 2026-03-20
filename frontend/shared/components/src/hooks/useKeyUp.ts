@@ -1,6 +1,6 @@
 import { useFocused } from '@simonbackx/vue-app-navigation';
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, unref } from 'vue';
-import { KeyMatcher } from './useKeyDown';
+import type { KeyMatcher } from './useKeyDown';
 
 export function useKeyUp(keyHandler: KeyMatcher) {
     const isFocused = useFocused();

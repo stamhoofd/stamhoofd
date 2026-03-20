@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { EmailInformation } from '@stamhoofd/structures';
+import type { EmailInformation } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EmailInformationView from './EmailAddressInformationView.vue';
 import { useEmailInformation } from '../hooks/useEmailInformation';

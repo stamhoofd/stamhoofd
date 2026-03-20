@@ -1,4 +1,5 @@
-import { Ref, ref } from "vue";
+import type { Ref} from 'vue';
+import { ref } from 'vue';
 
 const width = ref(0);
 let added = false;

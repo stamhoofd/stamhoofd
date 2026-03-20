@@ -1,18 +1,18 @@
-import { TranslationDictionary } from "../types/TranslationDictionary";
-import { Translations } from "../types/Translations";
+import type { TranslationDictionary } from '../types/TranslationDictionary.js';
+import type { Translations } from '../types/Translations.js';
 
 export function validateTranslations(
-    translations: Translations
+    translations: Translations,
 ): { valid: boolean; message?: string } {
-    if (typeof translations !== "object" || Array.isArray(translations)) {
+    if (typeof translations !== 'object' || Array.isArray(translations)) {
         return {
             valid: false,
-            message: "translations must be an object",
+            message: 'translations must be an object',
         };
     }
 
     for (const [key, value] of Object.entries(translations)) {
-        if (key === "replacements") {
+        if (key === 'replacements') {
             const validationResult = validateReplacements(value);
 
             if (validationResult.valid === false) {
@@ -21,7 +21,7 @@ export function validateTranslations(
             continue;
         }
 
-        if (key === "extends") {
+        if (key === 'extends') {
             const validationResult = validateExtends(value);
 
             if (validationResult.valid === false) {
@@ -30,7 +30,7 @@ export function validateTranslations(
             continue;
         }
 
-        if (typeof value !== "string") {
+        if (typeof value !== 'string') {
             return {
                 valid: false,
                 message: `translations.${key} must be a string`,
@@ -47,15 +47,15 @@ function validateReplacements(replacements: any): {
     valid: boolean;
     message?: string;
 } {
-    if (typeof replacements !== "object" || Array.isArray(replacements)) {
+    if (typeof replacements !== 'object' || Array.isArray(replacements)) {
         return {
             valid: false,
-            message: "replacements must be an object",
+            message: 'replacements must be an object',
         };
     }
 
     for (const [key, value] of Object.entries(replacements)) {
-        if (typeof value !== "string") {
+        if (typeof value !== 'string') {
             return {
                 valid: false,
                 message: `replacements.${key} must be a string`,
@@ -75,14 +75,14 @@ function validateExtends(extendsArray: any): {
     if (!Array.isArray(extendsArray)) {
         return {
             valid: false,
-            message: "extends must be an array",
+            message: 'extends must be an array',
         };
     }
 
-    if (extendsArray.some((value) => typeof value !== "string")) {
+    if (extendsArray.some(value => typeof value !== 'string')) {
         return {
             valid: false,
-            message: "extends must be an array of strings",
+            message: 'extends must be an array of strings',
         };
     }
 
@@ -96,27 +96,20 @@ export function validateConsistentWords(consistentWordsRecord: any): {
     message?: string;
 } {
     if (
-        typeof consistentWordsRecord !== "object" ||
-        Array.isArray(consistentWordsRecord)
+        typeof consistentWordsRecord !== 'object'
+        || Array.isArray(consistentWordsRecord)
     ) {
         return {
             valid: false,
-            message: "consistent-words must be an object",
+            message: 'consistent-words must be an object',
         };
     }
 
     for (const [key, value] of Object.entries(consistentWordsRecord)) {
-        if (typeof value !== "string") {
+        if (typeof value !== 'string') {
             return {
                 valid: false,
                 message: `consistent-words.${key} must be a string`,
-            };
-        }
-
-        if (typeof key !== "string") {
-            return {
-                valid: false,
-                message: `consistent-words key ${key} must be a string`,
             };
         }
 
@@ -141,31 +134,24 @@ export function validateConsistentWords(consistentWordsRecord: any): {
 }
 
 export function validateTranslationDictionary(dictionary: TranslationDictionary): { valid: boolean; message?: string } {
-    if (typeof dictionary !== "object" || Array.isArray(dictionary)) {
+    if (typeof dictionary !== 'object' || Array.isArray(dictionary)) {
         return {
             valid: false,
-            message: "translation dictionary must be an object",
+            message: 'translation dictionary must be an object',
         };
     }
 
     for (const [key, value] of Object.entries(dictionary)) {
-        if(typeof key !== "string") {
+        if (typeof value !== 'object' || Array.isArray(value)) {
             return {
                 valid: false,
-                message: `translation dictionary key ${key} must be a string`,
+                message: 'translation dictionary value must be an object',
             };
         }
 
-        if (typeof value !== "object" || Array.isArray(value)) {
-            return {
-                valid: false,
-                message: "translation dictionary value must be an object",
-            };
-        }
-
-        for(const [key2, value2] of Object.entries(value)) {
-            if(key2 === 'original' || key2 === 'translation') {
-                if(typeof value2 !== "string") {
+        for (const [key2, value2] of Object.entries(value)) {
+            if (key2 === 'original' || key2 === 'translation') {
+                if (typeof value2 !== 'string') {
                     return {
                         valid: false,
                         message: `translation dictionary ${key2} must be a string for key ${key}`,
@@ -177,7 +163,7 @@ export function validateTranslationDictionary(dictionary: TranslationDictionary)
             return {
                 valid: false,
                 message: `Unknown translation dictionary key ${key2} for key ${key}`,
-            }
+            };
         }
     }
 

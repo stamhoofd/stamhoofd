@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
@@ -28,7 +28,8 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import { Group, GroupStatus, OrganizationRegistrationPeriod, SetupStepType } from '@stamhoofd/structures';
+import type { Group, OrganizationRegistrationPeriod} from '@stamhoofd/structures';
+import { GroupStatus, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupReview from './GroupReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';

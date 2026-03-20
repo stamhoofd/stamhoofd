@@ -44,13 +44,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
 import { GlobalEventBus } from '#EventBus.ts';
 import STGridItem from '#layout/STGridItem.vue';
 import { useContext } from '#hooks/useContext.ts';
-import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, GroupedBalanceItems } from '@stamhoofd/structures';
+import type { GroupedBalanceItems } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';

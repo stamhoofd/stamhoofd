@@ -1,20 +1,22 @@
+import type { GetEmailIdentityCommandOutput } from '@aws-sdk/client-sesv2';
+import { CreateEmailIdentityCommand, DeleteEmailIdentityCommand, GetEmailIdentityCommand, PutEmailIdentityFeedbackAttributesCommand, PutEmailIdentityMailFromAttributesCommand, SESv2Client } from '@aws-sdk/client-sesv2';
 import { column, Database } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
-import { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { ModelCache, QueryableModel } from '@stamhoofd/sql';
-import { Address, appToUri, Country, DNSRecordStatus, EmailTemplateType, Language, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
-
-import { CreateEmailIdentityCommand, DeleteEmailIdentityCommand, GetEmailIdentityCommand, GetEmailIdentityCommandOutput, PutEmailIdentityFeedbackAttributesCommand, PutEmailIdentityMailFromAttributesCommand, SESv2Client } from '@aws-sdk/client-sesv2';
-
-import { v4 as uuidv4 } from 'uuid';
-
+import { I18n } from '@stamhoofd/backend-i18n/I18n';
+import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
+import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
+import { Address, appToUri, DNSRecordStatus, EmailTemplateType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
-import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData.js';
-import { OrganizationRegistrationPeriod, StripeAccount } from './index.js';
+import { Group } from './Group.js';
+import { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
+import { StripeAccount } from './StripeAccount.js';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
@@ -475,6 +477,8 @@ export class Organization extends QueryableModel {
                 to: i18n.$t('%19'),
             },
         ];
+
+        const { sendEmailTemplate } = await import('../helpers/EmailBuilder.js');
 
         // Create e-mail builder
         await sendEmailTemplate(null, {
@@ -968,5 +972,29 @@ export class Organization extends QueryableModel {
         }
 
         return await super.delete();
+    }
+
+    /**
+     * Get the number of active members that are currently registered
+     * This is used for billing
+     */
+    static async getActiveMembers(organizationId: string): Promise<number> {
+        const organization = await Organization.getByID(organizationId);
+        if (!organization) {
+            return 0;
+        }
+
+        return await this.select()
+            .join(
+                SQL.join(Group.table)
+                    .where(SQL.column('id'), SQL.parentColumn('groupId')),
+            )
+            .where('periodId', organization.periodId)
+            .where('deactivatedAt', null)
+            .where('registeredAt', '!=', null)
+            .where(SQL.column(Group.table, 'deletedAt'), null)
+            .count(
+                SQL.distinct(SQL.column('memberId')),
+            );
     }
 }

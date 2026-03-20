@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
@@ -75,10 +75,12 @@ import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { Option, OptionMenu, OptionSelectionRequirementHelper, ProductSelector } from '@stamhoofd/structures';
+import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import type { Option, OptionMenu} from '@stamhoofd/structures';
+import { OptionSelectionRequirementHelper, ProductSelector } from '@stamhoofd/structures';
 import { OptionSelectionRequirement } from '@stamhoofd/structures';
-import { PrivateWebshop, Product, ProductPrice, ProductsSelector } from '@stamhoofd/structures';
+import type { PrivateWebshop, Product, ProductPrice} from '@stamhoofd/structures';
+import { ProductsSelector } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import ChooseProductsView from './ChooseProductsView.vue';
@@ -122,8 +124,8 @@ export default class ProductsSelectorBox extends Mixins(NavigationMixin) {
         }
     }
 
-    changeProduct() {
-        this.present({
+    async changeProduct() {
+        await this.present({
             components: [
                 new ComponentWithProperties(ChooseProductsView, {
                     webshop: this.webshop,
@@ -263,7 +265,7 @@ export default class ProductsSelectorBox extends Mixins(NavigationMixin) {
         return OptionSelectionRequirementHelper.getName(requirement);
     }
 
-    showRequirementMenu(productSelector: ProductSelector, menu: OptionMenu, option: Option, event) {
+    showRequirementMenu(productSelector: ProductSelector, menu: OptionMenu, option: Option, event: MouseEvent) {
         const value = this.getOptionRequirement(productSelector, menu, option);
         let values = [OptionSelectionRequirement.Optional, OptionSelectionRequirement.Required, OptionSelectionRequirement.Excluded];
 
@@ -285,7 +287,7 @@ export default class ProductsSelectorBox extends Mixins(NavigationMixin) {
         ]);
 
         c.show({
-            button: event.currentTarget,
+            button: event.currentTarget as HTMLElement,
             xPlacement: 'left',
             yPlacement: 'bottom',
         }).catch(console.error);

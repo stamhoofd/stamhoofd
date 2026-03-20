@@ -9,7 +9,8 @@
 </template>
 
 <script setup lang="ts">
-import { Group, GroupType, Organization } from '@stamhoofd/structures';
+import type { Group, Organization } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import IconContainer from '../../../icons/IconContainer.vue';
 import GroupIcon from './GroupIcon.vue';

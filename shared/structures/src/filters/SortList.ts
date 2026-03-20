@@ -1,4 +1,4 @@
-import { Data } from '@simonbackx/simple-encoding';
+import type { Data } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 export enum SortItemDirection {

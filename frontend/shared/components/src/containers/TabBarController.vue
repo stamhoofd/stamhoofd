@@ -43,7 +43,7 @@ import { inject, shallowRef } from 'vue';
 
 import { GlobalEventBus } from '../EventBus';
 import { useDeviceWidth } from '../hooks';
-import TabBarController from './TabBarController.vue';
+import type TabBarController from './TabBarController.vue';
 import TabBarDropdownView from './TabBarDropdownView.vue';
 
 export function useTabBarController(): Ref<InstanceType<typeof TabBarController>> {
@@ -78,9 +78,11 @@ export function useHideTabBar() {
 </script>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, PushOptions, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentPublicInstance, computed, getCurrentInstance, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, Ref, ref, unref } from 'vue';
+import type { ComponentPublicInstance, Ref} from 'vue';
+import { computed, getCurrentInstance, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, ref, unref } from 'vue';
 
 import InheritComponent from './InheritComponent.vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';

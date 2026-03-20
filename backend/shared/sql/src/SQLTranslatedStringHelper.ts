@@ -1,5 +1,7 @@
-import { SQL, SQLColumnExpression, SQLExpression, SQLExpressionOptions, SQLQuery } from '@stamhoofd/sql';
-import { Language } from '@stamhoofd/structures';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
+import type { SQLColumnExpression } from './SQLExpressions.js';
+import { SQL } from './SQL.js';
+import { Language } from '@stamhoofd/types/Language';
 
 export class SQLTranslatedStringHelper implements SQLExpression {
     constructor(private columnExpression: SQLColumnExpression, private path: string, private getLanguage: () => Language) {

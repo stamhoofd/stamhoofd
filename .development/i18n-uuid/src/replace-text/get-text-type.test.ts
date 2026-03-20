@@ -1,7 +1,7 @@
-import { getTextType, TextType } from "./get-text-type";
+import { getTextType, TextType } from './get-text-type.js';
 
-describe("get-text-type", () => {
-    test("array should return correct type", () => {
+describe('get-text-type', () => {
+    test('array should return correct type', () => {
         const testCases: {
             allParts: { value: string }[];
             expectedName: string;
@@ -9,74 +9,74 @@ describe("get-text-type", () => {
         }[] = [
             {
                 allParts: [
-                    { value: "const a = 5;"},
+                    { value: 'const a = 5;' },
                     { value: '"test abc"' },
                     {
-                        value: ";const array = [1,[2,3],"
+                        value: ';const array = [1,[2,3],',
                     },
                 ],
-                expectedName: "const a = 5;\"test abc\";const array ",
-                expectedType: TextType.Variable
+                expectedName: 'const a = 5;"test abc";const array ',
+                expectedType: TextType.Variable,
             },
             {
                 allParts: [
-                    { value: "const a = 5;" },
+                    { value: 'const a = 5;' },
                     { value: '"test abc"' },
-                    { value: ";const array = [,"},
-                    { value: '"blabla"'},
-                    { value: "," },
+                    { value: ';const array = [,' },
+                    { value: '"blabla"' },
+                    { value: ',' },
                 ],
-                expectedName: "const a = 5;\"test abc\";const array ",
-                expectedType: TextType.Variable
+                expectedName: 'const a = 5;"test abc";const array ',
+                expectedType: TextType.Variable,
             },
             {
                 allParts: [
                     {
-                        value: "export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys: [",
+                        value: 'export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys: [',
                     },
                 ],
                 expectedName:
-                    "export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys",
-                    expectedType: TextType.Key
+                    'export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys',
+                expectedType: TextType.Key,
             },
             {
                 allParts: [
                     {
-                        value: "import { Member } from ",
+                        value: 'import { Member } from ',
                     },
                     {
                         value: "'@stamhoofd/models'",
                     },
                     {
-                        value: ";\nimport { getDefaultGenerator, ModelLogger } from ",
+                        value: ';\nimport { getDefaultGenerator, ModelLogger } from ',
                     },
                     {
                         value: "'./ModelLogger'",
                     },
                     {
-                        value: ";\nimport { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from ",
+                        value: ';\nimport { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from ',
                     },
                     {
                         value: "'@stamhoofd/structures'",
                     },
                     {
-                        value: ";\n\nexport const MemberLogger = new ModelLogger(Member, {\n",
+                        value: ';\n\nexport const MemberLogger = new ModelLogger(Member, {\n',
                     },
                     {
-                        value: "// Skip repeated auto generated fields",
+                        value: '// Skip repeated auto generated fields',
                     },
                     {
-                        value: "\n    skipKeys: [",
+                        value: '\n    skipKeys: [',
                     },
                     {
                         value: "'firstName'",
                     },
                     {
-                        value: ", ",
+                        value: ', ',
                     },
                 ],
                 expectedName: `import { Member } from '@stamhoofd/models';\nimport { getDefaultGenerator, ModelLogger } from './ModelLogger';\nimport { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';\n\nexport const MemberLogger = new ModelLogger(Member, {\n// Skip repeated auto generated fields\n    skipKeys`,
-                expectedType: TextType.Key
+                expectedType: TextType.Key,
             },
         ];
 
@@ -88,18 +88,18 @@ describe("get-text-type", () => {
         }
     });
 
-    test("key should return type key", () => {
+    test('key should return type key', () => {
         const testCases: {
-            allParts: { value: string}[];
+            allParts: { value: string }[];
             expectedName: string;
         }[] = [
             {
                 allParts: [
                     {
-                        value: "export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys:"
+                        value: 'export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys:',
                     },
                 ],
-                expectedName: "export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys",
+                expectedName: 'export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, { skipKeys',
             },
         ];
 
@@ -111,58 +111,58 @@ describe("get-text-type", () => {
         }
     });
 
-    test("equality should return type equality", () => {
+    test('equality should return type equality', () => {
         const testCases: {
             allParts: { value: string }[];
         }[] = [
             {
                 allParts: [
                     {
-                        value: "if(test === ",
+                        value: 'if(test === ',
                     },
-                ]
+                ],
             },
             {
                 allParts: [
                     {
-                        value: "if(test !== ",
+                        value: 'if(test !== ',
                     },
-                ]
+                ],
             },
             {
                 allParts: [
                     {
-                        value: "if(test > ",
+                        value: 'if(test > ',
                     },
-                ]
+                ],
             },
             {
                 allParts: [
                     {
-                        value: "if(test < ",
+                        value: 'if(test < ',
                     },
-                ]
+                ],
             },
             {
                 allParts: [
                     {
-                        value: "if(test == ",
+                        value: 'if(test == ',
                     },
-                ]
+                ],
             },
             {
                 allParts: [
                     {
-                        value: "if(test >= ",
+                        value: 'if(test >= ',
                     },
-                ]
+                ],
             },
             {
                 allParts: [
                     {
-                        value: "if(test <= ",
+                        value: 'if(test <= ',
                     },
-                ]
+                ],
             },
         ];
 
@@ -174,17 +174,17 @@ describe("get-text-type", () => {
         }
     });
 
-    test("switch case should return type switch case", () => {
+    test('switch case should return type switch case', () => {
         const testCases: {
             allParts: { value: string }[];
         }[] = [
             {
                 allParts: [
                     {
-                        value: "switch(test) { case ",
+                        value: 'switch(test) { case ',
                     },
-                ]
-            }
+                ],
+            },
         ];
 
         for (const testCase of testCases) {

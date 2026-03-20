@@ -1,17 +1,17 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { isEmptyFilter, PropertyFilter, StamhoofdFilter, StamhoofdNotFilter, unwrapFilter, wrapFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { PropertyFilter, StamhoofdFilter, StamhoofdNotFilter, WrapperFilter } from '@stamhoofd/structures';
+import { isEmptyFilter, unwrapFilter, wrapFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export type UIFilterWrapper = ((value: StamhoofdFilter) => StamhoofdFilter);
 export type UIFilterUnwrapper = ((value: StamhoofdFilter) => StamhoofdFilter | null);
 
 export type UIFilterBuilders = UIFilterBuilder[];
-export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
+export interface BaseUIFilterBuilder {
     /**
      * Create a new default filter
      */
-    create(options?: { isInverted?: boolean }): F;
     name: string;
 
     /**
@@ -27,6 +27,13 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> {
     unwrapFilter?: UIFilterUnwrapper | null | undefined;
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null;
+}
+
+export interface UIFilterBuilder<F extends UIFilter = UIFilter> extends BaseUIFilterBuilder {
+    /**
+     * Create a new default filter
+     */
+    create(options?: { isInverted?: boolean }): F;
 }
 
 export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter; isInverted?: boolean } {
@@ -88,12 +95,12 @@ export type StyledDescriptionChoice = { id: string; text: string; action: () => 
 export type StyledDescription = { text: string; style: string; choices?: StyledDescriptionChoice[] }[];
 export type UiFilterOptions = { isInverted?: boolean };
 
-export abstract class UIFilter {
+export abstract class UIFilter<Builder extends BaseUIFilterBuilder = BaseUIFilterBuilder> {
     id = uuidv4();
-    builder!: UIFilterBuilder;
+    builder!: Builder;
     isInverted = false;
 
-    constructor(data: Partial<UIFilter>, options: UiFilterOptions = {}) {
+    constructor(data: Partial<UIFilter<Builder>>, options: UiFilterOptions = {}) {
         Object.assign(this, data);
 
         if (options.isInverted) {

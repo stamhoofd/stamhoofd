@@ -52,9 +52,11 @@ import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { Group, MemberResponsibility, PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import type { Group, PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import { MemberResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditRoleView from '../admins/EditRoleView.vue';
 import { useReloadAdmins } from '../admins/hooks/useReloadAdmins';
@@ -67,7 +69,7 @@ const pop = usePop();
 const present = usePresent();
 
 const organization = useOrganization();
-const { reloadPromise, reload } = useReloadAdmins();
+const { reload } = useReloadAdmins();
 
 const { saving, errors, save: rawSave, hasChanges, createInheritedResponsibilityRolePatchArray, responsibilities, inheritedResponsibilitiesWithGroup, patchResponsibilities, patchInheritedResponsibilityRoles } = usePatchRoles();
 
@@ -198,8 +200,7 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
 
 async function save() {
     await rawSave(async () => {
-        reload();
-        await reloadPromise();
+        await reload();
         new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     });

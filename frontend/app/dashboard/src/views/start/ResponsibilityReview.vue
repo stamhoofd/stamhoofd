@@ -43,7 +43,7 @@ import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import ProgressIcon from '@stamhoofd/components/icons/ProgressIcon.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useMemberActions } from '@stamhoofd/components/members/classes/MemberActionBuilder.ts';
-import { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -84,7 +84,7 @@ const name = computed(() => {
     const name = props.responsibility.name;
     const group = props.group;
     if (group) {
-        return `${name} van ${group.settings.name}`;
+        return `${name} van ${group.settings.name.toString()}`;
     }
 
     return name;

@@ -1,7 +1,8 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { PlatformMember } from '@stamhoofd/structures';
-import { defaultDisplayOptions, DisplayOptions, glueNavigationActions, NavigationActions, runDisplayOptions } from '../../types/NavigationActions';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { PlatformMember } from '@stamhoofd/structures';
+import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
+import { defaultDisplayOptions, glueNavigationActions, runDisplayOptions } from '../../types/NavigationActions';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 
 export class MemberStepManager {
     member: PlatformMember;

@@ -16,7 +16,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { PlatformPremiseType } from '@stamhoofd/structures';

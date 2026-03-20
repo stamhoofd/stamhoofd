@@ -1,5 +1,5 @@
 import { AutoEncoder } from '@simonbackx/simple-encoding';
-import { PaymentProvider } from './PaymentProvider.js';
+import type { PaymentProvider } from './PaymentProvider.js';
 
 export class PaymentMandate extends AutoEncoder {
     /**

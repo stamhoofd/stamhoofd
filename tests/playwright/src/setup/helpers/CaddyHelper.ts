@@ -1,8 +1,8 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
-import { CaddyConfigHelper } from './CaddyConfigHelper';
-import { ProcessInfo } from './ProcessInfo';
-import { STChildProcess } from './STChildProcess';
+import { CaddyConfigHelper } from './CaddyConfigHelper.js';
+import { ProcessInfo } from './ProcessInfo.js';
+import { STChildProcess } from './STChildProcess.js';
 
 const exec = promisify(execCallback);
 

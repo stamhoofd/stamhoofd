@@ -5,10 +5,12 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Payment, PaymentGeneral } from '@stamhoofd/structures';
-import { Ref, ref } from 'vue';
+import type { Payment} from '@stamhoofd/structures';
+import { PaymentGeneral } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { ref } from 'vue';
 import { LoadingViewTransition } from '../containers';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';

@@ -1,4 +1,4 @@
-import { Group, PaymentMethod, RecordAnswer } from '@stamhoofd/structures';
+import type { Group, PaymentMethod, RecordAnswer } from '@stamhoofd/structures';
 
 /**
 * Class with data concerning the registration of a member that is being imported (from a spreadsheet).

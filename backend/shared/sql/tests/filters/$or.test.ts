@@ -3,13 +3,6 @@ import { SQL } from '../../src/SQL.js';
 import { test } from '../utils/index.js';
 
 describe('$or', () => {
-    /**
-     * Tests that should be repeated for all filter types
-     */
-    describe('Common checks', () => {
-        // todo
-    });
-
     it('If one child is always true, the whole $or is always true', async () => {
         const filters = {
             ...baseSQLFilterCompilers,

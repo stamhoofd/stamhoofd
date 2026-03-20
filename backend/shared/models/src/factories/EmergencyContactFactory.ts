@@ -5,7 +5,7 @@ type Options = Record<string, never>;
 
 export class EmergencyContactFactory extends Factory<Options, EmergencyContact> {
     create(): Promise<EmergencyContact> {
-        const contact = new EmergencyContact();
+        const contact = EmergencyContact.create({});
         contact.title = this.randomArray([
             'Oma',
             'Opa',

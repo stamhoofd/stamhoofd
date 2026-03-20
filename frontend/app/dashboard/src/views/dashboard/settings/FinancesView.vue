@@ -161,7 +161,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
@@ -173,7 +173,8 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, BalanceItem, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
-import { ComponentOptions, ref, Ref } from 'vue';
+import type { ComponentOptions, Ref } from 'vue';
+import { ref } from 'vue';
 import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
@@ -194,7 +195,7 @@ defineRoutes([
     {
         name: Routes.Transfers,
         url: 'overschrijvingen',
-        component: PaymentsTableView as ComponentOptions,
+        component: PaymentsTableView,
         paramsToProps() {
             return {
                 methods: [PaymentMethod.Transfer],
@@ -212,12 +213,12 @@ defineRoutes([
     {
         name: Routes.ReceivableBalance,
         url: 'openstaande-bedragen',
-        component: ReceivableBalancesTableView as ComponentOptions,
+        component: ReceivableBalancesTableView,
     },
     {
         name: Routes.Payments,
         url: 'betalingen',
-        component: PaymentsTableView as ComponentOptions,
+        component: PaymentsTableView,
         paramsToProps() {
             return {
                 defaultFilter: {
@@ -233,12 +234,12 @@ defineRoutes([
     {
         name: Routes.BalanceItems,
         url: 'balance-items',
-        component: BalanceItemsTableView as ComponentOptions,
+        component: BalanceItemsTableView,
     },
     {
         name: Routes.Invoices,
         url: 'facturen',
-        component: InvoicesTableView as ComponentOptions,
+        component: InvoicesTableView,
         paramsToProps() {
             return {};
         },
@@ -256,7 +257,7 @@ defineRoutes([
         params: {
             uri: String,
         },
-        component: PayableBalanceCollectionView as ComponentOptions,
+        component: PayableBalanceCollectionView,
         async paramsToProps(params: { uri: string }) {
             await balancePromise;
             const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);

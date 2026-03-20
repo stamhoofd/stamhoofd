@@ -1,6 +1,7 @@
 /// <reference types="@vitest/browser/providers/playwright" />
 import { Formatter, sleep } from '@stamhoofd/utility';
-import { enableAutoUnmount, mount, VueWrapper } from '@vue/test-utils';
+import type { VueWrapper } from '@vue/test-utils';
+import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test, vi } from 'vitest';
 import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
 

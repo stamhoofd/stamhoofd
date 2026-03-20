@@ -1,4 +1,4 @@
-import { Language } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -6,7 +6,8 @@ import {
 } from '../../src/filters/SQLFilter.js';
 import { SQL } from '../../src/SQL.js';
 import { SQLTranslatedStringHelper } from '../../src/SQLTranslatedStringHelper.js';
-import { TableDefinition, testMatch } from '../utils/index.js';
+import type { TableDefinition} from '../utils/index.js';
+import { testMatch } from '../utils/index.js';
 
 type TranslatedStringValue = string | { [key in Language]?: string };
 

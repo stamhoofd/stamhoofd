@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { OrganizationPaymentMandate, OrganizationPaymentMandateDetails, STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Organization } from './index.js';
+import { Organization } from './Organization.js';
 
 export class STInvoice extends QueryableModel {
     static table = 'stamhoofd_invoices';
@@ -83,9 +83,6 @@ export class STInvoice extends QueryableModel {
 
     @column({ type: 'boolean' })
     didSendPeppol = false;
-
-    // static organization = new ManyToOneRelation(Organization, 'organization');
-    // static payment = new ManyToOneRelation(Payment, 'payment');
 
     static async getMollieMandates(organization: Organization) {
         // Poll mollie status

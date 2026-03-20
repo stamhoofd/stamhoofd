@@ -40,22 +40,25 @@
 </template>
 
 <script setup lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { Toast } from '#overlays/Toast.ts';
-import { UIFilter } from '#filters/UIFilter.ts';
+import type { UIFilter } from '#filters/UIFilter.ts';
 import UIFilterEditor from '#filters/UIFilterEditor.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import { assertSort, Group, isEmptyFilter, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, SortItemDirection, SortList } from '@stamhoofd/structures';
-import { computed, Ref, ref, watchEffect } from 'vue';
+import type { Group, Organization, PlatformMember, RegisterCheckout, SortList } from '@stamhoofd/structures';
+import { assertSort, isEmptyFilter, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, RegisterItem, SortItemDirection } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
 import { useAuth, useContext, useOrganization, usePlatform } from '../hooks';
-import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
+import type { NavigationActions} from '../types/NavigationActions';
+import { useNavigationActions } from '../types/NavigationActions';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
 
 type ObjectType = PlatformMember;

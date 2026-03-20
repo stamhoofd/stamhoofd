@@ -329,7 +329,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { useDismiss, useUrl } from '@simonbackx/vue-app-navigation';
 import { useContext, useErrors, useFeatureFlag, usePatch, useRequiredOrganization } from '@stamhoofd/components';
@@ -348,7 +349,9 @@ import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount } from '@stamhoofd/structures';
+import type { MollieProfile} from '@stamhoofd/structures';
+import { BuckarooSettings, CheckMollieResponse, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 

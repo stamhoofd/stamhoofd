@@ -46,8 +46,8 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
-        jest.useRealTimers();
+        vitest.restoreAllMocks();
+        vitest.useRealTimers();
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {
@@ -274,7 +274,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await balanceItem1.delete();
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast'));
         });
@@ -348,7 +348,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Member not found'));
             // #endregion
@@ -387,7 +387,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await balanceItem1.delete();
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Oeps, jouw mandje is leeg.'));
             // #endregion
@@ -418,7 +418,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(STExpect.simpleError({ code: 'changed_price' }));
         });
@@ -454,7 +454,7 @@ describe('Endpoint.RegisterMembers', () => {
             await post(body, organization, token);
 
             // second time should fail
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(STExpect.simpleError({ code: 'already_registered' }));
         });
@@ -492,7 +492,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(STExpect.simpleErrors([
                     { code: 'duplicate_register_item' },
@@ -530,7 +530,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Oeps, je hebt geen geldige betaalmethode geselecteerd'));
             // #endregion
@@ -569,7 +569,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('redirectUrl or cancelUrl is missing'));
             // #endregion
@@ -602,7 +602,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('redirectUrl or cancelUrl is missing'));
         });
@@ -880,7 +880,7 @@ describe('Endpoint.RegisterMembers', () => {
         test('Register for group with trial should set trial period', async () => {
             // #region arrange
             const date = new Date('2023-05-14');
-            jest.useFakeTimers({ advanceTimers: true, doNotFake: ['setTimeout', 'clearTimeout', 'hrtime', 'nextTick', 'performance', 'queueMicrotask', 'setImmediate', 'clearImmediate'] }).setSystemTime(date);
+            vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(date);
 
             try {
                 const { member, group, groupPrice, organization, token } = await initData();
@@ -926,7 +926,7 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(trialUntil!.getDate()).toBe(19);
             }
             finally {
-                jest.useRealTimers();
+                vitest.useRealTimers();
             }
         }, 20_00000);
 
@@ -1013,7 +1013,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             expect(group?.stockReservations.length).toBe(0);
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Maximum reached'));
             // #endregion
@@ -1090,7 +1090,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Stock empty'));
             // #endregion
@@ -1168,7 +1168,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Option maximum exceeded'));
         });
@@ -1295,7 +1295,7 @@ describe('Endpoint.RegisterMembers', () => {
                 // act
 
                 // should throw error
-                await expect(async () => await post(body, organization, token))
+                await expect(post(body, organization, token))
                     .rejects
                     .toThrow(STExpect.errorWithCode('changed_price'));
 
@@ -2005,7 +2005,7 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             // send request and check occupancy
-            await expect(async () => await post(body, organization, token)).rejects.toThrow('No permission to register in this group');
+            await expect(post(body, organization, token)).rejects.toThrow('No permission to register in this group');
         });
 
         test('Cannot register a member with only read permissions even when having full permissions to the specific member', async () => {
@@ -2041,7 +2041,7 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             // send request and check occupancy
-            await expect(async () => await post(body, organization, token)).rejects.toThrow('No permission to register in this group');
+            await expect(post(body, organization, token)).rejects.toThrow('No permission to register in this group');
         });
     });
 
@@ -2165,7 +2165,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(STExpect.simpleError({ code: 'forbidden' }));
         });
@@ -2201,7 +2201,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(STExpect.simpleError({ code: 'as_organization_disabled' }));
         });
@@ -2234,7 +2234,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('customer is required when paying as an organization'));
         });
@@ -2272,7 +2272,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(STExpect.simpleError({ code: 'forbidden' }));
         });
@@ -2307,7 +2307,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('customer.company is required'));
         });
@@ -2344,7 +2344,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.'));
         });
@@ -2609,7 +2609,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Registration not found'));
             // #endregion
@@ -2660,7 +2660,7 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             // send request and check occupancy
-            await expect(async () => await post(body, organization, token)).rejects.toThrow('Not allowed to move registrations');
+            await expect(post(body, organization, token)).rejects.toThrow('Not allowed to move registrations');
         });
     });
 
@@ -2783,7 +2783,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(async () => await post(body, organization1, token)).rejects.toThrow('Permission denied: you are not allowed to delete registrations');
+            await expect(post(body, organization1, token)).rejects.toThrow('Permission denied: you are not allowed to delete registrations');
         });
 
         test('Should deactivate registration', async () => {
@@ -2936,7 +2936,7 @@ describe('Endpoint.RegisterMembers', () => {
                     customer: null,
                 });
 
-                await expect(async () => await post(body2, organization, token))
+                await expect(post(body2, organization, token))
                     .rejects
                     .toThrow(STExpect.simpleError({
                         field: 'cancellationFeePercentage',
@@ -2987,7 +2987,7 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(async () => await post(body, organization, token))
+            await expect(post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Permission denied: you are not allowed to delete registrations'));
         });
@@ -3020,7 +3020,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
             });
 
-            await expect(async () => await post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
+            await expect(post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
         });
 
         /**
@@ -3052,7 +3052,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
             });
 
-            await expect(async () => await post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
+            await expect(post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
         });
 
         test('Should fail if registration does not exist anymore', async () => {
@@ -3100,7 +3100,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             // #region act and assert
             await registration.delete();
-            await expect(async () => await post(body, organization, token)).rejects.toThrow(new RegExp('Registration not found'));
+            await expect(post(body, organization, token)).rejects.toThrow(new RegExp('Registration not found'));
             // #endregion
         });
 
@@ -3181,7 +3181,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             // #region act and assert
             await post(body1, organization, token);
-            await expect(async () => await post(body2, organization, token)).rejects.toThrow(/No permission to delete this registration/);
+            await expect(post(body2, organization, token)).rejects.toThrow(/No permission to delete this registration/);
             // #endregion
         });
     });

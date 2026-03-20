@@ -150,10 +150,11 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { BalanceItem, BalanceItemRelationType, Organization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
+import type { BalanceItem, Organization, PaymentGeneral} from '@stamhoofd/structures';
+import { BalanceItemRelationType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
@@ -172,7 +173,7 @@ import STListItem from '../layout/STListItem.vue';
 import SearchOrganizationView from '../members/SearchOrganizationView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
-import { NavigationActions } from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import PaymentCustomerSelectionBox from './components/PaymentCustomerSelectionBox.vue';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 

@@ -4,18 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
-import { ModelCache, QueryableModel } from '@stamhoofd/sql';
-import { Member, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
+import { QueryableModel } from '@stamhoofd/sql';
+import { type OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
+import { Registration } from './Registration.js';
 
-if (Member === undefined) {
-    throw new Error('Import Member is undefined');
-}
-if (User === undefined) {
-    throw new Error('Import User is undefined');
-}
-if (Payment === undefined) {
-    throw new Error('Import Payment is undefined');
-}
 if (Registration === undefined) {
     throw new Error('Import Registration is undefined');
 }
@@ -240,6 +232,3 @@ export class Group extends QueryableModel {
         return await this.applyStockReservations(groupId, reservations, true);
     }
 }
-
-Registration.group = new ManyToOneRelation(Group, 'group');
-Registration.group.foreignKey = 'groupId';

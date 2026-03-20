@@ -50,7 +50,7 @@ import { computed } from 'vue';
 import Dropdown from '../../inputs/Dropdown.vue';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
 import { GroupUIFilter, GroupUIFilterMode } from '../GroupUIFilter';
-import { StyledDescriptionChoice, UIFilter } from '../UIFilter';
+import type { StyledDescriptionChoice, UIFilter } from '../UIFilter';
 import UIFilterEditor from '../UIFilterEditor.vue';
 
 const props = defineProps<{

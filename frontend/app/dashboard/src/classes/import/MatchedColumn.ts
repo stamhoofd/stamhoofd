@@ -1,4 +1,4 @@
-import { BaseColumnMatcher, ColumnMatcher } from './ColumnMatcher';
+import type { BaseColumnMatcher, ColumnMatcher } from './ColumnMatcher';
 
 export class MatchedColumn {
     index = 0;
@@ -55,6 +55,6 @@ export class MatchedColumn {
     }
 }
 
-function isBaseMatcher(matcher: ColumnMatcher): matcher is BaseColumnMatcher {
-    return matcher['setBaseValue'] !== undefined;
+function isBaseMatcher(matcher: object): matcher is BaseColumnMatcher {
+    return 'setBaseValue' in matcher && typeof matcher.setBaseValue === 'function'
 }

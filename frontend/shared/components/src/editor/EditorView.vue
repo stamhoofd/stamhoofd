@@ -76,7 +76,7 @@
                     <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('%aA')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
                     <button class="button icon hr" type="button" :v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
                     <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('%aC')" @click.prevent="openLinkEditor()" @mousedown.stop />
-                    <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.stop>
+                    <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.stop>
                         <div class="button icon image" type="button" :v-tooltip="$t('%aD')" />
                     </UploadButton>
                     <slot name="buttons" />
@@ -104,8 +104,9 @@
 </template>
 
 <script lang="ts" setup>
-import { EditorSmartButton, EditorSmartVariable, Image, Replacement, ResolutionRequest } from '@stamhoofd/structures';
-import { Content, JSONContent } from '@tiptap/core';
+import type { Image, Replacement} from '@stamhoofd/structures';
+import { EditorSmartButton, EditorSmartVariable, ResolutionRequest } from '@stamhoofd/structures';
+import type { Content, JSONContent } from '@tiptap/core';
 import { Image as ImageExtension } from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import StarterKit from '@tiptap/starter-kit';

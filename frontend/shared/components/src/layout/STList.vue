@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { SortableEvent, SortableOptions } from 'sortablejs';
+import type { SortableEvent, SortableOptions } from 'sortablejs';
 import { Sortable } from 'sortablejs-vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -23,7 +23,7 @@ const props = withDefaults(
         draggable?: boolean;
         group?: string;
         withAnimation?: boolean;
-        itemKey?: string | ((item: any) => string | number | symbol);
+        itemKey?: string | ((item: T) => string | number | symbol);
     }>(),
     // default values
     {

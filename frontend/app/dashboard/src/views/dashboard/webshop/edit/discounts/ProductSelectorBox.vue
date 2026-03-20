@@ -63,7 +63,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
@@ -75,8 +76,9 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { Option, OptionMenu, OptionSelectionRequirement, OptionSelectionRequirementHelper, PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
+import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import type { Option, OptionMenu, PrivateWebshop, Product, ProductPrice} from '@stamhoofd/structures';
+import { OptionSelectionRequirement, OptionSelectionRequirementHelper, ProductSelector } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ChooseProductView from './ChooseProductView.vue';
 

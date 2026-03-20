@@ -39,9 +39,10 @@
 </template>
 
 <script setup lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
+import type { MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
 import { DeleteView } from '../../../..';
 import { GlobalEventBus } from '../../../EventBus';
 import { Toast } from '../../../overlays/Toast';

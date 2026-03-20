@@ -39,12 +39,13 @@
 </template>
 
 <script setup lang="ts">
-import { BooleanStatus, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { BooleanStatus } from '@stamhoofd/structures';
 
 import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { ErrorBox } from '../../../errors/ErrorBox';
-import { Validator } from '../../../errors/Validator';
+import type { ErrorBox } from '../../../errors/ErrorBox';
+import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import { useDataPermissionSettings } from '../../../groups';

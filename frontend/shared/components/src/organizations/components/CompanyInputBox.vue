@@ -30,16 +30,17 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import type { Validator } from '#errors/Validator.ts';
 import AddressInput from '#inputs/AddressInput.vue';
 import CheckboxListItem from '#inputs/CheckboxListItem.vue';
 import CompanyNumberInput from '#inputs/CompanyNumberInput.vue';
 import EmailInput from '#inputs/EmailInput.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import { useValidation } from '#errors/useValidation.ts';
-import { Validator } from '#errors/Validator.ts';
 import VATNumberInput from '#inputs/VATNumberInput.vue';
-import { Company, Country } from '@stamhoofd/structures';
+import { SimpleError } from '@simonbackx/simple-errors';
+import type { Company } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { computed } from 'vue';
 import { useErrors } from '../../errors/useErrors';
 import { useCountry, useEmitPatch } from '../../hooks';

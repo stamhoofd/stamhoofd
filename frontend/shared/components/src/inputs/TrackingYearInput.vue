@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import { useErrors } from '../errors/useErrors';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import NumberInput from './NumberInput.vue';
 import STInputBox from './STInputBox.vue';
 

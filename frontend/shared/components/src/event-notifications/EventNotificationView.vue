@@ -230,11 +230,12 @@ import ViewRecordCategoryAnswersBox from '#records/components/ViewRecordCategory
 import IconContainer from '#icons/IconContainer.vue';
 import ProgressIcon from '#icons/ProgressIcon.vue';
 import { ObjectDiffer } from '@stamhoofd/object-differ';
-import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
+import type { Event} from '@stamhoofd/structures';
+import { AccessRight, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
+import type { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from './EditEventNotificationRecordCategoryView.vue';
 import OriginalEventNotificationAnswersView from './OriginalEventNotificationAnswersView.vue';
 

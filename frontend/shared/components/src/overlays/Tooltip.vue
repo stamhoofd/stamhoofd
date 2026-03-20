@@ -192,7 +192,7 @@ export default class Tooltip extends Mixins(NavigationMixin) {
     }
 
     hide() {
-        this.pop({force: true})
+        this.pop({force: true})?.catch(console.error)
     }
 }
 </script>

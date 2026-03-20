@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformMember, RecordCategory } from '@stamhoofd/structures';
+import type { PlatformMember, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useOrganization } from '../../../hooks';

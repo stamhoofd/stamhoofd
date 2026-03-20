@@ -1,4 +1,5 @@
-import { Data, Decoder, EncodableObject, Encodeable, EncodeContext, encodeObject } from '@simonbackx/simple-encoding';
+import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext} from '@simonbackx/simple-encoding';
+import { encodeObject } from '@simonbackx/simple-encoding';
 
 export class IPaginatedResponse<Result, Query> {
     results: Result;

@@ -40,7 +40,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { CalculationGroup } from './classes/CalculationOutput';
+import type { CalculationGroup } from './classes/CalculationOutput';
 
 const props = defineProps<{
     calculation: CalculationGroup;

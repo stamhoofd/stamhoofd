@@ -119,7 +119,7 @@ export default class DevPanelView extends Mixins(NavigationMixin) {
         try {
             await this.saveChannel();
             new Toast($t(`%54`), 'success').show();
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
         }
         catch (e) {
             Toast.fromError(e as Error).show();

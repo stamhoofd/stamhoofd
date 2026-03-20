@@ -5,9 +5,10 @@ export function wrapWithTranslationFunction(value: string, skipQuoteTypes?: Quot
 
     const hasQuoteType = (quoteType: QuoteType) => value.includes(quoteType) || !!skipQuoteTypes?.includes(quoteType);
 
-    if(hasQuoteType("'")) {
+    if (hasQuoteType("'")) {
         quoteType = hasQuoteType('"') ? '`' : '"';
-    } else if(hasQuoteType('"')) {
+    }
+    else if (hasQuoteType('"')) {
         quoteType = '`';
     }
 

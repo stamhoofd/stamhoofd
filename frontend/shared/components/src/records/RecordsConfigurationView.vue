@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -64,7 +64,8 @@ import { useAppContext } from '#context/appContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
-import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import type { PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationRecordsConfiguration, Platform, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePlatformMemberFilterBuilders } from '../filters/filter-builders/members';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';

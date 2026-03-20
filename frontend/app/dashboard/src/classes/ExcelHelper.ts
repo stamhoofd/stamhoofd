@@ -87,6 +87,7 @@ export class ExcelHelper {
     }
 
     static formatColumn(colNum: number, fmt: string, worksheet: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const range = XLSX.utils.decode_range(worksheet['!ref']);
         for (let i = range.s.r + 1; i <= range.e.r; ++i) {
             /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */
@@ -102,6 +103,7 @@ export class ExcelHelper {
     }
 
     static wrapColumn(colNum: number, worksheet: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const range = XLSX.utils.decode_range(worksheet['!ref']);
         for (let i = range.s.r + 1; i <= range.e.r; ++i) {
             /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */

@@ -12,7 +12,8 @@
 </template>
 
 <script lang="ts" setup>
-import { BalanceItem, getBalanceItemTypeIcon, GroupedBalanceItems } from '@stamhoofd/structures';
+import type { BalanceItem, GroupedBalanceItems } from '@stamhoofd/structures';
+import { getBalanceItemTypeIcon } from '@stamhoofd/structures';
 
 withDefaults(
     defineProps<{

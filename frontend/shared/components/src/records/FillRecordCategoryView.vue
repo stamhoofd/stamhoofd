@@ -6,13 +6,15 @@
 
 <script setup lang="ts" generic="T extends ObjectWithRecords">
 import { PatchMap, patchObject } from '@simonbackx/simple-encoding';
-import { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import type { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
+import type { NavigationActions} from '../types/NavigationActions';
+import { useNavigationActions } from '../types/NavigationActions';
 import FillRecordCategoryBox from './components/FillRecordCategoryBox.vue';
 
 const props = withDefaults(

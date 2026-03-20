@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Product } from './webshops/Product.js';
-import { Webshop, WebshopPreview } from './webshops/Webshop.js';
+import type { Product } from './webshops/Product.js';
+import type { Webshop, WebshopPreview } from './webshops/Webshop.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class SeatingSizeConfiguration {

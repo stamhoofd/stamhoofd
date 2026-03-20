@@ -1,5 +1,6 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import AccountSwitcher from '@stamhoofd/components/context/AccountSwitcher.vue';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -27,7 +28,8 @@ import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { AccessRight, AppType, Organization, PermissionLevel, PermissionsResourceType, Webshop } from '@stamhoofd/structures';
+import type { AppType, Webshop } from '@stamhoofd/structures';
+import { AccessRight, Organization, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed, markRaw, onUnmounted, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -168,9 +170,7 @@ export function getLoginRoot() {
     return base;
 }
 
-export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
-    // In platform mode, we always redirect to the 'auto' login view, so that we redirect the user to the appropriate environment after signin in
-    // if (STAMHOOFD.userMode === 'platform') {
+export function getScopedAutoRootComponent(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     return new ComponentWithProperties(PromiseView, {
         promise: async () => {
             // Replace itself again after a successful login
@@ -179,9 +179,6 @@ export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: { 
             return new ComponentWithProperties({}, {});
         },
     });
-    // }
-
-    // return getLoginRoot();
 }
 
 export async function getOrganizationSelectionRoot(session: SessionContext) {
@@ -198,7 +195,7 @@ export async function getOrganizationSelectionRoot(session: SessionContext) {
 
             // If a user gets logged out on the organization selection root, we'll replace the root with the auto selection root
             // This is because we want the user to automatically go to the right place after signing in
-            loginRoot: wrapWithModalStack(getNonAutoLoginRoot(session)),
+            loginRoot: wrapWithModalStack(getScopedAutoRootComponent(session)),
         });
     }
 
@@ -353,7 +350,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
             }
         }
         else {
-            localStorage.setItem('what-is-new', (WhatsNewCount as any).toString());
+            localStorage.setItem('what-is-new', WhatsNewCount.toString());
         }
     };
     loadWhatsNew();
@@ -518,7 +515,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                     }),
                 }),
             ),
-            loginRoot: wrapWithModalStack(getNonAutoLoginRoot(reactiveSession, options)),
+            loginRoot: wrapWithModalStack(getScopedAutoRootComponent(reactiveSession, options)),
             noPermissionsRoot: getNoPermissionsView(),
         }),
         options,

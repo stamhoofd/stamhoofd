@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
@@ -81,7 +81,8 @@ import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import UrlInput from '@stamhoofd/components/inputs/UrlInput.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { Image, ResolutionRequest, Sponsor } from '@stamhoofd/structures';
+import type { Image} from '@stamhoofd/structures';
+import { ResolutionRequest, Sponsor } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

@@ -6,15 +6,15 @@
             </h2>
             <p>{{ $t('%g4') }}</p>
             <dl class="details-grid hover">
-                <template v-for="(email, index) of unverifiedEmails">
+                <template v-for="(email, index) of unverifiedEmails" :key="index">
                     <MemberDetailWithButton :label="formatWithIndex('E-mailadres', index, unverifiedEmails)" :value="email" icon="trash" color="gray" :on-click="() => deleteEmail(email)" />
                 </template>
 
-                <template v-for="(phone, index) of unverifiedPhones">
+                <template v-for="(phone, index) of unverifiedPhones" :key="index">
                     <MemberDetailWithButton :label="formatWithIndex($t('%2k'), index, unverifiedPhones)" :value="phone" icon="trash" color="gray" :on-click="() => deletePhone(phone)" />
                 </template>
 
-                <template v-for="(address, index) of unverifiedAddresses">
+                <template v-for="(address, index) of unverifiedAddresses" :key="index">
                     <MemberDetailWithButton :label="formatWithIndex('Adres', index, unverifiedAddresses)" :value="addressToLines(address)" icon="trash" color="gray" :on-click="() => deleteAddress(address)" />
                 </template>
             </dl>
@@ -23,8 +23,10 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { Address, CountryHelper, MemberDetails, MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
+import type { AutoEncoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { Address, PlatformMember } from '@stamhoofd/structures';
+import { CountryHelper, MemberDetails, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCountry } from '../../../hooks';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
@@ -65,7 +67,7 @@ function addressToLines(address: Address): string[] {
 }
 
 async function deletePhone(phone: string) {
-    deleteFromMemberDetails({
+    await deleteFromMemberDetails({
         valueToDelete: phone,
         confirmMessage: $t(`%10L`, { phone }),
         key: 'unverifiedPhones',
@@ -73,7 +75,7 @@ async function deletePhone(phone: string) {
 }
 
 async function deleteEmail(email: string) {
-    deleteFromMemberDetails({
+    await deleteFromMemberDetails({
         valueToDelete: email,
         confirmMessage: $t(`%10M`, { email }),
         key: 'unverifiedEmails',
@@ -81,7 +83,7 @@ async function deleteEmail(email: string) {
 }
 
 async function deleteAddress(address: Address) {
-    deleteFromMemberDetails({
+    await deleteFromMemberDetails({
         valueToDelete: address,
         confirmMessage: $t(`%10N`, { address: address.toString() }),
         key: 'unverifiedAddresses',

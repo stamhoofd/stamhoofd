@@ -12,18 +12,19 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import Checkbox from '#inputs/Checkbox.vue';
 import LoadingView from '#containers/LoadingView.vue';
+import Checkbox from '#inputs/Checkbox.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { Cart, CartItem, Category, Checkout, Webshop } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import type { CartItem, Category, Checkout, Webshop } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import ProductGrid from "./ProductGrid.vue"
+import type { ComponentOptions } from "vue";
+import ProductGrid from "./ProductGrid.vue";
 
 @Component({
     components: {
@@ -56,7 +57,7 @@ export default class CategoryBox extends Mixins(NavigationMixin){
         checkout: Checkout
 
     @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component: ComponentOptions) => void
 
     get products() {
         return this.category.productIds.flatMap(id => {

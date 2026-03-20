@@ -1,10 +1,12 @@
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import { CartItem, CartItemOption, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop } from '@stamhoofd/structures';
+import type { PrivateOrder, Webshop } from '@stamhoofd/structures';
+import { CartItem, CartItemOption, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, ProductType, ReservedSeat } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 
-import { ExcelHelper, RowValue } from './ExcelHelper';
+import type { RowValue } from './ExcelHelper';
+import { ExcelHelper } from './ExcelHelper';
 
 function cartItemGroupingString(item: CartItem) {
     let name = item.product.name;

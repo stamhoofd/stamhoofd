@@ -2,8 +2,8 @@ import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { Invoice } from './Invoice.js';
-import { BalanceItem } from './BalanceItem.js';
+import { type Invoice } from './Invoice.js';
+import { type BalanceItem } from './BalanceItem.js';
 import { VATExcemptReason } from '@stamhoofd/structures';
 
 /**
@@ -23,10 +23,10 @@ export class InvoicedBalanceItem extends QueryableModel {
     @column({ type: 'string' })
     organizationId: string;
 
-    @column({ type: 'string', foreignKey: InvoicedBalanceItem.invoice })
+    @column({ type: 'string' })
     invoiceId: string;
 
-    @column({ type: 'string', foreignKey: InvoicedBalanceItem.balanceItem })
+    @column({ type: 'string' })
     balanceItemId: string;
 
     @column({ type: 'string' })
@@ -114,6 +114,6 @@ export class InvoicedBalanceItem extends QueryableModel {
     })
     updatedAt: Date;
 
-    static balanceItem = new ManyToOneRelation(BalanceItem, 'balanceItem');
-    static invoice = new ManyToOneRelation(Invoice, 'invoice');
+    static balanceItem: ManyToOneRelation<'balanceItem', BalanceItem>;
+    static invoice: ManyToOneRelation<'invoice', Invoice>;
 }

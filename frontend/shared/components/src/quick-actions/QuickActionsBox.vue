@@ -6,7 +6,7 @@
             </h2>
 
             <STList>
-                <STListItem v-for="action of actions" class="left-center right-stack" :selectable="true" @click="action.action">
+                <STListItem v-for="(action, index) of actions" :key="index" class="left-center right-stack" :selectable="true" @click="action.action">
                     <template #left>
                         <component :is="action.leftComponent" v-bind="action.leftProps || {}" v-if="action.leftComponent" />
                         <img v-else :src="action.illustration" class="style-illustration-img">
@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { computed, unref } from 'vue';
 import { LoadingBoxTransition } from '../containers';
-import { QuickActions } from './classes/QuickActions';
+import type { QuickActions } from './classes/QuickActions';
 
 const props = defineProps<{
     quickActions: QuickActions;

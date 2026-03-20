@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { Comment, Fragment, isVNode } from 'vue';
-import { ErrorBox } from '../errors/ErrorBox';
+import type { ErrorBox } from '../errors/ErrorBox';
 import LoadingBox from './LoadingBox.vue';
 
 withDefaults(

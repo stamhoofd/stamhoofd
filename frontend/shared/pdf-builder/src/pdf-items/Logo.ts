@@ -1,5 +1,5 @@
-import { PdfDocWrapper } from '../PdfDocWrapper';
-import { PdfItem } from '../PdfItem';
+import type { PdfDocWrapper } from '../PdfDocWrapper';
+import type { PdfItem } from '../PdfItem';
 
 /**
  * A fixed logo in the top right corner

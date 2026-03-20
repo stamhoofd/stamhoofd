@@ -15,7 +15,8 @@ import ReceivableBalanceBox from '#payments/ReceivableBalanceBox.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { PermissionLevel, PlatformMember, ReceivableBalance, ReceivableBalanceObject, ReceivableBalanceType } from '@stamhoofd/structures';
+import type { PlatformMember} from '@stamhoofd/structures';
+import { PermissionLevel, ReceivableBalance, ReceivableBalanceObject, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

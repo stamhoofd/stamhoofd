@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import type { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ref, useTemplateRef, watch } from 'vue';
 
 import { ErrorBox } from './ErrorBox';
@@ -38,7 +38,7 @@ watch(() => props.errorBox, (val: ErrorBox | ErrorBox[] | null) => {
         errors.value = [];
         return;
     }
-    let newArray: SimpleError[] = [];
+    const newArray: SimpleError[] = [];
     for (const errorBox of arr) {
         if (props.errorFields === '') {
             continue;

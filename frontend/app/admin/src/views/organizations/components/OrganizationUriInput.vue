@@ -29,7 +29,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import PrefixInput from '@stamhoofd/components/inputs/PrefixInput.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';

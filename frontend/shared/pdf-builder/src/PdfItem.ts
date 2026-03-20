@@ -1,5 +1,5 @@
-import { PdfDocWrapper } from './PdfDocWrapper';
-import { PdfFont } from './PdfFont';
+import type { PdfDocWrapper } from './PdfDocWrapper';
+import type { PdfFont } from './PdfFont';
 
 export type PdfItemDrawOptions = {
     /**

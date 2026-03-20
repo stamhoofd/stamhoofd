@@ -1,12 +1,15 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { EventBus } from '@stamhoofd/components/EventBus.ts';
-import { fetchAll, ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version } from '@stamhoofd/structures';
-import { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
-import { WebshopSettingsStore } from './WebshopSettingsStore';
+import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
+import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { CountFilteredRequest, SortList, StamhoofdFilter} from '@stamhoofd/structures';
+import { CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, TicketPrivate, Version } from '@stamhoofd/structures';
+import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
+import type { WebshopSettingsStore } from './WebshopSettingsStore';
 
 /**
  * Responsible for webshop ticket operations (including patches).

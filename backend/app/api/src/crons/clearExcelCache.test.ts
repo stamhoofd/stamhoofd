@@ -3,8 +3,8 @@ import fs from 'fs/promises';
 import { clearExcelCacheHelper } from './clearExcelCache.js';
 
 const testPath = '/Users/user/project/backend/app/api/.cache';
-jest.mock('fs/promises');
-const fsMock = jest.mocked(fs, { shallow: true });
+vitest.mock('fs/promises');
+const fsMock = vitest.mocked(fs, { deep: false });
 
 describe('clearExcelCacheHelper', () => {
     it('should only run between 3 and 6 AM', async () => {
@@ -34,7 +34,7 @@ describe('clearExcelCacheHelper', () => {
                 environment: 'production',
             });
 
-            expect(didClear).toBeFalse();
+            expect(didClear).toBe(false);
         }
 
         for (const date of shouldPass) {
@@ -45,7 +45,7 @@ describe('clearExcelCacheHelper', () => {
                 environment: 'production',
             });
 
-            expect(didClear).toBeTrue();
+            expect(didClear).toBe(true);
         }
         // #endregion
     });
@@ -70,7 +70,7 @@ describe('clearExcelCacheHelper', () => {
             environment: 'production',
         });
 
-        expect(didClearSecondTry).toBeFalse();
+        expect(didClearSecondTry).toBe(false);
 
         // third try, should pass because the last clear was more than a day ago
         const didClearThirdTry = await clearExcelCacheHelper({
@@ -80,7 +80,7 @@ describe('clearExcelCacheHelper', () => {
             environment: 'production',
         });
 
-        expect(didClearThirdTry).toBeTrue();
+        expect(didClearThirdTry).toBe(true);
 
         // fourth try, should fail because 5 min earlier the cache was cleared
         const didClearFourthTry = await clearExcelCacheHelper({
@@ -90,7 +90,7 @@ describe('clearExcelCacheHelper', () => {
             environment: 'production',
         });
 
-        expect(didClearFourthTry).toBeFalse();
+        expect(didClearFourthTry).toBe(false);
         // #endregion
     });
 

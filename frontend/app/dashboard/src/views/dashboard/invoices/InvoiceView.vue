@@ -146,7 +146,8 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { Invoice, InvoiceTypeHelper } from '@stamhoofd/structures';
+import type { Invoice} from '@stamhoofd/structures';
+import { InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';

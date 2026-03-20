@@ -1,26 +1,17 @@
 {
-    // File used when building the package.
-    "extends": "../tsconfig.base.json",
     "compilerOptions": {
-        "outDir": "./dist/test",
-        "lib": [
-            "es2019",
-            "dom"
-        ],
-        "types": [
-            "node", 
-            "jest"
-        ]
+        "outDir": "dist",
+        "rootDir": "src"
     },
-    "references": [
-        // Give access to build
-        { "path": "./tsconfig.esm.json" }
-    ],
+    "extends": "../../tsconfig.test.json",
     "include": [
         "../stamhoofd.d.ts",
         "../../jest-extended.d.ts",
         "./src/**/*.spec.ts", 
         "./src/**/*.test.ts",
-        "./tests",
+        "./tests"
+    ],
+    "references": [
+        { "path": "./tsconfig.build.json" }
     ]
 }

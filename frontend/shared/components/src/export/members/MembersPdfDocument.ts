@@ -1,7 +1,9 @@
-import { colorGray, DefaultText, drawPageNumbers, H1, metropolisMedium, mmToPoints, PdfDocWrapper, PdfItem, PdfRenderer, PdfTextOptions, Spacing } from '@stamhoofd/frontend-pdf-builder';
-import { Image, PlatformMember } from '@stamhoofd/structures';
+import type { PdfItem, PdfTextOptions } from '@stamhoofd/frontend-pdf-builder';
+import { colorGray, DefaultText, drawPageNumbers, H1, metropolisMedium, mmToPoints, PdfDocWrapper, PdfRenderer, Spacing } from '@stamhoofd/frontend-pdf-builder';
+import type { Image } from '@stamhoofd/structures';
+import { PlatformMember } from '@stamhoofd/structures';
 import { imageToDocumentLogo } from '../imageToDocumentLogo';
-import { SelectablePdfSheet } from '../SelectablePdfSheet';
+import type { SelectablePdfSheet } from '../SelectablePdfSheet';
 import { MemberListPdfItem } from './MemberListPdfItem';
 import { MembersSummaryPdfItem } from './MembersSummaryPdfItem';
 
@@ -12,7 +14,7 @@ export class MembersPdfDocument {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
-        const PDFDocument = (await import('pdfkit/js/pdfkit.standalone')).default as PDFKit.PDFDocument;
+        const PDFDocument = (await import('pdfkit/js/pdfkit.standalone')).default;
         return new PDFDocument({ size: 'A4', margin: pageMargin, bufferPages: true });
     }
 

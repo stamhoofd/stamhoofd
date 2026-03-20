@@ -1,8 +1,9 @@
-import { Organization, Platform } from '@stamhoofd/structures';
+import type { Organization} from '@stamhoofd/structures';
+import { Platform } from '@stamhoofd/structures';
 import { useOrganization } from './useOrganization';
 import { usePlatform } from './usePlatform';
 import { useContext } from './useContext';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 
 function checkFeatureFlag(flag: string, context: SessionContext, platform: Platform, organization?: Organization | null): boolean {
     if (platform.config.featureFlags.includes(flag)) {

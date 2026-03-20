@@ -1,11 +1,11 @@
+import EditMemberGeneralBox from '../../components/edit/EditMemberGeneralBox.vue';
+import MemberStepView from '#members/MemberStepView.vue';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { EditMemberGeneralBox, MemberStepView } from '../..';
-import { NavigationActions } from '../../../types/NavigationActions';
-import { MemberStepManager } from '../MemberStepManager';
-import { EditMemberStep } from '../MemberStepManager';
-import { markRaw } from 'vue';
-import { MemberSharedStepOptions } from './MemberSharedStepOptions';
 import { PermissionLevel } from '@stamhoofd/structures';
+import { markRaw } from 'vue';
+import type { NavigationActions } from '../../../types/NavigationActions';
+import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberGeneralStep implements EditMemberStep {
     options: MemberSharedStepOptions;

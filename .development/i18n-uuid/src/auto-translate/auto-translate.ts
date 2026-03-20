@@ -8,10 +8,10 @@
  * - add feedback while translating (if it takes a long time for example)
  */
 
-import { globals } from "../shared/globals";
-import { AutoTranslateOptions } from "../types/AutoTranslateOptions";
-import { AutoTranslator } from "./AutoTranslator";
-import { TranslationManager } from "./TranslationManager";
+import { globals } from '../shared/globals.js';
+import type { AutoTranslateOptions } from '../types/AutoTranslateOptions.js';
+import { AutoTranslator } from './AutoTranslator.js';
+import { TranslationManager } from './TranslationManager.js';
 
 export async function autoTranslate(args: Partial<AutoTranslateOptions>) {
     const manager = new TranslationManager();

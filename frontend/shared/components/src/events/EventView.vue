@@ -1,5 +1,5 @@
 <template>
-    <ExternalOrganizationContainer v-slot="{externalOrganization: groupOrganization}" :organization-id="event.organizationId" @update="setOrganization">
+    <ExternalOrganizationContainer :organization-id="event.organizationId" @update="setOrganization">
         <div class="st-view event-view">
             <STNavigationBar :title="title" />
 
@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import EventInfoTable from '#events/components/EventInfoTable.vue';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
 import ImageComponent from '#views/ImageComponent.vue';
@@ -81,9 +81,11 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Event, Organization, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import type { Event, Organization, WebshopPreview } from '@stamhoofd/structures';
+import { Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onMounted, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
     event: Event;
@@ -153,7 +155,7 @@ async function loadWebshop() {
         return;
     }
     // @ts-ignore
-    let loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
+    const loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
     if (loaded) {
         loadedWebshop.value = loaded;
         return;

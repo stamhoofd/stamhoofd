@@ -23,7 +23,8 @@ export async function buildPresets(presets: string[], service: Service): Promise
         // Loop
         const fileLocation = `./presets/${preset}.js`;
         try {
-            const presetBuilder = await import(fileLocation);
+            let presetBuilder = await import(fileLocation);
+            presetBuilder = presetBuilder?.default ?? presetBuilder;
 
             let config: any;
             if ('config' in presetBuilder) {
@@ -65,7 +66,8 @@ export async function buildPresets(presets: string[], service: Service): Promise
     for (const preset of presetsSet) {
         const fileLocation = `./presets/${preset}.js`;
         try {
-            const presetBuilder = await import(fileLocation);
+            let presetBuilder = await import(fileLocation);
+            presetBuilder = presetBuilder?.default ?? presetBuilder;
 
             if ('inject' in presetBuilder) {
                 const injectedConfig = await presetBuilder.inject(result, service);

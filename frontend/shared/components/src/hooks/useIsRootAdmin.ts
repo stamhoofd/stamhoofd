@@ -1,6 +1,7 @@
 import { useContext } from './useContext';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { computed, Ref } from 'vue';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Ref } from 'vue';
+import { computed } from 'vue';
 
 function checkRootAdmin(context: SessionContext): boolean {
     if (context.user && context.user.email.endsWith('@stamhoofd.be') && context.auth.hasPlatformFullAccess()) {

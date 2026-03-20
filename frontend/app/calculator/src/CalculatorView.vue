@@ -83,7 +83,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
-import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import CalculationOutputBox from './CalculationOutputBox.vue';
 import CalculatorSettingsView from './CalculatorSettingsView.vue';
@@ -131,7 +130,7 @@ const input = ref(new CalculationInput({
     },
 }));
 
-async function showSettingsView(event: MouseEvent) {
+async function showSettingsView() {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {

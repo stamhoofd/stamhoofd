@@ -51,9 +51,11 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { GroupType, NamedObject, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures';
+import type { RegistrationPeriod} from '@stamhoofd/structures';
+import { GroupType, NamedObject, RegistrationPeriodList } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, Ref, ref, watchEffect } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 
 const props = withDefaults(
     defineProps<{

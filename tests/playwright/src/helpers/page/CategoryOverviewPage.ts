@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
-import { Group, Organization } from '@stamhoofd/models';
+import type { Group, Organization } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
-import { WorkerData } from '../worker/WorkerData';
+import { WorkerData } from '../worker/WorkerData.js';
 
 export class CategoryOverviewPage {
     constructor(

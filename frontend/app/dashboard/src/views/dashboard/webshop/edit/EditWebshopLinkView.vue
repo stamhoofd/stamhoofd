@@ -114,7 +114,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
@@ -133,7 +133,8 @@ import { Formatter, throttle } from '@stamhoofd/utility';
 
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { computed, onMounted, ref } from 'vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 import WebshopDNSRecordsView from './WebshopDNSRecordsView.vue';
 
 const props = defineProps<UseEditWebshopProps>();

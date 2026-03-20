@@ -1,11 +1,12 @@
-import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { Toast } from '#overlays/Toast.ts';
-import { useErrors } from '#errors/useErrors.ts';
+import type { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
-import { Ref, readonly, ref } from 'vue';
+import type { Ref} from 'vue';
+import { readonly, ref } from 'vue';
 
 export function useEditPopup<T extends AutoEncoder>({ errors, saveHandler, deleteHandler, toPatch }: { errors: ReturnType<typeof useErrors>; saveHandler: (patch: AutoEncoderPatchType<T>) => Promise<void>; deleteHandler: (() => Promise<void>) | null; toPatch: T | Ref<T> }) {
     const pop = usePop();

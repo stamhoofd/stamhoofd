@@ -220,7 +220,8 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -237,11 +238,13 @@ import STListItem from '#layout/STListItem.vue';
 import SaveView from '#navigation/SaveView.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
-import { FileType, ObjectWithRecords, PermissionLevel, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
+import type { ObjectWithRecords, RecordCategory} from '@stamhoofd/structures';
+import { FileType, PermissionLevel, PropertyFilter, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
-import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
+import type { RecordEditorSettings} from './RecordEditorSettings';
+import { RecordEditorType } from './RecordEditorSettings';
 import PreviewRecordView from './components/PreviewRecordView.vue';
 import RecordChoiceRow from './components/RecordChoiceRow.vue';
 

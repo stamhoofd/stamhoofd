@@ -65,7 +65,8 @@ import PromiseView from '#containers/PromiseView.vue';
 import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
-import { LimitedFilteredRequest, MemberAdmin, PlatformMember } from '@stamhoofd/structures';
+import type { MemberAdmin, PlatformMember } from '@stamhoofd/structures';
+import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAdmins } from './hooks/useAdmins';
@@ -73,7 +74,7 @@ import { useAdmins } from './hooks/useAdmins';
 const me = useUser();
 const organization = useOrganization();
 const { memberHasFullAccess, memberHasNoRoles, sortedMembers } = useAdmins();
-let MAX_VISIBLE_DEFAULT = 5;
+const MAX_VISIBLE_DEFAULT = 5;
 const searchQuery = ref('');
 const showAll = ref(false);
 

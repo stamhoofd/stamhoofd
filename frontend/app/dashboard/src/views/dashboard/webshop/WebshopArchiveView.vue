@@ -28,7 +28,8 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import type { WebshopPreview} from '@stamhoofd/structures';
+import { WebshopStatus } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 

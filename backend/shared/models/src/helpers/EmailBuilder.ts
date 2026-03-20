@@ -3,8 +3,15 @@ import { BalanceItem as BalanceItemStruct, EmailRecipient as EmailRecipientStruc
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
-import { EmailRecipient, CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models/index.js';
+import { I18n } from '@stamhoofd/backend-i18n/I18n';
+import { EmailRecipient } from '../models/EmailRecipient.js';
+import { CachedBalance } from '../models/CachedBalance.js';
+import { EmailTemplate } from '../models/EmailTemplate.js';
+import { Group } from '../models/Group.js';
+import { Organization } from '../models/Organization.js';
+import { Platform } from '../models/Platform.js';
+import { User } from '../models/User.js';
+import { type Webshop } from '../models/Webshop.js';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;

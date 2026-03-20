@@ -2,7 +2,7 @@
     <ContextMenuView v-bind="$attrs" ref="contextMenuView">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="$refs.contextMenuView" :class="{'disabled': isDisabled(action), destructive: action.destructive}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
+            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="$refs.contextMenuView" :class="{'disabled': isDisabled(action), destructive: action.destructive}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action)">
                 <p>{{ action.name }}</p>
                 <p v-if="action.description" class="description">
                     {{ action.description }}
@@ -28,7 +28,7 @@ import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 import { Toast } from '#overlays/Toast.ts';
 
-import { TableAction, TableActionSelection } from './classes';
+import type { TableAction, TableActionSelection } from './classes';
 
 @Component({
     components: {
@@ -70,7 +70,7 @@ export default class TableActionsContextMenu extends VueComponent {
         return this.selection.markedRows.size === 1 && this.selection.markedRowsAreSelected === true;
     }
 
-    handleAction(action: TableAction<any>, event) {
+    handleAction(action: TableAction<any>) {
         if (this.isDisabled(action)) {
             return;
         }

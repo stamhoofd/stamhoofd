@@ -108,7 +108,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@simonbackx/vue-app-navigation';
@@ -134,7 +134,8 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/networking/Storage';
-import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode } from '@stamhoofd/structures';
+import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import SignupAccountView from './SignupAccountView.vue';

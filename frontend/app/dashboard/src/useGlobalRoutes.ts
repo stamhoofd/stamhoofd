@@ -2,11 +2,12 @@ import { ComponentWithProperties, defineRoutes, NavigationController, onCheckRou
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import ForgotPasswordResetView from '@stamhoofd/components/auth/ForgotPasswordResetView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import PaymentPendingView from '@stamhoofd/components/views/PaymentPendingView.vue';
 import RegistrationSuccessView from '@stamhoofd/components/members/checkout/RegistrationSuccessView.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
+import type { PaymentGeneral} from '@stamhoofd/structures';
+import { PaymentStatus } from '@stamhoofd/structures';
 
 let didCheckGlobalRoutes = false;
 export function useGlobalRoutes() {

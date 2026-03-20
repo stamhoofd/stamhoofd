@@ -399,7 +399,7 @@ describe('$eq', () => {
             createdAt: createColumnFilter({ expression: SQL.column('createdAt'), type: SQLValueType.Datetime, nullable: false }),
         };
 
-        jest.useFakeTimers().setSystemTime(new Date());
+        vitest.useFakeTimers().setSystemTime(new Date());
 
         try {
             await test({
@@ -418,7 +418,7 @@ describe('$eq', () => {
             });
         }
         finally {
-            jest.useRealTimers();
+            vitest.useRealTimers();
         }
     });
 

@@ -32,13 +32,14 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { Order, PermissionLevel, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import type { Order, TicketPublicPrivate} from '@stamhoofd/structures';
+import { PermissionLevel, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { computed } from 'vue';
 import TicketAlreadyScannedView from '../tickets/status/TicketAlreadyScannedView.vue';
 import ValidTicketView from '../tickets/status/ValidTicketView.vue';
-import { WebshopManager } from '../WebshopManager';
+import type { WebshopManager } from '../WebshopManager';
 
 const props = defineProps<{
     ticket: TicketPublicPrivate;

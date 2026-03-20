@@ -10,9 +10,11 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Group, GroupPrice, GroupSettings, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { Group, GroupPrice, GroupSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
 import { usePatch } from '../../hooks';

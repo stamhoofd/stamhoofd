@@ -24,12 +24,13 @@ import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts'
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
-import { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import { Invoice, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Invoice, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import InvoiceView from './InvoiceView.vue';
 
 const props = withDefaults(

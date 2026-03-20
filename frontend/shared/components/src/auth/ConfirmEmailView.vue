@@ -87,12 +87,12 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
     @Prop({ default: false })
     login!: boolean;
 
-    timer: any = null;
+    timer: NodeJS.Timeout | null = null;
 
     startTime = new Date();
 
     mounted() {
-        this.timer = setTimeout(this.poll.bind(this), 10000);
+        this.timer = setTimeout(this.doPoll.bind(this), 10000);
     }
 
     stopPolling() {
@@ -129,7 +129,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
             const stop = await LoginHelper.retryEmail(this.$context, this.token);
             this.startTime = new Date();
             if (stop) {
-                this.dismiss({ force: true });
+                await this.dismiss({ force: true });
                 return;
             }
             new Toast($t(`%un`), $t(`%16`)).show();
@@ -138,6 +138,10 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
             this.errorBox = new ErrorBox(error);
         }
         this.retrying = false;
+    }
+
+    doPoll() {
+        this.poll().catch(console.error)
     }
 
     async poll() {
@@ -150,13 +154,13 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
             if (this.$context && this.$context.user && this.$context.user.verified && this.$context.user.email === this.email) {
                 // User is already verified, stop polling
                 this.stopPolling();
-                this.dismiss({ force: true });
+                await this.dismiss({ force: true });
                 return;
             }
             console.error('playwright debug - poll email');
             const stop = await LoginHelper.pollEmail(this.$context, this.token);
             if (stop) {
-                this.dismiss({ force: true });
+                await this.dismiss({ force: true });
                 return;
             }
         }
@@ -171,7 +175,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
             return;
         }
 
-        this.timer = setTimeout(this.poll.bind(this), Math.max(this.pollCount * 1000, 5 * 1000));
+        this.timer = setTimeout(this.doPoll.bind(this), Math.max(this.pollCount * 1000, 5 * 1000));
     }
 
     async submit() {
@@ -190,7 +194,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
             // we could be sign in, or couldn't.
             // if signed in: we'll automitically get deallocated
             // so always return
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
         }
         catch (e) {
             // Prevent closing now that we showed an error

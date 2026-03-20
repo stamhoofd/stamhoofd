@@ -1,11 +1,11 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { StamhoofdFilter } from "@stamhoofd/structures";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 
-import { UIFilter, UIFilterBuilder } from "./UIFilter";
-import UnknownUIFilterView from "./UnknownUIFilterView.vue";
+import type { UIFilterBuilder } from './UIFilter';
+import { UIFilter } from './UIFilter';
+import UnknownUIFilterView from './UnknownUIFilterView.vue';
 
-export class UnknownUIFilter extends UIFilter {
-    builder!: UnknownFilterBuilder
+export class UnknownUIFilter extends UIFilter<UnknownFilterBuilder> {
     value: StamhoofdFilter
 
     constructor(data: Partial<UnknownUIFilter>, options: {isInverted?: boolean} = {}) {

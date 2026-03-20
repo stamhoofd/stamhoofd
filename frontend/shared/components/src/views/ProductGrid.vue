@@ -6,17 +6,17 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import Checkbox from '#inputs/Checkbox.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
+import type { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import ProductBox from "./ProductBox.vue"
+import ProductBox from "./ProductBox.vue";
 
 @Component({
     components: {
@@ -45,7 +45,7 @@ export default class ProductGrid extends Mixins(NavigationMixin){
         checkout: Checkout
 
     @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 }
 </script>
 

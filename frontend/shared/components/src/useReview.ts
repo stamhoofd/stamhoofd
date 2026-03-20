@@ -1,16 +1,18 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import {
-    OrganizationRegistrationPeriod,
+import type {
     SetupStep,
-    SetupStepType,
+    SetupStepType} from '@stamhoofd/structures';
+import {
+    OrganizationRegistrationPeriod
 } from '@stamhoofd/structures';
-import { computed, ComputedRef, readonly, Ref, ref } from 'vue';
+import type { ComputedRef, Ref} from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 export type ReviewCheckboxData = {
     step: SetupStep | undefined;

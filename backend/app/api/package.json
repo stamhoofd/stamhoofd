@@ -1,18 +1,28 @@
 {
     "name": "@stamhoofd/backend",
     "version": "2.119.0",
+    "type": "module",
     "main": "./dist/index.js",
     "exports": {
         ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
             "require": "./dist/index.js"
         },
-        "./src/migrate": {
+        "./migrate": {
+            "types": "./dist/src/migrate.d.ts",
+            "import": "./dist/src/migrate.js",
             "require": "./dist/src/migrate.js"
         },
-        "./src/boot": {
+        "./boot": {
+            "types": "./dist/src/boot.d.ts",
+            "import": "./dist/src/boot.js",
             "require": "./dist/src/boot.js"
         },
         "./tests/helpers": {
+            "@stamhoofd/source": "./tests/helpers/index.ts",
+            "types": "./dist/tests/helpers/index.d.ts",
+            "import": "./dist/tests/helpers/index.js",
             "require": "./dist/tests/helpers/index.js"
         }
     },
@@ -23,14 +33,13 @@
         "dev:full": "yarn -s dev",
         "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --delay 2000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM",
         "dev:backend": "yarn -s dev",
-        "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/src/seeds && yarn -s copy-assets && tsc -b",
+        "build": "tsc --build tsconfig.build.json --clean && yarn -s copy-assets && tsc --build tsconfig.build.json",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' -r --checksum ./src/ ./dist/src/",
         "build:full": "yarn -s clear && yarn -s build",
-        "clear": "rm -rf ./dist",
+        "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
-        "test": "jest --runInBand",
-        "test:build": "yarn -s build:full && yarn -s test",
-        "test:reset": "yarn -s build:full && jest --runInBand",
+        "test": "vitest",
+        "test:reset": "yarn -s build:full && yarn -s test",
         "migrations": "yarn -s build:full && node ./dist/migrations.js",
         "lint": "eslint"
     },
@@ -52,8 +61,8 @@
         "@aws-sdk/s3-request-presigner": "^3.839.0",
         "@bwip-js/node": "^4.5.1",
         "@mollie/api-client": "4.3.3",
-        "@simonbackx/simple-database": "1.34.0",
-        "@simonbackx/simple-encoding": "2.23.1",
+        "@simonbackx/simple-database": "1.36.12",
+        "@simonbackx/simple-encoding": "2.26.3",
         "@simonbackx/simple-endpoints": "1.20.1",
         "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/backend-i18n": "2.119.0",

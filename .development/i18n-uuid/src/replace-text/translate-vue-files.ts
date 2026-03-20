@@ -1,11 +1,13 @@
-import chalk from "chalk";
-import fs from "fs";
-import { getFilesToSearch } from "../shared/get-files-to-search";
-import { eslintFormatter } from "./eslint-formatter";
-import { fileCache } from "./FileCache";
-import { getChangedFiles } from "./git-helper";
-import { getVueTemplateMatchCount, TranslateVueFileOptions, translateVueTemplate } from "./translate-vue-template";
-import { getTotalMatchCount, translateTypescript, TypescriptTranslatorOptions } from "./typescript-translator";
+import chalk from 'chalk';
+import fs from 'fs';
+import { getFilesToSearch } from '../shared/get-files-to-search.js';
+import { eslintFormatter } from './eslint-formatter.js';
+import { fileCache } from './FileCache.js';
+import { getChangedFiles } from './git-helper.js';
+import type { TranslateVueFileOptions} from './translate-vue-template.js';
+import { getVueTemplateMatchCount, translateVueTemplate } from './translate-vue-template.js';
+import type { TypescriptTranslatorOptions } from './typescript-translator.js';
+import { getTotalMatchCount, translateTypescript } from './typescript-translator.js';
 
 interface TranslateVueFilesOptions {
     replaceChangesOnly?: boolean;
@@ -22,39 +24,40 @@ const attributeWhiteList = new Set([
     'label',
     'title',
     'text',
-    'empty-message'
+    'empty-message',
 ]);
 
 export async function translateVueFiles(options: TranslateVueFilesOptions = {}) {
     const files = getFilesToSearch(['vue']).filter(filePath => !fileCache.hasFile(filePath));
     let filesToLoop: string[];
 
-    if(options.replaceChangesOnly) {
-        const changedFiles = getChangedFiles('vue', {compare: options.commitsToCompare});
+    if (options.replaceChangesOnly) {
+        const changedFiles = getChangedFiles('vue', { compare: options.commitsToCompare });
         filesToLoop = files.filter(filePath => changedFiles.has(filePath));
-    } else {
+    }
+    else {
         filesToLoop = files;
     }
 
-    if(options.doPrompt) {
+    if (options.doPrompt) {
         const filesWithChangeInfo = await getMatchInfo(filesToLoop, options, options.commitsToCompare);
         const changedFiles = filesWithChangeInfo.filter(item => item.matchCount > 0);
         const totalMatchCount = changedFiles.map(x => x.matchCount).reduce((total, current) => total + current, 0);
         let currentMatchCount = 0;
 
         for (let i = 0; i < changedFiles.length; i++) {
-            const {file, matchCount} = changedFiles[i];
-    
+            const { file, matchCount } = changedFiles[i];
+
             const fileProgress = {
                 current: i + 1,
-                total: changedFiles.length
-            }
+                total: changedFiles.length,
+            };
 
             const totalProgress = {
                 current: currentMatchCount,
-                total: totalMatchCount
-            }
-            
+                total: totalMatchCount,
+            };
+
             await translateVueFileHelper(file, options, fileProgress, totalProgress, options.commitsToCompare);
             currentMatchCount = currentMatchCount + matchCount;
         }
@@ -62,19 +65,19 @@ export async function translateVueFiles(options: TranslateVueFilesOptions = {}) 
         return;
     }
 
-    for(const file of filesToLoop) {
+    for (const file of filesToLoop) {
         await translateVueFileHelper(file, options, undefined, undefined, options.commitsToCompare);
     }
 }
 
-type TranslateVueFileHelperOptions = Omit<TranslateVueFileOptions, 'replaceChangesOnly'> & {dryRun?: boolean, replaceChangesOnly?: boolean, doFix?: boolean}
+type TranslateVueFileHelperOptions = Omit<TranslateVueFileOptions, 'replaceChangesOnly'> & { dryRun?: boolean; replaceChangesOnly?: boolean; doFix?: boolean };
 
 export async function translateVueFileHelper(filePath: string, options: TranslateVueFileHelperOptions, fileProgress?: {
-    current: number,
-    total: number
+    current: number;
+    total: number;
 }, totalProgress?: {
-    current: number,
-    total: number
+    current: number;
+    total: number;
 }, commitsToCompare?: [string, string]) {
     let isDoubt = false;
 
@@ -89,15 +92,15 @@ export async function translateVueFileHelper(filePath: string, options: Translat
             isDoubt = true;
             fileCache.doubtFile(filePath);
         },
-        replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined,
+        replaceChangesOnly: options.replaceChangesOnly ? { filePath, commitsToCompare } : undefined,
         fileProgress,
-        totalProgress
+        totalProgress,
     };
 
-    const fileContent = fs.readFileSync(filePath, "utf8");
+    const fileContent = fs.readFileSync(filePath, 'utf8');
     const templateContent = getVueTemplate(fileContent);
 
-    if(templateContent === null) {
+    if (templateContent === null) {
         return;
     }
 
@@ -107,40 +110,40 @@ export async function translateVueFileHelper(filePath: string, options: Translat
     const scriptContent = getScriptContent(fileContent);
     let scriptTranslation = scriptContent;
 
-    if(scriptContent !== null) {
+    if (scriptContent !== null) {
         scriptTranslation = await translateTypescript(scriptContent, fileOptions);
         newFileContent = replaceScript(newFileContent, scriptTranslation, scriptContent);
     }
 
-    if(!isDoubt) {
+    if (!isDoubt) {
         fileCache.addFile(filePath);
     }
 
-    if(templateTranslation !== templateContent || scriptContent !== scriptTranslation) {
+    if (templateTranslation !== templateContent || scriptContent !== scriptTranslation) {
         const infoText = options.dryRun ? 'Completed with changes (dry-run)' : 'Write file';
 
         console.log(chalk.magenta(`
 ${infoText}: `) + chalk.gray(filePath) + `
-`)
+`);
 
-        if(!options.dryRun) {
+        if (!options.dryRun) {
             fs.writeFileSync(filePath, newFileContent);
 
-            if(options.doFix) {
+            if (options.doFix) {
                 await eslintFormatter.tryFixFile(filePath);
             }
         }
     }
 }
 
-async function getMatchInfo(files: string[], options: TranslateVueFileHelperOptions, commitsToCompare?: [string, string]): Promise<{file: string, matchCount: number}[]> {
-    const promises = files.map(async file => {
+async function getMatchInfo(files: string[], options: TranslateVueFileHelperOptions, commitsToCompare?: [string, string]): Promise<{ file: string; matchCount: number }[]> {
+    const promises = files.map(async (file) => {
         const matchCount = await getVueFileMatchCount(file, options, commitsToCompare);
 
         return {
             file,
-            matchCount
-        }
+            matchCount,
+        };
     });
 
     return await Promise.all(promises);
@@ -150,18 +153,18 @@ async function getVueFileMatchCount(filePath: string, options: TranslateVueFileH
     const fileOptions: TranslateVueFileOptions = {
         attributeWhiteList: options.attributeWhiteList ?? attributeWhiteList,
         doPrompt: false,
-        replaceChangesOnly: options.replaceChangesOnly ? {filePath, commitsToCompare} : undefined
+        replaceChangesOnly: options.replaceChangesOnly ? { filePath, commitsToCompare } : undefined,
     };
 
-    const fileContent = fs.readFileSync(filePath, "utf8");
+    const fileContent = fs.readFileSync(filePath, 'utf8');
     const templateContent = getVueTemplate(fileContent);
     const typescriptContent = getScriptContent(fileContent);
 
-    if(templateContent === null) {
+    if (templateContent === null) {
         return 0;
     }
 
-    if(typescriptContent !== null) {
+    if (typescriptContent !== null) {
         return await getVueTemplateMatchCount(templateContent, fileOptions) + await getScriptMatchCount(typescriptContent, fileOptions);
     }
 
@@ -173,7 +176,7 @@ function getVueTemplate(vueFileContent: string): string | null {
 
     const match = vueFileContent.match(templateRegex);
 
-    if(match === null) {
+    if (match === null) {
         return null;
     }
 
@@ -185,7 +188,7 @@ function getScriptContent(vueFileContent: string): string | null {
 
     const match = vueFileContent.match(regex);
 
-    if(match === null) {
+    if (match === null) {
         return null;
     }
 

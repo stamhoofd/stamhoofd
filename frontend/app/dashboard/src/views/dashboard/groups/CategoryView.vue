@@ -102,7 +102,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';

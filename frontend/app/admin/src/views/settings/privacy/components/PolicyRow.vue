@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PlatformPolicy } from '@stamhoofd/structures';
+import type { PlatformPolicy } from '@stamhoofd/structures';
 
 defineProps<{
     policy: PlatformPolicy;

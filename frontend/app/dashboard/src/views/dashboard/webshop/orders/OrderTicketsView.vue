@@ -30,10 +30,11 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
+import type { PrivateOrderWithTickets} from '@stamhoofd/structures';
+import { TicketPublic } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import { WebshopManager } from '../WebshopManager';
+import type { WebshopManager } from '../WebshopManager';
 import TicketRow from './TicketRow.vue';
 
 const props = defineProps<{

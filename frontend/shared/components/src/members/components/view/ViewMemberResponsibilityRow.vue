@@ -27,7 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupType, MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
+import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useOrganization, usePlatform } from '../../../hooks';
@@ -62,7 +63,7 @@ const resp = computed(() => {
 });
 
 const name = computed(() => {
-    const suffix = group.value ? ` van ${group.value.settings.name}` : (props.responsibility.groupId ? ' ' + $t(`%10K`) : '');
+    const suffix = group.value ? ` van ${group.value.settings.name.toString()}` : (props.responsibility.groupId ? ' ' + $t(`%10K`) : '');
     return (resp.value?.name ?? $t(`%qZ`)) + suffix;
 });
 

@@ -1,37 +1,40 @@
-import { AutoEncoderPatchType, deepSetArray, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 
 import { AccessRight } from '../AccessRight.js';
-import { type Group } from '../Group.js';
+import type {Group} from '../Group.js';
 import { GroupType } from '../GroupType.js';
 
-import { Organization } from '../Organization.js';
+import type { Organization } from '../Organization.js';
 import { PermissionLevel } from '../PermissionLevel.js';
 import { PermissionsResourceType } from '../PermissionsResourceType.js';
 
-import { Document as DocumentStruct } from '../Document.js';
+import type { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
-import { UserWithMembers } from '../UserWithMembers.js';
-import { Address } from '../addresses/Address.js';
-import { type PropertyFilter } from '../filters/PropertyFilter.js';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { UserWithMembers } from '../UserWithMembers.js';
+import type { Address } from '../addresses/Address.js';
+import type {PropertyFilter} from '../filters/PropertyFilter.js';
+import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { getActivePeriodIds } from '../getActivePeriods.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
-import { EmergencyContact } from './EmergencyContact.js';
+import type { EmergencyContact } from './EmergencyContact.js';
 import { Member } from './Member.js';
-import { MemberDetails, MemberProperty } from './MemberDetails.js';
-import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
-import { type ContinuousMembershipStatus } from './MembershipStatus.js';
+import type { MemberProperty } from './MemberDetails.js';
+import { MemberDetails } from './MemberDetails.js';
+import type { MembersBlob} from './MemberWithRegistrationsBlob.js';
+import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
+import type {ContinuousMembershipStatus} from './MembershipStatus.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
-import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
+import type { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
-import { Parent } from './Parent.js';
+import type { Parent } from './Parent.js';
 import { Registration } from './Registration.js';
-import { RegistrationsBlob } from './RegistrationsBlob.js';
+import type { RegistrationsBlob } from './RegistrationsBlob.js';
 import { RegisterCheckout } from './checkout/RegisterCheckout.js';
 import { RegisterItem } from './checkout/RegisterItem.js';
-import { RecordAnswer } from './records/RecordAnswer.js';
-import { RecordCategory } from './records/RecordCategory.js';
-import { RecordSettings } from './records/RecordSettings.js';
+import type { RecordAnswer } from './records/RecordAnswer.js';
+import type { RecordCategory } from './records/RecordCategory.js';
+import type { RecordSettings } from './records/RecordSettings.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -1120,6 +1123,7 @@ export class PlatformMember implements ObjectWithRecords {
         for (const group of groups) {
             const organization = this.family.getOrganization(group.organizationId);
             if (!organization) {
+                console.warn('Missing organization', group.organizationId, this, this.family)
                 continue;
             }
 
@@ -1135,7 +1139,7 @@ export class PlatformMember implements ObjectWithRecords {
             );
         }
 
-        if (groups.length === 0) {
+        if (configurations.length === 0) {
             configurations.push(
                 OrganizationRecordsConfiguration.build({
                     platform: this.platform,

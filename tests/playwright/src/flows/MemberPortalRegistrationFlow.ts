@@ -1,5 +1,6 @@
-import { Page, test } from '@playwright/test';
-import { Pages } from '../helpers';
+import type { Page} from '@playwright/test';
+import { test } from '@playwright/test';
+import type { Pages } from '../helpers/index.js';
 
 export class MemberPortalRegistrationFlow {
     private readonly page: Page;

@@ -119,7 +119,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
@@ -133,7 +134,8 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour, ProductDiscountSettings, ProductsSelector } from '@stamhoofd/structures';
+import type { PrivateWebshop, ProductDiscountRepeatBehaviour, ProductsSelector } from '@stamhoofd/structures';
+import { ProductDiscount, ProductDiscountSettings } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import ProductsSelectorBox from './ProductsSelectorBox.vue';

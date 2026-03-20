@@ -26,7 +26,7 @@ import { computed, ref, watch } from 'vue';
 import Checkbox from '../inputs/Checkbox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import { MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
+import type { MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 
 const props = defineProps<{ filter: MultipleChoiceUIFilter }>();
 

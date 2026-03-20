@@ -1,4 +1,4 @@
-import { Webshop } from '@stamhoofd/structures';
+import type { Webshop } from '@stamhoofd/structures';
 import { isLocationCustomDomain } from './isLocationCustomDomain';
 
 export function injectCustomCode(webshop: Webshop) {

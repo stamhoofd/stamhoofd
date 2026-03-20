@@ -1,26 +1,26 @@
-import chalk from "chalk";
-import { TranslatorType } from "../enums/TranslatorType";
+import chalk from 'chalk';
+import { TranslatorType } from '../enums/TranslatorType.js';
 import {
     getCountry,
     getLanguage,
     isValidLocale,
-} from "../helpers/i18n-helpers";
-import { globals } from "../shared/globals";
-import { AutoTranslateOptions } from "../types/AutoTranslateOptions";
-import { Translations } from "../types/Translations";
-import { TranslationWithVariant } from "../types/TranslationWithVariant";
-import { OutdatedTranslationFinder } from "./OutdatedTranslationFinder";
-import { promptLogger } from "./PromptLogger";
-import { TranslationManager } from "./TranslationManager";
-import { ClaudeTranslator } from "./translators/ClaudeTranslator";
-import { GoogleGeminiTranslator } from "./translators/GoogleGeminiTranslator";
-import { ITranslator } from "./translators/ITranslator";
+} from '../helpers/i18n-helpers.js';
+import { globals } from '../shared/globals.js';
+import type { AutoTranslateOptions } from '../types/AutoTranslateOptions.js';
+import type { Translations } from '../types/Translations.js';
+import type { TranslationWithVariant } from '../types/TranslationWithVariant.js';
+import { OutdatedTranslationFinder } from './OutdatedTranslationFinder.js';
+import { promptLogger } from './PromptLogger.js';
+import type { TranslationManager } from './TranslationManager.js';
+import { ClaudeTranslator } from './translators/ClaudeTranslator.js';
+import { GoogleGeminiTranslator } from './translators/GoogleGeminiTranslator.js';
+import type { ITranslator } from './translators/ITranslator.js';
 import {
     MistralLargeTranslator,
     MistralSmallTranslator,
-} from "./translators/MistralTranslator";
-import { OpenAiTranslator } from "./translators/OpenAiTranslator";
-import { Translator } from "./translators/Translator";
+} from './translators/MistralTranslator.js';
+import { OpenAiTranslator } from './translators/OpenAiTranslator.js';
+import type { Translator } from './translators/Translator.js';
 
 export class AutoTranslator {
     private readonly outdatedTranslationFinder: OutdatedTranslationFinder;
@@ -46,7 +46,7 @@ export class AutoTranslator {
         if (locales) {
             locales.forEach((l) => {
                 if (!isValidLocale(l)) {
-                    throw new Error("Invalid locale: " + l);
+                    throw new Error('Invalid locale: ' + l);
                 }
             });
         }
@@ -74,8 +74,8 @@ export class AutoTranslator {
         await this.autoTranslateDefaultNamespace(otherLocales);
 
         if (!(await this.isDefaultNamespaceTranslationComplete(otherLocales))) {
-            const message =
-                "Translation of other namespaces is skipped because the default namespace is not translated completely yet.";
+            const message
+                = 'Translation of other namespaces is skipped because the default namespace is not translated completely yet.';
             console.log(chalk.red(message));
             promptLogger.error(message);
             console.log('Locales', otherLocales.join(', '));
@@ -128,8 +128,8 @@ export class AutoTranslator {
 
         const namespace = globals.DEFAULT_NAMESPACE;
         const language = getLanguage(globals.DEFAULT_LOCALE);
-        const country =
-            getCountry(globals.DEFAULT_LOCALE) ?? globals.DEFAULT_COUNTRY;
+        const country
+            = getCountry(globals.DEFAULT_LOCALE) ?? globals.DEFAULT_COUNTRY;
         const locale = `${language}-${country}`;
 
         this.originalTextsBeforeReplacements = {
@@ -195,12 +195,12 @@ export class AutoTranslator {
         // get missing translations
         const missingTranslations = await this.findMissingTranslations(args);
         let simpleTranslations: Translations = {};
-        const translationsWithVariants: Record<string, TranslationWithVariant> =
-            {};
+        const translationsWithVariants: Record<string, TranslationWithVariant>
+            = {};
 
         if (args.namespace !== globals.DEFAULT_NAMESPACE) {
-            const originalTextsBeforeReplacements =
-                this.getOriginalTextsBeforeReplacements();
+            const originalTextsBeforeReplacements
+                = this.getOriginalTextsBeforeReplacements();
 
             const defaultTexts = this.getDefaultTexts();
 
@@ -221,8 +221,8 @@ export class AutoTranslator {
             for (const [uuid, missingTranslation] of Object.entries(
                 missingTranslations,
             )) {
-                const originalTextBeforeReplacements =
-                    originalTextsBeforeReplacements[uuid];
+                const originalTextBeforeReplacements
+                    = originalTextsBeforeReplacements[uuid];
 
                 if (originalTextBeforeReplacements === undefined) {
                     throw new Error(
@@ -233,9 +233,9 @@ export class AutoTranslator {
                 let originalAfterReplacements = originalTextBeforeReplacements;
 
                 for (const [key, value] of Object.entries(replacements)) {
-                    originalAfterReplacements =
-                        originalAfterReplacements.replaceAll(
-                            new RegExp(`${key}+(?![^{]*})`, "g"),
+                    originalAfterReplacements
+                        = originalAfterReplacements.replaceAll(
+                            new RegExp(`${key}+(?![^{]*})`, 'g'),
                             value,
                         );
                 }
@@ -243,8 +243,8 @@ export class AutoTranslator {
                 if (
                     originalAfterReplacements !== originalTextBeforeReplacements
                 ) {
-                    const translationOfOriginal =
-                        translationsOfOriginalTexts[uuid];
+                    const translationOfOriginal
+                        = translationsOfOriginalTexts[uuid];
 
                     if (translationOfOriginal === undefined) {
                         throw new Error(
@@ -265,11 +265,13 @@ export class AutoTranslator {
                         translation: translationOfOriginal,
                         variant: missingTranslation,
                     };
-                } else {
+                }
+                else {
                     simpleTranslations[uuid] = missingTranslation;
                 }
             }
-        } else {
+        }
+        else {
             simpleTranslations = missingTranslations;
         }
 
@@ -391,12 +393,12 @@ export class AutoTranslator {
     }
 
     /**
-     * 
-     * @param baseTranslations 
-     * @param distTranslations 
-     * @param locale 
-     * @param namespace 
-     * @returns 
+     *
+     * @param baseTranslations
+     * @param distTranslations
+     * @param locale
+     * @param namespace
+     * @returns
      */
     private getMissingTranslationIds(
         baseTranslations: Translations,
@@ -409,10 +411,10 @@ export class AutoTranslator {
             // if already in default namespace
             return Object.entries(distTranslations)
                 .filter(
-                    (entry) =>
-                        baseTranslations.hasOwnProperty(entry[0]) === false,
+                    entry =>
+                        Object.hasOwn(baseTranslations, entry[0]) === false,
                 )
-                .map((entry) => entry[0]);
+                .map(entry => entry[0]);
         }
 
         // if not in default namespace
@@ -429,7 +431,7 @@ export class AutoTranslator {
         return Object.entries(distTranslations)
             .filter((entry) => {
                 const key = entry[0];
-                if (baseTranslations.hasOwnProperty(key) === false) {
+                if (Object.hasOwn(baseTranslations, key) === false) {
                     // Only translate this key for this namespace if the
                     // value in dutch for the default namespace is not the same for the value in dutch for this namespace
                     const defaultText = defaultTexts[key];
@@ -453,7 +455,7 @@ export class AutoTranslator {
                 // This translation is already present in the base translations (machine translations + custom)
                 return false;
             })
-            .map((entry) => entry[0]);
+            .map(entry => entry[0]);
     }
 
     private createTranslator(): ITranslator {

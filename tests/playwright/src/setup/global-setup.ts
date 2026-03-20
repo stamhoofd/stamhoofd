@@ -1,10 +1,10 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import { CaddyHelper } from './helpers/CaddyHelper';
-import { FrontendBuilder } from './helpers/FrontendBuilder';
-import { PlaywrightHooks } from './helpers/PlaywrightHooks';
+import { CaddyHelper } from './helpers/CaddyHelper.js';
+import { FrontendBuilder } from './helpers/FrontendBuilder.js';
+import { PlaywrightHooks } from './helpers/PlaywrightHooks.js';
 
 // Make sure initial env is loaded
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
+ 
 TestUtils.globalSetup(new PlaywrightHooks());
 
 export default async function globalSetup() {

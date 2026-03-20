@@ -1,10 +1,14 @@
-import { column, Database, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
-import { ModelCache, QueryableModel, SQL } from '@stamhoofd/sql';
+import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
+import { Group } from './Group.js';
+import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
+import { MemberUser } from './MemberUser.js';
+import { Registration } from './Registration.js';
+import { User } from './User.js';
 
-import { Group, MemberResponsibilityRecord, MemberUser, Payment, Registration, User } from './index.js';
 export type MemberWithUsers = Member & {
     users: User[];
 };
@@ -448,7 +452,7 @@ export class Member extends QueryableModel {
         return this.getBlobByIds(...(await this.getMemberIdsForUser(user)));
     }
 
-    static getRegistrationWithTinyMemberStructure(registration: RegistrationWithMember & { group: import('./Group').Group }): RegistrationWithTinyMember {
+    static getRegistrationWithTinyMemberStructure(registration: RegistrationWithMember & { group: Group }): RegistrationWithTinyMember {
         return RegistrationWithTinyMember.create({
             ...registration.getStructure(),
             cycle: registration.cycle,

@@ -3,14 +3,14 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailAttachment, Recipient, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { TinyMember } from '../members/Member.js';
 import { MemberDetails } from '../members/MemberDetails.js';
 import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob.js';
 import { BaseOrganization } from '../Organization.js';
-import { OrganizationMetaData } from '../OrganizationMetaData.js';
-import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
-import { Platform } from '../Platform.js';
+import type { OrganizationMetaData } from '../OrganizationMetaData.js';
+import type { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
+import type { Platform } from '../Platform.js';
 import { User } from '../User.js';
 import { EmailTemplate } from './EmailTemplate.js';
 

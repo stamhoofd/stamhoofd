@@ -1,9 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 
 import { markRaw } from 'vue';
 import GroupUIFilterView from './GroupUIFilterView.vue';
-import { StyledDescription, UIFilter, UIFilterBuilder, UIFilterWrapper, unwrapFilterForBuilder } from './UIFilter';
+import type { StyledDescription, UIFilterBuilder, UIFilterWrapper} from './UIFilter';
+import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 import { UnknownFilterBuilder, UnknownUIFilter } from './UnknownUIFilter';
 
 export enum GroupUIFilterMode {
@@ -11,9 +12,8 @@ export enum GroupUIFilterMode {
     And = 'And',
 }
 
-export class GroupUIFilter extends UIFilter {
+export class GroupUIFilter extends UIFilter<GroupUIFilterBuilder> {
     filters: UIFilter[] = [];
-    builder!: GroupUIFilterBuilder;
     mode: GroupUIFilterMode = GroupUIFilterMode.And;
 
     get builders() {

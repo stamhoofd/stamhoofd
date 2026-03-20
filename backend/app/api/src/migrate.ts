@@ -7,6 +7,10 @@ import path from 'path';
 Column.setJSONVersion(Version);
 process.env.TZ = 'UTC';
 
+// Polyfill require.resolve, since import.meta.resolve is not supported by vitest
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+
 const emailPath = require.resolve('@stamhoofd/email');
 const modelsPath = require.resolve('@stamhoofd/models');
 
@@ -41,11 +45,17 @@ const start = async () => {
     await globalDatabase.statement(query);
 
     // External migrations
-    await Migration.runAll(path.dirname(modelsPath) + '/migrations');
-    await Migration.runAll(path.dirname(emailPath) + '/migrations');
+    if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {
+        throw new Error('Migrations failed')
+    }
+    if (!await Migration.runAll(path.dirname(emailPath) + '/../migrations')) {
+        throw new Error('Email migrations failed')
+    }
 
     // Internal
-    await Migration.runAll(__dirname + '/src/migrations');
+    if (!await Migration.runAll(import.meta.dirname + '/migrations')) {
+        throw new Error('Internal migrations failed')
+    }
 
     if (killSignalReceived) {
         console.error(chalk.red('Killing process due to received signal during migration'));

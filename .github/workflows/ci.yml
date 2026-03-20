@@ -80,7 +80,7 @@ jobs:
       - name: Linting
         run: cd backend/app/api && yarn lint --quiet
       - name: Run tests
-        run: cd backend/app/api && yarn build && yarn test --bail
+        run: cd backend/app/api && yarn build && yarn test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -135,7 +135,7 @@ jobs:
       - name: Linting
         run: cd backend/shared/models && yarn lint --quiet
       - name: Run tests
-        run: cd backend/shared/models && yarn build && yarn test --bail
+        run: cd backend/shared/models && yarn build && yarn test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -190,7 +190,7 @@ jobs:
       - name: Linting
         run: cd backend/shared/sql && yarn lint --quiet
       - name: Run tests
-        run: cd backend/shared/sql && yarn test --bail
+        run: cd backend/shared/sql && yarn test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -235,7 +235,7 @@ jobs:
       - name: Linting
         run: cd shared/structures && yarn lint --quiet
       - name: Run tests
-        run: cd shared/structures && yarn test --bail
+        run: cd shared/structures && yarn test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -294,7 +294,7 @@ jobs:
       - name: Running migrations
         run: cd backend/app/api && NODE_ENV=test node ./dist/migrations.js
       - name: Run boot test
-        run: NODE_ENV=test bash test/boot/boot-test.sh
+        run: NODE_ENV=test bash tests/boot/boot-test.sh
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'

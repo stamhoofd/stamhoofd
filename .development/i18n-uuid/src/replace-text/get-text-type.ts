@@ -6,51 +6,51 @@ export enum TextType {
     Equality,
     SwitchCase,
     Import,
-    ObjectAccessKey
+    ObjectAccessKey,
 }
 
-export function getTextType(allParts: {value: string}[] | string): {type: TextType, name: string | null} | null {
+export function getTextType(allParts: { value: string }[] | string): { type: TextType; name: string | null } | null {
     const text = typeof allParts === 'string' ? allParts : allParts.map(p => p.value).join('');
 
-    if(isObjectAccessKey(text)) {
-        return {type: TextType.ObjectAccessKey, name: null};
+    if (isObjectAccessKey(text)) {
+        return { type: TextType.ObjectAccessKey, name: null };
     }
 
     const lastCodePart = text.trimEnd().match(/(?<=(?:\s+))\S*$/g);
-    if(lastCodePart) {
+    if (lastCodePart) {
         const value = lastCodePart[0];
 
-        if(value.endsWith('case')) {
+        if (value.endsWith('case')) {
             return {
                 type: TextType.SwitchCase,
-                name: null
-            }
+                name: null,
+            };
         }
 
-        if(value.endsWith('from') || value.endsWith('import')) {
+        if (value.endsWith('from') || value.endsWith('import')) {
             return {
                 type: TextType.Import,
-                name: null
-            }
+                name: null,
+            };
         }
 
-        if(['==', '!=', '>=', '<=', '<', '>'].some(item => value.endsWith(item))) {
+        if (['==', '!=', '>=', '<=', '<', '>'].some(item => value.endsWith(item))) {
             return {
                 type: TextType.Equality,
-                name: null
-            }
+                name: null,
+            };
         }
     }
 
     const result = getOpenChar(text);
 
-    if(result === null) {
+    if (result === null) {
         return null;
     }
-    
+
     const type = result.type;
 
-    if(type === TextType.Array) {
+    if (type === TextType.Array) {
         return getOpenChar(result.name);
     }
 
@@ -62,24 +62,24 @@ function isObjectAccessKey(value: string) {
     return match !== null;
 }
 
-export function getOpenChar(text: string): {type: TextType, name: string} | null {
+export function getOpenChar(text: string): { type: TextType; name: string } | null {
     text = text.trimEnd();
-    
-    const openingChars = new Map<string, {reversed: string, result: TextType}>([
-        ['(', {result: TextType.FunctionArgument, reversed: ')'}],
-        ['[', {result: TextType.Array, reversed: ']'}],
+
+    const openingChars = new Map<string, { reversed: string; result: TextType }>([
+        ['(', { result: TextType.FunctionArgument, reversed: ')' }],
+        ['[', { result: TextType.Array, reversed: ']' }],
 
     ]);
-    const closingChars = new Map<string, {count: number}>([
-        [')', {count: 0}],
-        [']', {count: 0}]
+    const closingChars = new Map<string, { count: number }>([
+        [')', { count: 0 }],
+        [']', { count: 0 }],
     ]);
     const stringChars = new Set<string>([
-        '"', "'", '`'
+        '"', "'", '`',
     ]);
-    const singleChars = new Map<string, {result: TextType}>([
-        ['=', {result: TextType.Variable}],
-        [':', {result: TextType.Key}]
+    const singleChars = new Map<string, { result: TextType }>([
+        ['=', { result: TextType.Variable }],
+        [':', { result: TextType.Key }],
     ]);
 
     let currentOpeningChar: string | null = null;
@@ -87,36 +87,36 @@ export function getOpenChar(text: string): {type: TextType, name: string} | null
     for (let i = text.length - 1; i >= 0; i--) {
         const char = text[i];
 
-        if(currentOpeningChar !== null) {
-            if(char === currentOpeningChar) {
+        if (currentOpeningChar !== null) {
+            if (char === currentOpeningChar) {
                 currentOpeningChar = null;
                 continue;
             }
             continue;
         }
 
-        if(stringChars.has(char)) {
+        if (stringChars.has(char)) {
             currentOpeningChar = char;
             continue;
         }
 
-        if(singleChars.has(char)) {
+        if (singleChars.has(char)) {
             const result = singleChars.get(char)!;
-            return {type: result.result, name: text.substring(0, i)};
+            return { type: result.result, name: text.substring(0, i) };
         }
 
-        if(openingChars.has(char)) {
+        if (openingChars.has(char)) {
             const result = openingChars.get(char)!;
-            const reversedInfo =  closingChars.get(result.reversed)!;
-            if(reversedInfo.count === 0) {
-                return {type: result.result, name: text.substring(0, i)};
+            const reversedInfo = closingChars.get(result.reversed)!;
+            if (reversedInfo.count === 0) {
+                return { type: result.result, name: text.substring(0, i) };
             }
 
             reversedInfo.count = reversedInfo.count - 1;
             continue;
         }
 
-        if(closingChars.has(char)) {
+        if (closingChars.has(char)) {
             const result = closingChars.get(char)!;
             result.count = result.count + 1;
             continue;
@@ -125,7 +125,6 @@ export function getOpenChar(text: string): {type: TextType, name: string} | null
 
     return null;
 }
-
 
 // export function getTextType(allParts: {value: string, shouldTranslate: boolean}[]): {type: TextType, name: string | null} | null {
 //     const before = allParts[allParts.length - 1].value.trimEnd();
@@ -165,7 +164,7 @@ export function getOpenChar(text: string): {type: TextType, name: string} | null
 //                         return {
 //                             type: TextType.Array,
 //                             name: value.slice(undefined, i)
-//                         } 
+//                         }
 //                     } else {
 //                         arrayCount = arrayCount - 1;
 //                         continue;

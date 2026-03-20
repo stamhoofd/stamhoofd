@@ -8,7 +8,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import { ErrorBox } from '../errors/ErrorBox';
@@ -23,7 +24,7 @@ import LoadingViewTransition from './LoadingViewTransition.vue';
 })
 export default class PromiseView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    promise!: (this: typeof PromiseView) => Promise<ComponentWithProperties>;
+    promise!: (this: PromiseView) => Promise<ComponentWithProperties>;
 
     root: ComponentWithProperties | null = null;
     passRoutes = false;
@@ -39,7 +40,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
     run() {
         this.errorBox = null;
-        this.promise.call(this as any).then((value) => {
+        this.promise.call(this).then((value) => {
             if (!value) {
                 console.error('Promise view did not return a component.');
                 throw new Error('Missing component in promise');
@@ -57,7 +58,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
 
             if (this.canDismiss) {
                 Toast.fromError(e).show();
-                this.dismiss({ force: true });
+                this.dismiss({ force: true }).catch(console.error);
             }
             else {
                 this.errorBox = new ErrorBox(e);

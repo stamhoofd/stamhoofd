@@ -22,7 +22,7 @@
             </p>
             <div @click.stop>
                 <span v-if="cartItem.formattedAmount" class="amount">{{ cartItem.formattedAmount }}</span>
-                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.native.stop />
+                <StepperInput v-if="editable && !cartItem.cartError && cartItem.seats.length === 0 && (maximumRemaining === null || maximumRemaining > 1) && cartItem.productPrice.uitpasBaseProductPriceId === null" v-model="amount" :min="1" :max="maximumRemaining" @click.stop />
                 <button v-if="editable" class="button icon trash" type="button" @click="deleteItem()" />
             </div>
         </footer>
@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { Cart, CartItem, Webshop } from '@stamhoofd/structures';
+import type { Cart, CartItem, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import StepperInput from '../inputs/StepperInput.vue';

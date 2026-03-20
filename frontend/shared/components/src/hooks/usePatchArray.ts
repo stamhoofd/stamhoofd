@@ -1,5 +1,7 @@
-import { AutoEncoder, AutoEncoderPatchType, NonScalarIdentifiable, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { computed, ref, Ref, unref } from 'vue';
+import type { AutoEncoder, AutoEncoderPatchType, NonScalarIdentifiable, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { Ref} from 'vue';
+import { computed, ref, unref } from 'vue';
 
 export function usePatchArray<T extends AutoEncoder & NonScalarIdentifiable<any>>(obj: T[] | Ref<T[]>): {
     patched: Ref<T[]>;

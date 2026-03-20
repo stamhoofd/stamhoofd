@@ -1,9 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { StamhoofdCompareValue, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdCompareValue, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import MultipleChoiceUIFilterView from './MultipleChoiceUIFilterView.vue';
-import { StyledDescription, UIFilter, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder } from './UIFilter';
+import type { StyledDescription, UIFilterBuilder, UiFilterOptions, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export class MultipleChoiceUIFilterOption {
     name: string;
@@ -20,12 +21,11 @@ export enum MultipleChoiceUIFilterMode {
     Or = 'Or',
 }
 
-export class MultipleChoiceUIFilter extends UIFilter {
-    builder: MultipleChoiceFilterBuilder;
+export class MultipleChoiceUIFilter extends UIFilter<MultipleChoiceFilterBuilder> {
     selectedOptions: MultipleChoiceUIFilterOption[] = [];
     configuration: MultipleChoiceUiFilterConfiguration;
 
-    constructor(data: Partial<UIFilter>, options: UiFilterOptions, multipleChoiceConfiguration: MultipleChoiceUiFilterConfiguration) {
+    constructor(data: Partial<UIFilter<MultipleChoiceFilterBuilder>>, options: UiFilterOptions, multipleChoiceConfiguration: MultipleChoiceUiFilterConfiguration) {
         super(data, options);
 
         this.configuration = multipleChoiceConfiguration;

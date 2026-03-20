@@ -122,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import BundleDiscountSettingsView from '#bundle-discounts/BundleDiscountSettingsView.vue';
@@ -133,8 +133,9 @@ import NumberInput from '#inputs/NumberInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import TimeInput from '#inputs/TimeInput.vue';
 import { useValidation } from '#errors/useValidation.ts';
-import { Validator } from '#errors/Validator.ts';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, Group, GroupPrice, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import type { Validator } from '#errors/Validator.ts';
+import type { BundleDiscount, Group, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { BundleDiscountGroupPriceSettings, GroupPrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { ReduceablePriceInput } from '..';

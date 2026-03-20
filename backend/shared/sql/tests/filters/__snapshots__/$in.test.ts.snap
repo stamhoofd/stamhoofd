@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQL Query for filter: {"settings.name":{"$in":["Apple","other"]}} 1`] = `
+exports[`$in > JSON > Can check if a JSON string equals values, case insensitive > SQL Query for filter: {"settings.name":{"$in":["Apple","other"]}} 1`] = `
 {
   "params": [
     [
@@ -12,7 +12,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
 }
 `;
 
-exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQL Query for filter: {"settings.name":{"$in":["apple","banana","other"]}} 1`] = `
+exports[`$in > JSON > Can check if a JSON string equals values, case insensitive > SQL Query for filter: {"settings.name":{"$in":["apple","banana","other"]}} 1`] = `
 {
   "params": [
     [
@@ -25,7 +25,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
 }
 `;
 
-exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQL Query for filter: {"settings.name":{"$in":["apple"]}} 1`] = `
+exports[`$in > JSON > Can check if a JSON string equals values, case insensitive > SQL Query for filter: {"settings.name":{"$in":["apple"]}} 1`] = `
 {
   "params": [
     "apple",
@@ -34,7 +34,7 @@ exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQ
 }
 `;
 
-exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for filter: {"settings.randomValues":{"$in":["Apple","banana","other"]}} 1`] = `
+exports[`$in > JSON > Can check if a string is in a JSON string array, case insensitive > SQL Query for filter: {"settings.randomValues":{"$in":["Apple","banana","other"]}} 1`] = `
 {
   "params": [
     "["apple","banana","other"]",
@@ -43,7 +43,7 @@ exports[`$in JSON Can check if a string is in a JSON string array, case insensit
 }
 `;
 
-exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","cherry","other"]}} 1`] = `
+exports[`$in > JSON > Can check if a string is in a JSON string array, case insensitive > SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","cherry","other"]}} 1`] = `
 {
   "params": [
     "["apple","banana","cherry","other"]",
@@ -52,7 +52,7 @@ exports[`$in JSON Can check if a string is in a JSON string array, case insensit
 }
 `;
 
-exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","other"]}} 1`] = `
+exports[`$in > JSON > Can check if a string is in a JSON string array, case insensitive > SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","other"]}} 1`] = `
 {
   "params": [
     "["apple","banana","other"]",
@@ -61,7 +61,7 @@ exports[`$in JSON Can check if a string is in a JSON string array, case insensit
 }
 `;
 
-exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for not match filter: {"settings.randomValues":{"$in":["orange","kiwi"]}} 1`] = `
+exports[`$in > JSON > Can check if a string is in a JSON string array, case insensitive > SQL Query for not match filter: {"settings.randomValues":{"$in":["orange","kiwi"]}} 1`] = `
 {
   "params": [
     "["orange","kiwi"]",
@@ -70,7 +70,7 @@ exports[`$in JSON Can check if a string is in a JSON string array, case insensit
 }
 `;
 
-exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for not match filter: {"settings.randomValues":{"$in":["pple"]}} 1`] = `
+exports[`$in > JSON > Can check if a string is in a JSON string array, case insensitive > SQL Query for not match filter: {"settings.randomValues":{"$in":["pple"]}} 1`] = `
 {
   "params": [
     "["pple"]",
@@ -79,7 +79,7 @@ exports[`$in JSON Can check if a string is in a JSON string array, case insensit
 }
 `;
 
-exports[`$in JSON Can check if a string is in a JSON string array, case insensitive: SQL Query for not match filter: {"settings.randomValues":{"$in":["àpple"]}} 1`] = `
+exports[`$in > JSON > Can check if a string is in a JSON string array, case insensitive > SQL Query for not match filter: {"settings.randomValues":{"$in":["àpple"]}} 1`] = `
 {
   "params": [
     "["àpple"]",
@@ -88,7 +88,7 @@ exports[`$in JSON Can check if a string is in a JSON string array, case insensit
 }
 `;
 
-exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["🍎","🍌","other"]}} 1`] = `
+exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Query for filter: {"settings.randomValues":{"$in":["🍎","🍌","other"]}} 1`] = `
 {
   "params": [
     "["🍎","🍌","other"]",
@@ -97,7 +97,7 @@ exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for
 }
 `;
 
-exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["🍎","🍌","👩🏽‍🎤","other"]}} 1`] = `
+exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Query for filter: {"settings.randomValues":{"$in":["🍎","🍌","👩🏽‍🎤","other"]}} 1`] = `
 {
   "params": [
     "["🍎","🍌","👩🏽‍🎤","other"]",
@@ -106,7 +106,7 @@ exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for
 }
 `;
 
-exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["👩🏽‍🎤","other"]}} 1`] = `
+exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Query for filter: {"settings.randomValues":{"$in":["👩🏽‍🎤","other"]}} 1`] = `
 {
   "params": [
     "["👩🏽‍🎤","other"]",
@@ -115,7 +115,7 @@ exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for
 }
 `;
 
-exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for filter: {"settings.randomValues":{"$in":["👩🏽‍🎤"]}} 1`] = `
+exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Query for filter: {"settings.randomValues":{"$in":["👩🏽‍🎤"]}} 1`] = `
 {
   "params": [
     "["👩🏽‍🎤"]",
@@ -124,7 +124,7 @@ exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for
 }
 `;
 
-exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for not match filter: {"settings.randomValues":{"$in":["other"]}} 1`] = `
+exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Query for not match filter: {"settings.randomValues":{"$in":["other"]}} 1`] = `
 {
   "params": [
     "["other"]",
@@ -133,7 +133,7 @@ exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for
 }
 `;
 
-exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for not match filter: {"settings.randomValues":{"$in":["👩🏻‍🎤"]}} 1`] = `
+exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Query for not match filter: {"settings.randomValues":{"$in":["👩🏻‍🎤"]}} 1`] = `
 {
   "params": [
     "["👩🏻‍🎤"]",
@@ -142,7 +142,7 @@ exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for
 }
 `;
 
-exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for not match filter: {"settings.randomValues":{"$in":["👩🏽"]}} 1`] = `
+exports[`$in > JSON > Can check if an emoji is in a JSON string array > SQL Query for not match filter: {"settings.randomValues":{"$in":["👩🏽"]}} 1`] = `
 {
   "params": [
     "["👩🏽"]",
@@ -151,7 +151,7 @@ exports[`$in JSON Can check if an emoji is in a JSON string array: SQL Query for
 }
 `;
 
-exports[`$in JSON Can check if null is in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
+exports[`$in > JSON > Can check if null is in a JSON array > SQL Query for filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
 {
   "params": [
     "null",
@@ -161,7 +161,7 @@ exports[`$in JSON Can check if null is in a JSON array: SQL Query for filter: {"
 }
 `;
 
-exports[`$in JSON Can check if null is in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple"]}} 1`] = `
+exports[`$in > JSON > Can check if null is in a JSON array > SQL Query for not match filter: {"settings.randomValues":{"$in":["apple"]}} 1`] = `
 {
   "params": [
     "["apple"]",
@@ -170,7 +170,7 @@ exports[`$in JSON Can check if null is in a JSON array: SQL Query for not match 
 }
 `;
 
-exports[`$in JSON Can search booleans in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[false,true]}} 1`] = `
+exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for filter: {"settings.randomValues":{"$in":[false,true]}} 1`] = `
 {
   "params": [
     "[false,true]",
@@ -179,7 +179,7 @@ exports[`$in JSON Can search booleans in a JSON array: SQL Query for filter: {"s
 }
 `;
 
-exports[`$in JSON Can search booleans in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[false]}} 1`] = `
+exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for filter: {"settings.randomValues":{"$in":[false]}} 1`] = `
 {
   "params": [
     "[false]",
@@ -188,9 +188,9 @@ exports[`$in JSON Can search booleans in a JSON array: SQL Query for filter: {"s
 }
 `;
 
-exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[]}} 1`] = `"always false"`;
+exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for not match filter: {"settings.randomValues":{"$in":[]}} 1`] = `"always false"`;
 
-exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[0]}} 1`] = `
+exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for not match filter: {"settings.randomValues":{"$in":[0]}} 1`] = `
 {
   "params": [
     "[0]",
@@ -199,7 +199,7 @@ exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match f
 }
 `;
 
-exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[true]}} 1`] = `
+exports[`$in > JSON > Can search booleans in a JSON array > SQL Query for not match filter: {"settings.randomValues":{"$in":[true]}} 1`] = `
 {
   "params": [
     "[true]",
@@ -208,7 +208,7 @@ exports[`$in JSON Can search booleans in a JSON array: SQL Query for not match f
 }
 `;
 
-exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[5,15]}} 1`] = `
+exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter: {"settings.randomValues":{"$in":[5,15]}} 1`] = `
 {
   "params": [
     "[5,15]",
@@ -217,7 +217,7 @@ exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"se
 }
 `;
 
-exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[5]}} 1`] = `
+exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter: {"settings.randomValues":{"$in":[5]}} 1`] = `
 {
   "params": [
     "[5]",
@@ -226,7 +226,7 @@ exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"se
 }
 `;
 
-exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[15]}} 1`] = `
+exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter: {"settings.randomValues":{"$in":[15]}} 1`] = `
 {
   "params": [
     "[15]",
@@ -235,7 +235,7 @@ exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"se
 }
 `;
 
-exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"settings.randomValues":{"$in":[99,15]}} 1`] = `
+exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for filter: {"settings.randomValues":{"$in":[99,15]}} 1`] = `
 {
   "params": [
     "[99,15]",
@@ -244,9 +244,9 @@ exports[`$in JSON Can search numbers in a JSON array: SQL Query for filter: {"se
 }
 `;
 
-exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[]}} 1`] = `"always false"`;
+exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for not match filter: {"settings.randomValues":{"$in":[]}} 1`] = `"always false"`;
 
-exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[6,10]}} 1`] = `
+exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for not match filter: {"settings.randomValues":{"$in":[6,10]}} 1`] = `
 {
   "params": [
     "[6,10]",
@@ -255,7 +255,7 @@ exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match fi
 }
 `;
 
-exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match filter: {"settings.randomValues":{"$in":[99,14]}} 1`] = `
+exports[`$in > JSON > Can search numbers in a JSON array > SQL Query for not match filter: {"settings.randomValues":{"$in":[99,14]}} 1`] = `
 {
   "params": [
     "[99,14]",
@@ -264,7 +264,7 @@ exports[`$in JSON Can search numbers in a JSON array: SQL Query for not match fi
 }
 `;
 
-exports[`$in JSON If a json array exists and does not contain null, it is not included when checking for null: SQL Query for filter: {"settings.randomValues":{"$in":[false]}} 1`] = `
+exports[`$in > JSON > If a json array exists and does not contain null, it is not included when checking for null > SQL Query for filter: {"settings.randomValues":{"$in":[false]}} 1`] = `
 {
   "params": [
     "[false]",
@@ -273,7 +273,7 @@ exports[`$in JSON If a json array exists and does not contain null, it is not in
 }
 `;
 
-exports[`$in JSON If a json array exists and does not contain null, it is not included when checking for null: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
+exports[`$in > JSON > If a json array exists and does not contain null, it is not included when checking for null > SQL Query for not match filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
 {
   "params": [
     "null",
@@ -283,7 +283,7 @@ exports[`$in JSON If a json array exists and does not contain null, it is not in
 }
 `;
 
-exports[`$in JSON Including null also matches when a JSON path does not exist: SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","cherry",null]}} 1`] = `
+exports[`$in > JSON > Including null also matches when a JSON path does not exist > SQL Query for filter: {"settings.randomValues":{"$in":["apple","banana","cherry",null]}} 1`] = `
 {
   "params": [
     "null",
@@ -293,7 +293,7 @@ exports[`$in JSON Including null also matches when a JSON path does not exist: S
 }
 `;
 
-exports[`$in JSON Including null also matches when a JSON path does not exist: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple","banana","cherry"]}} 1`] = `
+exports[`$in > JSON > Including null also matches when a JSON path does not exist > SQL Query for not match filter: {"settings.randomValues":{"$in":["apple","banana","cherry"]}} 1`] = `
 {
   "params": [
     "["apple","banana","cherry"]",
@@ -302,7 +302,7 @@ exports[`$in JSON Including null also matches when a JSON path does not exist: S
 }
 `;
 
-exports[`$in JSON Including null will also check on key existence for json arrays: SQL Query for filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
+exports[`$in > JSON > Including null will also check on key existence for json arrays > SQL Query for filter: {"settings.randomValues":{"$in":["apple",null]}} 1`] = `
 {
   "params": [
     "null",
@@ -312,7 +312,7 @@ exports[`$in JSON Including null will also check on key existence for json array
 }
 `;
 
-exports[`$in JSON Including null will also check on key existence for json arrays: SQL Query for filter: {"settings.randomValues":{"$in":[null]}} 1`] = `
+exports[`$in > JSON > Including null will also check on key existence for json arrays > SQL Query for filter: {"settings.randomValues":{"$in":[null]}} 1`] = `
 {
   "params": [
     "null",
@@ -321,7 +321,7 @@ exports[`$in JSON Including null will also check on key existence for json array
 }
 `;
 
-exports[`$in JSON Including null will also check on key existence for json arrays: SQL Query for not match filter: {"settings.randomValues":{"$in":["apple"]}} 1`] = `
+exports[`$in > JSON > Including null will also check on key existence for json arrays > SQL Query for not match filter: {"settings.randomValues":{"$in":["apple"]}} 1`] = `
 {
   "params": [
     "["apple"]",
@@ -330,7 +330,7 @@ exports[`$in JSON Including null will also check on key existence for json array
 }
 `;
 
-exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for filter: {"settings.scalar":{"$in":["Hello world"]}} 1`] = `
+exports[`$in > JSON scalars > Can compare case insensitive with string scalars > SQL Query for filter: {"settings.scalar":{"$in":["Hello world"]}} 1`] = `
 {
   "params": [
     "hello world",
@@ -339,7 +339,7 @@ exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL 
 }
 `;
 
-exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for filter: {"settings.scalar":{"$in":["hello world"]}} 1`] = `
+exports[`$in > JSON scalars > Can compare case insensitive with string scalars > SQL Query for filter: {"settings.scalar":{"$in":["hello world"]}} 1`] = `
 {
   "params": [
     "hello world",
@@ -348,7 +348,7 @@ exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL 
 }
 `;
 
-exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for not match filter: {"settings.scalar":{"$in":["hello","world"]}} 1`] = `
+exports[`$in > JSON scalars > Can compare case insensitive with string scalars > SQL Query for not match filter: {"settings.scalar":{"$in":["hello","world"]}} 1`] = `
 {
   "params": [
     [
@@ -360,14 +360,14 @@ exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL 
 }
 `;
 
-exports[`$in JSON scalars Can compare case insensitive with string scalars: SQL Query for not match filter: {"settings.scalar":{"$in":[null]}} 1`] = `
+exports[`$in > JSON scalars > Can compare case insensitive with string scalars > SQL Query for not match filter: {"settings.scalar":{"$in":[null]}} 1`] = `
 {
   "params": [],
   "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" NULL ON ERROR) IS NULL",
 }
 `;
 
-exports[`$in JSON scalars Can compare with null: SQL Query for filter: {"settings.scalar":{"$in":[5,6,7,null]}} 1`] = `
+exports[`$in > JSON scalars > Can compare with null > SQL Query for filter: {"settings.scalar":{"$in":[5,6,7,null]}} 1`] = `
 {
   "params": [
     [
@@ -380,7 +380,7 @@ exports[`$in JSON scalars Can compare with null: SQL Query for filter: {"setting
 }
 `;
 
-exports[`$in JSON scalars Can compare with null: SQL Query for filter: {"settings.scalar":{"$in":[null,5,6,7]}} 1`] = `
+exports[`$in > JSON scalars > Can compare with null > SQL Query for filter: {"settings.scalar":{"$in":[null,5,6,7]}} 1`] = `
 {
   "params": [
     [
@@ -393,7 +393,7 @@ exports[`$in JSON scalars Can compare with null: SQL Query for filter: {"setting
 }
 `;
 
-exports[`$in JSON scalars Can compare with null: SQL Query for not match filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
+exports[`$in > JSON scalars > Can compare with null > SQL Query for not match filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
 {
   "params": [
     [
@@ -406,7 +406,7 @@ exports[`$in JSON scalars Can compare with null: SQL Query for not match filter:
 }
 `;
 
-exports[`$in JSON scalars Can compare with number scalars: SQL Query for filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
+exports[`$in > JSON scalars > Can compare with number scalars > SQL Query for filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
 {
   "params": [
     [
@@ -419,7 +419,7 @@ exports[`$in JSON scalars Can compare with number scalars: SQL Query for filter:
 }
 `;
 
-exports[`$in JSON scalars Can compare with number scalars: SQL Query for not match filter: {"settings.scalar":{"$in":[4,6,7]}} 1`] = `
+exports[`$in > JSON scalars > Can compare with number scalars > SQL Query for not match filter: {"settings.scalar":{"$in":[4,6,7]}} 1`] = `
 {
   "params": [
     [
@@ -432,7 +432,7 @@ exports[`$in JSON scalars Can compare with number scalars: SQL Query for not mat
 }
 `;
 
-exports[`$in JSON scalars Converts column to first provided value type (number): SQL Query for filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
+exports[`$in > JSON scalars > Converts column to first provided value type (number) > SQL Query for filter: {"settings.scalar":{"$in":[5,6,7]}} 1`] = `
 {
   "params": [
     [
@@ -445,7 +445,7 @@ exports[`$in JSON scalars Converts column to first provided value type (number):
 }
 `;
 
-exports[`$in JSON scalars Converts column to first provided value type (number): SQL Query for not match filter: {"settings.scalar":{"$in":[-5,-6,-7]}} 1`] = `
+exports[`$in > JSON scalars > Converts column to first provided value type (number) > SQL Query for not match filter: {"settings.scalar":{"$in":[-5,-6,-7]}} 1`] = `
 {
   "params": [
     [

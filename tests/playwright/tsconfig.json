@@ -1,36 +1,19 @@
 {
     "compilerOptions": {
-        "target": "es2022", // needs to be es2019 to support optional chaining. Node.js doesn't support optional chaining yet, so we need the transpiling
-        "module": "commonjs",
-        "jsx": "preserve",
-        "importHelpers": true,
-        "moduleResolution": "node",
-        "experimentalDecorators": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "sourceMap": true,
-        "strictNullChecks": true,
-        "declaration": true,
-        "declarationMap": true,
+        "customConditions": ["@stamhoofd/source", "import", "require"],
         "outDir": "dist",
-        "lib": [
-            "es2022",
-            "dom" // for puppeteer
-        ],
-        "types": ["node", "playwright/test"], // include Node and Playwright types
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "skipLibCheck": true,
-        "baseUrl": ".", // base path for relative imports
-        "paths": {
-            "@stamhoofd/models": ["../../backend/shared/models"], // adjust relative path to backend package
-            "@stamhoofd/build-development-env": ["../../shared/build-development-env"]
-        },
+        "rootDir": ".",
+        "types": ["node", "playwright/test"]
     },
+    "extends": "../../tsconfig.base.json",
     "include": [
-        "src/**/*.ts",
-        "*.d.ts",
-        "../../*.d.ts"
+        "./src",
+        "./stamhoofd.d.ts",
+        "./playwright.config.ts"
     ],
-    "exclude": ["dist", "node_modules"]
+    "references": [
+        { "path": "../../backend/app/api/tsconfig.build.json" },
+        { "path": "../../backend/app/api/tsconfig.test.json" },
+        { "path": "../../shared/types/tsconfig.build.json" }
+    ]
 }

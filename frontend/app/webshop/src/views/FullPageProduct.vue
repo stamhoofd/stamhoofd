@@ -6,8 +6,10 @@
 
 <script lang="ts" setup>
 import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
-import { CartItem, Checkout, Product, Webshop } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import type { Checkout, Product, Webshop } from '@stamhoofd/structures';
+import { CartItem } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;

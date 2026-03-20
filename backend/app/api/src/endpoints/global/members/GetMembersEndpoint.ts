@@ -1,12 +1,14 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, Country, CountryCode, GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type { CountFilteredRequest, MembersBlob, StamhoofdFilter } from '@stamhoofd/structures';
+import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type { CountryCode } from '@stamhoofd/types/Country';
+import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
-
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';

@@ -52,9 +52,11 @@ import { useAppContext } from '#context/appContext.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
-import { Group, GroupCategoryTree, GroupType, Organization, PlatformMember } from '@stamhoofd/structures';
+import type { Group, Organization, PlatformMember } from '@stamhoofd/structures';
+import { GroupCategoryTree, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onMounted, Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import SearchOrganizationView from './SearchOrganizationView.vue';
 

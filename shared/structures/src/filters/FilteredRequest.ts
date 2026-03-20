@@ -1,8 +1,10 @@
-import { AutoEncoder, Data, DateDecoder, Decoder, Encodeable, EncodeContext, field, IntegerDecoder, PlainObject, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder, Encodeable, EncodeContext, PlainObject} from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { encodeSortList, SortList, SortListDecoder } from './SortList.js';
-import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
+import type { SortList} from './SortList.js';
+import { encodeSortList, SortListDecoder } from './SortList.js';
+import type { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
 
 export class StamhoofdFilterJSONDecoder {
     static encode(filter: StamhoofdFilter, context: EncodeContext): string {

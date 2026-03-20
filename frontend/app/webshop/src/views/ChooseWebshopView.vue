@@ -58,7 +58,7 @@ import OrganizationLogo from '@stamhoofd/components/context/OrganizationLogo.vue
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { Organization, WebshopPreview } from '@stamhoofd/structures';
+import type { Organization, WebshopPreview } from '@stamhoofd/structures';
 
 const props = defineProps<{
     organization: Organization;

@@ -1,6 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
-import StreetNames from '@simonbackx/simple-database/dist/src/classes/data/streets';
-import { Address, Country } from '@stamhoofd/structures';
+import StreetNames from '@simonbackx/simple-database/data/streets';
+import { Address } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 
 type Options = Record<string, never>;
 

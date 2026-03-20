@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { WorkerData } from '../worker/WorkerData';
+import { WorkerData } from '../worker/WorkerData.js';
 
 export class MemberPortalPage {
     constructor(public readonly page: Page) {}

@@ -1,8 +1,9 @@
 {
     "name": "@stamhoofd/logging",
     "version": "2.119.0",
-    "main": "./dist/index.js",
+    "type": "module",
     "types": "./dist/index.d.ts",
+    "main": "./dist/index.js",
     "license": "UNLICENCED",
     "sideEffects": false,
     "files": [
@@ -10,7 +11,8 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b"
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint"
     },
     "dependencies": {
         "@simonbackx/simple-logging": "^1.0.1"

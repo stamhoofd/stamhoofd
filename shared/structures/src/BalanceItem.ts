@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
 import { Payment, PrivatePayment } from './members/Payment.js';
-import { PriceBreakdown } from './PriceBreakdown.js';
+import type { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 

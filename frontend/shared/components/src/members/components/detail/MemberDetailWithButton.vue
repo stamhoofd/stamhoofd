@@ -1,9 +1,11 @@
 <template>
-    <dt v-if="label">{{ label }}</dt>
-    <dd  class="with-icons hover-box" :class="{button: $context.auth.hasFullAccess(), 'no-label': label === undefined}">
+    <dt v-if="label">
+        {{ label }}
+    </dt>
+    <dd class="with-icons hover-box" :class="{button: $context.auth.hasFullAccess(), 'no-label': label === undefined}">
         <span v-copyable>
             <template v-if="Array.isArray(value)">
-                <template v-for="(line, index) of value">
+                <template v-for="(line, index) of value" :key="index">
                     {{ line }}
                     <br v-if="index < value.length - 1">
                 </template>
@@ -13,10 +15,12 @@
             </template>
         </span>
         <Transition name="fade" mode="out-in">
-            <Spinner v-if ="showLoader"/>
-            <span v-else-if="$context.auth.hasFullAccess()"
+            <Spinner v-if="showLoader" />
+            <span
+                v-else-if="$context.auth.hasFullAccess()"
                 class="icon hover-show" :class="[icon, color]"
-                @click="clickHandler"/>
+                @click="clickHandler"
+            />
         </Transition>
     </dd>
 </template>
@@ -31,12 +35,12 @@ const isLoading = ref(false);
 const showLoader = computed(() => props.loading || isLoading.value);
 
 function clickHandler() {
-    if(showLoader.value) return;
+    if (showLoader.value) return;
     emits('clickButton');
     const onDelete = props.onClick;
-    if(onDelete) {
+    if (onDelete) {
         isLoading.value = true;
-        onDelete().finally(() => isLoading.value = false);
+        onDelete().catch(console.error).finally(() => isLoading.value = false);
     }
 }
 </script>

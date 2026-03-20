@@ -76,10 +76,10 @@ export default class CheckUpdateView extends Mixins(NavigationMixin) {
         console.log('Mounted CheckUpdateView');
         if (!this.status.shouldBeVisible) {
             console.log('Update should not be visible: dismiss on mount');
-            this.dismiss({ force: true, animated: false });
+            this.dismiss({ force: true, animated: false }).catch(console.error);
         }
         this.status.setDoHide(() => {
-            this.dismiss({ force: true, animated: false });
+            this.dismiss({ force: true, animated: false }).catch(console.error);
         });
 
         this.interval = setInterval(() => {

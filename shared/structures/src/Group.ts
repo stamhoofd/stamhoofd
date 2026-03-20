@@ -1,16 +1,16 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Event } from './Event.js';
-import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { Event } from './Event.js';
+import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { getActivePeriodIds } from './getActivePeriods.js';
-import { GroupCategory } from './GroupCategory.js';
+import type { GroupCategory } from './GroupCategory.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { GroupPrivateSettings } from './GroupPrivateSettings.js';
 import { GroupSettings, WaitingListType } from './GroupSettings.js';
 import { GroupType } from './GroupType.js';
 import { Gender } from './members/Gender.js';
-import { Organization } from './Organization.js';
+import type { Organization } from './Organization.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';

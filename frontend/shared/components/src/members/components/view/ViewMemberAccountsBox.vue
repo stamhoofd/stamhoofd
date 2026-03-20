@@ -12,8 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PlatformMember, User } from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAdmins } from '../../../admins/hooks/useAdmins';

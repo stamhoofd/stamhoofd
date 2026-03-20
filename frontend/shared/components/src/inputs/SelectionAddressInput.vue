@@ -28,7 +28,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
-import { Address, ValidatedAddress } from '@stamhoofd/structures';
+import type { Address, ValidatedAddress } from '@stamhoofd/structures';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';

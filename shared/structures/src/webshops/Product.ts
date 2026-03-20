@@ -6,7 +6,7 @@ import { Address } from '../addresses/Address.js';
 import { UitpasEventResponse } from '../endpoints/UitpasEventsResponse.js';
 import { Image } from '../files/Image.js';
 import { ReservedSeat } from '../SeatingPlan.js';
-import { Webshop } from './Webshop.js';
+import type { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 

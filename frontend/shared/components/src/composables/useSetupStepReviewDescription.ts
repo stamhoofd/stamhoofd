@@ -1,4 +1,4 @@
-import { SetupStepReview } from '@stamhoofd/structures';
+import type { SetupStepReview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 export function useSetupStepReviewDescription(): { getDescription: (review: SetupStepReview | null, short?: boolean, textIfNotReviewed?: string) => string } {

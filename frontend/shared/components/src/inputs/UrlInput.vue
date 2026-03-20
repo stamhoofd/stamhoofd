@@ -9,7 +9,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
 @Component({

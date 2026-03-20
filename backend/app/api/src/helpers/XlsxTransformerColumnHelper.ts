@@ -1,5 +1,7 @@
-import { isXlsxTransformerConcreteColumn, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import { Address, CountryHelper, Parent, ParentTypeHelper, PlatformMember, RecordAnswer, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
+import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
+import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
+import type { Address, Parent, PlatformMember, RecordAnswer, RecordSettings} from '@stamhoofd/structures';
+import { CountryHelper, ParentTypeHelper, RecordCategory, RecordType } from '@stamhoofd/structures';
 
 export class XlsxTransformerColumnHelper {
     static formatBoolean(value: boolean | undefined | null): string {

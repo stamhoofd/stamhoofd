@@ -45,7 +45,7 @@ import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import Spinner from '../Spinner.vue';
-import { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
+import type { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
 import { onActivated, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
 import { useErrors } from '../errors/useErrors';
 
@@ -60,7 +60,7 @@ const isChecked = ref(false);
 
 onMounted(() => {
     props.centeredMessage.doHide = () => {
-        close();
+        close().catch(console.error);
     };
 
     if (document.activeElement && (document.activeElement as any).blur) {
@@ -102,7 +102,7 @@ async function onClickButton(button: CenteredMessageButton) {
         errors.errorBox = null;
         button.loading = false;
     }
-    close();
+    await close();
 }
 
 function dismiss() {
@@ -114,12 +114,12 @@ function dismiss() {
     onClickButton(closeButton).catch(console.error);
 }
 
-function close() {
+async function close() {
     if (isClosing.value) {
         return;
     }
     isClosing.value = true;
-    pop({ force: true });
+    await pop({ force: true });
 }
 
 onActivated(() => {
@@ -144,7 +144,7 @@ function getButtons() {
 }
 
 function focusNextButton() {
-    let buttons = getButtons();
+    const buttons = getButtons();
     if (buttons.length === 0) {
         return;
     }

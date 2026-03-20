@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
 import ViewMemberParentBox from './ViewMemberParentBox.vue';
 
 defineOptions({

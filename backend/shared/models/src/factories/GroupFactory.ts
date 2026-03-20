@@ -1,10 +1,11 @@
 import { Factory } from '@simonbackx/simple-database';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import type { BundleDiscount, GroupPriceDiscount, GroupType} from '@stamhoofd/structures';
+import { BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group } from '../models/Group.js';
-import { RegistrationPeriod } from '../models/index.js';
-import { Organization } from '../models/Organization.js';
+import type { RegistrationPeriod } from '../models/index.js';
+import type { Organization } from '../models/Organization.js';
 import { OrganizationFactory } from './OrganizationFactory.js';
 
 class Options {

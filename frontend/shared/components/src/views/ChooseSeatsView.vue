@@ -35,22 +35,24 @@
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import BackButton from '#navigation/BackButton.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import NumberInput from '#inputs/NumberInput.vue';
 import Radio from '#inputs/Radio.vue';
 import StepperInput from '#inputs/StepperInput.vue';
-import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
+import BackButton from '#navigation/BackButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { Cart, CartItem, CartReservedSeat, ReservedSeat, Webshop } from '@stamhoofd/structures';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import type { Cart, CartItem, ReservedSeat, Webshop } from '@stamhoofd/structures';
+import { CartReservedSeat } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import type { ComponentOptions } from 'vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import SeatSelectionBox from './SeatSelectionBox.vue';
@@ -98,7 +100,7 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin) {
     cart: Cart;
 
     @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void;
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null, component: ComponentOptions) => void;
 
     errorBox: ErrorBox | null = null;
 

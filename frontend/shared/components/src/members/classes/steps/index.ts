@@ -1,12 +1,13 @@
-import { PermissionLevel, PlatformMember, RegisterItem } from '@stamhoofd/structures';
-import { EditMemberStep } from '../MemberStepManager';
+import type { PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
+import type { EditMemberStep } from '../MemberStepManager';
 import { MemberDataPermissionStep } from './MemberDataPermissionStep';
 import { MemberEmergencyContactsStep } from './MemberEmergencyContactsStep';
 import { MemberFinancialSupportStep } from './MemberFinancialSupportStep';
 import { MemberGeneralStep } from './MemberGeneralStep';
 import { MemberParentsStep } from './MemberParentsStep';
 import { MemberRecordCategoryStep } from './MemberRecordCategoryStep';
-import { MemberSharedStepOptions } from './MemberSharedStepOptions';
+import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
 import { MemberUitpasStep } from './MemberUitpasStep';
 
 const defaultOutdatedTime = 60 * 1000 * 60 * 24 * 31 * 3; // 3 months

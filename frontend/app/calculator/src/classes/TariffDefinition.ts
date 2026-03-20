@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CalculationInput } from './CalculationInput';
-import { CalculationGroup, CalculationLine, CalculationOutput, CalculationRemark, FixedPriceCalculationLine, VolumePercentageCalculationLine } from './CalculationOutput';
+import type { CalculationInput } from './CalculationInput';
+import type { CalculationLine, CalculationRemark} from './CalculationOutput';
+import { CalculationGroup, CalculationOutput, FixedPriceCalculationLine, VolumePercentageCalculationLine } from './CalculationOutput';
 import { ModuleType } from './ModuleType';
 import { calculatePaymentMethodUsage, getPaymentMethodName, PaymentMethod } from './PaymentMethod';
 import { Formatter } from '@stamhoofd/utility';

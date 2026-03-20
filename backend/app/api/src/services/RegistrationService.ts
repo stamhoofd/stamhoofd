@@ -1,6 +1,6 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
-import { BalanceItem, Document, Group, Member, Registration } from '@stamhoofd/models';
-import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, StockReservation, TranslatedString, Version } from '@stamhoofd/structures';
+import { BalanceItem, Document, Group, Member, Organization, Registration, sendEmailTemplate } from '@stamhoofd/models';
+import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, Recipient, Replacement, StockReservation, TranslatedString, Version } from '@stamhoofd/structures';
 import { AuditLogService } from './AuditLogService.js';
 import { GroupService } from './GroupService.js';
 import { PlatformMembershipService } from './PlatformMembershipService.js';
@@ -58,7 +58,7 @@ export const RegistrationService = {
         await PlatformMembershipService.updateMembershipsForId(registration.memberId);
 
         if (registration.sendConfirmationEmail) {
-            await registration.sendEmailTemplate({
+            await RegistrationService.sendEmailTemplate(registration, {
                 type: EmailTemplateType.RegistrationConfirmation,
             });
         }
@@ -74,6 +74,68 @@ export const RegistrationService = {
         await GroupService.updateOccupancy(registration.groupId);
 
         return true;
+    },
+
+    async getRecipients(registration: Registration, organization: Organization, group: Group) {
+        const member = await Member.getByIdWithUsers(registration.memberId);
+
+        if (!member) {
+            return [];
+        }
+
+        const allowedEmails = member.details.getNotificationEmails();
+
+        return member.users.map(user => Recipient.create({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            userId: user.id,
+            replacements: [
+                Replacement.create({
+                    token: 'firstNameMember',
+                    value: member.details.firstName,
+                }),
+                Replacement.create({
+                    token: 'lastNameMember',
+                    value: member.details.lastName,
+                }),
+                Replacement.create({
+                    token: 'registerUrl',
+                    value: 'https://' + organization.getHost(),
+                }),
+                Replacement.create({
+                    token: 'groupName',
+                    value: group.settings.name.toString(),
+                }),
+            ],
+        })).filter(r => allowedEmails.includes(r.email.toLocaleLowerCase()));
+    },
+
+    async sendEmailTemplate(registration: Registration, data: {
+        type: EmailTemplateType;
+    }) {
+        const group = await Group.getByID(registration.groupId);
+
+        if (!group) {
+            return;
+        }
+
+        const organization = await Organization.getByID(group.organizationId);
+        if (!organization) {
+            return;
+        }
+
+        const recipients = await RegistrationService.getRecipients(registration, organization, group);
+
+        // Create e-mail builder
+        await sendEmailTemplate(organization, {
+            template: {
+                type: data.type,
+                group,
+            },
+            recipients,
+            type: 'transactional',
+        });
     },
 
     async updateDiscounts(registrationId: string) {

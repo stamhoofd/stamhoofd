@@ -18,10 +18,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox } from '#errors/ErrorBox';
+import type { ErrorBox } from '#errors/ErrorBox';
 import { useErrors } from '#errors/useErrors';
 import { useValidation } from '#errors/useValidation';
-import { Validator } from '#errors/Validator';
+import type { Validator } from '#errors/Validator';
 import { onMounted, ref, watch } from 'vue';
 import STInputBox from './STInputBox.vue';
 

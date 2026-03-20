@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { EventNotificationDeadline } from '@stamhoofd/structures';
+import type { EventNotificationDeadline } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 defineProps<{

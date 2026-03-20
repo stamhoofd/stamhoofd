@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { CartReservedSeat } from '../SeatingPlan.js';
 import { CartItem } from './CartItem.js';
-import { Order } from './Order.js';
-import { Webshop, WebshopPreview } from './Webshop.js';
+import { type Order } from './Order.js';
+import { type Webshop, type WebshopPreview } from './Webshop.js';
 
 export class Ticket extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

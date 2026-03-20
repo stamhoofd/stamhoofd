@@ -1,17 +1,21 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
+import type { ObjectDirective } from 'vue';
 import { ModalStackEventBus } from '../overlays/ModalStackEventBus';
 import Tooltip from '../overlays/Tooltip.vue';
-import { ObjectDirective } from 'vue';
 
 const helper = {
-    copyElementFallback(event, vnode) {
-        event.target.contentEditable = true;
+    copyElementFallback(event: Event) {
+        if (!(event.target instanceof HTMLElement)) {
+            return;
+        }
+
+        event.target.contentEditable = 'true';
 
         document.execCommand('selectAll', false);
         document.execCommand('copy');
 
-        event.target.contentEditable = false;
+        event.target.contentEditable = 'false';
 
         const w = window as any;
         if (w.getSelection) {
@@ -27,8 +31,12 @@ const helper = {
         (document.activeElement as HTMLElement)?.blur();
     },
 
-    copiedPopup(event) {
-        const el = event.currentTarget || event.target;
+    copiedPopup(event: Event) {
+        const _el = event.currentTarget || event.target;
+        if (!_el || !(_el instanceof HTMLElement)) {
+            return;
+        }
+        const el = _el as HTMLElement & {$tooltipDisplayedComponent?: undefined | null |  ComponentWithProperties};
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
@@ -67,41 +75,41 @@ const helper = {
         }, 500);
     },
 
-    copyElement(event, bindingValue: any, vnode: any) {
+    copyElement(event: MouseEvent, bindingValue: string | undefined) {
         if (window.getSelection() !== null && window.getSelection()!.toString().length > 0) {
             return;
         }
         if (navigator.clipboard) {
             // Select all
-            const myText = bindingValue ?? event.currentTarget.textContent.trim();
+            const myText = bindingValue ?? (event.currentTarget as HTMLElement)?.textContent?.trim() ?? '';
             navigator.clipboard.writeText(myText).then(() => {
                 this.copiedPopup(event);
             }).catch((e) => {
                 console.error(e);
-                this.copyElementFallback(event, vnode);
+                this.copyElementFallback(event);
             });
         }
         else {
             console.warn('No navigator.clipboard support');
-            this.copyElementFallback(event, vnode);
+            this.copyElementFallback(event);
         }
     },
 };
 
-const CopyableDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedComponent: null | ComponentWithProperties }, string> = {
-    beforeMount(el, binding, vnode) {
+const CopyableDirective: ObjectDirective<HTMLElement & { _copyableValue: null | string }, string> = {
+    beforeMount(el, binding) {
         // Add a hover listener
         el.addEventListener(
             'click',
             (event) => {
-                helper.copyElement(event, (el as any)._copyableValue ?? binding.value, vnode);
+                helper.copyElement(event, el._copyableValue ?? binding.value);
             },
             { passive: true },
         );
     },
 
-    updated(el, binding, vnode) {
-        (el as any)._copyableValue = binding.value;
+    updated(el, binding) {
+        el._copyableValue = binding.value;
     },
 };
 

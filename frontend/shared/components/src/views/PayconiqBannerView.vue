@@ -19,8 +19,8 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
-import { Server } from '@simonbackx/simple-networking';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Server } from '@simonbackx/simple-networking';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
@@ -60,7 +60,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin) {
     finishedHandler: (payment: Payment | null) => void;
 
     pollCount = 0;
-    timer: any = null;
+    timer: NodeJS.Timeout | null = null;
 
     loading = false;
     canceling = false;
@@ -69,9 +69,9 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin) {
         this.timer = setTimeout(this.poll.bind(this), 3000);
     }
 
-    close() {
+    async close() {
         // Try to cancel the payment in the background
-        this.dismiss();
+        await this.dismiss();
     }
 
     cancel() {
@@ -117,13 +117,13 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin) {
 
                 if (payment.status === PaymentStatus.Succeeded) {
                     this.finishedHandler(payment);
-                    this.dismiss({ force: true });
+                    this.dismiss({ force: true }).catch(console.error);
                 }
 
                 if (payment.status === PaymentStatus.Failed) {
                     // TODO: temporary message
                     this.finishedHandler(payment);
-                    this.dismiss({ force: true });
+                    this.dismiss({ force: true }).catch(console.error);
                 }
             }).catch((e) => {
                 // too: handle this

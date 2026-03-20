@@ -1,23 +1,25 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
-import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
-import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
-import { getNonAutoLoginRoot, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { getScopedAutoRootComponent, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { Country, Language, Organization, uriToApp } from '@stamhoofd/structures';
+import { Organization, uriToApp } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { computed } from 'vue';
 
 import CartView from './views/cart/CartView.vue';
+import MemberCommunicationView from './views/communication/MemberCommunicationView.vue';
 import EventsOverview from './views/events/EventsOverview.vue';
 import StartView from './views/start/StartView.vue';
-import MemberCommunicationView from './views/communication/MemberCommunicationView.vue';
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, { initialComponents: components });
@@ -132,7 +134,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                                 icon: 'basket',
                                 name: $t(`%X5`),
                                 component: cartRoot,
-                                badge: computed(() => $memberManager.family.checkout.cart.count == 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0)),
+                                badge: computed(() => $memberManager.family.checkout.cart.count === 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0)),
                             }),
                         ],
                     });
@@ -140,7 +142,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
             }),
         ),
         loginRoot: wrapWithModalStack(
-            getNonAutoLoginRoot(session),
+            getScopedAutoRootComponent(session),
         ),
     }), { ownDomain });
 }

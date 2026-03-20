@@ -1,3 +1,3 @@
-export * from './TestGroups';
-export * from './TestMembers';
-export * from './TestOrganizations';
+export * from './TestGroups.js';
+export * from './TestMembers.js';
+export * from './TestOrganizations.js';

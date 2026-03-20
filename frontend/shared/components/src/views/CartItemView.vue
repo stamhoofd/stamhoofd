@@ -168,13 +168,15 @@
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse, Webshop } from '@stamhoofd/structures';
+import type { CartItem, Checkout, ProductDateRange, ProductPrice, Webshop } from '@stamhoofd/structures';
+import { CartStockHelper, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { computed, onMounted, ref, Ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';

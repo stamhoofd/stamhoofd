@@ -40,11 +40,13 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
-import { computed, onMounted, Ref, ref } from 'vue';
+import type { LoginProviderType} from '@stamhoofd/structures';
+import { OpenIDClientConfiguration } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{

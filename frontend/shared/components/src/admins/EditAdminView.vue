@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -99,7 +99,8 @@ import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
-import { Permissions, PermissionsResourceType, User, UserWithMembers } from '@stamhoofd/structures';
+import type { Permissions, PermissionsResourceType} from '@stamhoofd/structures';
+import { User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';

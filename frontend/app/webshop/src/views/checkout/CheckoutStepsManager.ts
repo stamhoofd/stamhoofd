@@ -3,11 +3,12 @@ import { ComponentWithProperties, useDismiss, useNavigationController, useShow }
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
+import type { Checkout, CheckoutMethod, OrganizationMetaData, PatchAnswers, Webshop } from '@stamhoofd/structures';
+import { CheckoutMethodType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { patchObject } from '@simonbackx/simple-encoding';
-import { CheckoutManager } from '../../classes/CheckoutManager';
+import type { CheckoutManager } from '../../classes/CheckoutManager';
 
 export enum CheckoutStepType {
     Method = 'Method',

@@ -6,7 +6,7 @@ import { Group } from './Group.js';
 import { PermissionRole } from './PermissionRole.js';
 import { PermissionsByRole } from './PermissionsByRole.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
-import { OrganizationRegistrationPeriod } from './RegistrationPeriod.js';
+import type { OrganizationRegistrationPeriod } from './RegistrationPeriod.js';
 
 /**
  * Give access to a given resouce based by the roles of a user

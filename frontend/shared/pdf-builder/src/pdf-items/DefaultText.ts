@@ -1,6 +1,7 @@
 import { colorGray } from '../colors';
 import { metropolisMedium } from '../fonts';
-import { PdfText, PdfTextOptions } from './PdfText';
+import type { PdfTextOptions } from './PdfText';
+import { PdfText } from './PdfText';
 
 export class DefaultText extends PdfText {
     constructor(text: string, options: PdfTextOptions = {}) {

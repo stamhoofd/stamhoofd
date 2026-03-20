@@ -1,6 +1,7 @@
-import { Country, type CountryCode } from '@stamhoofd/structures';
+import type { CountryCode } from '@stamhoofd/types/Country';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
-import { App } from 'vue';
+import type { App } from 'vue';
 
 export class I18n {
     loadedLocales: Map<string, Map<string, string>> = new Map();

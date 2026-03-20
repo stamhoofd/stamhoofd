@@ -1,8 +1,10 @@
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
-import { computed, ComputedRef, onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, unref, watch } from 'vue';
+import type { ComputedRef, Ref} from 'vue';
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, unref, watch } from 'vue';
 import { useAppContext } from '../context/appContext';
 import { getInvalidEmailDescription } from '../helpers/getInvalidEmailDescription';
 import { useContext } from './useContext';

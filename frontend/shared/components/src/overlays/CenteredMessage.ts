@@ -21,7 +21,7 @@ export class CenteredMessageButton {
      */
     requireAcceptCheckbox = false;
 
-    constructor(text, settings?: {
+    constructor(text: string, settings?: {
         action?: (() => Promise<any>);
         type?: 'destructive' | 'secundary' | 'primary';
         icon?: string ;

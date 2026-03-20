@@ -1,24 +1,24 @@
-module.exports = {
+export default {
     presets: [
         // Run on default ports
-        "ports-primary", 
+        'ports-primary', 
 
         // Run local DNS server
-        "services/coredns", 
+        'services/coredns', 
 
         // Start caddy server
-        "services/caddy", 
+        'services/caddy', 
 
         // Start stripe webhook server
-        "services/stripe", 
+        'services/stripe', 
 
         // Connect with maildev smtp server
-        "services/maildev", 
+        'services/maildev', 
 
         // Check frontend types
-        "services/frontend-type-checking", 
+        'services/frontend-type-checking', 
 
         // Default Stamhoofd configuration
-        "stamhoofd",
+        'stamhoofd',
     ],
 }

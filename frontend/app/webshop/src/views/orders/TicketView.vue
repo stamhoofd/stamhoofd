@@ -11,7 +11,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
@@ -20,7 +21,8 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import { TicketPublic } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 
 const props = defineProps<{

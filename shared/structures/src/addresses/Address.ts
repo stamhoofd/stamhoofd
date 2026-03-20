@@ -1,7 +1,8 @@
 import { AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-import { Country, CountryDecoder, CountryHelper } from './CountryDecoder.js';
+import { CountryDecoder, CountryHelper } from './CountryDecoder.js';
 
 export class Address extends AutoEncoder {
     get id() {

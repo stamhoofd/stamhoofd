@@ -43,7 +43,7 @@
             {{ isRootCategory ? $t('%iH') : $t('%17h') }}
         </p>
 
-        <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
+        <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="(newValue: RecordSettings[]) => getDraggableRecords(patchedCategory).computed.value = newValue!">
             <template #item="{item: record}">
                 <RecordRow :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" @edit="editRecord($event)" />
             </template>
@@ -83,7 +83,7 @@
 
             <p v-if="c.description" class="style-description-block style-em pre-wrap" v-text="c.description" />
 
-            <STList :model-value="getDraggableRecords(c).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(c).computed.value = newValue!">
+            <STList :model-value="getDraggableRecords(c).computed.value" :draggable="true" @update:model-value="(newValue: RecordSettings[]) => getDraggableRecords(c).computed.value = newValue!">
                 <template #item="{item: record}">
                     <RecordRow :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" @edit="editRecord($event, c)" />
                 </template>
@@ -112,13 +112,18 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { ObjectWithRecords, PatchAnswers, PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
-import { Ref, computed, getCurrentInstance, reactive, ref } from 'vue';
+import type { ObjectWithRecords, PatchAnswers } from '@stamhoofd/structures';
+import { PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
+import { computed, getCurrentInstance, reactive, ref } from 'vue';
 import { useAppContext } from '../context/appContext';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
+import { useValidation } from '../errors/useValidation';
 import { GroupUIFilterBuilder } from '../filters';
 import PropertyFilterInput from '../filters/PropertyFilterInput.vue';
 import { propertyFilterToString } from '../filters/UIFilter';
@@ -126,13 +131,12 @@ import { useDraggableArray, usePatchArray, usePatchMoveUpDown } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import { NavigationActions } from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
-import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
+import type { RecordEditorSettings } from './RecordEditorSettings';
+import { RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
-import { useValidation } from '../errors/useValidation';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 // Define
 const props = defineProps<{

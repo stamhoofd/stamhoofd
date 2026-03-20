@@ -1,9 +1,11 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { StamhoofdFilter, unwrapFilterByPath, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import { unwrapFilterByPath } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import NumberUIFilterView from './NumberUIFilterView.vue';
-import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder } from './UIFilter';
+import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export enum UINumberFilterMode {
     GreaterThan = 'GreaterThan',
@@ -12,8 +14,7 @@ export enum UINumberFilterMode {
     NotEquals = 'NotEquals',
 }
 
-export class NumberUIFilter extends UIFilter {
-    builder!: NumberFilterBuilder;
+export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
     value = 0;
     mode: UINumberFilterMode = UINumberFilterMode.Equals;
 
@@ -108,16 +109,18 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
     wrapFilter?: UIFilterWrapper | null;
     unwrapFilter?: UIFilterUnwrapper | null;
     wrapper?: WrapperFilter;
+    additionalUnwrappers?: WrapperFilter[];
 
     floatingPoint = false;
     type = NumberFilterFormat.Number;
 
-    constructor(data: { key: string; name: string; type?: NumberFilterFormat; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter }) {
+    constructor(data: { key: string; name: string; type?: NumberFilterFormat; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; additionalUnwrappers?: WrapperFilter[] }) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
         this.name = data.name;
         this.wrapper = data.wrapper;
+        this.additionalUnwrappers = data.additionalUnwrappers;
         if (data.type !== undefined) {
             this.type = data.type;
         }

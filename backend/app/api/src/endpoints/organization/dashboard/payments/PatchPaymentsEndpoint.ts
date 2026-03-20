@@ -300,7 +300,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
 
                 if (patch.customer) {
-                    payment.customer = patchObject(payment.customer, patch.customer, { defaultValue: PaymentCustomer.create({}) });
+                    // payment.customer = patchObject(payment.customer, patch.customer, { getDefaultValue: () => PaymentCustomer.create({}) });
                 }
 
                 const payingOrganizationId = patch.payingOrganizationId ?? patch.payingOrganization?.id ?? null;

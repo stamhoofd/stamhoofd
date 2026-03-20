@@ -1,8 +1,12 @@
-import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Request, RequestMiddleware } from '@simonbackx/simple-networking';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import type { RequestMiddleware } from '@simonbackx/simple-networking';
+import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { LoginProviderType, OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
+import type { LoginProviderType} from '@stamhoofd/structures';
+import { OpenIDAuthTokenResponse, Organization, Platform, Token, UserWithMembers, Version } from '@stamhoofd/structures';
 import { isReactive, reactive } from 'vue';
 import { ContextPermissions } from './ContextPermissions';
 import { ManagedToken } from './ManagedToken';
@@ -15,12 +19,12 @@ type AuthenticationStateListener = (changed: 'user' | 'organization' | 'token' |
 
 // dec2hex :: Integer -> String
 // i.e. 0-255 -> '00'-'ff'
-function dec2hex(dec) {
+function dec2hex(dec: number) {
     return dec.toString(16).padStart(2, '0');
 }
 
 // generateId :: Integer -> String
-function generateId(len) {
+function generateId(len: number) {
     const arr = new Uint8Array((len || 40) / 2);
     window.crypto.getRandomValues(arr);
     return Array.from(arr, dec2hex).join('');

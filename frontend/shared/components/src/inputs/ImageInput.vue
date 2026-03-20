@@ -21,7 +21,7 @@ import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes'
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import Spinner from '../Spinner.vue';
 import STInputBox from './STInputBox.vue';
 
@@ -84,7 +84,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         return this.placeholder!.getResolutionForSize(undefined, 220);
     }
 
-    onClick(event) {
+    onClick(event: Event) {
         if (!this.required && this.modelValue) {
             event.preventDefault();
             this.$emit('update:modelValue', null);
@@ -95,7 +95,12 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         Request.cancelAll(this);
     }
 
-    changedFile(event) {
+    changedFile(event: Event) {
+        if (!(event.target instanceof HTMLInputElement)) {
+            return;
+        }
+        const target = event.target
+
         if (!event.target.files || event.target.files.length !== 1) {
             return;
         }
@@ -147,7 +152,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
                 this.uploading = false;
 
                 // Clear selection
-                event.target.value = null;
+                target.value = '';
             });
     }
 }

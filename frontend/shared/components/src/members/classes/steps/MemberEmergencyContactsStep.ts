@@ -1,11 +1,11 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { MemberStepView } from "../..";
-import { NavigationActions } from "../../../types/NavigationActions";
-import EditEmergencyContactsBox from "../../components/edit/EditEmergencyContactsBox.vue";
-import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
-import { markRaw } from "vue";
-import { PermissionLevel } from "@stamhoofd/structures";
-import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import MemberStepView from '#members/MemberStepView.vue';
+import type { NavigationActions } from '../../../types/NavigationActions';
+import EditEmergencyContactsBox from '../../components/edit/EditEmergencyContactsBox.vue';
+import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import { markRaw } from 'vue';
+import { PermissionLevel } from '@stamhoofd/structures';
+import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberEmergencyContactsStep implements EditMemberStep {
     options: MemberSharedStepOptions
@@ -36,7 +36,7 @@ export class MemberEmergencyContactsStep implements EditMemberStep {
         }
 
         if (this.options.outdatedTime) {
-            if (details.reviewTimes.isOutdated("emergencyContacts", this.options.outdatedTime)) {
+            if (details.reviewTimes.isOutdated('emergencyContacts', this.options.outdatedTime)) {
                 return true;
             }
         }

@@ -1,18 +1,19 @@
 // test should always be imported first
-import { test } from '../test-fixtures/platform';
+import { test } from '../test-fixtures/platform.js';
 
 // other imports
 import { UitpasMocker } from '@stamhoofd/backend/tests/helpers';
+import type {
+    Organization,
+    OrganizationRegistrationPeriod,
+    RegistrationPeriod,
+    User} from '@stamhoofd/models';
 import {
     GroupFactory,
     MemberFactory,
-    Organization,
     OrganizationFactory,
-    OrganizationRegistrationPeriod,
     OrganizationRegistrationPeriodFactory,
-    RegistrationPeriod,
-    RegistrationPeriodFactory,
-    User,
+    RegistrationPeriodFactory
 } from '@stamhoofd/models';
 import {
     MemberDetails,
@@ -23,14 +24,15 @@ import {
     UitpasSocialTariff,
     UitpasSocialTariffStatus,
 } from '@stamhoofd/structures';
-import { MemberPortalRegistrationFlow } from '../flows/MemberPortalRegistrationFlow';
+import { MemberPortalRegistrationFlow } from '../flows/MemberPortalRegistrationFlow.js';
+import type {
+    YouthOrganization1Context} from '../helpers/index.js';
 import {
     TableHelper,
     TestMembers,
     TestOrganizations,
-    WorkerData,
-    YouthOrganization1Context,
-} from '../helpers';
+    WorkerData
+} from '../helpers/index.js';
 
 /**
  * todo:

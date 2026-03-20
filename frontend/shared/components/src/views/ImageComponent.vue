@@ -24,7 +24,8 @@
 
 <script lang="ts">
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { DarkMode, Image } from '@stamhoofd/structures';
+import type { Image } from '@stamhoofd/structures';
+import { DarkMode } from '@stamhoofd/structures';
 
 @Component({})
 export default class ImageComponent extends VueComponent {

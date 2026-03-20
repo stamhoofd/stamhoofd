@@ -1,9 +1,10 @@
-import {
+import type {
     Group,
     Organization,
     OrganizationRegistrationPeriod,
+    RegistrationPeriod} from '@stamhoofd/models';
+import {
     OrganizationRegistrationPeriodFactory,
-    RegistrationPeriod,
     RegistrationPeriodFactory,
 } from '@stamhoofd/models';
 import {
@@ -13,7 +14,7 @@ import {
     OrganizationRecordsConfiguration,
     PropertyFilter,
 } from '@stamhoofd/structures';
-import { TestGroups } from './TestGroups';
+import { TestGroups } from './TestGroups.js';
 
 export type OrganizationContext = {
     organization: Organization;

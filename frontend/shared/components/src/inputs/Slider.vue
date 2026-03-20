@@ -85,14 +85,16 @@ export default class Slider extends VueComponent {
         document.removeEventListener("touchend", this.mouseUp);
     }
 
-    delayedSelect(event) {
+    delayedSelect(event: Event) {
         // Prevent default seems to be required because else it wont work 100% of the time
         event.preventDefault();
 
-        // Select all the text
-        event.target.select();
+        if (event.target instanceof HTMLInputElement) {
+            // Select all the text
+            event.target.select();
+        }
 
-        const handler = (event) => {
+        const handler = (event: Event) => {
             // Safari deselects the text on mouse up, we need to prevent this
             event.preventDefault();
             document.removeEventListener("mouseup", handler);
@@ -134,11 +136,11 @@ export default class Slider extends VueComponent {
         return ((this.internalValue - this.min) / (this.max - this.min)) * (this.getWidth() - handleWidth) + handleWidth / 2;
     }
 
-    getHandleOffset(event) {
+    getHandleOffset(event: Event) {
         return this.getEventX(event) - this.getXOffset() - this.getHandleX();
     }
 
-    dragStart(event) {
+    dragStart(event: Event) {
         if (this.dragging) {
             return;
         }
@@ -195,7 +197,7 @@ export default class Slider extends VueComponent {
         this.handlePercentage = ((percentage / width) * relativeWidth + percentageOffset) * 100;
     }
 
-    mouseMove(event) {
+    mouseMove(event: Event) {
         const handleWidth = this.getHandleWidth();
         const width = this.getWidth();
         const x = this.getEventX(event) - this.getXOffset() - this.startOffset - handleWidth / 2;
@@ -225,7 +227,7 @@ export default class Slider extends VueComponent {
         return false;
     }
 
-    mouseUp(_event) {
+    mouseUp() {
         if (this.dragging) {
             this.detach();
             this.dragging = false;

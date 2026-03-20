@@ -38,7 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
@@ -51,9 +52,11 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
+import type { GroupCategoryTree} from '@stamhoofd/structures';
+import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     period: OrganizationRegistrationPeriod;
@@ -125,7 +128,7 @@ async function restoreGroup(event: TouchEvent | MouseEvent | undefined, group: G
 }
 
 async function restoreTo(group: Group, cat: GroupCategoryTree) {
-    if (!(await CenteredMessage.confirm(`${group.settings.name} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten'))) {
+    if (!(await CenteredMessage.confirm(`${group.settings.name.toString()} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten'))) {
         return;
     }
 

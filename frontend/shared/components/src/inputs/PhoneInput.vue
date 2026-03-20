@@ -27,15 +27,17 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { countryCodes, CountryHelper } from '@stamhoofd/structures';
+import type { CountryCode } from "@stamhoofd/types/Country";
+import { Country } from "@stamhoofd/types/Country";
 import { DataValidator } from '@stamhoofd/utility';
+import { AsYouType, parsePhoneNumber } from 'libphonenumber-js/max';
 import { computed, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
-import { Validator } from '../errors/Validator';
-import { AsYouType, parsePhoneNumber } from 'libphonenumber-js/max';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Country, CountryCode, countryCodes, CountryHelper } from '@stamhoofd/structures';
+import type { Validator } from '../errors/Validator';
 
 const props = withDefaults(
     defineProps<{

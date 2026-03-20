@@ -1,3 +1,4 @@
+import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
 import { Service } from '../Service.js';
 
 export function build(service: Service): any {

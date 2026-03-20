@@ -83,7 +83,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
@@ -99,7 +100,8 @@ import EditDiscountCodeView from './discounts/EditDiscountCodeView.vue';
 import EditDiscountView from './discounts/EditDiscountView.vue';
 
 import { computed, nextTick, onMounted, ref } from 'vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 

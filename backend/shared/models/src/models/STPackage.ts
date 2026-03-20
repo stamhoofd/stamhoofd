@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { Organization } from './index.js';
+import { Organization } from './Organization.js';
 
 export class STPackage extends QueryableModel {
     static table = 'stamhoofd_packages';

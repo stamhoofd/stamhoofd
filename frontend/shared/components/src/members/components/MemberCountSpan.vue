@@ -5,7 +5,8 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
 import { useMembersObjectFetcher } from '../../fetchers';
 

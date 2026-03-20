@@ -5,7 +5,7 @@ import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
-import { UIFilter, UIFilterBuilder } from '../UIFilter';
+import type { UIFilter, UIFilterBuilder } from '../UIFilter';
 
 export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>[] {
     const all: UIFilterBuilder<UIFilter>[] = [

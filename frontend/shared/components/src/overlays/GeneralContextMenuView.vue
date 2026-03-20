@@ -3,7 +3,7 @@
         <template v-for="(items, groupIndex) of menu.items" :key="groupIndex+'-group'">
             <ContextMenuLine v-if="groupIndex > 0" />
 
-            <ContextMenuItemView v-for="(item, index) of items" :key="index" v-tooltip="item.disabled" :context-menu-view="$refs.contextMenuView" :class="{'disabled': !!item.disabled, 'with-description': !!item.description}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item, $event)">
+            <ContextMenuItemView v-for="(item, index) of items" :key="index" v-tooltip="item.disabled" :context-menu-view="$refs.contextMenuView" :class="{'disabled': !!item.disabled, 'with-description': !!item.description}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item)">
                 <template v-if="item.selected !== null || item.leftIcon !== null" #left>
                     <Checkbox v-if="item.selected !== null" :model-value="item.selected" :only-line="true" />
                     <span v-else :class="'icon '+item.leftIcon" />
@@ -30,7 +30,7 @@
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import Checkbox from '../inputs/Checkbox.vue';
-import { ContextMenu, ContextMenuItem } from './ContextMenu';
+import type { ContextMenu, ContextMenuItem } from './ContextMenu';
 import ContextMenuItemView from './ContextMenuItemView.vue';
 import ContextMenuLine from './ContextMenuLine.vue';
 import ContextMenuView from './ContextMenuView.vue';
@@ -47,7 +47,7 @@ export default class GeneralContextMenuView extends VueComponent {
     @Prop({ required: false })
     menu: ContextMenu;
 
-    handleAction(item: ContextMenuItem, event) {
+    handleAction(item: ContextMenuItem) {
         if (!item.action || item.disabled) {
             return;
         }

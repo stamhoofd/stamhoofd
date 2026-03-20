@@ -22,12 +22,12 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { NavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STInputBox from '#inputs/STInputBox.vue';

@@ -7,11 +7,11 @@
 </template>
 
 <script setup lang="ts">
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import ReduceablePriceInput from '@stamhoofd/components/groups/components/ReduceablePriceInput.vue';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { ReduceablePrice } from '@stamhoofd/structures';
+import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import type { ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

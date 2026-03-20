@@ -260,7 +260,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -280,9 +280,11 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
+import type { BalanceItem, BalanceItemRelation} from '@stamhoofd/structures';
+import { BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { computed, onMounted, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import PaymentRow from './components/PaymentRow.vue';
 

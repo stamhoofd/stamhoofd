@@ -1,4 +1,5 @@
-import { Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { ref } from 'vue';
 import { useResizeObserver } from '../inputs/hooks/useResizeObserver';
 
 export function useElementWidth(element: Ref<HTMLElement | null>): Ref<number> {

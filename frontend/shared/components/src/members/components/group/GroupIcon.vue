@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import ImageComponent from '#views/ImageComponent.vue';
 import OrganizationAvatar from '#context/OrganizationAvatar.vue';
-import { Group, Organization } from '@stamhoofd/structures';
+import type { Group, Organization } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(

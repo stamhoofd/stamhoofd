@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -109,7 +109,8 @@ import TagIdsInput from '@stamhoofd/components/inputs/TagIdsInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import InheritedRecordsConfigurationBox from '@stamhoofd/components/records/components/InheritedRecordsConfigurationBox.vue';
-import { DefaultAgeGroup, OrganizationRecordsConfiguration, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
+import type { DefaultAgeGroup} from '@stamhoofd/structures';
+import { OrganizationRecordsConfiguration, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();

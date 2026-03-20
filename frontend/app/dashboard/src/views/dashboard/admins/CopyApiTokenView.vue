@@ -43,7 +43,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import { ApiUserWithToken } from '@stamhoofd/structures';
+import type { ApiUserWithToken } from '@stamhoofd/structures';
 
 @Component({
     components: {

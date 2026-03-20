@@ -17,7 +17,8 @@
 </template>
 
 <script lang="ts" setup>
-import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import type { PlatformMembershipType, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import { PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

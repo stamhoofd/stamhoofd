@@ -1,10 +1,11 @@
-/* eslint-disable jest/expect-expect */
 
-/* eslint-disable jest/no-standalone-expect */
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
-import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import type { Organization, StripeAccount } from '@stamhoofd/models';
+import { Order, OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint.js';
@@ -1258,7 +1259,6 @@ describe('E2E.Stock', () => {
                 const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
                 const response = await testServer.test(endpoint, r);
-                expect(response.body).toBeDefined();
                 const orderStruct = response.body.order;
 
                 // Now check the stock has changed for the product
@@ -1317,7 +1317,6 @@ describe('E2E.Stock', () => {
                 const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
                 const response = await testServer.test(endpoint, r);
-                expect(response.body).toBeDefined();
                 const orderStruct = response.body.order;
 
                 // Now check the stock has changed for the product
@@ -1712,7 +1711,6 @@ describe('E2E.Stock', () => {
             const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
 
             const response = await testServer.test(endpoint, r);
-            expect(response.body).toBeDefined();
             const orderStruct = response.body.order;
 
             // Now check the stock has changed for the product

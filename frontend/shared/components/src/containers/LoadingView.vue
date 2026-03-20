@@ -1,10 +1,10 @@
 <template>
-    <LoadingBox :appear="true" :show="show" :errorBox="errorBox" :view="true" />
+    <LoadingBox :appear="true" :show="show" :error-box="errorBox" :view="true" />
 </template>
 
 
 <script lang="ts" setup>
-import { ErrorBox } from "../errors/ErrorBox";
+import type { ErrorBox } from "../errors/ErrorBox";
 import LoadingBox from "./LoadingBox.vue";
 
 withDefaults(

@@ -1,7 +1,7 @@
-import { CellObject } from 'xlsx';
-import { BaseColumnMatcher } from '../ColumnMatcher';
+import type { CellObject } from 'xlsx';
+import type { BaseColumnMatcher } from '../ColumnMatcher';
 import { DateColumnMatcher } from '../DateColumnMatcher';
-import { ImportMemberBaseResult } from '../ImportMemberBaseResult';
+import type { ImportMemberBaseResult } from '../ImportMemberBaseResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class BirthDayColumnMatcher extends DateColumnMatcher implements BaseColumnMatcher {

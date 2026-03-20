@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SetupSteps, SetupStepType } from '@stamhoofd/structures';
+import type { SetupSteps, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import SetupStepRow from './SetupStepRow.vue';
 

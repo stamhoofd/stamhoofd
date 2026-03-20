@@ -1,4 +1,5 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,19 +14,19 @@ import { StockReservation } from './StockReservation.js';
 import { TranslatedString } from './TranslatedString.js';
 import { Image } from './files/Image.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
-import { RegisterItem } from './members/checkout/RegisterItem.js';
+import type { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
 
 export class GroupPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    @field({ decoder: StringDecoder })
-    @field(TranslatedString.field({ version: 370 }))
-    name = new TranslatedString($t(`%132`));
+    @field({ decoder: StringDecoder, defaultValue: () => '' })
+    @field(TranslatedString.field({ version: 370, defaultValue: () => new TranslatedString($t(`%132`)) }))
+    name: TranslatedString;
 
-    @field({ decoder: ReduceablePrice })
-    price = ReduceablePrice.create({});
+    @field({ decoder: ReduceablePrice, defaultValue: () => ReduceablePrice.create({}) })
+    price: ReduceablePrice;
 
     @field({ decoder: BooleanDecoder, version: 290 })
     hidden = false;
@@ -34,31 +35,31 @@ export class GroupPrice extends AutoEncoder {
      * Total stock, excluding already sold items into account
      */
     @field({ decoder: IntegerDecoder, nullable: true, version: 290 })
-    stock: number | null = null;
+    stock: number | null;
 
     /**
      * @deprecated removed
      */
     @field({ decoder: IntegerDecoder, optional: true, field: 'usedStock' })
-    _usedStock = 0;
+    _usedStock: number;
 
     /**
      * @deprecated removed
      */
     @field({ decoder: IntegerDecoder, optional: true, field: 'reserved' })
-    _reserved = 0;
+    _reserved: number;
 
     /**
      * Bundle discounts that are enabled for this group price, and possible custom settings
      */
     @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), version: 374 })
-    bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings> = new Map();
+    bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings>;
 
     @field({ decoder: DateDecoder, nullable: true, version: 378 })
-    startDate: Date | null = null;
+    startDate: Date | null;
 
     @field({ decoder: DateDecoder, nullable: true, version: 378 })
-    endDate: Date | null = null;
+    endDate: Date | null;
 
     getUsedStock(group: Group) {
         const groupStockReservations = group.stockReservations;

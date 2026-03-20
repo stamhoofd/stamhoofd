@@ -17,7 +17,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, VersionBox } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { VersionBox } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';

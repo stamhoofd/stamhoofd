@@ -1,4 +1,5 @@
-import { Group, GroupType, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Group, StamhoofdFilter } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { useOrganization, usePlatform } from '../../hooks';
 import { Formatter } from '@stamhoofd/utility';
 

@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformMember, User } from '@stamhoofd/structures';
+import type { PlatformMember, User } from '@stamhoofd/structures';
 import { useAppContext } from '../../../context/appContext';
 import STGridItem from '../../../layout/STGridItem.vue';
 import EmailAddress from '../../../email/EmailAddress.vue';

@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StringCompare } from '@stamhoofd/utility';
-import XLSX from 'xlsx';
+import type XLSX from 'xlsx';
 import { GeneralMemberDetailsMatcher } from '../GeneralMemberDetailsMatcher';
 
 export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {

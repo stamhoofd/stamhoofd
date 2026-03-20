@@ -65,14 +65,16 @@
 
 <script setup lang="ts">
 import { usePopup } from '@simonbackx/vue-app-navigation';
-import { computed, onMounted, Ref, shallowRef } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, shallowRef } from 'vue';
 
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { PromiseComponent } from '../containers/AsyncComponent';
 import { ReplaceRootEventBus } from '../overlays/ModalStackEventBus';
 import { useAppData } from './appContext';
 import ContextLogo from './ContextLogo.vue';
-import { Option, useContextOptions } from './hooks/useContextOptions';
+import type { Option} from './hooks/useContextOptions';
+import { useContextOptions } from './hooks/useContextOptions';
 
 const popup = usePopup();
 

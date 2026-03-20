@@ -48,7 +48,7 @@ describe('E2E.Documents', () => {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {

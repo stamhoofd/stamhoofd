@@ -68,7 +68,7 @@ import STToolbar from '#navigation/STToolbar.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 
-import { RegisterCheckout } from '@stamhoofd/structures';
+import type { RegisterCheckout } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 
 const props = defineProps<{

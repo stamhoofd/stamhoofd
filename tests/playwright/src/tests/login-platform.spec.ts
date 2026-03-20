@@ -1,17 +1,18 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base';
+import { test } from '../test-fixtures/base.js';
 
 // other imports
-import {
+import type {
     Organization,
+    User} from '@stamhoofd/models';
+import {
     OrganizationFactory,
     Token,
-    User,
     UserFactory,
 } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { WorkerData } from '../helpers';
+import { WorkerData } from '../helpers/index.js';
 
 test.describe('Login', () => {
     let organization: Organization;

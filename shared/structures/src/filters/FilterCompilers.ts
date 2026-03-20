@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
+import type { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
 
 function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, StamhoofdCompareValue> {
     if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined || filter instanceof Date) {

@@ -1,12 +1,13 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
-import { computed, ref, Ref, unref, watchEffect } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref, unref, watchEffect } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useContext, useOrganization } from '../../hooks';
 import { SearchOrganizationView } from '../../members';
-import { NavigationActions } from '../../types/NavigationActions';
+import type { NavigationActions } from '../../types/NavigationActions';
 
 export function useExternalOrganization(organizationId: Ref<string | null>, organizationHint?: Organization | null | Ref<Organization | null>) {
     const organization = useOrganization();

@@ -69,7 +69,7 @@ useValidation(errors.validator, () => {
 });
 
 async function doDelete() {
-    if(disabled.value) {
+    if (disabled.value) {
         return;
     }
 
@@ -78,16 +78,16 @@ async function doDelete() {
     try {
         const isValid = await errors.validator.validate();
 
-        if(!isValid) {
+        if (!isValid) {
             return;
         }
 
         const isDeleted = await props.onDelete();
 
-        if(isDeleted) {
+        if (isDeleted) {
             await pop();
         }
-    } catch(e) {
+    } catch (e) {
         Toast.fromError(e).show();
     } finally {
         loading.value = false;

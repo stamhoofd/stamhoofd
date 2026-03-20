@@ -3,15 +3,15 @@
 </template>
 
 <script setup lang="ts">
-import { PatchAnswers, PlatformMember, RecordCategory } from '@stamhoofd/structures';
+import type { PatchAnswers, PlatformMember, RecordCategory } from '@stamhoofd/structures';
 
-import { Validator } from '../../../errors/Validator';
+import type { Validator } from '../../../errors/Validator';
 
 import { computed } from 'vue';
 import FillRecordCategoryBox from '../../../records/components/FillRecordCategoryBox.vue';
 import { useIsAllOptional } from '../../hooks/useIsPropertyRequired';
 import { useAppContext } from '../../../context/appContext';
-import { ErrorBox } from '../../../errors/ErrorBox';
+import type { ErrorBox } from '../../../errors/ErrorBox';
 import { useOrganization } from '../../../hooks';
 
 const props = withDefaults(defineProps<{
