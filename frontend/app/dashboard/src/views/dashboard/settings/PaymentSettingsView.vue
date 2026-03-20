@@ -932,6 +932,7 @@ async function mollieDashboard() {
             path: '/mollie/dashboard',
             shouldRetry: false,
             owner,
+            decoder: StringDecoder as Decoder<string>,
         });
 
         if (AppManager.shared.isNative) {
