@@ -1,4 +1,5 @@
-import { ref, Ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { ref, watch } from 'vue';
 
 /**
  * This hook will make sure every value is 'visible' for a minimum duration.

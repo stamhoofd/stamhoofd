@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
+import type { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
 
 defineOptions({
     inheritAttrs: false,

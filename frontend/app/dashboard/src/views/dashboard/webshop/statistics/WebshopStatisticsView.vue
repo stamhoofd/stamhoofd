@@ -83,12 +83,14 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import { Category, Graph, GraphData, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import type { Category, Order, TicketPrivate} from '@stamhoofd/structures';
+import { Graph, GraphData, OrderStatus, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { DurationLike } from 'luxon';
-import { computed, onBeforeUnmount, onMounted, Ref, ref } from 'vue';
-import { WebshopManager } from '../WebshopManager';
+import type { DurationLike } from 'luxon';
+import type { Ref} from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import type { WebshopManager } from '../WebshopManager';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
 

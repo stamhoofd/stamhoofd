@@ -25,11 +25,11 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Product, ProductPrice } from '@stamhoofd/structures';
+import type { Product, ProductPrice } from '@stamhoofd/structures';
 
 import EditProductPriceView from './EditProductPriceView.vue';
 import { useDeleteProductPrice } from '../hooks/useDeleteProductPrice';

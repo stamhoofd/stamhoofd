@@ -9,7 +9,7 @@ import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
-import { UIFilter, UIFilterBuilder } from '../UIFilter';
+import type { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';

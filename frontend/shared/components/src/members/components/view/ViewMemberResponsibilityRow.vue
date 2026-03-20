@@ -27,7 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupType, MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
+import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useOrganization, usePlatform } from '../../../hooks';

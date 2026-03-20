@@ -1,4 +1,5 @@
-import { AccessRight, NamedObject, Organization, OrganizationTag, PermissionsResourceType } from '@stamhoofd/structures';
+import type { NamedObject, Organization, OrganizationTag} from '@stamhoofd/structures';
+import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { useAuth, usePlatform } from '../../hooks';
 
 export function useEventPermissions() {

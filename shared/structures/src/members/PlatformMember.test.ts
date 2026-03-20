@@ -1,4 +1,3 @@
-import 'jest-extended';
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { Platform } from '../Platform.js';

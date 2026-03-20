@@ -460,7 +460,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, useCanDismiss, useCanPop, usePop, usePresent, useShow, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
@@ -475,11 +476,12 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import AccountSettingsView from '@stamhoofd/components/views/AccountSettingsView.vue';
-import { AccessRight, Country, EmailTemplate, EmailTemplateType, PaymentMethod, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
-
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import type { WebshopPreview} from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate, EmailTemplateType, PaymentMethod, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import PackageSettingsView from '../settings/packages/PackageSettingsView.vue';

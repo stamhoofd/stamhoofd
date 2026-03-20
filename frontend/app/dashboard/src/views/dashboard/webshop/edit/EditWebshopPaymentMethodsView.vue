@@ -9,15 +9,17 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import { PaymentConfiguration, PrivatePaymentConfiguration, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import type { PaymentConfiguration, PrivatePaymentConfiguration} from '@stamhoofd/structures';
+import { PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 

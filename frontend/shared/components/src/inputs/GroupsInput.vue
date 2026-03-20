@@ -34,7 +34,8 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { GroupType, NamedObject, RegistrationPeriodList } from '@stamhoofd/structures';
-import { computed, Ref, ref, watch, watchEffect } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
 
 const props = withDefaults(
     defineProps<{

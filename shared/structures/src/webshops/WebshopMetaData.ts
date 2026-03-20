@@ -1,11 +1,13 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Data, Decoder, PatchableDecoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { Country } from '@stamhoofd/types/Country';
 import { Address } from '../addresses/Address.js';
 import { City } from '../addresses/City.js';
-import { Country, CountryDecoder } from '../addresses/CountryDecoder.js';
+import { CountryDecoder } from '../addresses/CountryDecoder.js';
 import { Province } from '../addresses/Province.js';
 import { DNSRecord, DNSRecordType } from '../DNSRecord.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
@@ -177,12 +179,12 @@ export class CheckoutMethodTypeHelper {
     }
 }
 
-export class CheckoutMethod extends AutoEncoder {
+export abstract class CheckoutMethod extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    @field({ decoder: new EnumDecoder(CheckoutMethodType) })
-    type: CheckoutMethodType;
+    // @field({ decoder: new EnumDecoder(CheckoutMethodType), defaultValue: () => CheckoutMethodType.Takeout })
+    abstract type: CheckoutMethodType;
 
     @field({ decoder: StringDecoder })
     name = '';
@@ -205,8 +207,8 @@ export class CheckoutMethod extends AutoEncoder {
 }
 
 export class WebshopTakeoutMethod extends CheckoutMethod {
-    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Takeout }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
-    type: CheckoutMethodType.Takeout = CheckoutMethodType.Takeout;
+    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Takeout, defaultValue: () => CheckoutMethodType.Takeout }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
+    type: CheckoutMethodType.Takeout;
 
     @field({ decoder: Address })
     address: Address;
@@ -217,16 +219,18 @@ export class WebshopTakeoutMethod extends CheckoutMethod {
  */
 export class WebshopOnSiteMethod extends CheckoutMethod {
     // Indicate this field exists for all versions, but the downgrade should get executed
-    @field({ decoder: new EnumDecoder(CheckoutMethodType) })
+    @field({ decoder: new EnumDecoder(CheckoutMethodType), defaultValue: () => CheckoutMethodType.Takeout })
     @field({
         decoder: new EnumDecoder(CheckoutMethodType),
-        version: 105, downgrade: () => {
+        version: 105,
+        downgrade: () => {
             // Return takeout method for old clients
             return CheckoutMethodType.Takeout;
         },
         patchDefaultValue: () => CheckoutMethodType.OnSite,
+        defaultValue: () => CheckoutMethodType.OnSite,
     }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
-    type: CheckoutMethodType.OnSite = CheckoutMethodType.OnSite;
+    type: CheckoutMethodType.OnSite;
 
     // TODO: transform into an address with coordinates (used by e-tickets)
     @field({ decoder: Address })
@@ -255,8 +259,8 @@ export class CheckoutMethodPrice extends AutoEncoder {
 }
 
 export class WebshopDeliveryMethod extends CheckoutMethod {
-    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
-    type: CheckoutMethodType.Delivery = CheckoutMethodType.Delivery;
+    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery, defaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
+    type: CheckoutMethodType.Delivery;
 
     @field({ decoder: CheckoutMethodPrice, version: 45 })
     price: CheckoutMethodPrice = CheckoutMethodPrice.create({});
@@ -276,16 +280,16 @@ export type AnyCheckoutMethodPatch = AutoEncoderPatchType<WebshopTakeoutMethod> 
 
 export class AnyCheckoutMethodPatchDecoder {
     static decode(data: Data): AnyCheckoutMethodPatch {
-        const base = data.decode(CheckoutMethod.patchType() as Decoder<AutoEncoderPatchType<CheckoutMethod>>);
-        if (base.type === CheckoutMethodType.Takeout) {
+        const type = data.field('type').enum(CheckoutMethodType);
+        if (type === CheckoutMethodType.Takeout) {
             return WebshopTakeoutMethod.patchType().decode(data);
         }
 
-        if (base.type === CheckoutMethodType.Delivery) {
+        if (type === CheckoutMethodType.Delivery) {
             return WebshopDeliveryMethod.patchType().decode(data);
         }
 
-        if (base.type === CheckoutMethodType.OnSite) {
+        if (type === CheckoutMethodType.OnSite) {
             return WebshopOnSiteMethod.patchType().decode(data);
         }
 
@@ -304,16 +308,16 @@ export class AnyCheckoutMethodPatchDecoder {
 
 export class AnyCheckoutMethodDecoder {
     static decode(data: Data): AnyCheckoutMethod {
-        const base = data.decode(CheckoutMethod as Decoder<CheckoutMethod>);
-        if (base.type === CheckoutMethodType.Takeout) {
+        const type = data.field('type').enum(CheckoutMethodType);
+        if (type === CheckoutMethodType.Takeout) {
             return WebshopTakeoutMethod.decode(data);
         }
 
-        if (base.type === CheckoutMethodType.Delivery) {
+        if (type === CheckoutMethodType.Delivery) {
             return WebshopDeliveryMethod.decode(data);
         }
 
-        if (base.type === CheckoutMethodType.OnSite) {
+        if (type === CheckoutMethodType.OnSite) {
             return WebshopOnSiteMethod.decode(data);
         }
 

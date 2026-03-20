@@ -35,14 +35,15 @@
 </template>
 
 <script setup lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
 import { useEmitPatchArray, usePatchMoveUpDownSingle } from '../../hooks';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import { RecordEditorSettings } from '../RecordEditorSettings';
+import type { RecordEditorSettings } from '../RecordEditorSettings';
 
 const props = withDefaults(
     defineProps<{

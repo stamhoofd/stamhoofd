@@ -1,22 +1,17 @@
-import { FormatInputDirective } from '@stamhoofd/components/directives/FormatInputDirective';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import { MemberManager, OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { CountryHelper, Organization, Platform, User } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import Vue from 'vue';
+import type { FormatInputDirective } from '@stamhoofd/components/directives/FormatInputDirective';
+import type { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import type { MemberManager, OrganizationManager, SessionContext } from '@stamhoofd/networking';
+import type { CountryHelper, Organization, Platform, User } from '@stamhoofd/structures';
+import type { Formatter } from '@stamhoofd/utility';
 
 export { };
 
-declare module 'vue' {
-    import { CompatVue } from 'vue';
+/*declare module 'vue' {
+    import type { CompatVue } from 'vue';
     const Vue: CompatVue;
     export default Vue;
     export * from '@vue/runtime-dom';
-}
-
-declare module '*.vue' {
-    export default Vue;
-}
+}*/
 
 declare module 'vue' {
     interface ComponentCustomProperties {

@@ -49,7 +49,7 @@ import { ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
 const props = withDefaults(defineProps<{

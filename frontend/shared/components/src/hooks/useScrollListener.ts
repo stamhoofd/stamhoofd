@@ -1,4 +1,5 @@
-import { onBeforeUnmount, Ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { onBeforeUnmount, watch } from 'vue';
 
 export function useScrollListener(element: Ref<HTMLElement | null>, listener: () => void) {
     function handler() {

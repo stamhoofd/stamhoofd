@@ -64,12 +64,13 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from '@stamhoofd/structures';
+import type { Product, ProductDateRange} from '@stamhoofd/structures';
+import { Category, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { computed, ref } from 'vue';
-import { WebshopManager } from '../WebshopManager';
+import type { WebshopManager } from '../WebshopManager';
 import TicketScannerView from './TicketScannerView.vue';
 
 const props = defineProps<{

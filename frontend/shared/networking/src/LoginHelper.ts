@@ -1,10 +1,12 @@
-import { AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { RequestResult } from '@simonbackx/simple-networking';
-import { CreateOrganization, NewUser, Organization, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import type { RequestResult } from '@simonbackx/simple-networking';
+import type { Organization} from '@stamhoofd/structures';
+import { CreateOrganization, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
-import { type SessionContext } from './SessionContext';
+import type {SessionContext} from './SessionContext';
 import { SessionManager } from './SessionManager';
 
 export class LoginHelper {

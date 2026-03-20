@@ -53,13 +53,13 @@ defineRoutes([
     {
         url: Routes.Roles,
         name: 'roles',
-        component: RolesView as ComponentOptions,
+        component: RolesView,
         present: 'popup',
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: EditResponsibilitiesView as ComponentOptions,
+        component: EditResponsibilitiesView,
     },
 ]);
 

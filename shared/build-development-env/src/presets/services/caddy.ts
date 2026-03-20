@@ -8,7 +8,7 @@ const exec = promisify(execCallback);
 
 export async function init(config: SharedEnvironment): Promise<ConcurrentlyCommandInput[]> {
     const caddyConfig = buildCaddyConfig(config.domains);
-    const tmpFileLocation = __dirname + '/caddy.json';
+    const tmpFileLocation = import.meta.dirname + '/caddy.json';
 
     // Write to file
     await fs.writeFile(tmpFileLocation, JSON.stringify(caddyConfig, null, 2));

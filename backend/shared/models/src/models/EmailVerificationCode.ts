@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
+import { type I18n } from '@stamhoofd/backend-i18n';
 import { QueryableModel } from '@stamhoofd/sql';
 import { EmailTemplateType, Recipient, Replacement } from '@stamhoofd/structures';
 import basex from 'base-x';
@@ -8,6 +8,8 @@ import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { Platform } from './Platform.js';
+import { type User } from './User.js';
+import { type Organization } from './Organization.js';
 
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
@@ -118,7 +120,7 @@ export class EmailVerificationCode extends QueryableModel {
         this.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 12);
     }
 
-    getEmailVerificationUrl(user: import('./User').User, organization: import('./Organization').Organization | null, i18n: I18n) {
+    getEmailVerificationUrl(user: User, organization: Organization | null, i18n: I18n) {
         let host: string;
         if (user.permissions || !organization || STAMHOOFD.userMode === 'platform') {
             host = 'https://' + (STAMHOOFD.domains.dashboard ?? 'stamhoofd.app') + '/' + i18n.locale;
@@ -244,7 +246,7 @@ export class EmailVerificationCode extends QueryableModel {
         }
     }
 
-    async send(user: import('./User').User, organization: import('./Organization').Organization | null, i18n: I18n, withCode = true) {
+    async send(user: User, organization: Organization | null, i18n: I18n, withCode = true) {
         const url = this.getEmailVerificationUrl(user, organization, i18n);
 
         const name = organization?.name ?? (await Platform.getSharedPrivateStruct()).config.name;
@@ -298,7 +300,7 @@ export class EmailVerificationCode extends QueryableModel {
         }
     }
 
-    static async resend(organization: import('./Organization').Organization | null, token: string, i18n: I18n) {
+    static async resend(organization: Organization | null, token: string, i18n: I18n) {
         const verificationCodes = await this.where({
             token,
             organizationId: organization
@@ -336,7 +338,7 @@ export class EmailVerificationCode extends QueryableModel {
      * If needed, it will update the code.
      * Use this method for sending only, not for verification!
      */
-    static async createFor(user: import('./User').User, email: string): Promise<EmailVerificationCode> {
+    static async createFor(user: User, email: string): Promise<EmailVerificationCode> {
         // TODO: make this constant time to avoid complex timing attacks (especially when under load)
         // Do we already have a verificationCode for this email?
 

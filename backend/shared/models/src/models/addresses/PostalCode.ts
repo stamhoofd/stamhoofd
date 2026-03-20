@@ -1,7 +1,7 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Country } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

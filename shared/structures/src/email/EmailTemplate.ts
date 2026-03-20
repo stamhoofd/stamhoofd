@@ -1,6 +1,6 @@
 import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Replacement } from '../endpoints/EmailRequest.js';
+import type { Replacement } from '../endpoints/EmailRequest.js';
 import { EmailRecipientFilterType } from './Email.js';
 import { ExampleReplacements } from './exampleReplacements.js';
 

@@ -68,11 +68,13 @@
 
 <script lang="ts" setup>
 import { Sorter } from '@stamhoofd/utility';
-import { computed, defineComponent, getCurrentInstance, onMounted, ref, Ref, useTemplateRef, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, defineComponent, getCurrentInstance, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
 import { useDeviceWidth, useScrollListener } from '../../hooks';
 import SaveView from '../../navigation/SaveView.vue';
-import { SaveViewDefaults, SaveViewProps } from '../../navigation/SaveViewProps';
+import type { SaveViewProps } from '../../navigation/SaveViewProps';
+import { SaveViewDefaults } from '../../navigation/SaveViewProps';
 import STList from '../STList.vue';
 import STListItem from '../STListItem.vue';
 import { CategorizedViewCategory } from './CategorizedViewCategory';
@@ -138,9 +140,9 @@ function updateVisible() {
             return;
         }
 
-        let filtered: CategorizedViewCategory[] = [];
+        const filtered: CategorizedViewCategory[] = [];
         let requiredPercentage = 0.5;
-        let percentageMap: Map<CategorizedViewCategory, number> = new Map();
+        const percentageMap: Map<CategorizedViewCategory, number> = new Map();
 
         for (const category of categories.value) {
             const box = category.el.value;

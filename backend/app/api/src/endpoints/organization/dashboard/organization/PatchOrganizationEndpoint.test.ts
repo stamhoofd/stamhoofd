@@ -592,7 +592,7 @@ describe('Endpoint.PatchOrganization', () => {
 
                 // other fields should be default fields and not be set
                 expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].level).toBe(PermissionLevel.None);
-                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].accessRights).toBeEmpty();
+                expect(response.body.privateMeta!.inheritedResponsibilityRoles[0].accessRights).toEqual([]);
             });
 
             test('should only be able to patch resources of inherited responsibility roles', async () => {

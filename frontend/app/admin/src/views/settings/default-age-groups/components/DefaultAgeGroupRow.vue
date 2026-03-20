@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DefaultAgeGroup } from '@stamhoofd/structures';
+import type { DefaultAgeGroup } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 defineProps<{

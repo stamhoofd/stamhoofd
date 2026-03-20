@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import { DateOption } from './DateRange';
+import type { DateOption } from './DateRange';
 
 const props = withDefaults(defineProps<{
     options?: DateOption[] | null;

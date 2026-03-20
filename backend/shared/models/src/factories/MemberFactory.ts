@@ -1,5 +1,5 @@
-import { Factory } from '@simonbackx/simple-database';
-import { Gender, MemberDetails, ParentType } from '@stamhoofd/structures';
+import { Column, Factory } from '@simonbackx/simple-database';
+import { Gender, MemberDetails, ParentType, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Member, MemberWithUsersRegistrationsAndGroups } from '../models/Member.js';
@@ -32,7 +32,7 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
         const organization = this.options.organization
             ?? (STAMHOOFD.userMode === 'organization' ? (await new OrganizationFactory({}).create()) : null);
 
-        const memberDetails = this.options.details?.clone() ?? new MemberDetails();
+        const memberDetails = this.options.details?.clone() ?? MemberDetails.create({});
         const minAge = (this.options.minAge ?? 6);
         const maxAge = this.options.maxAge ?? 18;
 

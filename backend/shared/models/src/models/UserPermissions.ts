@@ -3,7 +3,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Organization, User } from './index.js';
+import { type Organization, type User } from './index.js';
 
 export class UserPermissions extends QueryableModel {
     static table = 'user_permissions';
@@ -16,10 +16,10 @@ export class UserPermissions extends QueryableModel {
     })
     id!: string;
 
-    @column({ foreignKey: UserPermissions.organization, type: 'string' })
+    @column({ type: 'string' })
     organizationId: string;
 
-    @column({ foreignKey: UserPermissions.user, type: 'string' })
+    @column({ type: 'string' })
     userId: string;
 
     @column({ type: 'json', decoder: Permissions, nullable: true })
@@ -47,6 +47,6 @@ export class UserPermissions extends QueryableModel {
     })
     updatedAt: Date;
 
-    static organization = new ManyToOneRelation(Organization, 'organization');
-    static user = new ManyToOneRelation(User, 'user');
+    static organization: ManyToOneRelation<'organization', Organization>;
+    static user: ManyToOneRelation<'user', User>;
 }

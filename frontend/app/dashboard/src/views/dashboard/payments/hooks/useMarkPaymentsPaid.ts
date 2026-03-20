@@ -1,9 +1,10 @@
-import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 
 export function useMarkPaymentsPaid() {

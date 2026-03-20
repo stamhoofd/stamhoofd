@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :loading="loadingView" :error-box="errorBox">
-        <form class="st-view" data-testid="save-view" v-bind="$attrs" @submit.prevent="$emit('save')" novalidate>
+        <form class="st-view" data-testid="save-view" v-bind="$attrs" novalidate @submit.prevent="$emit('save')">
             <STNavigationBar :title="title instanceof TranslatedString ? title.toString() : title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
@@ -73,7 +73,8 @@ import LoadingButton from './LoadingButton.vue';
 import STButtonToolbar from './STButtonToolbar.vue';
 import STNavigationBar from './STNavigationBar.vue';
 import STToolbar from './STToolbar.vue';
-import { SaveViewDefaults, SaveViewProps } from './SaveViewProps';
+import type { SaveViewProps } from './SaveViewProps';
+import { SaveViewDefaults } from './SaveViewProps';
 import { TranslatedString } from '@stamhoofd/structures';
 import { Comment, Fragment, isVNode } from 'vue';
 

@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -53,7 +53,7 @@ import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { EventNotificationDeadline } from '@stamhoofd/structures';
+import type { EventNotificationDeadline } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();

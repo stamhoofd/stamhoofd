@@ -35,7 +35,8 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { Category, PrivateWebshop, Product, ProductDateRange } from '@stamhoofd/structures';
+import type { PrivateWebshop, Product, ProductDateRange } from '@stamhoofd/structures';
+import { Category } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 

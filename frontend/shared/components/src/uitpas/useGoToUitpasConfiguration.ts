@@ -1,14 +1,15 @@
-import { Product, UitpasClientCredentialsStatus, UitpasEventResponse } from '@stamhoofd/structures';
+import type { Product, UitpasEventResponse } from '@stamhoofd/structures';
+import { UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { NavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import SearchUitpasEventView from '#organizations/components/SearchUitpasEventView.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import UitpasSettingsView from '@stamhoofd/dashboard/src/views/dashboard/settings/UitpasSettingsView.vue';
 import { useSetUitpasEvent } from './useSetUitpasEvent';
-import { Ref } from 'vue';
-import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { Ref } from 'vue';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 
 export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProductPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<Product>>) => void) {
     const organization = useRequiredOrganization();

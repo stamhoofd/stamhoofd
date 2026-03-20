@@ -21,7 +21,7 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import Spinner from '../Spinner.vue';
-import { Toast } from './Toast';
+import type { Toast } from './Toast';
 
 /**
  * This component will automatically show the root if we have a valid token. If the user logs out, we'll automatically show the login view

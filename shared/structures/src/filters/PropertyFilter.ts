@@ -1,9 +1,11 @@
-import { cloneObject, Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
+import { cloneObject } from '@simonbackx/simple-encoding';
 
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
-import { Filterable } from '../members/records/RecordCategory.js';
+import type { Filterable } from '../members/records/RecordCategory.js';
 import { StamhoofdFilterDecoder } from './FilteredRequest.js';
-import { isEmptyFilter, isEqualFilter, mergeFilters, StamhoofdFilter } from './StamhoofdFilter.js';
+import type { StamhoofdFilter } from './StamhoofdFilter.js';
+import { isEmptyFilter, isEqualFilter, mergeFilters } from './StamhoofdFilter.js';
 import { convertOldPropertyFilter } from './convertOldPropertyFilter.js';
 
 export class PropertyFilter implements Encodeable {

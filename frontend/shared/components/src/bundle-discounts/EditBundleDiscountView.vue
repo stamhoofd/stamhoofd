@@ -129,7 +129,8 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import GroupAvatar from '#GroupAvatar.vue';
@@ -144,7 +145,8 @@ import { useContext } from '#hooks/useContext.ts';
 import EditGroupView from '#groups/EditGroupView.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 
 const props = withDefaults(
     defineProps<{

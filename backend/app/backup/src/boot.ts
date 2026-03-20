@@ -22,7 +22,7 @@ const start = async () => {
     console.log('Started Backup.');
     loadLogger();
     const router = new Router();
-    await router.loadEndpoints(__dirname + '/endpoints');
+    await router.loadEndpoints(import.meta.dirname + '/endpoints');
     router.endpoints.push(new CORSPreflightEndpoint());
 
     const routerServer = new RouterServer(router);

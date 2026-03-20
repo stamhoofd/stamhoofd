@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
+import type { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAuth, useOrganization, usePlatform } from '../../../hooks';
 import { useMemberActions } from '../../classes/MemberActionBuilder';

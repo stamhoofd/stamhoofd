@@ -1,4 +1,4 @@
-import { BaseColumnMatcher, ColumnMatcher } from './ColumnMatcher';
+import type { BaseColumnMatcher, ColumnMatcher } from './ColumnMatcher';
 
 export class MatchedColumn {
     index = 0;

@@ -1,5 +1,6 @@
-import { AutoEncoder, NonScalarIdentifiable, AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { Ref, computed } from 'vue';
+import type { AutoEncoder, NonScalarIdentifiable, AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Ref} from 'vue';
+import { computed } from 'vue';
 import { usePatchableArray } from './usePatchableArray';
 
 export function useEmitPatchArray<Props, PropName extends string & keyof Props, T extends AutoEncoder & NonScalarIdentifiable<any>>(props: Props, emit: ((d: `patch:${PropName}`, value: PatchableArrayAutoEncoder<T>) => unknown), propName: PropName): {

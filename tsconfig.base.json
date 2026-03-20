@@ -1,27 +1,29 @@
 {
     "compilerOptions": {
-        "target": "es2022",
-        "module": "commonjs",
-        "jsx": "preserve",
-        "importHelpers": true,
-        "moduleResolution": "node",
-        "experimentalDecorators": true,
-        "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "sourceMap": true,
-        "strictNullChecks": true,
+        "composite": true,
         "declaration": true,
         "declarationMap": true,
-        "composite": true,
-        "resolveJsonModule": true,
-        "noErrorTruncation": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
+        "importHelpers": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
         "lib": [
-            "es2019",
+            "es2023",
             "dom"
         ],
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "noErrorTruncation": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "target": "es2023",
         "types": [
             "node"
         ],
+        "useDefineForClassFields": true
     }
 }

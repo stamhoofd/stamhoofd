@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { MemberSegmentedView } from '../..';
 

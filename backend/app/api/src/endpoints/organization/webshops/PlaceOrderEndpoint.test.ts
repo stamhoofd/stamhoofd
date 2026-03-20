@@ -1,6 +1,10 @@
-import { Request, Response } from '@simonbackx/simple-endpoints';
-import { Organization, OrganizationFactory, StripeAccount, Token, User, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
-import { Address, Cart, CartItem, CartItemOption, Country, Customer, Option, OptionMenu, OrderData, OrderResponse, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import type { Response } from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
+import type { Organization, StripeAccount, User} from '@stamhoofd/models';
+import { OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import type { OrderResponse} from '@stamhoofd/structures';
+import { Address, Cart, CartItem, CartItemOption, Customer, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import sinon from 'sinon';
 
 import { StripeMocker } from '../../../../tests/helpers/StripeMocker.js';

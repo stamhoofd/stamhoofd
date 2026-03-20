@@ -1,11 +1,12 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { PaymentStatus, PlatformFamily, PlatformMember, RegisterCheckout, RegisterResponse } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { PlatformMember, RegisterCheckout} from '@stamhoofd/structures';
+import { PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
 import { updateContextFromMembersBlob } from '../';
 import { GlobalEventBus } from '../../EventBus';
-import { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { RegistrationSuccessView } from '../checkout';
 import { FreeContributionStep } from './steps/FreeContributionStep';

@@ -6,7 +6,7 @@ import { usePlatform, useUser } from '../../hooks';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
-import { UIFilterBuilder } from '../UIFilter';
+import type { UIFilterBuilder } from '../UIFilter';
 
 export function useAdvancedRegistrationsUIFilterBuilders() {
     const $platform = usePlatform();

@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PriceBreakdown } from '@stamhoofd/structures';
+import type { PriceBreakdown } from '@stamhoofd/structures';
 
 defineProps<{
     priceBreakdown: PriceBreakdown;

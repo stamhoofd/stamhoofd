@@ -27,12 +27,13 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Category, PrivateWebshop, Product } from '@stamhoofd/structures';
+import type { Product } from '@stamhoofd/structures';
+import { Category, PrivateWebshop } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { computed } from 'vue';

@@ -1,10 +1,11 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
-import { I18n } from '@stamhoofd/backend-i18n';
+import { type I18n } from '@stamhoofd/backend-i18n';
 import { QueryableModel } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
-import { Organization, User } from './index.js';
+import { type Organization } from './Organization.js';
+import { User } from './User.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
@@ -45,10 +46,10 @@ export class PasswordToken extends QueryableModel {
     })
     createdAt: Date;
 
-    @column({ type: 'string', foreignKey: PasswordToken.user })
+    @column({ type: 'string' })
     userId: string;
 
-    static user = new ManyToOneRelation(User, 'user');
+    static user: ManyToOneRelation<'user', User>;
 
     isExpired(): boolean {
         return this.validUntil < new Date();

@@ -1,5 +1,5 @@
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { MembersBlob, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { MembersBlob, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 
 /**
  * Call this method when we receive a fresh blob from the backend.

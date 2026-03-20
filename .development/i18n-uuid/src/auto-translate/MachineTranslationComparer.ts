@@ -1,11 +1,11 @@
-import { TranslatorType } from "../enums/TranslatorType";
-import { globals } from "../shared/globals";
-import { Translations } from "../types/Translations";
-import { TranslationManager } from "./TranslationManager";
+import { TranslatorType } from '../enums/TranslatorType.js';
+import { globals } from '../shared/globals.js';
+import type { Translations } from '../types/Translations.js';
+import type { TranslationManager } from './TranslationManager.js';
 
 type MachineTranslationComparisonItem = {
     original: string;
-    translations: Record<TranslatorType, string>
+    translations: Record<TranslatorType, string>;
 };
 
 export type MachineTranslationComparison = Record<
@@ -30,8 +30,8 @@ export class MachineTranslationComparer {
 
         for (const otherLocale of otherLocales) {
             for (const namespace of this.translationManager.namespaces) {
-                const comparison: MachineTranslationComparison =
-                    Object.fromEntries(
+                const comparison: MachineTranslationComparison
+                    = Object.fromEntries(
                         Object.entries(
                             this.translationManager.readDist(
                                 defaultLocale,
@@ -52,7 +52,7 @@ export class MachineTranslationComparer {
                     const translations = this.translationManager.readMachineTranslations(
                         otherLocale,
                         namespace,
-                    )
+                    );
 
                     for (const [uuid, translation] of Object.entries(
                         translations,

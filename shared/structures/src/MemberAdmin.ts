@@ -1,7 +1,7 @@
 import { type MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { type Organization } from './Organization.js';
 import { Platform } from './Platform.js';
-import { User } from './User.js';
+import type { User } from './User.js';
 
 export class MemberAdmin {
     users: User[] = [];

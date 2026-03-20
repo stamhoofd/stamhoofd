@@ -6,7 +6,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { appToUri } from '@stamhoofd/structures';
 import { isReactive } from 'vue';

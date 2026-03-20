@@ -2,33 +2,30 @@
     "name": "@stamhoofd/structures",
     "version": "2.119.0",
     "type": "module",
-    "main": "./dist/cjs/index.js",
-    "module": "./dist/esm/index.js",
-    "types": "./dist/esm/index.d.ts",
+    "types": "./dist/index.d.ts",
+    "module": "./dist/index.js",
+    "main": "./dist/index.js",
     "exports": {
         ".": {
-            "import": "./dist/esm/index.js",
-            "require": "./dist/cjs/index.js",
-            "types": "./dist/esm/index.d.ts"
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
         }
     },
     "files": [
-        "dist/cjs",
-        "dist/esm",
+        "dist",
         "package.json"
     ],
     "license": "UNLICENCED",
     "sideEffects": [
         "./src/circular-dependencies/*.ts",
-        "./index.ts",
-        "./dist/esm/src/circular-dependencies/*.js",
-        "./dist/cjs/src/circular-dependencies/*.js",
-        "./dist/esm/index.js",
-        "./dist/cjs/index.js"
+        "./src/index.ts",
+        "./dist/circular-dependencies/*.js",
+        "./dist/index.js"
     ],
     "scripts": {
-        "build": "tsc --build tsconfig.cjs.json tsconfig.esm.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
-        "test": "jest",
+        "build": "tsc --build tsconfig.build.json",
+        "test": "vitest",
         "lint": "eslint"
     },
     "devDependencies": {

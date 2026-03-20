@@ -1,7 +1,7 @@
-import XLSX from 'xlsx';
-import { BaseColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberBaseResult } from '../ImportMemberBaseResult';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type XLSX from 'xlsx';
+import type { BaseColumnMatcher } from '../ColumnMatcher';
+import type { ImportMemberBaseResult } from '../ImportMemberBaseResult';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class MemberNumberColumnMatcher implements BaseColumnMatcher {

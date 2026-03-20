@@ -1,4 +1,4 @@
-import { MemberPlatformMembership } from '../members/MemberPlatformMembership.js';
+import type { MemberPlatformMembership } from '../members/MemberPlatformMembership.js';
 import { ContinuousMembershipStatus, MembershipStatus } from '../members/MembershipStatus.js';
 
 export class MemberPlatformMembershipHelper {

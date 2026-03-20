@@ -1,8 +1,8 @@
-import XLSX from 'xlsx';
+import type XLSX from 'xlsx';
 
-import { ColumnMatcher } from '../ColumnMatcher';
+import type { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class CityColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {

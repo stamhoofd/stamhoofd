@@ -167,9 +167,11 @@ import STList from '#layout/STList.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { GroupOption, GroupOptionMenu, GroupPrice, GroupType, PatchAnswers, PriceBreakdown, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
+import type { GroupOption, GroupOptionMenu, GroupPrice, PatchAnswers, PriceBreakdown, RegisterItem} from '@stamhoofd/structures';
+import { GroupType, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onMounted, Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
 import SendConfirmationEmailBox from './SendConfirmationEmailBox.vue';
 

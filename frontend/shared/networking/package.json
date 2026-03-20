@@ -11,6 +11,10 @@
         "./*.ts": "./src/*.ts",
         "./*.vue": "./src/*.vue"
     },
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "imports": {
         "#*.vue": "./src/*.vue",
         "#*.ts": "./src/*.ts",

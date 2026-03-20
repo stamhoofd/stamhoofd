@@ -98,7 +98,8 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { PackageCheckout, PackagePurchases, PaymentMethod, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from '@stamhoofd/structures';
+import type { STPackage, STPackageType } from '@stamhoofd/structures';
+import { PackageCheckout, PackagePurchases, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
@@ -158,7 +159,7 @@ function getUpdatedPackages() {
             continue;
         }
 
-        let isCombineable = true;
+        const isCombineable = true;
         let isBought = false;
         let isTrial = false;
         let expiresSoon = false;

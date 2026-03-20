@@ -30,7 +30,7 @@
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import Checkbox from '../inputs/Checkbox.vue';
-import { ContextMenu, ContextMenuItem } from './ContextMenu';
+import type { ContextMenu, ContextMenuItem } from './ContextMenu';
 import ContextMenuItemView from './ContextMenuItemView.vue';
 import ContextMenuLine from './ContextMenuLine.vue';
 import ContextMenuView from './ContextMenuView.vue';

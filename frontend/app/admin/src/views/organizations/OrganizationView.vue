@@ -181,7 +181,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
@@ -193,7 +194,8 @@ import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { appToUri, Organization, StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { appToUri, Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';

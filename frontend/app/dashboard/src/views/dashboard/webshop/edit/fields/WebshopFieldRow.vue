@@ -13,10 +13,10 @@
 </template>
 
 <script lang="ts" setup>
-import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { WebshopField } from '@stamhoofd/structures';
+import type { WebshopField } from '@stamhoofd/structures';
 
 import EditWebshopFieldView from './EditWebshopFieldView.vue';
 

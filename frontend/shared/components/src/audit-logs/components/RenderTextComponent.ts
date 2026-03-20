@@ -1,4 +1,4 @@
-import { usePresent } from '@simonbackx/vue-app-navigation';
+import type { usePresent } from '@simonbackx/vue-app-navigation';
 import { AuditLogReplacement, AuditLogReplacementType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { h, withDirectives } from 'vue';
@@ -6,7 +6,7 @@ import { useAppContext } from '../../context';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
 import { useShowEvent } from '../../events';
-import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
+import type { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
 import { useShowMember } from '../../members';
 import { useShowOrganization } from '../../organizations';
 import { useShowPayment } from '../../payments';

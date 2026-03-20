@@ -57,11 +57,12 @@
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
 import { PatchMap } from '@simonbackx/simple-encoding';
-import { ObjectWithRecords, PatchAnswers, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
+import type { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../context/appContext';
-import { ErrorBox } from '../../errors/ErrorBox';
-import { Validator } from '../../errors/Validator';
+import type { ErrorBox } from '../../errors/ErrorBox';
+import type { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
 import RecordAnswerInput from '../../inputs/RecordAnswerInput.vue';

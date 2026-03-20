@@ -1,4 +1,5 @@
-import { Request, Server } from '@simonbackx/simple-networking';
+import type { Server } from '@simonbackx/simple-networking';
+import { Request } from '@simonbackx/simple-networking';
 import { Token } from '@stamhoofd/structures';
 
 import { waitForNetworkOnline } from './utility/waitForNetworkOnline';

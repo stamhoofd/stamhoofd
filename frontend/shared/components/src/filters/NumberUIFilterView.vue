@@ -51,7 +51,8 @@ import { computed, markRaw, nextTick, ref } from 'vue';
 import NumberInput from '../inputs/NumberInput.vue';
 import PriceInput from '../inputs/PriceInput.vue';
 import TimeMinutesInput from '../inputs/TimeMinutesInput.vue';
-import { NumberFilterFormat, NumberUIFilter, UINumberFilterMode } from './NumberUIFilter';
+import type { NumberUIFilter} from './NumberUIFilter';
+import { NumberFilterFormat, UINumberFilterMode } from './NumberUIFilter';
 
 const props = defineProps<{
     filter: NumberUIFilter;

@@ -1,10 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
-import { BalanceItem, getVATExcemptInvoiceNote, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
+import type { BalanceItem} from '../BalanceItem.js';
+import { getVATExcemptInvoiceNote, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
-import { PriceBreakdown, PriceBreakdownAction } from '../PriceBreakdown.js';
+import type { PriceBreakdown, PriceBreakdownAction } from '../PriceBreakdown.js';
 import { File } from '../files/File.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';

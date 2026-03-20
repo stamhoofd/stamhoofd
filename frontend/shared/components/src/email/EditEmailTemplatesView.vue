@@ -84,7 +84,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
@@ -96,10 +97,12 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
+import type { Group } from '@stamhoofd/structures';
+import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { computed, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import EditEmailTemplateView from './EditEmailTemplateView.vue';
 
 const props = withDefaults(

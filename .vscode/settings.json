@@ -1,6 +1,12 @@
 {
+    "[javascript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
     "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
     "[typescript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
@@ -8,20 +14,8 @@
     "[vue]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "[javascript]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
-    },
-    "github.copilot.enable": {
-        "*": true,
-        "plaintext": false,
-        "markdown": false,
-        "scminput": false,
-        "vue": true,
-        "yaml": false,
-        "json": false
     },
     "editor.codeLens": true,
     "editor.formatOnPaste": false,
@@ -30,7 +24,9 @@
     "eslint.validate": [
         "typescript",
         "javascript",
-        "vue"
+        "vue",
+        "json",
+        "jsonc"
     ],
     "eslint.workingDirectories": [
         "./backend/app/*",
@@ -40,13 +36,29 @@
         "./devops",
         "./shared/*"
     ],
+    "github.copilot.enable": {
+        "*": true,
+        "json": false,
+        "markdown": false,
+        "plaintext": false,
+        "scminput": false,
+        "vue": true,
+        "yaml": false
+    },
+    "i18n-ally.annotationInPlace": false,
     "i18n-ally.autoDetection": false,
+    "i18n-ally.dirStructure": "file",
     "i18n-ally.disablePathParsing": true,
     "i18n-ally.displayLanguage": "nl",
     "i18n-ally.enabledFrameworks": [
         "vue"
     ],
+    "i18n-ally.enabledParsers": ["json"],
     "i18n-ally.extract.autoDetect": true,
+    "i18n-ally.extract.ignored": [
+        "success green"
+    ],
+    "i18n-ally.extract.keyMaxLength": 1000,
     "i18n-ally.extract.keygenStrategy": "source",
     "i18n-ally.extract.parsers.html": {
         "attributes": [
@@ -64,22 +76,19 @@
         "inlineText": true,
         "vBind": true
     },
+    "i18n-ally.indent": 4,
     "i18n-ally.keepFulfilled": false,
     "i18n-ally.keystyle": "flat",
+    "i18n-ally.languageTagSystem": "none",
     "i18n-ally.localesPaths": [
         "shared/locales/dist/locales/keeo"
     ],
-    "i18n-ally.annotationInPlace": false,
-    "i18n-ally.extract.keyMaxLength": 1000,
-    "i18n-ally.indent": 4,
-    "i18n-ally.tabStyle": "space",
     "i18n-ally.sourceLanguage": "nl-BE",
-    "i18n-ally.languageTagSystem": "none",
-    "i18n-ally.enabledParsers": ["json"],
-    "i18n-ally.dirStructure": "file",
+    "i18n-ally.tabStyle": "space",
     "javascript.format.enable": false,
     "search.exclude": {
         "**.tsbuildinfo": true,
+        "**/.cache": true,
         "**/android/app/build": true,
         "**/android/app/src/main/assets": true,
         "**/dist": true,
@@ -89,15 +98,11 @@
         "**/node_modules": true,
         "**/yarn-error.log": true,
         ".yarn/releases": true,
-        "**/.cache": true,
         "LICENSE": true
     },
     "search.useIgnoreFiles": false,
-    "typescript.preferences.importModuleSpecifier": "project-relative",
-    "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.enablePromptUseWorkspaceTsdk": true,
-    "i18n-ally.extract.ignored": [
-        "success green"
-    ],
-    "typescript.preferGoToSourceDefinition": true
+    "typescript.preferGoToSourceDefinition": true,
+    "typescript.preferences.importModuleSpecifier": "project-relative",
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

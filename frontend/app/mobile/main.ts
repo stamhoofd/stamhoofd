@@ -13,18 +13,18 @@ import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
 import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { InAppReview } from '@capacitor-community/in-app-review';
 import { createApp } from 'vue';
 
 import App from '../dashboard/src/App.vue';
-import { CapacitorStorage } from './src/CapacitorStorage';
-import FileOpener from './src/FileOpenerPlugin';
-import QRScanner from './src/QRScannerPlugin';
-import { UpdateStatus } from './src/UpdateStatus';
-import { WrapperHTTPRequest } from './src/WrapperHTTPRequest';
+import { CapacitorStorage } from './src/CapacitorStorage.js';
+import FileOpener from './src/FileOpenerPlugin/index.js';
+import QRScanner from './src/QRScannerPlugin/index.js';
+import { UpdateStatus } from './src/UpdateStatus.js';
+import { WrapperHTTPRequest } from './src/WrapperHTTPRequest.js';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -135,10 +135,12 @@ if (STAMHOOFD.PLAUSIBLE_DOMAIN && STAMHOOFD.environment === 'production') {
     script.src = 'https://plausible.io/js/plausible.js';
     document.head.appendChild(script); // or something of the likes
     const w = window as any;
+    // eslint-disable-next-line prefer-rest-params
     w.plausible = w.plausible || function () { (w.plausible.q = w.plausible.q || []).push(arguments); };
 }
 else {
     (window as any).plausible = function () {
+        // eslint-disable-next-line prefer-rest-params
         console.log('Debug plausible with args ', arguments);
     };
 }

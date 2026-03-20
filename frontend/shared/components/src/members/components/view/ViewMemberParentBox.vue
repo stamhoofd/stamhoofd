@@ -55,7 +55,8 @@
 </template>
 
 <script setup lang="ts">
-import { NationalRegisterNumberOptOut, Parent, ParentTypeHelper, PlatformMember } from '@stamhoofd/structures';
+import type { Parent, PlatformMember } from '@stamhoofd/structures';
+import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import EmailAddress from '../../../email/EmailAddress.vue';
 import { useCountry } from '../../../hooks';
 

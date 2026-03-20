@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Group, GroupStatus } from './Group.js';
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree } from './GroupCategory.js';
 import { GroupType } from './GroupType.js';
-import { Organization } from './Organization.js';
+import type { Organization } from './Organization.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { SetupSteps } from './SetupSteps.js';
 import { BundleDiscount } from './BundleDiscount.js';

@@ -1,13 +1,16 @@
-import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { Country, Language, Organization, Version } from '@stamhoofd/structures';
+import { Organization, Version } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { isReactive } from 'vue';
 import { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
-import { isReactive } from 'vue';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })

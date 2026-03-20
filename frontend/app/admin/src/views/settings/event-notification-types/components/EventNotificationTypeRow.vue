@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { EventNotificationType } from '@stamhoofd/structures';
+import type { EventNotificationType } from '@stamhoofd/structures';
 
 defineProps<{
     type: EventNotificationType;

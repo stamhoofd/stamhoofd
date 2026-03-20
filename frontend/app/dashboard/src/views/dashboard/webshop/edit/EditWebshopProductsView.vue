@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import CategoryRow from './categories/CategoryRow.vue';
@@ -68,7 +68,8 @@ import ProductRow from './products/ProductRow.vue';
 import { computed } from 'vue';
 import EditCategoryView from './categories/EditCategoryView.vue';
 import EditProductView from './products/EditProductView.vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 

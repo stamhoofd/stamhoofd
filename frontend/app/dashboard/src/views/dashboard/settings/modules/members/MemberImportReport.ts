@@ -1,4 +1,4 @@
-import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
+import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 
 export class MemberImportReport {
     private _errorMessage: string | null = null;

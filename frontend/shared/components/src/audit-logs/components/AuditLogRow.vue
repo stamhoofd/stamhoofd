@@ -31,7 +31,8 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { AuditLog, AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import type { AuditLog} from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import IconContainer from '../../icons/IconContainer.vue';

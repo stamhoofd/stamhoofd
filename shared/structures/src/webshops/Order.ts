@@ -1,4 +1,5 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { BalanceItemWithPayments, BalanceItemWithPrivatePayments } from '../BalanceItem.js';
@@ -7,14 +8,15 @@ import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
 import { Payment, PrivatePayment } from '../members/Payment.js';
 import { RecordCheckboxAnswer } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
-import { Organization } from '../Organization.js';
+import type { Organization } from '../Organization.js';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { Checkout } from './Checkout.js';
 import { Customer } from './Customer.js';
 import { TicketPrivate } from './Ticket.js';
-import { WebshopPreview } from './Webshop.js';
-import { CheckoutMethodType, WebshopTakeoutMethod } from './WebshopMetaData.js';
+import type { WebshopPreview } from './Webshop.js';
+import type { WebshopTakeoutMethod } from './WebshopMetaData.js';
+import { CheckoutMethodType } from './WebshopMetaData.js';
 
 export enum OrderStatusV103 {
     Created = 'Created',

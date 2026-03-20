@@ -35,7 +35,7 @@ export async function loadEnvironmentFile(name: string) {
         // If the local env file doesn't exist, we can ignore it
     }
 
-    let environment = localEnvFile ?? globalEnvFile;
+    let environment = localEnvFile?.default ?? localEnvFile ?? globalEnvFile?.default ?? globalEnvFile;
 
     if (isInternalContributor) {
         environment = {

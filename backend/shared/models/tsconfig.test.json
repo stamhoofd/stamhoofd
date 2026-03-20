@@ -1,0 +1,17 @@
+{
+    "extends": "../../../tsconfig.test.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "dist"
+    },
+    "references": [
+        { "path": "./tsconfig.build.json" }
+    ],
+    "include": [
+        "../../stamhoofd.d.ts",
+        "../../../jest-extended.d.ts",
+        "./src/**/*.spec.ts", 
+        "./src/**/*.test.ts",
+        "./tests"
+    ]
+}

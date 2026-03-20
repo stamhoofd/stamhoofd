@@ -34,7 +34,7 @@ import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import { UIFilter } from './UIFilter';
+import type { UIFilter } from './UIFilter';
 
 @Component({
     components: {

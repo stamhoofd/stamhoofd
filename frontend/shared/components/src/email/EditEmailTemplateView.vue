@@ -28,10 +28,12 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplate, EmailTemplateType, Replacement } from '@stamhoofd/structures';
-import { Ref, computed, nextTick, onMounted, ref } from 'vue';
+import type { Replacement } from '@stamhoofd/structures';
+import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';

@@ -2,10 +2,10 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { DataPermissionsSettings, PermissionLevel, Platform } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { MemberStepView } from '../..';
-import { NavigationActions } from '../../../types/NavigationActions';
+import type { NavigationActions } from '../../../types/NavigationActions';
 import EditMemberDataPermissionsBox from '../../components/edit/EditMemberDataPermissionsBox.vue';
-import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
-import { MemberSharedStepOptions } from './MemberSharedStepOptions';
+import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 const maxOutdatedTime = 60 * 1000 * 60 * 24; // 1 day
 

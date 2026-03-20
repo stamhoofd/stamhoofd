@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DetailedReceivableBalance } from '@stamhoofd/structures';
+import type { DetailedReceivableBalance } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalanceItemRow from './BalanceItemRow.vue';
 import STGrid from '../layout/STGrid.vue';

@@ -68,13 +68,14 @@
 </template>
 
 <script lang="ts" setup>
-import { type AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type {AutoEncoderPatchType} from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import SaveView from '#navigation/SaveView.vue';
-import { PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import STList from '../layout/STList.vue';
 import EditRoleView from './EditRoleView.vue';
@@ -85,7 +86,7 @@ defineRoutes([
     {
         url: 'nieuw',
         name: 'createRole',
-        component: EditRoleView as ComponentOptions,
+        component: EditRoleView,
         present: 'popup',
         paramsToProps: () => {
             const role = PermissionRoleDetailed.create({});
@@ -106,7 +107,7 @@ defineRoutes([
     {
         url: '@roleId',
         name: 'editRole',
-        component: EditRoleView as ComponentOptions,
+        component: EditRoleView,
         present: 'popup',
         params: {
             roleId: String,

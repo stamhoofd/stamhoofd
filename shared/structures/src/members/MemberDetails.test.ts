@@ -1,5 +1,3 @@
-import 'jest-extended';
-
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { MemberDetails } from './MemberDetails.js';
 import { Parent } from './Parent.js';

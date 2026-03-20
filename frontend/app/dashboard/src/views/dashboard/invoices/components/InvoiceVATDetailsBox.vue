@@ -45,7 +45,8 @@
 import { usePopup } from '@simonbackx/vue-app-navigation';
 import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
-import { getVATExcemptInvoiceNote, Invoice } from '@stamhoofd/structures';
+import type { Invoice } from '@stamhoofd/structures';
+import { getVATExcemptInvoiceNote } from '@stamhoofd/structures';
 
 withDefaults(
     defineProps<{

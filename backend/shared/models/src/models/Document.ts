@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars.js';
-import { Member, MemberWithRegistrations, MemberWithUsersRegistrationsAndGroups, RegistrationWithMember } from './Member.js';
+import { Member, MemberWithRegistrations, RegistrationWithMember } from './Member.js';
 import { Organization } from './Organization.js';
 import { Registration } from './Registration.js';
 

@@ -1,9 +1,10 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { OrganizationPackagesStatus } from '@stamhoofd/structures';
-import { onMounted, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { onMounted, ref } from 'vue';
 
 let sharedState: null | {
     loading: Ref<boolean>;

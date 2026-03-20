@@ -1,11 +1,13 @@
 /// <reference types="@vitest/browser/providers/playwright" />
 import { Formatter } from '@stamhoofd/utility';
-import { mount, VueWrapper } from '@vue/test-utils';
+import type { VueWrapper } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { describe, expect, test, vi } from 'vitest';
 import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { Locator, page } from '@vitest/browser/context';
+import type { Locator} from '@vitest/browser/context';
+import { page } from '@vitest/browser/context';
 import { ref } from 'vue';
 import DateSelectionView from './DateSelectionView.vue';
 

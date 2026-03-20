@@ -3,19 +3,19 @@ import { GroupedThrottledQueue } from './GroupedThrottledQueue.js';
 describe('GroupedThrottledQueue', () => {
     // Mock timers for controlling setTimeout
     beforeEach(() => {
-        jest.useFakeTimers();
+        vitest.useFakeTimers();
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        vitest.useRealTimers();
     });
 
     afterAll(() => {
-        jest.clearAllMocks();
+        vitest.clearAllMocks();
     });
 
     it('should create an instance with the provided handler', () => {
-        const handler = jest.fn();
+        const handler = vitest.fn();
         const queue = new GroupedThrottledQueue(handler);
 
         expect(queue.handler).toBe(handler);
@@ -23,7 +23,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should call handler when processing items from a group', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue<number>(handler);
 
         queue.addItem('group1', 1);
@@ -33,7 +33,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should process items from different groups separately', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue<number>(handler);
 
         queue.addItem('group1', 1);
@@ -47,7 +47,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should batch items from the same group', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue<number>(handler);
 
         queue.addItems('group1', [1, 2, 3]);
@@ -59,7 +59,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should flush only the specified group', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue<number>(handler);
 
         queue.addItem('group1', 1);
@@ -77,7 +77,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should remove the group when all items are processed', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue<number>(handler);
 
         queue.addItem('group1', 1);
@@ -93,7 +93,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should handle multiple items added to the same group', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue<number>(handler);
 
         queue.addItem('group1', 1);
@@ -107,7 +107,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should handle large batch sizes correctly', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue<number>(handler);
 
         // Create a large array of items
@@ -127,9 +127,9 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should handle errors in handler without failing the queue', async () => {
-        const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation();
+        const consoleErrorMock = vitest.spyOn(console, 'error');// .mockImplementation();
 
-        const handler = jest.fn().mockImplementation((group, items) => {
+        const handler = vitest.fn().mockImplementation((group, items) => {
             if (group === 'error-group') {
                 throw new Error('Test error');
             }
@@ -155,7 +155,7 @@ describe('GroupedThrottledQueue', () => {
     it('should handle async handler functions', async () => {
         let processingPromise: Promise<void> | null = null;
 
-        const handler = jest.fn().mockImplementation((group, items) => {
+        const handler = vitest.fn().mockImplementation((group, items) => {
             processingPromise = new Promise((resolve) => {
                 setTimeout(() => {
                     resolve();
@@ -174,7 +174,7 @@ describe('GroupedThrottledQueue', () => {
         expect(queue.queues.size).toBe(1);
 
         // Fast-forward time to resolve the processing promise
-        jest.advanceTimersByTime(100);
+        vitest.advanceTimersByTime(100);
 
         // Wait for the processing to complete
         await waitPromise;
@@ -184,7 +184,7 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should not error when flushing non-existing groups', async () => {
-        const handler = jest.fn();
+        const handler = vitest.fn();
         const queue = new GroupedThrottledQueue<number>(handler);
 
         await expect(queue.flushGroupAndWait('non-existing')).resolves.not.toThrow();
@@ -194,21 +194,21 @@ describe('GroupedThrottledQueue', () => {
     });
 
     it('should automatically flush after maxDelay', async () => {
-        const handler = jest.fn().mockResolvedValue(undefined);
+        const handler = vitest.fn().mockResolvedValue(undefined);
         const queue = new GroupedThrottledQueue(handler);
         queue.maxDelay = 1000; // Set a max delay for the timeout
 
         queue.addItem('group-1', 1);
         expect(queue.timeout).not.toBeNull();
 
-        jest.advanceTimersByTime(500);
+        vitest.advanceTimersByTime(500);
 
         queue.addItem('group-2', 2);
         await queue.wait();
         expect(handler).not.toHaveBeenCalled();
 
         // Fast-forward time
-        jest.advanceTimersByTime(500);
+        vitest.advanceTimersByTime(500);
 
         await queue.wait();
         expect(handler).toHaveBeenCalledWith('group-1', [1]);

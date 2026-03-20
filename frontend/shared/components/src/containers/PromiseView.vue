@@ -8,7 +8,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import { ErrorBox } from '../errors/ErrorBox';

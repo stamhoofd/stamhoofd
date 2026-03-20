@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import ImageComponent from '#views/ImageComponent.vue';
 import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
-import { OrganizationMetaData, WebshopMetaData } from '@stamhoofd/structures';
+import type { OrganizationMetaData, WebshopMetaData } from '@stamhoofd/structures';
 import { computed, onMounted } from 'vue';
 
 const props = defineProps<{

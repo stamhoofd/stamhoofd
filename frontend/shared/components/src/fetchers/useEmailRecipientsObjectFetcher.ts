@@ -1,7 +1,9 @@
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { assertSort, CountFilteredRequest, CountResponse, EmailRecipient, LimitedFilteredRequest, PaginatedResponseDecoder, SortList } from '@stamhoofd/structures';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
+import { assertSort, CountResponse, EmailRecipient, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import { useContext } from '../hooks';
-import { ObjectFetcher } from '../tables';
+import type { ObjectFetcher } from '../tables';
 
 type ObjectType = EmailRecipient;
 

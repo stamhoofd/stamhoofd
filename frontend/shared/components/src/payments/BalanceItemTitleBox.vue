@@ -38,7 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import { BalanceItem, BalanceItemStatus, GroupedBalanceItems, PaymentStatus } from '@stamhoofd/structures';
+import type { GroupedBalanceItems, PaymentStatus } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemStatus } from '@stamhoofd/structures';
 
 withDefaults(
     defineProps<{

@@ -21,7 +21,7 @@ import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 
 import { SortItemDirection } from "@stamhoofd/structures";
-import { Column } from "./classes";
+import type { Column } from "./classes";
 
 @Component({
     components: {

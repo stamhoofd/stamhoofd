@@ -3,25 +3,27 @@
     "version": "2.119.0",
     "license": "UNLICENCED",
     "type": "module",
-    "main": "./dist/cjs/index.js",
-    "module": "./dist/esm/index.js",
-    "types": "./dist/esm/index.d.ts",
+    "types": "./dist/index.d.ts",
+    "module": "./dist/index.js",
+    "main": "./dist/index.js",
     "exports": {
         ".": {
-            "import": "./dist/esm/index.js",
-            "require": "./dist/cjs/index.js",
-            "types": "./dist/esm/index.d.ts"
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
         },
-        "./locales": "./dist/locales"
+        "./locales/*": {
+            "types": "./dist/locales/*",
+            "import": "./dist/locales/*",
+            "require": "./dist/locales/*"
+        }
     },
     "files": [
-        "dist/cjs",
-        "dist/esm",
-        "dist/locales",
+        "dist",
         "package.json"
     ],
     "sideEffects": false,
     "scripts": {
-        "build": "tsc --build tsconfig.cjs.json tsconfig.esm.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json && node build.mjs"
+        "build": "tsc --build tsconfig.build.json && node build.js"
     }
 }

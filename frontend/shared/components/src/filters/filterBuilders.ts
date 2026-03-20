@@ -1,4 +1,5 @@
-import { Gender, AppType, AuditLogType, BalanceItemStatus, BalanceItemType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, Platform, PrivateWebshop, RecordCategory, RecordType, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, PrivateWebshop, RecordCategory, WebshopPreview } from '@stamhoofd/structures';
+import { Gender, AuditLogType, BalanceItemStatus, BalanceItemType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, RecordType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useContext, useOrganization, usePlatform } from '../hooks';
@@ -8,7 +9,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './Mul
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
-import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
+import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 
 export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [

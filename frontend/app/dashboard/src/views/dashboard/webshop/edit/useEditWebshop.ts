@@ -1,4 +1,4 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -9,7 +9,8 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { PermissionLevel, PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
-import { computed, readonly, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, readonly, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 
 export type UseEditWebshopProps = {

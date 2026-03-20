@@ -13,7 +13,7 @@ import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-naviga
 import { DataValidator } from '@stamhoofd/utility';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
 @Component({

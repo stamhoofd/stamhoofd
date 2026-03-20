@@ -1,9 +1,9 @@
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
-import { PdfDocWrapper } from './PdfDocWrapper';
-import { PdfFont } from './PdfFont';
-import { PdfItem } from './PdfItem';
+import type { PdfDocWrapper } from './PdfDocWrapper';
+import type { PdfFont } from './PdfFont';
+import type { PdfItem } from './PdfItem';
 
 // polyfill
 globalThis.Buffer = Buffer;

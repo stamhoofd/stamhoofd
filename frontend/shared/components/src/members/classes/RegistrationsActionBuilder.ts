@@ -1,11 +1,14 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { appToUri, Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PlatformMember, Registration} from '@stamhoofd/structures';
+import { appToUri, PermissionLevel, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
 import { useContext, useOrganization } from '../../hooks';
-import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes';
-import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager';
+import type { TableAction } from '../../tables/classes';
+import { InMemoryTableAction, MenuTableAction } from '../../tables/classes';
+import type { PlatformFamilyManager} from '../PlatformFamilyManager';
+import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 
 export function useRegistrationsActionBuilder() {
     const present = usePresent();

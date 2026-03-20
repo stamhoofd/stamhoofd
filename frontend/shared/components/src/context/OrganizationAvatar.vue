@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { BaseOrganization } from '@stamhoofd/structures';
+import type { BaseOrganization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import ImageComponent from '#views/ImageComponent.vue';

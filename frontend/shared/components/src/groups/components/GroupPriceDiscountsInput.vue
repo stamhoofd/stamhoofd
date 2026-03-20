@@ -8,7 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import { Group, GroupPriceDiscount } from '@stamhoofd/structures';
+import type { Group} from '@stamhoofd/structures';
+import { GroupPriceDiscount } from '@stamhoofd/structures';
 import { watch } from 'vue';
 import GroupPriceDiscountInput from './GroupPriceDiscountInput.vue';
 

@@ -33,7 +33,8 @@
 </template>
 
 <script setup lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';

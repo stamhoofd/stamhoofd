@@ -1,3 +1,3 @@
-export * from './models/EmailAddress';
-export * from './classes/Email';
-export * from './classes/EmailMocker';
+export * from './models/EmailAddress.js';
+export * from './classes/Email.js';
+export * from './classes/EmailMocker.js';

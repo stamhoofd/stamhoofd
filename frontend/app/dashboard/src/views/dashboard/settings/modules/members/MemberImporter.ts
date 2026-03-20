@@ -1,11 +1,13 @@
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { PlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
+import type { PlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { startSilentRegister } from '@stamhoofd/components/members/checkout/startCheckout.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { BalanceItem, BalanceItemPaymentDetailed, DetailedReceivableBalance, Group, GroupPrice, GroupType, Organization, OrganizationRegistrationPeriod, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, Platform, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { BalanceItem, Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, Registration} from '@stamhoofd/structures';
+import { BalanceItemPaymentDetailed, DetailedReceivableBalance, GroupPrice, GroupType, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
-import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
+import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 import { MemberImportReport } from './MemberImportReport';
 
 interface RegistrationData {

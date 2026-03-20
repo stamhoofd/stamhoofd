@@ -15,11 +15,12 @@
 </template>
 
 <script lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import STListItem from '#layout/STListItem.vue';
-import { RecordChoice, RecordSettings } from '@stamhoofd/structures';
+import type { RecordChoice, RecordSettings } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "@simonbackx/vue-app-navigation/classes";
 
 import EditRecordChoiceView from '../EditRecordChoiceView.vue';

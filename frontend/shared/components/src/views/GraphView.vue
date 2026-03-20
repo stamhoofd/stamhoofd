@@ -25,18 +25,20 @@
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import Spinner from '#Spinner.vue';
 import { Toast } from '#overlays/Toast.ts';
-import { Graph } from '@stamhoofd/structures';
+import type { Graph } from '@stamhoofd/structures';
+import type { ChartArea, ChartDataset, ChartOptions} from 'chart.js';
 import {
     CategoryScale,
-    Chart, ChartArea, ChartDataset, ChartOptions, Filler, LinearScale,
+    Chart, Filler, LinearScale,
     LineController,
     LineElement, PointElement, Tooltip,
 } from 'chart.js';
 
-import { computed, ComputedRef, ref, Ref, watch, WritableComputedRef } from 'vue';
-import { DateOption } from './DateRange';
+import type { ComputedRef, Ref, WritableComputedRef } from 'vue';
+import { computed, ref, watch } from 'vue';
+import type { DateOption } from './DateRange';
 import GraphDateRangeSelector from './GraphDateRangeSelector.vue';
-import { GraphViewConfiguration } from './GraphViewConfiguration';
+import type { GraphViewConfiguration } from './GraphViewConfiguration';
 
 const props = defineProps<{
     configurations: GraphViewConfiguration[][];

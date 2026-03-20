@@ -23,7 +23,7 @@ import { PlatformPolicy, RichText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
-import { Validator } from '../../errors/Validator';
+import type { Validator } from '../../errors/Validator';
 import { useErrors } from '../../errors/useErrors';
 import { useValidation } from '../../errors/useValidation';
 import { useOrganization, usePlatform } from '../../hooks';

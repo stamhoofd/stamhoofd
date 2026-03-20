@@ -98,7 +98,7 @@ defineRoutes([
     {
         name: Routes.Event,
         url: '@year/@slug/@id',
-        component: EventView as ComponentOptions,
+        component: EventView,
         params: {
             year: Number,
             slug: String,

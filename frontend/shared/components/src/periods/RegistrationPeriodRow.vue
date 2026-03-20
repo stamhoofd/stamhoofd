@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { RegistrationPeriod } from '@stamhoofd/structures';
+import type { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

@@ -1,6 +1,6 @@
-import { globals } from "../shared/globals";
-import { Translations } from "../types/Translations";
-import { TranslationManager } from "./TranslationManager";
+import { globals } from '../shared/globals.js';
+import type { Translations } from '../types/Translations.js';
+import type { TranslationManager } from './TranslationManager.js';
 
 export class TranslationScanner {
     private readonly cache: Map<string, Translations> = new Map();
@@ -33,16 +33,16 @@ export class TranslationScanner {
         const words: Map<string, number> = new Map();
 
         for (const [id, text] of Object.entries(translations)) {
-            text.split(" ")
-                .map((word) =>
+            text.split(' ')
+                .map(word =>
                     word
                         .toLowerCase()
                         .replace(
-                            /[\!\@\#\$\%\^\&\*\)\(\+\=\.\<\>\{\}\[\]\:\;\'\"\|\~\`\_\-]/g,
-                            "",
+                            /[!@#$%^&*)(+=.<>{}[]:;'"|~`_-]/g,
+                            '',
                         ),
                 )
-                .filter((word) => word.length > minLength)
+                .filter(word => word.length > minLength)
                 .forEach((word) => {
                     words.set(word, (words.get(word) ?? 0) + 1);
                 });
@@ -50,14 +50,14 @@ export class TranslationScanner {
 
         return Array.from(words.entries())
             .sort((a, b) => b[1] - a[1])
-            .filter((a) => a[1] > 4);
+            .filter(a => a[1] > 4);
     }
 
     scanConsistentWords(): string {
         return JSON.stringify(
             Object.fromEntries(
                 this.scanFrequentlyUsedWords(globals.DEFAULT_LOCALE).map(
-                    (word) => [word[0], ""],
+                    word => [word[0], ''],
                 ),
             ),
         );

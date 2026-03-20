@@ -1,4 +1,4 @@
-import { SelectableColumn } from './SelectableColumn';
+import type { SelectableColumn } from './SelectableColumn';
 
 export class SelectableSheet {
     id: string;

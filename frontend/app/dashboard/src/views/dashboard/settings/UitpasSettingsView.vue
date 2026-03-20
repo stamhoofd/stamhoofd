@@ -110,8 +110,9 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { ComponentWithProperties, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { OrganizationMetaData, UitpasOrganizerResponse, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasEventResponse } from '@stamhoofd/structures';
-import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import type { UitpasOrganizerResponse, UitpasEventResponse } from '@stamhoofd/structures';
+import { OrganizationMetaData, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper } from '@stamhoofd/structures';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import SearchUitpasOrganizerView from '@stamhoofd/components/organizations/components/SearchUitpasOrganizerView.vue';
 import SetUitpasClientCredentialsView from '@stamhoofd/components/organizations/components/SetUitpasClientCredentialsView.vue';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';

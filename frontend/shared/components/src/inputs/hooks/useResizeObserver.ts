@@ -1,4 +1,5 @@
-import { onBeforeUnmount, Ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { onBeforeUnmount, watch } from 'vue';
 
 export function useResizeObserver(elementRef: Ref<HTMLElement | HTMLElement[] | null>, callback: () => void) {
     const observing = new Set<HTMLElement>();

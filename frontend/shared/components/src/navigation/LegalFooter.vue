@@ -46,7 +46,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Company, Organization, Webshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import type { Company, Organization, Webshop, WebshopPreview} from '@stamhoofd/structures';
+import { WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import { useContext, usePlatform } from '../hooks';

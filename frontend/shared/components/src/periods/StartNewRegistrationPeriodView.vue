@@ -30,14 +30,15 @@
 </template>
 
 <script setup lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { Toast } from '#overlays/Toast.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
+import type { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { ref } from 'vue';
 
 const props = defineProps<{

@@ -88,7 +88,8 @@
 </template>
 
 <script lang="ts" setup>
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -103,7 +104,8 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { Discount, DiscountCode, PrivateWebshop } from '@stamhoofd/structures';
+import type { PrivateWebshop } from '@stamhoofd/structures';
+import { Discount, DiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { computed } from 'vue';

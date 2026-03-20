@@ -1,12 +1,12 @@
-import { Data, Decoder, Encodeable, EncodeContext, EnumDecoder, ObjectData, Patchable, PatchType, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder, Encodeable, EncodeContext, Patchable, PatchType} from '@simonbackx/simple-encoding';
+import { EnumDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Language } from './Language.js';
+import type { StringLikeObject } from '@stamhoofd/types/StringLikeObject';
+import { Language } from '@stamhoofd/types/Language';
 
 type LanguageMapPatch = {
     [key in Language]?: string | null;
 };
-
-const TranslationEncodeVersion = 370;
 
 export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedStringPatch> {
     /**
@@ -218,7 +218,7 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         return this.translations[Language.English] ?? this.translations[Language.Dutch] ?? this.translations[keys[0]];
     }
 
-    static field(options: { version?: number; nullable?: boolean }) {
+    static field(options: { version?: number; nullable?: boolean; defaultValue?: () => TranslatedString; isDefaultValue?: (v: TranslatedString | undefined | null) => boolean }) {
         return {
             ...options,
             decoder: TranslatedStringDecoder,
@@ -233,6 +233,8 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
             downgradePatch: (name: TranslatedStringPatch): PatchType<string> => {
                 return name.translations[$getLanguage()] ?? name.translations[Language.English] ?? name.translations[Language.Dutch] ?? undefined;
             },
+            defaultValue: options.defaultValue, // ?? (() => new TranslatedString()),
+            isDefaultValue: options.isDefaultValue,
         };
     }
 

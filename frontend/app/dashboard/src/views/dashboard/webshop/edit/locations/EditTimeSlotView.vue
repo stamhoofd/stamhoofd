@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -53,7 +53,8 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeMinutesInput from '@stamhoofd/components/inputs/TimeMinutesInput.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { PrivateWebshop, ProductType, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import type { PrivateWebshop, WebshopTimeSlot} from '@stamhoofd/structures';
+import { ProductType, WebshopTimeSlots } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

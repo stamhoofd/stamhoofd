@@ -1,5 +1,5 @@
 import { SelectablePdfDocumentFilter } from '@stamhoofd/structures';
-import { SelectablePdfSheet } from './SelectablePdfSheet';
+import type { SelectablePdfSheet } from './SelectablePdfSheet';
 
 export class SelectablePdfDocument<T> {
     readonly sheets: SelectablePdfSheet<T>[] = [];

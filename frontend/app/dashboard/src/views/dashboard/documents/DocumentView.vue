@@ -92,7 +92,8 @@ import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
-import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from '@stamhoofd/structures';
+import type { Document, DocumentTemplatePrivate} from '@stamhoofd/structures';
+import { DocumentStatusHelper, RecordCategory, RecordWarning } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { computed } from 'vue';

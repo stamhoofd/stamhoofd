@@ -1,9 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import XLSX from 'xlsx';
+import type XLSX from 'xlsx';
 
-import { ColumnMatcher } from '../ColumnMatcher';
+import type { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class CityWithZipColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {

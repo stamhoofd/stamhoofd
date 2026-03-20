@@ -50,7 +50,7 @@ export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
     paymentUrl: string;
 
     getOS(): string {
-        var userAgent = navigator.userAgent || navigator.vendor;
+        const userAgent = navigator.userAgent || navigator.vendor;
 
         if (/android/i.test(userAgent)) {
             return 'android';

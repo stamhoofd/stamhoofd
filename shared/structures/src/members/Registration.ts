@@ -3,15 +3,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppliedRegistrationDiscount } from '../AppliedRegistrationDiscount.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { registrationInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { GenericBalance } from '../GenericBalance.js';
 import { Group } from '../Group.js';
 import { GroupPrice } from '../GroupSettings.js';
 import { StockReservation } from '../StockReservation.js';
 import { RegisterItemOption } from './checkout/RegisterItem.js';
-import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
-import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
-import { RecordSettings } from './records/RecordSettings.js';
+import type { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
+import type { RecordAnswer} from './records/RecordAnswer.js';
+import { RecordAnswerDecoder } from './records/RecordAnswer.js';
+import type { RecordSettings } from './records/RecordSettings.js';
 
 export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

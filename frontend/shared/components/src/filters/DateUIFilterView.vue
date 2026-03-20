@@ -49,7 +49,8 @@
 <script lang="ts" setup>
 import { nextTick, ref } from 'vue';
 import DateSelection from '../inputs/DateSelection.vue';
-import { DateUIFilter, UIDateFilterMode } from './DateUIFilter';
+import type { DateUIFilter} from './DateUIFilter';
+import { UIDateFilterMode } from './DateUIFilter';
 
 defineProps<{
     filter: DateUIFilter;

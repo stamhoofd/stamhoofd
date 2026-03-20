@@ -1,5 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Address, Group, Organization, OrganizationRegistrationPeriod, Platform, RecordCategory, RecordType } from '@stamhoofd/structures';
+import type { Address, Group, Organization, OrganizationRegistrationPeriod, Platform} from '@stamhoofd/structures';
+import { RecordCategory, RecordType } from '@stamhoofd/structures';
 import { AddressColumnMatcher } from './AddressColumnMatcher';
 import { ColumnMatcherHelper } from './ColumnMatcherHelper';
 import { DateColumnMatcher } from './DateColumnMatcher';
@@ -24,7 +25,7 @@ import { StreetNumberColumnMatcher } from './default-matchers/StreetNumberColumn
 import { StreetWithNumberColumnMatcher } from './default-matchers/StreetWithNumberColumnMatcher';
 import { UitpasNumberColumnMatcher } from './default-matchers/UitpasNumberColumnMatcher';
 import { ZipColumnMatcher } from './default-matchers/ZipColumnMatcher';
-import { ImportMemberResult } from './ImportMemberResult';
+import type { ImportMemberResult } from './ImportMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 import { TextColumnMatcher } from './TextColumnMatcher';
 

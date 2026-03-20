@@ -1,4 +1,4 @@
-import { Country } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 
 import { City } from './City.js';
 import { PostalCode } from './PostalCode.js';

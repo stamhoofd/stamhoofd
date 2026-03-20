@@ -1,6 +1,8 @@
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
-import { Address, Parent, ParentType, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
-import { ImportMemberResult } from './ImportMemberResult';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
+import type { PatchAnswers, RecordSettings} from '@stamhoofd/structures';
+import { Address, Parent, ParentType, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordTextAnswer } from '@stamhoofd/structures';
+import type { ImportMemberResult } from './ImportMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 
 export class ColumnMatcherHelper {

@@ -79,7 +79,7 @@ defineRoutes([
     {
         name: Routes.Email,
         url: '@id',
-        component: MemberEmailOverview as ComponentOptions,
+        component: MemberEmailOverview,
         present: 'popup',
         params: {
             id: String,

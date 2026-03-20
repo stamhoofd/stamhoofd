@@ -1,17 +1,19 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, PatchableArray, PatchableArrayAutoEncoder, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
-import { Group } from '../Group.js';
+import type { Group } from '../Group.js';
 import { GroupGenderType } from '../GroupGenderType.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { Gender } from './Gender.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { Parent } from './Parent.js';
-import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
+import type { RecordAnswer} from './records/RecordAnswer.js';
+import { RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
 
@@ -47,20 +49,20 @@ export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' 
  */
 export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    firstName = '';
+    firstName: string;
 
     @field({ decoder: StringDecoder })
-    lastName = '';
+    lastName: string;
 
     @field({ decoder: StringDecoder, version: 30, nullable: true })
-    memberNumber: string | null = null;
+    memberNumber: string | null;
 
     /**
      * In case the member has been merged with other members, this array contains a list
      * of the old ids of the members that were merged into this member.
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 378 })
-    oldIds: string[] = [];
+    oldIds: string[];
 
     /**
      * Note: when this is set to 'NationalRegisterNumberOptOut' it means the user manually opted out - and doesn't have a national register number
@@ -72,7 +74,7 @@ export class MemberDetails extends AutoEncoder {
         nullable: true,
         downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) => n === NationalRegisterNumberOptOut ? null : n,
     })
-    nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null = null;
+    nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null;
 
     /**
      * Code needed to get access to this member when detecting duplicates. It is only visible for admins, otherwise it will be null.
@@ -80,35 +82,35 @@ export class MemberDetails extends AutoEncoder {
      * Set this value if you want to gain access to a member but receive the known_member_missing_rights error code
      */
     @field({ decoder: StringDecoder, nullable: true, version: 331 })
-    securityCode: string | null = null;
+    securityCode: string | null;
 
     @field({ decoder: DateDecoder, optional: true, nullable: true })
     lastExternalSync?: Date | null;
 
-    @field({ decoder: new EnumDecoder(Gender) })
-    gender: Gender = Gender.Other;
+    @field({ decoder: new EnumDecoder(Gender), defaultValue: () => Gender.Other, isDefaultValue: v => v === Gender.Other })
+    gender: Gender;
 
     @field({ decoder: StringDecoder, nullable: true })
-    phone: string | null = null;
+    phone: string | null;
 
     @field({ decoder: StringDecoder, nullable: true, field: 'mail' })
     @field({ decoder: StringDecoder, nullable: true, version: 5 })
-    email: string | null = null;
+    email: string | null;
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 277 })
-    alternativeEmails: string[] = [];
+    alternativeEmails: string[];
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 304 })
-    unverifiedEmails: string[] = [];
+    unverifiedEmails: string[];
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 304 })
-    unverifiedPhones: string[] = [];
+    unverifiedPhones: string[];
 
     @field({ decoder: new ArrayDecoder(Address), version: 304 })
-    unverifiedAddresses: Address[] = [];
+    unverifiedAddresses: Address[];
 
     @field({ decoder: StringDecoder, nullable: true, version: 301 })
-    notes: string | null = null;
+    notes: string | null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 306, field: 'uitpasNumber' })
     @field({
@@ -134,23 +136,23 @@ export class MemberDetails extends AutoEncoder {
             return null;
         },
     })
-    uitpasNumberDetails: UitpasNumberDetails | null = null;
+    uitpasNumberDetails: UitpasNumberDetails | null;
 
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date('1970-01-01') })
-    birthDay: Date | null = null;
+    birthDay: Date | null;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 352 })
-    trackingYear: number | null = null;
+    trackingYear: number | null;
 
     @field({ decoder: Address, nullable: true })
-    address: Address | null = null;
+    address: Address | null;
 
     @field({ decoder: new ArrayDecoder(Parent) })
-    parents: Parent[] = [];
+    parents: Parent[];
 
     @field({ decoder: new ArrayDecoder(EmergencyContact) })
-    emergencyContacts: EmergencyContact[] = [];
+    emergencyContacts: EmergencyContact[];
 
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder), version: 120 })
     @field({
@@ -164,7 +166,7 @@ export class MemberDetails extends AutoEncoder {
             return map;
         },
     })
-    recordAnswers: Map<string, RecordAnswer> = new Map();
+    recordAnswers: Map<string, RecordAnswer>;
 
     @field({ decoder: BooleanStatus, version: 117, optional: true })
     @field({
@@ -180,7 +182,7 @@ export class MemberDetails extends AutoEncoder {
             return oldValue;
         },
     })
-    requiresFinancialSupport: BooleanStatus | null = null;
+    requiresFinancialSupport: BooleanStatus | null;
 
     /**
      * Indicates whether parents can have access to the members data and receive notification emails.
@@ -188,7 +190,7 @@ export class MemberDetails extends AutoEncoder {
      * Also when not set, parents will have acess until the member reaches the age of 18.
      */
     @field({ decoder: BooleanStatus, nullable: true, version: 388 })
-    parentsHaveAccess: BooleanStatus | null = null;
+    parentsHaveAccess: BooleanStatus | null;
 
     /**
      * Gave permission to collect sensitive information
@@ -207,23 +209,17 @@ export class MemberDetails extends AutoEncoder {
             return oldValue;
         },
     })
-    dataPermissions: BooleanStatus | null = null;
+    dataPermissions: BooleanStatus | null;
 
     /**
      * Last time the records were reviewed
      */
-    @field({ decoder: DateDecoder, nullable: true, version: 20, field: 'lastReviewed' })
-    @field({ decoder: ReviewTimes, version: 71, upgrade: (oldDate: Date | null) => {
-        const times = ReviewTimes.create({});
-        if (oldDate) {
-            times.markReviewed('records', oldDate);
-            times.markReviewed('parents', oldDate);
-            times.markReviewed('emergencyContacts', oldDate);
-            times.markReviewed('details', oldDate);
-        }
-        return times;
-    } })
-    reviewTimes = ReviewTimes.create({});
+    @field({
+        decoder: ReviewTimes,
+        defaultValue: () => ReviewTimes.create({}),
+        isDefaultValue: v => !!v && ReviewTimes.isDefaultValue(v as AutoEncoder),
+    })
+    reviewTimes: ReviewTimes;
 
     /**
      * Call this to clean up capitals in all the available data

@@ -6,7 +6,7 @@ import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registratio
 import { testServer } from '../helpers/TestServer.js';
 
 export async function patchUserMember({ patch, organization, user }: { patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>; organization: Organization; user: User }) {
-    expect(patch.id).toBeString();
+    expect(patch.id).toEqual(expect.any(String));
 
     const token = await Token.createToken(user);
 

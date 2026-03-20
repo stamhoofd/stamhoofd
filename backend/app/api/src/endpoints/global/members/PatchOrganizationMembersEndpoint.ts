@@ -1,9 +1,13 @@
-import { OneToManyRelation } from '@simonbackx/simple-database';
-import { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { OneToManyRelation } from '@simonbackx/simple-database';
+import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
+import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
+import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, mergeTwoMembers, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
+import type { MemberResponsibility, MembersBlob } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PermissionLevel, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -732,8 +736,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             ] }).catch(console.error);
         }
 
+        const r = await AuthenticatedStructures.membersBlob(members);
+
         return new Response(
-            await AuthenticatedStructures.membersBlob(members),
+            r,
         );
     }
 
@@ -1027,6 +1033,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Check for duplicates and prevent creating a duplicate member by a user
         const duplicate = await this.findExistingMember(member);
         if (duplicate) {
+            console.error('duplicate detection');
+            console.error(member.details.parents);
+            console.error(duplicate.details.parents);
+
             await this.checkSecurityCode(duplicate, securityCode, type);
 
             // Merge data

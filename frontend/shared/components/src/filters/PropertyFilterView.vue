@@ -23,12 +23,14 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { PropertyFilter, Version } from '@stamhoofd/structures';
+import type { PropertyFilter} from '@stamhoofd/structures';
+import { Version } from '@stamhoofd/structures';
 
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import PropertyFilterInput from './PropertyFilterInput.vue';
-import { propertyFilterToString, UIFilterBuilder } from './UIFilter';
+import type { UIFilterBuilder } from './UIFilter';
+import { propertyFilterToString } from './UIFilter';
 
 @Component({
     components: {

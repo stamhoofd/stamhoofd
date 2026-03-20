@@ -13,7 +13,8 @@
 
 <script lang="ts" setup>
 import { getExposeProxy } from '@simonbackx/vue-app-navigation';
-import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, ref, Ref, unref, useSlots, useTemplateRef } from 'vue';
+import type { Ref} from 'vue';
+import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, ref, unref, useSlots, useTemplateRef } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useGlobalEventListener } from '../../hooks';
 import IconContainer from '../../icons/IconContainer.vue';

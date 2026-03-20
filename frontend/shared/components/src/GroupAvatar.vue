@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { Group } from '@stamhoofd/structures';
+import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 

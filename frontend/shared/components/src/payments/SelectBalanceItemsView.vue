@@ -7,12 +7,13 @@
 </template>
 
 <script setup lang="ts">
-import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
+import type { NavigationActions} from '../types/NavigationActions';
+import { useNavigationActions } from '../types/NavigationActions';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 
 const props = defineProps<{

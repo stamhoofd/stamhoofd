@@ -20,7 +20,7 @@ import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import { Column } from './classes';
+import type { Column } from './classes';
 
 @Component({
     components: {

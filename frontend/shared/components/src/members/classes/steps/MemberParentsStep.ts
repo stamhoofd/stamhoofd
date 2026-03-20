@@ -2,10 +2,10 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { PermissionLevel } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { MemberStepView } from '../..';
-import { NavigationActions } from '../../../types/NavigationActions';
+import type { NavigationActions } from '../../../types/NavigationActions';
 import EditMemberParentsBox from '../../components/edit/EditMemberParentsBox.vue';
-import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
-import { MemberSharedStepOptions } from './MemberSharedStepOptions';
+import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberParentsStep implements EditMemberStep {
     options: MemberSharedStepOptions;

@@ -1,6 +1,6 @@
 import { ColorHelper } from '../ColorHelper.ts';
 import { Colors, Formatter } from '@stamhoofd/utility';
-import type { ObjectDirective } from "vue";
+import type { ObjectDirective } from 'vue';
 
 export const ColorDirective: ObjectDirective<HTMLElement> = {
     // called right before the element is inserted into the DOM.
@@ -8,10 +8,10 @@ export const ColorDirective: ObjectDirective<HTMLElement> = {
         if (!binding.value) {
             return;
         }
-        const id = typeof binding.value === "string" ? binding.value : binding.value.id;
-        el.classList.add("st-color-directive"); // Fixes dark mode colors
+        const id = typeof binding.value === 'string' ? binding.value : binding.value.id;
+        el.classList.add('st-color-directive'); // Fixes dark mode colors
 
-        if (id.startsWith("#")) {
+        if (id.startsWith('#')) {
             return ColorHelper.setColor(id, el)
         }
 

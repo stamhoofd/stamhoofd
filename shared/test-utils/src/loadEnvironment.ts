@@ -1,4 +1,4 @@
-import testEnv from './env.json';
+import testEnv from './env.json' with {type: 'json'};
 // import { read1PasswordCli } from '@stamhoofd/build-development-env';
 
 export function getGlobalObject() {
@@ -29,12 +29,12 @@ export function updateLinkedEnvs() {
     process.env.DB_MULTIPLE_STATEMENTS = 'true';
 }
 
-export async function loadEnvironment() {
+export function loadEnvironment() {
     const globalObject = getGlobalObject();
     (globalObject as any).STAMHOOFD = JSON.parse(JSON.stringify(testEnv)); // deep clone
 
     if (!globalObject.$t) {
-        (globalObject as any).$t = (key: string, replace?: Record<string, string>) => key;
+        (globalObject as any).$t = (key: string) => key;
     }
     if (!globalObject.$getLanguage) {
         (globalObject as any).$getLanguage = () => 'nl';

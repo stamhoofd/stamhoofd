@@ -29,9 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { AccessRight, MemberResponsibility, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
+import type { AccessRight, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
+import { MemberResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useOrganization } from '../hooks';
 import { Toast } from '../overlays/Toast';

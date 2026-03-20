@@ -74,7 +74,7 @@ import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEv
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { Organization } from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import { getScopedAutoRoot } from '../../getRootViews';
 

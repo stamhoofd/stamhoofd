@@ -15,7 +15,7 @@ import { PermissionRoleDetailed } from './PermissionRole.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
-import { User } from './User.js';
+import type { User } from './User.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {

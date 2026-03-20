@@ -30,7 +30,8 @@ import { useAuth } from '#hooks/useAuth.ts';
 import { useBackForward } from '#hooks/useBackForward.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
+import type { Group, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
+import { AccessRight, Gender, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
@@ -98,7 +99,7 @@ const tabs = computed(() => {
 
     return base;
 });
-let currentItem = tabs.value[0];
+const currentItem = tabs.value[0];
 
 const tabIndex = computed(() => {
     return Math.max(0, tabs.value.findIndex(t => t.name === currentItem.name));

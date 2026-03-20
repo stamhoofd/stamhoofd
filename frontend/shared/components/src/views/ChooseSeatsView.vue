@@ -48,7 +48,8 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { Cart, CartItem, CartReservedSeat, ReservedSeat, Webshop } from '@stamhoofd/structures';
+import type { Cart, CartItem, ReservedSeat, Webshop } from '@stamhoofd/structures';
+import { CartReservedSeat } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import FieldBox from './FieldBox.vue';

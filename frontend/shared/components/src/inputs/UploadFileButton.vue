@@ -19,7 +19,7 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { File } from '@stamhoofd/structures';
 
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import { Toast } from '../overlays/Toast';
 import STInputBox from './STInputBox.vue';

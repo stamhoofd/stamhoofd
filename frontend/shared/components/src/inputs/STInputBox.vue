@@ -15,7 +15,7 @@
 <script lang="ts">
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
-import { ErrorBox } from '../errors/ErrorBox';
+import type { ErrorBox } from '../errors/ErrorBox';
 import STErrorsInput from '../errors/STErrorsInput.vue';
 
 @Component({

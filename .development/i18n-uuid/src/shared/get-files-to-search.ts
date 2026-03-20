@@ -1,14 +1,14 @@
-import fs from "fs";
-import path from "path";
-import { globals } from "./globals";
+import fs from 'fs';
+import path from 'path';
+import { globals } from './globals.js';
 
 export function getFilesToSearch(types: ('vue' | 'typescript' | 'eslint')[]): string[] {
     const root = globals.I18NUUID_ROOT;
-    
+
     const includes: RegExp[] = [];
 
     if (types.includes('vue')) {
-        includes.push(/\.vue$/)
+        includes.push(/\.vue$/);
     }
 
     if (types.includes('typescript')) {
@@ -38,12 +38,12 @@ export function getFilesToSearch(types: ('vue' | 'typescript' | 'eslint')[]): st
             }
 
             if (stats.isDirectory()) {
-                if(file.startsWith('.')) continue;
-                if(excludeDirectories.some(dir => dir === file)) {
+                if (file.startsWith('.')) continue;
+                if (excludeDirectories.some(dir => dir === file)) {
                     continue;
                 }
                 const nestedFiles = getAllEligibleFiles(filePath);
-                for(const nestedFile of nestedFiles) {
+                for (const nestedFile of nestedFiles) {
                     filePaths.push(nestedFile);
                 }
             }

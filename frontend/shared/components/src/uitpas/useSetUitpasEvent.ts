@@ -1,8 +1,9 @@
 import { Product, ProductPrice, UitpasEventResponse } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { nextTick, Ref } from 'vue';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { Ref } from 'vue';
+import { nextTick } from 'vue';
 import { useGetOfficialUitpasSocialTariff } from './useGetOfficialUitpasSocialTariff';
 
 type EventResponse = {

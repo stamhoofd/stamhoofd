@@ -1,10 +1,11 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, EncodeContext, EnumDecoder, IntegerDecoder, MapDecoder, PlainObject, StringDecoder, field } from '@simonbackx/simple-encoding';
-import { CartItem, CartItemPrice } from './CartItem.js';
+import type { Data, EncodeContext, PlainObject} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import type { CartItem, CartItemPrice } from './CartItem.js';
 import { v4 as uuidv4 } from 'uuid';
-import { Checkout } from './Checkout.js';
-import { Webshop } from './Webshop.js';
+import type { Checkout } from './Checkout.js';
+import type { Webshop } from './Webshop.js';
 import { Formatter } from '@stamhoofd/utility';
-import { OptionMenu, Option } from './Product.js';
+import type { OptionMenu, Option } from './Product.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum OptionSelectionRequirement {

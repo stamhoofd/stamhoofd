@@ -45,7 +45,7 @@ import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import Spinner from '../Spinner.vue';
-import { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
+import type { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
 import { onActivated, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
 import { useErrors } from '../errors/useErrors';
 
@@ -144,7 +144,7 @@ function getButtons() {
 }
 
 function focusNextButton() {
-    let buttons = getButtons();
+    const buttons = getButtons();
     if (buttons.length === 0) {
         return;
     }

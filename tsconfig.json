@@ -1,46 +1,9 @@
 {
-    "compilerOptions": {
-        "target": "es2017",
-        "module": "esnext",
-        "jsx": "preserve",
-        "importHelpers": true,
-        "moduleResolution": "node",
-        "noFallthroughCasesInSwitch": true,
-        "experimentalDecorators": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "sourceMap": true,
-        "strictNullChecks": true,
-        "declarationMap": true,
-        "noErrorTruncation": true,
-        "isolatedModules": true,
-        "lib": [
-            "esnext",
-            "dom",
-            "dom.iterable",
-            "scripthost"
-        ],
-        "types": [
-            "node",
-            "jest"
-        ]
-    },
+    "extends": "./tsconfig.base.json",
+    "files": [],
     "include": [
-        "frontend/app/**/*.ts",
-        "frontend/app/**/*.ts.map",
-        "frontend/app/**/*.vue",
-        "frontend/shared/**/*.ts",
-        "frontend/shared/**/*.ts.map",
-        "frontend/shared/**/*.vue",
-        "frontend/*.d.ts", 
-        "frontend/*.d.ts.map",
-        "shared/**/*.ts",
-        "shared/**/*.d.ts.map",
-        "backend/**/*.ts",
-        "backend/**/*.ts.map",
-        "*.d.ts",
-    ],
-    "exclude": [
-        "node_modules"
+        "./vitest.config.ts",
+        "./*.d.ts",
+        "./backend/stamhoofd.d.ts"  
     ]
 }

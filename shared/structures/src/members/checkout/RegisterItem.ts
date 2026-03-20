@@ -5,25 +5,26 @@ import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from '../../BalanceItem.js';
 import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
 import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
-import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
-import { Group } from '../../Group.js';
+import type { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
+import type { Group } from '../../Group.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
 import { type Organization } from '../../Organization.js';
 import { Platform, PlatformMembershipTypeBehaviour } from '../../Platform.js';
-import { PriceBreakdown } from '../../PriceBreakdown.js';
+import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
 import { TranslatedString } from '../../TranslatedString.js';
-import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
+import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import { type PlatformMember } from '../PlatformMember.js';
-import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
+import type { RecordAnswer} from '../records/RecordAnswer.js';
+import { RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
-import { RecordSettings } from '../records/RecordSettings.js';
+import type { RecordSettings } from '../records/RecordSettings.js';
 import { type Registration } from '../Registration.js';
 import { type RegisterCart } from './RegisterCart.js';
 import { type RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
-import { GroupCategory } from '../../GroupCategory.js';
+import type { GroupCategory } from '../../GroupCategory.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })

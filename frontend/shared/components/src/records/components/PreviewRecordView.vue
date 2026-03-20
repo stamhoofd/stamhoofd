@@ -38,7 +38,8 @@ import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { Validator } from '#errors/Validator.ts';
-import { PatchAnswers, RecordAnswer, RecordSettings, Version } from '@stamhoofd/structures';
+import type { PatchAnswers, RecordAnswer, RecordSettings} from '@stamhoofd/structures';
+import { Version } from '@stamhoofd/structures';
 
 @Component({
     components: {

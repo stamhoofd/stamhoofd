@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
 export function getChildDirectories(parentDirectory: string): string[] {
     const files = fs.readdirSync(parentDirectory);

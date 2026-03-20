@@ -23,13 +23,13 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
     if (!isPlaywrightBuild) {
         if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
         // Force load the cjs version of test-utils because the esm version gives issues with the json environment
-            const builder = await import('@stamhoofd/test-utils/cjs');
-            await builder.TestUtils.loadEnvironment();
+            const builder = await import('@stamhoofd/test-utils');
+            builder.TestUtils.loadEnvironment();
             loadedEnv = STAMHOOFD;
         }
         else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
             console.log('Building for development...', process.env.NODE_ENV);
-            const builder = await import('@stamhoofd/build-development-env/cjs');
+            const builder = await import('@stamhoofd/build-development-env');
             const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
                 frontend: options.name,
             });

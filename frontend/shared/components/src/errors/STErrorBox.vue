@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import type { SimpleError } from '@simonbackx/simple-errors';
 import { computed, useTemplateRef, watch } from 'vue';
 import { Request } from '@simonbackx/simple-networking';
 

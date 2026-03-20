@@ -1,50 +1,11 @@
 {
-    "compilerOptions": {
-        "target": "es2021",
-        "useDefineForClassFields": false, /* this makes sue we can still use this in class property definitions */
-        "module": "ESNext",
-        "lib": [
-            "es2021",
-            "DOM",
-            "DOM.Iterable"
-        ],
-        "skipLibCheck": true,
-        /* Bundler mode */
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "jsx": "preserve",
-        "noFallthroughCasesInSwitch": true,
-        "experimentalDecorators": true,
-        "sourceMap": true,
-        "strict": true,
-        "importHelpers": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "strictPropertyInitialization": false,
-        "noImplicitAny": false,
-        "paths": {
-            // There is an issue in vue-tsc that it resolves *.vue files through node_modules, while TypeScript doesn't. This causes type differences
-            // Because TypeScript read a type from /absolute/frontend/shared/components/folder/type.ts
-            // and vue-tsc via /absolute/node_modules/@stamhoofd/components/folder/type.ts
-            "@stamhoofd/components": ["./shared/components/index.ts"],
-            "@stamhoofd/components/*.vue": ["./shared/components/src/*.vue"],
-            "@stamhoofd/components/*.ts": ["./shared/components/src/*.ts"],
-            "@stamhoofd/components/*": ["./shared/components/src/*"],
-        }
-    },
-    "include": [
-        "../*.d.ts",
-        "*.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.vue"
-    ],
+    "files": [],
     "references": [
         {
             "path": "./tsconfig.node.json"
+        },
+        {
+            "path": "./tsconfig.build.json"
         }
     ]
 }

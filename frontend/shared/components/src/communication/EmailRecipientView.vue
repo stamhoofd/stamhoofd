@@ -204,7 +204,8 @@
 </template>
 
 <script setup lang="ts">
-import { bounceErrorToHuman, EmailAddressSettings, EmailPreview, EmailRecipient, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
+import type { EmailPreview} from '@stamhoofd/structures';
+import { bounceErrorToHuman, EmailAddressSettings, EmailRecipient, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { useAuth, useBackForward, useContext } from '../hooks';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
@@ -213,8 +214,9 @@ import { LoadingViewTransition, PromiseView } from '../containers';
 import { MemberSegmentedView } from '../members';
 import { Toast } from '../overlays/Toast';
 import { useEmailRecipientsObjectFetcher, useMembersObjectFetcher } from '../fetchers';
-import { computed, onMounted, Ref, ref } from 'vue';
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import IconContainer from '../icons/IconContainer.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
@@ -259,7 +261,7 @@ async function retrySending() {
         return;
     }
     isRetrying.value = true;
-    let toast = new Toast($t('%1Go'), 'spinner');
+    const toast = new Toast($t('%1Go'), 'spinner');
     toast.setHide(null);
     toast.show();
     try {

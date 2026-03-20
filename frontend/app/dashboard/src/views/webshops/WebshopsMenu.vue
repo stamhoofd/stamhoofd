@@ -47,10 +47,11 @@
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import type {
+    PrivateWebshop,
+    WebshopPreview} from '@stamhoofd/structures';
 import {
     AccessRight,
-    PrivateWebshop,
-    WebshopPreview,
     WebshopStatus,
 } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';

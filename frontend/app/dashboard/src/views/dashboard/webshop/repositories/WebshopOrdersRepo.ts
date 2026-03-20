@@ -1,14 +1,18 @@
-import { ArrayDecoder, Decoder, ObjectData, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventBus } from '@stamhoofd/components/EventBus.ts';
-import { fetchAll, ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { compileToInMemoryFilter, CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
+import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { CountFilteredRequest, InMemoryFilterRunner, SortItem, SortList, StamhoofdFilter} from '@stamhoofd/structures';
+import { compileToInMemoryFilter, CountResponse, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItemDirection, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
-import { createPrivateOrderIndexBox, OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
-import { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
-import { WebshopSettingsStore } from './WebshopSettingsStore';
-import { WebshopTicketsRepo } from './WebshopTicketsRepo';
+import type { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
+import { createPrivateOrderIndexBox } from '../ordersIndexedDBSorters';
+import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
+import type { WebshopSettingsStore } from './WebshopSettingsStore';
+import type { WebshopTicketsRepo } from './WebshopTicketsRepo';
 
 class CompilerFilterError extends Error {}
 class CallbackError extends Error {}

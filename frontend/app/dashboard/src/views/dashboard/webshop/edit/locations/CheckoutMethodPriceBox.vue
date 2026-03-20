@@ -21,9 +21,9 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { CheckoutMethodPrice } from '@stamhoofd/structures';

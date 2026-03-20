@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { computed, unref } from 'vue';
 import { LoadingBoxTransition } from '../containers';
-import { QuickActions } from './classes/QuickActions';
+import type { QuickActions } from './classes/QuickActions';
 
 const props = defineProps<{
     quickActions: QuickActions;

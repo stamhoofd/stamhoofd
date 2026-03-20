@@ -1,4 +1,4 @@
-import { Data } from '@simonbackx/simple-encoding';
+import type { Data } from '@simonbackx/simple-encoding';
 
 /// Only used as input
 export class RefreshTokenGrantStruct {

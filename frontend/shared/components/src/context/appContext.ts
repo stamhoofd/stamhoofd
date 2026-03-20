@@ -1,4 +1,5 @@
-import { Organization, getAppName, getAppTitle, getAppDescription, AppType } from '@stamhoofd/structures';
+import type { Organization, AppType } from '@stamhoofd/structures';
+import { getAppName, getAppTitle, getAppDescription } from '@stamhoofd/structures';
 import { inject } from 'vue';
 
 export function useAppContext(): AppType | 'auto' {

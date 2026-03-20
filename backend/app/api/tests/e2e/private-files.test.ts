@@ -1,6 +1,7 @@
 import { File, MemberDetails, MemberWithRegistrationsBlob, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
 
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Member, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
@@ -173,7 +174,6 @@ describe('E2E.PrivateFiles', () => {
         const memberStruct = response.body.members[0];
         const answer = memberStruct.details.recordAnswers.get(recordSettings.id);
         if (!answer) {
-            // eslint-disable-next-line jest/no-conditional-expect
             expect(memberStruct.details.recordAnswers).toHaveProperty(recordSettings.id);
             throw new Error('Unexpected: Answer is not defined');
         }
@@ -235,8 +235,6 @@ describe('E2E.PrivateFiles', () => {
         const memberStruct = response.body.members[0];
         const answer = memberStruct.details.recordAnswers.get(recordSettings.id);
         if (!answer) {
-            // eslint-disable-next-line jest/no-conditional-expect
-            expect(memberStruct.details.recordAnswers).toHaveProperty(recordSettings.id);
             throw new Error('Unexpected: Answer is not defined');
         }
 
@@ -246,8 +244,8 @@ describe('E2E.PrivateFiles', () => {
 
         expect(answer.file).toBeDefined();
         expect(answer.file!.isPrivate).toBe(false);
-        expect(answer.file!.signature).toBeFalsy();
-        expect(answer.file!.signedUrl).toBeFalsy();
+        expect(answer.file!.signature).toBeNull();
+        expect(answer.file!.signedUrl).toBeNull();
     });
 
     /**
@@ -328,7 +326,7 @@ describe('E2E.PrivateFiles', () => {
 
         expect(answer.file).toBeDefined();
         expect(answer.file!.isPrivate).toBe(true);
-        expect(answer.file!.signedUrl).toBeFalsy();
+        expect(answer.file!.signedUrl).toBeNull();
     });
 
     /**
@@ -410,7 +408,7 @@ describe('E2E.PrivateFiles', () => {
 
         expect(answer.file).toBeDefined();
         expect(answer.file!.isPrivate).toBe(true);
-        expect(answer.file!.signedUrl).toBeString();
+        expect(answer.file!.signedUrl).toEqual(expect.any(String));
         expect(answer.file!.signedUrl).not.toEqual('https://test.com/test.exe'); // It got replaced with a proper signed url
     });
 
@@ -441,7 +439,7 @@ describe('E2E.PrivateFiles', () => {
             data.circular.data.here = data;
 
             await FileSignService.fillSignedUrlsForStruct(data);
-            expect(data.circular.file.signedUrl).toBeString();
+            expect(data.circular.file.signedUrl).toEqual(expect.any(String));
         });
 
         test('Can handle duplicate files', async () => {
@@ -470,10 +468,10 @@ describe('E2E.PrivateFiles', () => {
             };
 
             await FileSignService.fillSignedUrlsForStruct(data);
-            expect(data.circular.file1.signedUrl).toBeString();
-            expect(data.circular.file2.signedUrl).toBeString();
-            expect(data.arr[0].signedUrl).toBeString();
-            expect(data.arr[1].signedUrl).toBeString();
+            expect(data.circular.file1.signedUrl).toEqual(expect.any(String));
+            expect(data.circular.file2.signedUrl).toEqual(expect.any(String));
+            expect(data.arr[0].signedUrl).toEqual(expect.any(String));
+            expect(data.arr[1].signedUrl).toEqual(expect.any(String));
         });
     });
 

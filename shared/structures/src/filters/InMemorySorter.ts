@@ -1,9 +1,10 @@
-import { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@simonbackx/simple-encoding';
 import { Sorter } from '@stamhoofd/utility';
 
-import { MemberSummary } from '../admin/MemberSummary.js';
-import { SortDefinition } from './Sorters.js';
-import { SortItemDirection, SortList } from './SortList.js';
+import type { MemberSummary } from '../admin/MemberSummary.js';
+import type { SortDefinition } from './Sorters.js';
+import type { SortList } from './SortList.js';
+import { SortItemDirection } from './SortList.js';
 
 export type InMemorySorter<T> = (a: T, b: T) => number;
 export type InMemorySortDefinition<T, B extends PlainObject = PlainObject> = SortDefinition<T, B> & {

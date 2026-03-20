@@ -1,11 +1,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
-import { Country, Language } from '@stamhoofd/structures';
+import { I18n } from '@stamhoofd/backend-i18n/I18n';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { DataValidator, Formatter, sleep } from '@stamhoofd/utility';
 import htmlToText from 'html-to-text';
-import nodemailer from 'nodemailer';
-import Mail from 'nodemailer/lib/mailer';
-import { EmailAddress } from '../models/EmailAddress';
+import nodemailer, { type Transporter } from 'nodemailer';
+import { EmailAddress } from '../models/EmailAddress.js';
 
 export type EmailInterfaceRecipient = {
     name?: string | null;
@@ -23,7 +23,7 @@ export type EmailInterfaceBase = {
     retryCount?: number;
     type?: 'transactional' | 'broadcast';
     headers?: Record<string, string> | null;
-    callback?: (error: Error | null) => void;
+    callback?: (error: unknown | null) => void;
 };
 
 export type EmailInterface = EmailInterfaceBase & {
@@ -69,8 +69,8 @@ function emailObjectsToString(emails: EmailInterfaceRecipient[]): string | undef
 }
 
 class EmailStatic {
-    transporter: Mail;
-    transactionalTransporter: Mail;
+    transporter: Transporter;
+    transactionalTransporter: Transporter;
     rps = 14;
 
     currentQueue: EmailBuilder[] = [];
@@ -134,7 +134,7 @@ class EmailStatic {
 
     private sendNextIfNeeded() {
         if (!this.sending) {
-            if (this.currentQueue.length == 0) {
+            if (this.currentQueue.length === 0) {
                 console.log('mail queue is empty');
                 return;
             }
@@ -142,7 +142,7 @@ class EmailStatic {
 
             while (next === undefined) {
                 this.currentQueue.shift();
-                if (this.currentQueue.length == 0) {
+                if (this.currentQueue.length === 0) {
                     console.log('mail queue is empty');
                     return;
                 }
@@ -150,7 +150,7 @@ class EmailStatic {
             }
 
             this.sending = true;
-            this.doSend(next).catch((e) => {
+            this.doSend(next).catch((e: unknown) => {
                 console.error(e);
                 if (next.callback) {
                     next.callback(e);
@@ -319,7 +319,7 @@ class EmailStatic {
 
         if (recipients.length === 0) {
             // Invalid string
-            console.warn("Filtered all emails due hard bounce or spam '" + data.to + "'. E-mail skipped");
+            console.warn("Filtered all emails due hard bounce or spam '" + data.to.map(t => t.email).join(',') + "'. E-mail skipped");
 
             try {
                 data.callback?.(
@@ -447,7 +447,7 @@ class EmailStatic {
                 console.error('Error in email callback', e);
             }
         }
-        catch (e) {
+        catch (e: unknown) {
             if (STAMHOOFD.environment !== 'test') {
                 console.error('Failed to send e-mail:');
                 console.error(e);

@@ -1,4 +1,5 @@
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';

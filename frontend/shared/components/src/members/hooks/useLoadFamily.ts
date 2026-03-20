@@ -1,8 +1,9 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { useContext } from '#hooks/useContext.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { MembersBlob, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { MembersBlob } from '@stamhoofd/structures';
 import { updateContextFromMembersBlob } from '../helpers';
 
 export function useLoadFamilyFromId() {

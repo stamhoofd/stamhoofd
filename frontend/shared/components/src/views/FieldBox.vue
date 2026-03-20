@@ -12,9 +12,10 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { ErrorBox } from '#errors/ErrorBox.ts';
+import type { ErrorBox } from '#errors/ErrorBox.ts';
 import STInputBox from '#inputs/STInputBox.vue';
-import { WebshopField, WebshopFieldAnswer } from '@stamhoofd/structures';
+import type { WebshopField} from '@stamhoofd/structures';
+import { WebshopFieldAnswer } from '@stamhoofd/structures';
 
 @Component({
     components: {

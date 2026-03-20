@@ -8,7 +8,7 @@ export function useCollapsed(globalIdentifier: string) {
         try {
             const value = await Storage.keyValue.getItem('collapsed-' + globalIdentifier);
             if (value) {
-                const values = JSON.parse(value);
+                const values = JSON.parse(value) as string[];
                 for (const value of values) {
                     collapsedSections.add(value);
                 }

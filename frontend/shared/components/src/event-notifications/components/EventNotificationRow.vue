@@ -25,7 +25,8 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { Event, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, Organization } from '@stamhoofd/structures';
+import type { Event, EventNotificationType, Organization } from '@stamhoofd/structures';
+import { EventNotificationStatus, EventNotificationStatusHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { usePlatform } from '../../hooks';
 import { ViewStepsManager } from '#steps/ViewStepsManager.ts';

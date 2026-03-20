@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
+import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
 import RecordCategoryAnswersBox from './RecordCategoryAnswersBox.vue';
 
 withDefaults(

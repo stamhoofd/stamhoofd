@@ -11,7 +11,8 @@
     "trapeze": "trapeze run config.yaml -y && trapeze run entitlements.yaml -y && trapeze run display-name.yaml -y",
     "sync:production": "yarn -s trapeze && cap sync",
     "ios": "cap open ios",
-    "android": "cap open android"
+    "android": "cap open android",
+    "lint": "eslint"
   },
   "dependencies": {
     "@capacitor-community/in-app-review": "^7.1.0",
@@ -41,6 +42,6 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",
-    "@trapezedev/configure": "^7.0.10"
+    "@trapezedev/configure": "^7.1.3"
   }
 }

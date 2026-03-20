@@ -19,7 +19,8 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { Cart, CartItem, Category, Checkout, Webshop } from '@stamhoofd/structures';
+import type { CartItem, Category, Checkout, Webshop } from '@stamhoofd/structures';
+import { Cart } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
 

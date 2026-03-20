@@ -1,11 +1,10 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "../../tsconfig.base.json",
     "include": [
         "../../*.d.ts",
-        "../../../*.d.ts",
         "*.ts",
         "**/*.ts",
         "**/*.tsx",
         "**/*.vue"
-    ],
+    ]
 }

@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PlatformPremiseType } from '@stamhoofd/structures';
+import type { PlatformPremiseType } from '@stamhoofd/structures';
 
 defineProps<{
     type: PlatformPremiseType;

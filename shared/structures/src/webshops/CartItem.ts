@@ -1,14 +1,16 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, PartialWithoutMethods, StringDecoder } from '@simonbackx/simple-encoding';
+import type { PartialWithoutMethods} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CartReservedSeat, ReservedSeat } from '../SeatingPlan.js';
-import { Cart } from './Cart.js';
-import { CartStockHelper, StockDefinition } from './CartStockHelper.js';
+import type { Cart } from './Cart.js';
+import type { StockDefinition } from './CartStockHelper.js';
+import { CartStockHelper } from './CartStockHelper.js';
 import { ProductDiscountSettings } from './Discount.js';
 import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product.js';
-import { Webshop } from './Webshop.js';
+import type { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
 import { UitpasNumberAndPrice } from './UitpasNumberAndPrice.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';

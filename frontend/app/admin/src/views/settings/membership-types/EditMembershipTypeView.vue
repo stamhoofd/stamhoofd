@@ -80,7 +80,8 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -96,9 +97,11 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import type { PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
+import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { Ref, computed, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import EditMembershipTypeConfigView from './EditMembershipTypeConfigView.vue';
 import PlatformMembershipTypeConfigRow from './components/PlatformMembershipTypeConfigRow.vue';
 

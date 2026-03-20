@@ -1,8 +1,9 @@
-import { Server } from '@simonbackx/simple-networking';
+import type { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { Organization, Payment, PaymentMethod, PaymentProvider, PaymentStatus, TransferSettings } from '@stamhoofd/structures';
+import type { Organization, Payment, TransferSettings } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 
-import { NavigationActions } from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import PayconiqBannerView from './PayconiqBannerView.vue';
 import PayconiqButtonView from './PayconiqButtonView.vue';
 import TransferPaymentView from './TransferPaymentView.vue';

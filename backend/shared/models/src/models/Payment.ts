@@ -1,10 +1,12 @@
 import { column } from '@simonbackx/simple-database';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferSettings, BaseOrganization, PaymentType } from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { BalanceItem, Organization } from './index.js';
 import { QueryableModel } from '@stamhoofd/sql';
+import { BalanceItem } from './BalanceItem.js';
+import { BalanceItemPayment } from './BalanceItemPayment.js';
+import { Organization } from './Organization.js';
 
 export class Payment extends QueryableModel {
     static table = 'payments';
@@ -201,8 +203,8 @@ export class Payment extends QueryableModel {
 
     static getGeneralStructureFromRelations({ payments, balanceItemPayments, balanceItems, payingOrganizations }: {
         payments: Payment[];
-        balanceItemPayments: import('./BalanceItemPayment').BalanceItemPayment[];
-        balanceItems: import('./BalanceItem').BalanceItem[];
+        balanceItemPayments: BalanceItemPayment[];
+        balanceItems: BalanceItem[];
         payingOrganizations: Organization[];
     }, includeSettlements = false): PaymentGeneral[] {
         if (payments.length === 0) {
@@ -274,7 +276,7 @@ export class Payment extends QueryableModel {
         return { payingOrganizations };
     }
 
-    static async loadBalanceItemRelations(balanceItems: import('./BalanceItem').BalanceItem[]) {
+    static async loadBalanceItemRelations(balanceItems: BalanceItem[]) {
         const { Order } = await import('./Order.js');
         const { Member } = await import('./Member.js');
 
