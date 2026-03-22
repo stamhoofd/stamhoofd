@@ -112,13 +112,16 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, Decoder, encodeObject, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { encodeObject, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, PermissionsResourceType } from '@stamhoofd/structures';
+import type { EmailRecipientSubfilter, File} from '@stamhoofd/structures';
+import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailStatus, EmailTemplate, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, sleep, throttle } from '@stamhoofd/utility';
-import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 import { LoadingViewTransition } from '../containers';
@@ -473,7 +476,7 @@ const { patchEmail: doPatchEmail } = usePatchEmail();
 
 async function waitForSave(timeout = 5_000) {
     // Listen for savingPAtch becomes null
-    let start = Date.now();
+    const start = Date.now();
     while (savingPatch.value && (Date.now() - start) < timeout) {
         await sleep(200);
     }

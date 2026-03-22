@@ -1,17 +1,19 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
 import { FilterWrapperMarker, unwrapFilter } from './filters/StamhoofdFilter.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
-import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
+import type { RecordAnswer} from './members/records/RecordAnswer.js';
+import { RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
 import { PayconiqAccount, PrivatePaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';
 import { PaymentProvider } from './PaymentProvider.js';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
-import { StripeMetaData } from './StripeAccount.js';
+import type { StripeMetaData } from './StripeAccount.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class CreditItem extends AutoEncoder {

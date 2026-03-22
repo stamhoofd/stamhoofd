@@ -1,8 +1,8 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import XLSX from 'xlsx';
+import type XLSX from 'xlsx';
 
-import { ColumnMatcher } from './import/ColumnMatcher';
-import { ImportMemberResult } from './import/ImportMemberResult';
+import type { ColumnMatcher } from './import/ColumnMatcher';
+import type { ImportMemberResult } from './import/ImportMemberResult';
 import { SharedMemberDetailsMatcher } from './import/SharedMemberDetailsMatcher';
 
 export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetailsMatcher implements ColumnMatcher {

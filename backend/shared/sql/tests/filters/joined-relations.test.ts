@@ -15,13 +15,6 @@ describe('Joined relations', () => {
             SQL.parentColumn('organizationId'),
         );
 
-    /**
-     * Tests that should be repeated for all filter types
-     */
-    describe('Common checks', () => {
-        // todo
-    });
-
     it('Joins when used', async () => {
         const filters = {
             ...baseSQLFilterCompilers,

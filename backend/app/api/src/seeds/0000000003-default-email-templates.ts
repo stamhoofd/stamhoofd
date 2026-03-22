@@ -12,7 +12,7 @@ export default new Migration(async () => {
 
     // Insert defaults
     console.log('Inserting default email templates');
-    const sqlStatement = await fs.readFile(__dirname + '/data/default-email-templates.sql', { encoding: 'utf-8' });
+    const sqlStatement = await fs.readFile(import.meta.dirname + '/data/default-email-templates.sql', { encoding: 'utf-8' });
     await Database.statement(sqlStatement);
 
     // Do something here

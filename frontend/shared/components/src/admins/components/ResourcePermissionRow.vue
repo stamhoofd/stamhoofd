@@ -39,12 +39,15 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { PatchMap } from '@simonbackx/simple-encoding';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
-import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
-import { Ref, computed } from 'vue';
+import type { AccessRight, PermissionsResourceType} from '@stamhoofd/structures';
+import { AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
     resource: { id: string; name: string; type: PermissionsResourceType; description?: string };

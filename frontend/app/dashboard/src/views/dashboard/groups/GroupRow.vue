@@ -16,13 +16,14 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Group, GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import type { Organization} from '@stamhoofd/structures';
+import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { computed } from 'vue';
 

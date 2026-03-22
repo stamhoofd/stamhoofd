@@ -12,7 +12,8 @@
 
 <script lang="ts" setup>
 import { useEmitPatch } from '@stamhoofd/components/hooks/useEmitPatch.ts';
-import { Organization, OrganizationMetaData, OrganizationTag } from '@stamhoofd/structures';
+import type { Organization, OrganizationTag } from '@stamhoofd/structures';
+import { OrganizationMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{

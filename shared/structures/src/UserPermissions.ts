@@ -1,10 +1,11 @@
-import { AutoEncoder, AutoEncoderPatchType, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { AccessRightHelper } from './AccessRight.js';
 import { LoadedPermissions } from './LoadedPermissions.js';
-import { MemberResponsibility } from './MemberResponsibility.js';
+import type { MemberResponsibility } from './MemberResponsibility.js';
 import { PermissionLevel } from './PermissionLevel.js';
-import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
+import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { Platform } from './Platform.js';

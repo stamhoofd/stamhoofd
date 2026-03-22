@@ -1,10 +1,12 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
 import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { Ref, inject, toRef } from 'vue';
-import { type SessionContext } from './SessionContext';
+import type { Ref} from 'vue';
+import { inject, toRef } from 'vue';
+import type {SessionContext} from './SessionContext';
 import { SessionManager } from './SessionManager';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {

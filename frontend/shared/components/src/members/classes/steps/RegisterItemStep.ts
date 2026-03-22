@@ -1,8 +1,8 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { RegisterItem } from '@stamhoofd/structures';
-import { NavigationActions } from '../../../types/NavigationActions';
+import type { RegisterItem } from '@stamhoofd/structures';
+import type { NavigationActions } from '../../../types/NavigationActions';
 import RegisterItemView from '../../RegisterItemView.vue';
-import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
 
 export class RegisterItemStep implements EditMemberStep {
     item: RegisterItem;

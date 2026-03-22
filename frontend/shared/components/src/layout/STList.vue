@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { SortableEvent, SortableOptions } from 'sortablejs';
+import type { SortableEvent, SortableOptions } from 'sortablejs';
 import { Sortable } from 'sortablejs-vue3';
 import { computed, nextTick, ref } from 'vue';
 

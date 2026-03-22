@@ -54,13 +54,15 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { Event, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { Event, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
+import type { Ref} from 'vue';
+import { ComponentOptions, computed, ref, watch, watchEffect } from 'vue';
 import { useAppContext } from '../context';
 import { useEventsObjectFetcher } from '../fetchers';
 import { useEventUIFilterBuilders } from '../filters/filterBuilders';
-import { UIFilter } from '../filters/UIFilter';
+import type { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { useAuth, useGlobalEventListener, useOrganization, usePlatform, useUser } from '../hooks';
 import ScrollableSegmentedControl from '../inputs/ScrollableSegmentedControl.vue';
@@ -111,7 +113,7 @@ defineRoutes([
     {
         name: Routes.Event,
         url: '@id',
-        component: EventOverview as ComponentOptions,
+        component: EventOverview,
         params: {
             id: String,
         },

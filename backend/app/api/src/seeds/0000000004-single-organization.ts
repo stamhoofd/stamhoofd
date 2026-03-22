@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { Address, Country } from '@stamhoofd/structures';
+import { Address } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 
 export default new Migration(async () => {

@@ -1,4 +1,5 @@
-import { AutoEncoder, NonScalarIdentifiable, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, NonScalarIdentifiable, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { computed } from 'vue';
 
 export function useDraggableArray<T extends AutoEncoder & NonScalarIdentifiable<any>>(getter: () => T[], addPatch: (newPatch: PatchableArrayAutoEncoder<T>) => void) {

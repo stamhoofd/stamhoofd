@@ -33,13 +33,15 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PermissionLevel, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { RecordSettings} from '@stamhoofd/structures';
+import { PermissionLevel, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { propertyFilterToString } from '../../filters/UIFilter';
 import { usePatchMoveUpDownSingle } from '../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../overlays/ContextMenu';
-import { RecordEditorSettings } from '../RecordEditorSettings';
+import type { RecordEditorSettings } from '../RecordEditorSettings';
 
 const props = withDefaults(
     defineProps<{

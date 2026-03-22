@@ -4,8 +4,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
-
-import { Organization } from './index.js';
+import { type Organization } from './Organization.js';
 
 export class Webshop extends QueryableModel {
     static table = 'webshops';
@@ -18,7 +17,7 @@ export class Webshop extends QueryableModel {
     })
     id!: string;
 
-    @column({ foreignKey: Webshop.organization, type: 'string' })
+    @column({ type: 'string' })
     organizationId: string;
 
     // A custom domain name that is used to host the webshop application (should be unique)
@@ -93,7 +92,7 @@ export class Webshop extends QueryableModel {
     })
     updatedAt: Date;
 
-    static organization = new ManyToOneRelation(Organization, 'organization');
+    static organization: ManyToOneRelation<'organization', Organization>;
 
     // Methods
     static async getByLegacyURI(organizationId: string, uri: string): Promise<Webshop | undefined> {

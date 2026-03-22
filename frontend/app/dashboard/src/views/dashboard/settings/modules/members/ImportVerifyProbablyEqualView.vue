@@ -35,7 +35,7 @@
                 </template>
 
                 <template #left>
-                    <Checkbox :model-value="match.isEqual" @update:model-value="setEqual(match, $event)"/>
+                    <Checkbox :model-value="match.isEqual" @update:model-value="setEqual(match, $event)" />
                 </template>
             </STListItem>
         </STList>
@@ -43,13 +43,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties, PushOptions} from '@simonbackx/vue-app-navigation';
+import { useShow } from '@simonbackx/vue-app-navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';
+import type { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';
 
 const props = defineProps<{
     members: (FindExistingMemberResult & { readonly existingMember: PlatformMember })[];

@@ -14,8 +14,8 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { Address, ProductLocation } from '@stamhoofd/structures';
+import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import type { Address, ProductLocation } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

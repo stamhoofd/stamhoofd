@@ -6,7 +6,7 @@
 
 
 <script lang="ts" setup>
-import { UnknownUIFilter } from './UnknownUIFilter';
+import type { UnknownUIFilter } from './UnknownUIFilter';
 
 const props = defineProps<{
     filter: UnknownUIFilter

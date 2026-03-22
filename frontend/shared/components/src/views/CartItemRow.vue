@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { Cart, CartItem, Webshop } from '@stamhoofd/structures';
+import type { Cart, CartItem, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import StepperInput from '../inputs/StepperInput.vue';

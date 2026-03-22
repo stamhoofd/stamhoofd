@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "rootDir": "src"
+    },
+    "extends": "../../tsconfig.test.json",
+    "include": [
+        "./src",
+        "./src/*.json",
+        "../stamhoofd.d.ts",
+        "../../jest-extended.d.ts"
+    ]
+}

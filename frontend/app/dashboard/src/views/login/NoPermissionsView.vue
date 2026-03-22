@@ -35,9 +35,5 @@ export default class NoPermissionsView extends Mixins(NavigationMixin) {
     gotoRegistration() {
         window.location.href = this.organization.registerUrl;
     }
-
-    logout() {
-        this.$context.logout();
-    }
 }
 </script>

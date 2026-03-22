@@ -2,16 +2,16 @@ import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, String
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import { BalanceItem } from '../../BalanceItem.js';
+import type { BalanceItem } from '../../BalanceItem.js';
 import { type Group } from '../../Group.js';
-import { Organization } from '../../Organization.js';
+import type { Organization } from '../../Organization.js';
 import { PaymentCustomer } from '../../PaymentCustomer.js';
 import { PaymentMethod } from '../../PaymentMethod.js';
-import { PriceBreakdown } from '../../PriceBreakdown.js';
+import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import { type PlatformMember } from '../PlatformMember.js';
-import { BalanceItemCartItem } from './BalanceItemCartItem.js';
+import type { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
-import { RegisterItem } from './RegisterItem.js';
+import type { RegisterItem } from './RegisterItem.js';
 import { type RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 

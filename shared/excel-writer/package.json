@@ -2,25 +2,24 @@
     "name": "@stamhoofd/excel-writer",
     "version": "2.119.0",
     "type": "module",
-    "main": "./dist/cjs/index.js",
-    "module": "./dist/esm/index.js",
-    "types": "./dist/esm/index.d.ts",
+    "types": "./dist/index.d.ts",
+    "module": "./dist/index.js",
+    "main": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "import": "./dist/esm/index.js",
-            "require": "./dist/cjs/index.js",
-            "types": "./dist/esm/index.d.ts"
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
         }
     },
     "files": [
-        "dist/cjs",
-        "dist/esm",
+        "dist",
         "package.json"
     ],
     "license": "UNLICENCED",
     "sideEffects": false,
     "scripts": {
-        "build": "tsc --build tsconfig.cjs.json tsconfig.esm.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+        "build": "tsc --build tsconfig.build.json",
         "lint": "eslint"
     },
     "devDependencies": {

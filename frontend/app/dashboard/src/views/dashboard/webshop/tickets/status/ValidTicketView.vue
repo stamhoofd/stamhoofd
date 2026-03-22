@@ -367,7 +367,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
@@ -382,14 +383,15 @@ import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsCo
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
-import { AccessRight, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductDateRange, RecordCategory, RecordWarning, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
+import type { Payment, PrivateOrder, ProductDateRange, TicketPublicPrivate } from '@stamhoofd/structures';
+import { AccessRight, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { OrderActionBuilder } from '../../orders/OrderActionBuilder';
 import OrderView from '../../orders/OrderView.vue';
-import { WebshopManager } from '../../WebshopManager';
+import type { WebshopManager } from '../../WebshopManager';
 
 const props = defineProps<{
     webshopManager: WebshopManager;

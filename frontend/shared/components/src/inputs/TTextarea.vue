@@ -26,14 +26,14 @@
 </template>
 
 <script setup lang="ts">
-import { Language, TranslatedString } from '@stamhoofd/structures';
-import { computed } from 'vue';
-import { useEditorLanguage } from './hooks/useEditorLanguage';
-import { registerTranslateableComponent } from './hooks/useEditorContext';
-import TInputButton from './TInputButton.vue';
-import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import SuffixInput from './SuffixInput.vue';
+import type { TranslatedString } from '@stamhoofd/structures';
+import { Language } from "@stamhoofd/types/Language";
+import { computed } from 'vue';
+import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
+import { registerTranslateableComponent } from './hooks/useEditorContext';
+import { useEditorLanguage } from './hooks/useEditorLanguage';
+import TInputButton from './TInputButton.vue';
 
 const value = defineModel<TranslatedString>({ required: true });
 

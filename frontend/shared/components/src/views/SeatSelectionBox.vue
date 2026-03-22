@@ -65,7 +65,8 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop, Watch } from '@simonbackx/vue-app-navigation/classes';
-import { CartReservedSeat, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatingSizeConfiguration, SeatMarkings } from '@stamhoofd/structures';
+import type { SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection} from '@stamhoofd/structures';
+import { CartReservedSeat, ReservedSeat, SeatingSizeConfiguration, SeatMarkings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Toast } from '../overlays/Toast';
@@ -339,7 +340,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
 
             if (this.amount && seats.length > this.amount) {
                 // Remove seat that is the furthest away
-                let currentPosition = { x: seat.x, y: seat.y };
+                const currentPosition = { x: seat.x, y: seat.y };
 
                 let furthestSeat: { seat: ReservedSeat; distance: number } | null = null;
 

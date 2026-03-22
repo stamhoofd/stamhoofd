@@ -8,7 +8,7 @@ import { defineCustomElement } from 'vue';
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Country } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import App from './App.ce.vue';
 
 document.body.classList.add((AppManager.shared.isNative ? 'native-' : 'web-') + AppManager.shared.getOS());

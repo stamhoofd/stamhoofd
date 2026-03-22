@@ -84,7 +84,7 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
@@ -264,7 +264,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
                 decoder: Organization as Decoder<Organization>,
             });
             this.$organization.deepSet(response.data);
-            this.show(new ComponentWithProperties(DNSRecordsView, {}));
+            await this.show(new ComponentWithProperties(DNSRecordsView, {}));
             this.saving = false;
         }
         catch (e) {
@@ -299,7 +299,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
             });
 
             this.$context.updateOrganization(response.data);
-            this.pop({ force: true });
+            await this.pop({ force: true });
             this.saving = false;
         }
         catch (e) {

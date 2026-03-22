@@ -4,7 +4,8 @@
 
 <script setup lang="ts">
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
-import { BalanceItem, DetailedPayableBalance, DetailedReceivableBalance } from '@stamhoofd/structures';
+import type { DetailedReceivableBalance } from '@stamhoofd/structures';
+import { BalanceItem, DetailedPayableBalance } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

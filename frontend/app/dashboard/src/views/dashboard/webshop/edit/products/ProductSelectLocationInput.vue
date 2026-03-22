@@ -33,15 +33,16 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Address, Country, ProductLocation } from '@stamhoofd/structures';
+import { Address, ProductLocation } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 
 import { computed, onMounted, ref, watch } from 'vue';
 import ProductLocationInput from './ProductLocationInput.vue';

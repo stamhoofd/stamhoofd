@@ -23,7 +23,7 @@ import TransitionFade from '#transitions/TransitionFade.vue';
 import { useSetupStepReviewDescription } from '#composables/useSetupStepReviewDescription.ts';
 import { useSetupStepTranslations } from '#hooks/useSetupStepTranslations.ts';
 import { computed } from 'vue';
-import { ReviewCheckboxData } from './useReview';
+import type { ReviewCheckboxData } from './useReview';
 
 const props = defineProps<{data: ReviewCheckboxData}>();
 const $review = computed(() => props.data.step?.review);

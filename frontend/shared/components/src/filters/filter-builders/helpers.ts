@@ -1,4 +1,5 @@
-import { StamhoofdCompareValue, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
+import type { StamhoofdCompareValue, StamhoofdFilter} from '@stamhoofd/structures';
+import { unwrapFilter } from '@stamhoofd/structures';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 
 /**

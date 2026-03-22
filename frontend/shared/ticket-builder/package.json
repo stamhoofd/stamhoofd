@@ -2,6 +2,10 @@
     "name": "@stamhoofd/ticket-builder",
     "version": "1.0.0",
     "private": true,
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@stamhoofd/assets": "1.0.0"
     },

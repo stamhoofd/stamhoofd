@@ -1,5 +1,6 @@
-import { type SessionContext } from '@stamhoofd/networking/SessionContext';
-import { inject, Ref, toRef } from 'vue';
+import type {SessionContext} from '@stamhoofd/networking/SessionContext';
+import type { Ref} from 'vue';
+import { inject, toRef } from 'vue';
 
 export function useContext(): Ref<SessionContext> {
     const refOrReal = inject('$context', null) as SessionContext | null;

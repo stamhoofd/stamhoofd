@@ -1,7 +1,8 @@
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 
 class ResponseBody extends AutoEncoder {
     @field({ decoder: StringDecoder })

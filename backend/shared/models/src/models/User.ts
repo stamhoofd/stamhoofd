@@ -1,13 +1,13 @@
-import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
+import { column, Database } from '@simonbackx/simple-database';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { ModelCache, QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
 import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Organization } from './index.js';
+import { type Organization } from './Organization.js';
 
 export class User extends QueryableModel {
     static table = 'users';
@@ -21,7 +21,7 @@ export class User extends QueryableModel {
     })
     id!: string;
 
-    @column({ foreignKey: User.organization, type: 'string', nullable: true })
+    @column({ type: 'string', nullable: true })
     organizationId: string | null;
 
     @column({ type: 'string', nullable: true })
@@ -76,8 +76,6 @@ export class User extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
-
-    static organization = new ManyToOneRelation(Organization, 'organization');
 
     get name() {
         if (this.firstName && this.lastName) {

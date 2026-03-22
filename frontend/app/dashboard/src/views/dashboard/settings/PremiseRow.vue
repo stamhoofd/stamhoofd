@@ -21,7 +21,8 @@
 <script lang="ts" setup>
 import { useCountry } from '@stamhoofd/components/hooks/useCountry.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { CountryHelper, Premise } from '@stamhoofd/structures';
+import type { Premise } from '@stamhoofd/structures';
+import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 

@@ -1,15 +1,16 @@
-import {
+import type {
     GenerativeModel,
+    Schema} from '@google/generative-ai';
+import {
     GoogleGenerativeAI,
-    Schema,
     SchemaType,
-} from "@google/generative-ai";
-import { globals } from "../../shared/globals";
-import { AutoTranslateOptions } from "../../types/AutoTranslateOptions";
-import { Batch } from "../../types/Batch";
-import { PromiseQueue } from "../PromiseQueue";
-import { TranslationManager } from "../TranslationManager";
-import { Translator } from "./Translator";
+} from '@google/generative-ai';
+import { globals } from '../../shared/globals.js';
+import type { AutoTranslateOptions } from '../../types/AutoTranslateOptions.js';
+import type { Batch } from '../../types/Batch.js';
+import { PromiseQueue } from '../PromiseQueue.js';
+import type { TranslationManager } from '../TranslationManager.js';
+import { Translator } from './Translator.js';
 
 export class GoogleGeminiTranslator extends Translator {
     private readonly genAI: GoogleGenerativeAI;
@@ -23,21 +24,21 @@ export class GoogleGeminiTranslator extends Translator {
 
         // https://ai.google.dev/gemini-api/docs/structured-output?lang=node
         const schema: Schema = {
-            description: "List of translations",
+            description: 'List of translations',
             type: SchemaType.ARRAY,
             items: {
                 type: SchemaType.OBJECT,
                 properties: {
                     id: { type: SchemaType.NUMBER },
                     value: { type: SchemaType.STRING },
-                }
+                },
             },
         };
 
         this.model = this.genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: 'gemini-1.5-flash',
             generationConfig: {
-                responseMimeType: "application/json",
+                responseMimeType: 'application/json',
                 responseSchema: schema,
             },
         });
@@ -49,9 +50,9 @@ export class GoogleGeminiTranslator extends Translator {
     }
 
     protected override transformParsedJson<T>(parsedJson: T): T {
-        if(Array.isArray(parsedJson)) {
-            return parsedJson.map(value => {
-                if(typeof value === 'string' && value.trim().length === 0) {
+        if (Array.isArray(parsedJson)) {
+            return parsedJson.map((value) => {
+                if (typeof value === 'string' && value.trim().length === 0) {
                     return null;
                 }
 

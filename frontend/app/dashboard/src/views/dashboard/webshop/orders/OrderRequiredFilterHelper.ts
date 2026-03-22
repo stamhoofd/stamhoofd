@@ -1,4 +1,5 @@
-import { OrderStatus, StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { OrderStatus } from '@stamhoofd/structures';
 
 export class OrderRequiredFilterHelper {
     static getDefault(webshopId: string): StamhoofdFilter {

@@ -23,8 +23,8 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { ProductDateRange } from '@stamhoofd/structures';
+import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import type { ProductDateRange } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{ validator?: Validator | null }>(), {

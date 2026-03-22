@@ -204,7 +204,7 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -217,8 +217,10 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import SaveView from '#navigation/SaveView.vue';
 import Spinner from '#Spinner.vue';
-import { AccessRight, getUnlistedResources, Group, GroupCategory, maximumPermissionlevel, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, User, WebshopPreview } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import type { Group, GroupCategory, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
+import { AccessRight, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';

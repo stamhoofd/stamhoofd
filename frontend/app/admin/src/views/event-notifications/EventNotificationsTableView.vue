@@ -21,21 +21,24 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import EmailView from '@stamhoofd/components/email/EmailView.vue';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
-import { useEventNotificationBackendFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
-import { useEventNotificationsObjectFetcher } from '@stamhoofd/components/fetchers/useEventNotificationsObjectFetcher.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { EventNotificationViewModel } from '@stamhoofd/components/event-notifications/classes/EventNotificationViewModel.ts';
 import EventNotificationView from '@stamhoofd/components/event-notifications/EventNotificationView.vue';
+import { useEventNotificationsObjectFetcher } from '@stamhoofd/components/fetchers/useEventNotificationsObjectFetcher.ts';
+import { useEventNotificationBackendFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { EventNotification, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
+import type { EventNotification, EventNotificationType, StamhoofdFilter } from '@stamhoofd/structures';
+import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = EventNotification;

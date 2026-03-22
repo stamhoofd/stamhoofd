@@ -28,19 +28,21 @@
 </template>
 
 <script setup lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { NavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import Spinner from '#Spinner.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { UitpasOrganizerResponse, UitpasOrganizersResponse } from '@stamhoofd/structures';
+import type { UitpasOrganizerResponse} from '@stamhoofd/structures';
+import { UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
-import { Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { ref, watch } from 'vue';
 
 const props = withDefaults(
     defineProps<{

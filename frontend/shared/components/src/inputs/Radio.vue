@@ -1,7 +1,7 @@
 <template>
     <div>
         <label class="radio" :class="{ 'with-text': hasDefaultSlot }" :for="id">
-            <input ref="radio" v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete" :disabled="disabled" :id="id">
+            <input :id="id" ref="radio" v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete" :disabled="disabled">
             <div>
                 <div />
                 <div><slot /></div>

@@ -19,7 +19,7 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import { Toast } from '../overlays/Toast';
 import STInputBox from './STInputBox.vue';

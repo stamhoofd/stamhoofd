@@ -45,7 +45,7 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { Group } from '@stamhoofd/structures';
+import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import GroupOverview from './GroupOverview.vue';
@@ -95,8 +95,8 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
         return this.organization.getCategoryTree({ admin: true, permissions: this.$context.organizationPermissions }).getAllCategories().filter(c => c.categories.length === 0);
     }
 
-    openGroup(group: Group) {
-        this.show({
+    async openGroup(group: Group) {
+        await this.show({
             components: [
                 new ComponentWithProperties(GroupOverview, {
                     group,

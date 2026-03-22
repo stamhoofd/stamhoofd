@@ -51,8 +51,8 @@ import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
     },
 })
 export default class SignupModulesView extends Mixins(NavigationMixin) {
-    goNext() {
-        this.dismiss({ force: true });
+    async goNext() {
+        await this.dismiss({ force: true });
     }
 }
 </script>

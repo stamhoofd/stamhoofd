@@ -36,12 +36,13 @@
 </template>
 
 <script setup lang="ts">
-import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
-import { ErrorBox } from '../../../errors/ErrorBox';
-import { Validator } from '../../../errors/Validator';
+import type { ErrorBox } from '../../../errors/ErrorBox';
+import type { Validator } from '../../../errors/Validator';
 import { useAuth, useOrganization } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 import EditEmergencyContactsBox from './EditEmergencyContactsBox.vue';

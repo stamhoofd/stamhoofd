@@ -83,17 +83,20 @@
 </template>
 
 <script setup lang="ts">
-import { Group, LoadedPermissions, MemberResponsibility, MemberResponsibilityRecord, Organization, PlatformMember } from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, Organization, PlatformMember } from '@stamhoofd/structures';
+import { LoadedPermissions, MemberResponsibilityRecord } from '@stamhoofd/structures';
 
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { Formatter } from '@stamhoofd/utility';
-import { Ref, computed, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
-import { Validator } from '../../../errors/Validator';
+import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import ResponsibilityIcon from '../ResponsibilityIcon.vue';

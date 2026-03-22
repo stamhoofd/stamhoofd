@@ -88,7 +88,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import LoadingBoxTransition from '@stamhoofd/components/containers/LoadingBoxTransition.vue';
@@ -96,7 +97,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useCountry } from '@stamhoofd/components/hooks/useCountry.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -109,7 +110,8 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { AdministrationFeeSettings, Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
+import { AdministrationFeeSettings, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import PaymentSettingsView from '../views/dashboard/settings/PaymentSettingsView.vue';
@@ -362,7 +364,7 @@ function getDescription(paymentMethod: PaymentMethod): string {
 }
 
 function getSettingsDescription(paymentMethod: PaymentMethod): string {
-    let texts: string[] = [];
+    const texts: string[] = [];
     const settings = props.config.paymentMethodSettings.get(paymentMethod);
 
     if (settings) {

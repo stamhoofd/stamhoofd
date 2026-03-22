@@ -201,7 +201,9 @@
 <script lang="ts" setup>
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import type { Organization, Payment, TransferSettings } from '@stamhoofd/structures';
+import { TransferDescriptionType } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -240,7 +242,7 @@ onMounted(() => {
 });
 
 function getOS(): string {
-    var userAgent = navigator.userAgent || navigator.vendor;
+    const userAgent = navigator.userAgent || navigator.vendor;
 
     if (/android/i.test(userAgent)) {
         return 'android';

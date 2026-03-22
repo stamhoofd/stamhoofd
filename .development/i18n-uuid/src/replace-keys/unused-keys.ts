@@ -1,6 +1,6 @@
-import { getTranslationsWithPath } from "./get-translations-with-path";
-import { findUnusedTranslationKeys } from "./replace-keys-with-uuid";
-import { writeTranslation } from "./write-translations";
+import { getTranslationsWithPath } from './get-translations-with-path.js';
+import { findUnusedTranslationKeys } from './replace-keys-with-uuid.js';
+import { writeTranslation } from './write-translations.js';
 
 export function unusedKeys() {
     const translationsWithPath = getTranslationsWithPath();
@@ -12,7 +12,7 @@ export function unusedKeys() {
                 continue;
             }
             if (typeof translations[key] === 'string') {
-                keys.add(key)
+                keys.add(key);
             }
         }
 
@@ -20,7 +20,7 @@ export function unusedKeys() {
 
         if (unusedKeys.size) {
             for (const key of unusedKeys.values()) {
-                console.log('Found unused key ' + key + ' in ' + filePath)
+                console.log('Found unused key ' + key + ' in ' + filePath);
 
                 delete translations[key];
             }

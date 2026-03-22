@@ -3,13 +3,6 @@ import { SQL } from '../../src/SQL.js';
 import { TableDefinition, test, testMatch } from '../utils/index.js';
 
 describe('$lte', () => {
-    /**
-     * Tests that should be repeated for all filter types
-     */
-    describe('Common checks', () => {
-        // todo
-    });
-
     it('can filter on $lte', async () => {
         const filters = {
             ...baseSQLFilterCompilers,

@@ -1,5 +1,6 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
+import type { Replacement } from '../endpoints/EmailRequest.js';
+import { Recipient } from '../endpoints/EmailRequest.js';
 import { EditorSmartButton } from './EditorSmartButton.js';
 import { EmailRecipient } from './Email.js';
 import { ExampleReplacements } from './exampleReplacements.js';

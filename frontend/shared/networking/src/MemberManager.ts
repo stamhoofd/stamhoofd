@@ -1,7 +1,9 @@
-import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Storage } from './Storage';
-import { SessionContext } from './SessionContext';
-import { BalanceItem, DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, Platform, PlatformFamily, Version } from '@stamhoofd/structures';
+import type { SessionContext } from './SessionContext';
+import type { BalanceItem, Platform} from '@stamhoofd/structures';
+import { DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, Version } from '@stamhoofd/structures';
 import { inject, reactive, watch } from 'vue';
 
 export function useMemberManager() {

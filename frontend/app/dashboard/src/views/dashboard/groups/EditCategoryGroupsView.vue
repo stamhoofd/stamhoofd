@@ -87,7 +87,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
@@ -101,7 +102,8 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useDraggableArrayIds } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
-import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
+import type { Organization} from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
 import { computed, getCurrentInstance, ref } from 'vue';
 import GroupCategoryRow from './GroupCategoryRow.vue';

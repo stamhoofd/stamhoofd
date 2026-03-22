@@ -1,8 +1,8 @@
-import chalk from "chalk";
-import { globals } from "../shared/globals";
-import { promptYesNoOrDoubt, YesNoOrDoubt } from "../shared/prompt-helper";
-import { TranslationDictionary } from "../types/TranslationDictionary";
-import { TranslationManager } from "./TranslationManager";
+import chalk from 'chalk';
+import { globals } from '../shared/globals.js';
+import { promptYesNoOrDoubt, YesNoOrDoubt } from '../shared/prompt-helper.js';
+import type { TranslationDictionary } from '../types/TranslationDictionary.js';
+import { TranslationManager } from './TranslationManager.js';
 
 export interface AutoTranslatorPostValidatorOptions {
     dryRun?: boolean;
@@ -10,32 +10,32 @@ export interface AutoTranslatorPostValidatorOptions {
 
 // validate translationns after they have been written
 export class AutoTranslatorPostValidator {
-    constructor(private readonly manager: TranslationManager
+    constructor(private readonly manager: TranslationManager,
     ) {
     }
 
-    filterInvalidTranslations({dryRun = false}: AutoTranslatorPostValidatorOptions = {}) {
+    filterInvalidTranslations({ dryRun = false }: AutoTranslatorPostValidatorOptions = {}) {
         console.log(chalk.blue('Start filter invalid translations (dryRun: ' + !!dryRun + ')'));
 
         this.manager.iterateNonDefaultLocalesWithNamespace((locale, namespace) => {
             const dict = this.manager.readMachineTranslationDictionary(locale, namespace);
-            const {filteredDictionary, errors} = this.filterDictionary(dict);
-            if(errors > 0) {
+            const { filteredDictionary, errors } = this.filterDictionary(dict);
+            if (errors > 0) {
                 console.error(chalk.red(`Found ${errors} errors in auto translations (locale: ${locale}, namespace: ${namespace})`));
 
-                if(!dryRun) {
+                if (!dryRun) {
                     this.manager.setMachineTranslationDictionary(filteredDictionary, {
                         locale,
                         namespace,
                     });
                 }
             }
-        })
+        });
 
         console.log(chalk.blue('Done filter invalid translations'));
     }
 
-    async loopAndPromptValidateInvalidTranslations({dryRun = false}: AutoTranslatorPostValidatorOptions = {}) {
+    async loopAndPromptValidateInvalidTranslations({ dryRun = false }: AutoTranslatorPostValidatorOptions = {}) {
         console.log(chalk.blue('Start loop invalid translations (dryRun: ' + !!dryRun + ')'));
 
         await this.manager.iterateNonDefaultLocalesWithNamespaceAsync(async (locale, namespace) => {
@@ -46,17 +46,17 @@ export class AutoTranslatorPostValidator {
                 return errorMessage !== null;
             }).length + 1;
 
-            if(total > 0) {
+            if (total > 0) {
                 console.log(chalk.blue('Found ' + total + ' errors in auto translations (locale: ' + locale + ', namespace: ' + namespace + ')'));
 
                 console.log(chalk.blue(`
 Found ${total} errors in auto translations (locale: ${locale}, namespace: ${namespace})`));
 
                 let current = 0;
-                for(const [key, value] of Object.entries(dict)) {
+                for (const [key, value] of Object.entries(dict)) {
                     const errorMessage = this.validateDictionaryValue(value);
-        
-                    if(errorMessage !== null) {
+
+                    if (errorMessage !== null) {
                         current = current + 1;
                         console.log(chalk.underline.white(`
 ORIGINAL:`));
@@ -73,13 +73,13 @@ ${current}/${total}`));
                         // prompt
                         const promptResult = await promptYesNoOrDoubt(chalk.yellow(`> Accept (press [y] or [enter])?`));
 
-                        switch(promptResult) {
+                        switch (promptResult) {
                             case YesNoOrDoubt.Yes:
-                                this.manager.setSourceTranslation({key, value: value.translation, locale, namespace});
-                                this.manager.removeFromMachineTranslationDictionary({locale, namespace, key});
+                                this.manager.setSourceTranslation({ key, value: value.translation, locale, namespace });
+                                this.manager.removeFromMachineTranslationDictionary({ locale, namespace, key });
                                 break;
                             case YesNoOrDoubt.No:
-                                this.manager.removeFromMachineTranslationDictionary({locale, namespace, key});
+                                this.manager.removeFromMachineTranslationDictionary({ locale, namespace, key });
                                 break;
                             case YesNoOrDoubt.Doubt:
                                 // do nothing
@@ -88,31 +88,32 @@ ${current}/${total}`));
                     }
                 }
             }
-        })
+        });
 
         console.log(chalk.blue('Done loop invalid translations'));
     }
 
-    private filterDictionary(dict: TranslationDictionary): {filteredDictionary: TranslationDictionary, errors: number} {
+    private filterDictionary(dict: TranslationDictionary): { filteredDictionary: TranslationDictionary; errors: number } {
         const filteredDictionary = {};
         let errors = 0;
 
-        for(const [key, value] of Object.entries(dict)) {
+        for (const [key, value] of Object.entries(dict)) {
             const errorMessage = this.validateDictionaryValue(value);
 
-            if(errorMessage === null) {
+            if (errorMessage === null) {
                 filteredDictionary[key] = value;
-            } else {
+            }
+            else {
                 errors = errors + 1;
             }
         }
 
-        return {filteredDictionary, errors};
+        return { filteredDictionary, errors };
     }
 
-    private validateDictionaryValue<K extends keyof TranslationDictionary>({original, translation}: TranslationDictionary[K]): string | null {
-        if(original.length > 0) {
-            if(original === translation) {
+    private validateDictionaryValue<K extends keyof TranslationDictionary>({ original, translation }: TranslationDictionary[K]): string | null {
+        if (original.length > 0) {
+            if (original === translation) {
                 return 'Not translated';
             }
         }

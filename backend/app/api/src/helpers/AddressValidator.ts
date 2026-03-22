@@ -1,8 +1,11 @@
 import { Database } from '@simonbackx/simple-database';
-import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { City, PostalCode, Street } from '@stamhoofd/models';
-import { Address, Country, ValidatedAddress } from '@stamhoofd/structures';
+import type { Address } from '@stamhoofd/structures';
+import { ValidatedAddress } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { sleep, StringCompare } from '@stamhoofd/utility';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';

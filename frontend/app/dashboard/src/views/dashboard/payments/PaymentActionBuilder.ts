@@ -1,6 +1,8 @@
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, InMemoryTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EmailView, { type RecipientChooseOneOption, type RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
@@ -10,9 +12,10 @@ import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Organization, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, Platform } from '@stamhoofd/structures';
-import { ComputedRef, Ref } from 'vue';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Organization, Platform } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import type { ComputedRef, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
 

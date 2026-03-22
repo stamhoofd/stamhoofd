@@ -1,5 +1,5 @@
-import { TranslatedString } from '@stamhoofd/structures';
-import { ErrorBox } from '../errors/ErrorBox';
+import type { TranslatedString } from '@stamhoofd/structures';
+import type { ErrorBox } from '../errors/ErrorBox';
 
 export type SaveViewProps = {
     loading?: boolean;

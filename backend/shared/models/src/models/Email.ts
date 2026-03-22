@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
+import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
 import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';

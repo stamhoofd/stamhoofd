@@ -15,9 +15,10 @@
 </template>
 
 <script lang="ts" setup>
-import { Column } from '#tables/classes/Column.ts';
+import type { Column } from '#tables/classes/Column.ts';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import { InMemoryTableAction, TableAction } from '#tables/classes/TableAction.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import ModernTableView from '#tables/ModernTableView.vue';
 import { useAppContext } from '#context/appContext.ts';
@@ -28,8 +29,10 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
-import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, mergeFilters, Organization, PlatformRegistration, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, GroupType, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import MemberSegmentedView from '../members/MemberSegmentedView.vue';

@@ -105,7 +105,8 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { DarkMode, Image, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import type { Image} from '@stamhoofd/structures';
+import { DarkMode, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const platformManager = usePlatformManager();

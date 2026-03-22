@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
@@ -43,12 +43,14 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
-import { PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
+import type { PrivateOrder, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
+import { PermissionLevel, PrivateOrderWithTickets } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { computed, onBeforeUnmount, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import EditSeatingPlanView from '../edit/seating/EditSeatingPlanView.vue';
-import { WebshopManager } from '../WebshopManager';
+import type { WebshopManager } from '../WebshopManager';
 import OrderView from './OrderView.vue';
 
 const props = defineProps<{

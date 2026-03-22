@@ -7,9 +7,11 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { defineRoutes, FramedComponent, HistoryManager, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onBeforeUnmount, Ref, ref, unref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onBeforeUnmount, ref, unref } from 'vue';
 import { SegmentedControl } from '../inputs';
 
 type Item = { name: string; component: ComponentWithProperties };

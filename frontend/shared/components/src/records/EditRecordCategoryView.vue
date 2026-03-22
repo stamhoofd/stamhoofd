@@ -112,10 +112,13 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { ObjectWithRecords, PatchAnswers, PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
-import { Ref, computed, getCurrentInstance, reactive, ref } from 'vue';
+import type { ObjectWithRecords, PatchAnswers} from '@stamhoofd/structures';
+import { PropertyFilter, RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
+import { computed, getCurrentInstance, reactive, ref } from 'vue';
 import { useAppContext } from '../context/appContext';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
@@ -126,10 +129,11 @@ import { useDraggableArray, usePatchArray, usePatchMoveUpDown } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import { NavigationActions } from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
-import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
+import type { RecordEditorSettings} from './RecordEditorSettings';
+import { RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
 import { useValidation } from '../errors/useValidation';
 import { SimpleError } from '@simonbackx/simple-errors';

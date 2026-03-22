@@ -97,7 +97,8 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Address, NationalRegisterNumberOptOut, Parent, ParentType, ParentTypeHelper, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -110,7 +111,8 @@ import NRNInput from '../../../inputs/NRNInput.vue';
 import PhoneInput from '../../../inputs/PhoneInput.vue';
 import SelectionAddressInput from '../../../inputs/SelectionAddressInput.vue';
 import { CenteredMessage } from '../../../overlays/CenteredMessage';
-import { NavigationActions, useNavigationActions } from '../../../types/NavigationActions';
+import type { NavigationActions} from '../../../types/NavigationActions';
+import { useNavigationActions } from '../../../types/NavigationActions';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 

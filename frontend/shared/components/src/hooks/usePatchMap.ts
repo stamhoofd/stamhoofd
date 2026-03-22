@@ -1,5 +1,7 @@
-import { ConvertArrayToPatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
-import { computed, ref, Ref, unref } from 'vue';
+import type { ConvertArrayToPatchableArray} from '@simonbackx/simple-encoding';
+import { PatchMap, patchObject } from '@simonbackx/simple-encoding';
+import type { Ref} from 'vue';
+import { computed, ref, unref } from 'vue';
 
 export function usePatchMap<K, T>(obj: Map<K, T> | Ref<Map<K, T>>): {
     patched: Ref<Map<K, T>>;

@@ -1,5 +1,6 @@
 import { City, PostalCode, Province } from '@stamhoofd/models';
-import { Address, Country } from '@stamhoofd/structures';
+import { Address } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 
 import { AddressValidator } from './AddressValidator.js';
 

@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-networking';
-import { LimitedFilteredRequest, SortList, StamhoofdFilter, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
+import type { SortList, StamhoofdFilter} from '@stamhoofd/structures';
+import { LimitedFilteredRequest, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
 import { onBeforeUnmount, reactive } from 'vue';
-import { ObjectFetcher } from './ObjectFetcher';
+import type { ObjectFetcher } from './ObjectFetcher';
 
 export function useInfiniteObjectFetcher<O extends { id: string }, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): InfiniteObjectFetcher<O> {
     const fetcher = reactive(new InfiniteObjectFetcher<O>({

@@ -28,7 +28,7 @@ import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 import { Toast } from '#overlays/Toast.ts';
 
-import { TableAction, TableActionSelection } from './classes';
+import type { TableAction, TableActionSelection } from './classes';
 
 @Component({
     components: {

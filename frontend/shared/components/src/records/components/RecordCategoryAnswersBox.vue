@@ -67,7 +67,8 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import { ObjectWithRecords, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordFileAnswer } from '@stamhoofd/structures';
+import type { ObjectWithRecords, RecordCategory} from '@stamhoofd/structures';
+import { PermissionLevel, RecordCheckboxAnswer, RecordFileAnswer } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../context';
 

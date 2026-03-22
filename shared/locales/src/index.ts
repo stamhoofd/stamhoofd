@@ -1,6 +1,9 @@
-export const countries: GlobalCountry[] = ['BE', 'NL', 'FR'] as GlobalCountry[];
-export const languages: GlobalLanguage[] = [
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
+
+export const countries = ['BE', 'NL', 'FR'] as Country[];
+export const languages = [
     'nl',
     'en',
     'fr',
-] as GlobalLanguage[];
+] as Language[];

@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
-import { ObjectWithRecords } from '../ObjectWithRecords.js';
+import type { ObjectWithRecords } from '../ObjectWithRecords.js';
 import { type RecordAnswer } from './RecordAnswer.js';
 import { TranslatedString } from '../../TranslatedString.js';
 
@@ -219,7 +219,7 @@ export class RecordSettings extends BaseRecordSettings {
      * In case of multiple choice: the values you can choose from with optional additional information
      */
     @field({ decoder: new ArrayDecoder(RecordChoice) })
-    choices: RecordChoice[] = [];
+    choices: RecordChoice[];
 
     /**
      * Label used for input (depending on the type)
@@ -227,33 +227,33 @@ export class RecordSettings extends BaseRecordSettings {
      * Text inputs: label field above the input
      * If empty: name is used
      */
-    @field({ decoder: StringDecoder })
-    @field(TranslatedString.field({ version: 370 }))
-    label = TranslatedString.create();
+    @field({ decoder: StringDecoder, defaultValue: () => '' })
+    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    label: TranslatedString;
 
     /**
      * Text underneath the label in case of a checkbox.
      * For other types: below the input
      */
-    @field({ decoder: StringDecoder })
-    @field(TranslatedString.field({ version: 370 }))
+    @field({ decoder: StringDecoder, defaultValue: () => '' })
+    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
     description = TranslatedString.create();
 
     /// In case of textboxes or comments for checked checkboxes
-    @field({ decoder: StringDecoder })
-    @field(TranslatedString.field({ version: 370 }))
+    @field({ decoder: StringDecoder, defaultValue: () => '' })
+    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
     inputPlaceholder = TranslatedString.create();
 
     /// Text below the input field for comments (if any)
-    @field({ decoder: StringDecoder, version: 120 })
-    @field(TranslatedString.field({ version: 370 }))
+    @field({ decoder: StringDecoder, version: 120, defaultValue: () => '' })
+    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
     commentsDescription = TranslatedString.create();
 
     /**
      * Show a warning if selected / entered (or not selected/entered if inverted)
      */
     @field({ decoder: RecordWarning, version: 122, nullable: true })
-    warning: RecordWarning | null = null;
+    warning: RecordWarning | null;
 
     /**
      * Only for images

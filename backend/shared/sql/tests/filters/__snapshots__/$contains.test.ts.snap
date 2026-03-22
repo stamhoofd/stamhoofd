@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for filter: {"settings.names":{"$contains":"%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for % in the array > SQL Query for filter: {"settings.names":{"$contains":"%"}} 1`] = `
 {
   "params": [
     "%\\%%",
@@ -9,7 +9,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQ
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for filter: {"settings.names":{"$contains":"BAn%ana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for % in the array > SQL Query for filter: {"settings.names":{"$contains":"BAn%ana"}} 1`] = `
 {
   "params": [
     "%ban\\%ana%",
@@ -18,7 +18,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQ
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for not match filter: {"settings.names":{"$contains":"%%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for % in the array > SQL Query for not match filter: {"settings.names":{"$contains":"%%"}} 1`] = `
 {
   "params": [
     "%\\%\\%%",
@@ -27,7 +27,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQ
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for not match filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for % in the array > SQL Query for not match filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
 {
   "params": [
     "%banana%",
@@ -36,7 +36,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQ
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for filter: {"settings.names":{"$contains":"\\\\"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for backslash in the array > SQL Query for filter: {"settings.names":{"$contains":"\\\\"}} 1`] = `
 {
   "params": [
     "%\\\\%",
@@ -45,7 +45,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the a
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for filter: {"settings.names":{"$contains":"BAn\\\\ana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for backslash in the array > SQL Query for filter: {"settings.names":{"$contains":"BAn\\\\ana"}} 1`] = `
 {
   "params": [
     "%ban\\\\ana%",
@@ -54,7 +54,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the a
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for not match filter: {"settings.names":{"$contains":"\\\\\\\\"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for backslash in the array > SQL Query for not match filter: {"settings.names":{"$contains":"\\\\\\\\"}} 1`] = `
 {
   "params": [
     "%\\\\\\\\%",
@@ -63,7 +63,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the a
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the array: SQL Query for not match filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search for backslash in the array > SQL Query for not match filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
 {
   "params": [
     "%banana%",
@@ -72,7 +72,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search for backslash in the a
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings":{"names":{"$contains":"pple"}}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search in the array > SQL Query for filter: {"settings":{"names":{"$contains":"pple"}}} 1`] = `
 {
   "params": [
     "%pple%",
@@ -81,7 +81,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Quer
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search in the array > SQL Query for filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
 {
   "params": [
     "%banana%",
@@ -90,7 +90,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Quer
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"banana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search in the array > SQL Query for filter: {"settings.names":{"$contains":"banana"}} 1`] = `
 {
   "params": [
     "%banana%",
@@ -99,7 +99,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Quer
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"pple"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search in the array > SQL Query for filter: {"settings.names":{"$contains":"pple"}} 1`] = `
 {
   "params": [
     "%pple%",
@@ -108,7 +108,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Quer
 }
 `;
 
-exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Query for not match filter: {"settings.names":{"$contains":"chrry"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON arrays > Can search in the array > SQL Query for not match filter: {"settings.names":{"$contains":"chrry"}} 1`] = `
 {
   "params": [
     "%chrry%",
@@ -117,7 +117,7 @@ exports[`$contains MySQL behaviour JSON arrays Can search in the array: SQL Quer
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Booleans are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"true"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Booleans are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"true"}} 1`] = `
 {
   "params": [
     "%true%",
@@ -126,7 +126,7 @@ exports[`$contains MySQL behaviour JSON scalars Booleans are converted to string
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Booleans are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"0"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Booleans are converted to strings > SQL Query for not match filter: {"settings.scalar":{"$contains":"0"}} 1`] = `
 {
   "params": [
     "%0%",
@@ -135,7 +135,7 @@ exports[`$contains MySQL behaviour JSON scalars Booleans are converted to string
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Booleans are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Booleans are converted to strings > SQL Query for not match filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
 {
   "params": [
     "%1%",
@@ -144,7 +144,7 @@ exports[`$contains MySQL behaviour JSON scalars Booleans are converted to string
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for filter: {"settings.scalar":{"$contains":"%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Can actually search strings for % > SQL Query for filter: {"settings.scalar":{"$contains":"%"}} 1`] = `
 {
   "params": [
     "%\\%%",
@@ -153,7 +153,7 @@ exports[`$contains MySQL behaviour JSON scalars Can actually search strings for 
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for filter: {"settings.scalar":{"$contains":"0%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Can actually search strings for % > SQL Query for filter: {"settings.scalar":{"$contains":"0%"}} 1`] = `
 {
   "params": [
     "%0\\%%",
@@ -162,7 +162,7 @@ exports[`$contains MySQL behaviour JSON scalars Can actually search strings for 
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for filter: {"settings.scalar":{"$contains":"50%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Can actually search strings for % > SQL Query for filter: {"settings.scalar":{"$contains":"50%"}} 1`] = `
 {
   "params": [
     "%50\\%%",
@@ -171,7 +171,7 @@ exports[`$contains MySQL behaviour JSON scalars Can actually search strings for 
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for not match filter: {"settings.scalar":{"$contains":"%%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Can actually search strings for % > SQL Query for not match filter: {"settings.scalar":{"$contains":"%%"}} 1`] = `
 {
   "params": [
     "%\\%\\%%",
@@ -180,7 +180,7 @@ exports[`$contains MySQL behaviour JSON scalars Can actually search strings for 
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Can actually search strings for %: SQL Query for not match filter: {"settings.scalar":{"$contains":"%50"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Can actually search strings for % > SQL Query for not match filter: {"settings.scalar":{"$contains":"%50"}} 1`] = `
 {
   "params": [
     "%\\%50%",
@@ -189,7 +189,7 @@ exports[`$contains MySQL behaviour JSON scalars Can actually search strings for 
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"-"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"-"}} 1`] = `
 {
   "params": [
     "%-%",
@@ -198,7 +198,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"-1"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"-1"}} 1`] = `
 {
   "params": [
     "%-1%",
@@ -207,7 +207,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"-15"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"-15"}} 1`] = `
 {
   "params": [
     "%-15%",
@@ -216,7 +216,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
 {
   "params": [
     "%1%",
@@ -225,7 +225,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"5"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"5"}} 1`] = `
 {
   "params": [
     "%5%",
@@ -234,7 +234,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
 {
   "params": [
     "%15%",
@@ -243,7 +243,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"2"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for not match filter: {"settings.scalar":{"$contains":"2"}} 1`] = `
 {
   "params": [
     "%2%",
@@ -252,7 +252,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Negative number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"151"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are converted to strings > SQL Query for not match filter: {"settings.scalar":{"$contains":"151"}} 1`] = `
 {
   "params": [
     "%151%",
@@ -261,7 +261,7 @@ exports[`$contains MySQL behaviour JSON scalars Negative number fields are conve
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Null fields do not match: SQL Query for not match filter: {"settings.scalar":{"$contains":""}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Null fields do not match > SQL Query for not match filter: {"settings.scalar":{"$contains":""}} 1`] = `
 {
   "params": [
     "%%",
@@ -270,7 +270,7 @@ exports[`$contains MySQL behaviour JSON scalars Null fields do not match: SQL Qu
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Null fields do not match: SQL Query for not match filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Null fields do not match > SQL Query for not match filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
 {
   "params": [
     "%15%",
@@ -279,7 +279,7 @@ exports[`$contains MySQL behaviour JSON scalars Null fields do not match: SQL Qu
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"1"}} 1`] = `
 {
   "params": [
     "%1%",
@@ -288,7 +288,7 @@ exports[`$contains MySQL behaviour JSON scalars Number fields are converted to s
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"5"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"5"}} 1`] = `
 {
   "params": [
     "%5%",
@@ -297,7 +297,7 @@ exports[`$contains MySQL behaviour JSON scalars Number fields are converted to s
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converted to strings > SQL Query for filter: {"settings.scalar":{"$contains":"15"}} 1`] = `
 {
   "params": [
     "%15%",
@@ -306,7 +306,7 @@ exports[`$contains MySQL behaviour JSON scalars Number fields are converted to s
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"2"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converted to strings > SQL Query for not match filter: {"settings.scalar":{"$contains":"2"}} 1`] = `
 {
   "params": [
     "%2%",
@@ -315,7 +315,7 @@ exports[`$contains MySQL behaviour JSON scalars Number fields are converted to s
 }
 `;
 
-exports[`$contains MySQL behaviour JSON scalars Number fields are converted to strings: SQL Query for not match filter: {"settings.scalar":{"$contains":"151"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converted to strings > SQL Query for not match filter: {"settings.scalar":{"$contains":"151"}} 1`] = `
 {
   "params": [
     "%151%",
@@ -324,7 +324,7 @@ exports[`$contains MySQL behaviour JSON scalars Number fields are converted to s
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for filter: {"settings.name":{"$contains":"%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % > SQL Query for filter: {"settings.name":{"$contains":"%"}} 1`] = `
 {
   "params": [
     "%\\%%",
@@ -333,7 +333,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for filter: {"settings.name":{"$contains":"0%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % > SQL Query for filter: {"settings.name":{"$contains":"0%"}} 1`] = `
 {
   "params": [
     "%0\\%%",
@@ -342,7 +342,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for filter: {"settings.name":{"$contains":"50%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % > SQL Query for filter: {"settings.name":{"$contains":"50%"}} 1`] = `
 {
   "params": [
     "%50\\%%",
@@ -351,7 +351,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for not match filter: {"settings.name":{"$contains":"%%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % > SQL Query for not match filter: {"settings.name":{"$contains":"%%"}} 1`] = `
 {
   "params": [
     "%\\%\\%%",
@@ -360,7 +360,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Query for not match filter: {"settings.name":{"$contains":"%50"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % > SQL Query for not match filter: {"settings.name":{"$contains":"%50"}} 1`] = `
 {
   "params": [
     "%\\%50%",
@@ -369,7 +369,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for %: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for filter: {"settings.name":{"$contains":"_"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ > SQL Query for filter: {"settings.name":{"$contains":"_"}} 1`] = `
 {
   "params": [
     "%\\_%",
@@ -378,7 +378,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for filter: {"settings.name":{"$contains":"_doe"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ > SQL Query for filter: {"settings.name":{"$contains":"_doe"}} 1`] = `
 {
   "params": [
     "%\\_doe%",
@@ -387,7 +387,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for filter: {"settings.name":{"$contains":"john_doe"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ > SQL Query for filter: {"settings.name":{"$contains":"john_doe"}} 1`] = `
 {
   "params": [
     "%john\\_doe%",
@@ -396,7 +396,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for not match filter: {"settings.name":{"$contains":"__"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ > SQL Query for not match filter: {"settings.name":{"$contains":"__"}} 1`] = `
 {
   "params": [
     "%\\_\\_%",
@@ -405,7 +405,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Query for not match filter: {"settings.name":{"$contains":"john__doe"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ > SQL Query for not match filter: {"settings.name":{"$contains":"john__doe"}} 1`] = `
 {
   "params": [
     "%john\\_\\_doe%",
@@ -414,7 +414,7 @@ exports[`$contains MySQL behaviour JSON strings Can actually search for _: SQL Q
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for filter: {"settings.name":{"$contains":"\\\\"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash > SQL Query for filter: {"settings.name":{"$contains":"\\\\"}} 1`] = `
 {
   "params": [
     "%\\\\%",
@@ -423,7 +423,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for filter: {"settings.name":{"$contains":"\\\\%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash > SQL Query for filter: {"settings.name":{"$contains":"\\\\%"}} 1`] = `
 {
   "params": [
     "%\\\\\\%%",
@@ -432,7 +432,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for not match filter: {"settings.name":{"$contains":"\\\\%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash > SQL Query for not match filter: {"settings.name":{"$contains":"\\\\%"}} 1`] = `
 {
   "params": [
     "%\\\\\\%%",
@@ -441,7 +441,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for not match filter: {"settings.name":{"$contains":"\\\\\\\\"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash > SQL Query for not match filter: {"settings.name":{"$contains":"\\\\\\\\"}} 1`] = `
 {
   "params": [
     "%\\\\\\\\%",
@@ -450,7 +450,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Query for not match filter: {"settings.name":{"$contains":"\\\\_"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash > SQL Query for not match filter: {"settings.name":{"$contains":"\\\\_"}} 1`] = `
 {
   "params": [
     "%\\\\\\_%",
@@ -459,7 +459,7 @@ exports[`$contains MySQL behaviour JSON strings Can search for backslash: SQL Qu
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Does not return values without % when filtering for %: SQL Query for not match filter: {"settings.name":{"$contains":"%"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Does not return values without % when filtering for % > SQL Query for not match filter: {"settings.name":{"$contains":"%"}} 1`] = `
 {
   "params": [
     "%\\%%",
@@ -468,7 +468,7 @@ exports[`$contains MySQL behaviour JSON strings Does not return values without %
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"settings.name":{"$contains":"_"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Does not return values without _ when filtering for _ > SQL Query for not match filter: {"settings.name":{"$contains":"_"}} 1`] = `
 {
   "params": [
     "%\\_%",
@@ -477,7 +477,7 @@ exports[`$contains MySQL behaviour JSON strings Does not return values without _
 }
 `;
 
-exports[`$contains MySQL behaviour JSON strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"settings.name":{"$contains":"john_"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON strings > Does not return values without _ when filtering for _ > SQL Query for not match filter: {"settings.name":{"$contains":"john_"}} 1`] = `
 {
   "params": [
     "%john\\_%",
@@ -486,7 +486,7 @@ exports[`$contains MySQL behaviour JSON strings Does not return values without _
 }
 `;
 
-exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON wildcard arrays > Can search in the array > SQL Query for filter: {"settings.names":{"$contains":"BAnana"}} 1`] = `
 {
   "params": [
     "%banana%",
@@ -495,7 +495,7 @@ exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array:
 }
 `;
 
-exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"banana"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON wildcard arrays > Can search in the array > SQL Query for filter: {"settings.names":{"$contains":"banana"}} 1`] = `
 {
   "params": [
     "%banana%",
@@ -504,7 +504,7 @@ exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array:
 }
 `;
 
-exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for filter: {"settings.names":{"$contains":"pple"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON wildcard arrays > Can search in the array > SQL Query for filter: {"settings.names":{"$contains":"pple"}} 1`] = `
 {
   "params": [
     "%pple%",
@@ -513,7 +513,7 @@ exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array:
 }
 `;
 
-exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array: SQL Query for not match filter: {"settings.names":{"$contains":"chrry"}} 1`] = `
+exports[`$contains > MySQL behaviour > JSON wildcard arrays > Can search in the array > SQL Query for not match filter: {"settings.names":{"$contains":"chrry"}} 1`] = `
 {
   "params": [
     "%chrry%",
@@ -522,7 +522,7 @@ exports[`$contains MySQL behaviour JSON wildcard arrays Can search in the array:
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for filter: {"name":{"$contains":"%"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for % > SQL Query for filter: {"name":{"$contains":"%"}} 1`] = `
 {
   "params": [
     "%\\%%",
@@ -531,7 +531,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for filter: {"name":{"$contains":"0%"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for % > SQL Query for filter: {"name":{"$contains":"0%"}} 1`] = `
 {
   "params": [
     "%0\\%%",
@@ -540,7 +540,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for filter: {"name":{"$contains":"50%"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for % > SQL Query for filter: {"name":{"$contains":"50%"}} 1`] = `
 {
   "params": [
     "%50\\%%",
@@ -549,7 +549,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for not match filter: {"name":{"$contains":"%%"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for % > SQL Query for not match filter: {"name":{"$contains":"%%"}} 1`] = `
 {
   "params": [
     "%\\%\\%%",
@@ -558,7 +558,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for %: SQL Query for not match filter: {"name":{"$contains":"%50"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for % > SQL Query for not match filter: {"name":{"$contains":"%50"}} 1`] = `
 {
   "params": [
     "%\\%50%",
@@ -567,7 +567,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for filter: {"name":{"$contains":"_"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for _ > SQL Query for filter: {"name":{"$contains":"_"}} 1`] = `
 {
   "params": [
     "%\\_%",
@@ -576,7 +576,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for filter: {"name":{"$contains":"_doe"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for _ > SQL Query for filter: {"name":{"$contains":"_doe"}} 1`] = `
 {
   "params": [
     "%\\_doe%",
@@ -585,7 +585,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for filter: {"name":{"$contains":"john_doe"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for _ > SQL Query for filter: {"name":{"$contains":"john_doe"}} 1`] = `
 {
   "params": [
     "%john\\_doe%",
@@ -594,7 +594,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for not match filter: {"name":{"$contains":"__"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for _ > SQL Query for not match filter: {"name":{"$contains":"__"}} 1`] = `
 {
   "params": [
     "%\\_\\_%",
@@ -603,7 +603,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can actually search for _: SQL Query for not match filter: {"name":{"$contains":"john__doe"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can actually search for _ > SQL Query for not match filter: {"name":{"$contains":"john__doe"}} 1`] = `
 {
   "params": [
     "%john\\_\\_doe%",
@@ -612,7 +612,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can actually search for 
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for filter: {"name":{"$contains":"\\\\"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can search for backslash > SQL Query for filter: {"name":{"$contains":"\\\\"}} 1`] = `
 {
   "params": [
     "%\\\\%",
@@ -621,7 +621,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for filter: {"name":{"$contains":"\\\\%"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can search for backslash > SQL Query for filter: {"name":{"$contains":"\\\\%"}} 1`] = `
 {
   "params": [
     "%\\\\\\%%",
@@ -630,7 +630,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for not match filter: {"name":{"$contains":"\\\\%"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can search for backslash > SQL Query for not match filter: {"name":{"$contains":"\\\\%"}} 1`] = `
 {
   "params": [
     "%\\\\\\%%",
@@ -639,7 +639,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for not match filter: {"name":{"$contains":"\\\\\\\\"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can search for backslash > SQL Query for not match filter: {"name":{"$contains":"\\\\\\\\"}} 1`] = `
 {
   "params": [
     "%\\\\\\\\%",
@@ -648,7 +648,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash: SQL Query for not match filter: {"name":{"$contains":"\\\\_"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Can search for backslash > SQL Query for not match filter: {"name":{"$contains":"\\\\_"}} 1`] = `
 {
   "params": [
     "%\\\\\\_%",
@@ -657,7 +657,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Can search for backslash
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Does not return values without % when filtering for %: SQL Query for not match filter: {"name":{"$contains":"%"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Does not return values without % when filtering for % > SQL Query for not match filter: {"name":{"$contains":"%"}} 1`] = `
 {
   "params": [
     "%\\%%",
@@ -666,7 +666,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Does not return values w
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"name":{"$contains":"_"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Does not return values without _ when filtering for _ > SQL Query for not match filter: {"name":{"$contains":"_"}} 1`] = `
 {
   "params": [
     "%\\_%",
@@ -675,7 +675,7 @@ exports[`$contains MySQL behaviour Native MySQL strings Does not return values w
 }
 `;
 
-exports[`$contains MySQL behaviour Native MySQL strings Does not return values without _ when filtering for _: SQL Query for not match filter: {"name":{"$contains":"john_"}} 1`] = `
+exports[`$contains > MySQL behaviour > Native MySQL strings > Does not return values without _ when filtering for _ > SQL Query for not match filter: {"name":{"$contains":"john_"}} 1`] = `
 {
   "params": [
     "%john\\_%",

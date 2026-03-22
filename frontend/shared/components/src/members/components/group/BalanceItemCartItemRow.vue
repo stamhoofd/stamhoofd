@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { BalanceItemCartItem, RegisterCheckout } from '@stamhoofd/structures';
+import type { BalanceItemCartItem, RegisterCheckout } from '@stamhoofd/structures';
 import { BalanceItemIcon, BalanceItemTitleBox } from '../../../payments';
 
 const props = withDefaults(

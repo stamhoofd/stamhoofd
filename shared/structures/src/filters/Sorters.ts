@@ -1,5 +1,6 @@
-import { PlainObject } from '@simonbackx/simple-encoding';
-import { SortItemDirection, SortList } from './SortList.js';
+import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { SortList } from './SortList.js';
+import { SortItemDirection } from './SortList.js';
 
 export type SortDefinition<T, B extends PlainObject | Date = PlainObject | Date> = {
     getValue(a: T): B;

@@ -18,7 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import EmailView, { type RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
@@ -31,13 +32,16 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import { AsyncTableAction, InMemoryTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationPrivateMetaData, OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import type { OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
+import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationPrivateMetaData } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
 import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';

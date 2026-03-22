@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
@@ -59,7 +59,7 @@ import { DNSRecordStatus, PrivateWebshop } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
-import { WebshopManager } from '../WebshopManager';
+import type { WebshopManager } from '../WebshopManager';
 
 const props = defineProps<{
     webshopManager: WebshopManager;

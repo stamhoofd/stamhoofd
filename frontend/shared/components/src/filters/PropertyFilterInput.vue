@@ -97,14 +97,16 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { isEmptyFilter, PropertyFilter, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import type { StamhoofdFilter} from '@stamhoofd/structures';
+import { isEmptyFilter, PropertyFilter, Version } from '@stamhoofd/structures';
 
 import Radio from '../inputs/Radio.vue';
 import STInputBox from '../inputs/STInputBox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
-import { filterToString, UIFilter, UIFilterBuilder } from './UIFilter';
+import type { UIFilter, UIFilterBuilder } from './UIFilter';
+import { filterToString } from './UIFilter';
 import UIFilterEditor from './UIFilterEditor.vue';
 
 @Component({

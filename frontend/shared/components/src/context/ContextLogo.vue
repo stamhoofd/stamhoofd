@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { AppType, Organization } from '@stamhoofd/structures';
+import type { AppType, Organization } from '@stamhoofd/structures';
 import OrganizationAvatar from './OrganizationAvatar.vue';
 import PlatformAvatar from './PlatformAvatar.vue';
 

@@ -57,7 +57,8 @@
 </template>
 
 <script lang="ts" setup>
-import { GroupType, PlatformMember, Registration } from '@stamhoofd/structures';
+import type { PlatformMember, Registration } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';

@@ -41,12 +41,14 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { City, Country, CountryHelper, Province, SearchRegions, WebshopDeliveryMethod } from '@stamhoofd/structures';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import type { City, Province} from '@stamhoofd/structures';
+import { CountryHelper, SearchRegions, WebshopDeliveryMethod } from '@stamhoofd/structures';
+import type { Country } from "@stamhoofd/types/Country";
 import { throttle } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 

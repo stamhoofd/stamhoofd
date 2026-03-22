@@ -1,5 +1,7 @@
-import { AccessRight, EmailPreview, Event, EventPermissionChecker, Group, GroupCategory, GroupType, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
-import { Ref, toRaw, unref } from 'vue';
+import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType, Platform } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { toRaw, unref } from 'vue';
 
 export class ContextPermissions {
     reactiveUser: UserWithMembers | null | Ref<UserWithMembers | null>;

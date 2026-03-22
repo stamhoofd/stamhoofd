@@ -56,13 +56,15 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { PaymentCustomer, type RegisterCheckout, type Checkoutable } from '@stamhoofd/structures';
+import { PaymentCustomer   } from '@stamhoofd/structures';
+import type {RegisterCheckout, Checkoutable} from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import { NavigationActions, useNavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions} from '#types/NavigationActions.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
 import GeneralSettingsView from '#organizations/GeneralSettingsView.vue';

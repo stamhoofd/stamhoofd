@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
-import { Group } from './Group.js';
+import type { Group } from './Group.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 

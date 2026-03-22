@@ -1,4 +1,5 @@
-import { markRaw, Ref, Slot } from 'vue';
+import type { Ref, Slot } from 'vue';
+import { markRaw } from 'vue';
 
 export class CategorizedViewCategory {
     el: Ref<HTMLElement | null>;

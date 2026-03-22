@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "node:path";
+import fs from 'fs';
+import path from 'node:path';
 
 const cachePath = path.normalize(__dirname + '/../../..') + '/file-cache.txt';
 const doubtCachePath = path.normalize(__dirname + '/../../..') + '/file-cache-doubt.txt';
@@ -15,7 +15,7 @@ class FileCache {
     }
 
     private readCache(path: string) {
-        const content = fs.readFileSync(path, "utf8");
+        const content = fs.readFileSync(path, 'utf8');
         return new Set(content.split(separator));
     }
 

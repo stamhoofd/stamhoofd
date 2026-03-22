@@ -24,7 +24,7 @@
             </tbody>
         </table>
 
-        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox" />
     </SaveView>
 </template>
 
@@ -33,7 +33,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { ref } from 'vue';
-import { ImportError } from '../../../../../classes/import/ImportError';
+import type { ImportError } from '../../../../../classes/import/ImportError';
 
 defineProps<{
     importErrors: ImportError[];

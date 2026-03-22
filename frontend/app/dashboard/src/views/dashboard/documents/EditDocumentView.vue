@@ -25,7 +25,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -37,8 +38,10 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Document, DocumentData, DocumentTemplatePrivate, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import { computed, ComputedRef, ref } from 'vue';
+import type { DocumentTemplatePrivate, PatchAnswers} from '@stamhoofd/structures';
+import { Document, DocumentData, RecordCategory } from '@stamhoofd/structures';
+import type { ComputedRef} from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     isNew: boolean;

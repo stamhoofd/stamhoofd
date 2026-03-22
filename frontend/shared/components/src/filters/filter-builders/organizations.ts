@@ -1,10 +1,11 @@
-import { FilterWrapperMarker, SetupStepType, StamhoofdFilter, User } from '@stamhoofd/structures';
+import type { StamhoofdFilter, User } from '@stamhoofd/structures';
+import { FilterWrapperMarker, SetupStepType } from '@stamhoofd/structures';
 import { usePlatform } from '../../hooks';
 import { getOrganizationCompanyFilterBuilders } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
-import { UIFilterBuilders } from '../UIFilter';
+import type { UIFilterBuilders } from '../UIFilter';
 
 const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [

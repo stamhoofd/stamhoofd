@@ -14,7 +14,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <form @submit.prevent="save" novalidate>
+            <form novalidate @submit.prevent="save">
                 <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%jx`)">
                     <div class="input-group">
                         <div>

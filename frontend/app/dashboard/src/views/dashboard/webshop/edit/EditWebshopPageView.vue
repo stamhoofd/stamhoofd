@@ -144,7 +144,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -163,12 +163,14 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
-import { Cart, CartItem, CartReservedSeat, DarkMode, Image, Policy, PrivateWebshop, ProductType, ResolutionRequest, RichText, SponsorConfig, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
+import type { DarkMode, Image, RichText, SponsorConfig} from '@stamhoofd/structures';
+import { Cart, CartItem, CartReservedSeat, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditSponsorsBox from '../../sponsors/EditSponsorsBox.vue';
 import EditPolicyBox from './EditPolicyBox.vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 

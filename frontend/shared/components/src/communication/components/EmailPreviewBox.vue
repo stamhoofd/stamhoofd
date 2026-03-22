@@ -23,7 +23,8 @@
 
 <script lang="ts" setup>
 import SafeHtmlBox from '#editor/SafeHtmlBox.vue';
-import { EmailPreview, EmailRecipient, EmailWithRecipients, replaceEmailHtml } from '@stamhoofd/structures';
+import type { EmailPreview, EmailRecipient, EmailWithRecipients} from '@stamhoofd/structures';
+import { replaceEmailHtml } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 

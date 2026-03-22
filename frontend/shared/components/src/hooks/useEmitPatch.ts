@@ -1,5 +1,6 @@
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { Ref, computed } from 'vue';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { Ref} from 'vue';
+import { computed } from 'vue';
 
 export function useEmitPatch<T extends AutoEncoder>(props: any, emit: any, propName: string): {
     createPatch: () => AutoEncoderPatchType<T>;

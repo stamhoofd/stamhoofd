@@ -1,6 +1,7 @@
-import { ArrayDecoder, AutoEncoder, Decoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 import { RecordCategory } from './members/records/RecordCategory.js';
-import { Organization } from './Organization.js';
+import type { Organization } from './Organization.js';
 
 export class OrganizationLevelRecordsConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>) })

@@ -2,8 +2,8 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address.js';
-import { Country } from '../addresses/CountryDecoder.js';
+import { Country } from '@stamhoofd/types/Country';
+import type { Address } from '../addresses/Address.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum STPackageType {

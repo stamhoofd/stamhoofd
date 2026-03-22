@@ -4,8 +4,9 @@ import { CartReservedSeat } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-
-import { Order, Organization, Webshop } from './index.js';
+import { type Order } from './Order.js';
+import { type Organization } from './Organization.js';
+import { type Webshop } from './Webshop.js';
 
 // Note: 0 and O is removed to prevent typing it in wrong
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -45,10 +46,10 @@ export class Ticket extends QueryableModel {
     @column({ type: 'string' })
     secret!: string;
 
-    @column({ foreignKey: Ticket.organization, type: 'string' })
+    @column({ type: 'string' })
     organizationId: string;
 
-    @column({ foreignKey: Ticket.webshop, type: 'string' })
+    @column({ type: 'string' })
     webshopId: string;
 
     /**
@@ -57,7 +58,7 @@ export class Ticket extends QueryableModel {
      * The order details should remain private to a ticket holder except for the item details
      * + also the orderID should remain private for the holder (since this provides access via URL, need to add a secret here)
      */
-    @column({ foreignKey: Ticket.order, type: 'string' })
+    @column({ type: 'string' })
     orderId: string;
 
     /**
@@ -121,9 +122,9 @@ export class Ticket extends QueryableModel {
     @column({ type: 'string', nullable: true })
     scannedBy: string | null = null;
 
-    static webshop = new ManyToOneRelation(Webshop, 'webshop');
-    static order = new ManyToOneRelation(Order, 'order');
-    static organization = new ManyToOneRelation(Organization, 'organization');
+    static webshop: ManyToOneRelation<'webshop', Webshop>;
+    static order: ManyToOneRelation<'order', Order>;
+    static organization: ManyToOneRelation<'organization', Organization>;
 
     getUrl(this: Ticket & { webshop: Webshop & { organization: Organization } }) {
         return 'https://' + this.webshop.getHost() + '/ticket/' + this.secret;

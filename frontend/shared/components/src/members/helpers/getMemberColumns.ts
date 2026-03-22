@@ -1,6 +1,7 @@
 import { Column } from '#tables/classes/Column.ts';
-import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import { ContinuousMembershipStatus, GroupType, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformMember;

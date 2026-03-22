@@ -7,10 +7,10 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
-import { Country } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
 
 @Component({

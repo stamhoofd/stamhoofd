@@ -47,7 +47,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
@@ -63,7 +64,8 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
-import { Ref, computed, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
 import RegistrationPeriodRow from './RegistrationPeriodRow.vue';
 

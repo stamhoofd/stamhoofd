@@ -46,7 +46,7 @@ describe('E2E.Bundle Discounts', () => {
     });
 
     afterEach(() => {
-        jest.restoreAllMocks();
+        vitest.restoreAllMocks();
     });
 
     async function initData() {

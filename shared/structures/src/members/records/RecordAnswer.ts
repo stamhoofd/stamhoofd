@@ -1,4 +1,5 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,15 +27,15 @@ export class RecordAnswer extends AutoEncoder {
     /**
      * Date that this was changed. To determine merge order
      */
-    @field({ decoder: DateDecoder, version: 128 })
-    date: Date = new Date();
+    @field({ decoder: DateDecoder, version: 128, defaultValue: () => new Date() })
+    date: Date;
 
     /**
      * Date that this answer was last reviewed by the author
      * -> when editing by the organization, don't set this date
      */
     @field({ decoder: DateDecoder, nullable: true })
-    reviewedAt: Date | null = null;
+    reviewedAt: Date | null;
 
     isOutdated(timeoutMs: number): boolean {
         if (!this.reviewedAt) {

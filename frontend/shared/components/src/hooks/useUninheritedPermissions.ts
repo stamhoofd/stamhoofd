@@ -1,9 +1,9 @@
-import { ContextPermissions } from "@stamhoofd/networking"
-import { Organization, Platform, UserWithMembers } from "@stamhoofd/structures"
-import { Ref } from "vue"
-import { useOrganization } from "./useOrganization"
-import { usePlatform } from "./usePlatform"
-import { useUser } from "./useUser"
+import { ContextPermissions } from '@stamhoofd/networking'
+import type { Organization, Platform, UserWithMembers } from '@stamhoofd/structures'
+import type { Ref } from 'vue'
+import { useOrganization } from './useOrganization'
+import { usePlatform } from './usePlatform'
+import { useUser } from './useUser'
 
 /**
  * Allows you to use the ContextPermissions object in a specific context (editing user permissions mostly)

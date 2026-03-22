@@ -23,11 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, PushOptions, useDismiss, useNavigate, usePopup, useShow } from '@simonbackx/vue-app-navigation';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useDismiss, useNavigate, usePopup, useShow } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentPublicInstance, computed, getCurrentInstance, ref, unref } from 'vue';
+import type { ComponentPublicInstance} from 'vue';
+import { computed, getCurrentInstance, ref, unref } from 'vue';
 
-import { TabBarItem, TabBarItemGroup } from './TabBarItem';
+import type { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
 const props = defineProps<{
     group: TabBarItemGroup,

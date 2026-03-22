@@ -1,10 +1,10 @@
 import { Mistral } from '@mistralai/mistralai';
-import { globals } from '../../shared/globals';
-import { AutoTranslateOptions } from '../../types/AutoTranslateOptions';
-import { Batch } from '../../types/Batch';
-import { PromiseQueue } from "../PromiseQueue";
-import { TranslationManager } from "../TranslationManager";
-import { Translator } from "./Translator";
+import { globals } from '../../shared/globals.js';
+import type { AutoTranslateOptions } from '../../types/AutoTranslateOptions.js';
+import type { Batch } from '../../types/Batch.js';
+import { PromiseQueue } from '../PromiseQueue.js';
+import type { TranslationManager } from '../TranslationManager.js';
+import { Translator } from './Translator.js';
 
 abstract class MistralTranslator extends Translator {
     protected readonly maxBatchLength = 15000;
@@ -16,11 +16,11 @@ abstract class MistralTranslator extends Translator {
 
     constructor(manager: TranslationManager, options: AutoTranslateOptions) {
         super(manager, options);
-        this.client = new Mistral({apiKey: globals.MISTRAL_API_KEY});
+        this.client = new Mistral({ apiKey: globals.MISTRAL_API_KEY });
     }
 
     protected override canRetryBatch(error: any): boolean {
-        if(error?.statusCode === 429 || error?.body?.includes('Requests rate limit exceeded')) {
+        if (error?.statusCode === 429 || error?.body?.includes('Requests rate limit exceeded')) {
             // Requests rate limit exceeded
             return true;
         }
@@ -31,12 +31,13 @@ abstract class MistralTranslator extends Translator {
     protected async generateResponse(prompt: string): Promise<string> {
         const chatResponse = await this.client.chat.complete({
             model: this.model,
-            messages: [{role: 'user', content: prompt}],
-          });
+            messages: [{ role: 'user', content: prompt }],
+        });
 
-          const text = chatResponse.choices?.[0].message.content?.toString() ?? '';
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        const text = chatResponse.choices?.[0].message.content?.toString() ?? '';
 
-          return this.extractJsonArrayFromResponse(text);
+        return this.extractJsonArrayFromResponse(text);
     }
 
     private extractJsonArrayFromResponse(response: string): string {
@@ -45,7 +46,7 @@ abstract class MistralTranslator extends Translator {
         const match = response.match(regex);
         const jsonString = match?.[1];
 
-        if(!jsonString) {
+        if (!jsonString) {
             return response;
         }
 

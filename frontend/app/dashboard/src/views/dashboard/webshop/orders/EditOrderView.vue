@@ -156,7 +156,8 @@
     </SaveView>
 </template>
 <script lang="ts" setup>
-import { PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
@@ -181,10 +182,11 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, DiscountCode, OrderData, PatchAnswers, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, ValidatedAddress, Version, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import type { CartItem, CheckoutMethod, DiscountCode, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod} from '@stamhoofd/structures';
+import { CheckoutMethodType, Customer, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { WebshopManager } from '../WebshopManager';
+import type { WebshopManager } from '../WebshopManager';
 import AddItemView from './AddItemView.vue';
 
 const props = withDefaults(defineProps<{
@@ -508,7 +510,7 @@ async function save() {
 }
 
 async function addProduct() {
-    let clone = patchedOrder.value.data.clone();
+    const clone = patchedOrder.value.data.clone();
     const w = await props.webshopManager.loadWebshopIfNeeded();
 
     present(new ComponentWithProperties(NavigationController, {
@@ -536,7 +538,7 @@ async function addProduct() {
 }
 
 async function editCartItem(cartItem: CartItem) {
-    let clone = patchedOrder.value.data.clone();
+    const clone = patchedOrder.value.data.clone();
     const w = await props.webshopManager.loadWebshopIfNeeded();
 
     const newCartItem = cartItem.clone();
@@ -587,7 +589,7 @@ async function deleteItem(cartItem: CartItem) {
     if (!await CenteredMessage.confirm('Ben je zeker dat je dit wilt verwijderen?', 'Ja, verwijderen', 'Je kan de bestelling nog nakijken voor je het definitief verwijdert.')) {
         return;
     }
-    let clone = patchedOrder.value.data.cart.clone();
+    const clone = patchedOrder.value.data.cart.clone();
     clone.removeItem(cartItem);
 
     if (clone.price !== patchedOrder.value.data.cart.price) {
@@ -602,7 +604,7 @@ async function deleteItem(cartItem: CartItem) {
 }
 
 function setCartItemAmount(cartItem: CartItem, amount: number) {
-    let clone = patchedOrder.value.data.cart.clone();
+    const clone = patchedOrder.value.data.cart.clone();
     const found = clone.items.find(i => i.id === cartItem.id);
     if (found) {
         found.amount = amount;

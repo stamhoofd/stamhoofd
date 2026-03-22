@@ -29,15 +29,15 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { Server } from '@simonbackx/simple-networking';
+import type { Server } from '@simonbackx/simple-networking';
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Address, Country, CountryHelper, ValidatedAddress } from '@stamhoofd/structures';
-
+import { Address, CountryHelper, ValidatedAddress } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import Dropdown from './Dropdown.vue';
 import STInputBox from './STInputBox.vue';
 

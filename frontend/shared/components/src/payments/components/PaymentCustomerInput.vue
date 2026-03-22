@@ -71,12 +71,13 @@
 
 <script lang="ts" setup>
 import EmailInput from '#inputs/EmailInput.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
+import type { ErrorBox } from '#errors/ErrorBox.ts';
 import PhoneInput from '#inputs/PhoneInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
-import { Validator } from '#errors/Validator.ts';
-import { Company, PaymentCustomer } from '@stamhoofd/structures';
+import type { Validator } from '#errors/Validator.ts';
+import type { PaymentCustomer } from '@stamhoofd/structures';
+import { Company } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(defineProps<{

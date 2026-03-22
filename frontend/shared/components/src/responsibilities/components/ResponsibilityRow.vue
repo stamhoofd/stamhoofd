@@ -48,7 +48,8 @@
 
 <script lang="ts" setup>
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { LoadedPermissions, MemberResponsibility, PermissionLevel } from '@stamhoofd/structures';
+import type { MemberResponsibility} from '@stamhoofd/structures';
+import { LoadedPermissions, PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

@@ -1,15 +1,17 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, PayableBalanceCollection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed, onActivated, onMounted, ref, Ref, unref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onActivated, onMounted, ref, unref } from 'vue';
 import { useContextOptions } from '../../context';
 import PlatformAvatar from '../../context/PlatformAvatar.vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
 import { useAuth, useContext, usePlatform } from '../../hooks';
-import { mergeErrorBox, QuickAction, QuickActions } from '../classes/QuickActions';
+import type { QuickAction, QuickActions } from '../classes/QuickActions';
+import { mergeErrorBox } from '../classes/QuickActions';
 import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';

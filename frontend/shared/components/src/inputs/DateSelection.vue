@@ -34,7 +34,8 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
-import { computed, ComputedRef, nextTick, onActivated, onBeforeMount, onDeactivated, onMounted, Ref, ref, useTemplateRef, watch } from 'vue';
+import type { ComputedRef, Ref} from 'vue';
+import { computed, nextTick, onActivated, onBeforeMount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useIsMobile } from '../hooks';
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 

@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { QueueHandler } from './QueueHandler';
+import { QueueHandler } from './QueueHandler.js';
 
 describe('QueueHandler', () => {
     it('Guards against deadlocks', async () => {

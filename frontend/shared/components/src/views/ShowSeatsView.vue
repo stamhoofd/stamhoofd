@@ -32,7 +32,7 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { Order, TicketPublic, Webshop } from '@stamhoofd/structures';
+import type { Order, TicketPublic, Webshop } from '@stamhoofd/structures';
 
 import SeatSelectionBox from './SeatSelectionBox.vue';
 

@@ -1,5 +1,5 @@
 import { SelectablePdfDataFilter, SelectablePdfSheetFilter } from '@stamhoofd/structures';
-import { SelectablePdfData } from './SelectablePdfData';
+import type { SelectablePdfData } from './SelectablePdfData';
 
 export class SelectablePdfSheet<T> {
     readonly id: string;

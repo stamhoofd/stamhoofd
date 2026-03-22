@@ -19,7 +19,7 @@ export async function getProjectPath() {
 
     while (true) {
         // check lerna.json exists at depth
-        const fileName = __dirname + '/' + '../'.repeat(depth) + `lerna.json`;
+        const fileName = import.meta.dirname + '/' + '../'.repeat(depth) + `lerna.json`;
         if (await fileExists(fileName)) {
             break;
         }
@@ -30,6 +30,6 @@ export async function getProjectPath() {
         }
     }
 
-    const rootPath = path.normalize(__dirname + '/' + '../'.repeat(depth));
+    const rootPath = path.normalize(import.meta.dirname + '/' + '../'.repeat(depth));
     return rootPath;
 }

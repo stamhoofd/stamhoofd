@@ -1,5 +1,6 @@
-import { EmailInformation } from '@stamhoofd/structures';
-import { computed, Ref, unref } from 'vue';
+import type { EmailInformation } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, unref } from 'vue';
 import { getInvalidEmailDescription } from '../helpers/getInvalidEmailDescription';
 
 export function useEmailWarning(emailInformation: Ref<null | EmailInformation> | null | EmailInformation) {

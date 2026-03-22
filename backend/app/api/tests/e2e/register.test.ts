@@ -44,7 +44,7 @@ describe('E2E.Register', () => {
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        vitest.useRealTimers();
     });
 
     beforeAll(async () => {
@@ -1024,7 +1024,7 @@ describe('E2E.Register', () => {
     describe('Register for group with default age group', () => {
         test('Should create membership', async () => {
             const date = new Date('2023-05-14');
-            jest.useFakeTimers({ advanceTimers: true, doNotFake: ['setTimeout', 'clearTimeout', 'hrtime', 'nextTick', 'performance', 'queueMicrotask', 'setImmediate', 'clearImmediate'] }).setSystemTime(date);
+            vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(date);
 
             const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
                 startDate: period.startDate,
@@ -1108,7 +1108,7 @@ describe('E2E.Register', () => {
 
         test('Should set trial until on membership if trial', async () => {
             const date = new Date('2023-05-14');
-            jest.useFakeTimers({ advanceTimers: true, doNotFake: ['setTimeout', 'clearTimeout', 'hrtime', 'nextTick', 'performance', 'queueMicrotask', 'setImmediate', 'clearImmediate'] }).setSystemTime(date);
+            vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(date);
 
             try {
                 const platformMembershipTypeConfig = PlatformMembershipTypeConfig.create({
@@ -1198,7 +1198,7 @@ describe('E2E.Register', () => {
                 expect(trialUntil!.getDate()).toBe(19);
             }
             finally {
-                jest.useRealTimers().resetAllMocks();
+                vitest.useRealTimers().resetAllMocks();
             }
         });
     });

@@ -40,7 +40,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -55,7 +56,8 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ReviewCheckbox from '@stamhoofd/components/ReviewCheckbox.vue';
 import { useReview } from '@stamhoofd/components/useReview.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { Organization, OrganizationPrivateMetaData, PlatformPremiseType, Premise, SetupStepType } from '@stamhoofd/structures';
+import type { PlatformPremiseType} from '@stamhoofd/structures';
+import { Organization, OrganizationPrivateMetaData, Premise, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import PremiseRow from './PremiseRow.vue';
 import PremiseView from './PremiseView.vue';

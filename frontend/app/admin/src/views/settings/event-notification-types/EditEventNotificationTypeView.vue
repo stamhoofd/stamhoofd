@@ -56,7 +56,8 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
@@ -70,7 +71,8 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
 import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
-import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, EventNotificationType, RecordCategory } from '@stamhoofd/structures';
+import type { EventNotificationType, RecordCategory } from '@stamhoofd/structures';
+import { Address, BaseOrganization, EventNotification, EventNotificationDeadline } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EventNotificationDeadlineRow from './components/EventNotificationDeadlineRow.vue';
 import EditEventNotificationDeadlineView from './EditEventNotificationDeadlineView.vue';

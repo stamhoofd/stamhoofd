@@ -57,19 +57,19 @@ export class ViewportHelper {
             (navigator as any).virtualKeyboard.overlaysContent = true;
         }
 
-        const w = window as any;
+        const w = window;
         if (w.visualViewport) {
             let pendingUpdate = false;
-            const viewportHandler = (event) => {
-                // if (pendingUpdate) return;
+            const viewportHandler = () => {
+                if (pendingUpdate) return;
                 pendingUpdate = true;
 
                 requestAnimationFrame(() => {
                     pendingUpdate = false;
-                    const viewport = event.target;
                     const height = w.visualViewport?.height;
-
-                    this.setVh(height);
+                    if (height) {
+                        this.setVh(height);
+                    }
                 });
             };
             // w.visualViewport.addEventListener('scroll', viewportHandler);

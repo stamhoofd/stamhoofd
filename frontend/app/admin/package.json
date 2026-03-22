@@ -5,7 +5,8 @@
     "type": "module",
     "main": "./src/exports.ts",
     "scripts": {
-        "lint": "eslint"
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
     },
     "files": [
         "dist"

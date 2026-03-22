@@ -157,7 +157,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -165,15 +166,17 @@ import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
-import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
+import type { PatchAnswers } from '@stamhoofd/structures';
+import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, ref } from 'vue';
+import type { ComponentOptions} from 'vue';
+import { computed, ref } from 'vue';
 
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -203,7 +206,7 @@ enum Routes {
 defineRoutes([
     {
         url: Routes.Documents,
-        component: DocumentsView as ComponentOptions,
+        component: DocumentsView,
         paramsToProps() {
             return {
                 template: props.template,
@@ -213,7 +216,7 @@ defineRoutes([
     {
         url: Routes.Settings,
         present: 'popup',
-        component: EditDocumentTemplateView as ComponentOptions,
+        component: EditDocumentTemplateView,
         paramsToProps() {
             return {
                 isNew: false,
@@ -438,7 +441,7 @@ async function generateXML(): Promise<Blob> {
 async function downloadXml() {
     try {
         const blob = await generateXML();
-        AppManager.shared.downloadFile(blob, Formatter.fileSlug(props.template.settings.name) + '.xml');
+        await AppManager.shared.downloadFile(blob, Formatter.fileSlug(props.template.settings.name) + '.xml');
     }
     catch (e: any) {
         if (!Request.isAbortError(e as Error)) {

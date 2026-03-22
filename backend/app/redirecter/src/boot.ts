@@ -1,6 +1,5 @@
 import { Router, RouterServer } from '@simonbackx/simple-endpoints';
-import { Country } from '@stamhoofd/structures';
-
+import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from './classes/Geolocator.js';
 
 process.on('unhandledRejection', (error: Error) => {
@@ -18,15 +17,15 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 const start = async () => {
-    await Geolocator.shared.load(__dirname + '/data/belgium.csv', Country.Belgium);
+    await Geolocator.shared.load(import.meta.dirname + '/data/belgium.csv', Country.Belgium);
 
     // Netherlands not needed, because it is the current default
-    // await Geolocator.shared.load(__dirname+"/data/netherlands.csv", Country.Netherlands)
+    // await Geolocator.shared.load(import.meta.dirname+"/data/netherlands.csv", Country.Netherlands)
 
     console.log('Initialising server...');
     const router = new Router();
-    await router.loadAllEndpoints(__dirname + '/endpoints');
-    await router.loadAllEndpoints(__dirname + '/endpoints/*');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/*');
 
     const routerServer = new RouterServer(router);
     routerServer.verbose = false;

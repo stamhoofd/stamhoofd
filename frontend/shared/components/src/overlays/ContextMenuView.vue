@@ -13,14 +13,15 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, injectHooks, usePop } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { injectHooks, usePop } from '@simonbackx/vue-app-navigation';
 
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import { ViewportHelper } from '../ViewportHelper';
-import ContextMenuItemView from './ContextMenuItemView.vue';
+import type ContextMenuItemView from './ContextMenuItemView.vue';
 
 function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
-    let det = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+    const det = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
 
     return det * ((bx - ax) * (y - ay) - (by - ay) * (x - ax)) >= 0
         && det * ((cx - bx) * (y - by) - (cy - by) * (x - bx)) >= 0
@@ -580,7 +581,7 @@ export default class ContextMenuView extends VueComponent {
 
     isInsideMenu(x: number, y: number): boolean {
         // Check which one is hovered, and manually add a hover state to it
-        let selectedElement = document.elementFromPoint(x, y);
+        const selectedElement = document.elementFromPoint(x, y);
 
         if (selectedElement && selectedElement.closest('.context-menu')) {
             return true;

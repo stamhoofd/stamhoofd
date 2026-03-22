@@ -5,7 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAuth, useOrganization } from '../../../hooks';
 import ViewMemberRecordCategoryBox from './ViewMemberRecordCategoryBox.vue';

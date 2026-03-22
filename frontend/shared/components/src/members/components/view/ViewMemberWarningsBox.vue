@@ -15,7 +15,8 @@
 </template>
 
 <script setup lang="ts">
-import { MemberPlatformMembership, MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
+import type { MemberPlatformMembership, PlatformMember} from '@stamhoofd/structures';
+import { MembershipStatus, PermissionLevel, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';

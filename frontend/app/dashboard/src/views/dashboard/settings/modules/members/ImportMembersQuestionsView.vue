@@ -195,10 +195,12 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { getGenderName, Group, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, Registration } from '@stamhoofd/structures';
+import type { Group, OrganizationRegistrationPeriod, Parent, Registration } from '@stamhoofd/structures';
+import { getGenderName, GroupType, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed, Ref, ref, watch } from 'vue';
-import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
+import type { Ref} from 'vue';
+import { computed, ref, watch } from 'vue';
+import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
 import ImportMembersErrorReportView from './ImportMembersErrorReportView.vue';
 import { MemberImporter } from './MemberImporter';
@@ -455,7 +457,7 @@ function openMultipleGroups() {
 
 function getParentDescription(parent: Parent) {
     const description: string[] = [];
-    let type = ParentTypeHelper.getName(parent.type);
+    const type = ParentTypeHelper.getName(parent.type);
     if (parent.name.trim()) {
         description.push(type + ': ' + parent.name);
     }
@@ -479,7 +481,7 @@ function openResultView() {
         title: $t(`%19R`),
         description: $t(`%19S`),
         members: props.importMemberResults.map((member) => {
-            let description: string[] = [];
+            const description: string[] = [];
             const registration = memberImporter.buildRegistration(member, isWaitingList.value);
 
             if (registration !== null) {

@@ -1,14 +1,17 @@
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, InMemoryTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EmailView, { type RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { downloadDocuments } from '@stamhoofd/document-helper';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, DocumentTemplatePrivate, EmailRecipientFilterType, EmailRecipientSubfilter } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { DocumentTemplatePrivate} from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, EmailRecipientFilterType, EmailRecipientSubfilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DocumentActionBuilder {

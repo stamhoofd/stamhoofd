@@ -21,7 +21,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { ref } from 'vue';
-import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
+import type { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 
 const props = withDefaults(
     defineProps<{

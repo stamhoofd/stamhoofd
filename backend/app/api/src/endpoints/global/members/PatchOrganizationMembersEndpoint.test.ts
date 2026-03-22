@@ -1,12 +1,14 @@
-import { Database } from '@simonbackx/simple-database';
+import { Column, Database } from '@simonbackx/simple-database';
 import { PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { Address, Country, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { SQL } from '@stamhoofd/sql';
+import { Address, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
+import { Country } from '@stamhoofd/types/Country';
 
 const baseUrl = `/organization/members`;
 const endpoint = new PatchOrganizationMembersEndpoint();
@@ -124,14 +126,35 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         firstName: 'Jane',
                         lastName: 'Doe',
                         email: 'jane.doe@example.com',
+                        createdAt: new Date(500),
                     }),
                 ],
             });
+
+            console.error(details.parents);
+            Column.setJSONVersion(Version);
 
             const existingMember = await new MemberFactory({
                 birthDay,
                 details,
             }).create();
+            console.error(existingMember.details.parents);
+            console.error(existingMember.details.parents[0].encode({ version: Version }));
+            console.error(
+                MemberDetails.decodeField(
+                    existingMember.details.encode({ version: Version }),
+                    { version: Version },
+                ),
+            );
+
+            console.error(
+            );
+
+            const rawData = await SQL.select().from('members').where('id', existingMember.id).fetch();
+            console.error(rawData);
+
+            await existingMember.refresh();
+            console.error(existingMember.details.parents);
 
             // Create a registration for this member
             const group = await new GroupFactory({ organization }).create();
@@ -2936,7 +2959,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
                     expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
                     expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeDate();
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeInstanceOf(Date);
                 });
 
                 test('Should throw if invalid uitpas number', async () => {

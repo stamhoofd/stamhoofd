@@ -19,5 +19,9 @@
         "#*.vue": "./src/*.vue",
         "#*.ts": "./src/*.ts",
         "#*": "./src/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
     }
 }

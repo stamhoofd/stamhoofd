@@ -1,10 +1,12 @@
 import { Factory } from '@simonbackx/simple-database';
-import { Address, Country, OrganizationMetaData, OrganizationType, PermissionRoleDetailed } from '@stamhoofd/structures';
+import type { PermissionRoleDetailed } from '@stamhoofd/structures';
+import { Address, OrganizationMetaData, OrganizationType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Organization } from '../models/Organization.js';
-import { RegistrationPeriod } from '../models/RegistrationPeriod.js';
+import type { RegistrationPeriod } from '../models/RegistrationPeriod.js';
 import { RegistrationPeriodFactory } from './RegistrationPeriodFactory.js';
+import { Country } from '@stamhoofd/types/Country';
 
 class Options {
     uri?: string;

@@ -217,7 +217,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await expect(model.queueForSending(true)).toReject();
+        await expect(model.queueForSending(true)).rejects.toThrow();
         await model.refresh();
 
         // Check if it was sent correctly
@@ -933,20 +933,20 @@ describe('Model.Email', () => {
                     subject: `${expectedAmount}`,
                 });
 
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p>' + expectedAmount + '</p>');
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(expectedAmount);
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<p>' + expectedAmount + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(expectedAmount);
 
                 // Check if the table is correct
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<table');
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('2 x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude(Formatter.price(12_99)); // unit price
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<td>' + expectedAmount); // total price in table
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('Test balance item'); // description
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<table');
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch('2 x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(Formatter.price(12_99)); // unit price
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<td>' + expectedAmount); // total price in table
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch('Test balance item'); // description
 
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude('2 x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(Formatter.price(12_99)); // unit price
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(expectedAmount); // total price in table
-                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toInclude('test balance item'); // description
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch('2 x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(Formatter.price(12_99)); // unit price
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(expectedAmount); // total price in table
+                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toMatch('test balance item'); // description
             }, 15_000);
 
             it('The balance is zero for unknown users', async () => {
@@ -994,16 +994,16 @@ describe('Model.Email', () => {
                     subject: `${expectedAmount}`,
                 });
 
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p>' + expectedAmount + '</p>');
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(expectedAmount);
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<p>' + expectedAmount + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(expectedAmount);
 
                 // Check if the table is correct
-                expect(EmailMocker.getSucceededEmail(0).html).not.toInclude('<table');
-                expect(EmailMocker.getSucceededEmail(0).html).not.toInclude(' x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p class="description">' + $t('%hX') + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).html).not.toMatch('<table');
+                expect(EmailMocker.getSucceededEmail(0).html).not.toMatch(' x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<p class="description">' + $t('%hX') + '</p>');
 
-                expect(EmailMocker.getSucceededEmail(0).text).not.toInclude(' x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toInclude($t('%hX').toLowerCase());
+                expect(EmailMocker.getSucceededEmail(0).text).not.toMatch(' x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toMatch($t('%hX').toLowerCase());
             }, 15_000);
 
             it('loginDetails are added for existing users without password', async () => {
@@ -1048,10 +1048,10 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getSucceededCount()).toBe(1);
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(
                     $t('%1EB', { email: existingUser.email }),
                 );
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EB', { email: existingUser.email }),
                 );
             }, 15_000);
@@ -1093,10 +1093,10 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getSucceededCount()).toBe(1);
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(
                     $t('%1EB', { email: 'unknown@example.com' }),
                 );
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EB', { email: 'unknown@example.com' }),
                 );
             }, 15_000);
@@ -1143,10 +1143,10 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getSucceededCount()).toBe(1);
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(
                     $t('%1EA', { email: existingUser.email }),
                 );
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EA', { email: existingUser.email }),
                 );
             }, 15_000);
@@ -1202,13 +1202,13 @@ describe('Model.Email', () => {
                 expect(await EmailMocker.getSucceededCount()).toBe(1);
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
-                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(
                     $t('%1EC', {
                         firstName: Formatter.escapeHtml(member.firstName),
                         securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
                     }),
                 );
-                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EC', {
                         firstName: member.firstName,
                         securityCode: Formatter.spaceString(member.details.securityCode ?? '', 4, '-'),

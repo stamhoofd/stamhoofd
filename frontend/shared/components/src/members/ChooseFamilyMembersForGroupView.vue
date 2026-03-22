@@ -21,7 +21,7 @@
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
 import { GlobalEventBus } from '#EventBus.ts';
-import { Group, Organization, PlatformFamily } from '@stamhoofd/structures';
+import type { Group, Organization, PlatformFamily } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import RegisterItemCheckboxRow from './components/group/RegisterItemCheckboxRow.vue';
 

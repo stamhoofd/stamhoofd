@@ -15,9 +15,11 @@ import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { usePaymentsObjectFetcher } from '@stamhoofd/components/fetchers/usePaymentsObjectFetcher.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import { PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import type { PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { usePaymentActions } from './PaymentActionBuilder';
 
 const props = withDefaults(

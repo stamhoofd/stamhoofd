@@ -20,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { Group, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import type { Group, Organization, PlatformMember} from '@stamhoofd/structures';
+import { RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 

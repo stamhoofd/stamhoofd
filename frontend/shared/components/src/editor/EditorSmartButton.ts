@@ -1,4 +1,4 @@
-import { EditorSmartButton } from '@stamhoofd/structures';
+import type { EditorSmartButton } from '@stamhoofd/structures';
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core';
 
 export type SmartButtonNodeOptions = {

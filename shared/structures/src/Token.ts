@@ -1,4 +1,4 @@
-import { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
 
 /**
  * This is a custom encoded implementation since we need to follow the OAuth2 specification, which for some reason

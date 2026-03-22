@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { RegisterCheckout, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import type { RegisterCheckout, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupIconWithWaitingList from './GroupIconWithWaitingList.vue';
 

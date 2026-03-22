@@ -12,13 +12,13 @@ async function fileExists(path: string): Promise<boolean> {
     }
 }
 
-async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
+export async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
     let env: any;
 
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
     // Force load the cjs version of test-utils because the esm version gives issues with the json environment
         const builder = await import('@stamhoofd/test-utils');
-        await builder.TestUtils.loadEnvironment();
+        builder.TestUtils.loadEnvironment();
         env = STAMHOOFD;
     }
     else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
@@ -50,6 +50,7 @@ async function load(settings?: { path?: string; service?: 'redirecter' | 'api' |
 
     if (settings?.service === 'api') {
         if (!STAMHOOFD.domains) {
+            console.error('env', env);
             throw new Error('Expected environment variable domains');
         }
 
@@ -92,6 +93,4 @@ export function verifyInternalSignature(signature: string, ...content: string[])
 
 export default {
     load,
-    signInternal,
-    verifyInternalSignature,
 };

@@ -124,35 +124,38 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
-import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import MultiSelectInput from '@stamhoofd/components/inputs/MultiSelectInput.vue';
-import { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import RecordAnswerInput from '@stamhoofd/components/inputs/RecordAnswerInput.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { CountFilteredRequest, Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
+import type { DocumentTemplateGroup, PatchAnswers, RecordAnswer} from '@stamhoofd/structures';
+import { CountFilteredRequest, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
 

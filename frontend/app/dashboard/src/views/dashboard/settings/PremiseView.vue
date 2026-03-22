@@ -56,13 +56,13 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useEditPopup } from '@stamhoofd/components/hooks/useEditPopup.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import { PlatformPremiseType, Premise } from '@stamhoofd/structures';
+import type { PlatformPremiseType, Premise } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(

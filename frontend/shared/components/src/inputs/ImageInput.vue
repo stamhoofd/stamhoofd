@@ -21,7 +21,7 @@ import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes'
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import Spinner from '../Spinner.vue';
 import STInputBox from './STInputBox.vue';
 

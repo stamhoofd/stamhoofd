@@ -224,7 +224,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import listIllustrationSrc from '@stamhoofd/assets/images/illustrations/list.svg';
 import scannerIllustrationSrc from '@stamhoofd/assets/images/illustrations/scanner.svg';
@@ -245,11 +246,13 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, StripeAccount, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, StripeAccount, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 
 const props = withDefaults(defineProps<UseEditWebshopProps & { forceType: WebshopType | null }>(), { forceType: null });
 

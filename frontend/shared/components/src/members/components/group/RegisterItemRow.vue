@@ -62,7 +62,8 @@
 </template>
 
 <script setup lang="ts">
-import { GroupType, RegisterItem } from '@stamhoofd/structures';
+import type { RegisterItem } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '../../checkout';
 import MemberIcon from '../MemberIcon.vue';

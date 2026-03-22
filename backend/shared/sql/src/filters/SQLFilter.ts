@@ -1,11 +1,13 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { compileFilter, FilterCompiler, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, type StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
+import type { FilterCompiler, FilterDefinitions, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
+import { compileFilter, filterDefinitionsToCompiler, type StamhoofdCompareValue } from '@stamhoofd/structures';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
 import { SQLSafeValue } from '../SQLExpressions.js';
-import { SQLJoin } from '../SQLJoin.js';
+import type { SQLJoin } from '../SQLJoin.js';
 import { SQLJsonValue } from '../SQLJsonExpressions.js';
-import { SQLSelect } from '../SQLSelect.js';
-import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere.js';
+import type { SQLSelect } from '../SQLSelect.js';
+import type { SQLWhere} from '../SQLWhere.js';
+import { SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere.js';
 import { $containsSQLFilterCompiler } from './compilers/contains.js';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers/index.js';
 
@@ -161,6 +163,7 @@ export function $andSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilte
 
     return async (column: SQLCurrentColumn) => {
         const wheres = (await Promise.all(
+            // eslint-disable-next-line @typescript-eslint/await-thenable
             runners.map(runner => (runner(column))),
         ));
 
@@ -173,6 +176,7 @@ export function $orSQLFilterCompiler(filter: StamhoofdFilter, filters: SQLFilter
 
     return async (column: SQLCurrentColumn) => {
         const wheres = (await Promise.all(
+            // eslint-disable-next-line @typescript-eslint/await-thenable
             runners.map(runner => (runner(column))),
         ));
 

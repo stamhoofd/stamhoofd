@@ -79,5 +79,5 @@ export class EventNotification extends QueryableModel {
     updatedAt: Date;
 
     // Note: all relations should point to their parents, not the other way around to avoid reference cycles
-    static events = new ManyToManyRelation(EventNotification, Event, 'events');
+    static events = new ManyToManyRelation<'events', EventNotification, Event>(EventNotification, Event, 'events');
 }

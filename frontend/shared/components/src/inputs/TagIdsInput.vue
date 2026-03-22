@@ -29,10 +29,10 @@
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useValidation } from '#errors/useValidation.ts';
-import { Validator } from '#errors/Validator.ts';
+import type { Validator } from '#errors/Validator.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { OrganizationTag } from '@stamhoofd/structures';
+import type { OrganizationTag } from '@stamhoofd/structures';
 import { computed, ref, watch, watchEffect } from 'vue';
 
 const props = withDefaults(

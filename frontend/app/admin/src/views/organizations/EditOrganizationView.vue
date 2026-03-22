@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import JumpToContainer from '@stamhoofd/components/containers/JumpToContainer.vue';
@@ -74,7 +74,8 @@ import UrlInput from '@stamhoofd/components/inputs/UrlInput.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTag, PatchAnswers, TagHelper } from '@stamhoofd/structures';
+import type { Organization, OrganizationTag, PatchAnswers} from '@stamhoofd/structures';
+import { OrganizationMetaData, OrganizationPrivateMetaData, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import OrganizationUriInput from './components/OrganizationUriInput.vue';

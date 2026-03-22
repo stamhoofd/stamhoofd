@@ -11,7 +11,7 @@ import { GroupCategory } from './GroupCategory.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { OrganizationGenderType } from './OrganizationGenderType.js';
-import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
+import type { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationType } from './OrganizationType.js';
 import { PaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';

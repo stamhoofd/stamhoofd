@@ -1,4 +1,4 @@
-import winston from "winston";
+import winston from 'winston';
 
 function formatDuration(durationMs: number): string {
     const minutes = Math.floor(durationMs / 60000);
@@ -19,23 +19,23 @@ const timerFormat = winston.format.printf(({ durationMs, message }: any) => {
 
 class PromptLogger {
     private readonly winstonPromptLogger = winston.createLogger({
-        level: "info",
+        level: 'info',
         format: winston.format.json(),
         transports: [
             new winston.transports.File({
-                filename: "prompts.log",
+                filename: 'prompts.log',
                 format: timerFormat,
-                options: { flags: "w" },
+                options: { flags: 'w' },
             }),
         ],
     });
 
     private readonly winstonErrorLogger = winston.createLogger({
-        level: "error",
+        level: 'error',
         transports: [
             new winston.transports.File({
-                filename: "errors.log",
-                options: { flags: "w" },
+                filename: 'errors.log',
+                options: { flags: 'w' },
             }),
         ],
     });

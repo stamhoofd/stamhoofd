@@ -8,7 +8,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import EmailView, { type RecipientChooseOneOption, type RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
@@ -23,9 +24,11 @@ import { useReceivableBalancesObjectFetcher } from '@stamhoofd/components/fetche
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
+import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 
 type ObjectType = ReceivableBalance;

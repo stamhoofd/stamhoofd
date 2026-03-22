@@ -13,14 +13,16 @@
 </template>
 
 <script lang="ts" setup>
-import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import { PrivateWebshop, WebshopField, WebshopMetaData } from '@stamhoofd/structures';
+import type { WebshopField} from '@stamhoofd/structures';
+import { PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 
 const viewTitle = 'Vrije invoervelden';
 

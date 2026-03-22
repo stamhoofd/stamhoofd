@@ -3,8 +3,8 @@ import { Colors } from '@stamhoofd/utility';
 
 export class ColorHelper {
     static primaryColor: string | null;
-    static hue;
-    static saturation;
+    static hue: number;
+    static saturation: number;
 
     static setColor(color: string, element?: HTMLElement) {
         const { h, s, l } = Colors.hexToHSL(color);

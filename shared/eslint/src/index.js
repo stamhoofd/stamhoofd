@@ -1,69 +1,64 @@
 'use strict';
 import tseslint from 'typescript-eslint';
 import eslint from '@eslint/js';
-import stylistic from '@stylistic/eslint-plugin'
+import stylistic from '@stylistic/eslint-plugin';
 import importPlugin from 'eslint-plugin-import';
+import json from '@eslint/json';
 
 // Configs
 import frontend from './configs/frontend.js';
 import typescript from './configs/typescript.js';
 import defaultRules from './configs/default.js';
-import jest from 'eslint-plugin-jest'
 import node from './configs/node.js';
-import globals from "globals";
+import vitest from '@vitest/eslint-plugin';
 
 const baseRules = [
+    ...defaultRules,
     {
         settings: {
-            "import/parsers": {
-                "@typescript-eslint/parser": [".ts", ".tsx"],
+            'import/parsers': {
+                '@typescript-eslint/parser': ['.ts', '.tsx'],
             },
             'import/resolver': {
                 typescript: {
-                    bun: false
+                    bun: false,
                 },
             },
         },
     },
     eslint.configs.recommended,
-    ...tseslint.configs.recommendedTypeChecked,  
-    {
-        plugins: {
-            'import': importPlugin
-        },
-        rules: {
-            "import/no-unresolved": "error",
-            'import/no-cycle': ["warn", { maxDepth: 100, ignoreExternal: false }],
-        }
-    },
-    stylistic.configs.customize({
-        // the following options are the default values
-        indent: 4,
-        quotes: 'single',
-        semi: true,
-        jsx: false
-    }),
-    {
-        rules: {
-            '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: true, avoidEscape: true }],
-        }
-    },
-    {
-        // Make sure TypeScript type checking can run correctly for rules that require it
-        files: ['*.ts', '**/*.ts'],
-        languageOptions: {
-            parserOptions: {
-                projectService: true,
-                tsconfigRootDir: import.meta.dirname,
-            },
-        }
-    },    
-    {
-        ...defaultRules
-    },
+    ...tseslint.configs.recommendedTypeChecked.map(config => ({
+        ...config,
+        files: ['*.ts', '**/*.ts', '*.vue', '**/*.vue'], // We use TS config only for TS files
+    })),
     {
         files: ['*.ts', '**/*.ts', '*.vue', '**/*.vue'],
-        ...typescript
+        languageOptions: {
+            sourceType: 'module',
+            parser: tseslint.parser,
+            parserOptions: {
+                projectService: true,
+            },
+        },
+        ...typescript,
+    },
+    {
+        plugins: {
+            import: importPlugin,
+        },
+        rules: {
+            'import/no-cycle': ['warn', { maxDepth: 100, ignoreExternal: false }],
+        },
+    },
+    {
+        files: ['**/*.js', '**/*.ts'],
+        plugins: {
+            '@stylistic': stylistic,
+        },
+        rules: {
+            ...stylistic.configs.recommended,
+            '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: true, avoidEscape: true }],
+        },
     },
     {
         // Make sure we disable TypeScript eslint rules that are not compatible with JavaScript files
@@ -73,20 +68,51 @@ const baseRules = [
     {
         files: ['**/*.cjs'],
         languageOptions: {
-            sourceType: "commonjs"
-        }
+            sourceType: 'commonjs',
+        },
     },
     {
-        files: ['**/*.test.js', '**/*.test.ts'],
-        ...jest.configs['flat/recommended'],
+        files: ['tests/**', '**/*.test.js', '**/*.test.ts'],
+        plugins: { vitest },
         rules: {
-            ...jest.configs['flat/recommended'].rules,
-            'jest/prefer-expect-assertions': 'off',
+            ...vitest.configs.recommended.rules,
+            'vitest/no-conditional-expect': 'warn',
+            'vitest/expect-expect': 'warn'
         },
     },
 
     {
-        ignores: ["**/dist/*"]
+        ignores: ['**/dist/*', '**/dist-*/*', '**/ios/*', '**/android/*'],
+    },
+
+    {
+        // https://github.com/vitest-dev/vitest/issues/4543#issuecomment-1824628142
+        files: ['**/*.test.js', '**/*.test.ts'],
+        rules: {
+            '@typescript-eslint/no-unsafe-assignment': 'off',
+            '@typescript-eslint/no-unsafe-member-access': 'off',
+            '@typescript-eslint/no-unsafe-argument': 'off',
+        },
+    },
+    // lint JSON files
+    {
+        plugins: {
+            json,
+        },
+        files: ['**/*.json'],
+        language: 'json/json',
+        rules: {
+            ...json.configs.recommended.rules,
+            'no-irregular-whitespace': 'off', // json bug
+            'json/sort-keys': 'warn',
+            'json/no-empty-keys': 'off'
+        },
+    },
+    {
+        files: ['**/package.json'], // don't sort package.json as order is important for types
+        rules: {
+            'json/sort-keys': 'off'
+        },
     }
 ];
 
@@ -95,22 +121,15 @@ export default {
         base: baseRules,
         frontend: [
             ...baseRules,
-            ...frontend
+            ...frontend,
         ],
         backend: [
-            {
-                languageOptions: {
-                    globals: {
-                        ...globals.node,
-                    }
-                }
-            },
             ...baseRules,
-            ...node
+            ...node,
         ],
         shared: [
             ...baseRules,
-            ...node
-        ]
+            ...node,
+        ],
     },
 };

@@ -1,5 +1,6 @@
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
-import { computed, getCurrentInstance, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, getCurrentInstance } from 'vue';
 import { useArrowUpDown } from './useArrowUpDown';
 
 export function useBackForward<T extends { id: string }, Name extends string, Props>(name: Name, props: Props & {

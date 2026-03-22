@@ -34,7 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import { Group, GroupType, Organization, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import type { Group, Organization, PlatformMember} from '@stamhoofd/structures';
+import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '../../checkout';
 import { useAppContext } from '../../../context';

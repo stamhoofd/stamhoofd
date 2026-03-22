@@ -1,5 +1,6 @@
-import { PdfDocWrapper } from './PdfDocWrapper';
-import { PdfText, PdfTextOptions } from './pdf-items';
+import type { PdfDocWrapper } from './PdfDocWrapper';
+import type { PdfTextOptions } from './pdf-items';
+import { PdfText } from './pdf-items';
 
 /**
  * Draw a page number on each page

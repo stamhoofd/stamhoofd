@@ -95,7 +95,8 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods} from '@simonbackx/simple-encoding';
+import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
@@ -108,7 +109,8 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { Image, Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
+import type { Image} from '@stamhoofd/structures';
+import { Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
@@ -289,7 +291,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
             await this.$organizationManager.patch(this.organizationPatch);
             this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
         }
         catch (e) {
             this.errorBox = new ErrorBox(e);
@@ -298,14 +300,14 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
         this.saving = false;
     }
 
-    setupDomain() {
-        this.present(new ComponentWithProperties(NavigationController, {
+    async setupDomain() {
+        await this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(DomainSettingsView, {}),
         }).setDisplayStyle('popup'));
     }
 
-    openRecords() {
-        this.present(new ComponentWithProperties(NavigationController, {
+    async openRecords() {
+        await this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(DNSRecordsView, {}),
         }).setDisplayStyle('popup'));
     }

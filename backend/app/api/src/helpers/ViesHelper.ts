@@ -1,6 +1,7 @@
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Company, Country } from '@stamhoofd/structures';
+import type { Company } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import axios from 'axios';
 import * as jsvat from 'jsvat-next'; // has no default export, so we need the wildcard
 

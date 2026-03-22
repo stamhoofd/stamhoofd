@@ -2,7 +2,7 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
 import { ModalStackEventBus } from '../overlays/ModalStackEventBus';
 import Tooltip from '../overlays/Tooltip.vue';
-import { ObjectDirective } from 'vue';
+import type { ObjectDirective } from 'vue';
 
 const helper = {
     copyElementFallback(event, vnode) {

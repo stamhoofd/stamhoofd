@@ -1,13 +1,10 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "resolveJsonModule": true,
-        "composite": true,
-        "rootDir": "./../../../"
-    },
+    "extends": "../../tsconfig.base.json",
     "include": [
-        "**/*",
         "../../*.d.ts",
-        "../../../*.d.ts"
+        "*.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.vue"
     ]
 }

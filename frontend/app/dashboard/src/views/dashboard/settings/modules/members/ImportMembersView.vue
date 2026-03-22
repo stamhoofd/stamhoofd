@@ -100,7 +100,8 @@
 
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
@@ -113,17 +114,19 @@ import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembe
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { Address, LimitedFilteredRequest, OrganizationRegistrationPeriod, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import { computed, Ref, ref, watch } from 'vue';
+import type { Address, OrganizationRegistrationPeriod} from '@stamhoofd/structures';
+import { LimitedFilteredRequest, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref, watch } from 'vue';
 import XLSX from 'xlsx';
 import { AddressColumnMatcher } from '../../../../../classes/import/AddressColumnMatcher';
-import { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
+import type { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
 import { DateColumnMatcher } from '../../../../../classes/import/DateColumnMatcher';
 import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
 import { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';
 import { ImportError } from '../../../../../classes/import/ImportError';
 import { ImportMemberBaseResult } from '../../../../../classes/import/ImportMemberBaseResult';
-import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
+import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 import { ImportMembersBaseResultWithErrors, ImportMembersResultWithErrors } from '../../../../../classes/import/ImportResultWithErrors';
 import { MatchedColumn } from '../../../../../classes/import/MatchedColumn';
 import { MemberDetailsMatcherCategory } from '../../../../../classes/import/MemberDetailsMatcherCategory';

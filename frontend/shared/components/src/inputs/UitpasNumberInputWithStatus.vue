@@ -26,7 +26,7 @@ import { computed, ref, watch } from 'vue';
 import { useGetUitpasNumberDetails } from '../composables/useGetUitpasNumberDetails';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import Spinner from '../Spinner.vue';
 import UitpasNumberInput from './UitpasNumberInput.vue';
 

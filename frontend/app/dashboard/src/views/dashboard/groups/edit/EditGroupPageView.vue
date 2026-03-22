@@ -49,7 +49,8 @@ import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
-import { GroupSettings, Image, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import type { Image} from '@stamhoofd/structures';
+import { GroupSettings, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 
 import EditGroupMixin from './EditGroupMixin';

@@ -1,14 +1,22 @@
-import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import type { WebshopTimeSlot } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { WebshopCounter } from '../helpers/WebshopCounter.js';
-import { BalanceItem, BalanceItemPayment, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './index.js';
+import { BalanceItem } from './BalanceItem.js';
+import { BalanceItemPayment } from './BalanceItemPayment.js';
+import type { Organization } from './Organization.js';
+import { Payment } from './Payment.js';
+import { Ticket } from './Ticket.js';
+import { Webshop } from './Webshop.js';
+import { WebshopDiscountCode } from './WebshopDiscountCode.js';
 
 export class Order extends QueryableModel {
     static table = 'webshop_orders';
@@ -21,13 +29,13 @@ export class Order extends QueryableModel {
     })
     id!: string;
 
-    @column({ foreignKey: Order.organization, type: 'string' })
+    @column({ type: 'string' })
     organizationId: string;
 
-    @column({ foreignKey: Order.webshop, type: 'string' })
+    @column({ type: 'string' })
     webshopId: string;
 
-    @column({ type: 'string', nullable: true, foreignKey: Order.payment })
+    @column({ type: 'string', nullable: true })
     paymentId: string | null = null;
 
     @column({ type: 'string', nullable: true })
@@ -88,9 +96,9 @@ export class Order extends QueryableModel {
     } })
     timeSlotTime: string | null = null;
 
-    static webshop = new ManyToOneRelation(Webshop, 'webshop');
-    static payment = new ManyToOneRelation(Payment, 'payment');
-    static organization = new ManyToOneRelation(Organization, 'organization');
+    static webshop: ManyToOneRelation<'webshop', Webshop>;
+    static payment: ManyToOneRelation<'payment', Payment>; ;
+    static organization: ManyToOneRelation<'organization', Organization>;
 
     getTransferReplacements(): { [key: string]: string } {
         const base = {

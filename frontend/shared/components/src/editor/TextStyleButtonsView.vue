@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Editor } from '@tiptap/vue-3';
+import type { Editor } from '@tiptap/vue-3';
 
 defineProps<{
     editor: Editor;

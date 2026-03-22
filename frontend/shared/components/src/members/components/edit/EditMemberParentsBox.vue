@@ -86,16 +86,18 @@
 </template>
 
 <script setup lang="ts">
-import { BooleanStatus, Parent, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { BooleanStatus, Parent, PermissionLevel } from '@stamhoofd/structures';
 
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context';
 import { ErrorBox } from '../../../errors/ErrorBox';
-import { Validator } from '../../../errors/Validator';
+import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import STList from '../../../layout/STList.vue';

@@ -1,10 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { RecordCategory } from '@stamhoofd/structures';
-import { type ViewStepsManager } from '#steps/ViewStepsManager.ts';
-import { type ViewStep } from '#steps/ViewStep.ts';
-import { EventNotificationViewModel } from '../classes/EventNotificationViewModel';
+import type { RecordCategory } from '@stamhoofd/structures';
+import type {ViewStepsManager} from '#steps/ViewStepsManager.ts';
+import type {ViewStep} from '#steps/ViewStep.ts';
+import type { EventNotificationViewModel } from '../classes/EventNotificationViewModel';
 import EditEventNotificationRecordCategoryView from '../EditEventNotificationRecordCategoryView.vue';
-import { NavigationActions } from '../../types/NavigationActions';
+import type { NavigationActions } from '../../types/NavigationActions';
 
 export class RecordCategoryStep implements ViewStep {
     viewModel: EventNotificationViewModel;

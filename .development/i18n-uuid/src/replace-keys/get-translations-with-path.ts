@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
-import { globals } from "../shared/globals";
-import { readTranslations } from "./read-translations";
+import fs from 'fs';
+import path from 'path';
+import { globals } from '../shared/globals.js';
+import { readTranslations } from './read-translations.js';
 
 export function getTranslationsWithPath(): Map<string, Record<string, string>> {
     // Path to the directory containing your translation files (e.g., locales/en.json)
@@ -20,7 +20,7 @@ export function getTranslationsWithPath(): Map<string, Record<string, string>> {
             const stats = fs.statSync(filePath);
 
             if (stats.isFile()) {
-                if (filePath.endsWith(".json")) {
+                if (filePath.endsWith('.json')) {
                     filePaths.push(filePath);
                 }
 
@@ -43,9 +43,9 @@ export function getTranslationsWithPath(): Map<string, Record<string, string>> {
     return result;
 }
 
-export function getDefaultTranslations(): {translations: Record<string, string>, filePath: string} {
+export function getDefaultTranslations(): { translations: Record<string, string>; filePath: string } {
     const defaultLocale = globals.I18NUUID_DEFAULT_LOCALE;
     const filePath = `${globals.I18NUUID_LOCALES_DIR}/${defaultLocale}.json`;
     const translations = readTranslations(filePath);
-    return {translations, filePath};
+    return { translations, filePath };
 }

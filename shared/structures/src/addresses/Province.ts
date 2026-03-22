@@ -1,6 +1,7 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Country, CountryDecoder } from './CountryDecoder.js';
+import { CountryDecoder } from './CountryDecoder.js';
+import type { Country } from '@stamhoofd/types/Country';
 
 export class Province extends AutoEncoder {
     @field({ decoder: StringDecoder })

@@ -1,7 +1,9 @@
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
-import { computed, ComputedRef, Ref, ref } from 'vue';
+import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompareValue, StamhoofdFilter} from '@stamhoofd/structures';
+import { FilterWrapperMarker, Gender, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
+import type { ComputedRef, Ref} from 'vue';
+import { computed, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -10,7 +12,7 @@ import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
-import { UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
+import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from './helpers';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 

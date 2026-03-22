@@ -1,13 +1,12 @@
-/* eslint-disable jest/no-conditional-expect */
 import { Request } from '@simonbackx/simple-endpoints';
-import { Organization, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
+import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 
-import { PatchMap } from '@simonbackx/simple-encoding';
-import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { GetUserEndpoint } from '../../src/endpoints/auth/GetUserEndpoint.js';
 import { CreateApiUserEndpoint } from '../../src/endpoints/organization/dashboard/users/CreateApiUserEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
-import { GetUserEndpoint } from '../../src/endpoints/auth/GetUserEndpoint.js';
 
 describe('E2E.APIRateLimits', () => {
     // Test endpoint

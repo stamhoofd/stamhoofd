@@ -37,11 +37,11 @@ if (!isPrerender && STAMHOOFD.PLAUSIBLE_DOMAIN && STAMHOOFD.environment === 'pro
     script.src = 'https://plausible.io/js/plausible.js';
     document.head.appendChild(script); // or something of the likes
     const w = window as any;
-    w.plausible = w.plausible || function () { (w.plausible.q = w.plausible.q || []).push(arguments); };
+    w.plausible = w.plausible || function (...args: unknown[]) { (w.plausible.q = w.plausible.q || []).push(args); };
 }
 else {
-    (window as any).plausible = function () {
-        console.log('Debug plausible with args ', arguments);
+    (window as any).plausible = function (...args: unknown[]) {
+        console.log('Debug plausible with args ', args);
     };
 }
 

@@ -1,8 +1,8 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberStepView } from '..';
-import { NavigationActions } from '../../types/NavigationActions';
+import type { NavigationActions } from '../../types/NavigationActions';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useContext } from '../../hooks';
 

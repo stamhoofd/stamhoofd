@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { Organization, Webshop } from '@stamhoofd/structures';
+import type { Organization, Webshop } from '@stamhoofd/structures';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import MetaLogo from '../MetaLogo.vue';

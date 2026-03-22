@@ -1,5 +1,6 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import AccountSwitcher from '@stamhoofd/components/context/AccountSwitcher.vue';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -27,7 +28,8 @@ import { PlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { AccessRight, AppType, Organization, PermissionLevel, PermissionsResourceType, Webshop } from '@stamhoofd/structures';
+import type { AppType, Webshop } from '@stamhoofd/structures';
+import { AccessRight, Organization, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed, markRaw, onUnmounted, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -353,7 +355,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
             }
         }
         else {
-            localStorage.setItem('what-is-new', (WhatsNewCount as any).toString());
+            localStorage.setItem('what-is-new', WhatsNewCount.toString());
         }
     };
     loadWhatsNew();

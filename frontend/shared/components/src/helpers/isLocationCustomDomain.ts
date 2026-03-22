@@ -1,4 +1,4 @@
-import { Webshop } from '@stamhoofd/structures';
+import type { Webshop } from '@stamhoofd/structures';
 
 export function isLocationCustomDomain(webshop: Webshop) {
     if (STAMHOOFD.environment === 'development') {

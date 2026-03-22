@@ -1,4 +1,4 @@
-import { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
 
 import { File } from './File.js';
 

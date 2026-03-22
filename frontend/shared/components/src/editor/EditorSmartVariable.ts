@@ -1,4 +1,4 @@
-import { EditorSmartVariable } from '@stamhoofd/structures';
+import type { EditorSmartVariable } from '@stamhoofd/structures';
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 

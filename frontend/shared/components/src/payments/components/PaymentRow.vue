@@ -39,7 +39,8 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
+import type { Payment} from '@stamhoofd/structures';
+import { PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 import AsyncPaymentView from '../AsyncPaymentView.vue';
 import PaymentMethodIcon from './PaymentMethodIcon.vue';
 

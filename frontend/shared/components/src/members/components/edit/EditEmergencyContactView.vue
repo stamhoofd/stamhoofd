@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
+import type { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';

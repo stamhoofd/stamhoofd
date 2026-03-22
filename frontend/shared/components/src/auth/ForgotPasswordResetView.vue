@@ -50,7 +50,8 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin, PushOptions } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import Checkbox from '#inputs/Checkbox.vue';
 import ConfirmEmailView from '#auth/ConfirmEmailView.vue';

@@ -3,10 +3,13 @@ import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metrop
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import { Country, Order, Organization, Sponsor, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import type { Order, Organization, Sponsor, TicketPublic, Webshop, WebshopPreview} from '@stamhoofd/structures';
+import { WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { Buffer } from 'buffer';
 import PDFDocument from 'pdfkit/js/pdfkit.standalone';
+
 // PDFKit is used! Wrong warning below!
 // import PDFKit from "pdfkit"
 import QRCode from 'qrcode';

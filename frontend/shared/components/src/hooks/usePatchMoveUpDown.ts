@@ -1,5 +1,7 @@
-import { AutoEncoder, NonScalarIdentifiable, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { computed, Ref, unref } from 'vue';
+import type { AutoEncoder, NonScalarIdentifiable, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { Ref} from 'vue';
+import { computed, unref } from 'vue';
 
 export function usePatchMoveUpDown<T extends AutoEncoder & NonScalarIdentifiable<any>>(
     inList: Ref<T[]> | T[],

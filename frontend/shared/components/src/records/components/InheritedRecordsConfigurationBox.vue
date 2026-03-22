@@ -76,14 +76,15 @@
 <script setup lang="ts">
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import PropertyFilterView from '#filters/PropertyFilterView.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { propertyFilterToString } from '#filters/UIFilter.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import { BooleanStatus, MemberDetails, MemberPropertyWithFilter, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
+import type { MemberPropertyWithFilter, Organization, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, Platform, PlatformFamily, PlatformMember, PropertyFilter } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';

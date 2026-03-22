@@ -104,8 +104,9 @@
 </template>
 
 <script lang="ts" setup>
-import { EditorSmartButton, EditorSmartVariable, Image, Replacement, ResolutionRequest } from '@stamhoofd/structures';
-import { Content, JSONContent } from '@tiptap/core';
+import type { Image, Replacement} from '@stamhoofd/structures';
+import { EditorSmartButton, EditorSmartVariable, ResolutionRequest } from '@stamhoofd/structures';
+import type { Content, JSONContent } from '@tiptap/core';
 import { Image as ImageExtension } from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import StarterKit from '@tiptap/starter-kit';

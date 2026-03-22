@@ -1,7 +1,9 @@
 import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
-import { BalanceItem, Payment } from './index.js';
+import { type BalanceItem } from './BalanceItem.js';
+import { type Payment } from './Payment.js';
+
 import { QueryableModel } from '@stamhoofd/sql';
 
 /**
@@ -21,10 +23,10 @@ export class BalanceItemPayment extends QueryableModel {
     @column({ type: 'string' })
     organizationId: string;
 
-    @column({ type: 'string', foreignKey: BalanceItemPayment.payment })
+    @column({ type: 'string' })
     paymentId: string;
 
-    @column({ type: 'string', foreignKey: BalanceItemPayment.balanceItem })
+    @column({ type: 'string' })
     balanceItemId: string;
 
     /**
@@ -55,6 +57,6 @@ export class BalanceItemPayment extends QueryableModel {
     })
     updatedAt: Date;
 
-    static balanceItem = new ManyToOneRelation(BalanceItem, 'balanceItem');
-    static payment = new ManyToOneRelation(Payment, 'payment');
+    static balanceItem: ManyToOneRelation<'balanceItem', BalanceItem>;
+    static payment: ManyToOneRelation<'payment', Payment>;
 }

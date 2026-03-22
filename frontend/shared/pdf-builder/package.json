@@ -4,6 +4,10 @@
     "private": true,
     "main": "index.ts",
     "type": "module",
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "dependencies": {
         "@stamhoofd/structures": "*",
         "@stamhoofd/components": "*"

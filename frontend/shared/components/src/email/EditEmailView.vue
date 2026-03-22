@@ -121,7 +121,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import Checkbox from '#inputs/Checkbox.vue';
@@ -143,7 +144,8 @@ import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatch
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, PermissionsResourceType, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
-import { computed, onMounted, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
     email: OrganizationEmail;

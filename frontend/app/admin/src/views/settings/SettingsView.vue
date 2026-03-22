@@ -389,7 +389,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
 import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
@@ -403,7 +403,8 @@ import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
+import type { OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration} from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
@@ -443,12 +444,12 @@ const platformManager = usePlatformManager();
 defineRoutes([
     {
         url: Routes.Admins,
-        component: AdminsView as ComponentOptions,
+        component: AdminsView,
     },
     {
         url: Routes.Records,
         present: 'popup',
-        component: RecordsConfigurationView as ComponentOptions,
+        component: RecordsConfigurationView,
         paramsToProps() {
             return {
                 recordsConfiguration: platform.value.config.recordsConfiguration,
@@ -466,7 +467,7 @@ defineRoutes([
     {
         name: Routes.FinancialSupport,
         url: 'financiele-ondersteuning',
-        component: FinancialSupportSettingsView as ComponentOptions,
+        component: FinancialSupportSettingsView,
         paramsToProps() {
             return {
                 financialSupport: platform.value.config.financialSupport ?? FinancialSupportSettings.create({}),
@@ -486,7 +487,7 @@ defineRoutes([
     {
         name: Routes.DataPermissions,
         url: 'toestemming-gegevensverzameling',
-        component: DataPermissionSettingsView as ComponentOptions,
+        component: DataPermissionSettingsView,
         paramsToProps() {
             return {
                 dataPermission: platform.value.config.dataPermission ?? DataPermissionsSettings.create({}),
@@ -506,62 +507,62 @@ defineRoutes([
     {
         url: Routes.CorporateIdentity,
         present: 'popup',
-        component: EditCorporateIdView as ComponentOptions,
+        component: EditCorporateIdView,
     },
     {
         url: Routes.Labs,
         present: 'popup',
-        component: LabsView as ComponentOptions,
+        component: LabsView,
     },
     {
         url: Routes.DefaultAgeGroups,
         present: 'popup',
-        component: EditDefaultAgeGroupsView as ComponentOptions,
+        component: EditDefaultAgeGroupsView,
     },
     {
         url: Routes.Terms,
         present: 'popup',
-        component: EditPrivacyView as ComponentOptions,
+        component: EditPrivacyView,
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: EditResponsibilitiesView as ComponentOptions,
+        component: EditResponsibilitiesView,
     },
     {
         url: Routes.RegistrationPeriods,
         present: 'popup',
-        component: EditRegistrationPeriodsView as ComponentOptions,
+        component: EditRegistrationPeriodsView,
     },
     {
         url: Routes.PlatformMembershipTypes,
         present: 'popup',
-        component: EditPlatformMembershipTypesView as ComponentOptions,
+        component: EditPlatformMembershipTypesView,
     },
     {
         url: Routes.EmailTemplates,
         present: 'popup',
-        component: EditEmailTemplatesView as ComponentOptions,
+        component: EditEmailTemplatesView,
     },
     {
         url: Routes.EmailSettings,
         present: 'popup',
-        component: EmailSettingsView as ComponentOptions,
+        component: EmailSettingsView,
     },
     {
         url: Routes.EventTypes,
         present: 'popup',
-        component: EditEventTypesView as ComponentOptions,
+        component: EditEventTypesView,
     },
     {
         url: Routes.EventNotificationTypes,
         present: 'popup',
-        component: EditEventNotificationTypesView as ComponentOptions,
+        component: EditEventNotificationTypesView,
     },
     {
         url: Routes.Premises,
         present: 'popup',
-        component: EditPremiseTypesView as ComponentOptions,
+        component: EditPremiseTypesView,
     },
     {
         url: Routes.OrganizationRecordConfiguration,

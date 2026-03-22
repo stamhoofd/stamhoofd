@@ -1,6 +1,8 @@
 import { languages } from '@stamhoofd/locales';
-import { Language, TranslatedString } from '@stamhoofd/structures';
-import { inject, markRaw, onBeforeUnmount, provide, Raw, reactive, ref, Ref, watch } from 'vue';
+import type { TranslatedString } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
+import type { Raw, Ref} from 'vue';
+import { inject, markRaw, onBeforeUnmount, provide, reactive, ref, watch } from 'vue';
 
 export class TranslateableComponent {
     latestValue: TranslatedString | null = null;

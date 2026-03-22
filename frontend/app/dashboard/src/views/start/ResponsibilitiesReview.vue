@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -38,8 +38,10 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Group, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
-import { computed, onMounted, Ref, ref } from 'vue';
+import type { Group, MemberResponsibility, Organization, PlatformMember} from '@stamhoofd/structures';
+import { GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import ResponsibilityReview from './ResponsibilityReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
 
