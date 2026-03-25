@@ -1,4 +1,4 @@
-import { XlsxTransformerSheet, XlsxWorkbookFilter, XlsxWriterAdapter } from './interfaces.js';
+import type { XlsxTransformerSheet, XlsxWorkbookFilter, XlsxWriterAdapter } from './interfaces.js';
 import { XlsxColumnFilterer } from './XlsxColumnFilterer.js';
 import { XlsxTransformer } from './XlsxTransformer.js';
 

@@ -1,8 +1,10 @@
 import { Database } from '@simonbackx/simple-database';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
-import { Endpoint, Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint} from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import type { PatchAnswers} from '@stamhoofd/structures';
+import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';

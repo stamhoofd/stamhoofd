@@ -1,10 +1,13 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, EmailRecipient as EmailRecipientStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, StamhoofdFilter } from '@stamhoofd/structures';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { CountFilteredRequest, EmailRecipient as EmailRecipientStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
 
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailRecipient, fillRecipientReplacements } from '@stamhoofd/models';
-import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context.js';
 import { emailRecipientsFilterCompilers } from '../../../sql-filters/email-recipients.js';
 import { emailRecipientSorters } from '../../../sql-sorters/email-recipients.js';

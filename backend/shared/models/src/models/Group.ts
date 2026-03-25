@@ -1,11 +1,12 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
-import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
+import type { GroupCategory} from '@stamhoofd/structures';
+import { GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
-import { type OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
+import type {OrganizationRegistrationPeriod} from './OrganizationRegistrationPeriod.js';
 import { Registration } from './Registration.js';
 
 if (Registration === undefined) {

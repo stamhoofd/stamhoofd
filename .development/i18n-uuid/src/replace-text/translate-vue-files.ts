@@ -184,7 +184,7 @@ function getVueTemplate(vueFileContent: string): string | null {
 }
 
 function getScriptContent(vueFileContent: string): string | null {
-    const regex = /<script.*>((?:.|\n)+)<\/script>/;
+    const regex = /<script[^>]*>.+<\/script>/s;
 
     const match = vueFileContent.match(regex);
 

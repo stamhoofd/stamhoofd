@@ -1,4 +1,5 @@
-import { BalanceItemType, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, LimitedFilteredRequest, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest} from '@stamhoofd/structures';
+import { BalanceItemType, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
 import { Email } from './Email.js';
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailMocker } from '@stamhoofd/email';
@@ -284,7 +285,7 @@ describe('Model.Email', () => {
                 sentAt: null,
                 failCount: 1,
                 failError: STExpect.simpleErrors([{
-                    message: /This is a simulated network error (3|4|5|6)/,
+                    message: /This is a simulated network error ([3-6])/,
                 }]),
                 firstFailedAt: expect.any(Date),
                 lastFailedAt: expect.any(Date),
@@ -294,7 +295,7 @@ describe('Model.Email', () => {
                 sentAt: null,
                 failCount: 1,
                 failError: STExpect.simpleErrors([{
-                    message: /This is a simulated network error (3|4|5|6)/,
+                    message: /This is a simulated network error ([3-6])/,
                 }]),
                 firstFailedAt: expect.any(Date),
                 lastFailedAt: expect.any(Date),

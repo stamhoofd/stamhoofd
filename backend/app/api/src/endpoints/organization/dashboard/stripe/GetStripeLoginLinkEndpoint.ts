@@ -1,5 +1,7 @@
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount, Token } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/structures';

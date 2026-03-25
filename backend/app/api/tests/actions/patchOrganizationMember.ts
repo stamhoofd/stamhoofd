@@ -1,7 +1,8 @@
-import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import { Organization } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/models';
+import type { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { PatchOrganizationMembersEndpoint } from '../../src/endpoints/global/members/PatchOrganizationMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
 import { initAdmin } from '../init/initAdmin.js';

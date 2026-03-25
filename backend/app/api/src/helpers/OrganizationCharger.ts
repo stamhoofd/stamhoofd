@@ -1,5 +1,6 @@
 import { BalanceItem } from '@stamhoofd/models';
-import { BalanceItemType, Organization as OrganizationStruct } from '@stamhoofd/structures';
+import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
+import { BalanceItemType } from '@stamhoofd/structures';
 
 export class OrganizationCharger {
     static async chargeMany({ chargingOrganizationId, organizationsToCharge, price, amount, description, dueAt, createdAt }: { chargingOrganizationId: string; organizationsToCharge: OrganizationStruct[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {

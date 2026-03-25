@@ -1,4 +1,4 @@
-/* eslint-disable no-irregular-whitespace */
+ 
 import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2';
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
@@ -324,9 +324,9 @@ export class TicketBuilder {
 
         const price = ticket.getPrice(this.order);
         if (!dryRun) {
-            this.document.text(Formatter.price(price).replace(/ /g, ' ').replace(/,00/g, ''), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM });
+            this.document.text(Formatter.price(price).replace(/\xa0/g, ' ').replace(/,00/g, ''), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM });
         }
-        height += this.document.heightOfString(Formatter.price(price).replace(/ /g, ' ').replace(/,00/g, ''), { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM });
+        height += this.document.heightOfString(Formatter.price(price).replace(/\xa0/g, ' ').replace(/,00/g, ''), { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM });
 
         // END LEFT COLUMN
         MAX_COLUMN_HEIGHT = height - initialColumnHeight;

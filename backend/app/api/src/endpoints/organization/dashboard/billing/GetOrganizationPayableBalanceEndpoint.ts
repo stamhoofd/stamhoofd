@@ -1,5 +1,7 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { PayableBalanceCollection, ReceivableBalanceType } from '@stamhoofd/structures';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { PayableBalanceCollection} from '@stamhoofd/structures';
+import { ReceivableBalanceType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { GetUserPayableBalanceEndpoint } from '../../../global/registration/GetUserPayableBalanceEndpoint.js';

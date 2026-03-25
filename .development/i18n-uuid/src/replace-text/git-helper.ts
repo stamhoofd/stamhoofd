@@ -65,10 +65,10 @@ function isDiffChunkHeader(line: string): boolean {
 }
 
 function getStartAndEndIndexFromDifChunkHeader(diffChunkHeader: string): DiffChunk {
-    const match = diffChunkHeader.match(/\+([0-9]+),([0-9]+)/);
+    const match = diffChunkHeader.match(/\+(\d+),(\d+)/);
 
     if (match === null) {
-        const match = diffChunkHeader.match(/\+([0-9]+)/);
+        const match = diffChunkHeader.match(/\+(\d+)/);
 
         if (match === null) {
             throw new Error('Failed to read start and end index from diff chunk header, header: ' + diffChunkHeader);
@@ -112,7 +112,7 @@ export const startChangeMarker = '[[start-change]]';
 export const endChangeMarker = '[[end-change]]';
 
 function splitLines(text: string): string[] {
-    return text.split(/(\r|\n)/).filter(item => !/(\r|\n)/.test(item));
+    return text.split(/(\r|\n)/).filter(item => !/\r|\n/.test(item));
 }
 
 export function addChangeMarkers(filePath: string, text: string, commitsToCompare?: [string, string]): string | null {

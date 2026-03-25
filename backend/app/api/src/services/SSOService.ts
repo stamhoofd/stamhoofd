@@ -1,12 +1,16 @@
-import { DecodedRequest, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest} from '@simonbackx/simple-endpoints';
+import { Response } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
-import { LoginMethod, LoginProviderType, OpenIDClientConfiguration, StartOpenIDFlowStruct, Token as TokenStruct } from '@stamhoofd/structures';
+import type { Organization} from '@stamhoofd/models';
+import { Platform, Token, User, Webshop } from '@stamhoofd/models';
+import type { LoginMethod, StartOpenIDFlowStruct} from '@stamhoofd/structures';
+import { LoginProviderType, OpenIDClientConfiguration, Token as TokenStruct } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { generators, Issuer } from 'openid-client';
 import { Context } from '../helpers/Context.js';
 
-import { CookieHelper, ObjectWithHeaders } from '../helpers/CookieHelper.js';
+import type { ObjectWithHeaders } from '../helpers/CookieHelper.js';
+import { CookieHelper } from '../helpers/CookieHelper.js';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {

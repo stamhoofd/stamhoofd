@@ -1,9 +1,10 @@
-import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { type Organization } from './Organization.js';
+import type {Organization} from './Organization.js';
 
 /**
  * Things that should get paid, but are not yet invoiced yet because:

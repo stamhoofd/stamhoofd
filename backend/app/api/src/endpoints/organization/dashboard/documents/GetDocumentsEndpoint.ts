@@ -1,9 +1,12 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Document } from '@stamhoofd/models';
-import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory, StamhoofdFilter } from '@stamhoofd/structures';
+import type { CountFilteredRequest, Document as DocumentStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory } from '@stamhoofd/structures';
 
-import { Decoder } from '@simonbackx/simple-encoding';
-import { applySQLSorter, compileToSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper.js';

@@ -1,8 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Organization, OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization} from '@stamhoofd/models';
+import { OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, PlatformConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
 
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchPlatformEndpoint } from './PatchPlatformEnpoint.js';

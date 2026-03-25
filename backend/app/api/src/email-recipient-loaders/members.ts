@@ -1,6 +1,7 @@
 import { Email } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, MembersBlob, PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
+import type { EmailRecipient, LimitedFilteredRequest, MembersBlob} from '@stamhoofd/structures';
+import { EmailRecipientFilterType, PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
 
 async function getRecipients(result: PaginatedResponse<MembersBlob, LimitedFilteredRequest>, type: 'member' | 'parents' | 'unverified') {

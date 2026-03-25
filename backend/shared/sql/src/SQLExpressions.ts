@@ -1,6 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
-import { joinSQLQuery, SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
-import { ParseWhereArguments, SQLEmptyWhere } from './SQLWhere.js';
+import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
+import { joinSQLQuery } from './SQLExpression.js';
+import type { ParseWhereArguments} from './SQLWhere.js';
+import { SQLEmptyWhere } from './SQLWhere.js';
 
 export type SQLScalarValue = string | number | boolean | Date;
 export type SQLDynamicExpression = SQLScalarValue | SQLScalarValue[] | null | SQLExpression;

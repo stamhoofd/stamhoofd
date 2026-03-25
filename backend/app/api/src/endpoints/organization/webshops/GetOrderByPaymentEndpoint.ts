@@ -1,9 +1,10 @@
 import { PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
-import { Order as OrderStruct } from '@stamhoofd/structures';
+import type { Order as OrderStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
 type Params = { id: string; paymentId: string };

@@ -1,6 +1,8 @@
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { DocumentTemplate, DocumentTemplateFactory, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import type { Endpoint} from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
+import type { Organization, RegistrationPeriod, User} from '@stamhoofd/models';
+import { DocumentTemplate, DocumentTemplateFactory, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { DocumentPrivateSettings, DocumentStatus, DocumentTemplateDefinition, DocumentTemplatePrivate, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

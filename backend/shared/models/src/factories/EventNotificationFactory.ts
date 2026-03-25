@@ -1,9 +1,11 @@
 import { Factory } from '@simonbackx/simple-database';
-import { EventNotificationStatus, RecordAnswer } from '@stamhoofd/structures';
+import type { RecordAnswer } from '@stamhoofd/structures';
+import { EventNotificationStatus } from '@stamhoofd/structures';
 
-import { EventNotification, User } from '../models/index.js';
-import { Event } from '../models/Event.js';
-import { Organization } from '../models/Organization.js';
+import type { User } from '../models/index.js';
+import { EventNotification } from '../models/index.js';
+import type { Event } from '../models/Event.js';
+import type { Organization } from '../models/Organization.js';
 import { EventFactory } from './EventFactory.js';
 import { EventNotificationTypeFactory } from './EventNotificationTypeFactory.js';
 

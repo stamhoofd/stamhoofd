@@ -4,7 +4,8 @@ import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { DataValidator, Formatter, sleep } from '@stamhoofd/utility';
 import htmlToText from 'html-to-text';
-import nodemailer, { type Transporter } from 'nodemailer';
+import nodemailer from 'nodemailer';
+import type {Transporter} from 'nodemailer';
 import { EmailAddress } from '../models/EmailAddress.js';
 
 export type EmailInterfaceRecipient = {

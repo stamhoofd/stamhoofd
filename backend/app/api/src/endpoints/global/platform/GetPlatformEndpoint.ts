@@ -1,6 +1,7 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Platform } from '@stamhoofd/models';
-import { Platform as PlatformStruct } from '@stamhoofd/structures';
+import type { Platform as PlatformStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
 

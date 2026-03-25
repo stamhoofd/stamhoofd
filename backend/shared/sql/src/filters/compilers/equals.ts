@@ -1,8 +1,11 @@
-import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { assertFilterCompareValue } from '@stamhoofd/structures';
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions.js';
 import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../SQLJsonExpressions.js';
-import { SQLWhere, SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../SQLWhere.js';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLFilter.js';
+import type { SQLWhere} from '../../SQLWhere.js';
+import { SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../SQLWhere.js';
+import type { SQLCurrentColumn, SQLSyncFilterRunner} from '../SQLFilter.js';
+import { normalizeColumn, SQLValueType } from '../SQLFilter.js';
 import { isJSONColumn } from '../helpers/isJSONColumn.js';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
 

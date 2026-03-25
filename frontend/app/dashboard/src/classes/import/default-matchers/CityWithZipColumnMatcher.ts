@@ -1,14 +1,15 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type XLSX from 'xlsx';
 
+import { Formatter } from '@stamhoofd/utility';
 import type { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
 import type { ImportMemberResult } from '../ImportMemberResult';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class CityWithZipColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {
-    private reg = /^\s*(([0-9]+?)(\s?[A-Z]{2})?)[\s,]+(([A-Za-z]|\s)+)\s*$/;
-    private regReverse = /^\s*(([0-9]+?)(\s?[A-Z]{2})?)[\s,]+(([A-Za-z]|\s)+)\s*$/;
+    private reg = /^((\d+)(\s?[A-Z]{2})?)[\s,]?\s(([A-Za-z\s])+)$/;
+    private regReverse = /^((\d+)(\s?[A-Z]{2})?)[\s,]?\s(([A-Za-z\s])+)$/;
 
     getName(): string {
         return 'Gemeente met postcode';
@@ -55,7 +56,7 @@ export class CityWithZipColumnMatcher extends SharedMemberDetailsMatcher impleme
             return;
         }
 
-        const value = ((cell.w ?? cell.v) + '').trim();
+        const value = Formatter.removeDuplicateSpaces((cell.w ?? cell.v) + '').trim();
 
         if (!value) {
             return;

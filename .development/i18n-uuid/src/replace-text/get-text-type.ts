@@ -16,7 +16,7 @@ export function getTextType(allParts: { value: string }[] | string): { type: Tex
         return { type: TextType.ObjectAccessKey, name: null };
     }
 
-    const lastCodePart = text.trimEnd().match(/(?<=(?:\s+))\S*$/g);
+    const lastCodePart = text.trimEnd().match(/(?<=\s+)\S*$/g);
     if (lastCodePart) {
         const value = lastCodePart[0];
 

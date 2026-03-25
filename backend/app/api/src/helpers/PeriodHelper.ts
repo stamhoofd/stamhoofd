@@ -1,5 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import type { RegistrationPeriod } from '@stamhoofd/models';
+import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint.js';

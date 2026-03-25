@@ -1,6 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
-import { isSQLExpression, joinSQLQuery, normalizeSQLQuery, SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
-import { scalarToSQLExpression, SQLAlias, SQLAssignment, SQLColumnExpression, SQLScalarValue, SQLTableExpression } from './SQLExpressions.js';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
+import { isSQLExpression, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
+import type { SQLAssignment, SQLScalarValue} from './SQLExpressions.js';
+import { scalarToSQLExpression, SQLAlias, SQLColumnExpression, SQLTableExpression } from './SQLExpressions.js';
 import { SQLLogger } from './SQLLogger.js';
 
 export class SQLInsert implements SQLExpression {

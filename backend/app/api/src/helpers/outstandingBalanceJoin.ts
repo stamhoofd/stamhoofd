@@ -1,5 +1,6 @@
 import { CachedBalance, Registration } from '@stamhoofd/models';
-import { SQL, SQLAlias, SQLCalculation, SQLNamedExpression, SQLPlusSign, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
+import type { SQLNamedExpression} from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLCalculation, SQLPlusSign, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
 
 export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     SQL.select('objectId', 'organizationId',

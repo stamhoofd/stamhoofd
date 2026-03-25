@@ -1,7 +1,9 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
+import type { BalanceItem} from '@stamhoofd/models';
+import { Organization, Platform, STPackage } from '@stamhoofd/models';
 import { CheckoutResponse, PackageCheckout, Payment as PaymentStruct, STPackageBundleHelper, STPackageStruct } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 import { PaymentService } from '../../../services/PaymentService.js';

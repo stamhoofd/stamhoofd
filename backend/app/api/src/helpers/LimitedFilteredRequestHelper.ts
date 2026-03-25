@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { getSortFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 export class LimitedFilteredRequestHelper {

@@ -1,4 +1,4 @@
-import { Organization } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { PaymentMethod } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { StripeMocker } from '../helpers/StripeMocker.js';

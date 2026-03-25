@@ -1,4 +1,4 @@
-import { Service } from '../Service.js';
+import type { Service } from '../Service.js';
 import { build as defaultPortsBuild } from './ports-primary.js';
 
 export function build(service: Service): any {

@@ -1,5 +1,6 @@
 import { CachedBalance, Email } from '@stamhoofd/models';
-import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, ReceivableBalanceType, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, ReceivableBalanceType, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint.js';
 

@@ -1,5 +1,6 @@
-import { Model, ModelEvent } from '@simonbackx/simple-database';
-import { AuditLogSource } from '@stamhoofd/structures';
+import type { ModelEvent } from '@simonbackx/simple-database';
+import { Model } from '@simonbackx/simple-database';
+import type { AuditLogSource } from '@stamhoofd/structures';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 export type AuditLogContextSettings = {

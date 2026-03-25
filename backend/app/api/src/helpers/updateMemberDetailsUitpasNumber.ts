@@ -1,8 +1,9 @@
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
-import { MemberDetails, ReviewTimes, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
-import { GetPassResponse } from '../services/uitpas/PassholderEndpoints.js';
+import type { MemberDetails, ReviewTimes} from '@stamhoofd/structures';
+import { UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import type { GetPassResponse } from '../services/uitpas/PassholderEndpoints.js';
 import { UitpasService } from '../services/uitpas/UitpasService.js';
 import { throwIfInvalidUitpasNumber } from '../services/uitpas/checkUitpasNumbers.js';
 

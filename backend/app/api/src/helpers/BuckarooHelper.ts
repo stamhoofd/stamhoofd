@@ -1,5 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BuckarooPayment, Payment } from '@stamhoofd/models';
+import type { Payment } from '@stamhoofd/models';
+import { BuckarooPayment } from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import axios from 'axios';
 import crypto from 'crypto';

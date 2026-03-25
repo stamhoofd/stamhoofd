@@ -1,5 +1,6 @@
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -74,7 +75,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
 
             if (request.body.domain !== undefined) {
                 if (request.body.domain !== null) {
-                    const cleaned = request.body.domain.toLowerCase().replace(/[^a-zA-Z0-9-.]/g, '');
+                    const cleaned = request.body.domain.toLowerCase().replace(/[^a-z0-9-.]/gi, '');
 
                     if (cleaned !== webshop.domain) {
                         webshop.domain = cleaned;

@@ -1,12 +1,15 @@
 import { column } from '@simonbackx/simple-database';
-import { BaseOrganization, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, SortItemDirection, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
+import type { BaseOrganization, EmailRecipientFilterType, EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
+import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
-import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
-import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
+import type { EmailInterfaceRecipient } from '@stamhoofd/email';
+import { Email as EmailClass } from '@stamhoofd/email';
+import type { QueueHandlerOptions } from '@stamhoofd/queues';
+import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
 import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
 import { EmailRecipient } from './EmailRecipient.js';

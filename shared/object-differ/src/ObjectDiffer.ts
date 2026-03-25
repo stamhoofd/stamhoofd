@@ -1,4 +1,5 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, Field, getOptionalId, isPatchMap, SymbolDecoder } from '@simonbackx/simple-encoding';
+import type { Field} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, EnumDecoder, getOptionalId, isPatchMap, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, TranslatedString, Version } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 

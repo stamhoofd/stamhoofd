@@ -1,11 +1,14 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform, Registration } from '@stamhoofd/models';
-import { SQL, SQLExpression, SQLSelect, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMemberBlob, StamhoofdFilter, assertSort, RegistrationsBlob } from '@stamhoofd/structures';
+import type { SQLExpression, SQLSortDefinitions} from '@stamhoofd/sql';
+import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import type { CountFilteredRequest, RegistrationWithMemberBlob, StamhoofdFilter, RegistrationsBlob } from '@stamhoofd/structures';
+import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
 
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';

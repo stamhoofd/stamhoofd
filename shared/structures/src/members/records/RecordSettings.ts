@@ -6,7 +6,7 @@ import { ResolutionRequest } from '../../files/ResolutionRequest.js';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import type { ObjectWithRecords } from '../ObjectWithRecords.js';
-import { type RecordAnswer } from './RecordAnswer.js';
+import type {RecordAnswer} from './RecordAnswer.js';
 import { TranslatedString } from '../../TranslatedString.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };

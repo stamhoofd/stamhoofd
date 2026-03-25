@@ -1,7 +1,9 @@
-import { CachedBalance, Member, MemberResponsibilityRecord, MemberWithUsers, Organization, Platform, User } from '@stamhoofd/models';
+import type { MemberWithUsers} from '@stamhoofd/models';
+import { CachedBalance, Member, MemberResponsibilityRecord, Organization, Platform, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
-import { AuditLogSource, MemberDetails, PermissionRole, Permissions, ReceivableBalanceType, UserPermissions } from '@stamhoofd/structures';
+import type { MemberDetails, PermissionRole} from '@stamhoofd/structures';
+import { AuditLogSource, Permissions, ReceivableBalanceType, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';

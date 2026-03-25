@@ -1,5 +1,6 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Member, MemberPlatformMembership, Organization } from '@stamhoofd/models';
+import type { Member, MemberPlatformMembership} from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { scalarToSQLExpression, SQL, SQLCharLength, SQLWhereLike } from '@stamhoofd/sql';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';

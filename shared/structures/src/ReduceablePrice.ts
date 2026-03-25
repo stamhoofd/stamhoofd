@@ -1,6 +1,6 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 
-import { type PlatformMember } from './members/PlatformMember.js';
+import type {PlatformMember} from './members/PlatformMember.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class ReduceablePrice extends AutoEncoder {

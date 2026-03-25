@@ -2,9 +2,9 @@ import { Database } from '@simonbackx/simple-database';
 
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 import { UserFactory } from '../factories/UserFactory.js';
-import { Organization } from './Organization.js';
+import type { Organization } from './Organization.js';
 import { Token } from './Token.js';
-import { User } from './User.js';
+import type { User } from './User.js';
 
 describe('Model.Token', () => {
     const existingToken = 'ABCDEFG';

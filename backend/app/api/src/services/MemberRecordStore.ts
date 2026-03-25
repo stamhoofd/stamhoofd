@@ -1,7 +1,7 @@
 import { Model } from '@simonbackx/simple-database';
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { RecordSettings } from '@stamhoofd/structures';
+import type { RecordSettings } from '@stamhoofd/structures';
 
 export type RecordCacheEntry = { record: RecordSettings; rootCategoryId: string; organizationId: string | null };
 

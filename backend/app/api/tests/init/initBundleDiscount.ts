@@ -1,5 +1,6 @@
-import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { GroupPriceDiscountType, BundleDiscount, TranslatedString, GroupPriceDiscount, ReduceablePrice, GroupPrice, BundleDiscountGroupPriceSettings } from '@stamhoofd/structures';
+import type { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
+import type { GroupPrice} from '@stamhoofd/structures';
+import { GroupPriceDiscountType, BundleDiscount, TranslatedString, GroupPriceDiscount, ReduceablePrice, BundleDiscountGroupPriceSettings } from '@stamhoofd/structures';
 
 function createBundleDiscount({
     name = 'Bundle discount',

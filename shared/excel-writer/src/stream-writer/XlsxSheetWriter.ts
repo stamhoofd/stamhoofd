@@ -1,7 +1,8 @@
-import { CellType, CellValue } from '../interfaces.js';
+import type { CellValue } from '../interfaces.js';
+import { CellType } from '../interfaces.js';
 import { escapeXml } from './escapeXml.js';
 import { XlsxFileWriter } from './XlsxFileWriter.js';
-import { XlsxStylesWriter } from './XlsxStylesWriter.js';
+import type { XlsxStylesWriter } from './XlsxStylesWriter.js';
 import { DateTime } from 'luxon';
 
 function numberToAlpha(num: number) {

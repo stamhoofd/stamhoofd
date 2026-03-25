@@ -1,7 +1,10 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, SetupStepType } from '@stamhoofd/structures';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct} from '@stamhoofd/structures';
+import { SetupStepType } from '@stamhoofd/structures';
 
-import { AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';

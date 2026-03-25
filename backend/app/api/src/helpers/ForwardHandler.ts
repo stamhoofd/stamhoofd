@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
-import { Email, EmailAddress, EmailInterface, EmailInterfaceRecipient } from '@stamhoofd/email';
+import type { EmailInterface, EmailInterfaceRecipient } from '@stamhoofd/email';
+import { Email, EmailAddress } from '@stamhoofd/email';
 import { Organization, Platform } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import { simpleParser } from 'mailparser';

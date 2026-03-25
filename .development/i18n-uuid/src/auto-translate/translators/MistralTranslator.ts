@@ -41,7 +41,7 @@ abstract class MistralTranslator extends Translator {
     }
 
     private extractJsonArrayFromResponse(response: string): string {
-        const regex = /```json\n((?:.|\r|\n)*)```/;
+        const regex = /```json\n((?:.|[\r\n])*)```/;
 
         const match = response.match(regex);
         const jsonString = match?.[1];

@@ -1,10 +1,11 @@
-import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
-import { type I18n } from '@stamhoofd/backend-i18n';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { column, Database } from '@simonbackx/simple-database';
+import type {I18n} from '@stamhoofd/backend-i18n';
 import { QueryableModel } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
-import { type Organization } from './Organization.js';
+import type {Organization} from './Organization.js';
 import { User } from './User.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';

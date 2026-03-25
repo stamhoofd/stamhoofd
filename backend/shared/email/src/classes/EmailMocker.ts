@@ -1,5 +1,6 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import { Email, InternalEmailData } from './Email.js';
+import type { InternalEmailData } from './Email.js';
+import { Email } from './Email.js';
 
 type MockedCallback = (data: InternalEmailData) => Promise<void> | void;
 type MockedResponse = { error?: Error | null; callback?: MockedCallback };

@@ -4,10 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Group } from './Group.js';
 import { GroupPriceDiscount } from './GroupPriceDiscount.js';
 import { calculateHungarianAlgorithm } from './helpers/calculateHungarianAlgorithm.js';
-import { type RegisterCart } from './members/checkout/RegisterCart.js';
+import type {RegisterCart} from './members/checkout/RegisterCart.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
-import { type PlatformFamily, type PlatformMember } from './members/PlatformMember.js';
+import type {PlatformFamily, PlatformMember} from './members/PlatformMember.js';
 import { TranslatedString } from './TranslatedString.js';
 
 export class BundleDiscount extends AutoEncoder {

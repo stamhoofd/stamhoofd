@@ -37,7 +37,7 @@ export class StreetColumnMatcher extends SharedMemberDetailsMatcher implements C
             return false;
         }
         for (const example of examples) {
-            if (!example.match(/^\s*([^0-9]+?)[\s,]*([0-9].*?)\s*$/g)) {
+            if (!example.match(/\D\d/g)) {
                 return false;
             }
         }

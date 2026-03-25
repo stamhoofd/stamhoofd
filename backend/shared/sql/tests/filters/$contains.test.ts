@@ -1,6 +1,7 @@
 import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
 import { SQL } from '../../src/SQL.js';
-import { TableDefinition, test, testMatch, testMultipleErrors } from '../utils/index.js';
+import type { TableDefinition} from '../utils/index.js';
+import { test, testMatch, testMultipleErrors } from '../utils/index.js';
 
 describe('$contains', () => {
     it('Throws when passing non-string values', async () => {

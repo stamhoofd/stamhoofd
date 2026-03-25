@@ -33,7 +33,7 @@ export class StripeMocker {
             .persist()
             .get(/v1\/.*/)
             .reply((uri, body) => {
-                const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/?(\w+)){0,2}/) || [null];
+                const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/(\w+)){0,2}/) || [null];
 
                 if (!match) {
                     return [500];
@@ -54,7 +54,7 @@ export class StripeMocker {
             .persist()
             .post(/v1\/.*/)
             .reply((uri, body: string) => {
-                const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/?(\w+)){0,2}/) || [null];
+                const [match, resource] = uri.match(/\/?v1\/(\w+)(?:\/(\w+)){0,2}/) || [null];
 
                 if (!match) {
                     return [500];
@@ -184,7 +184,7 @@ export class StripeMocker {
             allowPrototypes: true,
             decoder(value: unknown) {
                 // Convert numbers to numbers and bools to bools
-                if (typeof value === 'string' && /^(\d+|\d*\.\d+)$/.test(value)) {
+                if (typeof value === 'string' && /^(?:\d+|\d*\.\d+)$/.test(value)) {
                     return parseFloat(value);
                 }
 

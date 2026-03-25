@@ -132,7 +132,7 @@ describe('clearExcelCacheHelper', () => {
         });
 
         fsMock.readdir.mockReturnValue(
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+             
             Promise.resolve([...directories, file1]) as any,
         );
         // #endregion

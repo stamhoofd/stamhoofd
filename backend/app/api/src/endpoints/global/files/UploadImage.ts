@@ -1,5 +1,7 @@
-import { AutoEncoder, BooleanDecoder, Decoder, field, ObjectData } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field, ObjectData } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Image, RateLimiter } from '@stamhoofd/models';
 import { Image as ImageStruct, ResolutionRequest } from '@stamhoofd/structures';

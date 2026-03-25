@@ -1,5 +1,5 @@
-import { ManyToOneRelation } from '@simonbackx/simple-database';
-import { BalanceItemPayment, Organization } from '@stamhoofd/models';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import type { BalanceItemPayment, Organization } from '@stamhoofd/models';
 import { BalanceItemService } from './BalanceItemService.js';
 
 type Loaded<T> = (T) extends ManyToOneRelation<infer Key, infer Model> ? Record<Key, Model> : never;

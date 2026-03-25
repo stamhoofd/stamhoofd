@@ -1,8 +1,10 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
-import { EmailTemplateType, Recipient, Replacement, UserPermissions, User as UserStruct, UserWithMembers } from '@stamhoofd/structures';
+import type { UserWithMembers } from '@stamhoofd/structures';
+import { EmailTemplateType, Recipient, Replacement, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';

@@ -1,4 +1,5 @@
-import { concurrently, type ConcurrentlyCommandInput } from 'concurrently';
+import { concurrently  } from 'concurrently';
+import type {ConcurrentlyCommandInput} from 'concurrently';
 import { buildConfig } from './build.js';
 import chalk from 'chalk';
 

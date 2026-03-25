@@ -1,7 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
 import os from 'os';
 import { read1PasswordCli } from '../helpers/1password.js';
-import { Service } from '../Service.js';
+import type { Service } from '../Service.js';
 
 export async function build(service: Service) {
     const config = {

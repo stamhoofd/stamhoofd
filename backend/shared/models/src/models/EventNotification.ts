@@ -1,7 +1,8 @@
 import { column, ManyToManyRelation } from '@simonbackx/simple-database';
 import { MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { EventNotificationStatus, RecordAnswer, RecordAnswerDecoder } from '@stamhoofd/structures';
+import type { RecordAnswer} from '@stamhoofd/structures';
+import { EventNotificationStatus, RecordAnswerDecoder } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Event } from './Event.js';
 

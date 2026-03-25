@@ -1,11 +1,10 @@
-import { PlainObject } from '@simonbackx/simple-encoding';
-import { SortDefinition, SortList } from '@stamhoofd/structures';
-
+import type { PlainObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { SQLExpression } from '../SQLExpression.js';
-import { SQLJoin } from '../SQLJoin.js';
-import { SQLOrderBy, SQLOrderByDirection } from '../SQLOrderBy.js';
-import { SQLSelect } from '../SQLSelect.js';
+import type { SortDefinition, SortList } from '@stamhoofd/structures';
+import type { SQLExpression } from '../SQLExpression.js';
+import type { SQLJoin } from '../SQLJoin.js';
+import type { SQLOrderBy, SQLOrderByDirection } from '../SQLOrderBy.js';
+import type { SQLSelect } from '../SQLSelect.js';
 
 export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Date> = SortDefinition<T, B> & {
     toSQL(direction: SQLOrderByDirection): SQLOrderBy;

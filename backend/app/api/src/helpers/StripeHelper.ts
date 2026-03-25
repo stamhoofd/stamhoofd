@@ -1,6 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { I18n } from '@stamhoofd/backend-i18n';
-import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
+import type { I18n } from '@stamhoofd/backend-i18n';
+import type { BalanceItem, BalanceItemPayment, Organization, StripeAccount} from '@stamhoofd/models';
+import { Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
 import { calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';

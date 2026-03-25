@@ -1,12 +1,14 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { DNSRecord, DNSRecordType, Organization as OrganizationStruct, OrganizationDomains } from '@stamhoofd/structures';
+import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
+import { DNSRecord, DNSRecordType, OrganizationDomains } from '@stamhoofd/structures';
 import NodeRSA from 'node-rsa';
 
+import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { Formatter } from '@stamhoofd/utility';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -52,7 +54,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
 
             // Validate domains
 
-            if (request.body.registerDomain !== null && !request.body.registerDomain.match(/^([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+            if (request.body.registerDomain !== null && !request.body.registerDomain.match(/^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
                 throw new SimpleError({
                     code: 'invalid_domain',
                     message: 'registerDomain is invalid',
@@ -61,7 +63,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 });
             }
 
-            if (request.body.mailDomain !== null && !request.body.mailDomain.match(/^([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+            if (request.body.mailDomain !== null && !request.body.mailDomain.match(/^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
                 throw new SimpleError({
                     code: 'invalid_domain',
                     message: 'mailDomain is invalid',

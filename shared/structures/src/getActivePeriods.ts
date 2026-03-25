@@ -1,6 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
-import { type Organization } from './Organization.js';
-import { type Platform } from './Platform.js';
+import type {Organization} from './Organization.js';
+import type {Platform} from './Platform.js';
 
 export function getActivePeriodIds(periodId: string | null, organization: Organization | null, platform: Platform | null = null): Set<string> {
     const periods = new Set<string>();

@@ -1,7 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { MemberDetails } from '@stamhoofd/structures';
-import { type Member } from './index.js';
+import type {Member} from './index.js';
 
 export class MergedMember extends QueryableModel {
     static override table = 'merged_members';

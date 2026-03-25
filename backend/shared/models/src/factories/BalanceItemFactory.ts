@@ -1,6 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType } from '@stamhoofd/structures';
+import type { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
+import { BalanceItemStatus } from '@stamhoofd/structures';
 import { BalanceItem } from '../models/index.js';
 
 class Options {

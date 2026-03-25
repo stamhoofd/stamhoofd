@@ -1,11 +1,13 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
 import { QueueHandler } from '@stamhoofd/queues';
 import formidable from 'formidable';
 import { firstValues } from 'formidable/src/helpers/firstValues.js';
 import { promises as fs } from 'fs';
-import puppeteer, { Browser } from 'puppeteer';
+import type { Browser } from 'puppeteer';
+import puppeteer from 'puppeteer';
 
 import { FileCache } from '../helpers/FileCache.js';
 

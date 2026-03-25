@@ -166,9 +166,9 @@ const { inputRef: yearText, onModelChange: onModelChangeYear } = dateInputFactor
  * Convert the text in the inputs to a DateTime object.
  */
 function getTextInputDate() {
-    let day = parseInt(dayText.value.replace(/[^0-9]/g, ''));
-    let month = parseInt(monthText.value.replace(/[^0-9]/g, ''));
-    let year = parseInt(yearText.value.replace(/[^0-9]/g, ''));
+    let day = parseInt(dayText.value.replace(/\D/g, ''));
+    let month = parseInt(monthText.value.replace(/\D/g, ''));
+    let year = parseInt(yearText.value.replace(/\D/g, ''));
 
     if (day < dayConfig.min) {
         day = dayConfig.min;

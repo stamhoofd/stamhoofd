@@ -1,4 +1,5 @@
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression.js';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery} from './SQLExpression.js';
+import { joinSQLQuery } from './SQLExpression.js';
 import { SQLColumnExpression } from './SQLExpressions.js';
 
 type Constructor<T = object> = new (...args: any[]) => T;

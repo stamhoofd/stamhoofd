@@ -79,14 +79,14 @@ Handlebars.registerHelper('filterString', (a, options) => {
         return '';
     }
     if (options.hash.type === 'phone') {
-        return Formatter.removeAccents(a).replace(/[^A-Za-z0-9+]+/g, '');
+        return Formatter.removeAccents(a).replace(/[^A-Z0-9+]+/gi, '');
     }
     if (options.hash.type === 'companyNumber') {
         // BE prefix not allowed
-        return Formatter.removeAccents(a).replace(/[^0-9]+/g, '');
+        return Formatter.removeAccents(a).replace(/\D+/g, '');
     }
     // Default: alphanumeric
-    return Formatter.removeAccents(a).replace(/[^A-Za-z0-9]+/g, '');
+    return Formatter.removeAccents(a).replace(/[^A-Z0-9]+/gi, '');
 });
 Handlebars.registerHelper('year', (a) => {
     if (!(a instanceof Date)) {

@@ -1,7 +1,8 @@
 import { Factory } from '@simonbackx/simple-database';
 
 import { DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateDefinition, DocumentTemplateGroup, NamedObject, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
-import { DocumentTemplate, Group } from '../models/index.js';
+import type { Group } from '../models/index.js';
+import { DocumentTemplate } from '../models/index.js';
 import { OrganizationFactory } from './OrganizationFactory.js';
 
 class Options {

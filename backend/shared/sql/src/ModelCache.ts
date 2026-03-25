@@ -1,5 +1,5 @@
 import { AutoEncoder } from '@simonbackx/simple-encoding';
-import { QueryableModel } from './QueryableModel.js';
+import type { QueryableModel } from './QueryableModel.js';
 import { LRUCache } from 'lru-cache';
 
 /**

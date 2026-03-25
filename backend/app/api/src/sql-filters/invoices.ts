@@ -1,4 +1,5 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { invoicedBalanceItemCompilers } from './invoiced-balance-items.js';
 
 /**

@@ -11,14 +11,15 @@ import {
 } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import type {
+    MemberResponsibility,
+    Platform as PlatformStruct,
+    SetupSteps} from '@stamhoofd/structures';
 import {
     AuditLogSource,
     GroupType,
-    MemberResponsibility,
-    Platform as PlatformStruct,
     RecordCategory,
-    SetupStepType,
-    SetupSteps,
+    SetupStepType
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService.js';

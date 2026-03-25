@@ -1,7 +1,8 @@
 import { Factory } from '@simonbackx/simple-database';
-import { MemberResponsibility } from '@stamhoofd/structures';
+import type { MemberResponsibility } from '@stamhoofd/structures';
 
-import { Member, MemberResponsibilityRecord } from '../models/index.js';
+import type { Member} from '../models/index.js';
+import { MemberResponsibilityRecord } from '../models/index.js';
 import { PlatformResponsibilityFactory } from './PlatformResponsibilityFactory.js';
 
 class Options {

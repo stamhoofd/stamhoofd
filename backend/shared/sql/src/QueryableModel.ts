@@ -1,11 +1,12 @@
-import { Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { Model } from '@simonbackx/simple-database';
 import { SQLSelect } from './SQLSelect.js';
 import { SQL } from './SQL.js';
-import { SQLDelete } from './SQLDelete.js';
-import { SQLUpdate } from './SQLUpdate.js';
-import { SQLInsert } from './SQLInsert.js';
-import { SQLExpression } from './SQLExpression.js';
-import { ModelCache } from './ModelCache.js';
+import type { SQLDelete } from './SQLDelete.js';
+import type { SQLUpdate } from './SQLUpdate.js';
+import type { SQLInsert } from './SQLInsert.js';
+import type { SQLExpression } from './SQLExpression.js';
+import type { ModelCache } from './ModelCache.js';
 
 export class QueryableModel extends Model {
     rawSelectedRow: SQLResultNamespacedRow | null = null;

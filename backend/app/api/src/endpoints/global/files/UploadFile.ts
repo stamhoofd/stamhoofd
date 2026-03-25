@@ -1,5 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { File } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -7,7 +8,8 @@ import formidable from 'formidable';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
 import { Context } from '../../../helpers/Context.js';
 import { limiter } from './UploadImage.js';
 import { Image } from '@stamhoofd/models';

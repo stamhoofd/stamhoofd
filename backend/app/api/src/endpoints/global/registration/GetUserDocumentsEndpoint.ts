@@ -1,6 +1,8 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Document, DocumentTemplate, Member } from '@stamhoofd/models';
-import { Document as DocumentStruct, DocumentStatus } from '@stamhoofd/structures';
+import type { Document as DocumentStruct} from '@stamhoofd/structures';
+import { DocumentStatus } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { Context } from '../../../helpers/Context.js';

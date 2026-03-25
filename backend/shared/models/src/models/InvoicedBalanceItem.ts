@@ -1,10 +1,11 @@
-import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { type Invoice } from './Invoice.js';
-import { type BalanceItem } from './BalanceItem.js';
-import { VATExcemptReason } from '@stamhoofd/structures';
+import type {Invoice} from './Invoice.js';
+import type {BalanceItem} from './BalanceItem.js';
+import type { VATExcemptReason } from '@stamhoofd/structures';
 
 /**
  * Keeps track of all the created invoices of a balance item, which contains how many balance was invoiced (including VAT)

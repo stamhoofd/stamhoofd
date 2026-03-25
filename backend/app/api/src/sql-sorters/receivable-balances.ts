@@ -1,5 +1,6 @@
-import { CachedBalance } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { CachedBalance } from '@stamhoofd/models';
+import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
 export const receivableBalanceSorters: SQLSortDefinitions<CachedBalance> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!

@@ -100,17 +100,17 @@ function getMissingKeys(translations: Record<string, string>): {
 
     const regexes = [
         // Regex to match $t('value')
-        /\$t\([']([^']+)['](,.+)?\)/g,
+        /\$t\('([^']+)'(,.+)?\)/g,
         // Regex to match $t("value")
-        /\$t\(["]([^"]+)["](,.+)?\)/g,
+        /\$t\("([^"]+)"(,.+)?\)/g,
         // Regex to match $t(`value`)
-        /\$t\([`]([^`]+)[`](,.+)?\)/g,
+        /\$t\(`([^`]+)`(,.+)?\)/g,
         // Regex to match $t('value',
-        /\$t\([']([^']+)['](,.+)?,/g,
+        /\$t\('([^']+)'(,.+)?,/g,
         // Regex to match $t("value")
-        /\$t\(["]([^"]+)["](,.+)?,/g,
+        /\$t\("([^"]+)"(,.+)?,/g,
         // Regex to match $t(`value`)
-        /\$t\([`]([^`]+)[`](,.+)?,/g,
+        /\$t\(`([^`]+)`(,.+)?,/g,
     ];
 
     const missingKeys = new Set<string>();

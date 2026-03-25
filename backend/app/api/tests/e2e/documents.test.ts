@@ -1,5 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Document, DocumentTemplateFactory, Group, GroupFactory, Member, MemberFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Group, Member, Organization, RegistrationPeriod} from '@stamhoofd/models';
+import { Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { IDRegisterCart, IDRegisterCheckout, IDRegisterItem, MemberDetails, MemberWithRegistrationsBlob, PaymentMethod } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';

@@ -1,4 +1,4 @@
-import { type ConcurrentlyCommandInput } from 'concurrently';
+import type {ConcurrentlyCommandInput} from 'concurrently';
 
 export function init(): ConcurrentlyCommandInput[] {
     return [

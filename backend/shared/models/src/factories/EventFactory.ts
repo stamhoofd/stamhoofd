@@ -2,9 +2,9 @@ import { Factory } from '@simonbackx/simple-database';
 import { EventMeta } from '@stamhoofd/structures';
 
 import { Event } from '../models/Event.js';
-import { Organization } from '../models/Organization.js';
+import type { Organization } from '../models/Organization.js';
 import { PlatformEventTypeFactory } from './PlatformEventTypeFactory.js';
-import { Group } from '../models/Group.js';
+import type { Group } from '../models/Group.js';
 
 class Options {
     organization?: Organization;

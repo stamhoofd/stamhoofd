@@ -1,7 +1,8 @@
 import { Factory } from '@simonbackx/simple-database';
-import { NewUser, Permissions, UserPermissions } from '@stamhoofd/structures';
+import type { Permissions} from '@stamhoofd/structures';
+import { NewUser, UserPermissions } from '@stamhoofd/structures';
 
-import { Organization } from '../models/Organization.js';
+import type { Organization } from '../models/Organization.js';
 import { User } from '../models/User.js';
 import { OrganizationFactory } from './OrganizationFactory.js';
 

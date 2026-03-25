@@ -1,5 +1,7 @@
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression.js';
-import { SQLJSONFalse, SQLJSONNull, SQLJSONTrue, SQLSafeValue, SQLScalar, SQLScalarValue } from './SQLExpressions.js';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery} from './SQLExpression.js';
+import { joinSQLQuery } from './SQLExpression.js';
+import type { SQLScalarValue } from './SQLExpressions.js';
+import { SQLJSONFalse, SQLJSONNull, SQLJSONTrue, SQLSafeValue, SQLScalar } from './SQLExpressions.js';
 import { SQLWhere } from './SQLWhere.js';
 
 export function scalarToSQLJSONExpression(s: SQLScalarValue | null): SQLExpression {

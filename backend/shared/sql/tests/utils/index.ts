@@ -1,11 +1,13 @@
-import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { PlainObject } from '@simonbackx/simple-encoding';
-import { StamhoofdFilter } from '@stamhoofd/structures';
+import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { Database } from '@simonbackx/simple-database';
+import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { compileToSQLFilter, SQLFilterDefinitions } from '../../src/filters/SQLFilter.js';
+import type { SQLFilterDefinitions } from '../../src/filters/SQLFilter.js';
+import { compileToSQLFilter } from '../../src/filters/SQLFilter.js';
 import { SQL } from '../../src/SQL.js';
-import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression.js';
-import { SQLScalarValue } from '../../src/SQLExpressions.js';
+import type { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression.js';
+import type { SQLScalarValue } from '../../src/SQLExpressions.js';
 import { SQLWhereAnd } from '../../src/SQLWhere.js';
 
 export async function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; error: string }) {

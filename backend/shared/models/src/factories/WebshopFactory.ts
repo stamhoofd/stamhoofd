@@ -1,6 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Product, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { Product, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Webshop } from '../models/index.js';

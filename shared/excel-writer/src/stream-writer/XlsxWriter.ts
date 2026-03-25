@@ -1,5 +1,5 @@
-import { CellValue, XlsxWriterAdapter } from '../interfaces.js';
-import { ZipWriterAdapter } from './interfaces.js';
+import type { CellValue, XlsxWriterAdapter } from '../interfaces.js';
+import type { ZipWriterAdapter } from './interfaces.js';
 import { XlsxAppPropsWriter } from './XlsxAppPropsWriter.js';
 import { XlsxContentTypesWriter } from './XlsxContentTypesWriter.js';
 import { XlsxCorePropsWriter } from './XlsxCorePropsWriter.js';

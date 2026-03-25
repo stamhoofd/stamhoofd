@@ -5,7 +5,7 @@ import { PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem.js';
-import { Member } from './Member.js';
+import type { Member } from './Member.js';
 import { Organization } from './Organization.js';
 import { Platform } from './Platform.js';
 import { Registration } from './Registration.js';

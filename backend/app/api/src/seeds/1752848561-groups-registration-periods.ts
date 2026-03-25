@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { CycleInformation, GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import type { CycleInformation} from '@stamhoofd/structures';
+import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {

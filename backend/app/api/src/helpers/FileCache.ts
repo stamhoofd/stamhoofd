@@ -3,8 +3,8 @@ import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';
 import fs from 'node:fs';
-import { Writable } from 'node:stream';
-import { Readable } from 'stream';
+import type { Writable } from 'node:stream';
+import type { Readable } from 'stream';
 
 const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
 const baseEncoder = basex(ALPHABET);

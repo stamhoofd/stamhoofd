@@ -1,13 +1,14 @@
 import { column, Database } from '@simonbackx/simple-database';
-import { EmailInterfaceRecipient } from '@stamhoofd/email';
+import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
-import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
+import type { LoginProviderType, NewUser} from '@stamhoofd/structures';
+import { Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { type Organization } from './Organization.js';
+import type {Organization} from './Organization.js';
 
 export class User extends QueryableModel {
     static table = 'users';

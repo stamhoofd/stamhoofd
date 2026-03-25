@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { PropertyFilter } from '../filters/PropertyFilter.js';
-import { type Group } from '../Group.js';
+import type {Group} from '../Group.js';
 import { GroupType } from '../GroupType.js';
 import type { Organization } from '../Organization.js';
 import type { Platform } from '../Platform.js';

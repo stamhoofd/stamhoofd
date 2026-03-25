@@ -1,8 +1,11 @@
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Organization } from '@stamhoofd/models';
-import { scalarToSQLExpression, SQL, SQLMatch, SQLWhere, SQLWhereLike } from '@stamhoofd/sql';
-import { Organization as OrganizationStruct } from '@stamhoofd/structures';
+import type { SQLWhere} from '@stamhoofd/sql';
+import { scalarToSQLExpression, SQL, SQLMatch, SQLWhereLike } from '@stamhoofd/sql';
+import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 
 type Params = Record<string, never>;
@@ -33,7 +36,7 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Escape query
-        const query = request.query.query.replace(/([-+><()~*"@\s]+)/g, ' ').replace(/[^\w\d]+$/, '').trim();
+        const query = request.query.query.replace(/[-+><()~*"@\s]+/g, ' ').replace(/\W+$/, '').trim();
         if (query.length === 0) {
             // Do not try searching...
             return new Response([]);

@@ -1,5 +1,6 @@
 import { SimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { DNSRecord, DNSRecordStatus, DNSRecordType } from '@stamhoofd/structures';
+import type { DNSRecord} from '@stamhoofd/structures';
+import { DNSRecordStatus, DNSRecordType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import { Resolver } from 'dns/promises';
 

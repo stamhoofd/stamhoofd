@@ -1,8 +1,9 @@
 import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
-import { DiscountCode } from '@stamhoofd/structures';
+import type { DiscountCode } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
 

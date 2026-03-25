@@ -1,5 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { EmailTemplate, GroupFactory, Organization, OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod} from '@stamhoofd/models';
+import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';

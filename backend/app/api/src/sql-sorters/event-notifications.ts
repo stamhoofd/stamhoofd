@@ -1,5 +1,6 @@
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { organizationJoin } from '../sql-filters/event-notifications.js';
 

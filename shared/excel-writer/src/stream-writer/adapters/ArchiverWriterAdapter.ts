@@ -1,4 +1,4 @@
-import { ZipWriterAdapter } from '../interfaces.js';
+import type { ZipWriterAdapter } from '../interfaces.js';
 import { Writable } from 'node:stream';
 import os from 'os';
 import { v4 as uuidv4 } from 'uuid';

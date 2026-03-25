@@ -1,7 +1,10 @@
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { MollieToken } from '@stamhoofd/models';
-import { Organization as OrganizationStruct, PermissionLevel } from '@stamhoofd/structures';
+import type { Organization as OrganizationStruct} from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { checkMollieSettlementsFor } from '../../../../helpers/CheckSettlements.js';

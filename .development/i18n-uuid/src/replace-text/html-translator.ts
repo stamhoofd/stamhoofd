@@ -240,7 +240,7 @@ export class HtmlTranslator {
      * @param key text record key (#text)
      */
     private async processText(parent: Record<string, any>, record: Record<string, string>, key: string) {
-        const betweenBracketsRegex = /{{(?:.|\r|\n)*}}/g;
+        const betweenBracketsRegex = /\{\{(?:.|[\r\n])*\}\}/g;
         const text: string | null = this.setIsChangedAndRemoveMarkers(record[key]);
 
         if (text !== null) {
@@ -544,7 +544,7 @@ REPLACEMENT:`));
     }
 
     private async replaceTextInTypescript(parent: Record<string, any>, record: Record<string, string>, key: string, value: string): Promise<string> {
-        const parts = splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
+        const parts = splitInParts(value, /"[^"]*"|'[^']*'/g);
         const allParts: { value: string; shouldTranslate: boolean }[] = [];
 
         for (let i = 0; i < parts.length; i++) {

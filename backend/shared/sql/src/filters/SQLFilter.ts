@@ -1,12 +1,12 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { FilterCompiler, FilterDefinitions, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
-import { compileFilter, filterDefinitionsToCompiler, type StamhoofdCompareValue } from '@stamhoofd/structures';
+import type { FilterCompiler, FilterDefinitions, RequiredFilterCompiler, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
+import { compileFilter, filterDefinitionsToCompiler } from '@stamhoofd/structures';
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
 import { SQLSafeValue } from '../SQLExpressions.js';
 import type { SQLJoin } from '../SQLJoin.js';
 import { SQLJsonValue } from '../SQLJsonExpressions.js';
 import type { SQLSelect } from '../SQLSelect.js';
-import type { SQLWhere} from '../SQLWhere.js';
+import type { SQLWhere } from '../SQLWhere.js';
 import { SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere.js';
 import { $containsSQLFilterCompiler } from './compilers/contains.js';
 import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers/index.js';

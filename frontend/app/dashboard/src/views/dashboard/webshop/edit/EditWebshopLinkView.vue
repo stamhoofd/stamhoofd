@@ -365,7 +365,7 @@ set: (customUrl: string) => {
         patch.domainUri = '';
     }
     else {
-        patch.domain = split[0].toLowerCase().replace(/[^a-zA-Z0-9-.]/g, '');
+        patch.domain = split[0].toLowerCase().replace(/[^a-z0-9-.]/gi, '');
 
         if (!split[1] || split[1].length === 0) {
             patch.domainUri = '';

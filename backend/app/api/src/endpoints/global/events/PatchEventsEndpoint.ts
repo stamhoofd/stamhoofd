@@ -1,5 +1,7 @@
-import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Event, Group, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, PermissionLevel } from '@stamhoofd/structures';
 

@@ -1,6 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupCategory, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import type { GroupCategory} from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 const UNNASSIGNED_KEY = 'unassigned';

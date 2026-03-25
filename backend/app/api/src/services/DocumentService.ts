@@ -1,5 +1,5 @@
 import { Model } from '@simonbackx/simple-database';
-import { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@simonbackx/simple-encoding';
 import { Document, Group } from '@stamhoofd/models';
 
 function getGroupFieldsAffectingDocuments(group: Group): PlainObject {

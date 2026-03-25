@@ -37,13 +37,12 @@ export class StreetNumberColumnMatcher extends SharedMemberDetailsMatcher implem
             return false;
         }
         for (const example of examples) {
-            if (!example.match(/^\s*([^0-9]+?)[\s,]*([0-9].*?)\s*$/g)) {
+            if (!example.match(/\D\d/g)) {
                 return false;
             }
         }
         return true;
     }
-
     setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
         if (!cell) {
             return;

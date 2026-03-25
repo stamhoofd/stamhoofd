@@ -62,7 +62,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         let hadMonth = false;
 
         for (const part of parts) {
-            if (part.match(/^\s*[0-9]+\s*$/)) {
+            if (part.match(/^\s*\d+\s*$/)) {
                 const num = parseInt(part.trim());
                 numbersClean.push(num);
             }

@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { QueueHandler } from '@stamhoofd/queues';
 import { WebshopNumberingType } from '@stamhoofd/structures';
 
-import { type Webshop } from '../models/Webshop.js';
+import type {Webshop} from '../models/Webshop.js';
 
 export class WebshopCounter {
     static numberCache: Map<string, number> = new Map();

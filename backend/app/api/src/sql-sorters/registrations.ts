@@ -1,6 +1,7 @@
 import { Group, Member, Organization } from '@stamhoofd/models';
-import { SQL, SQLIfNull, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
-import { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
+import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
+import type { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';

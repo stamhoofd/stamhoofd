@@ -6,9 +6,6 @@ import type { ImportMemberResult } from '../ImportMemberResult';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class CityColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {
-    private reg = /^\s*(([0-9]+?)(\s?[A-Z]{2})?)[\s,]+(([A-Za-z]|\s)+)\s*$/;
-    private regReverse = /^\s*(([0-9]+?)(\s?[A-Z]{2})?)[\s,]+(([A-Za-z]|\s)+)\s*$/;
-
     getName(): string {
         return 'Gemeente';
     }
@@ -42,8 +39,8 @@ export class CityColumnMatcher extends SharedMemberDetailsMatcher implements Col
             return false;
         }
         for (const example of examples) {
-            if (!this.reg.exec(example) && !this.regReverse.exec(example)) {
-                return false;
+            if (/\d/.exec(example)) {
+                return true;
             }
         }
         return true;

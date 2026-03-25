@@ -1,4 +1,5 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from '../classes/Geolocator.js';
 

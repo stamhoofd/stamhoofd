@@ -1,6 +1,8 @@
-import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
+import type { XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
+import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import { ExcelExportType, Gender, GroupType, LimitedFilteredRequest, MembershipStatus, PlatformFamily, PlatformMember, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, PlatformMember} from '@stamhoofd/structures';
+import { ExcelExportType, Gender, GroupType, MembershipStatus, PlatformFamily, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';

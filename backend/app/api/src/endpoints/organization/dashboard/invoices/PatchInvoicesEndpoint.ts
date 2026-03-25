@@ -1,10 +1,12 @@
-import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { Invoice } from '@stamhoofd/models';
+import type { Invoice } from '@stamhoofd/models';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ViesHelper } from '../../../../helpers/ViesHelper.js';
 import { InvoiceService } from '../../../../services/InvoiceService.js';

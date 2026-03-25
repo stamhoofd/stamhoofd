@@ -1,4 +1,5 @@
-import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { eventFilterCompilers } from './events.js';
 import { organizationFilterCompilers } from './organizations.js';
 

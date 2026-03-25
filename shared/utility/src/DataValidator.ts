@@ -10,7 +10,7 @@ export class DataValidator {
             'gmail.nl',
             'icloud.be',
         ];
-        const regex = /^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+        const regex = /^[\w.!#$%&*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
 
         if (!regex.test(str)) {
             return false;
@@ -91,7 +91,7 @@ export class DataValidator {
     }
 
     static verifyBelgianNationalNumber(text: string) {
-        const trimmed = text.replace(/[^0-9]+/g, ''); // keep A-Z for validation
+        const trimmed = text.replace(/\D+/g, ''); // keep A-Z for validation
         if (trimmed.length !== 11) {
             return false;
         }
@@ -127,7 +127,7 @@ export class DataValidator {
     }
 
     static cleanBelgianNationalNumber(text: string) {
-        return text.replace(/[^0-9]+/g, '');
+        return text.replace(/\D+/g, '');
     }
 
     static cleanPhone(text: string) {
@@ -135,7 +135,7 @@ export class DataValidator {
     }
 
     static cleanUitpasNumber(text: string) {
-        return text.replace(/[^0-9]+/g, '');
+        return text.replace(/\D+/g, '');
     }
 
     static getUitpasNumberInputFormatter() {

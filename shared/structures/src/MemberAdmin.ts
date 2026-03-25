@@ -1,5 +1,5 @@
-import { type MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
-import { type Organization } from './Organization.js';
+import type {MemberResponsibilityRecordBase} from './members/MemberResponsibilityRecord.js';
+import type {Organization} from './Organization.js';
 import { Platform } from './Platform.js';
 import type { User } from './User.js';
 

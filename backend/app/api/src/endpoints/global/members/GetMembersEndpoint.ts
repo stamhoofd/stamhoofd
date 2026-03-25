@@ -204,7 +204,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         // Is lidnummer?
-        if (!searchFilter && (search.match(/^[0-9]{4}-[0-9]{6}-[0-9]{1,2}$/) || search.match(/^[0-9]{9,10}$/))) {
+        if (!searchFilter && (search.match(/^\d{4}-\d{6}-\d{1,2}$/) || search.match(/^\d{9,10}$/))) {
             searchFilter = {
                 memberNumber: {
                     $eq: search,

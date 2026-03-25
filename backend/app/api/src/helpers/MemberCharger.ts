@@ -1,5 +1,6 @@
 import { BalanceItem } from '@stamhoofd/models';
-import { BalanceItemType, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import type { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import { BalanceItemType } from '@stamhoofd/structures';
 
 export class MemberCharger {
     static async chargeMany({ chargingOrganizationId, membersToCharge, price, amount, description, dueAt, createdAt }: { chargingOrganizationId: string; membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {

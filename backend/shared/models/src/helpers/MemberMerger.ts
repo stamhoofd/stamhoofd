@@ -1,13 +1,14 @@
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import {
+import type {
     Address,
     BooleanStatus,
-    Gender,
     MemberDetails,
     Parent,
-    ParentType,
     RecordAnswer,
-    UitpasNumberDetails,
+    UitpasNumberDetails} from '@stamhoofd/structures';
+import {
+    Gender,
+    ParentType
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import {

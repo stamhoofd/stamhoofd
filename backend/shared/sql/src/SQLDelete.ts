@@ -1,6 +1,7 @@
 import { Database } from '@simonbackx/simple-database';
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
-import { SQLJoin } from './SQLJoin.js';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery} from './SQLExpression.js';
+import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
+import type { SQLJoin } from './SQLJoin.js';
 import { SQLLogger } from './SQLLogger.js';
 import { Whereable } from './SQLWhere.js';
 

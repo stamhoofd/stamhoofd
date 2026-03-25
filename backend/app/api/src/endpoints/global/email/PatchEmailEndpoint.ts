@@ -1,8 +1,11 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
-import { EmailPreview, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
+import type { EmailPreview} from '@stamhoofd/structures';
+import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
 
-import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context.js';
 

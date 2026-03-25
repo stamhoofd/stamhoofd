@@ -1,7 +1,7 @@
 import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from '../Group.js';
-import { type PlatformMember } from './PlatformMember.js';
+import type {PlatformMember} from './PlatformMember.js';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
 export class MemberResponsibilityRecordBase extends AutoEncoder {

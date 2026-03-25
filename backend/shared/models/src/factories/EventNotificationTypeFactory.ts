@@ -1,5 +1,6 @@
 import { Factory } from '@simonbackx/simple-database';
-import { EventNotificationType, RecordCategory } from '@stamhoofd/structures';
+import type { RecordCategory } from '@stamhoofd/structures';
+import { EventNotificationType } from '@stamhoofd/structures';
 
 import { Platform } from '../models/Platform.js';
 

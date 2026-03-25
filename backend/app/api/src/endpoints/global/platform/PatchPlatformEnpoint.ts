@@ -1,7 +1,10 @@
-import { AutoEncoderPatchType, Decoder, isPatchableArray, patchObject } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { isPatchableArray, patchObject } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from '@stamhoofd/structures';
+import type { MemberResponsibility, PlatformConfig, PlatformPremiseType} from '@stamhoofd/structures';
+import { Platform as PlatformStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';

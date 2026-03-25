@@ -1,7 +1,9 @@
-import { Model, ModelEvent } from '@simonbackx/simple-database';
+import type { ModelEvent } from '@simonbackx/simple-database';
+import { Model } from '@simonbackx/simple-database';
 import { AuditLog } from '@stamhoofd/models';
 import { ObjectDiffer } from '@stamhoofd/object-differ';
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import type { AuditLogType } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogSource } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context.js';
 import { AuditLogService } from '../services/AuditLogService.js';
 

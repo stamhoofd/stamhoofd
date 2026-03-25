@@ -81,7 +81,7 @@ function validate(): boolean {
         return true;
     }
 
-    const regex = /^([0-9]{1,2}:)?[0-9]{1,2}$/;
+    const regex = /^(?:\d{1,2}:)?\d{1,2}$/;
 
     if (!regex.test(timeValue)) {
         errors.errorBox = new ErrorBox(new SimpleError({

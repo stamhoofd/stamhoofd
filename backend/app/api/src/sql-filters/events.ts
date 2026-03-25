@@ -1,4 +1,5 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
 export const eventFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,

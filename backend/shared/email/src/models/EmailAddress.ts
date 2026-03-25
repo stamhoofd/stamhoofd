@@ -3,7 +3,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailInterfaceRecipient } from '../classes/Email.js';
+import type { EmailInterfaceRecipient } from '../classes/Email.js';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {

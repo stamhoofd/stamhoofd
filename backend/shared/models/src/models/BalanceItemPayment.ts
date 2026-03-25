@@ -1,8 +1,9 @@
-import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import type { ManyToOneRelation } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
-import { type BalanceItem } from './BalanceItem.js';
-import { type Payment } from './Payment.js';
+import type {BalanceItem} from './BalanceItem.js';
+import type {Payment} from './Payment.js';
 
 import { QueryableModel } from '@stamhoofd/sql';
 

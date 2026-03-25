@@ -3,7 +3,7 @@ import { PaymentStatus, PaymentGeneral } from '@stamhoofd/structures';
 import { PatchPaymentsEndpoint } from '../../src/endpoints/organization/dashboard/payments/PatchPaymentsEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
 import { Request } from '@simonbackx/simple-endpoints';
-import { Organization } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { initAdmin } from '../init/initAdmin.js';
 
 export async function changePaymentStatus({ payment, organization, status }: { payment: { id: string }; organization: Organization; status: PaymentStatus }) {

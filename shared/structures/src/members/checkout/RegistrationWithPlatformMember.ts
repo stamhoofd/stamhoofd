@@ -1,5 +1,5 @@
-import { type PlatformMember } from '../PlatformMember.js';
-import { type Registration } from '../Registration.js';
+import type {PlatformMember} from '../PlatformMember.js';
+import type {Registration} from '../Registration.js';
 
 export class RegistrationWithPlatformMember {
     registration: Registration;

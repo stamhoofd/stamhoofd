@@ -1,4 +1,3 @@
-import { SimpleError } from '@simonbackx/simple-errors';
 import { Address } from '@stamhoofd/structures';
 import type XLSX from 'xlsx';
 import type { ColumnMatcher } from '../ColumnMatcher';
@@ -40,7 +39,7 @@ export class StreetWithNumberColumnMatcher extends SharedMemberDetailsMatcher im
             return false;
         }
         for (const example of examples) {
-            if (!example.match(/^\s*([^0-9]+?)[\s,]*([0-9].*?)\s*$/g)) {
+            if (!example.match(/\D\d/g)) {
                 return false;
             }
         }

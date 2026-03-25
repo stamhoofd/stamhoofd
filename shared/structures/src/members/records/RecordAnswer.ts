@@ -4,7 +4,7 @@ import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { type CellValue } from '@stamhoofd/excel-writer';
+import type {CellValue} from '@stamhoofd/excel-writer';
 import { Address } from '../../addresses/Address.js';
 import { CountryHelper } from '../../addresses/CountryDecoder.js';
 import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';

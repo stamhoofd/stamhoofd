@@ -1,10 +1,13 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, EmailPreview, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse, PermissionLevel, StamhoofdFilter } from '@stamhoofd/structures';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { CountFilteredRequest, EmailPreview, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
 
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Platform } from '@stamhoofd/models';
-import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context.js';
 import { emailFilterCompilers } from '../../../sql-filters/emails.js';
 import { emailSorters } from '../../../sql-sorters/emails.js';

@@ -1,10 +1,12 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import { Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
+import type { User } from '@stamhoofd/models';
+import { Organization, Platform, RateLimiter, Token } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
 
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { ApiUserRateLimits } from '@stamhoofd/structures';
 import { AdminPermissionChecker } from './AdminPermissionChecker.js';
 

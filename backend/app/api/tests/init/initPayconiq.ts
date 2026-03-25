@@ -1,4 +1,4 @@
-import { Organization } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { PaymentMethod } from '@stamhoofd/structures';
 import { PayconiqMocker } from '../helpers/PayconiqMocker.js';
 

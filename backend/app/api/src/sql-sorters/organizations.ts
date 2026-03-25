@@ -1,5 +1,6 @@
-import { Organization } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { Organization } from '@stamhoofd/models';
+import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
 export const organizationSorters: SQLSortDefinitions<Organization> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!

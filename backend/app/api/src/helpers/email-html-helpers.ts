@@ -1,5 +1,6 @@
-import { Order, Webshop } from '@stamhoofd/models';
-import { CheckoutMethodType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, RecordCategory, RecordCheckboxAnswer, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import type { Order, Webshop } from '@stamhoofd/models';
+import type { WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { CheckoutMethodType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, RecordCategory, RecordCheckboxAnswer } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string {

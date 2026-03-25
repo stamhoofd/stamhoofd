@@ -1,6 +1,8 @@
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { EventFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import type { Endpoint} from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
+import type { Organization, User} from '@stamhoofd/models';
+import { EventFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, Event, Group, GroupSettings, GroupType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';

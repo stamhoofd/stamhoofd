@@ -1,4 +1,5 @@
-import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLFilterDefinitions, SQLJsonExtract, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLValueType } from '@stamhoofd/sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
 export const groupFilterCompilers: SQLFilterDefinitions = {

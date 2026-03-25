@@ -1,7 +1,8 @@
 import { column } from '@simonbackx/simple-database';
 import { AnyDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
+import type { EmailTemplateType } from '@stamhoofd/structures';
+import { EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

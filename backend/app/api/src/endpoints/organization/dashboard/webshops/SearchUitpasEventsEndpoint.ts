@@ -1,8 +1,10 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Context } from '../../../../helpers/Context.js';
-import { UitpasEventsResponse } from '@stamhoofd/structures';
+import type { UitpasEventsResponse } from '@stamhoofd/structures';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;

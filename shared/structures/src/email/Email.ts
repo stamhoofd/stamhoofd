@@ -391,7 +391,7 @@ export function isSoftEmailRecipientError(error: SimpleErrors) {
 
 export function bounceErrorToHuman(message: string) {
     message = message.toLowerCase();
-    if (message.startsWith('smtp; 554 4.4.7') || message.includes('storage') || message.includes('quota') || message.match(/inbox.*full/)) {
+    if (message.startsWith('smtp; 554 4.4.7') || message.includes('storage') || message.includes('quota') || message.match(/inbox.*?full/)) {
         return $t('%1GI');
     }
 

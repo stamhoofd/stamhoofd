@@ -1,5 +1,7 @@
-import { AutoEncoderPatchType, Decoder, isPatch } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { isPatch } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
 import { ApiUser, PermissionLevel, UserMeta, UserPermissions } from '@stamhoofd/structures';

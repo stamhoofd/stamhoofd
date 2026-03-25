@@ -1,13 +1,14 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import { PayconiqAccount, PaymentStatus, Version } from '@stamhoofd/structures';
-import { IncomingMessage } from 'http';
+import type { PayconiqAccount} from '@stamhoofd/structures';
+import { PaymentStatus, Version } from '@stamhoofd/structures';
+import type { IncomingMessage } from 'http';
 import https from 'https';
 import { v4 as uuidv4 } from 'uuid';
 
-import { type Organization } from './Organization.js';
-import { type Payment } from './Payment.js';
+import type {Organization} from './Organization.js';
+import type {Payment} from './Payment.js';
 
 import { Formatter } from '@stamhoofd/utility';
 

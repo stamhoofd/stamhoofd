@@ -1,11 +1,12 @@
 import { column } from '@simonbackx/simple-database';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
+import type { PaymentMethod, PaymentStatus} from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentProvider, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { BalanceItem } from './BalanceItem.js';
-import { BalanceItemPayment } from './BalanceItemPayment.js';
+import type { BalanceItem } from './BalanceItem.js';
+import type { BalanceItemPayment } from './BalanceItemPayment.js';
 import { Organization } from './Organization.js';
 
 export class Payment extends QueryableModel {

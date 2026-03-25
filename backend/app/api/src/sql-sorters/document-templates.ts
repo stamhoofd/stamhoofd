@@ -1,5 +1,6 @@
-import { DocumentTemplate } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { DocumentTemplate } from '@stamhoofd/models';
+import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
 export const documentTemplateSorters: SQLSortDefinitions<DocumentTemplate> = {

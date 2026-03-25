@@ -1,4 +1,5 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,

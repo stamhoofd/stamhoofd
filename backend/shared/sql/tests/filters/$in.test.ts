@@ -1,6 +1,7 @@
 import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
 import { SQL } from '../../src/SQL.js';
-import { TableDefinition, test, testError, testMatch } from '../utils/index.js';
+import type { TableDefinition} from '../utils/index.js';
+import { test, testError, testMatch } from '../utils/index.js';
 
 describe('$in', () => {
     it('throws when not passing an array', async () => {

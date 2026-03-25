@@ -1,9 +1,12 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { DocumentTemplate } from '@stamhoofd/models';
-import { assertSort, CountFilteredRequest, DocumentTemplatePrivate, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory, StamhoofdFilter } from '@stamhoofd/structures';
+import type { CountFilteredRequest, DocumentTemplatePrivate, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory } from '@stamhoofd/structures';
 
-import { Decoder } from '@simonbackx/simple-encoding';
-import { applySQLSorter, compileToSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import { Context } from '../../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper.js';
 import { documentTemplateFilterCompilers } from '../../../../sql-filters/document-templates.js';

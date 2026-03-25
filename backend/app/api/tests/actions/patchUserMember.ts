@@ -1,7 +1,9 @@
-import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import { Organization, Token, User } from '@stamhoofd/models';
-import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
+import type { Organization, User } from '@stamhoofd/models';
+import { Token } from '@stamhoofd/models';
+import type { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registration/PatchUserMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
 

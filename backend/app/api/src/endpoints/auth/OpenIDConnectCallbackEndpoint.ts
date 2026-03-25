@@ -1,5 +1,7 @@
-import { AnyDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Endpoint } from '@simonbackx/simple-endpoints';
 
 import { Context } from '../../helpers/Context.js';
 import { SSOServiceWithSession } from '../../services/SSOService.js';

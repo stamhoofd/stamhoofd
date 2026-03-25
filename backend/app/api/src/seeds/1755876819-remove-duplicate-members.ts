@@ -1,4 +1,5 @@
-import { Migration, SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { Migration } from '@simonbackx/simple-database';
 import { Member, mergeTwoMembers } from '@stamhoofd/models';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
 import { PatchOrganizationMembersEndpoint } from '../endpoints/global/members/PatchOrganizationMembersEndpoint.js';

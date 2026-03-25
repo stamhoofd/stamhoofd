@@ -1,5 +1,6 @@
 import { Model } from '@simonbackx/simple-database';
-import { BalanceItem, CachedBalance, Document, MemberUser, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
+import type { Organization, Payment} from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Document, MemberUser, Order, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue.js';
 import { ThrottledQueue } from '../helpers/ThrottledQueue.js';

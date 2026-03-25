@@ -1,8 +1,9 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount } from '@stamhoofd/models';
 import { AuditLogType, PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 import { Context } from '../../../../helpers/Context.js';
 import { StripeHelper } from '../../../../helpers/StripeHelper.js';

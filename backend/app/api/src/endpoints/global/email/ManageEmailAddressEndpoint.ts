@@ -1,5 +1,7 @@
-import { AutoEncoder, BooleanDecoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { Context } from '../../../helpers/Context.js';

@@ -1,11 +1,13 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, TransferSettings, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type { CountFilteredRequest, PaymentGeneral, StamhoofdFilter} from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PaginatedResponse, TransferSettings, assertSort, getSortFilter } from '@stamhoofd/structures';
 
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { paymentFilterCompilers } from '../../../../sql-filters/payments.js';

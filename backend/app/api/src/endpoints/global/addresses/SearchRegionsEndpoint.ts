@@ -33,14 +33,14 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Escape query
-        const rawQuery = request.query.query.replace(/([-+><()~*"@\s]+)/g, ' ');
+        const rawQuery = request.query.query.replace(/[-+><()~*"@\s]+/g, ' ');
         const words = rawQuery.split(' ').filter(w => w.length > 0);
 
         // Escape words
         const cleanedWords: string[] = [];
         for (const [index, word] of words.entries()) {
             // If contains special char (non a-zA-Z) - escape with " character
-            if (/^[a-zA-Z0-9]*$/.test(word)) {
+            if (/^[a-z0-9]*$/i.test(word)) {
                 if (index === words.length - 1) {
                     cleanedWords.push('+' + word + '*');
                 }

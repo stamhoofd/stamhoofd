@@ -1,7 +1,8 @@
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, MemberWithUsersRegistrationsAndGroups, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod} from '@stamhoofd/models';
+import { BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -276,7 +277,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast'));
+                .toThrow('Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast');
         });
 
         test('Should fail if balance item price difference', async () => {
@@ -350,7 +351,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Member not found'));
+                .toThrow('Member not found');
             // #endregion
         });
 
@@ -389,7 +390,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Oeps, jouw mandje is leeg.'));
+                .toThrow('Oeps, jouw mandje is leeg.');
             // #endregion
         });
 
@@ -532,7 +533,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Oeps, je hebt geen geldige betaalmethode geselecteerd'));
+                .toThrow('Oeps, je hebt geen geldige betaalmethode geselecteerd');
             // #endregion
         });
 
@@ -571,7 +572,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('redirectUrl or cancelUrl is missing'));
+                .toThrow('redirectUrl or cancelUrl is missing');
             // #endregion
         });
 
@@ -604,7 +605,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('redirectUrl or cancelUrl is missing'));
+                .toThrow('redirectUrl or cancelUrl is missing');
         });
 
         test('Should not reserve for point of sale payment method if group has max members', async () => {
@@ -1015,7 +1016,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Maximum reached'));
+                .toThrow('Maximum reached');
             // #endregion
         });
 
@@ -1092,7 +1093,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Stock empty'));
+                .toThrow('Stock empty');
             // #endregion
         });
 
@@ -1170,7 +1171,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Option maximum exceeded'));
+                .toThrow('Option maximum exceeded');
         });
 
         test('Should not fail if max option not exceeded', async () => {
@@ -2236,7 +2237,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('customer is required when paying as an organization'));
+                .toThrow('customer is required when paying as an organization');
         });
 
         test('Deleting registrations is not allowed', async () => {
@@ -2309,7 +2310,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('customer.company is required'));
+                .toThrow('customer.company is required');
         });
 
         test('Should fail if company does not exist on organization', async () => {
@@ -2346,7 +2347,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.'));
+                .toThrow('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.');
         });
     });
 
@@ -2611,7 +2612,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Registration not found'));
+                .toThrow('Registration not found');
             // #endregion
         });
 
@@ -2989,7 +2990,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow(new RegExp('Permission denied: you are not allowed to delete registrations'));
+                .toThrow('Permission denied: you are not allowed to delete registrations');
         });
 
         test('Cannot delete registrations as admin if no write permission to group', async () => {
@@ -3100,7 +3101,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             // #region act and assert
             await registration.delete();
-            await expect(post(body, organization, token)).rejects.toThrow(new RegExp('Registration not found'));
+            await expect(post(body, organization, token)).rejects.toThrow('Registration not found');
             // #endregion
         });
 

@@ -38,7 +38,7 @@ export class TranslationScanner {
                     word
                         .toLowerCase()
                         .replace(
-                            /[!@#$%^&*)(+=.<>{}[]:;'"|~`_-]/g,
+                            /[!@#$%^&*)(+=.<>{}[]:;'"|~`_-\]/g,
                             '',
                         ),
                 )

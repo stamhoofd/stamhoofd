@@ -1,5 +1,6 @@
-import { AuditLog } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { AuditLog } from '@stamhoofd/models';
+import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
 export const auditLogSorters: SQLSortDefinitions<AuditLog> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!

@@ -1,9 +1,12 @@
 import { Column, Database } from '@simonbackx/simple-database';
-import { PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
-import { Endpoint, Request } from '@simonbackx/simple-endpoints';
+import type { PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
+import type { Endpoint} from '@simonbackx/simple-endpoints';
+import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { Address, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
+import type { PatchAnswers} from '@stamhoofd/structures';
+import { Address, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';

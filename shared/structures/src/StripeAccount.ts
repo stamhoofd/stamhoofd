@@ -123,27 +123,27 @@ function requirementsToString(list: string[]) {
             return $t(`%nL`);
         }
 
-        if (key.match(/(representative|person|individual|director)\.address/)) {
+        if (key.match(/(?:representative|person|individual|director)\.address/)) {
             return $t(`%nM`);
         }
 
-        if (key.match(/(representative|person|individual|director)\.phone/)) {
+        if (key.match(/(?:representative|person|individual|director)\.phone/)) {
             return $t(`%nN`);
         }
 
-        if (key.match(/(representative|person|individual|director)\.email/)) {
+        if (key.match(/(?:representative|person|individual|director)\.email/)) {
             return $t(`%nO`);
         }
 
-        if (key.match(/(representative|person|individual|director)\.dob/)) {
+        if (key.match(/(?:representative|person|individual|director)\.dob/)) {
             return $t(`%nP`);
         }
 
-        if (key.match(/(representative|person|individual|director)\.(first|last)_name/)) {
+        if (key.match(/(?:representative|person|individual|director)\.(?:first|last)_name/)) {
             return $t(`%nQ`);
         }
 
-        if (key.match(/(representative|person|individual|director)?\.relationship.title/)) {
+        if (key.match(/(?:representative|person|individual|director)?\.relationship.title/)) {
             return $t(`%nR`);
         }
 
@@ -163,7 +163,7 @@ function requirementsToString(list: string[]) {
             return $t(`%nV`);
         }
 
-        if (key.match(/person_.+?\.(first|last)_name/)) {
+        if (key.match(/person_.+?\.(?:first|last)_name/)) {
             return $t(`%nW`);
         }
 
@@ -171,7 +171,7 @@ function requirementsToString(list: string[]) {
             return $t(`%nX`);
         }
 
-        if (key.match(/(representative|person|individual|director)_/)) {
+        if (key.match(/(?:representative|person|individual|director)_/)) {
             return $t(`%nY`);
         }
 

@@ -1,4 +1,5 @@
-import { CellAlignmentOptions, CellStyleRequest, FontOptions, NumberFormatOptions, XlsxBuiltInNumberFormat } from '../interfaces.js';
+import type { CellAlignmentOptions, CellStyleRequest, FontOptions, NumberFormatOptions} from '../interfaces.js';
+import { XlsxBuiltInNumberFormat } from '../interfaces.js';
 import { escapeXml } from './escapeXml.js';
 import { XlsxFileWriter } from './XlsxFileWriter.js';
 

@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { type I18n } from '@stamhoofd/backend-i18n';
+import type {I18n} from '@stamhoofd/backend-i18n';
 import { QueryableModel } from '@stamhoofd/sql';
 import { EmailTemplateType, Recipient, Replacement } from '@stamhoofd/structures';
 import basex from 'base-x';
@@ -8,8 +8,8 @@ import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { Platform } from './Platform.js';
-import { type User } from './User.js';
-import { type Organization } from './Organization.js';
+import type {User} from './User.js';
+import type {Organization} from './Organization.js';
 
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);

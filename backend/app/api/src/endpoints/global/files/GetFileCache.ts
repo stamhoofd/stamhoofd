@@ -1,6 +1,8 @@
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Readable } from 'node:stream';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { Readable } from 'node:stream';
 import { Context } from '../../../helpers/Context.js';
 import { FileCache } from '../../../helpers/FileCache.js';
 import { Formatter } from '@stamhoofd/utility';

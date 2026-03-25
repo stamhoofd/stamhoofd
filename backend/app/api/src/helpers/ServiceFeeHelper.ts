@@ -1,4 +1,4 @@
-import { Organization, Payment } from '@stamhoofd/models';
+import type { Organization, Payment } from '@stamhoofd/models';
 import { calculateVATPercentage, PaymentProvider, STPackageType } from '@stamhoofd/structures';
 
 export class ServiceFeeHelper {

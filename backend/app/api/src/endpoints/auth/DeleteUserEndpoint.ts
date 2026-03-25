@@ -1,4 +1,5 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 
 import { getDefaultEmailFrom, sendEmailTemplate } from '@stamhoofd/models';
 import { EmailTemplateType, Recipient } from '@stamhoofd/structures';

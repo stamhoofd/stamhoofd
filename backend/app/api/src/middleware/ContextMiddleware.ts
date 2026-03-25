@@ -1,4 +1,4 @@
-import { Request, RequestMiddleware } from '@simonbackx/simple-endpoints';
+import type { Request, RequestMiddleware } from '@simonbackx/simple-endpoints';
 
 import { ContextInstance } from '../helpers/Context.js';
 

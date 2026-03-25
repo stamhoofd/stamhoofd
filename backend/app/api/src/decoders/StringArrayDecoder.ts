@@ -1,4 +1,4 @@
-import { Data, Decoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder } from '@simonbackx/simple-encoding';
 
 export class StringArrayDecoder<T> implements Decoder<T[]> {
     decoder: Decoder<T>;

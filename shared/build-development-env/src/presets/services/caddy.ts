@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import { type ConcurrentlyCommandInput } from 'concurrently';
+import type {ConcurrentlyCommandInput} from 'concurrently';
 import fs from 'fs/promises';
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';

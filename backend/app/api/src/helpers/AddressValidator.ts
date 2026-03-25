@@ -29,7 +29,7 @@ export class AddressValidatorStatic {
             }
 
             const numbers = stripped.slice(0, 4);
-            if (!/[0-9]{4}/.test(numbers)) {
+            if (!/\d{4}/.test(numbers)) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postal code format (NL)',
@@ -47,7 +47,7 @@ export class AddressValidatorStatic {
 
         if (postalCode.length == 0) {
             const numbers = address.city.substring(0, 4);
-            if (!/[0-9]{4}/.test(numbers)) {
+            if (!/\d{4}/.test(numbers)) {
                 postalCode = numbers;
                 address.city = address.city.substring(4).trim();
             }

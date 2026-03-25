@@ -1,7 +1,8 @@
 import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
-import { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
+import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Group, Member, MemberResponsibilityRecord } from '@stamhoofd/models';
-import { ExcelExportType, LimitedFilteredRequest, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, Organization as OrganizationStruct, PaginatedResponse, Platform as PlatformStruct, Premise } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, Premise } from '@stamhoofd/structures';
+import { ExcelExportType, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, Organization as OrganizationStruct, PaginatedResponse, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint.js';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';

@@ -1,5 +1,6 @@
 import { Order, Organization, Webshop } from '@stamhoofd/models';
-import { BalanceItemPaymentsHtmlTableItem, BalanceItemRelationType, BalanceItemType, getBalanceItemPaymentsHtmlTable, PaymentGeneral, PaymentMethod, PaymentMethodHelper, Replacement, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import type { BalanceItemPaymentsHtmlTableItem, PaymentGeneral} from '@stamhoofd/structures';
+import { BalanceItemRelationType, BalanceItemType, getBalanceItemPaymentsHtmlTable, PaymentMethod, PaymentMethodHelper, Replacement, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { createOrderDataHTMLTable } from '../helpers/email-html-helpers.js';
 

@@ -536,7 +536,7 @@ ${error}`;
             return false;
         }
 
-        const regex = /{((?:.|\r|\n)*?)}/g;
+        const regex = /\{((?:.|[\r\n])*?)\}/g;
         const originalMatches = original.matchAll(regex);
         const translationMatches = translation.matchAll(regex);
         const originalArguments = [...originalMatches].map(match => match[1]);

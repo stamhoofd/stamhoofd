@@ -3,8 +3,8 @@ import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { Document } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Document } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 export async function getDocumentPdfBlob($context: SessionContext, document: Document, owner?: any): Promise<Blob> {

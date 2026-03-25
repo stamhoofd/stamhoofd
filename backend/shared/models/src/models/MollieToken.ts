@@ -1,12 +1,12 @@
 import { column } from '@simonbackx/simple-database';
-import { PartialWithoutMethods, PlainObject } from '@simonbackx/simple-encoding';
+import type { PartialWithoutMethods, PlainObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { MollieOnboarding, MollieProfile, MollieStatus } from '@stamhoofd/structures';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import https from 'https';
 
-import { Organization } from './Organization.js';
+import type { Organization } from './Organization.js';
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));

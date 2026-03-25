@@ -1,7 +1,8 @@
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
-import { ApiUser } from '@stamhoofd/structures';
+import type { ApiUser } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 type Params = Record<string, never>;

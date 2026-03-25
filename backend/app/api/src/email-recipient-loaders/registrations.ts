@@ -1,6 +1,7 @@
 import { Email, Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, RegistrationsBlob, mergeFilters } from '@stamhoofd/structures';
+import type { EmailRecipient, LimitedFilteredRequest, RegistrationsBlob} from '@stamhoofd/structures';
+import { EmailRecipientFilterType, PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
 import { memberJoin } from '../sql-filters/registrations.js';
 

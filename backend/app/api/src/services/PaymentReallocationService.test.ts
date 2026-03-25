@@ -1,4 +1,5 @@
-import { BalanceItem, BalanceItemPayment, MemberFactory, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
+import type { Organization} from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MemberFactory, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, PaymentMethod, PaymentStatus, ReceivableBalanceType, TranslatedString } from '@stamhoofd/structures';
 import { PaymentReallocationService } from './PaymentReallocationService.js';
 import { BalanceItemService } from './BalanceItemService.js';

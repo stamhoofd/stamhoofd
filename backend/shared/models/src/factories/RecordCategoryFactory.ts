@@ -1,6 +1,8 @@
 import { Factory } from '@simonbackx/simple-database';
-import { RecordCategory, RecordSettings, TranslatedString } from '@stamhoofd/structures';
-import { RecordFactory, RecordOptions } from './RecordFactory.js';
+import type { RecordSettings} from '@stamhoofd/structures';
+import { RecordCategory, TranslatedString } from '@stamhoofd/structures';
+import type { RecordOptions } from './RecordFactory.js';
+import { RecordFactory } from './RecordFactory.js';
 
 class Options {
     records: RecordOptions[];

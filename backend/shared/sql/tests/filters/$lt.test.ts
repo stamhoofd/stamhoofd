@@ -1,6 +1,7 @@
 import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
 import { SQL } from '../../src/SQL.js';
-import { TableDefinition, test, testMatch } from '../utils/index.js';
+import type { TableDefinition} from '../utils/index.js';
+import { test, testMatch } from '../utils/index.js';
 
 describe('$lt', () => {
     it('can filter on $lt', async () => {

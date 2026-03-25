@@ -178,7 +178,7 @@ function send() {
             break;
     }
 
-    url += phones.value.map(phone => phone.replace(/(\s)+/g, '')).join(',');
+    url += phones.value.map(phone => phone.replace(/\s+/g, '')).join(',');
 
     switch (os) {
         case 'macOS-old':

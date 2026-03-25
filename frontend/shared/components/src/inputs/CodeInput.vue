@@ -81,7 +81,7 @@ export default class CodeInput extends VueComponent {
         }
 
         const input = this.$refs.numberInput[index] as HTMLInputElement;
-        input.value = this.numbersOnly ? (input.value as string).replace(/[^0-9]/g, '') : (input.value as string).toLocaleUpperCase().replace(/[^0-9A-Z]/g, '');
+        input.value = this.numbersOnly ? (input.value as string).replace(/\D/g, '') : (input.value as string).toLocaleUpperCase().replace(/[^0-9A-Z]/g, '');
         if (input.value.length >= 1) {
             this.selectNext(index + 1);
         }

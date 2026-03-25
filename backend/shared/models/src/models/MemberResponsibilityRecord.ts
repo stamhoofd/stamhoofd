@@ -1,6 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { Group as GroupStruct, MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
+import type { Group as GroupStruct} from '@stamhoofd/structures';
+import { MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MemberResponsibilityRecord extends QueryableModel {

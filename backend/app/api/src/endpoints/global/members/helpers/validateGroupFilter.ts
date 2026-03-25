@@ -1,5 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
 export async function validateGroupFilter({ filter, permissionLevel, key }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel; key: string | null }) {

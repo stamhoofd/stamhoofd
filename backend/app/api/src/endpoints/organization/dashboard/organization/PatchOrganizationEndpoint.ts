@@ -1,8 +1,11 @@
-import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, isPatchMap, ObjectData, PatchableArray, PatchableArrayAutoEncoder, PatchMap, patchObject } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { cloneObject, isPatchableArray, isPatchMap, ObjectData, PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
+import type { Company, PermissionsResourceType, ResourcePermissions} from '@stamhoofd/structures';
+import { BuckarooSettings, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';

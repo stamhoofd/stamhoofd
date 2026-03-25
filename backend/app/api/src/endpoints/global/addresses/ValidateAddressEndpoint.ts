@@ -1,6 +1,8 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Address, ValidatedAddress } from '@stamhoofd/structures';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { ValidatedAddress } from '@stamhoofd/structures';
+import { Address } from '@stamhoofd/structures';
 
 import { AddressValidator } from '../../../helpers/AddressValidator.js';
 

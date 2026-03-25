@@ -1,6 +1,9 @@
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
-import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions.js';
-import { SQLJoin, SQLJoinType } from './SQLJoin.js';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
+import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
+import type { SQLDynamicExpression } from './SQLExpressions.js';
+import { SQLArray, SQLColumnExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions.js';
+import type { SQLJoin } from './SQLJoin.js';
+import { SQLJoinType } from './SQLJoin.js';
 import { SQLSelect } from './SQLSelect.js';
 
 type Constructor<T = object> = new (...args: any[]) => T;

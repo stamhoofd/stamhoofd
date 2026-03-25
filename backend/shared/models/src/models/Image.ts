@@ -3,7 +3,8 @@ import { column } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import { File, Resolution, ResolutionRequest } from '@stamhoofd/structures';
+import type { ResolutionRequest } from '@stamhoofd/structures';
+import { File, Resolution } from '@stamhoofd/structures';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 

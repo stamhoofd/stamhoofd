@@ -1,8 +1,11 @@
-import { AutoEncoderPatchType, Decoder, isPatch } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { isPatch } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, Member, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
-import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import type { UserWithMembers } from '@stamhoofd/structures';
+import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { MemberUserSyncer } from '../../helpers/MemberUserSyncer.js';

@@ -1,5 +1,6 @@
-import { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
+import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
 export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = {

@@ -1,6 +1,6 @@
-import { Response } from '@simonbackx/simple-endpoints';
+import type { Response } from '@simonbackx/simple-endpoints';
 import cookie from 'cookie';
-import http from 'http';
+import type http from 'http';
 
 export type ObjectWithHeaders = {
     headers: http.IncomingHttpHeaders;

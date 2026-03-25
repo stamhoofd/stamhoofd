@@ -1,6 +1,7 @@
 import { Email, Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, Replacement } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest} from '@stamhoofd/structures';
+import { EmailRecipient, EmailRecipientFilterType, PaginatedResponse, Replacement } from '@stamhoofd/structures';
 import { GetDocumentsEndpoint } from '../endpoints/organization/dashboard/documents/GetDocumentsEndpoint.js';
 
 async function fetch(query: LimitedFilteredRequest) {

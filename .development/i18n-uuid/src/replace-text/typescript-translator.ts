@@ -66,13 +66,12 @@ export class TypescriptTranslator {
         let lineIndex = 0;
         const allParts: { value: string; shouldTranslate: boolean }[] = [];
 
-        for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
+        for (const part of parts) {
             const isMatch = part.isMatch;
             const value = part.value;
 
             const startIndex = lineIndex;
-            const endIndex = lineIndex + [...value.matchAll(/(\r|\n)/g)].length;
+            const endIndex = lineIndex + [...value.matchAll(/\r|\n/g)].length;
             lineIndex = endIndex;
 
             let isChanged = true;
@@ -214,7 +213,7 @@ function splitInPartsIgnoreComments(text: string): { isMatch: boolean; value: st
             return { isMatch: false, value };
         }
 
-        return splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
+        return splitInParts(value, /"[^"]*"|'[^']*'/g);
     });
 }
 

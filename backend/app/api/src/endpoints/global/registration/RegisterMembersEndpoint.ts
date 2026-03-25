@@ -1,11 +1,14 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { ManyToOneRelation } from '@simonbackx/simple-database';
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWithUsersRegistrationsAndGroups, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment} from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
+import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem} from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';

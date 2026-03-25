@@ -126,18 +126,18 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         this.registerDomain = this.$organization.privateMeta?.pendingRegisterDomain ?? this.$organization.registerDomain ?? '';
         this.mailDomain = this.$organization.privateMeta?.pendingMailDomain ?? this.$organization.privateMeta?.mailDomain ?? '';
         this.customRegisterDomain = this.registerDomain && this.mailDomain ? (this.registerDomain !== 'inschrijven.' + this.mailDomain) : false;
-        this.allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/);
+        this.allowSubdomain = !!this.mailDomain.match(/^[a-z0-9-]+\.[a-z0-9-]+\.[a-z]+$/i);
     }
 
     validateDomain() {
         const d = this.mailDomain;
         if (this.allowSubdomain) {
-            if (!d.match(/^([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+            if (!d.match(/^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
                 return false;
             }
             return true;
         }
-        if (!d.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+        if (!d.match(/^[a-z0-9-]+\.[a-z]+$/i)) {
             return false;
         }
         return true;
@@ -145,7 +145,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
 
     validateRegisterDomain() {
         const d = this.registerDomain;
-        if (!d.match(/^([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+        if (!d.match(/^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
             return false;
         }
         return true;

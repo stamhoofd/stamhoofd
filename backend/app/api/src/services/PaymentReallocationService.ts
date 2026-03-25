@@ -1,6 +1,7 @@
 import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemStatus, doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
+import type { ReceivableBalanceType } from '@stamhoofd/structures';
+import { BalanceItemStatus, doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { BalanceItemService } from './BalanceItemService.js';
 

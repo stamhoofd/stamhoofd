@@ -1,7 +1,8 @@
 import { column } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, Parent, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import type { Parent, RecordAnswer} from '@stamhoofd/structures';
+import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, RecordAddressAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,8 +11,9 @@ import { render } from '../helpers/Handlebars.js';
 import { BalanceItem } from './BalanceItem.js';
 import { Document } from './Document.js';
 import { Group } from './Group.js';
-import { Member, RegistrationWithMember } from './Member.js';
-import { Organization } from './Organization.js';
+import type { RegistrationWithMember } from './Member.js';
+import { Member } from './Member.js';
+import type { Organization } from './Organization.js';
 import { Registration } from './Registration.js';
 import { User } from './User.js';
 

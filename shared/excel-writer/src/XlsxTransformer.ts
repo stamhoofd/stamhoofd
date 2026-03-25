@@ -1,4 +1,4 @@
-import { XlsxTransformerConcreteColumn, XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWriterAdapter } from './interfaces.js';
+import type { XlsxTransformerConcreteColumn, XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWriterAdapter } from './interfaces.js';
 
 /**
  * Transforms data into an excel file using

@@ -1,5 +1,7 @@
-import { Email, EmailAddress, EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
-import { BalanceItem as BalanceItemStruct, EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
+import type { EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
+import { Email, EmailAddress } from '@stamhoofd/email';
+import type { EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, Recipient} from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, ReceivableBalanceType, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -7,11 +9,11 @@ import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { EmailRecipient } from '../models/EmailRecipient.js';
 import { CachedBalance } from '../models/CachedBalance.js';
 import { EmailTemplate } from '../models/EmailTemplate.js';
-import { Group } from '../models/Group.js';
-import { Organization } from '../models/Organization.js';
+import type { Group } from '../models/Group.js';
+import type { Organization } from '../models/Organization.js';
 import { Platform } from '../models/Platform.js';
 import { User } from '../models/User.js';
-import { type Webshop } from '../models/Webshop.js';
+import type {Webshop} from '../models/Webshop.js';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;

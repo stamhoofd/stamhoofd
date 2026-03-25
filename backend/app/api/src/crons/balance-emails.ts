@@ -1,7 +1,9 @@
 import { registerCron } from '@stamhoofd/crons';
 import { CachedBalance, Email, EmailRecipient, Organization, User } from '@stamhoofd/models';
-import { IterableSQLSelect, readDynamicSQLExpression, SQL, SQLCalculation, SQLPlusSign } from '@stamhoofd/sql';
-import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailTemplateType, OrganizationEmail, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
+import type { IterableSQLSelect} from '@stamhoofd/sql';
+import { readDynamicSQLExpression, SQL, SQLCalculation, SQLPlusSign } from '@stamhoofd/sql';
+import type { OrganizationEmail, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailTemplateType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context.js';
 
 registerCron('balanceEmails', balanceEmails);

@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars.js';
-import { Member, MemberWithRegistrations, RegistrationWithMember } from './Member.js';
-import { Organization } from './Organization.js';
+import type { Member, MemberWithRegistrations, RegistrationWithMember } from './Member.js';
+import type { Organization } from './Organization.js';
 import { Registration } from './Registration.js';
 
 export class Document extends QueryableModel {

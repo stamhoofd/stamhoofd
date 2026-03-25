@@ -9,8 +9,19 @@ export class Formatter {
         return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
+    /**
+     * Replace unofficial whitespace characters (not detected by \s) with normal whitespaces
+     */
+    static normalizeWhitespace(input: StringLike) {
+        if (!input || !input.length) return input;
+
+        // 1. Target the "imposter" whitespace characters and replace them with standard spaces
+        const imposterRegex = /[\u200B-\u200D\uFEFF\u180E\u2800\u3164]/g;
+        return input.replace(imposterRegex, ' ');
+    }
+
     static emailSenderName(name: StringLike): string {
-        return this.removeAccents(name).replace(/[^A-Za-z0-9-_]+/g, ' ').trim();
+        return this.removeAccents(name).replace(/[^\w-]+/g, ' ').trim();
     }
 
     static iban(ibanRaw: string) {
@@ -32,16 +43,16 @@ export class Formatter {
     }
 
     static fileSlug(name: StringLike): string {
-        return this.removeAccents(name).replace(/[^A-Za-z0-9-]+/g, ' ').trim();
+        return this.removeAccents(name).replace(/[^A-Z0-9-]+/gi, ' ').trim();
     }
 
     static sepaPaymentSlug(name: string): string {
         // https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/sepa-requirements-extended-character-set-unicode-subset-best
-        return this.removeAccents(name).replace(/[^A-Za-z0-9-.:'+]+/g, ' ').trim();
+        return this.removeAccents(name).replace(/[^A-Z0-9-.:'+]+/gi, ' ').trim();
     }
 
     static removeDuplicateSpaces(name: StringLike): string {
-        return name.replace(/\s+/g, ' ');
+        return this.normalizeWhitespace(name).replace(/\s+/g, ' ');
     }
 
     static spaceString(str: string, spaceLength: number = 4, spaceChar = '\u00A0'): string {
@@ -444,7 +455,7 @@ export class Formatter {
             minimumFractionDigits: 2,
         }).format(Math.abs(value) / 100_00);
 
-        const v = (value < 0 ? '- ' : '') + formatted.replace(new RegExp('EUR', 'ig'), '€');
+        const v = (value < 0 ? '- ' : '') + formatted.replace(/EUR/gi, '€');
         if (removeZeroDecimals && (v.endsWith(',00') || v.endsWith('.00'))) {
             return v.substring(0, v.length - 3);
         }

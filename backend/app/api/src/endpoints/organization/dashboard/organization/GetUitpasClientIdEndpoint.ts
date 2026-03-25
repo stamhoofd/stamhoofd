@@ -1,4 +1,5 @@
-import { Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Request} from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { UitpasGetClientIdResponse } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
