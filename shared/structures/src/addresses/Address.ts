@@ -117,7 +117,7 @@ export class Address extends AutoEncoder {
         }
 
         city = city.trim();
-        if (city.match(/[0-9]/)) {
+        if (city.match(/\d/)) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid city',
@@ -128,7 +128,7 @@ export class Address extends AutoEncoder {
 
         if (c === Country.Belgium) {
             postalCode = postalCode.trim();
-            if (postalCode.length !== 4 || !postalCode.match(/^[0-9]+$/)) {
+            if (postalCode.length !== 4 || !postalCode.match(/^\d+$/)) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postalCode',
@@ -143,7 +143,7 @@ export class Address extends AutoEncoder {
             const firstFour = postalCode.substring(0, 4);
             const remaining = postalCode.substring(4).trim().toLocaleUpperCase();
 
-            if (firstFour.length !== 4 || !firstFour.match(/^[0-9]+$/) || remaining.length !== 2 || !remaining.match(/^[A-Z]+$/)) {
+            if (firstFour.length !== 4 || !firstFour.match(/^\d+$/) || remaining.length !== 2 || !remaining.match(/^[A-Z]+$/)) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postalCode',
@@ -192,23 +192,45 @@ export class Address extends AutoEncoder {
                 human: $t(`%nw`),
             });
         }
+        const cleanAddress = Formatter.removeDuplicateSpaces(Formatter.normalizeWhitespace(addressLine1)).trim()
 
-        // Get position of last letter
-        const match = /^\s*([^0-9\s][^0-9]+?)[\s,]+([0-9].*?)\s*$/.exec(addressLine1);
-        if (!match) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Missing number in address line 1',
-                human: $t(`%nx`),
-            });
+        // STAP 1: De "Zonder Nummer" edge case aan het einde
+        const znMatch = cleanAddress.match(/^(.*?)\s(z\/?n|s\/?n|z\.n\.|zonder nummer)$/i);
+        if (znMatch) {
+            return { street: znMatch[1].trim(), number: znMatch[2].trim().toLowerCase() };
         }
-        const number = match[2];
-        const street = match[1];
 
-        return {
-            number,
-            street,
-        };
+        const tailRegex = /\d{1,5}\.?\d{0,4}\s?[a-z]{0,2}\s?(?:bis|ter|quater)?\s?(?:(?:bus|bte\.?|b\.|box|boite|boîte|bt|[/\-&\s])\s?\d{0,8}\s?[a-z]{0,2}\s?[./]?\s?\d{0,4}[a-z]{0,2})?$/i
+
+        const match = cleanAddress.match(tailRegex);
+
+        if (match) {
+            let number = match[0]
+            let street = cleanAddress.substring(0, cleanAddress.length - number.length)
+
+            // De 'Wijk' uitzondering (als de straat eindigt op wijk en het nummer op een getal)
+            const wijkCheck = number.trim().match(/^(\d+)\s+(\d.*)$/);
+            if (street.trim().toLowerCase().endsWith('wijk') && wijkCheck) {
+                street = `${street}${wijkCheck[1]}`;
+                number = wijkCheck[2];
+            }
+
+            // 19XX-19XX, 'XX-'XX uitzondering
+            const historyMatch = number.match(/^19\d{2}-19\d{2}|19\d{2}|'\d{2}-'\d{2}\s/);
+            if (historyMatch) {
+                const common = historyMatch[0].length;
+                street = street +  number.substring(0, common).trim()
+                number = number.substring(common).trim()
+            }
+
+            return { street: street.trim(), number: number.trim() };
+        }
+
+       throw new SimpleError({
+            code: 'invalid_field',
+            message: 'Missing number in address line 1',
+            human: $t(`%nx`),
+        });
     }
 
     throwIfIncomplete() {
