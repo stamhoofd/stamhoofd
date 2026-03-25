@@ -60,7 +60,7 @@
     "install-vscode-extensions": "code --install-extension ./.vscode/extensions/vue.volar-2.2.10.vsix --force"
   },
   "dependencies": {
-    "@simonbackx/simple-encoding": "2.26.3",
+    "@simonbackx/simple-encoding": "2.26.4",
     "@simonbackx/simple-errors": "^1.5.0",
     "@simonbackx/simple-networking": "1.23.0",
     "@simonbackx/vue-app-navigation": "2.18.0",
