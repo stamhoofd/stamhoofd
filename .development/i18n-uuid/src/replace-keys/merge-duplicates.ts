@@ -1,6 +1,6 @@
-import { getTranslationsWithPath } from "./get-translations-with-path";
-import { findUnusedTranslationKeys, replaceOccurrences } from "./replace-keys-with-uuid";
-import { writeTranslation } from "./write-translations";
+import { getTranslationsWithPath } from './get-translations-with-path.js';
+import { findUnusedTranslationKeys, replaceOccurrences } from './replace-keys-with-uuid.js';
+import { writeTranslation } from './write-translations.js';
 
 /**
  * Find translations that have the same translation for every language (machine translations are ignored because those are automatically generated and should resolve to the same value), and merge them.
@@ -29,18 +29,19 @@ export function mergeDuplicates() {
             if (typeof translations[key] === 'string') {
                 const existingMap = translationsForKeys.get(key);
                 if (existingMap) {
-                    existingMap.set(filePath, translations[key])
-                } else {
+                    existingMap.set(filePath, translations[key]);
+                }
+                else {
                     translationsForKeys.set(key, new Map([[
-                        filePath, translations[key]
-                    ]]))
+                        filePath, translations[key],
+                    ]]));
                 }
             }
         }
     }
 
     // Find uuids in translationsForKeys with the exact same content (so same map keys and values, same size)
-    let merge: Map<string, string> = new Map();
+    const merge: Map<string, string> = new Map();
     for (const [uuid, values] of translationsForKeys.entries()) {
         for (const [otherUuid, otherValues] of translationsForKeys.entries()) {
             if (otherUuid === uuid) {
@@ -52,18 +53,18 @@ export function mergeDuplicates() {
             }
 
             if (isMapEqual(values, otherValues)) {
-                console.log('Found duplicate keys ', uuid, otherUuid)
-                merge.set(otherUuid, uuid)
+                console.log('Found duplicate keys ', uuid, otherUuid);
+                merge.set(otherUuid, uuid);
             }
         }
     }
- 
-    // Run multiple times to avoid regex errors
-    replaceOccurrences(merge)
-    replaceOccurrences(merge)
-    replaceOccurrences(merge)
 
-    console.log('Run unused-keys to clean up.')
+    // Run multiple times to avoid regex errors
+    replaceOccurrences(merge);
+    replaceOccurrences(merge);
+    replaceOccurrences(merge);
+
+    console.log('Run unused-keys to clean up.');
 }
 
 function isMapEqual(a: Map<string, string>, b: Map<string, string>) {

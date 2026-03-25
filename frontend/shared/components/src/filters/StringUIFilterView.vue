@@ -67,7 +67,8 @@ import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes'
 import Radio from '../inputs/Radio.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import { StringFilterMode, StringUIFilter } from './StringUIFilter';
+import type { StringUIFilter } from './StringUIFilter';
+import { StringFilterMode } from './StringUIFilter';
 
 @Component({
     components: {

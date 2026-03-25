@@ -3,7 +3,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 
 export function useGetOfficialUitpasSocialTariff() {
     const owner = useRequestOwner();

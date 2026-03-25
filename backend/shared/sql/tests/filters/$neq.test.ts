@@ -3,13 +3,6 @@ import { SQL } from '../../src/SQL.js';
 import { test } from '../utils/index.js';
 
 describe('$neq', () => {
-    /**
-     * Tests that should be repeated for all filter types
-     */
-    describe('Common checks', () => {
-        // todo
-    });
-
     it('removes caps when filtering strings', async () => {
         const filters = {
             ...baseSQLFilterCompilers,

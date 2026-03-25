@@ -1,9 +1,15 @@
-import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { logger, StyledText } from '@simonbackx/simple-logging';
 import { countries, languages } from '@stamhoofd/locales';
-import { appToUri, Country, Language } from '@stamhoofd/structures';
+import { appToUri } from '@stamhoofd/structures';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
+import { createRequire } from 'node:module';
+
+// Polyfill require.resolve, since import.meta.resolve is not supported by vitest
+const require = createRequire(import.meta.url);
 
 export class I18n {
     static loadedLocales: Map<string, Map<string, string>> = new Map();
@@ -23,14 +29,14 @@ export class I18n {
                 throw new Error('STAMHOOFD.translationNamespace is not set');
             }
 
-            const directory = path.dirname(require.resolve('@stamhoofd/locales')) + '/../locales/' + STAMHOOFD.translationNamespace;
+            const directory = path.dirname(require.resolve('@stamhoofd/locales/locales/' + STAMHOOFD.translationNamespace + '/nl-BE.json'));
             const files = (await fs.readdir(directory, { withFileTypes: true }))
                 .filter(dirent => !dirent.isDirectory());
 
             for (const file of files) {
                 const locale = file.name.substr(0, file.name.length - 5);
 
-                const messages = await import(directory + '/' + file.name);
+                const messages = await import(directory + '/' + file.name, { with: { type: 'json' } });
                 this.loadedLocales.set(locale, this.loadRecursive(messages.default));
             }
 
@@ -213,7 +219,7 @@ export class I18n {
     }
 
     escapeRegex(string) {
-        return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
     replace(text: string, replace?: Record<string, string | { toString(): string }>) {
@@ -221,10 +227,8 @@ export class I18n {
             return text;
         }
         for (const key in replace) {
-            if (replace.hasOwnProperty(key)) {
-                const value = replace[key];
-                text = text.replace(new RegExp('\\{' + this.escapeRegex(key) + '\\}', 'g'), value.toString());
-            }
+            const value = replace[key];
+            text = text.replace(new RegExp('\\{' + this.escapeRegex(key) + '\\}', 'g'), value.toString());
         }
         return text;
     }

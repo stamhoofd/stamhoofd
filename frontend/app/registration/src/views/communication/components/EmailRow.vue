@@ -29,7 +29,7 @@
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import PlatformOrganizationAvatar from '@stamhoofd/components/context/PlatformOrganizationAvatar.vue';
 import OrganizationAvatar from '@stamhoofd/components/context/OrganizationAvatar.vue';
-import { EmailPreview, EmailWithRecipients } from '@stamhoofd/structures';
+import type { EmailPreview, EmailWithRecipients } from '@stamhoofd/structures';
 
 defineProps<{
     email: EmailPreview | EmailWithRecipients;

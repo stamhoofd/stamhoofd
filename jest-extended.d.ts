@@ -1,14 +1,13 @@
-import "jest-extended";
+import 'vitest'
 
-declare global {
-    namespace jest {
-        interface AsymmetricMatchers {
-            toMatchMap(map: Map<any, any>): void;
-        }
-
-        interface Matchers<R> {
-            toMatchMap(map: Map<any, any>): R;
-        }
-    }
+declare module '@vitest/expect' {
+  interface Matchers<T = any> {
+    toMatchMap(map: Map<any, any>): void;
+    toIncludeSameMembers<E = unknown>(expected: readonly E[]): void;
+    toIncludeAllMembers<E = unknown>(expected: readonly E[] | E): void;
+    toResolve(): Promise<void>
+    toReject(): Promise<void>
+  }
 }
+
 export {  };

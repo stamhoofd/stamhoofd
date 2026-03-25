@@ -1,10 +1,12 @@
-import { AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, SortItem, StamhoofdFilter, Version, WebshopPreview } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SortItem, StamhoofdFilter, WebshopPreview } from '@stamhoofd/structures';
+import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from './IndexBox';
-import { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
+import type { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
 import { WebshopDatabase } from './repositories/WebshopDatabase';
 import { OrdersStore, WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
 import { WebshopSettingsStore } from './repositories/WebshopSettingsStore';

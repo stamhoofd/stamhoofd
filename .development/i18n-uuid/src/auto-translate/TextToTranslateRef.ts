@@ -14,7 +14,7 @@ export class TextToTranslateRef {
     get translation(): string {
         const translation = this._translation;
         if (translation === null) {
-            throw new Error("Not translated.");
+            throw new Error('Not translated.');
         }
         return translation;
     }

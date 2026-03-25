@@ -1,8 +1,9 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberStepView } from '..';
-import { DisplayOptions, NavigationActions, runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
+import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
+import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
 
 export function useEditMember() {
     const navigate = useNavigationActions();

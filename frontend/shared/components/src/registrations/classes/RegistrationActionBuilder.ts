@@ -1,18 +1,22 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import type { Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration} from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogsView } from '../../audit-logs';
 import { CommunicationView } from '../../communication';
 import { LoadComponent } from '../../containers/AsyncComponent';
-import { EmailView, RecipientChooseOneOption } from '../../email';
+import type { RecipientChooseOneOption } from '../../email';
+import { EmailView } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
+import type { PlatformFamilyManager} from '../../members';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { Toast } from '../../overlays/Toast';
-import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
+import type { TableAction, TableActionSelection } from '../../tables';
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '../../tables';
 import ChargeRegistrationsView from '../ChargeRegistrationsView.vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 

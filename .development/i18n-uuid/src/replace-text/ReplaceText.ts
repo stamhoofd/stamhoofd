@@ -1,5 +1,5 @@
-import { translateTypescriptFiles } from "./translate-typescript-files";
-import { translateVueFiles } from "./translate-vue-files";
+import { translateTypescriptFiles } from './translate-typescript-files.js';
+import { translateVueFiles } from './translate-vue-files.js';
 
 export interface ReplaceTextOptions {
     replaceChangesOnly?: boolean;
@@ -11,26 +11,26 @@ export interface ReplaceTextOptions {
 }
 
 export interface ReplaceTextArgs {
-    commits?: string[],
-    changes?: boolean,
-    attributes?: string[],
-    dryRun?: boolean,
-    prompt?: boolean,
-    fix?: boolean,
+    commits?: string[];
+    changes?: boolean;
+    attributes?: string[];
+    dryRun?: boolean;
+    prompt?: boolean;
+    fix?: boolean;
 }
 
 export class ReplaceText {
     private readonly options: ReplaceTextOptions;
 
-    constructor(args: ReplaceTextArgs){
+    constructor(args: ReplaceTextArgs) {
         this.options = {
             replaceChangesOnly: args.changes ?? false,
             doPrompt: args.prompt ?? false,
             doFix: args.fix ?? false,
             dryRun: args.dryRun ?? false,
             attributeWhiteList: args.attributes ? new Set(args.attributes) : undefined,
-            commitsToCompare: this.getCommitsToCompare(args.commits)
-        }
+            commitsToCompare: this.getCommitsToCompare(args.commits),
+        };
     }
 
     async start() {
@@ -39,12 +39,12 @@ export class ReplaceText {
     }
 
     private getCommitsToCompare(commits: string[] | undefined): [string, string] | undefined {
-        if(commits === undefined) {
+        if (commits === undefined) {
             return undefined;
         }
 
-        if(commits.length > 2) {
-            throw new Error(`Received more than two commits to compare: ${commits}`)
+        if (commits.length > 2) {
+            throw new Error(`Received more than two commits to compare: ${commits.join(', ')}`);
         }
 
         return commits as [string, string];

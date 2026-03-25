@@ -1,6 +1,7 @@
 import { Column } from '#tables/classes/Column.ts';
-import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MembershipStatus, Organization, PermissionLevel, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import { ContinuousMembershipStatus, GroupType, MembershipStatus, PermissionLevel } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformMember;
@@ -551,7 +552,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     }
                     const groups = category.getAllGroups();
                     const memberGroups = member.filterGroups({ groups: groups, periodId: filterPeriodId });
-                    const getIndex = g => groups.findIndex(_g => _g.id === g.id);
+                    const getIndex = (g: Group) => groups.findIndex(_g => _g.id === g.id);
                     return memberGroups.sort((a, b) => Sorter.byNumberValue(getIndex(b), getIndex(a)));
                 },
                 format: (groups) => {

@@ -36,7 +36,7 @@ import { computed } from 'vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import { GroupUIFilter, GroupUIFilterBuilder } from './GroupUIFilter';
-import { UIFilter, UIFilterBuilder } from './UIFilter';
+import type { UIFilter, UIFilterBuilder } from './UIFilter';
 import UIFilterEditor from './UIFilterEditor.vue';
 import GroupUIFilterList from './components/GroupUIFilterList.vue';
 

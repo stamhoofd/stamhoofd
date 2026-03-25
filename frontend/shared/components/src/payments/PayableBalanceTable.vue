@@ -25,14 +25,15 @@
 <script setup lang="ts">
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { GlobalEventBus } from '#EventBus.ts';
-import { NavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import SelectBalanceItemsView from '#payments/SelectBalanceItemsView.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { useAppContext } from '#context/appContext.ts';
 import { useOrganizationCart } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import { BalanceItem, BalanceItemCartItem, BalanceItemPaymentDetailed, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
+import type { BalanceItem, BalanceItemPaymentDetailed, DetailedPayableBalance} from '@stamhoofd/structures';
+import { BalanceItemCartItem, RegisterCheckout } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalancePriceBreakdown from './BalancePriceBreakdown.vue';
 import GroupedBalanceList from './GroupedBalanceList.vue';

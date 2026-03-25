@@ -2,12 +2,14 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@s
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
+export type ReviewTimeType = 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber';
+
 /**
  * Keep a timestamp of when certain information was reviewed of a member
  */
 export class ReviewTime extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    name: 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber';
+    name: ReviewTimeType
 
     /**
      * Date that this section was reviewed
@@ -28,7 +30,7 @@ export class ReviewTimes extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ReviewTime) })
     times: ReviewTime[] = [];
 
-    markReviewed(name: 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber', date?: Date) {
+    markReviewed(name: ReviewTimeType, date?: Date) {
         for (const time of this.times) {
             if (time.name === name) {
                 if (date && date < time.reviewedAt) {
@@ -45,11 +47,11 @@ export class ReviewTimes extends AutoEncoder {
         }));
     }
 
-    removeReview(name: 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber') {
+    removeReview(name: ReviewTimeType) {
         this.times = this.times.filter(t => t.name !== name);
     }
 
-    getLastReview(name?: 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber'): Date | undefined {
+    getLastReview(name?: ReviewTimeType): Date | undefined {
         if (!name) {
             if (this.times.length === 0) {
                 return;
@@ -69,7 +71,7 @@ export class ReviewTimes extends AutoEncoder {
         }
     }
 
-    isReviewed(name: 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber'): boolean {
+    isReviewed(name: ReviewTimeType): boolean {
         const time = this.getLastReview(name);
         if (!time) {
             return false;
@@ -77,7 +79,7 @@ export class ReviewTimes extends AutoEncoder {
         return true;
     }
 
-    isOutdated(name: 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber', timeoutMs: number): boolean {
+    isOutdated(name: ReviewTimeType, timeoutMs: number): boolean {
         const time = this.getLastReview(name);
         if (!time) {
             return true;

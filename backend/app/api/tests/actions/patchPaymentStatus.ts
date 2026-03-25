@@ -7,7 +7,7 @@ import { Organization } from '@stamhoofd/models';
 import { initAdmin } from '../init/initAdmin.js';
 
 export async function changePaymentStatus({ payment, organization, status }: { payment: { id: string }; organization: Organization; status: PaymentStatus }) {
-    expect(payment.id).toBeString();
+    expect(payment.id).toEqual(expect.any(String));
     const { adminToken } = await initAdmin({ organization: organization });
 
     const arr = new PatchableArray();

@@ -1,5 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Address, Country, CreateOrganization, NewUser, Organization as OrganizationStruct, Version } from '@stamhoofd/structures';
+import { Address, CreateOrganization, NewUser, Organization as OrganizationStruct, Version } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { CreateOrganizationEndpoint } from './CreateOrganizationEndpoint.js';
@@ -29,7 +30,7 @@ describe.skip('Endpoint.CreateOrganization', () => {
         }).encode({ version: Version }));
 
         const response = await testServer.test(endpoint, r);
-        expect(response.body.token).not.toBeEmpty();
+        expect(response.body.token).not.toEqual([]);
     });
 
     test('Creating an organization with an in-use URI throws', async () => {

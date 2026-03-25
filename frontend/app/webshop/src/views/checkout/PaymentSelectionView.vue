@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, useDismiss, useNavigationController, usePopup, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -35,7 +35,8 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
+import type { Payment} from '@stamhoofd/structures';
+import { OrderData, OrderResponse, PaymentMethod } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';

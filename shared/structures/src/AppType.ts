@@ -1,5 +1,5 @@
-import { Language } from './Language.js';
-import { Organization } from './Organization.js';
+import type { Language } from '@stamhoofd/types/Language';
+import type { Organization } from './Organization.js';
 import { TranslatedString } from './TranslatedString.js';
 
 export type AppType = 'registration' | 'dashboard' | 'admin' | 'webshop';

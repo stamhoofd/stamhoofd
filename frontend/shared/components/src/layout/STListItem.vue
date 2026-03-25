@@ -57,7 +57,7 @@ const hoverable = computed(() => dynamicElementName.value === 'button' || dynami
 const emit = defineEmits(['click', 'contextmenu']);
 const instance = getCurrentInstance();
 
-function onClick(event) {
+function onClick(event: Event) {
     const isDragging = instance?.proxy?.$parent?.$parent?.$el?.className?.indexOf('is-dragging') >= 0;
     if (isDragging) {
         console.log('canceled list item click because of drag');

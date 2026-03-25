@@ -540,7 +540,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
                 expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
                 expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeDate();
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeInstanceOf(Date);
             });
 
             test('Should throw if invalid uitpas number', async () => {

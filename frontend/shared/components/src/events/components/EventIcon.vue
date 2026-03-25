@@ -9,7 +9,7 @@
 import calendarSvg from '@stamhoofd/assets/images/illustrations/calendar.svg';
 import IconContainer from '#icons/IconContainer.vue';
 import ImageComponent from '#views/ImageComponent.vue';
-import { Event } from '@stamhoofd/structures';
+import type { Event } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{

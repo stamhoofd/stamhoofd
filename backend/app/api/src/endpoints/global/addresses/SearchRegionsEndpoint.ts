@@ -1,8 +1,11 @@
-import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { City, Province } from '@stamhoofd/models';
-import { City as CityStruct, Country, Province as ProvinceStruct, SearchRegions } from '@stamhoofd/structures';
+import { City as CityStruct, Province as ProvinceStruct, SearchRegions } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
+import { Country } from '@stamhoofd/types/Country';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {

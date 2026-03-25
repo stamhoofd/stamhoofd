@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
-import { ErrorBox } from '../errors/ErrorBox';
+import type { ErrorBox } from '../errors/ErrorBox';
 import Spinner from '../Spinner.vue';
 
 withDefaults(

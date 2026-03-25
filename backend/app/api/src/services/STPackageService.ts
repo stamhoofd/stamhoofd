@@ -1,7 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Organization, Platform, Registration, STPackage } from '@stamhoofd/models';
+import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Country, PaymentCustomer, STPackageStatus, STPackageType, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
+import type { PaymentCustomer, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { GroupBuilder } from '../helpers/GroupBuilder.js';
 
@@ -27,7 +29,7 @@ export class STPackageService {
         let membersCount: number | null = null;
 
         if (membersCount === null && pack.meta.pricingType === STPricingType.PerMember) {
-            membersCount = await Registration.getActiveMembers(pack.organizationId);
+            membersCount = await Organization.getActiveMembers(pack.organizationId);
         }
 
         if (pack.meta.pricingType === STPricingType.PerMember) {

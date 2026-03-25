@@ -1,5 +1,5 @@
 import pino from 'pino';
-import { WorkerData } from './worker/WorkerData';
+import { WorkerData } from './worker/WorkerData.js';
 
 const loggerBase = pino(
     {

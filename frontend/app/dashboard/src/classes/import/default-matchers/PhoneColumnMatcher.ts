@@ -1,11 +1,12 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Country, countryCodes } from '@stamhoofd/structures';
-import { PhoneNumber } from 'libphonenumber-js';
-import XLSX from 'xlsx';
-import { ColumnMatcher } from '../ColumnMatcher';
+import { countryCodes } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
+import type { PhoneNumber } from 'libphonenumber-js';
+import type XLSX from 'xlsx';
+import type { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 

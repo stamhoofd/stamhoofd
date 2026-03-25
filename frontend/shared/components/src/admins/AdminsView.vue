@@ -32,17 +32,16 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import EditResponsibilitiesView from '#responsibilities/EditResponsibilitiesView.vue';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import { ComponentOptions } from 'vue';
+import EditResponsibilitiesView from '#responsibilities/EditResponsibilitiesView.vue';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import ExternalAdminsBox from './ExternalAdminsBox.vue';
 import { useAdmins } from './hooks/useAdmins';
 import InternalAdminsBox from './InternalAdminsBox.vue';
 import RolesView from './RolesView.vue';
 
 const { loading, reload } = useAdmins();
-reload(true);
+reload(true)?.catch(console.error);
 
 enum Routes {
     Roles = 'rollen',
@@ -53,13 +52,13 @@ defineRoutes([
     {
         url: Routes.Roles,
         name: 'roles',
-        component: RolesView as ComponentOptions,
+        component: RolesView,
         present: 'popup',
     },
     {
         url: Routes.Responsibilities,
         present: 'popup',
-        component: EditResponsibilitiesView as ComponentOptions,
+        component: EditResponsibilitiesView,
     },
 ]);
 

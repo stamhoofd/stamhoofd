@@ -1,5 +1,6 @@
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector, InMemoryFilterDefinitions } from './InMemoryFilter.js';
-import { StamhoofdFilter } from './StamhoofdFilter.js';
+import type { InMemoryFilterDefinitions } from './InMemoryFilter.js';
+import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector } from './InMemoryFilter.js';
+import type { StamhoofdFilter } from './StamhoofdFilter.js';
 
 function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: InMemoryFilterDefinitions; error: string | RegExp }) {
     expect(() => {
@@ -10,13 +11,13 @@ function testError({ filter, filters, error }: { filter: StamhoofdFilter; filter
 function test({ filter, filters, objects, doNotMatch }: { filter: StamhoofdFilter; filters: InMemoryFilterDefinitions; objects?: any[]; doNotMatch?: any[] }) {
     const compiled = compileToInMemoryFilter(filter, filters);
     for (const object of objects ?? []) {
-        if (!compiled(object)) {
+        if (compiled(object) !== true) {
             expect.fail(`Object ${JSON.stringify(object)} did not match filter ${JSON.stringify(filter)}`);
         }
     }
 
     for (const object of doNotMatch ?? []) {
-        if (compiled(object)) {
+        if (compiled(object) !== false) {
             expect.fail(`Object ${JSON.stringify(object)} matched filter ${JSON.stringify(filter)}, but should not have`);
         }
     }
@@ -149,7 +150,7 @@ describe('InMemoryFilter', () => {
     });
 
     describe('$or', () => {
-        it('An empty $or is always true', () => {
+        it('An empty $or is always false', () => {
             const filters = {
                 ...baseInMemoryFilterCompilers,
                 age: createInMemoryFilterCompiler('age'),
@@ -160,10 +161,15 @@ describe('InMemoryFilter', () => {
                     $or: {},
                 },
                 filters,
-                objects: [
+                doNotMatch: [
                     { age: 12 },
                     { age: 13 },
                     { age: null },
+                    false,
+                    undefined,
+                    null,
+                    1,
+                    new Date(),
                 ],
             });
         });
@@ -233,7 +239,7 @@ describe('InMemoryFilter', () => {
     });
 
     describe('$and', () => {
-        it('An empty $and is always false', () => {
+        it('An empty $and is always true', () => {
             const filters = {
                 ...baseInMemoryFilterCompilers,
                 age: createInMemoryFilterCompiler('age'),
@@ -244,10 +250,16 @@ describe('InMemoryFilter', () => {
                     $and: {},
                 },
                 filters,
-                doNotMatch: [
+                objects: [
                     { age: 12 },
                     { age: 13 },
                     { age: null },
+                    { },
+                    null,
+                    new Date(),
+                    10,
+                    false,
+                    undefined,
                 ],
             });
         });

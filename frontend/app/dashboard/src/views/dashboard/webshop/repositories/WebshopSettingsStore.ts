@@ -1,5 +1,5 @@
 import { toRaw } from 'vue';
-import { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
+import type { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 
 // enum to prevent typos and keep overview of existing keys
 export enum WebshopSettingsKeys {

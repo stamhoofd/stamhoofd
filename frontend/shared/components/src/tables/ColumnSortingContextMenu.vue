@@ -21,7 +21,7 @@ import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 
 import { SortItemDirection } from "@stamhoofd/structures";
-import { Column } from "./classes";
+import type { Column } from "./classes";
 
 @Component({
     components: {
@@ -57,7 +57,7 @@ export default class ColumnSortingContextMenu extends Mixins(NavigationMixin) {
     }
 
     getSortDirectionIcon() {
-        return this.sortDirection === "ASC" ? "arrow-up-small" : "arrow-down-small"
+        return this.sortDirection === SortItemDirection.ASC ? "arrow-up-small" : "arrow-down-small"
     }
 
     get sortedColumns() {

@@ -94,13 +94,13 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
 import EditParentView from '@stamhoofd/components/members/components/edit/EditParentView.vue';
+import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
 import { useEditMember } from '@stamhoofd/components/members/hooks/useEditMember';
 import { usePlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import { Address, Parent, PlatformMember } from '@stamhoofd/structures';
+import type { Parent, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const memberManager = useMemberManager();
@@ -114,10 +114,6 @@ const editMember = useEditMember();
 
 async function checkAllMemberData(member: PlatformMember) {
     await editMember(member, { title: $t(`%uC`) });
-}
-
-function editAddress(_address: Address) {
-    // todo
 }
 
 async function editParent(parent: Parent) {

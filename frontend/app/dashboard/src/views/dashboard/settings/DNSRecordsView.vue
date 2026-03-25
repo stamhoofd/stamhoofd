@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 import BackButton from '@stamhoofd/components/navigation/BackButton.vue';
@@ -106,7 +106,7 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
             this.saving = false;
 
             if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null && response.data.privateMeta.pendingRegisterDomain === null) {
-                this.show(new ComponentWithProperties(DNSRecordsDoneView, {}));
+                await this.show(new ComponentWithProperties(DNSRecordsDoneView, {}));
             }
         }
         catch (e) {

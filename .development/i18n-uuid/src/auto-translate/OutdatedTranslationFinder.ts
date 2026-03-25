@@ -1,7 +1,7 @@
-import chalk from "chalk";
-import { TranslatorType } from "../enums/TranslatorType";
-import { globals } from "../shared/globals";
-import { TranslationManager } from "./TranslationManager";
+import chalk from 'chalk';
+import type { TranslatorType } from '../enums/TranslatorType.js';
+import { globals } from '../shared/globals.js';
+import type { TranslationManager } from './TranslationManager.js';
 
 export class OutdatedTranslationFinder {
     private readonly translationManager: TranslationManager;
@@ -13,7 +13,7 @@ export class OutdatedTranslationFinder {
     removeOutdatedTranslations(translator: TranslatorType, locales?: string[]) {
         console.log(
             chalk.blue(
-                `Start clear changed translations (locales: ${locales ? locales?.join(" ") : "all locales"}, translator: ${translator}).`,
+                `Start clear changed translations (locales: ${locales ? locales?.join(' ') : 'all locales'}, translator: ${translator}).`,
             ),
         );
 
@@ -46,14 +46,14 @@ export class OutdatedTranslationFinder {
 
             for (const locale of otherLocales) {
                 if (
-                    this.translationManager.getMappedLocale(locale) ===
-                    globals.DEFAULT_LOCALE
+                    this.translationManager.getMappedLocale(locale)
+                    === globals.DEFAULT_LOCALE
                 ) {
                     continue;
                 }
 
-                const machineTranslationDictionary =
-                    this.translationManager.readMachineTranslationDictionary(
+                const machineTranslationDictionary
+                    = this.translationManager.readMachineTranslationDictionary(
                         locale,
                         namespace,
                     );
@@ -65,9 +65,9 @@ export class OutdatedTranslationFinder {
                     ),
                 );
 
-                const difference =
-                    Object.keys(machineTranslationDictionary).length -
-                    Object.keys(filteredDictionary).length;
+                const difference
+                    = Object.keys(machineTranslationDictionary).length
+                        - Object.keys(filteredDictionary).length;
 
                 if (difference > 0) {
                     foundChanges = true;
@@ -88,7 +88,7 @@ export class OutdatedTranslationFinder {
         }
 
         if (!foundChanges) {
-            console.log(chalk.green("No changed translations found."));
+            console.log(chalk.green('No changed translations found.'));
         }
     }
 }

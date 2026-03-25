@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PaymentCustomer } from './PaymentCustomer.js';
+import type { PaymentCustomer } from './PaymentCustomer.js';
 import { PaymentMethod } from './PaymentMethod.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 import { TransferSettings } from './webshops/TransferSettings.js';

@@ -1,6 +1,6 @@
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { BalanceItem, VATExcemptReason } from '../BalanceItem.js';
+import { type BalanceItem, VATExcemptReason } from '../BalanceItem.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { STMath } from '@stamhoofd/utility';
 

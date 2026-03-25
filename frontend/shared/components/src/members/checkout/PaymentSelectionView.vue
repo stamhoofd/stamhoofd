@@ -46,7 +46,7 @@ import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
-import { RegisterCheckout } from '@stamhoofd/structures';
+import type { RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{

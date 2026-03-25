@@ -206,7 +206,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
@@ -231,11 +232,13 @@ import { useGetGroups } from '@stamhoofd/networking/hooks/useGetGroups';
 import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, NamedObject, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, PlatformEventType, RegistrationPeriod, RichText, TranslatedString } from '@stamhoofd/structures';
+import type { GroupCategoryTree, MemberResponsibility, Organization, PlatformEventType, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupSettings, GroupStatus, NamedObject, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed } from 'vue';
+import type { ComponentOptions} from 'vue';
+import { computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
 
@@ -275,7 +278,7 @@ enum Routes {
 defineRoutes([{
     url: 'inschrijvingen',
     name: Routes.Members,
-    component: RegistrationsTableView as ComponentOptions,
+    component: RegistrationsTableView,
     paramsToProps: () => {
         return {
             group: props.group,
@@ -286,7 +289,7 @@ defineRoutes([{
 {
     url: 'wachtlijst',
     name: Routes.WaitingList,
-    component: MembersTableView as ComponentOptions,
+    component: MembersTableView,
     paramsToProps: () => {
         if (!props.group.waitingList) {
             throw new Error('No waiting list');
@@ -302,7 +305,7 @@ defineRoutes([{
     params: {
         slug: String,
     },
-    component: MembersTableView as ComponentOptions,
+    component: MembersTableView,
     paramsToProps(params: { slug: string }) {
         const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug);
 
@@ -601,7 +604,7 @@ async function restoreGroup(event: MouseEvent) {
 }
 
 async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
-    if (!await CenteredMessage.confirm(`${group.settings.name} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten')) {
+    if (!await CenteredMessage.confirm(`${group.settings.name.toString()} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten')) {
         return;
     }
 

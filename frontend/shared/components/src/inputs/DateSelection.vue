@@ -34,7 +34,8 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
-import { computed, ComputedRef, nextTick, onActivated, onBeforeMount, onDeactivated, onMounted, Ref, ref, useTemplateRef, watch } from 'vue';
+import type { ComputedRef, Ref} from 'vue';
+import { computed, nextTick, onActivated, onBeforeMount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useIsMobile } from '../hooks';
 import DateSelectionView from '../overlays/DateSelectionView.vue';
 
@@ -310,7 +311,11 @@ const onKey = (event: KeyboardEvent) => {
     }
 };
 
-const updateHasFocus = async () => {
+function doUpdateHasFocus() {
+    updateHasFocus().catch(console.error);
+}
+
+async function updateHasFocus() {
     await nextTick();
     if (el.value === null) {
         return;
@@ -418,20 +423,20 @@ function onTyping() {
 
 function addEventListeners() {
     document.addEventListener('keydown', onKey);
-    document.addEventListener('focusin', updateHasFocus);
-    document.addEventListener('focusout', updateHasFocus);
-    document.addEventListener('visibilitychange', updateHasFocus);
+    document.addEventListener('focusin', doUpdateHasFocus);
+    document.addEventListener('focusout', doUpdateHasFocus);
+    document.addEventListener('visibilitychange', doUpdateHasFocus);
 
     // Sometimes focusin/focusout isn't called reliably
-    document.addEventListener('click', updateHasFocus, { passive: true });
+    document.addEventListener('click', doUpdateHasFocus, { passive: true });
 }
 
 function removeEventListeners() {
     document.removeEventListener('keydown', onKey);
-    document.removeEventListener('focusin', updateHasFocus);
-    document.removeEventListener('focusout', updateHasFocus);
-    document.removeEventListener('visibilitychange', updateHasFocus);
-    document.removeEventListener('click', updateHasFocus);
+    document.removeEventListener('focusin', doUpdateHasFocus);
+    document.removeEventListener('focusout', doUpdateHasFocus);
+    document.removeEventListener('visibilitychange', doUpdateHasFocus);
+    document.removeEventListener('click', doUpdateHasFocus);
 }
 
 function blurAllIfValid() {

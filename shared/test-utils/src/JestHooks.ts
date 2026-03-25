@@ -1,4 +1,4 @@
-import { TestHooks } from './TestHooks.js';
+import type { TestHooks } from './TestHooks.js';
 
 export class JestHooks implements TestHooks {
     beforeAll(callback: () => void | Promise<void>, timeout?: number) {

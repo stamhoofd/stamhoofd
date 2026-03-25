@@ -4,7 +4,7 @@ import path, { resolve } from 'path';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
 
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
-import { type ViteUserConfig } from 'vitest/config';
+import type {ViteUserConfig} from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
@@ -23,13 +23,13 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
     if (!isPlaywrightBuild) {
         if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
         // Force load the cjs version of test-utils because the esm version gives issues with the json environment
-            const builder = await import('@stamhoofd/test-utils/cjs');
-            await builder.TestUtils.loadEnvironment();
+            const builder = await import('@stamhoofd/test-utils');
+            builder.TestUtils.loadEnvironment();
             loadedEnv = STAMHOOFD;
         }
         else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
             console.log('Building for development...', process.env.NODE_ENV);
-            const builder = await import('@stamhoofd/build-development-env/cjs');
+            const builder = await import('@stamhoofd/build-development-env');
             const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
                 frontend: options.name,
             });
@@ -84,8 +84,8 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
         plugins: [
             viteSvgToWebfont({
                 ...iconConfig,
-                context: resolve(__dirname, './shared/assets/images/icons/'),
-                cssTemplate: resolve(__dirname, './shared/assets/images/icons/iconCss.hbs'),
+                context: resolve(import.meta.dirname, './shared/assets/images/icons/'),
+                cssTemplate: resolve(import.meta.dirname, './shared/assets/images/icons/iconCss.hbs'),
                 moduleId: options.name === 'calculator' ? 'vite-svg-2-webfont.css?inline' : 'vite-svg-2-webfont.css',
             }),
             svgNamespacePlugin({
@@ -113,8 +113,8 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     warmup: {
                         clientFiles: [
                             ...(options?.clientFiles ?? []),
-                            resolve(__dirname, './shared') + '/**/*.vue',
-                            resolve(__dirname, './shared') + '/**/*.ts',
+                            resolve(import.meta.dirname, './shared') + '/**/*.vue',
+                            resolve(import.meta.dirname, './shared') + '/**/*.ts',
                         ],
                     },
                 }
@@ -155,10 +155,10 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                             cssCodeSplit: false,
                             outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
                         }),
-        publicDir: resolve(__dirname, './public'),
+        publicDir: resolve(import.meta.dirname, './public'),
         test: {
             globals: true,
-            setupFiles: ['vitest-browser-vue', __dirname + '/tests/vitest.setup.ts'],
+            setupFiles: ['vitest-browser-vue', import.meta.dirname + '/tests/vitest.setup.ts'],
             browser: {
                 provider: 'playwright', // or 'webdriverio'
                 enabled: true,
@@ -170,8 +170,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
             },
         },
         optimizeDeps: {
-            exclude: ['fsevents'],
-            include: ['@stamhoofd/structures'],
+            exclude: ['fsevents', '@stamhoofd/*'],
         },
         css: {
             postcss: {

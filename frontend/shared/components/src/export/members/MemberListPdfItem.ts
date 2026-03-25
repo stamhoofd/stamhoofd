@@ -1,6 +1,7 @@
-import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
-import { PlatformMember } from '@stamhoofd/structures';
-import { SelectablePdfData } from '../SelectablePdfData';
+import type { PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions} from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfText, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import type { PlatformMember } from '@stamhoofd/structures';
+import type { SelectablePdfData } from '../SelectablePdfData';
 
 interface MembersDetailArgs {
     members: PlatformMember[];

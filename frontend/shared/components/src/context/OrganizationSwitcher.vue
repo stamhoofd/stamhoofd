@@ -1,7 +1,7 @@
 <template>
     <PlatformLogo v-if="!organization && (app === 'auto' || (app === 'registration' && !canSwitch))" />
     <OrganizationLogo v-else-if="(!canSwitch && organization)" :organization="organization" />
-    <button v-else v-long-press="($event) => open($event)" class="organization-switcher" :class="{small}" type="button" @click="open" @contextmenu.prevent="open($event)">
+    <button v-else v-long-press="($event: MouseEvent) => open($event)" class="organization-switcher" :class="{small}" type="button" @click="open" @contextmenu.prevent="open($event)">
         <ContextLogo :organization="organization" :app="app" />
         <div>
             <h1>

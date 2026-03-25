@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-networking';
 import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/structures';
 
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useContext } from '../hooks';

@@ -58,7 +58,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { CartItem, DiscountCode } from '@stamhoofd/structures';
+import type { CartItem, DiscountCode } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';

@@ -1,7 +1,8 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController } from '@simonbackx/vue-app-navigation';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { Webshop, WebshopAuthType } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Webshop} from '@stamhoofd/structures';
+import { WebshopAuthType } from '@stamhoofd/structures';
 
 import { wrapContext } from '@stamhoofd/dashboard';
 import RequiredLoginView from './views/RequiredLoginView.vue';

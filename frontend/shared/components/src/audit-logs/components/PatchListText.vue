@@ -6,9 +6,11 @@
 </template>
 
 <script setup lang="ts">
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacementType } from '@stamhoofd/structures';
+import type { AuditLogPatchItem} from '@stamhoofd/structures';
+import { AuditLogPatchItemType, AuditLogReplacementType } from '@stamhoofd/structures';
 import { h } from 'vue';
-import { Renderable, renderAny, RenderTextComponent } from './RenderTextComponent';
+import type { Renderable} from './RenderTextComponent';
+import { renderAny, RenderTextComponent } from './RenderTextComponent';
 
 defineProps<{
     items: AuditLogPatchItem[];

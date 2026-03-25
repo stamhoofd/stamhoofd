@@ -42,64 +42,65 @@
         </STList>
 
         <TInput v-if="warningText !== null" v-model="warningText" :placeholder="$t(`%iZ`)" error-fields="label" :error-box="errorBox" class="max" :title="$t(`%JE`)" />
-            <STInputBox v-if="warningType" class="max" :title="$t(`%1B`)">
-                <STList>
-                    <STListItem :selectable="true" element-name="label">
-                        <template #left>
-                            <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ $t('%iT') }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ $t('%iU') }}
-                        </p>
-                    </STListItem>
+        <STInputBox v-if="warningType" class="max" :title="$t(`%1B`)">
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('%iT') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('%iU') }}
+                    </p>
+                </STListItem>
 
-                    <STListItem :selectable="true" element-name="label">
-                        <template #left>
-                            <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ $t('%zJ') }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ $t('%iV') }}
-                        </p>
-                    </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('%zJ') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('%iV') }}
+                    </p>
+                </STListItem>
 
-                    <STListItem :selectable="true" element-name="label">
-                        <template #left>
-                            <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ $t('%iW') }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ $t("%iY") }}
-                        </p>
-                    </STListItem>
-                </STList>
-            </STInputBox>
-            <div v-if="!isNew" class="container">
-                <hr><h2>
-                    {{ $t('%iX') }}
-                </h2>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('%iW') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t("%iY") }}
+                    </p>
+                </STListItem>
+            </STList>
+        </STInputBox>
+        <div v-if="!isNew" class="container">
+            <hr><h2>
+                {{ $t('%iX') }}
+            </h2>
 
-                <button class="button secundary danger" type="button" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>{{ $t('%CJ') }}</span>
-                </button>
-            </div>
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>{{ $t('%CJ') }}</span>
+            </button>
+        </div>
     </SaveView>
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { ErrorBox } from '#errors/ErrorBox.ts';
+import type { ErrorBox } from '#errors/ErrorBox.ts';
 import Radio from '#inputs/Radio.vue';
 import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
@@ -107,7 +108,8 @@ import STInputBox from '#inputs/STInputBox.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { Validator } from '#errors/Validator.ts';
-import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, TranslatedString, Version } from '@stamhoofd/structures';
+import type { RecordSettings, TranslatedString} from '@stamhoofd/structures';
+import { RecordChoice, RecordWarning, RecordWarningType, Version } from '@stamhoofd/structures';
 
 @Component({
     components: {
@@ -269,7 +271,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         }
 
         this.saveHandler(arrayPatch);
-        this.pop({ force: true });
+        await this.pop({ force: true });
     }
 
     async deleteMe() {
@@ -279,7 +281,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
 
         if (this.isNew) {
             // do nothing
-            this.pop({ force: true });
+            await this.pop({ force: true });
             return;
         }
 
@@ -287,11 +289,11 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         arrayPatch.addDelete(this.choice.id);
 
         this.saveHandler(arrayPatch);
-        this.pop({ force: true });
+        await this.pop({ force: true });
     }
 
-    cancel() {
-        this.pop();
+    async cancel() {
+        await this.pop();
     }
 
     get hasChanges() {

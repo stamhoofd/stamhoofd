@@ -1,11 +1,10 @@
 import { column, ManyToOneRelation } from '@simonbackx/simple-database';
-import { AppliedRegistrationDiscount, EmailTemplateType, GroupPrice, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, GroupPrice, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { Group, Organization } from './index.js';
+import { QueryableModel } from '@stamhoofd/sql';
+import { type Group } from './Group.js';
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -29,7 +28,7 @@ export class Registration extends QueryableModel {
     @column({ type: 'string' })
     periodId: string;
 
-    @column({ type: 'string', foreignKey: Registration.group })
+    @column({ type: 'string' })
     groupId: string;
 
     @column({ type: 'json', decoder: GroupPrice })
@@ -153,102 +152,13 @@ export class Registration extends QueryableModel {
     @column({ type: 'json', decoder: new MapDecoder(StringDecoder, AppliedRegistrationDiscount) })
     discounts = new Map<string, AppliedRegistrationDiscount>();
 
-    static group: ManyToOneRelation<'group', import('./Group').Group>;
+    static group: ManyToOneRelation<'group', Group>;
 
-    getStructure(this: Registration & { group: import('./Group').Group }) {
+    getStructure(this: Registration & { group: Group }) {
         return RegistrationStructure.create({
             ...this,
             group: this.group.getStructure(),
             price: this.price ?? 0,
-        });
-    }
-
-    /**
-     * Get the number of active members that are currently registered
-     * This is used for billing
-     */
-    static async getActiveMembers(organizationId: string): Promise<number> {
-        const organization = await Organization.getByID(organizationId);
-        if (!organization) {
-            return 0;
-        }
-
-        return await this.select()
-            .join(
-                SQL.join(Group.table)
-                    .where(SQL.column('id'), SQL.parentColumn('groupId')),
-            )
-            .where('periodId', organization.periodId)
-            .where('deactivatedAt', null)
-            .where('registeredAt', '!=', null)
-            .where(SQL.column(Group.table, 'deletedAt'), null)
-            .count(
-                SQL.distinct(SQL.column('memberId')),
-            );
-    }
-
-    async getRecipients(organization: Organization, group: import('./').Group) {
-        const { Member } = await import('./Member.js');
-
-        const member = await Member.getByIdWithUsers(this.memberId);
-
-        if (!member) {
-            return [];
-        }
-
-        const allowedEmails = member.details.getNotificationEmails();
-
-        return member.users.map(user => Recipient.create({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            userId: user.id,
-            replacements: [
-                Replacement.create({
-                    token: 'firstNameMember',
-                    value: member.details.firstName,
-                }),
-                Replacement.create({
-                    token: 'lastNameMember',
-                    value: member.details.lastName,
-                }),
-                Replacement.create({
-                    token: 'registerUrl',
-                    value: 'https://' + organization.getHost(),
-                }),
-                Replacement.create({
-                    token: 'groupName',
-                    value: group.settings.name.toString(),
-                }),
-            ],
-        })).filter(r => allowedEmails.includes(r.email.toLocaleLowerCase()));
-    }
-
-    async sendEmailTemplate(data: {
-        type: EmailTemplateType;
-    }) {
-        const Group = (await import('./index.js')).Group;
-        const group = await Group.getByID(this.groupId);
-
-        if (!group) {
-            return;
-        }
-
-        const organization = await Organization.getByID(group.organizationId);
-        if (!organization) {
-            return;
-        }
-
-        const recipients = await this.getRecipients(organization, group);
-
-        // Create e-mail builder
-        await sendEmailTemplate(organization, {
-            template: {
-                type: data.type,
-                group,
-            },
-            recipients,
-            type: 'transactional',
         });
     }
 

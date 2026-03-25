@@ -32,7 +32,8 @@
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
+import type { CheckoutMethod} from '@stamhoofd/structures';
+import { CheckoutMethodType } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import { useCheckoutManager } from '../../composables/useCheckoutManager';

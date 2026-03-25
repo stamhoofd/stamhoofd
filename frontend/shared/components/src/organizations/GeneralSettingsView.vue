@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import AddressInput from '#inputs/AddressInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -111,7 +111,8 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useReview } from '#useReview.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { Company, OrganizationMetaData, OrganizationPrivateMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
+import type { PatchAnswers} from '@stamhoofd/structures';
+import { Company, OrganizationMetaData, OrganizationPrivateMetaData, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 import EditCompanyView from './components/EditCompanyView.vue';

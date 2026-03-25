@@ -64,7 +64,8 @@
 <script lang="ts" setup>
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, type useDismiss, type usePopup, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController,   usePresent } from '@simonbackx/vue-app-navigation';
+import type {useDismiss, usePopup} from '@simonbackx/vue-app-navigation';
 import CategoryBox from '@stamhoofd/components/views/CategoryBox.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
@@ -79,13 +80,15 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { CartItem, LoginProviderType, Payment, PaymentStatus } from '@stamhoofd/structures';
+import type { CartItem, Payment} from '@stamhoofd/structures';
+import { LoginProviderType, PaymentStatus } from '@stamhoofd/structures';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
 import { useCheckoutManager } from '../composables/useCheckoutManager';
 import { useWebshopManager } from '../composables/useWebshopManager';
 import CartView from './checkout/CartView.vue';
-import { CheckoutStep, CheckoutStepsManager } from './checkout/CheckoutStepsManager';
+import type { CheckoutStep} from './checkout/CheckoutStepsManager';
+import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
 import TicketView from './orders/TicketView.vue';
 

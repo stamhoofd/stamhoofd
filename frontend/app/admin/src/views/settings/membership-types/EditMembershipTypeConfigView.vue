@@ -51,7 +51,8 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -61,7 +62,8 @@ import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice, RegistrationPeriod } from '@stamhoofd/structures';
+import type { PlatformMembershipType, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
+import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfigPrice } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import PlatformMembershipTypePriceConfigEditBox from './components/PlatformMembershipTypePriceConfigEditBox.vue';
 

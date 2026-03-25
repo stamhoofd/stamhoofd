@@ -1,18 +1,18 @@
-import { exec } from "child_process";
-import fs from "fs";
-import { TranslatorType } from "../enums/TranslatorType";
-import { getChildDirectories, getChildFiles } from "../helpers/fs-helpers";
-import { isLanguage, isLocale } from "../helpers/i18n-helpers";
+import { exec } from 'child_process';
+import fs from 'fs';
+import { TranslatorType } from '../enums/TranslatorType.js';
+import { getChildDirectories, getChildFiles } from '../helpers/fs-helpers.js';
+import { isLanguage, isLocale } from '../helpers/i18n-helpers.js';
 import {
     validateConsistentWords,
     validateTranslationDictionary,
     validateTranslations,
-} from "../helpers/validate-translations";
-import { globals } from "../shared/globals";
-import { ConsistentWords } from "../types/ConsistentWords";
-import { TranslationDictionary } from "../types/TranslationDictionary";
-import { Translations } from "../types/Translations";
-import { MachineTranslationComparison } from "./MachineTranslationComparer";
+} from '../helpers/validate-translations.js';
+import { globals } from '../shared/globals.js';
+import type { ConsistentWords } from '../types/ConsistentWords.js';
+import type { TranslationDictionary } from '../types/TranslationDictionary.js';
+import type { Translations } from '../types/Translations.js';
+import type { MachineTranslationComparison } from './MachineTranslationComparer.js';
 
 export class TranslationManager {
     readonly namespaces: string[];
@@ -24,7 +24,7 @@ export class TranslationManager {
     }
 
     async buildDist() {
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
             exec(`cd ${globals.I18NUUID_LOCALES_ROOT} && yarn -s build`, resolve);
         });
     }
@@ -32,8 +32,8 @@ export class TranslationManager {
     iterateNonDefaultLocalesWithNamespace(callbackfn: (locale: string, namespace: string) => void, locales?: string[]) {
         const otherLocales = this.locales.filter(
             (locale) => {
-                if (locale === globals.DEFAULT_LOCALE || this.getMappedLocale(locale) ===
-                globals.DEFAULT_LOCALE) {
+                if (locale === globals.DEFAULT_LOCALE || this.getMappedLocale(locale)
+                    === globals.DEFAULT_LOCALE) {
                     return false;
                 }
 
@@ -45,7 +45,7 @@ export class TranslationManager {
             },
         );
 
-        for(const namespace of this.namespaces) {
+        for (const namespace of this.namespaces) {
             for (const locale of otherLocales) {
                 callbackfn(locale, namespace);
             }
@@ -55,8 +55,8 @@ export class TranslationManager {
     async iterateNonDefaultLocalesWithNamespaceAsync(callbackfn: (locale: string, namespace: string) => Promise<void>, locales?: string[]) {
         const otherLocales = this.locales.filter(
             (locale) => {
-                if (locale === globals.DEFAULT_LOCALE || this.getMappedLocale(locale) ===
-                globals.DEFAULT_LOCALE) {
+                if (locale === globals.DEFAULT_LOCALE || this.getMappedLocale(locale)
+                    === globals.DEFAULT_LOCALE) {
                     return false;
                 }
 
@@ -68,7 +68,7 @@ export class TranslationManager {
             },
         );
 
-        for(const namespace of this.namespaces) {
+        for (const namespace of this.namespaces) {
             for (const locale of otherLocales) {
                 await callbackfn(locale, namespace);
             }
@@ -76,7 +76,7 @@ export class TranslationManager {
     }
 
     getMappedLocale(locale: string): string {
-        const parts = locale.split("-");
+        const parts = locale.split('-');
         const language = parts[0];
         const country = parts[1];
 
@@ -91,12 +91,12 @@ export class TranslationManager {
                 dict.countries,
             )) {
                 if (countryList.includes(country)) {
-                    return language + "-" + defaultCountry;
+                    return language + '-' + defaultCountry;
                 }
             }
         }
 
-        return language + "-" + dict.default;
+        return language + '-' + dict.default;
     }
 
     readSource(locale: string, namespace: string): Translations {
@@ -123,7 +123,7 @@ export class TranslationManager {
         );
     }
 
-    setSourceTranslation({key, value, locale, namespace}: {key: string, value: string, locale: string, namespace: string}) {
+    setSourceTranslation({ key, value, locale, namespace }: { key: string; value: string; locale: string; namespace: string }) {
         const path = TranslationManager.getSourcePath(locale, namespace);
         const source = TranslationManager.readCompleteSource(path) ?? {};
         source[key] = value;
@@ -166,7 +166,7 @@ export class TranslationManager {
         return TranslationManager.readTranslationsAllowNull(path) ?? {};
     }
 
-    removeFromMachineTranslationDictionary(args: { locale: string; namespace: string, key: string }) {
+    removeFromMachineTranslationDictionary(args: { locale: string; namespace: string; key: string }) {
         const existingDictionary = this.readMachineTranslationDictionary(
             args.locale,
             args.namespace,
@@ -205,14 +205,14 @@ export class TranslationManager {
             args.locale,
             args.namespace,
         );
-        
+
         const sortedDictionary = Object.fromEntries(Object.keys(dictionary).sort().map(key => [key, dictionary[key]]));
 
         fs.writeFileSync(filePath, JSON.stringify(sortedDictionary, null, 2));
     }
 
-    setComparison(comparison: MachineTranslationComparison, {locale, namespace}: {locale: string, namespace: string}) {
-        if(globals.COMPARE_OUTPUT_DIR.length === 0) {
+    setComparison(comparison: MachineTranslationComparison, { locale, namespace }: { locale: string; namespace: string }) {
+        if (globals.COMPARE_OUTPUT_DIR.length === 0) {
             throw new Error('No COMPARE_OUTPUT_DIR set');
         }
         const dir = globals.COMPARE_OUTPUT_DIR;
@@ -221,12 +221,12 @@ export class TranslationManager {
     }
 
     async buildTranslations() {
-        console.log("Building translations...");
+        console.log('Building translations...');
         const root = globals.I18NUUID_LOCALES_ROOT;
         const command = `cd ${root} && yarn build`;
 
         await new Promise((resolve) => {
-            console.log("Finished building translations.");
+            console.log('Finished building translations.');
             exec(command, resolve);
         });
     }
@@ -236,11 +236,11 @@ export class TranslationManager {
         namespace: string,
     ): ConsistentWords | null {
         // for now the consistent-words are saved in the source ai file of the language
-        const language = locale.split("-")[0];
+        const language = locale.split('-')[0];
 
         // first get default consistent words for locale
-        const result =
-            TranslationManager.getConsistentWordsHelper(
+        const result
+            = TranslationManager.getConsistentWordsHelper(
                 language,
                 globals.DEFAULT_NAMESPACE,
             ) ?? {};
@@ -277,13 +277,13 @@ export class TranslationManager {
             return globalPrompt;
         }
 
-        const result = fs.readFileSync(filePath, "utf8").trim()
-        return globalPrompt + '\n' +  result;
+        const result = fs.readFileSync(filePath, 'utf8').trim();
+        return globalPrompt + '\n' + result;
     }
 
     static getSourceDir(namespace: string): string {
-        const namespacePart =
-            namespace === globals.DEFAULT_NAMESPACE ? "" : "/" + namespace;
+        const namespacePart
+            = namespace === globals.DEFAULT_NAMESPACE ? '' : '/' + namespace;
 
         return globals.I18NUUID_LOCALES_DIR + namespacePart;
     }
@@ -297,7 +297,7 @@ export class TranslationManager {
         namespace: string = globals.DEFAULT_NAMESPACE,
     ) {
         if (isLanguage(locale)) {
-            locale = locale + "-" + globals.DEFAULT_COUNTRY;
+            locale = locale + '-' + globals.DEFAULT_COUNTRY;
         }
 
         return `${globals.I18NUUID_LOCALES_DIR_DIST}/${namespace}/${locale}.json`;
@@ -313,20 +313,20 @@ export class TranslationManager {
     static getAllLocalesInProject(): string[] {
         const localesDir = globals.I18NUUID_LOCALES_DIR;
 
-        const jsonFiles = getChildFiles(localesDir).filter((file) =>
-            file.endsWith(".json"),
+        const jsonFiles = getChildFiles(localesDir).filter(file =>
+            file.endsWith('.json'),
         );
-        const jsonFileNames = jsonFiles.map((file) =>
+        const jsonFileNames = jsonFiles.map(file =>
             file.substring(0, file.length - 5),
         );
-        return jsonFileNames.filter((name) => isLocale(name));
+        return jsonFileNames.filter(name => isLocale(name));
     }
 
     static getAllNamespacesInProject(): string[] {
         const localesDir = globals.I18NUUID_LOCALES_DIR;
-        const exclude = ["platforms"];
+        const exclude = ['platforms'];
         const result = getChildDirectories(localesDir).filter(
-            (name) => !exclude.includes(name),
+            name => !exclude.includes(name),
         );
 
         if (!result.includes(globals.DEFAULT_NAMESPACE)) {
@@ -347,7 +347,7 @@ export class TranslationManager {
         }
 
         const parsedConsistentWords = JSON.parse(
-            fs.readFileSync(filePath, "utf8"),
+            fs.readFileSync(filePath, 'utf8'),
         );
 
         const validationResult = validateConsistentWords(parsedConsistentWords);
@@ -372,10 +372,10 @@ export class TranslationManager {
             return null;
         }
 
-        const parsedDictionary = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        const parsedDictionary = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
-        const validationResult =
-            validateTranslationDictionary(parsedDictionary);
+        const validationResult
+            = validateTranslationDictionary(parsedDictionary);
 
         if (validationResult.valid === false) {
             throw new Error(
@@ -392,20 +392,20 @@ export class TranslationManager {
         }
 
         return JSON.parse(
-            fs.readFileSync(filePath, "utf8"),
+            fs.readFileSync(filePath, 'utf8'),
         );
     }
 
     static readReplacementsAllowNull(filePath: string): Record<string, string> | null {
         const parsedTranslations = TranslationManager.readCompleteSource(filePath);
-        if(parsedTranslations === null) {
+        if (parsedTranslations === null) {
             return null;
         }
 
         const replacements = parsedTranslations.replacements ?? {};
 
         for (const [key, value] of Object.entries(replacements)) {
-            if (typeof value !== "string") {
+            if (typeof value !== 'string') {
                 delete replacements[key];
             }
         }
@@ -415,12 +415,12 @@ export class TranslationManager {
 
     static readTranslationsAllowNull(filePath: string): Translations | null {
         const parsedTranslations = TranslationManager.readCompleteSource(filePath);
-        if(parsedTranslations === null) {
+        if (parsedTranslations === null) {
             return null;
         }
 
         for (const [key, value] of Object.entries(parsedTranslations)) {
-            if (typeof value === "object") {
+            if (typeof value === 'object') {
                 delete parsedTranslations[key];
             }
         }

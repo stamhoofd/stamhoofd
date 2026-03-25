@@ -1,4 +1,4 @@
-import { EmailInformation } from '@stamhoofd/structures';
+import type { EmailInformation } from '@stamhoofd/structures';
 
 export function getInvalidEmailDescription(emailInformation: EmailInformation) {
     if (emailInformation.unsubscribedAll) {

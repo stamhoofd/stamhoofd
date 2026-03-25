@@ -1,5 +1,6 @@
-import { computed, Ref } from "vue";
-import { useOrganization } from "./useOrganization";
+import type { Ref } from 'vue';
+import { computed } from 'vue';
+import { useOrganization } from './useOrganization';
 
 export function useMembersPackage(): Ref<boolean> {
     const organization = useOrganization();

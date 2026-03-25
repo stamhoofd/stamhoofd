@@ -1,7 +1,7 @@
-/* eslint-disable jest/no-conditional-expect */
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import { Email, EmailRecipient, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User} from '@stamhoofd/models';
+import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -146,7 +146,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             senderId: 'invalid-sender-id',
         });
 
-        await expect(async () => await patchEmail(body, token, organization))
+        await expect(patchEmail(body, token, organization))
             .rejects
             .toThrow(STExpect.errorWithCode('invalid_sender'));
     });
@@ -197,7 +197,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             subject: 'new subject',
         });
 
-        await expect(async () => await patchEmail(body, token, organization))
+        await expect(patchEmail(body, token, organization))
             .rejects
             .toThrow(STExpect.errorWithCode('permission_denied'));
     });
@@ -249,7 +249,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             subject: 'new subject',
         });
 
-        await expect(async () => await patchEmail(body, token, organization))
+        await expect(patchEmail(body, token, organization))
             .rejects
             .toThrow(STExpect.errorWithCode('permission_denied'));
     });
@@ -350,7 +350,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             senderId: sender2.id,
         });
 
-        await expect(async () => await patchEmail(body, token, organization))
+        await expect(patchEmail(body, token, organization))
             .rejects
             .toThrow(STExpect.errorWithCode('permission_denied'));
     });
@@ -402,7 +402,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             status: EmailStatus.Sending,
         });
 
-        await expect(async () => await patchEmail(body, token, organization))
+        await expect(patchEmail(body, token, organization))
             .rejects
             .toThrow(STExpect.errorWithCode('permission_denied'));
     });
@@ -448,7 +448,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         const body = EmailStruct.patch({ id: email.id, senderId: sender.id, status: EmailStatus.Sending });
 
-        await expect(async () => await patchEmail(body, token, organization))
+        await expect(patchEmail(body, token, organization))
             .rejects
             .toThrow(STExpect.errorWithCode('missing_unsubscribe_button'));
     });
@@ -494,7 +494,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         const body = EmailStruct.patch({ id: email.id, senderId: sender.id, status: EmailStatus.Sending });
 
-        await expect(async () => await patchEmail(body, token, organization))
+        await expect(patchEmail(body, token, organization))
             .rejects
             .toThrow(STExpect.errorWithCode('missing_unsubscribe_button'));
     });
@@ -707,7 +707,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
             const balanceTable = recipient.replacements.find(r => r.token === 'balanceTable');
             expect(balanceTable).toBeDefined();
-            expect(balanceTable?.html).toInclude($t('%hX'));
+            expect(balanceTable?.html).toMatch($t('%hX'));
 
             // Outstanding balance
             const outstandingBalance = recipient.replacements.find(r => r.token === 'outstandingBalance');

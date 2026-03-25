@@ -51,6 +51,7 @@ export class Validator {
 
         let valid = true;
         if (promises.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/await-thenable
             const results = await Promise.all(promises);
             valid = results.every(r => typeof r === 'boolean' ? r : true);
         }

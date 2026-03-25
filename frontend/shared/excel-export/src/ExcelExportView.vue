@@ -38,7 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
@@ -53,10 +54,11 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { Storage } from '@stamhoofd/networking/Storage';
-import { ExcelExportRequest, ExcelExportResponse, ExcelExportType, ExcelWorkbookFilter, LimitedFilteredRequest, Version } from '@stamhoofd/structures';
+import type { ExcelExportType, LimitedFilteredRequest} from '@stamhoofd/structures';
+import { ExcelExportRequest, ExcelExportResponse, ExcelWorkbookFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, ref } from 'vue';
-import { SelectableWorkbook } from './SelectableWorkbook';
+import type { SelectableWorkbook } from './SelectableWorkbook';
 
 const props = defineProps<{
     type: ExcelExportType;

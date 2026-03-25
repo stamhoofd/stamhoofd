@@ -47,7 +47,8 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
@@ -218,7 +219,7 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
             await this.$organizationManager.patch(this.organizationPatch);
             this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
         }
         catch (e) {
             this.errorBox = new ErrorBox(e);

@@ -16,7 +16,7 @@
 import CategoryBox from '@stamhoofd/components/views/CategoryBox.vue';
 import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { CartItem, Checkout, Webshop } from '@stamhoofd/structures';
+import type { CartItem, Checkout, Webshop } from '@stamhoofd/structures';
 
 defineProps<{
     webshop: Webshop;

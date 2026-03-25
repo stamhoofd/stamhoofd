@@ -1,10 +1,13 @@
-import { Decoder, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Request, RequestResult } from '@simonbackx/simple-networking';
+import type { RequestResult } from '@simonbackx/simple-networking';
+import { Request } from '@simonbackx/simple-networking';
 import { useAppContext } from '#context/appContext.ts';
 import { useContext } from '#hooks/useContext.ts';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { AppType, MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, PlatformMember, Registration, Version } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { AppType, PlatformMember, Registration} from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';
 import { updateContextFromMembersBlob } from './helpers/updateContextFromMembersBlob';
 

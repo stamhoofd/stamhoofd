@@ -1,8 +1,9 @@
 // test should always be imported first
-import { test } from '../test-fixtures/base';
+import { test } from '../test-fixtures/base.js';
 
 // other imports
-import { expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import {
     Organization,
     OrganizationFactory,
@@ -10,7 +11,7 @@ import {
 } from '@stamhoofd/models';
 import { AcquisitionType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { WorkerData } from '../helpers';
+import { WorkerData } from '../helpers/index.js';
 
 /**
  * Onboarding a new organization

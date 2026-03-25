@@ -1,8 +1,9 @@
-import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { WebshopManager } from './WebshopManager'
+import type { WebshopManager } from './WebshopManager'
 
 /**
  * Convenient access to the organization of the current session
@@ -38,8 +39,8 @@ export class CheckoutManager {
         try {
             // Validate code
             const response = await this.$webshopManager.server.request({
-                method: "POST",
-                path: "/webshop/"+this.$webshopManager.webshop.id + '/discount-codes',
+                method: 'POST',
+                path: '/webshop/'+this.$webshopManager.webshop.id + '/discount-codes',
                 body: this.checkout.discountCodes.map(c => c.code),
                 decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
             })
@@ -59,8 +60,8 @@ export class CheckoutManager {
         try {
             // Validate code
             const response = await this.$webshopManager.server.request({
-                method: "POST",
-                path: "/webshop/"+this.$webshopManager.webshop.id + '/discount-codes',
+                method: 'POST',
+                path: '/webshop/'+this.$webshopManager.webshop.id + '/discount-codes',
                 body: [...this.checkout.discountCodes.map(c => c.code), code],
                 decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
             })
@@ -90,14 +91,14 @@ export class CheckoutManager {
 
     loadCheckout() {
         try {
-            const json = localStorage.getItem(this.$webshopManager.webshop.id+"-checkout")
+            const json = localStorage.getItem(this.$webshopManager.webshop.id+'-checkout')
             if (json) {
                 const obj = JSON.parse(json)
                 const versionBox = new VersionBoxDecoder(Checkout as Decoder<Checkout>).decode(new ObjectData(obj, { version: Version }))
                 return versionBox.data
             }
         } catch (e) {
-            console.error("Failed to load cart")
+            console.error('Failed to load cart')
             console.error(e)
         }
         return new Checkout()
@@ -108,9 +109,9 @@ export class CheckoutManager {
             this.checkout.update(this.$webshopManager.webshop)
             const data = new VersionBox(this.checkout).encode({ version: Version })
             const json = JSON.stringify(data)
-            localStorage.setItem(this.$webshopManager.webshop.id+"-checkout", json)
+            localStorage.setItem(this.$webshopManager.webshop.id+'-checkout', json)
         } catch (e) {
-            console.error("Failed to save cart")
+            console.error('Failed to save cart')
             console.error(e)
         }
     }

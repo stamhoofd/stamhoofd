@@ -1,7 +1,8 @@
 /// <reference types="@vitest/browser/providers/playwright" />
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Country, Language } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { userEvent } from '@vitest/browser/context';
 import { expect, test } from 'vitest';
 import { render } from 'vitest-browser-vue';

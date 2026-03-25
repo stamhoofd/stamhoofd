@@ -1,12 +1,12 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-    globalSetup: "./src/setup/global-setup.ts",
-    globalTeardown: "./src/setup/global-teardown.ts",
-    testDir: "./src/tests",
+    globalSetup: './src/setup/global-setup.js',
+    globalTeardown: './src/setup/global-teardown.js',
+    testDir: './src/tests',
     /* Run tests in files in parallel */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -15,29 +15,33 @@ export default defineConfig({
     /* Opt out of parallel tests on CI. */
     workers: process.env.CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: "html",
+    reporter: 'line',
+    
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Base URL to use in actions like `await page.goto('')`. */
         // baseURL: 'http://localhost:3000',
 
+        // Capture screenshot after each test failure.
+        screenshot: 'only-on-failure',
+
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-        trace: "on-first-retry",
+        trace: 'on-first-retry',
 
         // todo
         headless: true,
         // ignoreHTTPSErrors: true,
         launchOptions: {
-            args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
         },
     },
 
     /* Configure projects for major browsers */
     projects: [
         {
-            name: "chromium",
+            name: 'chromium',
             use: {
-                ...devices["Desktop Chrome"],
+                ...devices['Desktop Chrome'],
                 channel: 'chromium',
             },
         },

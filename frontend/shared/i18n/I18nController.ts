@@ -4,7 +4,10 @@ import { countries, languages } from '@stamhoofd/locales';
 import { type SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { Country, CountryCode, countryToCode, Language } from '@stamhoofd/structures';
+import { countryToCode } from '@stamhoofd/structures';
+import type { CountryCode } from '@stamhoofd/types/Country';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { I18n } from './I18n';
 
 export function useTranslate(): typeof I18n.prototype.$t {
@@ -187,7 +190,7 @@ export class I18nController {
 
         if (!i18n.isLocaleLoaded(namespace, locale)) {
             // If the language hasn't been loaded yet
-            const messages = await import(`../../../shared/locales/dist/locales/${namespace}/${locale}.json`);
+            const messages = await import(`../../../shared/locales/dist/locales/keeo/${locale}.json`);
             i18n.loadLocale(namespace, locale, messages.default);
             console.log('[I18n] Successfully loaded locale', namespace, locale);
         }
@@ -290,7 +293,7 @@ export class I18nController {
                 needsSave = true;
             }
             else {
-                if (language !== l) {
+                if (language?.toString() !== l) {
                     console.warn('[I18n] Ignored language from url', l);
                 }
             }

@@ -1,6 +1,6 @@
 import { AutoEncoder, DateDecoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 
 export class ChargeRequest extends AutoEncoder {
     @field({ decoder: StringDecoder })

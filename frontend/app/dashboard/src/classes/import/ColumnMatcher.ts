@@ -1,6 +1,6 @@
-import XLSX from 'xlsx';
-import { ImportMemberBaseResult } from './ImportMemberBaseResult';
-import { ImportMemberResult } from './ImportMemberResult';
+import type XLSX from 'xlsx';
+import type { ImportMemberBaseResult } from './ImportMemberBaseResult';
+import type { ImportMemberResult } from './ImportMemberResult';
 
 export interface ColumnMatcher {
     id: string;

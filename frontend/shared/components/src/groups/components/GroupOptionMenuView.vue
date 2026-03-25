@@ -10,9 +10,9 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { Group, GroupOptionMenu } from '@stamhoofd/structures';
+import type { Group, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
 import { usePatch } from '../../hooks';
@@ -77,7 +77,7 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         if (props.showToasts) {
-            await Toast.success($t('%1FX')).show();
+            Toast.success($t('%1FX')).show();
         }
         await pop({ force: true });
     }

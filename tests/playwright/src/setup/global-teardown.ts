@@ -1,5 +1,5 @@
-import { CaddyHelper } from './helpers/CaddyHelper';
-import { ProcessInfo } from './helpers/ProcessInfo';
+import { CaddyHelper } from './helpers/CaddyHelper.js';
+import { ProcessInfo } from './helpers/ProcessInfo.js';
 
 export default async function globalTeardown() {
     const caddyHelper = new CaddyHelper();

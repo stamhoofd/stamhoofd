@@ -1,8 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { StamhoofdFilter, unwrapFilterByPath, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import { unwrapFilterByPath } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import DateUIFilterView from './DateUIFilterView.vue';
-import { UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder } from './UIFilter';
+import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export enum UIDateFilterMode {
     GreaterThan = 'GreaterThan',
@@ -19,8 +21,7 @@ function getEndOfDay(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
 }
 
-export class DateUIFilter extends UIFilter {
-    builder!: DateFilterBuilder;
+export class DateUIFilter extends UIFilter<DateFilterBuilder> {
     value: Date = new Date();
     mode: UIDateFilterMode = UIDateFilterMode.Equals;
 

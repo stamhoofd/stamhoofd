@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DNSRecord } from '@stamhoofd/structures';
+import type { DNSRecord } from '@stamhoofd/structures';
 
 defineProps<{
     record: DNSRecord;

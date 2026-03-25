@@ -1,8 +1,9 @@
+import { getProjectPath } from '@stamhoofd/build-development-env';
 import { cp, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { CaddyConfigHelper } from './CaddyConfigHelper';
-import { NetworkHelper } from './NetworkHelper';
-import { ServiceHelper, ServiceProcess } from './ServiceHelper';
+import { CaddyConfigHelper } from './CaddyConfigHelper.js';
+import { NetworkHelper } from './NetworkHelper.js';
+import type { ServiceHelper, ServiceProcess } from './ServiceHelper.js';
 
 export type FrontendProjectName = 'dashboard' | 'registration' | 'webshop';
 
@@ -41,7 +42,7 @@ export class FrontendService implements ServiceHelper {
     }
 
     private async copyProjectDist() {
-        const sourcePath = this.getProjectDistPath();
+        const sourcePath = await this.getProjectDistPath();
 
         const destinationPath = this.getDestinationDistPath(this.workerId);
 
@@ -59,16 +60,16 @@ export class FrontendService implements ServiceHelper {
         }
     }
 
-    private getProjectDistPath() {
-        const thisDirectoryToRoot = '../../../../..';
+    private async getProjectDistPath() {
+        const thisDirectoryToRoot = await getProjectPath()
         const pathFromRoot = 'frontend/app';
         const distFolder = 'dist-playwright';
-        const sourcePath = `${thisDirectoryToRoot}/${pathFromRoot}/${this.name}/${distFolder}`;
-        return resolve(__dirname, sourcePath);
+        const sourcePath = `${thisDirectoryToRoot}${pathFromRoot}/${this.name}/${distFolder}`;
+        return resolve(import.meta.dirname, sourcePath);
     }
 
     static getDestinationDistPath(service: FrontendProjectName, workerId: string) {
-        return resolve(__dirname, `../../../dist/${service}/${workerId}`);
+        return resolve(import.meta.dirname, `../../../dist/${service}/${workerId}`);
     }
 
     getDestinationDistPath(workerId: string) {

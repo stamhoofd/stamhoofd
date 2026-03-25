@@ -1,6 +1,7 @@
-import { usePlatformManager, useRequestOwner } from "@stamhoofd/networking";
-import { computed, onMounted, Ref, unref } from "vue";
-import { Toast } from "../../overlays/Toast";
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import type { Ref} from 'vue';
+import { computed, onMounted, unref } from 'vue';
+import { Toast } from '../../overlays/Toast';
 
 export function useRegistrationPeriods() {
     const platformManager = usePlatformManager()

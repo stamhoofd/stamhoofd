@@ -337,7 +337,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, setUrl, usePop, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -354,8 +355,10 @@ import Spinner from '@stamhoofd/components/Spinner.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import TransferPaymentView from '@stamhoofd/components/views/TransferPaymentView.vue';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
-import { Order, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
-import { Ref, computed, onMounted, ref, watch } from 'vue';
+import type { Payment} from '@stamhoofd/structures';
+import { Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, RecordCategory, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';
 import { useWebshopManager } from '../../composables/useWebshopManager';

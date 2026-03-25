@@ -6,7 +6,12 @@ function test(matrix: number[][], expectedIndexes: number[]) {
 }
 
 function testOptimalSum(matrix: number[][]) {
+    const startTime = process.hrtime.bigint();
     const result = calculateHungarianAlgorithm(matrix);
+    const elapsedTime = process.hrtime.bigint() - startTime;
+    const elapsedTimeMs = Number(elapsedTime) / 1000 / 1000;
+
+    expect(elapsedTimeMs).toBeLessThanOrEqual(matrix.length / 5);
 
     // Verify result has correct length
     expect(result).toHaveLength(matrix.length);
@@ -241,7 +246,10 @@ describe('calculateHungarianAlgorithm', () => {
             );
 
             testOptimalSum(matrix); // because it is 10x10 the result will still be checked against all permutations
-        }, 1_000);
+
+            // Note: timeout here is for testing if the random matrix generated a real optimum using brute force techniques.
+            // The algorithm itself should resolve in a much shorter time frame
+        }, 10_000);
 
         it('should handle larger matrices efficiently', () => {
             const size = 500;

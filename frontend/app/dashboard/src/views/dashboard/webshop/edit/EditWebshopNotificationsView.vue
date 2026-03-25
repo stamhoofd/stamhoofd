@@ -29,7 +29,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { getInvalidEmailDescription as getInvalidEmailDescriptionHelper } from '@stamhoofd/components/helpers/getInvalidEmailDescription.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
@@ -39,7 +40,8 @@ import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from '@stamh
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { computed, onMounted, ref } from 'vue';
-import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
+import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 const viewTitle = 'Meldingen';

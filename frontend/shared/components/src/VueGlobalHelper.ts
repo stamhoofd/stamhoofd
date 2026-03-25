@@ -4,7 +4,7 @@ import { AppManager } from '@stamhoofd/networking/AppManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { type App } from 'vue';
+import type {App, ComponentPublicInstance} from 'vue';
 
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
@@ -234,7 +234,7 @@ export class VueGlobalHelper {
                     $patchOrganizationPeriod: usePatchOrganizationPeriod(),
                 };
 
-                injectHooks(this, directives);
+                injectHooks(this as unknown as ComponentPublicInstance, directives);
             },
             methods: {
                 formatPrice: Formatter.price.bind(Formatter),

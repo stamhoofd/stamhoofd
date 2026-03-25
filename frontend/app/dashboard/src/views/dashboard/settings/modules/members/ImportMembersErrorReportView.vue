@@ -28,7 +28,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { ref } from 'vue';
-import { MemberImportReport } from './MemberImportReport';
+import type { MemberImportReport } from './MemberImportReport';
 
 const props = defineProps<{
     reports: MemberImportReport[];

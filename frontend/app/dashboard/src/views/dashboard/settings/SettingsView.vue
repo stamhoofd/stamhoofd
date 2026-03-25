@@ -398,13 +398,16 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.ts';
 
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, StripeAccount } from '@stamhoofd/structures';
-import { ComponentOptions, Ref, computed, ref } from 'vue';
+import type { OrganizationRegistrationPeriod} from '@stamhoofd/structures';
+import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
+import type { ComponentOptions, Ref} from 'vue';
+import { computed, ref } from 'vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 import LabsView from './LabsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
@@ -479,12 +482,12 @@ defineRoutes([
     },
     {
         url: Routes.Admins,
-        component: AdminsView as ComponentOptions,
+        component: AdminsView,
     },
     {
         url: Routes.EmailTemplates,
         present: 'popup',
-        component: EditEmailTemplatesView as ComponentOptions,
+        component: EditEmailTemplatesView,
         paramsToProps() {
             return {
                 types: [...Object.values(EmailTemplateType)].filter((t) => {
@@ -502,7 +505,7 @@ defineRoutes([
     {
         url: Routes.EmailSettings,
         present: 'popup',
-        component: EmailSettingsView as ComponentOptions,
+        component: EmailSettingsView,
     },
     {
         url: Routes.RegistrationPaymentMethods,
@@ -521,7 +524,7 @@ defineRoutes([
             const component = await buildEditGroupsView();
 
             await present({
-                ...(options as any),
+                ...options,
                 components: [component],
             });
         },
@@ -529,7 +532,7 @@ defineRoutes([
     {
         url: Routes.BundleDiscounts,
         present: 'popup',
-        component: BundleDiscountSettingsView as ComponentOptions,
+        component: BundleDiscountSettingsView,
         paramsToProps() {
             return {
                 period: organization.value!.period,
@@ -543,7 +546,7 @@ defineRoutes([
     {
         url: Routes.RegistrationRecords,
         present: 'popup',
-        component: RecordsConfigurationView as ComponentOptions,
+        component: RecordsConfigurationView,
         paramsToProps() {
             return {
                 inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({ platform: platform.value }),
@@ -598,14 +601,14 @@ defineRoutes([
     {
         url: Routes.OrganizationRegistrationPeriods,
         present: 'popup',
-        component: EditRegistrationPeriodsView as ComponentOptions,
+        component: EditRegistrationPeriodsView,
     },
     ...(!isPlatform
         ? [
                 {
                     url: Routes.Packages,
                     present: 'popup' as const,
-                    component: PackageSettingsView as ComponentOptions,
+                    component: PackageSettingsView,
                 },
             ]
         : []),

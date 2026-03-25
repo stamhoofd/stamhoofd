@@ -31,11 +31,14 @@ export class EventBus<E, Value> {
     }
 
     async sendEvent(type: E, value: Value) {
-        const values: (Promise<any> | undefined)[] = [];
+        const values: (Promise<any>)[] = [];
         for (const owner of this.listeners.values()) {
             for (const listener of owner) {
                 if (listener.type === type) {
-                    values.push(listener.listener(value, type) ?? undefined);
+                    const promise = listener.listener(value, type) ?? undefined;
+                    if (promise) {
+                        values.push(promise);
+                    }
                 }
             }
         }

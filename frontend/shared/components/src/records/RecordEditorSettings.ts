@@ -1,5 +1,5 @@
 import type { UIFilterBuilder } from '#filters/UIFilter.ts';
-import { ObjectWithRecords, OrganizationRecordsConfiguration, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
+import type { ObjectWithRecords, OrganizationRecordsConfiguration, RecordCategory } from '@stamhoofd/structures';
 
 export enum RecordEditorType {
     PlatformMember = 'PlatformMember',

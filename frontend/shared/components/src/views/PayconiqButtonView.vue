@@ -32,7 +32,7 @@ import LoadingButton from '#navigation/LoadingButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
 
 import PayconiqBannerView from './PayconiqBannerView.vue';
 
@@ -46,11 +46,8 @@ import PayconiqBannerView from './PayconiqBannerView.vue';
     },
 })
 export default class PayconiqButtonView extends Mixins(PayconiqBannerView) {
-    @Prop({})
-    paymentUrl: string;
-
     getOS(): string {
-        var userAgent = navigator.userAgent || navigator.vendor;
+        const userAgent = navigator.userAgent || navigator.vendor;
 
         if (/android/i.test(userAgent)) {
             return 'android';

@@ -292,8 +292,8 @@ describe('TagHelper', () => {
             const result2 = TagHelper.validateTags(validPlatformTags);
 
             // assert
-            expect(result1).toBeFalse();
-            expect(result2).toBeTrue();
+            expect(result1).toBe(false);
+            expect(result2).toBe(true);
         });
 
         it('should return false if a tag is a child tag of multiple tags', () => {
@@ -339,8 +339,8 @@ describe('TagHelper', () => {
             const result2 = TagHelper.validateTags(validPlatformTags);
 
             // assert
-            expect(result1).toBeFalse();
-            expect(result2).toBeTrue();
+            expect(result1).toBe(false);
+            expect(result2).toBe(true);
         });
 
         it('should return false if the child tags contain an infinite loop', () => {
@@ -367,7 +367,7 @@ describe('TagHelper', () => {
             const result = TagHelper.validateTags(platformTagsWithInfiniteLoop);
 
             // assert
-            expect(result).toBeFalse();
+            expect(result).toBe(false);
         });
     });
 });

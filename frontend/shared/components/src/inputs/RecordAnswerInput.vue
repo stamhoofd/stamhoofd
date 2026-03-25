@@ -71,13 +71,15 @@
 </template>
 
 <script lang="ts" setup>
-import { Address, FileType, Image, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChoice, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import type { Address, Image, PatchAnswers, RecordChoice, RecordSettings} from '@stamhoofd/structures';
+import { FileType, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 
-import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { PatchMap } from '@simonbackx/simple-encoding';
 import { computed, onMounted } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
 import STList from '../layout/STList.vue';

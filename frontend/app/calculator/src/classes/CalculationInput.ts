@@ -10,7 +10,7 @@
 
 import { Country } from './Country';
 import { ModuleType } from './ModuleType';
-import { PaymentMethod } from './PaymentMethod';
+import type { PaymentMethod } from './PaymentMethod';
 
 export class CalculationProduct {
     unitPrice = 10_00; // Price per ticket or registration

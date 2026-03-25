@@ -50,8 +50,8 @@ function logRequestDetails(request: Request) {
             return;
         }
         try {
-            const json = JSON.parse(body);
-            if (Array.isArray(json) || Object.keys(json).length) {
+            const json: unknown = JSON.parse(body);
+            if (typeof json === 'object' && json !== null && (Array.isArray(json) || Object.keys(json).length)) {
                 removePII(json);
 
                 logger.error(

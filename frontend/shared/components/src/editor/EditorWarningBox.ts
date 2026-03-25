@@ -4,14 +4,14 @@ type BoxType = 'info' | 'warning'
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         warningBox: {
-            /**
+        /**
        * Set a heading node
        */
-            setBox: (BoxType) => ReturnType,
-            /**
+            setBox: (type: BoxType) => ReturnType,
+        /**
        * Toggle a heading node
        */
-            toggleBox: (BoxType) => ReturnType,
+            toggleBox: (type:BoxType) => ReturnType,
         }
     }
 }

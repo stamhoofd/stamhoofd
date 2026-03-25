@@ -3,13 +3,6 @@ import { SQL } from '../../src/SQL.js';
 import { TableDefinition, test, testMatch, testMultipleErrors } from '../utils/index.js';
 
 describe('$contains', () => {
-    /**
-     * Tests that should be repeated for all filter types
-     */
-    describe('Common checks', () => {
-        // todo
-    });
-
     it('Throws when passing non-string values', async () => {
         const filters = {
             ...baseSQLFilterCompilers,

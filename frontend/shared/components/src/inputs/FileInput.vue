@@ -25,7 +25,7 @@ import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes'
 import { File } from '@stamhoofd/structures';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import Spinner from '../Spinner.vue';
 import STInputBox from './STInputBox.vue';
 
@@ -89,15 +89,19 @@ export default class FileInput extends Mixins(NavigationMixin) {
         Request.cancelAll(this);
     }
 
-    changedFile(event) {
-        if (!event.target.files || event.target.files.length !== 1) {
+    changedFile(event: Event) {
+        if (!(event.target instanceof HTMLInputElement)) {
+            return;
+        }
+        const target = event.target
+        if (!target.files || target.files.length !== 1) {
             return;
         }
         if (this.uploading) {
             return;
         }
 
-        const file = event.target.files[0];
+        const file = target.files[0];
 
         if (file.size > 20 * 1024 * 1024) {
             this.errorBox = new ErrorBox(new SimpleError({
@@ -142,7 +146,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
             .finally(() => {
                 this.uploading = false;
                 // Clear selection
-                event.target.value = null;
+                target.value = '';
             });
     }
 }

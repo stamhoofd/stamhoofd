@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import { SelectableData } from './SelectableData';
+import type { SelectableData } from './SelectableData';
 
 export type SelectablePdfDataValue = string | null | undefined | number | boolean | Date;
 

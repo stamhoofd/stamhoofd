@@ -48,7 +48,7 @@ import { useAddMember } from '@stamhoofd/components/members/hooks/useAddMember';
 import { useChooseGroupForMember } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
 import { useUser } from '@stamhoofd/components/hooks/useUser';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import { PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const memberManager = useMemberManager();

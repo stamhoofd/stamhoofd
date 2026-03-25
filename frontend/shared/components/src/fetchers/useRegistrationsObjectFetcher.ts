@@ -1,7 +1,8 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PlatformRegistration, RegistrationsBlob, SortItemDirection, SortList } from '@stamhoofd/structures';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
+import { assertSort, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PlatformRegistration, RegistrationsBlob, SortItemDirection } from '@stamhoofd/structures';
 import { useContext, usePlatform } from '../hooks';
-import { ObjectFetcher } from '../tables';
+import type { ObjectFetcher } from '../tables';
 
 type ObjectType = PlatformRegistration;
 

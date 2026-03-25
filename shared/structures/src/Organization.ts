@@ -5,19 +5,20 @@ import { Address } from './addresses/Address.js';
 import { appToUri } from './AppType.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
-import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { Group } from './Group.js';
-import { GroupCategoryTree } from './GroupCategory.js';
-import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
-import { RecordAnswer } from './members/records/RecordAnswer.js';
-import { RecordSettings } from './members/records/RecordSettings.js';
+import type { GroupCategoryTree } from './GroupCategory.js';
+import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
+import type { RecordAnswer } from './members/records/RecordAnswer.js';
+import type { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
-import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod.js';
+import type { RegistrationPeriodList } from './RegistrationPeriod.js';
+import { OrganizationRegistrationPeriod, RegistrationPeriod } from './RegistrationPeriod.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
-import { User } from './User.js';
+import type { User } from './User.js';
 import { Company } from './Company.js';
-import { Language } from './Language.js';
+import { Language } from '@stamhoofd/types/Language';
 
 export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

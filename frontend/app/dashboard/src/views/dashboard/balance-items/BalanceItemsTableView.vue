@@ -19,12 +19,15 @@ import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanc
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import type { BalanceItem, BalanceItemType, StamhoofdFilter } from '@stamhoofd/structures';
+import { BalanceItemRelationType, BalanceItemStatus, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { BalanceItemWithPayments } from '@stamhoofd/structures';
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder, PatchableArray, ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder, Decoder } from '@simonbackx/simple-encoding';
+import { PatchableArray, ArrayDecoder } from '@simonbackx/simple-encoding';
 
 const props = withDefaults(
     defineProps<{

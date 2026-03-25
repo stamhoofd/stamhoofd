@@ -1,20 +1,20 @@
 import { test } from '@playwright/test';
-import { TestHooks } from '@stamhoofd/test-utils';
+import type { TestHooks } from '@stamhoofd/test-utils';
 
 export class PlaywrightHooks implements TestHooks {
-    beforeAll(callback: () => Promise<any> | any, timeout?: number) {
+    beforeAll(callback: () => Promise<any> | any) {
         test.beforeAll(callback);
     }
 
-    beforeEach(callback: () => void | Promise<void>, timeout?: number) {
+    beforeEach(callback: () => void | Promise<void>) {
         test.beforeEach(callback);
     }
 
-    afterEach(callback: () => void | Promise<void>, timeout?: number) {
+    afterEach(callback: () => void | Promise<void>) {
         test.afterEach(callback);
     }
 
-    afterAll(callback: () => void | Promise<void>, timeout?: number) {
+    afterAll(callback: () => void | Promise<void>) {
         test.afterAll(callback);
     }
 }

@@ -1,6 +1,7 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
-import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import { AccessRight, FinancialSupportSettings, Group, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
+import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { Group, Organization, Platform} from '@stamhoofd/structures';
+import { AccessRight, FinancialSupportSettings, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableColumns({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectableColumn[] }) {
     const recordCategories = [

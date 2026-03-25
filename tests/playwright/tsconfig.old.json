@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true, 
+        "baseUrl": ".",
+        "declaration": true,
+        "declarationMap": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
+        "importHelpers": true,
+        "jsx": "preserve",
+        "lib": [
+            "es2023",
+            "dom" 
+        ],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "outDir": "dist",
+        "paths": {
+            "@stamhoofd/build-development-env": ["../../shared/build-development-env"], 
+            "@stamhoofd/models": ["../../backend/shared/models"]
+        },
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "target": "es2023", 
+        "types": ["node", "playwright/test"]
+    },
+    "exclude": ["dist", "node_modules"],
+    "include": [
+        "src/**/*.ts",
+        "*.d.ts",
+        "../../*.d.ts"
+    ]
+}

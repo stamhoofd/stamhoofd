@@ -55,11 +55,11 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import { PrivateOrder, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
+import type { PrivateOrder, TicketPrivate, TicketPublicPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { ref, watch } from 'vue';
-import { WebshopManager } from '../../WebshopManager';
+import type { WebshopManager } from '../../WebshopManager';
 import ValidTicketView from './ValidTicketView.vue';
 
 const props = defineProps<{

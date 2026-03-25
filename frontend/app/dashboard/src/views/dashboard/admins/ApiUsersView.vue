@@ -63,7 +63,8 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
@@ -147,10 +148,10 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         return this.organization.privateMeta?.roles ?? [];
     }
 
-    createUser() {
+    async createUser() {
         const p = UserPermissions.create({});
         p.organizationPermissions.set(this.organization.id, Permissions.create({ level: PermissionLevel.Full }));
-        this.present(new ComponentWithProperties(NavigationController, {
+        await this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ApiUserView, {
                 user: ApiUser.create({
                     organizationId: this.organization.id,
@@ -166,8 +167,8 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         }).setDisplayStyle('popup'));
     }
 
-    editUser(admin: ApiUser) {
-        this.present(new ComponentWithProperties(NavigationController, {
+    async editUser(admin: ApiUser) {
+        await this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(ApiUserView, {
                 user: admin,
                 isNew: false,

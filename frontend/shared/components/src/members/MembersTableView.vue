@@ -14,7 +14,9 @@
 
 <script lang="ts" setup>
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import { InMemoryTableAction, TableAction, type TableActionSelection } from '#tables/classes/TableAction.ts';
+import type { TableAction} from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction  } from '#tables/classes/TableAction.ts';
+import type {TableActionSelection} from '#tables/classes/TableAction.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import ModernTableView from '#tables/ModernTableView.vue';
 import { useAppContext } from '#context/appContext.ts';
@@ -25,8 +27,10 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
-import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { Ref, computed, ref } from 'vue';
+import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, GroupType } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';

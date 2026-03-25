@@ -6,9 +6,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { appToUri } from '@stamhoofd/structures';
+import { appToUri  } from '@stamhoofd/structures';
+import type { AppType} from '@stamhoofd/structures';
 import { isReactive } from 'vue';
 
 @Component({
@@ -34,7 +36,7 @@ import { isReactive } from 'vue';
             }
             else {
                 // Build reactive url
-                this.context.reactive_navigation_url = appToUri(this.context.stamhoofd_app) + (this.context.$context.organization && !STAMHOOFD.singleOrganization ? '/' + this.context.$context.organization!.uri : '');
+                this.context.reactive_navigation_url = appToUri(this.context.stamhoofd_app as unknown as AppType) + (this.context.$context.organization && !STAMHOOFD.singleOrganization ? '/' + this.context.$context.organization!.uri : '');
             }
         }
 

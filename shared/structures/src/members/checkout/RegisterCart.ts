@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { BalanceItem } from '../../BalanceItem.js';
+import type { BalanceItem } from '../../BalanceItem.js';
 import { type BundleDiscountCalculation } from '../../BundleDiscount.js';
 import { Platform } from '../../Platform.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';

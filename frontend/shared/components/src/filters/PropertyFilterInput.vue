@@ -97,14 +97,16 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { isEmptyFilter, PropertyFilter, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import type { StamhoofdFilter} from '@stamhoofd/structures';
+import { isEmptyFilter, PropertyFilter, Version } from '@stamhoofd/structures';
 
 import Radio from '../inputs/Radio.vue';
 import STInputBox from '../inputs/STInputBox.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
-import { filterToString, UIFilter, UIFilterBuilder } from './UIFilter';
+import type { UIFilter, UIFilterBuilder } from './UIFilter';
+import { filterToString } from './UIFilter';
 import UIFilterEditor from './UIFilterEditor.vue';
 
 @Component({
@@ -213,7 +215,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         );
     }
 
-    setEnabledWhen(useCache = false) {
+    async setEnabledWhen(useCache = false) {
         if (useCache && this.cachedEnabledFilter && !isEmptyFilter(this.cachedEnabledFilter)) {
             this.$emit('update:modelValue',
                 new PropertyFilter(
@@ -226,7 +228,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
 
         const filter = this.modelValue?.enabledWhen ? this.builder.fromFilter(this.modelValue.enabledWhen) : this.builder.create();
 
-        this.present({
+        await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(UIFilterEditor, {
@@ -266,7 +268,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         );
     }
 
-    setRequiredWhen(useCache = false) {
+    async setRequiredWhen(useCache = false) {
         if (useCache && this.cachedRequiredFilter && !isEmptyFilter(this.cachedRequiredFilter)) {
             this.$emit('update:modelValue',
                 new PropertyFilter(
@@ -279,7 +281,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
 
         const filter = !this.modelValue ? (this.builder.create()) : (isEmptyFilter(this.modelValue.requiredWhen) ? this.builder.create() : this.builder.fromFilter(this.modelValue.requiredWhen));
 
-        this.present({
+        await this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(UIFilterEditor, {

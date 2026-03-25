@@ -7,12 +7,12 @@
     "scripts": {
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
         "dev:build": "yarn -s build",
-        "build": "yarn -s check-types && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
         "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
-        "build:production": "yarn -s check-types && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
-        "test": "yarn -s check-types",
-        "lint": "eslint --cache",
-        "check-types": "vue-tsc --noEmit"
+        "build:production": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
+        "test": "yarn -s typecheck",
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
     },
     "files": [
         "dist"

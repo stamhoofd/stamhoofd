@@ -1,14 +1,15 @@
 // Setup environment + register beforeAll/before/... hooks with Playwright
 import { TestUtils } from '@stamhoofd/test-utils';
-import { PlaywrightHooks } from '../setup/helpers/PlaywrightHooks';
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
+import { PlaywrightHooks } from '../setup/helpers/PlaywrightHooks.js';
+ import { test as base, expect } from '@playwright/test';
+
+global.expect = expect;
 TestUtils.globalSetup(new PlaywrightHooks());
 TestUtils.setup();
 
 // All other imports perferably later
-import { test as base } from '@playwright/test';
-import { Logger, Pages } from '../helpers';
-import { WorkerHelper } from '../setup/helpers/WorkerHelper';
+import { Logger, Pages } from '../helpers/index.js';
+import { WorkerHelper } from '../setup/helpers/WorkerHelper.js';
 
 /**
  * Base test fixture (unauthenticated)

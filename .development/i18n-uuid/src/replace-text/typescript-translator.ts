@@ -1,9 +1,9 @@
-import chalk from "chalk";
-import { promptYesNoOrDoubt, YesNoOrDoubt } from "../shared/prompt-helper";
-import { getChangedLines, removeChangeMarkers } from "./git-helper";
-import { getWhiteSpaceBeforeAndAfter, splitInParts } from "./regex-helper";
-import { shouldTranslateTypescriptString } from "./should-translate-typescript-string";
-import { wrapWithTranslationFunction } from "./translation-helper";
+import chalk from 'chalk';
+import { promptYesNoOrDoubt, YesNoOrDoubt } from '../shared/prompt-helper.js';
+import { getChangedLines, removeChangeMarkers } from './git-helper.js';
+import { getWhiteSpaceBeforeAndAfter, splitInParts } from './regex-helper.js';
+import { shouldTranslateTypescriptString } from './should-translate-typescript-string.js';
+import { wrapWithTranslationFunction } from './translation-helper.js';
 
 export interface TypescriptTranslatorOptions {
     path?: string[];
@@ -40,15 +40,15 @@ export class TypescriptTranslator {
     constructor(readonly options: TypescriptTranslatorOptions = {}) {
         this.shouldCheckChanges = this.options.replaceChangesOnly !== undefined;
         this.fileProgressText = options.fileProgress
-            ? chalk.gray(" File ") +
-              chalk.white(
-                  `${options.fileProgress.current} / ${options.fileProgress.total}`,
-              )
-            : "";
+            ? chalk.gray(' File ')
+            + chalk.white(
+                `${options.fileProgress.current} / ${options.fileProgress.total}`,
+            )
+            : '';
     }
 
     async getTotalMatchCount(html: string): Promise<number> {
-        const copyTranslator = new TypescriptTranslator({...this.options, doPrompt: false});
+        const copyTranslator = new TypescriptTranslator({ ...this.options, doPrompt: false });
         await copyTranslator.translate(html);
         return copyTranslator.currentMatchCount;
     }
@@ -56,17 +56,17 @@ export class TypescriptTranslator {
     async translate(text: string): Promise<string> {
         this._currentMatchCount = 0;
 
-        if(this.options.doPrompt) {
+        if (this.options.doPrompt) {
             this.totalMatchCount = await this.getTotalMatchCount(text);
         }
 
-        const changedLines = this.shouldCheckChanges ? getChangedLines(this.options.replaceChangesOnly!.filePath, {compare: this.options.replaceChangesOnly?.commitsToCompare}) : null;
+        const changedLines = this.shouldCheckChanges ? getChangedLines(this.options.replaceChangesOnly!.filePath, { compare: this.options.replaceChangesOnly?.commitsToCompare }) : null;
         const parts = splitInPartsIgnoreComments(text);
 
         let lineIndex = 0;
-        const allParts: {value: string, shouldTranslate: boolean}[] = [];
+        const allParts: { value: string; shouldTranslate: boolean }[] = [];
 
-        for(let i = 0; i < parts.length; i++) {
+        for (let i = 0; i < parts.length; i++) {
             const part = parts[i];
             const isMatch = part.isMatch;
             const value = part.value;
@@ -77,41 +77,41 @@ export class TypescriptTranslator {
 
             let isChanged = true;
 
-            if(changedLines !== null) {
+            if (changedLines !== null) {
                 isChanged = false;
 
-                for(let i = startIndex; i <= endIndex; i++) {
-                    if(changedLines.has(i)) {
+                for (let i = startIndex; i <= endIndex; i++) {
+                    if (changedLines.has(i)) {
                         isChanged = true;
                         break;
                     }
                 }
             }
 
-            if(!isChanged || !isMatch) {
+            if (!isChanged || !isMatch) {
                 allParts.push({
                     value,
-                    shouldTranslate: false
+                    shouldTranslate: false,
                 });
                 continue;
             }
-    
+
             const unquoted = value.slice(1, value.length - 1);
             const trimmed = unquoted.trim();
-            
-            if(trimmed.length < 2) {
+
+            if (trimmed.length < 2) {
                 allParts.push({
                     value,
-                    shouldTranslate: false
+                    shouldTranslate: false,
                 });
                 continue;
             }
 
             const shouldTranslate = shouldTranslateTypescriptString(allParts);
-    
+
             allParts.push({
                 value,
-                shouldTranslate
+                shouldTranslate,
             });
         }
 
@@ -119,64 +119,63 @@ export class TypescriptTranslator {
             const unquoted = value.slice(1, value.length - 1);
             const trimmed = unquoted.trim();
             const quoteType = "'";
-            const {whiteSpaceBefore, whiteSpaceAfter} = getWhiteSpaceBeforeAndAfter(unquoted);
+            const { whiteSpaceBefore, whiteSpaceAfter } = getWhiteSpaceBeforeAndAfter(unquoted);
             const quotedWhiteSpaceBefore = whiteSpaceBefore.length ? `${quoteType}${whiteSpaceBefore}${quoteType} + ` : '';
             const quotedWhiteSpaceAfter = whiteSpaceAfter.length ? ` + ${quoteType}${whiteSpaceAfter}${quoteType}` : '';
             return quotedWhiteSpaceBefore + wrapWithTranslationFunction(trimmed, ['"']) + quotedWhiteSpaceAfter;
         });
     }
 
-    private async translateTextParts(textParts: {value: string, shouldTranslate: boolean}[], original: string, translate: (text: string) => string) {
-
+    private async translateTextParts(textParts: { value: string; shouldTranslate: boolean }[], original: string, translate: (text: string) => string) {
         const processedParts: string[] = [];
-    
+
         const getUnprocessedpart = (i: number) => {
             return textParts.slice(i + 1).map(t => t.value).join('');
-        }
-    
-        for(let i = 0; i < textParts.length; i++) {
-            const {value, shouldTranslate} = textParts[i];
-    
-            if(!shouldTranslate) {
+        };
+
+        for (let i = 0; i < textParts.length; i++) {
+            const { value, shouldTranslate } = textParts[i];
+
+            if (!shouldTranslate) {
                 processedParts.push(value);
                 continue;
             }
-    
+
             const translatedPart = translate(value);
             const isTranslated = translatedPart !== value;
 
-            if(isTranslated) {
+            if (isTranslated) {
                 this._currentMatchCount = this._currentMatchCount + 1;
             }
-    
+
             const canTranslate = isTranslated && (!this.options.doPrompt || await this.prompt(value, translatedPart, processedParts.join(''), getUnprocessedpart(i)));
-            if(this._isDoubt) {
+            if (this._isDoubt) {
                 return original;
             }
 
             processedParts.push(canTranslate ? translatedPart : value);
         }
-    
+
         return processedParts.join('');
     }
 
     private async prompt(part: string, translatedPart: string, processedParts: string, unprocessedPart: string): Promise<boolean> {
-        if(this._isDoubt) {
+        if (this._isDoubt) {
             return false;
         }
 
-        if(this.options.onBeforePrompt) {
+        if (this.options.onBeforePrompt) {
             this.options.onBeforePrompt();
         }
-    
+
         this.logContext(part, translatedPart, processedParts, unprocessedPart);
         const result = await promptYesNoOrDoubt(chalk.yellow(`> Accept (press [y] or [enter])?`));
 
-        if(result === YesNoOrDoubt.Yes) {
+        if (result === YesNoOrDoubt.Yes) {
             return true;
         }
 
-        if(result === YesNoOrDoubt.Doubt && this.options.onPromptDoubt) {
+        if (result === YesNoOrDoubt.Doubt && this.options.onPromptDoubt) {
             this._isDoubt = true;
             this.options.onPromptDoubt();
         }
@@ -187,36 +186,36 @@ export class TypescriptTranslator {
     private logContext(part: string, translatedPart: string, processedParts: string, unprocessedPart: string) {
         const maxContextLength = 100;
         const completeContextBefore = processedParts;
-        let contextBefore = completeContextBefore.substring(completeContextBefore.length - maxContextLength);
-        let contextAfter = removeChangeMarkers((unprocessedPart)).substring(0, maxContextLength);
+        const contextBefore = completeContextBefore.substring(completeContextBefore.length - maxContextLength);
+        const contextAfter = removeChangeMarkers((unprocessedPart)).substring(0, maxContextLength);
 
         console.log(chalk.underline.white(`
-MATCH:`))
-        console.log(chalk.gray(contextBefore)+chalk.red(part)+chalk.gray(contextAfter));
-    
+MATCH:`));
+        console.log(chalk.gray(contextBefore) + chalk.red(part) + chalk.gray(contextAfter));
+
         console.log(chalk.underline.white(`
-REPLACEMENT:`))
-        console.log(chalk.gray(contextBefore)+chalk.green(translatedPart)+chalk.gray(contextAfter));
-    
+REPLACEMENT:`));
+        console.log(chalk.gray(contextBefore) + chalk.green(translatedPart) + chalk.gray(contextAfter));
+
         console.log(`
 `);
         const totalProgress = this.options.totalProgress;
         const totalProgressText = totalProgress ? chalk.gray(' Total ') + chalk.white(`${totalProgress.current + this._currentMatchCount} / ${totalProgress.total}`) : '';
 
-        console.log(chalk.gray('Match ') +chalk.white(`${this._currentMatchCount} / ${this.totalMatchCount}` )+ chalk.gray(this.fileProgressText) + chalk.gray(totalProgressText));
+        console.log(chalk.gray('Match ') + chalk.white(`${this._currentMatchCount} / ${this.totalMatchCount}`) + chalk.gray(this.fileProgressText) + chalk.gray(totalProgressText));
     }
 }
 
-function splitInPartsIgnoreComments(text: string): {isMatch: boolean, value: string}[] {
+function splitInPartsIgnoreComments(text: string): { isMatch: boolean; value: string }[] {
     const splittedByComments = splitInParts(text, /\/\*[\s\S]*?\*\/|(?:[^\\:]|^)\/\/.*$/gm);
 
-    return splittedByComments.flatMap(({value, isMatch}) => {
-        if(isMatch) {
-            return {isMatch: false, value}
+    return splittedByComments.flatMap(({ value, isMatch }) => {
+        if (isMatch) {
+            return { isMatch: false, value };
         }
 
         return splitInParts(value, /"(?:[^"]*?)"|'(?:[^']*?)'/ig);
-    })
+    });
 }
 
 export async function translateTypescript(html: string, options: TypescriptTranslatorOptions = {}) {

@@ -1,10 +1,11 @@
-import {
+import type {
     Group,
+    Organization} from '@stamhoofd/models';
+import {
     MemberFactory,
-    Organization,
     RegistrationFactory,
 } from '@stamhoofd/models';
-import { GroupPrice } from '@stamhoofd/structures';
+import type { GroupPrice } from '@stamhoofd/structures';
 
 export class TestMembers {
     static async defaultMember({

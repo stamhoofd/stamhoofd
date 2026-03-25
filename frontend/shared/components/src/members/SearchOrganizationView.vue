@@ -33,7 +33,8 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
@@ -47,7 +48,8 @@ import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
-import { Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { ref, watch } from 'vue';
 
 const props = withDefaults(
     defineProps<{

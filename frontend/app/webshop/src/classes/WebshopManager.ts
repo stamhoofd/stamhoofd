@@ -1,8 +1,9 @@
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { DarkMode, Platform, Webshop } from '@stamhoofd/structures';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Platform} from '@stamhoofd/structures';
+import { DarkMode, Webshop } from '@stamhoofd/structures';
 
 /**
  * Convenient access to the organization of the current session

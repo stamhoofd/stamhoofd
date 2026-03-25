@@ -1,4 +1,5 @@
-import { ComputedRef, isRef, Ref, watch } from 'vue';
+import type { ComputedRef, Ref} from 'vue';
+import { isRef, watch } from 'vue';
 
 export interface MetaTag {
     id: string;

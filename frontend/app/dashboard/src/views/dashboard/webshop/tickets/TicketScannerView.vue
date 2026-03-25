@@ -48,14 +48,16 @@ import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-ap
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { AppManager, PluginListenerHandle } from '@stamhoofd/networking/AppManager';
-import { Order, OrderStatus, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
+import type { PluginListenerHandle } from '@stamhoofd/networking/AppManager';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import type { Order, PrivateOrder, Product, TicketPrivate } from '@stamhoofd/structures';
+import { OrderStatus } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
 
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from 'vue';
-import { WebshopManager } from '../WebshopManager';
+import type { WebshopManager } from '../WebshopManager';
 import TicketAlreadyScannedView from './status/TicketAlreadyScannedView.vue';
 import ValidTicketView from './status/ValidTicketView.vue';
 
@@ -295,7 +297,7 @@ function stopStream() {
         }
         else {
             if (stream.value && stream.value.getTracks) {
-                var track = stream.value.getTracks()[0]; // if only one media track
+                const track = stream.value.getTracks()[0]; // if only one media track
                 track.stop();
                 stream.value = null;
             }

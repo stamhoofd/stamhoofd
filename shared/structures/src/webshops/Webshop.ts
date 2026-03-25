@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DNSRecord } from '../DNSRecord.js';
+import type { DNSRecord } from '../DNSRecord.js';
 
-import { Organization } from '../Organization.js';
+import type { Organization } from '../Organization.js';
 import { Category } from './Category.js';
 import { Product } from './Product.js';
 import { WebshopMetaData, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData.js';

@@ -1,9 +1,9 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation"
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation'
 
-import { sleep } from "@stamhoofd/utility"
-import { AppManager } from "../../../networking"
-import { Toast } from "../overlays/Toast"
-import PromiseView from "./PromiseView.vue"
+import { sleep } from '@stamhoofd/utility'
+import { AppManager } from '../../../networking'
+import { Toast } from '../overlays/Toast'
+import PromiseView from './PromiseView.vue'
 
 /**
  * In the app, we don't need to wait for components to load (because they are present).
@@ -29,9 +29,9 @@ export async function LoadComponent(component: () => Promise<any>, properties = 
                             return new ComponentWithProperties(c, properties)
                         } catch (e) {
                             if (AppManager.shared.isNative) {
-                                new Toast($t(`%Zy`), "error red").show()
+                                new Toast($t(`%Zy`), 'error red').show()
                             } else {
-                                new Toast($t(`%Zz`), "error red").show()
+                                new Toast($t(`%Zz`), 'error red').show()
                             }
                             throw e
                         }
@@ -44,9 +44,9 @@ export async function LoadComponent(component: () => Promise<any>, properties = 
         return new ComponentWithProperties(c, properties)
     } catch (e) {
         if (AppManager.shared.isNative) {
-            new Toast($t(`%Zy`), "error red").show()
+            new Toast($t(`%Zy`), 'error red').show()
         } else {
-            new Toast($t(`%Zz`), "error red").show()
+            new Toast($t(`%Zz`), 'error red').show()
         }
         throw e
     }
@@ -61,9 +61,9 @@ export function PromiseComponent(component: () => Promise<ComponentWithPropertie
                 return c
             } catch (e) {
                 if (AppManager.shared.isNative) {
-                    new Toast($t(`%Zy`), "error red").show()
+                    new Toast($t(`%Zy`), 'error red').show()
                 } else {
-                    new Toast($t(`%Zz`), "error red").show()
+                    new Toast($t(`%Zz`), 'error red').show()
                 }
                 throw e
             }
@@ -80,9 +80,9 @@ export function AsyncComponent(component: () => Promise<any>, properties = {}) {
                 return new ComponentWithProperties(c, properties)
             } catch (e) {
                 if (AppManager.shared.isNative) {
-                    new Toast($t(`%Zy`), "error red").show()
+                    new Toast($t(`%Zy`), 'error red').show()
                 } else {
-                    new Toast($t(`%Zz`), "error red").show()
+                    new Toast($t(`%Zz`), 'error red').show()
                 }
                 throw e
             }

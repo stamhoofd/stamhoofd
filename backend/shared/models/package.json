@@ -1,22 +1,25 @@
 {
     "name": "@stamhoofd/models",
     "version": "2.119.0",
-    "main": "./dist/src/index.js",
-    "types": "./dist/src/index.d.ts",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "main": "./dist/index.js",
     "license": "UNLICENCED",
-    "sideEffects": false,
+    "sideEffects": [
+        "./src/models/_relations.ts",
+        "./dist/models/_relations.js"
+    ],
     "files": [
         "dist",
         "src"
     ],
     "scripts": {
-        "build": "tsc -b && mkdir -p ./dist/src/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' -r --checksum ./src/migrations/ ./dist/src/migrations/ && rsync -r --checksum ./src/assets/ ./dist/src/assets/",
-        "test": "jest --runInBand",
-        "test:build": "yarn -s build && yarn -s test",
+        "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' -r --checksum ./src/migrations/ ./dist/migrations/ && rsync -r --checksum ./src/assets/ ./dist/assets/",
+        "test": "vitest",
         "lint": "eslint"
     },
     "peerDependencies": {
-        "@simonbackx/simple-database": "1.34.0",
+        "@simonbackx/simple-database": "1.36.12",
         "@stamhoofd/email": "*",
         "@stamhoofd/queues": "*"
     },
@@ -25,7 +28,7 @@
         "base-x": "^3.0.11"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.34.0"
+        "@simonbackx/simple-database": "1.36.12"
     },
     "publishConfig": {
         "access": "public"

@@ -1,5 +1,6 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
-import { Platform, RecordCategory } from '@stamhoofd/structures';
+import type { Platform} from '@stamhoofd/structures';
+import { RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(_platform: Platform) {
     const categories = _platform.config.organizationLevelRecordsConfiguration.recordCategories;

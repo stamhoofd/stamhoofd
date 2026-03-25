@@ -31,7 +31,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { SelectableData } from './SelectableData';
+import type { SelectableData } from './SelectableData';
 
 const props = defineProps<{
     name: string;

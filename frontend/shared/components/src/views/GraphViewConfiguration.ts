@@ -1,6 +1,6 @@
-import { Graph } from '@stamhoofd/structures';
+import type { Graph } from '@stamhoofd/structures';
 
-import { DateOption } from './DateRange';
+import type { DateOption } from './DateRange';
 
 export class GraphViewConfiguration {
     title = '';

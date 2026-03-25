@@ -50,23 +50,25 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
-import { Toast } from '#overlays/Toast.ts';
-import { UIFilter } from '#filters/UIFilter.ts';
-import UIFilterEditor from '#filters/UIFilterEditor.vue';
-import { useAdminEmailFilterBuilders } from '#filters/filterBuilders.ts';
-import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
 import { useEmailsObjectFetcher } from '#fetchers/useEmailsObjectFetcher.ts';
-import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, PlatformMember, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { useAdminEmailFilterBuilders } from '#filters/filterBuilders.ts';
+import type { UIFilter } from '#filters/UIFilter.ts';
+import UIFilterEditor from '#filters/UIFilterEditor.vue';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
+import { Toast } from '#overlays/Toast.ts';
+import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
+import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import type { EmailPreview, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
+import { isEmptyFilter, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
+import type { Ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
 import EmailOverview from './EmailOverview.vue';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 type ObjectType = EmailPreview;
 
@@ -93,7 +95,7 @@ defineRoutes([
     {
         name: Routes.Email,
         url: '@id',
-        component: EmailOverview as ComponentOptions,
+        component: EmailOverview,
         params: {
             id: String,
         },

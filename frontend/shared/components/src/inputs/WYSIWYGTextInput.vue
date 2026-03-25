@@ -194,7 +194,11 @@ export default class WYSIWYGTextInput extends VueComponent {
         });
     }
 
-    openTextStyles(event) {
+    openTextStyles(event: Event) {
+        if (!(event.currentTarget instanceof HTMLElement)) {
+            return;
+        }
+        
         // Get initial selection
         const m = this;
         const menu = new ContextMenu([

@@ -13,7 +13,7 @@
 <script setup lang="ts" generic="ObjectType extends {id: string}">
 import { onMounted, onUnmounted, ref } from 'vue';
 import Spinner from '../Spinner.vue';
-import { InfiniteObjectFetcher } from './classes';
+import type { InfiniteObjectFetcher } from './classes';
 
 
 const props = defineProps<{

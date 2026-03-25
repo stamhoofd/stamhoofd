@@ -1,5 +1,5 @@
-import { PdfDocWrapper } from '../PdfDocWrapper';
-import { PdfItem, PdfItemDrawOptions } from '../PdfItem';
+import type { PdfDocWrapper } from '../PdfDocWrapper';
+import type { PdfItem, PdfItemDrawOptions } from '../PdfItem';
 
 /**
  * Adds spacing between items

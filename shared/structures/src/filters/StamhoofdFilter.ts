@@ -1,6 +1,7 @@
 import { Version } from '../Version.js';
 import { StamhoofdFilterDecoder } from './FilteredRequest.js';
-import { AssertSortList, SortItemDirection, SortList } from './SortList.js';
+import type { AssertSortList, SortList } from './SortList.js';
+import { SortItemDirection } from './SortList.js';
 
 export type StamhoofdAndFilter<T = StamhoofdCompareValue> = {
     $and: StamhoofdFilter<T>;

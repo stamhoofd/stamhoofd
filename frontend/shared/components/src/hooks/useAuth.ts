@@ -1,4 +1,4 @@
-import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
+import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import { useContext } from '#hooks/useContext.ts';
 
 export function useAuth(): ContextPermissions {

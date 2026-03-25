@@ -123,7 +123,7 @@
                     <h3 class="style-definition-label">
                         {{ contact.firstName || 'Onbekende naam' }} {{ contact.lastName }}
                     </h3>
-                    <p v-for="(email, j) of contact.emails" :key="email" class="style-definition-text">
+                    <p v-for="(email) of contact.emails" :key="email" class="style-definition-text">
                         <EmailAddress :email="email" />
                     </p>
                     <p v-if="contact.emails.length === 0" class="style-definition-text">
@@ -139,7 +139,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import BalancePriceBreakdown from '#payments/BalancePriceBreakdown.vue';
 import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
@@ -158,9 +159,11 @@ import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.t
 import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
 import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { BalanceItemWithPayments, BaseOrganization, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
+import type { BaseOrganization, PlatformMember, ReceivableBalance} from '@stamhoofd/structures';
+import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { computed, onMounted, ref, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
 import EmailAddress from '../email/EmailAddress.vue';
 

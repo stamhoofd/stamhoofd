@@ -1,5 +1,6 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
-import { Platform, RecordCategory } from '@stamhoofd/structures';
+import type { Platform} from '@stamhoofd/structures';
+import { RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(platform: Platform) {
     const recordCategories = platform.config.eventNotificationTypes.flatMap(r => r.recordCategories);

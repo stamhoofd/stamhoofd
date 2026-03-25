@@ -75,7 +75,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
+import type { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';

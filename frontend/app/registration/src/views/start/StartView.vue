@@ -174,9 +174,11 @@ import { downloadDocument } from '@stamhoofd/document-helper';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Document, DocumentStatus, GroupType, PlatformMember, TranslatedString } from '@stamhoofd/structures';
+import type { Document, PlatformMember} from '@stamhoofd/structures';
+import { DocumentStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref } from 'vue';
 
 enum Routes {
     RegisterMembers = 'registerMembers',
@@ -288,7 +290,7 @@ async function onDownloadDocument(document: Document) {
         new Toast($t(`%Xc`, { name: member?.member.firstName ?? $t(`%15V`) }), 'error red').setHide(20000).show();
         return;
     }
-    downloadingDocuments.value.push(document as any); // fix for Type instantiation is excessively deep and possibly infinite
+    downloadingDocuments.value.push(document);
     try {
         await downloadDocument(context.value, document, requestOwner);
     }

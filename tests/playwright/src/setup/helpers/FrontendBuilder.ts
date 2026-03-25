@@ -1,4 +1,4 @@
-import { STChildProcess } from './STChildProcess';
+import { STChildProcess } from './STChildProcess.js';
 
 export class FrontendBuilder {
     async build() {

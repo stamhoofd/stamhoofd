@@ -1,4 +1,4 @@
-import { type DatabaseInstance } from '@simonbackx/simple-database';
+import type {DatabaseInstance} from '@simonbackx/simple-database';
 
 export class DatabaseHelper {
     private _database?: DatabaseInstance;

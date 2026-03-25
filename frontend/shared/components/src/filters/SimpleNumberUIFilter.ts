@@ -1,13 +1,13 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { NumberFilterFormat } from './NumberUIFilter';
 import SimpleNumberUIFilterView from './SimpleNumberUIFilterView.vue';
-import { UIFilter, UIFilterBuilder, unwrapFilterForBuilder } from './UIFilter';
+import type { UIFilterBuilder} from './UIFilter';
+import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
-export class SimpleNumberUIFilter extends UIFilter {
-    builder!: SimpleNumberFilterBuilder;
+export class SimpleNumberUIFilter extends UIFilter<SimpleNumberFilterBuilder> {
     value = 0;
 
     constructor(data: Partial<SimpleNumberUIFilter>, options: { isInverted?: boolean } = {}) {

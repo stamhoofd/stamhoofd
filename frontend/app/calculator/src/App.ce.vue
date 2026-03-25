@@ -6,18 +6,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
 import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 
+import webfontsString from 'virtual:vite-svg-2-webfont.css?inline';
 import { getCurrentInstance, onMounted, ref, watch } from 'vue';
 import CalculatorView from './CalculatorView.vue';
 const root = new ComponentWithProperties(NavigationController, {
     root: new ComponentWithProperties(CalculatorView, {}),
 });
-import webfontsString from 'virtual:vite-svg-2-webfont.css?inline';
 
 console.log('Webfonts string:', webfontsString);
 
@@ -48,7 +49,7 @@ onMounted(() => {
 
 const owner = {};
 
-const modalStack = ref<typeof ModalStackComponent | null>(null);
+const modalStack = ref<InstanceType<typeof ModalStackComponent> | null>(null);
 
 const manualPresent = useManualPresent();
 
@@ -59,10 +60,10 @@ watch(modalStack, (modalStack) => {
 
     ModalStackEventBus.addListener(owner, 'present', async (options: PushOptions | ComponentWithProperties) => {
         if (!(options as any).components) {
-            modalStack.present({ components: [options] });
+            await modalStack.present({ components: [options] });
         }
         else {
-            modalStack.present(options);
+            await modalStack.present(options);
         }
     });
 

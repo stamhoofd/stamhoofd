@@ -7,8 +7,9 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
-import { Ref, ref } from 'vue';
+import type { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { ref } from 'vue';
 
 export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<void> }) {
     const $organization = useOrganization();

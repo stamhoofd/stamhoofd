@@ -1,7 +1,7 @@
-import { CaddyConfigHelper } from './CaddyConfigHelper';
-import { DatabaseHelper } from './DatabaseHelper';
-import { NetworkHelper } from './NetworkHelper';
-import { ServiceHelper, ServiceProcess } from './ServiceHelper';
+import { CaddyConfigHelper } from './CaddyConfigHelper.js';
+import { DatabaseHelper } from './DatabaseHelper.js';
+import { NetworkHelper } from './NetworkHelper.js';
+import type { ServiceHelper, ServiceProcess } from './ServiceHelper.js';
 export class ApiService implements ServiceHelper {
     constructor(private workerId: string) {}
 
@@ -14,8 +14,7 @@ export class ApiService implements ServiceHelper {
 
         // Start api
         const { run: runMigrations }
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            = await require('@stamhoofd/backend/src/migrate');
+            = await import('@stamhoofd/backend/migrate');
         await runMigrations();
 
         // Clear database before we start
@@ -25,8 +24,7 @@ export class ApiService implements ServiceHelper {
 
         console.log(`Database cleared for worker ${this.workerId}.`);
 
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { boot } = await require('@stamhoofd/backend/src/boot');
+        const { boot } = await import('@stamhoofd/backend/boot');
         const { shutdown } = await boot({ killProcess: false });
 
         return {

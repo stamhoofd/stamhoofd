@@ -50,7 +50,8 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin, PushOptions } from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import Checkbox from '#inputs/Checkbox.vue';
 import ConfirmEmailView from '#auth/ConfirmEmailView.vue';
@@ -149,9 +150,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                 method: 'POST',
                 path: '/oauth/token',
                 body: {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     grant_type: 'password_token',
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     token: token,
                 },
                 decoder: Token,
@@ -172,12 +171,12 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                     this.loadingToken = false;
                 }).catch((e) => {
                     new Toast($t(`%uv`), 'error red').show();
-                    this.dismiss({ force: true });
+                    this.dismiss({ force: true }).catch(console.error);
                 });
         }
         else {
             new Toast($t(`%EF`), 'error red').show();
-            this.dismiss({ force: true });
+            this.dismiss({ force: true }).catch(console.error);
         }
     }
 
@@ -295,7 +294,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
 
             await ReplaceRootEventBus.sendEvent('replace', root);
 
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
             this.loading = false;
         }
         catch (e) {

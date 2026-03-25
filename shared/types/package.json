@@ -1,0 +1,26 @@
+{
+    "name": "@stamhoofd/types",
+    "version": "2.119.0",
+    "type": "module",
+    "exports": {
+        "./*": {
+            "types": "./dist/*.d.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
+        }
+    },
+    "files": [
+        "dist",
+        "package.json"
+    ],
+    "license": "UNLICENCED",
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint"
+    },
+    "devDependencies": {},
+    "peerDependencies": {},
+    "publishConfig": {
+        "access": "public"
+    }
+}

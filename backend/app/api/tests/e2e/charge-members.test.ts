@@ -148,7 +148,7 @@ describe('E2E.ChargeMembers', () => {
 
             const token = await Token.createToken(user);
 
-            await expect(async () => await postCharge(filter, organization, body, token))
+            await expect(postCharge(filter, organization, body, token))
                 .rejects
                 .toThrow(STExpect.errorWithCode('permission_denied'));
         }
@@ -301,7 +301,7 @@ describe('E2E.ChargeMembers', () => {
 
         // act and assert
         for (const [body, expectedErrorMessage] of testCases) {
-            await expect(async () => await postCharge(filter, organization, body, financialDirectorToken))
+            await expect(postCharge(filter, organization, body, financialDirectorToken))
                 .rejects
                 .toThrow(expectedErrorMessage);
         }
@@ -425,7 +425,7 @@ describe('E2E.ChargeMembers', () => {
                 createdAt: new Date(2023, 0, 4),
             });
 
-            await expect(async () => await postCharge(filter, organization, body, token))
+            await expect(postCharge(filter, organization, body, token))
                 .rejects
                 .toThrow(STExpect.errorWithCode('permission_denied'));
         });

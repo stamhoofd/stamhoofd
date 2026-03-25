@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 import { ProductType } from './Product.js';
-import { Webshop } from './Webshop.js';
+import type { Webshop } from './Webshop.js';
 import { CartItem } from './CartItem.js';
 import { Formatter } from '@stamhoofd/utility';
 import { error } from 'console';

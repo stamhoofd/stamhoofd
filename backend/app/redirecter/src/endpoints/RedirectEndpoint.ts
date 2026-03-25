@@ -1,6 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Country } from '@stamhoofd/structures';
-
+import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from '../classes/Geolocator.js';
 
 type Params = Record<string, never>;

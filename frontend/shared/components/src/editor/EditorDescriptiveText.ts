@@ -46,6 +46,6 @@ export const DescriptiveText = Node.create({
     },
 
     renderHTML() {
-        return ['p', { class: "description" }, 0]
+        return ['p', { class: 'description' }, 0]
     },
 })

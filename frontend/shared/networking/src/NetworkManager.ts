@@ -1,5 +1,6 @@
-import { SimpleErrors } from '@simonbackx/simple-errors';
-import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networking';
+import type { SimpleErrors } from '@simonbackx/simple-errors';
+import type { Request, RequestMiddleware} from '@simonbackx/simple-networking';
+import { Server } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Version } from '@stamhoofd/structures';

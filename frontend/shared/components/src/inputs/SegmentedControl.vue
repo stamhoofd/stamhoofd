@@ -53,7 +53,7 @@ export default class SegmentedControl extends VueComponent {
         return 'translateX(' + percentage.toFixed(2) + '%)';
     }
 
-    selectItem(index) {
+    selectItem(index: number) {
         this.$emit('update:modelValue', this.items[index]);
     }
 }

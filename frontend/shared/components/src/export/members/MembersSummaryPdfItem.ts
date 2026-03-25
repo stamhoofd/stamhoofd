@@ -1,6 +1,7 @@
-import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, Spacing, VerticalStack, VerticalStackOptions } from '@stamhoofd/frontend-pdf-builder';
-import { PlatformMember } from '@stamhoofd/structures';
-import { SelectablePdfData } from '../SelectablePdfData';
+import type { PdfDocWrapper, PdfFont, PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions, VerticalStackOptions } from '@stamhoofd/frontend-pdf-builder';
+import { colorDark, DefaultText, H3, HorizontalGrid, LabelWithValue, metropolisBold, metropolisMedium, mmToPoints, Spacing, VerticalStack } from '@stamhoofd/frontend-pdf-builder';
+import type { PlatformMember } from '@stamhoofd/structures';
+import type { SelectablePdfData } from '../SelectablePdfData';
 
 interface MembersSummarydArgs {
     members: PlatformMember[];

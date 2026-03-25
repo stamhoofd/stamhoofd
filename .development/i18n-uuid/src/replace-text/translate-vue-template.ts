@@ -1,28 +1,28 @@
-import { getTotalMatchCount, translateHtml } from "./html-translator";
+import { getTotalMatchCount, translateHtml } from './html-translator.js';
 
 export interface TranslateVueFileOptions {
-    doPrompt?: boolean,
-    attributeWhiteList?: Set<string>
-    onBeforePrompt?: () => void,
+    doPrompt?: boolean;
+    attributeWhiteList?: Set<string>;
+    onBeforePrompt?: () => void;
     onPromptDoubt?: () => void;
     replaceChangesOnly?: {
-        filePath: string,
-        commitsToCompare?: [string, string]
-    },
+        filePath: string;
+        commitsToCompare?: [string, string];
+    };
     totalProgress?: {
-        current: number,
-        total: number
-    }
+        current: number;
+        total: number;
+    };
     fileProgress?: {
-        current: number,
-        total: number
-    }
+        current: number;
+        total: number;
+    };
 }
 
 export async function translateVueTemplate(vueTemplate: string, options: TranslateVueFileOptions = {}) {
-    return translateHtml(vueTemplate, {skipKeys: new Set(['script', 'style']), ...options});
+    return translateHtml(vueTemplate, { skipKeys: new Set(['script', 'style']), ...options });
 }
 
 export async function getVueTemplateMatchCount(vueTemplate: string, options: TranslateVueFileOptions = {}): Promise<number> {
-    return getTotalMatchCount(vueTemplate, {skipKeys: new Set(['script', 'style']), ...options});
+    return getTotalMatchCount(vueTemplate, { skipKeys: new Set(['script', 'style']), ...options });
 }

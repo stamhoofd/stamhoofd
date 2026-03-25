@@ -22,6 +22,7 @@ import { FileSignService } from './services/FileSignService.js';
 import { PlatformMembershipService } from './services/PlatformMembershipService.js';
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
+import { AutoEncoder } from '@simonbackx/simple-encoding';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -35,16 +36,25 @@ Column.setJSONVersion(Version);
 // Set timezone
 process.env.TZ = 'UTC';
 
+if (STAMHOOFD.environment === 'development') {
+    Error.stackTraceLimit = 100;
+}
+
 // Quick check
 if (new Date().getTimezoneOffset() !== 0) {
     throw new Error('Process should always run in UTC timezone');
 }
 
-const seeds = async () => {
+const seeds = async (options: {shutdown: () => Promise<void>}) => {
     try {
         // Internal
         await AuditLogService.disable(async () => {
-            await Migration.runAll(__dirname + '/seeds');
+            if (!await Migration.runAll(import.meta.dirname + '/seeds')) {
+                console.error('Seeds failed!')
+                if (STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development') {
+                    await options.shutdown();
+                }
+            }
         });
     }
     catch (e) {
@@ -64,6 +74,9 @@ export const boot = async (options: { killProcess: boolean }) => {
     productionLog('Running server at v' + Version);
     productionLog('Running server at port ' + STAMHOOFD.PORT);
     productionLog('Running server on DB ' + process.env.DB_DATABASE); // note, should always use process env here
+    console.log('Node version is: ' + process.version);
+    
+    AutoEncoder.skipDefaultValuesVersion = 10000; // todo
 
     loadLogger();
 
@@ -79,17 +92,17 @@ export const boot = async (options: { killProcess: boolean }) => {
     productionLog('Loading endpoints...');
 
     // Note: we should load endpoints one by once to have a reliable order of url matching
-    await router.loadAllEndpoints(__dirname + '/endpoints/global/*');
-    await router.loadAllEndpoints(__dirname + '/endpoints/admin/*');
-    await router.loadAllEndpoints(__dirname + '/endpoints/frontend');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/global/*');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/admin/*');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/frontend');
 
-    await router.loadAllEndpoints(__dirname + '/endpoints/auth');
-    await router.loadAllEndpoints(__dirname + '/endpoints/organization/dashboard/*');
-    await router.loadAllEndpoints(__dirname + '/endpoints/organization/registration');
-    await router.loadAllEndpoints(__dirname + '/endpoints/organization/webshops');
-    await router.loadAllEndpoints(__dirname + '/endpoints/organization/shared');
-    await router.loadAllEndpoints(__dirname + '/endpoints/organization/shared/*');
-    await router.loadAllEndpoints(__dirname + '/endpoints/system');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/auth');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/dashboard/*');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/registration');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/webshops');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/shared');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/shared/*');
+    await router.loadAllEndpoints(import.meta.dirname + '/endpoints/system');
 
     router.endpoints.push(new CORSPreflightEndpoint());
 
@@ -257,7 +270,7 @@ export const boot = async (options: { killProcess: boolean }) => {
     UitpasService.listen();
 
     startCrons();
-    seeds().catch(console.error);
+    seeds({ shutdown }).catch(console.error);
 
     return { shutdown };
 };

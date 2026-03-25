@@ -1,5 +1,5 @@
 // First import base
-import { test as base } from './base';
+import { test as base } from './base.js';
 
 // All other imports perferably later
 import { Token, UserFactory } from '@stamhoofd/models';
@@ -7,7 +7,7 @@ import { Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import fs from 'fs';
 import path from 'path';
-import { WorkerData } from '../helpers';
+import { WorkerData } from '../helpers/index.js';
 
 /**
  * Base test fixture (unauthenticated)

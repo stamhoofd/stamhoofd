@@ -69,18 +69,20 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
+import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
 import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
 import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
 import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { DocumentTemplatePrivate, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { DocumentTemplatePrivate, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 
 import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/document-templates.ts';
-import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
+import type { ComponentOptions, Ref} from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
 import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
@@ -106,7 +108,7 @@ defineRoutes([
     {
         name: Routes.DocumentTemplate,
         url: '@id',
-        component: DocumentTemplateOverview as ComponentOptions,
+        component: DocumentTemplateOverview,
         params: {
             id: String,
         },

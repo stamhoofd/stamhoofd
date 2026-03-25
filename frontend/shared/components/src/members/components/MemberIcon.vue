@@ -17,7 +17,8 @@
 
 <script setup lang="ts">
 import ImageComponent from '#views/ImageComponent.vue';
-import { GroupType, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { GroupType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(

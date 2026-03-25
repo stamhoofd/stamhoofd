@@ -39,8 +39,8 @@ const LongPressDirective: ObjectDirective<HTMLElement & { $longPressTimer: NodeJ
         let firstTouch: { x: number; y: number } | undefined;
         let lastTouch: { x: number; y: number } | undefined;
 
-        const scrollListener = (e) => {
-            if (el.$longPressTimer && e.currentTarget.scrollTop > 1) {
+        const scrollListener = (e: Event) => {
+            if (el.$longPressTimer && e.currentTarget && e.currentTarget instanceof HTMLElement && e.currentTarget.scrollTop > 1) {
                 clearTimeout(el.$longPressTimer);
                 e.currentTarget.removeEventListener('scroll', scrollListener);
             }
@@ -127,7 +127,7 @@ const LongPressDirective: ObjectDirective<HTMLElement & { $longPressTimer: NodeJ
                     // Cancel all move events
                     el.$didTriggerLongPress = true;
 
-                    const onmove = (e) => {
+                    const onmove = (e: Event) => {
                         // Cancel all default handling from now on
                         e.preventDefault();
                     };
@@ -161,7 +161,7 @@ const LongPressDirective: ObjectDirective<HTMLElement & { $longPressTimer: NodeJ
         );
     },
 
-    unmounted(el, binding, vnode) {
+    unmounted(el) {
         if (el.$longPressTimer) {
             clearTimeout(el.$longPressTimer);
         }

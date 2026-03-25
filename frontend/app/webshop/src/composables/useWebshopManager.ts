@@ -1,5 +1,5 @@
 import { inject } from 'vue';
-import { WebshopManager } from '../classes/WebshopManager';
+import type { WebshopManager } from '../classes/WebshopManager';
 
 export function useWebshopManager(): WebshopManager {
     const webshopManager = inject<WebshopManager>('$webshopManager');

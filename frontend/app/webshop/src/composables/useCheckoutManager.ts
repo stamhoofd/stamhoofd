@@ -1,5 +1,5 @@
 import { inject } from 'vue';
-import { CheckoutManager } from '../classes/CheckoutManager';
+import type { CheckoutManager } from '../classes/CheckoutManager';
 
 export function useCheckoutManager(): CheckoutManager {
     const checkoutManager = inject<CheckoutManager>('$checkoutManager');

@@ -1,5 +1,6 @@
 import { LoginMethod, LoginMethodConfig } from '@stamhoofd/structures';
-import { Ref, computed } from 'vue';
+import type { Ref} from 'vue';
+import { computed } from 'vue';
 import { usePlatform } from './usePlatform';
 
 export function useLoginMethods(): Ref<Map<LoginMethod, LoginMethodConfig>> {

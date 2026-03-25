@@ -68,11 +68,13 @@
 
 <script lang="ts" setup>
 import { Sorter } from '@stamhoofd/utility';
-import { computed, defineComponent, getCurrentInstance, onMounted, ref, Ref, useTemplateRef, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, defineComponent, getCurrentInstance, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
 import { useDeviceWidth, useScrollListener } from '../../hooks';
 import SaveView from '../../navigation/SaveView.vue';
-import { SaveViewDefaults, SaveViewProps } from '../../navigation/SaveViewProps';
+import type { SaveViewProps } from '../../navigation/SaveViewProps';
+import { SaveViewDefaults } from '../../navigation/SaveViewProps';
 import STList from '../STList.vue';
 import STListItem from '../STListItem.vue';
 import { CategorizedViewCategory } from './CategorizedViewCategory';
@@ -138,9 +140,9 @@ function updateVisible() {
             return;
         }
 
-        let filtered: CategorizedViewCategory[] = [];
+        const filtered: CategorizedViewCategory[] = [];
         let requiredPercentage = 0.5;
-        let percentageMap: Map<CategorizedViewCategory, number> = new Map();
+        const percentageMap: Map<CategorizedViewCategory, number> = new Map();
 
         for (const category of categories.value) {
             const box = category.el.value;
@@ -186,12 +188,12 @@ function updateVisible() {
 /**
  * This is a real throttle. The throttle method in utility is a debounce.
  */
-function throttle(mainFunction, delay: number) {
+function throttle(mainFunction: (...args: unknown[]) => unknown, delay: number) {
     let timerFlag: NodeJS.Timeout | null = null; // Variable to keep track of the timer
     let runAtEnd = false;
 
     // Returning a throttled version
-    return (...args) => {
+    return (...args: unknown[]) => {
         if (timerFlag === null) { // If there is no timer currently running
             requestAnimationFrame(() => {
                 mainFunction(...args); // Execute the main function
@@ -316,8 +318,11 @@ function scrollToCategory(category: CategorizedViewCategory) {
     }
 }
 
-function getChildElementIndex(node) {
+function getChildElementIndex(node: HTMLElement | null) {
     if (!node) {
+        return 10000;
+    }
+    if (!node.parentNode) {
         return 10000;
     }
     return Array.prototype.indexOf.call(node.parentNode.children, node);

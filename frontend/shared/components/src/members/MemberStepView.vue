@@ -45,8 +45,10 @@
 <script setup lang="ts">
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { Address, PlatformMember, Version } from '@stamhoofd/structures';
-import { ComponentOptions, computed, onActivated, Ref, ref } from 'vue';
+import type { Address, PlatformMember, ReviewTimeType} from '@stamhoofd/structures';
+import { Version } from '@stamhoofd/structures';
+import type { ComponentOptions, Ref} from 'vue';
+import { computed, onActivated, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
@@ -56,7 +58,7 @@ import { useErrors } from '../errors/useErrors';
 import CodeInput from '../inputs/CodeInput.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
-import { NavigationActions } from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import { usePlatformFamilyManager } from './PlatformFamilyManager';
 
 defineOptions({
@@ -70,7 +72,7 @@ const props = withDefaults(
         component: ComponentOptions;
         // do not change this
         member: PlatformMember;
-        markReviewed?: string[];
+        markReviewed?: ReviewTimeType[];
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
         saveText: () => $t(`%v7`),
@@ -110,7 +112,7 @@ function patchMemberWithReviewed(member: PlatformMember) {
         const times = member.patchedMember.details.reviewTimes.clone();
 
         for (const r of props.markReviewed) {
-            times.markReviewed(r as any, new Date());
+            times.markReviewed(r, new Date());
         }
 
         member.addDetailsPatch({

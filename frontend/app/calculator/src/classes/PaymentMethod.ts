@@ -1,4 +1,4 @@
-import { CalculationOptions } from './CalculationInput';
+import type { CalculationOptions } from './CalculationInput';
 import { Country } from './Country';
 
 export enum PaymentMethod {
@@ -44,6 +44,7 @@ export function methodsEqual(a: PaymentMethod[], b: PaymentMethod[]): boolean {
     if (a.length !== b.length) {
         return false;
     }
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < a.length; i++) {
         if (!b.includes(a[i])) {
             return false;

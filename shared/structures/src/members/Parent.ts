@@ -10,14 +10,14 @@ export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    @field({ decoder: new EnumDecoder(ParentType) })
-    type: ParentType = ParentType.Mother;
+    @field({ decoder: new EnumDecoder(ParentType), defaultValue: () => ParentType.Mother, isDefaultValue: v => v === ParentType.Mother })
+    type: ParentType;
 
     @field({ decoder: StringDecoder })
-    firstName = '';
+    firstName: string;
 
     @field({ decoder: StringDecoder })
-    lastName = '';
+    lastName: string;
 
     @field({ decoder: StringDecoder, version: 348, nullable: true })
     @field({
@@ -26,29 +26,29 @@ export class Parent extends AutoEncoder {
         nullable: true,
         downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) => n === NationalRegisterNumberOptOut ? null : n,
     })
-    nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null = null;
+    nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    phone: string | null = null;
+    phone: string | null;
 
     @field({ decoder: StringDecoder, nullable: true, field: 'mail' })
     @field({ decoder: StringDecoder, nullable: true, version: 5 })
-    email: string | null = null;
+    email: string | null;
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 278 })
-    alternativeEmails: string[] = [];
+    alternativeEmails: string[];
 
     @field({ decoder: Address, nullable: true })
-    address: Address | null = null;
+    address: Address | null;
 
-    @field({ decoder: DateDecoder, version: 367 })
-    createdAt = new Date();
+    @field({ decoder: DateDecoder, version: 367, defaultValue: () => new Date() })
+    createdAt: Date;
 
     /**
      * Stores the timestamp the parent was last edited in the UI (not the same as edited in the database - this is used to find the most correct data in case of duplicates)
      */
     @field({ decoder: DateDecoder, nullable: true, version: 367 })
-    updatedAt: Date | null = null;
+    updatedAt: Date | null;
 
     get name() {
         if (!this.firstName) {

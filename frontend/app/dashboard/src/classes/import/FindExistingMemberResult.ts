@@ -1,6 +1,6 @@
-import { Organization, PlatformMember } from '@stamhoofd/structures';
+import type { Organization, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-import { ImportMemberBaseResult } from './ImportMemberBaseResult';
+import type { ImportMemberBaseResult } from './ImportMemberBaseResult';
 import { ImportMemberResult } from './ImportMemberResult';
 
 export class FindExistingMemberResult {

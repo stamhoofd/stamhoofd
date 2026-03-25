@@ -46,20 +46,22 @@
 </template>
 
 <script setup lang="ts">
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { NavigationActions } from '#types/NavigationActions.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 import Spinner from '#Spinner.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import DateBox from '#icons/DateBox.vue';
-import { UitpasEventResponse, UitpasEventsResponse } from '@stamhoofd/structures';
+import type { UitpasEventResponse} from '@stamhoofd/structures';
+import { UitpasEventsResponse } from '@stamhoofd/structures';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { throttle } from '@stamhoofd/utility';
-import { Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { ref, watch } from 'vue';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 
 const props = withDefaults(

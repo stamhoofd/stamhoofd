@@ -20,7 +20,7 @@ import ViewRecordCategoryAnswersBox from '#records/components/ViewRecordCategory
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useErrors } from '#errors/useErrors.ts';
-import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
+import type { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 
 const props = withDefaults(
     defineProps<{

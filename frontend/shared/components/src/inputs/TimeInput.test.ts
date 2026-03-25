@@ -243,7 +243,7 @@ describe('TimeInput', async () => {
         const wrapperBefore = app.findComponent(TimeInput);
 
         const inputWrapperBefore = wrapperBefore.find('input');
-        inputWrapperBefore.setValue('15:00');
+        await inputWrapperBefore.setValue('15:00');
 
         await app.setProps({ keepAlive: false });
         await app.setProps({ keepAlive: true });

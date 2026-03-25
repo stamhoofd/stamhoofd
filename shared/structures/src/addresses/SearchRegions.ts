@@ -1,8 +1,9 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 
 import { City } from './City.js';
-import { Country, CountryDecoder } from './CountryDecoder.js';
+import { CountryDecoder } from './CountryDecoder.js';
 import { Province } from './Province.js';
+import type { Country } from '@stamhoofd/types/Country';
 
 export class SearchRegions extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(City) })

@@ -72,22 +72,25 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
-import { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { Country, ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StamhoofdFilter, StripeAccount } from '@stamhoofd/structures';
+import type { StamhoofdFilter} from '@stamhoofd/structures';
+import { ExcelExportType, LimitedFilteredRequest, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, SortItemDirection, StripeAccount } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { Formatter } from '@stamhoofd/utility';
 
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
@@ -373,7 +376,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         this.saving = true;
 
         try {
-            this.show({
+            await this.show({
                 components: [
                     new ComponentWithProperties(ExcelExportView, {
                         type: ExcelExportType.Payments,

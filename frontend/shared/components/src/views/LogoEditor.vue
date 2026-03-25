@@ -42,9 +42,10 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { DarkMode, Image, OrganizationMetaData, PlatformConfig, ResolutionFit, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
+import type { Image, OrganizationMetaData, PlatformConfig, WebshopMetaData } from '@stamhoofd/structures';
+import { DarkMode, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import Checkbox from '../inputs/Checkbox.vue';
 import ImageInput from '../inputs/ImageInput.vue';
 

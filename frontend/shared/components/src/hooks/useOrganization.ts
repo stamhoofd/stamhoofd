@@ -1,5 +1,6 @@
-import { Organization } from '@stamhoofd/structures';
-import { Ref, computed } from 'vue';
+import type { Organization } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed } from 'vue';
 import { useContext } from './useContext';
 
 export function useOrganization(): Ref<Organization | null> {

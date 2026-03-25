@@ -1,9 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Address } from '@stamhoofd/structures';
-import XLSX from 'xlsx';
-import { ColumnMatcher } from '../ColumnMatcher';
+import type XLSX from 'xlsx';
+import type { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class StreetWithNumberColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {

@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ErrorBox } from '../errors/ErrorBox';
+import type { ErrorBox } from '../errors/ErrorBox';
 import LoadingBoxTransition from './LoadingBoxTransition.vue';
 
 withDefaults(

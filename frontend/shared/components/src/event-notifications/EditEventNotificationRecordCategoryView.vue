@@ -20,9 +20,9 @@ import FillRecordCategoryBox from '#records/components/FillRecordCategoryBox.vue
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import { RecordCategory } from '@stamhoofd/structures';
+import type { RecordCategory } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
+import type { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 
 const props = withDefaults(
     defineProps<{

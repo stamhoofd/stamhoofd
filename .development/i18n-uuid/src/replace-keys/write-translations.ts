@@ -1,5 +1,5 @@
-import fs from "fs";
-import { decodeBase62, isBase62 } from "./compress-uuids";
+import fs from 'fs';
+import { decodeBase62, isBase62 } from './compress-uuids.js';
 
 export function writeMultipleTranslations(translationsWithPath: Map<string, Record<string, string>>) {
     for (const [filePath, translations] of translationsWithPath) {
@@ -7,7 +7,7 @@ export function writeMultipleTranslations(translationsWithPath: Map<string, Reco
     }
 }
 
-const fixedOrder = ['extends', 'replacements']
+const fixedOrder = ['extends', 'replacements'];
 export function sortObjectKeysForEncoding(a: string, b: string) {
     // Always have a fixed order for certain keys, and follow with alphabetical order
     // id, name, description, ...remaining
@@ -50,13 +50,12 @@ export function sortObjectKeysForEncoding(a: string, b: string) {
     return a.localeCompare(b);
 }
 
-
 export function writeTranslation(filePath: string, translations: Record<string, string>) {
     // Sort keys
     const keys = Object.keys(translations).sort(sortObjectKeysForEncoding);
     const encodedObj = {};
     for (const key of keys) {
-        encodedObj[key] = translations[key]
+        encodedObj[key] = translations[key];
     }
     fs.writeFileSync(filePath, JSON.stringify(encodedObj, null, 2));
 }

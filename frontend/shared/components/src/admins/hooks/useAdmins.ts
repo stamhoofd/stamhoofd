@@ -1,11 +1,12 @@
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { GlobalEventBus } from '#EventBus.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { ApiUser, LoadedPermissions, MemberAdmin, Permissions, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import type { LoadedPermissions, Permissions, User} from '@stamhoofd/structures';
+import { ApiUser, MemberAdmin, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, shallowRef } from 'vue';
 import { useReloadAdmins } from './useReloadAdmins';

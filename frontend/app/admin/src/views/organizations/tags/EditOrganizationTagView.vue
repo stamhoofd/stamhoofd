@@ -48,7 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -58,7 +59,8 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { getOrganizationTagTypeName, OrganizationTag } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 import EditOrganizationTagView from './EditOrganizationTagView.vue';
 

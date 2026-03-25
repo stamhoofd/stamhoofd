@@ -1,8 +1,10 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { FilterWrapperMarker, StamhoofdFilter, unwrapFilter, unwrapFilterByPath, WrapperFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, unwrapFilter, unwrapFilterByPath } from '@stamhoofd/structures';
 
 import StringUIFilterView from './StringUIFilterView.vue';
-import { StyledDescriptionChoice, UIFilter, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper, unwrapFilterForBuilder } from './UIFilter';
+import type { StyledDescriptionChoice, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export enum StringFilterMode {
     Contains = 'Contains',
@@ -13,8 +15,7 @@ export enum StringFilterMode {
     Empty = 'Empty',
 }
 
-export class StringUIFilter extends UIFilter {
-    builder!: StringFilterBuilder;
+export class StringUIFilter extends UIFilter<StringFilterBuilder> {
     value = '';
     mode: StringFilterMode = StringFilterMode.Equals;
 

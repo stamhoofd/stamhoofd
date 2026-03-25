@@ -1,17 +1,17 @@
 {
     "name": "@stamhoofd/sql",
     "version": "2.119.0",
-    "main": "./dist/index.js",
+    "type": "module",
     "types": "./dist/index.d.ts",
+    "main": "./dist/index.js",
     "license": "UNLICENCED",
     "sideEffects": false,
     "files": [
-        "src",
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b --clean && tsc -b",
-        "test": "jest",
+        "build": "tsc --build tsconfig.build.json",
+        "test": "vitest",
         "lint": "eslint"
     },
     "publishConfig": {

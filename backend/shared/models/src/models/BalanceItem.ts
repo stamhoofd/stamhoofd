@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Payment } from './index.js';
+import { Payment } from './Payment.js';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.

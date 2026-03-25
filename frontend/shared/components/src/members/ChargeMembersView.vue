@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import ChargeView from '../views/ChargeView.vue';
 
 defineProps<{

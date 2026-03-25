@@ -1,7 +1,7 @@
-import { reactive } from "vue";
+import { reactive } from 'vue';
 
-import { ErrorBox } from "./ErrorBox";
-import { Validator } from "./Validator";
+import type { ErrorBox } from './ErrorBox';
+import { Validator } from './Validator';
 
 export function useErrors(options?: {validator?: Validator|null}) {
     return reactive({

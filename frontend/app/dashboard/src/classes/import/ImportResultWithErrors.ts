@@ -1,6 +1,6 @@
-import { ImportError } from './ImportError';
-import { ImportMemberBaseResult } from './ImportMemberBaseResult';
-import { ImportMemberResult } from './ImportMemberResult';
+import type { ImportError } from './ImportError';
+import type { ImportMemberBaseResult } from './ImportMemberBaseResult';
+import type { ImportMemberResult } from './ImportMemberResult';
 
 export class ImportMembersBaseResultWithErrors {
     errors: ImportError[] = [];

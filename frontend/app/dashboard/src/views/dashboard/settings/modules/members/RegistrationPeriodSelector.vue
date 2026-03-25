@@ -15,7 +15,7 @@
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 const props = withDefaults(defineProps<{ modelValue: OrganizationRegistrationPeriod; shouldDisableLockedPeriods?: boolean }>(), {
     shouldDisableLockedPeriods: false,

@@ -18,7 +18,8 @@
 import PriceInput from '#inputs/PriceInput.vue';
 import PermyriadInput from '#inputs/PermyriadInput.vue';
 import PriceOrPercentageInput from '#inputs/PriceOrPercentageInput.vue';
-import { Group, GroupPriceDiscount, GroupPriceDiscountType, ReduceablePrice } from '@stamhoofd/structures';
+import type { Group, GroupPriceDiscount} from '@stamhoofd/structures';
+import { GroupPriceDiscountType, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useFinancialSupportSettings } from '../hooks';
 

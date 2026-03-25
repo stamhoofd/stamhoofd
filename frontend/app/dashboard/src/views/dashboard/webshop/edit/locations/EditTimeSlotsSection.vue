@@ -41,11 +41,12 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { PrivateWebshop, WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
+import type { PrivateWebshop} from '@stamhoofd/structures';
+import { WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditTimeSlotView from './EditTimeSlotView.vue';

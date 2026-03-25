@@ -65,9 +65,11 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { ChargeRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Organization, StamhoofdFilter } from '@stamhoofd/structures';
+import { ChargeRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, ref, watch } from 'vue';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
 import { useChargeCount } from './hooks/useChargeCount';
 

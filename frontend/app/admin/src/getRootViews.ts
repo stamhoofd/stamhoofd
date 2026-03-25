@@ -1,4 +1,5 @@
-import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
@@ -8,8 +9,8 @@ import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts
 import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
-import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
-import { type useTranslate } from '@stamhoofd/frontend-i18n/I18nController';
+import { getScopedAutoRootComponent, wrapContext } from '@stamhoofd/dashboard';
+import type {useTranslate} from '@stamhoofd/frontend-i18n/I18nController';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
@@ -189,7 +190,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                 }),
             ),
             loginRoot: wrapWithModalStack(
-                getNonAutoLoginRoot(reactiveSession, options),
+                getScopedAutoRootComponent(reactiveSession, options),
             ),
             noPermissionsRoot: getNoPermissionsView(),
         }),

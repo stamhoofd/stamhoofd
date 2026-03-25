@@ -1,14 +1,14 @@
-import chalk from "chalk";
-import { validateTranslations } from "../../helpers/validate-translations";
-import { AutoTranslateOptions } from "../../types/AutoTranslateOptions";
-import { Batch } from "../../types/Batch";
-import { PromptBatch } from "../../types/PromptBatch";
-import { Translations } from "../../types/Translations";
-import { TranslationWithVariant } from "../../types/TranslationWithVariant";
-import { PromiseQueue } from "../PromiseQueue";
-import { promptLogger } from "../PromptLogger";
-import { TranslationManager } from "../TranslationManager";
-import { AfterBatchTranslatedCallback, ITranslator } from "./ITranslator";
+import chalk from 'chalk';
+import { validateTranslations } from '../../helpers/validate-translations.js';
+import type { AutoTranslateOptions } from '../../types/AutoTranslateOptions.js';
+import type { Batch } from '../../types/Batch.js';
+import type { PromptBatch } from '../../types/PromptBatch.js';
+import type { Translations } from '../../types/Translations.js';
+import type { TranslationWithVariant } from '../../types/TranslationWithVariant.js';
+import type { PromiseQueue } from '../PromiseQueue.js';
+import { promptLogger } from '../PromptLogger.js';
+import type { TranslationManager } from '../TranslationManager.js';
+import type { AfterBatchTranslatedCallback, ITranslator } from './ITranslator.js';
 
 export abstract class Translator implements ITranslator {
     // Max amount of characters in a batch
@@ -30,7 +30,7 @@ export abstract class Translator implements ITranslator {
             originalLocal,
             targetLocal,
             namespace,
-            getTranslation
+            getTranslation,
         }: { originalLocal: string; targetLocal: string; namespace: string; getTranslation: (batchValue: T) => string },
     ): Promise<string> {
         // const randomNumber = Math.random() * 100;
@@ -60,7 +60,7 @@ export abstract class Translator implements ITranslator {
             originalLocal,
             targetLocal,
             consistentWords,
-            prompt
+            prompt,
         }: {
             originalLocal: string;
             targetLocal: string;
@@ -68,19 +68,19 @@ export abstract class Translator implements ITranslator {
             prompt: string;
         },
     ): string {
-        const consistentWordsText =
-            consistentWords && Object.keys(consistentWords).length > 0
-                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n` +
-                  JSON.stringify(consistentWords, undefined, "  ") +
-                  "\n"
-                : "";
+        const consistentWordsText
+            = consistentWords && Object.keys(consistentWords).length > 0
+                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n`
+                + JSON.stringify(consistentWords, undefined, '  ')
+                + '\n'
+                : '';
 
         const fullPrompt = `Translate the values of the JSON array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
-${prompt ? (prompt + "\n") : ""}
+${prompt ? (prompt + '\n') : ''}
 Translate this array: 
-${JSON.stringify(batch, undefined, "  ")}
+${JSON.stringify(batch, undefined, '  ')}
 
-Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}.${prompt ? ("\n" + prompt): ""}`;
+Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}.${prompt ? ('\n' + prompt) : ''}`;
 
         return fullPrompt;
     }
@@ -92,7 +92,7 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
             originalLocal,
             targetLocal,
             consistentWords,
-            prompt
+            prompt,
         }: {
             originalLocal: string;
             targetLocal: string;
@@ -100,27 +100,27 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
             prompt: string;
         },
     ): string {
-        const consistentWordsText =
-            consistentWords && Object.keys(consistentWords).length > 0
-                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n` +
-                  JSON.stringify(consistentWords, undefined, "  ") +
-                  ".\n"
-                : "";
-            
+        const consistentWordsText
+            = consistentWords && Object.keys(consistentWords).length > 0
+                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n`
+                + JSON.stringify(consistentWords, undefined, '  ')
+                + '.\n'
+                : '';
+
         const fullPrompt = `Given is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants ("variant" property) of the original texts in a consistent way (in a new "value" property of each object), while trying to stay close to the example translation ("example" and "exampleTranslation"). ${consistentWordsText}
-${prompt ? (prompt + "\n") : ""}
+${prompt ? (prompt + '\n') : ''}
 Translate the variants in this array to ${targetLocal}: 
     
-${JSON.stringify(batch.map(b => {
+${JSON.stringify(batch.map((b) => {
     return {
         id: b.id,
-        "example": b.value.original,
-        "exampleTranslation": b.value.translation,
-        "variant": b.value.variant,
-    }
-}), undefined, "  ")}
+        example: b.value.original,
+        exampleTranslation: b.value.translation,
+        variant: b.value.variant,
+    };
+}), undefined, '  ')}
 
-Above is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts ("variant" property) in a consistent way (in a new "value" property of each object), while trying to stay close to the example translation ("example" and "exampleTranslation").${consistentWordsText}${prompt ? ("\n" + prompt): ""}`;
+Above is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts ("variant" property) in a consistent way (in a new "value" property of each object), while trying to stay close to the example translation ("example" and "exampleTranslation").${consistentWordsText}${prompt ? ('\n' + prompt) : ''}`;
 
         return fullPrompt;
     }
@@ -142,7 +142,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         const logResult = promptLogger.prompt(prompt, args);
 
         const text = this.options.fake
-            ? await this.fakeGenerateResponse(batch, {...args, getTranslation: (x) => x})
+            ? await this.fakeGenerateResponse(batch, { ...args, getTranslation: x => x })
             : await this.generateResponse(prompt);
 
         logResult(text);
@@ -167,7 +167,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         const logResult = promptLogger.prompt(prompt, args);
 
         const text = this.options.fake
-            ? await this.fakeGenerateResponse(batch, {...args, getTranslation: (x) => x.variant})
+            ? await this.fakeGenerateResponse(batch, { ...args, getTranslation: x => x.variant })
             : await this.generateResponse(prompt);
 
         logResult(text);
@@ -282,7 +282,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             translateBatch,
             getUntranslatedValue,
             afterBatchTranslated,
-            prompt
+            prompt,
         }: {
             originalLocal: string;
             targetLocal: string;
@@ -329,7 +329,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                                     namespace,
                                     batchNumber,
                                     totalBatches,
-                                    prompt
+                                    prompt,
                                 },
                             );
 
@@ -339,8 +339,8 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                                 ),
                             );
 
-                            const validatedBatch: Batch<string> =
-                                translatedBatch.filter(({ uuid, value }) => {
+                            const validatedBatch: Batch<string>
+                                = translatedBatch.filter(({ uuid, value }) => {
                                     const original = getUntranslatedValue(
                                         translations[uuid],
                                     );
@@ -355,14 +355,14 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                                 if (
                                     validatedBatch.every(
                                         ({ uuid, value }) =>
-                                            value ===
-                                            getUntranslatedValue(
+                                            value
+                                            === getUntranslatedValue(
                                                 translations[uuid],
                                             ),
                                     )
                                 ) {
                                     throw new Error(
-                                        "All translations in batch are equal to original",
+                                        'All translations in batch are equal to original',
                                     );
                                 }
                             }
@@ -375,7 +375,8 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                         });
 
                         return result;
-                    } catch (error) {
+                    }
+                    catch (error) {
                         const errorMessage = `Failed translating batch ${batchNumber} of ${totalBatches} (from ${originalLocal} to ${targetLocal}, namespace: ${namespace}):
 ${error}`;
                         console.error(chalk.red(errorMessage));
@@ -402,7 +403,7 @@ ${error}`;
 
         return Object.fromEntries(
             translatedBatches
-                .flatMap((x) => x)
+                .flatMap(x => x)
                 .map(({ uuid, value }) => {
                     return [uuid, value];
                 }),
@@ -453,7 +454,7 @@ ${error}`;
             translateBatch: (batch, args) => this.translateSimpleBatch(batch, args),
             getUntranslatedValue: (item: string) => item,
             afterBatchTranslated: args.afterBatchTranslated,
-            prompt
+            prompt,
         });
 
         console.log(
@@ -505,7 +506,7 @@ ${error}`;
             getUntranslatedValue: (item: TranslationWithVariant) =>
                 item.variant,
             afterBatchTranslated: args.afterBatchTranslated,
-            prompt
+            prompt,
         });
 
         console.log(
@@ -538,9 +539,9 @@ ${error}`;
         const regex = /{((?:.|\r|\n)*?)}/g;
         const originalMatches = original.matchAll(regex);
         const translationMatches = translation.matchAll(regex);
-        const originalArguments = [...originalMatches].map((match) => match[1]);
+        const originalArguments = [...originalMatches].map(match => match[1]);
         const translationArguments = [...translationMatches].map(
-            (match) => match[1],
+            match => match[1],
         );
 
         if (originalArguments.length !== translationArguments.length) {
@@ -551,8 +552,8 @@ ${error}`;
         }
 
         const orginalMap = this.createArgumentOccurrenceMap(originalArguments);
-        const translationMap =
-            this.createArgumentOccurrenceMap(translationArguments);
+        const translationMap
+            = this.createArgumentOccurrenceMap(translationArguments);
 
         for (const [argument, count] of orginalMap.entries()) {
             const translationCount = translationMap.get(argument);
@@ -595,29 +596,29 @@ ${error}`;
     }
 
     protected validateJson(json: any): { isValid: boolean; message?: string } {
-        if (typeof json !== "object") {
+        if (typeof json !== 'object') {
             return {
                 isValid: false,
-                message: "Json is not an object.",
+                message: 'Json is not an object.',
             };
         }
 
         if (!Array.isArray(json)) {
             return {
                 isValid: false,
-                message: "Json is not an array.",
+                message: 'Json is not an array.',
             };
         }
 
         if (
             json.some((item) => {
-                if (typeof item !== "object") {
+                if (typeof item !== 'object') {
                     return true;
                 }
-                if (typeof item["id"] !== "number") {
+                if (typeof item['id'] !== 'number') {
                     return true;
                 }
-                if (typeof item["value"] !== "string") {
+                if (typeof item['value'] !== 'string') {
                     return true;
                 }
                 return false;
@@ -626,7 +627,7 @@ ${error}`;
             return {
                 isValid: false,
                 message:
-                    "Json is not an array of objects with a number id and a string value.",
+                    'Json is not an array of objects with a number id and a string value.',
             };
         }
 

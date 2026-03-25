@@ -99,7 +99,8 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, VersionBox } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import { VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -114,7 +115,8 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { PrivateWebshop, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from '@stamhoofd/structures';
+import type { PrivateWebshop} from '@stamhoofd/structures';
+import { SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AppManager } from '@stamhoofd/networking/AppManager';

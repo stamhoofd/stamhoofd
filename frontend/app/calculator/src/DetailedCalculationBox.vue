@@ -99,8 +99,8 @@
 </template>
 
 <script lang="ts" setup>
-import { CalculationInput } from './classes/CalculationInput';
-import { CalculationOutput } from './classes/CalculationOutput';
+import type { CalculationInput } from './classes/CalculationInput';
+import type { CalculationOutput } from './classes/CalculationOutput';
 import { ModuleType } from './classes/ModuleType';
 
 defineProps<{

@@ -7,16 +7,16 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, useManualPresent } from '@simonbackx/vue-app-navigation';
+import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
-import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
-import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
@@ -25,9 +25,9 @@ import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { DarkMode, GetWebshopFromDomainResult, Language } from '@stamhoofd/structures';
+import { GetWebshopFromDomainResult } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
-
 import { ref, watch } from 'vue';
 import { getWebshopRootView } from './getRootView';
 import ChooseWebshopView from './views/ChooseWebshopView.vue';
@@ -158,7 +158,7 @@ const root = new ComponentWithProperties(PromiseView, {
     },
 });
 
-const modalStack = ref<typeof ModalStackComponent | null>(null);
+const modalStack = ref<InstanceType<typeof ModalStackComponent> | null>(null);
 
 function created() {
     if (GoogleTranslateHelper.isGoogleTranslateDomain(window.location.hostname)) {
@@ -175,17 +175,17 @@ function created() {
 created();
 const manualPresent = useManualPresent();
 
-watch(modalStack, (modalStack) => {
+watch(modalStack, (modalStack: InstanceType<typeof ModalStackComponent> | null) => {
     if (modalStack === null) {
         return;
     }
 
     ModalStackEventBus.addListener(owner, 'present', async (options: PushOptions | ComponentWithProperties) => {
-        if (!(options as any).components) {
-            modalStack.present({ components: [options] });
+        if (options instanceof ComponentWithProperties) {
+            await modalStack.present({ components: [options] });
         }
         else {
-            modalStack.present(options);
+            await modalStack.present(options);
         }
     });
 

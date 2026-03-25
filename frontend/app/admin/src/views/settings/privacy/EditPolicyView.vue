@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
@@ -50,7 +50,7 @@ import UploadFileButton from '@stamhoofd/components/inputs/UploadFileButton.vue'
 import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { PlatformPolicy } from '@stamhoofd/structures';
+import type { PlatformPolicy } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();

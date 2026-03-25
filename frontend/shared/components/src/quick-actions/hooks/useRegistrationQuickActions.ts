@@ -1,10 +1,13 @@
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, Platform, PlatformFamily, PlatformMember, SortItemDirection, StamhoofdFilter, WebshopStatus } from '@stamhoofd/structures';
+import type { Platform, PlatformFamily, PlatformMember, StamhoofdFilter} from '@stamhoofd/structures';
+import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onActivated, onMounted, ref, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, onActivated, onMounted, ref } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
@@ -13,7 +16,7 @@ import { useEditMember } from '../../members';
 import { MemberStepManager } from '../../members/classes/MemberStepManager';
 import { getAllMemberSteps } from '../../members/classes/steps';
 import { useNavigationActions } from '../../types/NavigationActions';
-import { QuickAction, QuickActions } from '../classes/QuickActions';
+import type { QuickAction, QuickActions } from '../classes/QuickActions';
 
 import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@simonbackx/vue-app-navigation';
 import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';

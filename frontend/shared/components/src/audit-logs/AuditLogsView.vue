@@ -55,13 +55,15 @@ import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-a
 import DateSelection from '#inputs/DateSelection.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
-import { AuditLog, isEmptyFilter, mergeFilters } from '@stamhoofd/structures';
+import type { AuditLog} from '@stamhoofd/structures';
+import { isEmptyFilter, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onActivated, ref, Ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { computed, onActivated, ref, watch } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { useAuditLogsObjectFetcher } from '../fetchers';
 import { useAuditLogUIFilterBuilders } from '../filters/filterBuilders';
-import { UIFilter } from '../filters/UIFilter';
+import type { UIFilter } from '../filters/UIFilter';
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { InfiniteObjectFetcherEnd, useInfiniteObjectFetcher, usePositionableSheet } from '../tables';
 import AuditLogRow from './components/AuditLogRow.vue';

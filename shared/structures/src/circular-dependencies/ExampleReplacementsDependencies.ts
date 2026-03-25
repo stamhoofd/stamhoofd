@@ -1,6 +1,6 @@
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { Address, ValidatedAddress } from '../addresses/Address.js';
-import { Country } from '../addresses/CountryDecoder.js';
 import { BalanceItem } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { injectReplacementValues } from '../email/exampleReplacements.js';

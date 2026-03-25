@@ -4,11 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { NamedObject } from './Event.js';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
 import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
-import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
-import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
-import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
+import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
+import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
+import type { RecordAnswer} from './members/records/RecordAnswer.js';
+import { RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
-import { RecordSettings } from './members/records/RecordSettings.js';
+import type { RecordSettings } from './members/records/RecordSettings.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum DocumentStatus {

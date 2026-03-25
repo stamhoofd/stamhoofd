@@ -81,7 +81,7 @@ export default class RegistrationPageSettingsView extends Mixins(NavigationMixin
         return this.organization.meta.type === OrganizationType.Youth;
     }
 
-    copyElement(event: any) {
+    async copyElement(event: any) {
         event.target.contentEditable = true;
 
         document.execCommand('selectAll', false);
@@ -94,7 +94,7 @@ export default class RegistrationPageSettingsView extends Mixins(NavigationMixin
             x: event.clientX,
             y: event.clientY + 10,
         });
-        this.present(displayedComponent.setDisplayStyle('overlay'));
+        await this.present(displayedComponent.setDisplayStyle('overlay'));
 
         setTimeout(() => {
             (displayedComponent.componentInstance() as any)?.hide?.();

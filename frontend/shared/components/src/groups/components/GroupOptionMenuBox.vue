@@ -88,11 +88,12 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Group, GroupOption, GroupOptionMenu, GroupSettings } from '@stamhoofd/structures';
+import type { GroupOptionMenu} from '@stamhoofd/structures';
+import { Group, GroupOption, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useErrors } from '../../errors/useErrors';
+import type { useErrors } from '../../errors/useErrors';
 import { useDraggableArray, useEmitPatch, usePatchableArray, usePatchMoveUpDownSingle } from '../../hooks';
 import StepperInput from '../../inputs/StepperInput.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';

@@ -1,4 +1,4 @@
-import { Country } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import fs from 'fs';
 import readline from 'readline';
 

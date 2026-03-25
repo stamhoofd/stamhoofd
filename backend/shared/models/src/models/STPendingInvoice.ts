@@ -3,7 +3,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Organization } from './index.js';
+import { type Organization } from './Organization.js';
 
 /**
  * Things that should get paid, but are not yet invoiced yet because:
@@ -27,7 +27,7 @@ export class STPendingInvoice extends QueryableModel {
     })
     id!: string;
 
-    @column({ foreignKey: STPendingInvoice.organization, type: 'string', nullable: true })
+    @column({ type: 'string', nullable: true })
     organizationId: string | null;
 
     @column({ type: 'json', decoder: STInvoiceMeta })
@@ -60,5 +60,5 @@ export class STPendingInvoice extends QueryableModel {
     })
     updatedAt: Date;
 
-    static organization = new ManyToOneRelation(Organization, 'organization');
+    static organization: ManyToOneRelation<'organization', Organization>;
 }

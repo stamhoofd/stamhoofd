@@ -1,5 +1,6 @@
-import { STPackage, STPackageType } from '@stamhoofd/structures';
-import { ref, Ref } from 'vue';
+import type { STPackage, STPackageType } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
+import { ref } from 'vue';
 import { useOrganizationPackages } from './useOrganizationPackages';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

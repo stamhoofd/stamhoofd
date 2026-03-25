@@ -31,7 +31,9 @@
 import Radio from '#inputs/Radio.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
-import { Country, Organization, PaymentConfiguration, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentType } from '@stamhoofd/structures';
+import type { Organization, PaymentConfiguration, PaymentCustomer} from '@stamhoofd/structures';
+import { PaymentMethod, PaymentMethodHelper, PaymentType } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { computed, onMounted } from 'vue';
 import PaymentMethodIcon from '../payments/components/PaymentMethodIcon.vue';
 

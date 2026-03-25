@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :disabled="!hasChanges" :loading="saving" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
-        <template #buttons v-if="!isNew">
+        <template v-if="!isNew" #buttons>
             <button class="button icon history" type="button" @click="viewAudit" />
         </template>
         <h1>
@@ -254,26 +254,29 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import AddressInput from '#inputs/AddressInput.vue';
-import AgeInput from '#inputs/AgeInput.vue';
 import AuditLogsView from '#audit-logs/AuditLogsView.vue';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import DateSelection from '#inputs/DateSelection.vue';
-import Dropdown from '#inputs/Dropdown.vue';
+import OrganizationAvatar from '#context/OrganizationAvatar.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { GlobalEventBus } from '#EventBus.ts';
-import ImageComponent from '#views/ImageComponent.vue';
-import OrganizationAvatar from '#context/OrganizationAvatar.vue';
+import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import AddressInput from '#inputs/AddressInput.vue';
+import AgeInput from '#inputs/AgeInput.vue';
+import DateSelection from '#inputs/DateSelection.vue';
+import Dropdown from '#inputs/Dropdown.vue';
 import TagIdsInput from '#inputs/TagIdsInput.vue';
 import TimeInput from '#inputs/TimeInput.vue';
-import { Toast } from '#overlays/Toast.ts';
 import UploadButton from '#inputs/UploadButton.vue';
-import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import WYSIWYGTextInput from '#inputs/WYSIWYGTextInput.vue';
-import { AccessRight, Country, Event, EventLocation, EventMeta, Organization, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import ImageComponent from '#views/ImageComponent.vue';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import type { Organization} from '@stamhoofd/structures';
+import { AccessRight, Event, EventLocation, EventMeta, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
+import { Country } from "@stamhoofd/types/Country";
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';

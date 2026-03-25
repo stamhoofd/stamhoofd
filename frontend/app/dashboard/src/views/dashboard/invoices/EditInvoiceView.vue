@@ -128,11 +128,13 @@ import PaymentCustomerSelectionBox from '@stamhoofd/components/payments/componen
 import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { Company, Invoice, PaymentCustomer } from '@stamhoofd/structures';
+import type { Company, PaymentCustomer } from '@stamhoofd/structures';
+import { Invoice } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import { InvoiceItemsBox } from './components';
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 
 const props = withDefaults(

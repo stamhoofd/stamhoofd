@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts" generic="Nullable extends string|null">
-import { Organization } from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/structures';
 import { computed, watchEffect } from 'vue';
 import { useExternalOrganization } from '../groups';
 import LoadingViewTransition from './LoadingViewTransition.vue';

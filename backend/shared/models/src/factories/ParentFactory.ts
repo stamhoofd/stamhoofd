@@ -10,7 +10,7 @@ interface Options {
 
 export class ParentFactory extends Factory<Options, Parent> {
     async create(): Promise<Parent> {
-        const parent = new Parent();
+        const parent = Parent.create({})
         parent.type = this.options.type ?? this.randomArray([ParentType.Mother, ParentType.Father, ParentType.Stepfather, ParentType.Stepmother, ParentType.Other]);
         if (parent.type == ParentType.Other) {
             // Second spin

@@ -1,10 +1,12 @@
-import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods} from '@simonbackx/simple-encoding';
+import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import { Group, GroupPrivateSettings, GroupSettings, Organization, OrganizationRegistrationPeriod, Version } from '@stamhoofd/structures';
+import type { Organization} from '@stamhoofd/structures';
+import { Group, GroupPrivateSettings, GroupSettings, OrganizationRegistrationPeriod, Version } from '@stamhoofd/structures';
 
 @Component
 export default class EditGroupMixin extends Mixins(NavigationMixin) {
@@ -114,7 +116,7 @@ export default class EditGroupMixin extends Mixins(NavigationMixin) {
 
             const dis = await this.shouldDismiss();
             if (dis) {
-                this.dismiss({ force: true });
+                await this.dismiss({ force: true });
             }
         }
         catch (e) {

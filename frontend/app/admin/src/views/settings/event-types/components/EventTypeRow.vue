@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PlatformEventType } from '@stamhoofd/structures';
+import type { PlatformEventType } from '@stamhoofd/structures';
 
 defineProps<{
     type: PlatformEventType;

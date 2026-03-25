@@ -87,7 +87,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
 
         try {
             await LoginHelper.changePassword(this.$context, this.password);
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
             new Toast($t(`%12U`), 'success').show();
         }
         catch (e) {

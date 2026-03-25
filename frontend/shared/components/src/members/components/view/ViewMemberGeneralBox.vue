@@ -88,7 +88,8 @@
 </template>
 
 <script setup lang="ts">
-import { NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
 import EmailAddress from '../../../email/EmailAddress.vue';
 

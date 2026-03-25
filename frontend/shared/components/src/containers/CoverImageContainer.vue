@@ -13,7 +13,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
 import { usePlatform } from '../hooks';
 import ImageComponent from '../views/ImageComponent.vue';
 

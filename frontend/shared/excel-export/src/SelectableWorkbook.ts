@@ -1,5 +1,5 @@
 import { ExcelSheetColumnFilter, ExcelSheetFilter, ExcelWorkbookFilter } from '@stamhoofd/structures';
-import { SelectableSheet } from './SelectableSheet';
+import type { SelectableSheet } from './SelectableSheet';
 
 export class SelectableWorkbook {
     sheets: SelectableSheet[] = [];

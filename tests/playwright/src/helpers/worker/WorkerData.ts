@@ -1,7 +1,7 @@
 import { User } from '@stamhoofd/models';
-import { CaddyConfigHelper } from '../../setup/helpers/CaddyConfigHelper';
-import { DatabaseHelper } from '../../setup/helpers/DatabaseHelper';
-import { UserConfigurator } from './UserConfigurator';
+import { CaddyConfigHelper } from '../../setup/helpers/CaddyConfigHelper.js';
+import { DatabaseHelper } from '../../setup/helpers/DatabaseHelper.js';
+import { UserConfigurator } from './UserConfigurator.js';
 
 export type StamhoofdUrls = {
     readonly api: string;

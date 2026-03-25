@@ -1,5 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
-import { FrontendProjectName, FrontendService } from './FrontendService';
+import type { FrontendProjectName} from './FrontendService.js';
+import { FrontendService } from './FrontendService.js';
 
 /**
  * Helper to create caddy configuration for playwright

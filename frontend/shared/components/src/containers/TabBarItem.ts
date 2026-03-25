@@ -1,6 +1,7 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentPublicInstance, markRaw, Ref, unref } from 'vue';
+import type { ComponentPublicInstance, Ref} from 'vue';
+import { markRaw, unref } from 'vue';
 
 export class TabBarItem {
     id: string;

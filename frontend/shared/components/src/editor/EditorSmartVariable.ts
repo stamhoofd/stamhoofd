@@ -1,4 +1,4 @@
-import { EditorSmartVariable } from '@stamhoofd/structures';
+import type { EditorSmartVariable } from '@stamhoofd/structures';
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 
@@ -126,7 +126,7 @@ export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
     },
 });
 
-export const SmartVariableNodeBlock = SmartVariableNode.extend({
+export const SmartVariableNodeBlock = SmartVariableNode.extend<SmartVariableNodeOptions>({
     name: 'smartVariableBlock',
     inline: false,
     group: 'block',

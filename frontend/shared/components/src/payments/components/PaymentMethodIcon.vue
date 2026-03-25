@@ -1,6 +1,6 @@
 <template>
     <img v-if="method === PaymentMethod.Payconiq" height="48" width="108" src="@stamhoofd/assets/images/partners/icons/bancontact-pay.png" class="bancontact-pay-icon">
-    <figure v-else class="style-image-with-icon":class="{white: method !== PaymentMethod.Unknown && method !== PaymentMethod.Transfer && method !== PaymentMethod.PointOfSale, dual: method === PaymentMethod.CreditCard}">
+    <figure v-else class="style-image-with-icon" :class="{white: method !== PaymentMethod.Unknown && method !== PaymentMethod.Transfer && method !== PaymentMethod.PointOfSale, dual: method === PaymentMethod.CreditCard}">
         <figure>
             <span v-if="method === PaymentMethod.Unknown && type === PaymentType.Reallocation" class="icon wand" />
             <img v-else-if="method === PaymentMethod.Bancontact" src="@stamhoofd/assets/images/partners/icons/bancontact.svg">

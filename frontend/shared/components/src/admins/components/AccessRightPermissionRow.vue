@@ -15,7 +15,8 @@
 
 <script setup lang="ts">
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';
-import { AccessRight, AccessRightHelper, PermissionRoleDetailed, Permissions, getPermissionLevelNumber } from '@stamhoofd/structures';
+import type { AccessRight, Permissions} from '@stamhoofd/structures';
+import { AccessRightHelper, PermissionRoleDetailed, getPermissionLevelNumber } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{

@@ -7,10 +7,10 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Component, Prop, VueComponent, Watch } from "@simonbackx/vue-app-navigation/classes";
-import { Country } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 
 import { ErrorBox } from "../errors/ErrorBox";
-import { Validator } from "../errors/Validator";
+import type { Validator } from "../errors/Validator";
 import STInputBox from "./STInputBox.vue";
 
 @Component({
@@ -87,7 +87,7 @@ export default class VATNumberInput extends VueComponent {
             return false
         }
 
-        if (this.VATNumberRaw.length > 2 && this.VATNumberRaw.substr(0, 2) !== this.country) {
+        if (this.VATNumberRaw.length > 2 && this.VATNumberRaw.substr(0, 2) !== this.country.toString()) {
             // Add required country in VAT number
             this.VATNumberRaw = this.country+this.VATNumberRaw
         }

@@ -31,7 +31,8 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { Address, ValidatedAddress } from '@stamhoofd/structures';
+import type { Address} from '@stamhoofd/structures';
+import { ValidatedAddress } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import { useCheckoutManager } from '../../composables/useCheckoutManager';

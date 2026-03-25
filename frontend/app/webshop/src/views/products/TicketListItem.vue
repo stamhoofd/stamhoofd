@@ -23,7 +23,8 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import DetailedTicketView from '@stamhoofd/components/views/DetailedTicketView.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Order, Organization, TicketPublic, Webshop, WebshopTicketType } from '@stamhoofd/structures';
+import type { Order, Organization, TicketPublic, Webshop} from '@stamhoofd/structures';
+import { WebshopTicketType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{

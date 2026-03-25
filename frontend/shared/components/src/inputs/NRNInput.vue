@@ -9,7 +9,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { Validator } from '../errors/Validator';
+import type { Validator } from '../errors/Validator';
 import { DataValidator } from '@stamhoofd/utility';
 import { ErrorBox } from '../errors/ErrorBox';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -70,7 +70,7 @@ function doesMatchNRNSuggestion(nrn: string | null): boolean {
         return false;
     }
     // Remove TRAILING -
-    let nrnWithoutDash = nrn.replace(/-$/, '');
+    const nrnWithoutDash = nrn.replace(/-$/, '');
     return nrrRaw.value === nrn || nrrRaw.value === nrnWithoutDash || (nrrRaw.value.length === 0 && !!nrn);
 }
 

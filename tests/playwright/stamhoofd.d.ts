@@ -1,3 +1,4 @@
+import '../../environment.d.ts';
 
 export { };
 

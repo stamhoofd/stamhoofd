@@ -1,11 +1,13 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
-import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
+import type { CountFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
-import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
-import { WebshopManager } from '../WebshopManager';
+import type { OrderIndexedDBIndex} from '../ordersIndexedDBSorters';
+import { ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
+import type { WebshopManager } from '../WebshopManager';
 import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
 let lastNextRequest: LimitedFilteredRequest | null = null;

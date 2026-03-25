@@ -1,8 +1,4 @@
-export enum Language {
-    Dutch = 'nl',
-    English = 'en',
-    French = 'fr',
-}
+import { Language } from '@stamhoofd/types/Language';
 
 export class LanguageHelper {
     /**

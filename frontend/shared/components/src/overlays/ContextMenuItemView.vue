@@ -13,9 +13,10 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import ContextMenuView from './ContextMenuView.vue';
+import type ContextMenuView from './ContextMenuView.vue';
 
 @Component({
     inheritAttrs: false,
@@ -34,7 +35,7 @@ export default class ContextMenuItemView extends Mixins(NavigationMixin) {
     childContextMenu!: ComponentWithProperties | null;
 
     @Prop({ required: true })
-    contextMenuView!: InstanceType<typeof ContextMenuView>;
+    contextMenuView!: ContextMenuView;
 
     get isOpen() {
         return (this.contextMenuView)?.childMenu && (this.contextMenuView).childMenu === this.childContextMenu;
@@ -48,7 +49,7 @@ export default class ContextMenuItemView extends Mixins(NavigationMixin) {
         (this.contextMenuView).onMouseLeaveItem(this);
     }
 
-    onClick(event) {
+    onClick(event: MouseEvent) {
         (this.contextMenuView).onClickItem(this, event);
     }
 }

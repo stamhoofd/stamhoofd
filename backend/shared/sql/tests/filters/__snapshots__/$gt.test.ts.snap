@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`$gt JSON scalars Can compare with number scalars: SQL Query for filter: {"settings.scalar":{"$gt":-4}} 1`] = `
+exports[`$gt > JSON scalars > Can compare with number scalars > SQL Query for filter: {"settings.scalar":{"$gt":-4}} 1`] = `
 {
   "params": [
     -4,
@@ -9,7 +9,7 @@ exports[`$gt JSON scalars Can compare with number scalars: SQL Query for filter:
 }
 `;
 
-exports[`$gt JSON scalars Can compare with number scalars: SQL Query for filter: {"settings.scalar":{"$gt":4}} 1`] = `
+exports[`$gt > JSON scalars > Can compare with number scalars > SQL Query for filter: {"settings.scalar":{"$gt":4}} 1`] = `
 {
   "params": [
     4,
@@ -18,7 +18,7 @@ exports[`$gt JSON scalars Can compare with number scalars: SQL Query for filter:
 }
 `;
 
-exports[`$gt JSON scalars Can compare with number scalars: SQL Query for not match filter: {"settings.scalar":{"$gt":5}} 1`] = `
+exports[`$gt > JSON scalars > Can compare with number scalars > SQL Query for not match filter: {"settings.scalar":{"$gt":5}} 1`] = `
 {
   "params": [
     5,
@@ -27,7 +27,7 @@ exports[`$gt JSON scalars Can compare with number scalars: SQL Query for not mat
 }
 `;
 
-exports[`$gt JSON scalars Ignores null: SQL Query for not match filter: {"settings.scalar":{"$gt":-1}} 1`] = `
+exports[`$gt > JSON scalars > Ignores null > SQL Query for not match filter: {"settings.scalar":{"$gt":-1}} 1`] = `
 {
   "params": [
     -1,
@@ -36,7 +36,7 @@ exports[`$gt JSON scalars Ignores null: SQL Query for not match filter: {"settin
 }
 `;
 
-exports[`$gt JSON scalars Ignores null: SQL Query for not match filter: {"settings.scalar":{"$gt":5}} 1`] = `
+exports[`$gt > JSON scalars > Ignores null > SQL Query for not match filter: {"settings.scalar":{"$gt":5}} 1`] = `
 {
   "params": [
     5,
@@ -45,7 +45,7 @@ exports[`$gt JSON scalars Ignores null: SQL Query for not match filter: {"settin
 }
 `;
 
-exports[`$gt JSON scalars Ignores string values that cannot convert to numbers: SQL Query for not match filter: {"settings.scalar":{"$gt":-1}} 1`] = `
+exports[`$gt > JSON scalars > Ignores string values that cannot convert to numbers > SQL Query for not match filter: {"settings.scalar":{"$gt":-1}} 1`] = `
 {
   "params": [
     -1,
@@ -54,7 +54,7 @@ exports[`$gt JSON scalars Ignores string values that cannot convert to numbers: 
 }
 `;
 
-exports[`$gt JSON scalars Ignores string values that cannot convert to numbers: SQL Query for not match filter: {"settings.scalar":{"$gt":5}} 1`] = `
+exports[`$gt > JSON scalars > Ignores string values that cannot convert to numbers > SQL Query for not match filter: {"settings.scalar":{"$gt":5}} 1`] = `
 {
   "params": [
     5,
@@ -63,7 +63,7 @@ exports[`$gt JSON scalars Ignores string values that cannot convert to numbers: 
 }
 `;
 
-exports[`$gt JSON scalars Matches booleans: SQL Query for filter: {"settings.scalar":{"$gt":-1}} 1`] = `
+exports[`$gt > JSON scalars > Matches booleans > SQL Query for filter: {"settings.scalar":{"$gt":-1}} 1`] = `
 {
   "params": [
     -1,
@@ -72,7 +72,7 @@ exports[`$gt JSON scalars Matches booleans: SQL Query for filter: {"settings.sca
 }
 `;
 
-exports[`$gt JSON scalars Matches booleans: SQL Query for not match filter: {"settings.scalar":{"$gt":1}} 1`] = `
+exports[`$gt > JSON scalars > Matches booleans > SQL Query for not match filter: {"settings.scalar":{"$gt":1}} 1`] = `
 {
   "params": [
     1,
@@ -81,7 +81,7 @@ exports[`$gt JSON scalars Matches booleans: SQL Query for not match filter: {"se
 }
 `;
 
-exports[`$gt JSON scalars Mathes string values that can convert to numbers: SQL Query for filter: {"settings.scalar":{"$gt":-1}} 1`] = `
+exports[`$gt > JSON scalars > Mathes string values that can convert to numbers > SQL Query for filter: {"settings.scalar":{"$gt":-1}} 1`] = `
 {
   "params": [
     -1,
@@ -90,7 +90,7 @@ exports[`$gt JSON scalars Mathes string values that can convert to numbers: SQL 
 }
 `;
 
-exports[`$gt JSON scalars Mathes string values that can convert to numbers: SQL Query for not match filter: {"settings.scalar":{"$gt":15}} 1`] = `
+exports[`$gt > JSON scalars > Mathes string values that can convert to numbers > SQL Query for not match filter: {"settings.scalar":{"$gt":15}} 1`] = `
 {
   "params": [
     15,
@@ -99,7 +99,7 @@ exports[`$gt JSON scalars Mathes string values that can convert to numbers: SQL 
 }
 `;
 
-exports[`$gt JSON scalars Mathes string values that can convert to numbers: SQL Query for not match filter: {"settings.scalar":{"$gt":16}} 1`] = `
+exports[`$gt > JSON scalars > Mathes string values that can convert to numbers > SQL Query for not match filter: {"settings.scalar":{"$gt":16}} 1`] = `
 {
   "params": [
     16,
@@ -108,7 +108,7 @@ exports[`$gt JSON scalars Mathes string values that can convert to numbers: SQL 
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$gt":-9}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON numbers values is numberic > SQL Query for filter: {"settings.age":{"$gt":-9}} 1`] = `
 {
   "params": [
     -9,
@@ -117,7 +117,7 @@ exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Quer
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$gt":0}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON numbers values is numberic > SQL Query for filter: {"settings.age":{"$gt":0}} 1`] = `
 {
   "params": [
     0,
@@ -126,7 +126,7 @@ exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Quer
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$gt":1}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON numbers values is numberic > SQL Query for filter: {"settings.age":{"$gt":1}} 1`] = `
 {
   "params": [
     1,
@@ -135,7 +135,7 @@ exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Quer
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$gt":9}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON numbers values is numberic > SQL Query for filter: {"settings.age":{"$gt":9}} 1`] = `
 {
   "params": [
     9,
@@ -144,7 +144,7 @@ exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Quer
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for not match filter: {"settings.age":{"$gt":10}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON numbers values is numberic > SQL Query for not match filter: {"settings.age":{"$gt":10}} 1`] = `
 {
   "params": [
     10,
@@ -153,7 +153,7 @@ exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Quer
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for not match filter: {"settings.age":{"$gt":12}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON numbers values is numberic > SQL Query for not match filter: {"settings.age":{"$gt":12}} 1`] = `
 {
   "params": [
     12,
@@ -162,7 +162,7 @@ exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Quer
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for not match filter: {"settings.age":{"$gt":20}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON numbers values is numberic > SQL Query for not match filter: {"settings.age":{"$gt":20}} 1`] = `
 {
   "params": [
     20,
@@ -171,7 +171,7 @@ exports[`$gt MySQL Behaviour Comparing JSON numbers values is numberic: SQL Quer
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for filter: {"settings.name":{"$gt":"Alic"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for filter: {"settings.name":{"$gt":"Alic"}} 1`] = `
 {
   "params": [
     "alic",
@@ -180,7 +180,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for filter: {"settings.name":{"$gt":"a"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for filter: {"settings.name":{"$gt":"a"}} 1`] = `
 {
   "params": [
     "a",
@@ -189,7 +189,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for filter: {"settings.name":{"$gt":"alic"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for filter: {"settings.name":{"$gt":"alic"}} 1`] = `
 {
   "params": [
     "alic",
@@ -198,7 +198,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for not match filter: {"settings.name":{"$gt":"ALICE"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for not match filter: {"settings.name":{"$gt":"ALICE"}} 1`] = `
 {
   "params": [
     "alice",
@@ -207,7 +207,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for not match filter: {"settings.name":{"$gt":"Alice"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for not match filter: {"settings.name":{"$gt":"Alice"}} 1`] = `
 {
   "params": [
     "alice",
@@ -216,7 +216,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for not match filter: {"settings.name":{"$gt":"aLice"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for not match filter: {"settings.name":{"$gt":"aLice"}} 1`] = `
 {
   "params": [
     "alice",
@@ -225,7 +225,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for not match filter: {"settings.name":{"$gt":"alice"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for not match filter: {"settings.name":{"$gt":"alice"}} 1`] = `
 {
   "params": [
     "alice",
@@ -234,7 +234,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: SQL Query for not match filter: {"settings.name":{"$gt":"b"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitive > SQL Query for not match filter: {"settings.name":{"$gt":"b"}} 1`] = `
 {
   "params": [
     "b",
@@ -243,7 +243,7 @@ exports[`$gt MySQL Behaviour Comparing JSON string values is case insensitive: S
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$gt":-9}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing numbers values is numberic > SQL Query for filter: {"age":{"$gt":-9}} 1`] = `
 {
   "params": [
     -9,
@@ -252,7 +252,7 @@ exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$gt":0}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing numbers values is numberic > SQL Query for filter: {"age":{"$gt":0}} 1`] = `
 {
   "params": [
     0,
@@ -261,7 +261,7 @@ exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$gt":1}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing numbers values is numberic > SQL Query for filter: {"age":{"$gt":1}} 1`] = `
 {
   "params": [
     1,
@@ -270,7 +270,7 @@ exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for filter: {"age":{"$gt":9}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing numbers values is numberic > SQL Query for filter: {"age":{"$gt":9}} 1`] = `
 {
   "params": [
     9,
@@ -279,7 +279,7 @@ exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for not match filter: {"age":{"$gt":10}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing numbers values is numberic > SQL Query for not match filter: {"age":{"$gt":10}} 1`] = `
 {
   "params": [
     10,
@@ -288,7 +288,7 @@ exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for not match filter: {"age":{"$gt":12}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing numbers values is numberic > SQL Query for not match filter: {"age":{"$gt":12}} 1`] = `
 {
   "params": [
     12,
@@ -297,7 +297,7 @@ exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for not match filter: {"age":{"$gt":20}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing numbers values is numberic > SQL Query for not match filter: {"age":{"$gt":20}} 1`] = `
 {
   "params": [
     20,
@@ -306,7 +306,7 @@ exports[`$gt MySQL Behaviour Comparing numbers values is numberic: SQL Query for
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$gt":"Alic"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for filter: {"name":{"$gt":"Alic"}} 1`] = `
 {
   "params": [
     "alic",
@@ -315,7 +315,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$gt":"a"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for filter: {"name":{"$gt":"a"}} 1`] = `
 {
   "params": [
     "a",
@@ -324,7 +324,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for filter: {"name":{"$gt":"alic"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for filter: {"name":{"$gt":"alic"}} 1`] = `
 {
   "params": [
     "alic",
@@ -333,7 +333,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$gt":"ALICE"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for not match filter: {"name":{"$gt":"ALICE"}} 1`] = `
 {
   "params": [
     "alice",
@@ -342,7 +342,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$gt":"Alice"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for not match filter: {"name":{"$gt":"Alice"}} 1`] = `
 {
   "params": [
     "alice",
@@ -351,7 +351,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$gt":"aLice"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for not match filter: {"name":{"$gt":"aLice"}} 1`] = `
 {
   "params": [
     "alice",
@@ -360,7 +360,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$gt":"alice"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for not match filter: {"name":{"$gt":"alice"}} 1`] = `
 {
   "params": [
     "alice",
@@ -369,7 +369,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"name":{"$gt":"b"}} 1`] = `
+exports[`$gt > MySQL Behaviour > Comparing string values is case insensitive > SQL Query for not match filter: {"name":{"$gt":"b"}} 1`] = `
 {
   "params": [
     "b",
@@ -378,7 +378,7 @@ exports[`$gt MySQL Behaviour Comparing string values is case insensitive: SQL Qu
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for not match filter: {"settings.age":{"$gt":-1000}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON numbers > SQL Query for not match filter: {"settings.age":{"$gt":-1000}} 1`] = `
 {
   "params": [
     -1000,
@@ -387,7 +387,7 @@ exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON number
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for not match filter: {"settings.age":{"$gt":0}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON numbers > SQL Query for not match filter: {"settings.age":{"$gt":0}} 1`] = `
 {
   "params": [
     0,
@@ -396,14 +396,14 @@ exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON number
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON numbers: SQL Query for not match filter: {"settings.age":{"$gt":null}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON numbers > SQL Query for not match filter: {"settings.age":{"$gt":null}} 1`] = `
 {
   "params": [],
   "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING SIGNED NULL ON ERROR) IS NOT NULL",
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for not match filter: {"settings.name":{"$gt":""}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON strings > SQL Query for not match filter: {"settings.name":{"$gt":""}} 1`] = `
 {
   "params": [
     "",
@@ -412,7 +412,7 @@ exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON string
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for not match filter: {"settings.name":{"$gt":"aaaa"}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON strings > SQL Query for not match filter: {"settings.name":{"$gt":"aaaa"}} 1`] = `
 {
   "params": [
     "aaaa",
@@ -421,14 +421,14 @@ exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON string
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for JSON strings: SQL Query for not match filter: {"settings.name":{"$gt":null}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON strings > SQL Query for not match filter: {"settings.name":{"$gt":null}} 1`] = `
 {
   "params": [],
   "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IS NOT NULL",
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for strings: SQL Query for not match filter: {"name":{"$gt":""}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for strings > SQL Query for not match filter: {"name":{"$gt":""}} 1`] = `
 {
   "params": [
     "",
@@ -437,7 +437,7 @@ exports[`$gt MySQL Behaviour NULL values are always the smallest for strings: SQ
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for strings: SQL Query for not match filter: {"name":{"$gt":"aaaa"}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for strings > SQL Query for not match filter: {"name":{"$gt":"aaaa"}} 1`] = `
 {
   "params": [
     "aaaa",
@@ -446,7 +446,7 @@ exports[`$gt MySQL Behaviour NULL values are always the smallest for strings: SQ
 }
 `;
 
-exports[`$gt MySQL Behaviour NULL values are always the smallest for strings: SQL Query for not match filter: {"name":{"$gt":null}} 1`] = `
+exports[`$gt > MySQL Behaviour > NULL values are always the smallest for strings > SQL Query for not match filter: {"name":{"$gt":null}} 1`] = `
 {
   "params": [],
   "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE \`test_table\`.\`name\` IS NOT NULL",

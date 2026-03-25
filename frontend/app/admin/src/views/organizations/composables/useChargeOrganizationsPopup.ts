@@ -1,5 +1,5 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { StamhoofdFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import ChargeOrganizationsView from '../ChargeOrganizationsView.vue';
 
 export function useChargeOrganizationsPopup() {

@@ -6,13 +6,14 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
 import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
-import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
@@ -23,13 +24,20 @@ import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import { Country, EmailAddressSettings, Language, Platform, uriToApp } from '@stamhoofd/structures';
-import { nextTick, onMounted, Ref, ref } from 'vue';
+import { EmailAddressSettings, Platform, uriToApp } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
+import type { Ref} from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFromUrl } from './getRootViews';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
 HistoryManager.debug = STAMHOOFD.environment === 'test';
+
+if (STAMHOOFD.environment === 'development') {
+    Error.stackTraceLimit = Infinity; // unlimited stack trace to debug infinite loops
+}
 
 const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {

@@ -72,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { FinancialSupportSettings } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

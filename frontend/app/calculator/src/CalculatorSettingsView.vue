@@ -86,12 +86,12 @@
 import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { CalculationInput } from './classes/CalculationInput';
+import type { CalculationInput } from './classes/CalculationInput';
 import { calculatePaymentMethodUsage, getPaymentMethodDescription, getPaymentMethodName, PaymentMethod } from './classes/PaymentMethod';
 import { StamhoofdTariffs } from './classes/tariffs/stamhoofd';
 import { ModuleType } from './classes/ModuleType';
 import { Country } from './classes/Country';
-import { TransactionFee } from './classes/TariffDefinition';
+import type { TransactionFee } from './classes/TariffDefinition';
 
 const props = defineProps<{
     input: CalculationInput;

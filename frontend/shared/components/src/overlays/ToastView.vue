@@ -21,7 +21,7 @@ import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import Spinner from '../Spinner.vue';
-import { Toast } from './Toast';
+import type { Toast } from './Toast';
 
 /**
  * This component will automatically show the root if we have a valid token. If the user logs out, we'll automatically show the login view
@@ -47,37 +47,37 @@ export default class ToastView extends Mixins(NavigationMixin) {
     mounted() {
         if (this.toast.autohideAfter) {
             window.setTimeout(() => {
-                this.close();
+                this.close().catch(console.error);
             }, this.toast.autohideAfter);
         }
         this.toast.doHide = () => {
-            this.close();
+            this.close().catch(console.error);
         };
     }
 
-    clicked() {
+    async clicked() {
         if (this.toast.forceButtonClick) {
             return this.clickedButton();
         }
 
-        this.close();
+        await this.close();
 
         if (this.toast.action) {
             this.toast.action();
         }
     }
 
-    close() {
+    async close() {
         if (this.onClose && !this.isClosing) {
             this.onClose();
         }
         this.isClosing = true;
-        this.pop();
+        await this.pop();
     }
 
-    clickedButton() {
+    async clickedButton() {
         this.toast.button!.action();
-        this.close();
+        await this.close();
     }
 }
 </script>

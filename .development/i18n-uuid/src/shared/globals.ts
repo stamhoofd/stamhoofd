@@ -1,31 +1,31 @@
-import { config } from "dotenv";
-import path from "node:path";
-import { TranslatorType } from "../enums/TranslatorType";
-import { DefaultLocalesDict } from "../types/DefaultLocalesDist";
-import { EnvVariables } from "../types/EnvVariables";
+import { config } from 'dotenv';
+import path from 'node:path';
+import { TranslatorType } from '../enums/TranslatorType.js';
+import type { DefaultLocalesDict } from '../types/DefaultLocalesDist.js';
+import type { EnvVariables } from '../types/EnvVariables.js';
 
 config();
 
 type Globals = EnvVariables & {
-        // Path to the directory containing your files that should be checked for translation keys
-        readonly I18NUUID_ROOT: string;
-        readonly I18NUUID_LOCALES_ROOT: string;
-        // Path to the directory containing your translation files (e.g., locales/en.json)
-        readonly I18NUUID_LOCALES_DIR: string;
-        // Path to the directory containing your built translations
-        readonly I18NUUID_LOCALES_DIR_DIST: string;
-        readonly COMPARE_OUTPUT_DIR: string;
-        // Directories that should be ignored
-        readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
-        
-        // The locale where the translations that are replaced will be stored into
-        readonly I18NUUID_DEFAULT_LOCALE: string;
-        readonly DEFAULT_LOCALE: string;
-        readonly DEFAULT_COUNTRY: string;
-        readonly DEFAULT_NAMESPACE: string;
-        readonly DEFAULT_LOCALES: DefaultLocalesDict;
-        readonly TRANSLATOR: TranslatorType;
-}
+    // Path to the directory containing your files that should be checked for translation keys
+    readonly I18NUUID_ROOT: string;
+    readonly I18NUUID_LOCALES_ROOT: string;
+    // Path to the directory containing your translation files (e.g., locales/en.json)
+    readonly I18NUUID_LOCALES_DIR: string;
+    // Path to the directory containing your built translations
+    readonly I18NUUID_LOCALES_DIR_DIST: string;
+    readonly COMPARE_OUTPUT_DIR: string;
+    // Directories that should be ignored
+    readonly I18NUUID_EXCLUDE_DIRS_ARRAY: string[];
+
+    // The locale where the translations that are replaced will be stored into
+    readonly I18NUUID_DEFAULT_LOCALE: string;
+    readonly DEFAULT_LOCALE: string;
+    readonly DEFAULT_COUNTRY: string;
+    readonly DEFAULT_NAMESPACE: string;
+    readonly DEFAULT_LOCALES: DefaultLocalesDict;
+    readonly TRANSLATOR: TranslatorType;
+};
 
 function getGlobals(): Globals {
     const envVariables: EnvVariables = readEnvVariables({
@@ -34,16 +34,16 @@ function getGlobals(): Globals {
         MISTRAL_API_KEY: '',
     });
 
-    const root = path.normalize(__dirname + "/../../../../.."); // (note we should build relative to the compiled output file in .development/i18n-uuid/dist/src/shared/globals.js)
+    const root = path.normalize(import.meta.dirname + '/../../../../..'); // (note we should build relative to the compiled output file in .development/i18n-uuid/dist/src/shared/globals.js)
 
     const globals: Globals = {
         I18NUUID_ROOT: root,
-        I18NUUID_LOCALES_ROOT: root + "/shared/locales",
-        I18NUUID_LOCALES_DIR: root + "/shared/locales/src",
-        I18NUUID_LOCALES_DIR_DIST: root + "/shared/locales/dist",
+        I18NUUID_LOCALES_ROOT: root + '/shared/locales',
+        I18NUUID_LOCALES_DIR: root + '/shared/locales/src',
+        I18NUUID_LOCALES_DIR_DIST: root + '/shared/locales/dist',
         COMPARE_OUTPUT_DIR: 'output',
         // This is the only environment variable we'll read for now, because the other once should always stay the same
-        I18NUUID_EXCLUDE_DIRS_ARRAY: ["dist", "esm", "node_modules"],
+        I18NUUID_EXCLUDE_DIRS_ARRAY: ['dist', 'esm', 'node_modules'],
 
         I18NUUID_DEFAULT_LOCALE: 'nl',
         DEFAULT_LOCALE: 'nl-BE',
@@ -52,22 +52,22 @@ function getGlobals(): Globals {
         DEFAULT_LOCALES: {
             es: {
                 countries: {
-                    CO: ["CO"],
+                    CO: ['CO'],
                 },
-                default: "ES",
+                default: 'ES',
             },
             en: {
-                default: "GB",
+                default: 'GB',
             },
             fr: {
-                default: "BE",
+                default: 'BE',
             },
             nl: {
-                default: "BE",
+                default: 'BE',
             },
         },
         TRANSLATOR: TranslatorType.OpenAi,
-        ...envVariables
+        ...envVariables,
 
     };
 
@@ -79,7 +79,7 @@ function readEnvVariables(defaults: EnvVariables): EnvVariables {
         Object.entries(defaults).map(([key, defaultValue]) => {
             const value = (process.env as unknown as Partial<EnvVariables>)[key];
             return [key, value === undefined ? defaultValue : value];
-    })) as EnvVariables;
+        })) as EnvVariables;
 }
 
 export const globals: Globals = getGlobals();

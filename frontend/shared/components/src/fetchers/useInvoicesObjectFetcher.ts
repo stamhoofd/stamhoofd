@@ -1,9 +1,11 @@
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { assertSort, CountFilteredRequest, CountResponse, Invoice, LimitedFilteredRequest, PaginatedResponseDecoder, SortList } from '@stamhoofd/structures';
-import { Ref } from 'vue';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
+import { assertSort, CountResponse, Invoice, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { useContext } from '../hooks';
-import { ObjectFetcher } from '../tables';
+import type { ObjectFetcher } from '../tables';
 
 type ObjectType = Invoice;
 

@@ -148,7 +148,8 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
@@ -165,9 +166,9 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import InputSheet from '@stamhoofd/components/overlays/InputSheet.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
+import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
-
 import ApiUsersView from '../admins/ApiUsersView.vue';
 
 @Component({
@@ -197,8 +198,8 @@ export default class LabsView extends Mixins(NavigationMixin) {
         return this.$organization.patch(this.organizationPatch);
     }
 
-    openApiUsers(animated = true) {
-        this.show({
+    async openApiUsers(animated = true) {
+        await this.show({
             components: [
                 new ComponentWithProperties(ApiUsersView, {}),
             ],
@@ -283,7 +284,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
             await this.$organizationManager.patch(this.organizationPatch);
             this.organizationPatch = Organization.patch({ id: this.$organization.id });
             new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
-            this.dismiss({ force: true });
+            await this.dismiss({ force: true });
         }
         catch (e) {
             this.errorBox = new ErrorBox(e);
@@ -450,8 +451,8 @@ export default class LabsView extends Mixins(NavigationMixin) {
         await this.$organizationManager.patch(organizationPatch);
     }
 
-    applyDiscountCode() {
-        this.present({
+    async applyDiscountCode() {
+        await this.present({
             components: [
                 new ComponentWithProperties(InputSheet, {
                     title: 'Kortingscode toepassen',

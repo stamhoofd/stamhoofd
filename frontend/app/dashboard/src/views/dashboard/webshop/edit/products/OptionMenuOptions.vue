@@ -7,10 +7,11 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import { useDraggableArray } from '@stamhoofd/components/hooks/useDraggableArray.ts';
-import { Option, OptionMenu } from '@stamhoofd/structures';
+import type { Option} from '@stamhoofd/structures';
+import { OptionMenu } from '@stamhoofd/structures';
 
 import OptionRow from './OptionRow.vue';
 

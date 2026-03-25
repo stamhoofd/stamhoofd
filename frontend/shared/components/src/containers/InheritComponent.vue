@@ -3,8 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
-import { computed, inject, Ref, unref } from 'vue';
+import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
+import type { Ref} from 'vue';
+import { computed, inject, unref } from 'vue';
 
 // The InheritComponent allows you to define comonents in the 'provide' context tree, and display one of those components if it is present
 // This allows you to keep logic outside of components and 'inject' them

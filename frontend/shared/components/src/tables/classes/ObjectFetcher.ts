@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import type { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 
 export interface ObjectFetcher<O> {
     extendSort?(list: SortList): SortList;

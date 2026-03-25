@@ -1,5 +1,5 @@
 import { column, ManyToOneRelation } from '@simonbackx/simple-database';
-import { Country } from '@stamhoofd/structures';
+import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';

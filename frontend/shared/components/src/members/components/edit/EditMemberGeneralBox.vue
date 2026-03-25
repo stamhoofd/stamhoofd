@@ -48,7 +48,7 @@
                     </RadioGroup>
                 </STInputBox>
 
-                <PhoneInput error-fields="phone" :error-box="errors.errorBox" v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`%fP`): $t(`%fQ`)" />
+                <PhoneInput v-if="!member.isNew && (isPropertyEnabled('phone') || phone)" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? $t(`%fP`): $t(`%fQ`)" />
                 <EmailInput v-if="!(member.isNew && isAdmin) && (isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? $t(`%fP`): $t(`%fQ`)" :validator="validator">
                     <template #right>
                         <button :v-tooltip="$t('%fI')" class="button icon add small gray" type="button" @click="addEmail" />
@@ -117,11 +117,12 @@
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
-import { Gender, NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
+import type { PlatformMember } from '@stamhoofd/structures';
+import { Gender, NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
-import { Validator } from '../../../errors/Validator';
+import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import BirthDayInput from '../../../inputs/BirthDayInput.vue';

@@ -1,9 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group } from '@stamhoofd/structures';
+import type { Group } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
-import XLSX from 'xlsx';
-import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type XLSX from 'xlsx';
+import type { ColumnMatcher } from '../ColumnMatcher';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class GroupColumnMatcher implements ColumnMatcher {

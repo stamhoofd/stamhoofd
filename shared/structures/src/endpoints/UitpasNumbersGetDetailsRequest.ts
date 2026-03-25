@@ -1,4 +1,5 @@
-import { ArrayDecoder, Data, Encodeable, EncodeContext, PlainObject, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext, PlainObject} from '@simonbackx/simple-encoding';
+import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 export class UitpasNumbersGetDetailsRequest implements Encodeable {

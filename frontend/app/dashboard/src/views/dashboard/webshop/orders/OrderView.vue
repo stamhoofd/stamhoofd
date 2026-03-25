@@ -292,7 +292,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
@@ -311,13 +312,15 @@ import { useArrowUpDown } from '@stamhoofd/components/hooks/useArrowUpDown.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
-import { AccessRight, BalanceItemWithPrivatePayments, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod} from '@stamhoofd/structures';
+import { AccessRight, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import OrderView from './OrderView.vue';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { computed, ComputedRef, onBeforeUnmount, ref, watch } from 'vue';
-import { WebshopManager } from '../WebshopManager';
+import type { ComputedRef} from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import type { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';
 import OrderTicketsView from './OrderTicketsView.vue';
 

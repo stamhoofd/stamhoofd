@@ -1,5 +1,6 @@
-import { ComponentWithProperties, PushOptions, useDismiss, useNavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { UnwrapRef } from 'vue';
+import type { ComponentWithProperties, PushOptions} from '@simonbackx/vue-app-navigation';
+import { useDismiss, useNavigationController, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import type { UnwrapRef } from 'vue';
 
 export type NavigationActions = {
     show: ReturnType<typeof useShow>;

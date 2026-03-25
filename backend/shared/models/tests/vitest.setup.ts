@@ -1,0 +1,34 @@
+import { Column, Database } from '@simonbackx/simple-database';
+import { Request } from '@simonbackx/simple-endpoints';
+import { EmailMocker } from '@stamhoofd/email';
+import { Version } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
+
+// Set version of saved structures
+Column.setJSONVersion(Version);
+
+// Automatically set endpoint default version to latest one (only in tests!)
+Request.defaultVersion = Version;
+
+console.log = vitest.fn();
+afterAll(async () => {
+    await Database.delete('DELETE FROM `users`');
+    await Database.delete('DELETE FROM `tokens`');
+    await Database.delete('DELETE FROM `users`');
+    await Database.delete('DELETE FROM `registrations`');
+    await Database.delete('DELETE FROM `payments`');
+    await Database.delete('DELETE FROM `members`');
+    await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
+    await Database.delete('DELETE FROM `organizations`');
+    await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
+    await Database.delete('DELETE FROM `email_recipients`');
+    await Database.delete('DELETE FROM `emails`');
+    await Database.delete('DELETE FROM `email_addresses`');
+    await Database.end();
+
+    // Override default $t handlers
+    TestUtils.loadEnvironment();
+});
+
+TestUtils.setup();
+EmailMocker.infect();

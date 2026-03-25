@@ -270,7 +270,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
@@ -284,8 +284,10 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { appToUri, ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
-import { computed, onActivated, Ref, ref } from 'vue';
+import type { PlatformMembershipType } from '@stamhoofd/structures';
+import { appToUri, ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
+import type { Ref} from 'vue';
+import { computed, onActivated, ref } from 'vue';
 
 const errors = useErrors();
 const summary = ref(null) as Ref<null | ChargeMembershipsSummary>;

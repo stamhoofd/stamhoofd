@@ -1,6 +1,6 @@
-import { PdfDocWrapper } from '../PdfDocWrapper';
-import { PdfFont } from '../PdfFont';
-import { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
+import type { PdfDocWrapper } from '../PdfDocWrapper';
+import type { PdfFont } from '../PdfFont';
+import type { PdfItem, PdfItemDrawOptions, PdfItemGetHeightOptions } from '../PdfItem';
 
 export interface VerticalStackOptions {
     /**

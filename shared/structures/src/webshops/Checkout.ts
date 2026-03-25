@@ -5,24 +5,27 @@ import { Formatter } from '@stamhoofd/utility';
 import { ValidatedAddress } from '../addresses/Address.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { checkoutInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
-import { I18n } from '../I18nInterface.js';
-import { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
-import { RecordAnswer, RecordAnswerDecoder } from '../members/records/RecordAnswer.js';
+import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { I18n } from '../I18nInterface.js';
+import type { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
+import type { RecordAnswer} from '../members/records/RecordAnswer.js';
+import { RecordAnswerDecoder } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
-import { RecordSettings } from '../members/records/RecordSettings.js';
-import { OrganizationMetaData } from '../OrganizationMetaData.js';
+import type { RecordSettings } from '../members/records/RecordSettings.js';
+import type { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { PaymentMethod } from '../PaymentMethod.js';
-import { PriceBreakdown } from '../PriceBreakdown.js';
+import type { PriceBreakdown } from '../PriceBreakdown.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
-import { User } from '../User.js';
+import type { User } from '../User.js';
 import { Cart } from './Cart.js';
 import { Customer } from './Customer.js';
-import { Discount, ProductDiscountTracker } from './Discount.js';
+import type { ProductDiscountTracker } from './Discount.js';
+import { Discount } from './Discount.js';
 import { DiscountCode } from './DiscountCode.js';
-import { Webshop } from './Webshop.js';
+import type { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
-import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData.js';
+import type { CheckoutMethod} from './WebshopMetaData.js';
+import { AnyCheckoutMethodDecoder, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData.js';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })

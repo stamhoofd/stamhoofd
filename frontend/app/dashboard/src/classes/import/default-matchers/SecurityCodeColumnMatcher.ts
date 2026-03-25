@@ -1,6 +1,6 @@
-import XLSX from 'xlsx';
-import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ImportMemberResult';
+import type XLSX from 'xlsx';
+import type { ColumnMatcher } from '../ColumnMatcher';
+import type { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class SecurityCodeColumnMatcher implements ColumnMatcher {

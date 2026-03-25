@@ -7,13 +7,13 @@ import { User } from '../User.js';
 import { EmailRecipient } from '../email/Email.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
-import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { Member } from './Member.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { Registration } from './Registration.js';
-import { Filterable } from './records/RecordCategory.js';
+import type { Filterable } from './records/RecordCategory.js';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(Registration) })

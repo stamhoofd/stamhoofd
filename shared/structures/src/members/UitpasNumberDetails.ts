@@ -1,6 +1,6 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator } from '@stamhoofd/utility';
-import { BooleanStatus } from './MemberDetails.js';
+import type { BooleanStatus } from './MemberDetails.js';
 
 /**
  * Possibles status returned from uitpas api

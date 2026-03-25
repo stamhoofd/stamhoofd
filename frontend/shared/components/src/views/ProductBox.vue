@@ -38,7 +38,8 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, useCanDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import CartItemView from '#views/CartItemView.vue';
-import { Cart, CartItem, CartStockHelper, Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import type { Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, CartStockHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 

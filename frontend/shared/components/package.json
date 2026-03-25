@@ -5,6 +5,10 @@
     "main": "index.ts",
     "type": "module",
     "sideEffects": false,
+    "scripts": {
+        "lint": "eslint",
+        "typecheck": "vue-tsc --noEmit"
+    },
     "exports": {
         ".": "./index.ts",
         "./*": "./src/*.ts",
