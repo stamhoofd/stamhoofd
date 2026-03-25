@@ -1,5 +1,5 @@
-import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import { computed, ComputedRef, Ref, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
@@ -1103,7 +1103,7 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
                 new MultipleChoiceUIFilterOption($t('%17w'), 'birthDay'),
                 new MultipleChoiceUIFilterOption($t('%Cn'), 'address'),
                 new MultipleChoiceUIFilterOption($t('%wD'), 'phone'),
-                new MultipleChoiceUIFilterOption($t('%1FK'), 'email'),
+                new MultipleChoiceUIFilterOption($t('%1FK'), 'emailAddress'),
                 new MultipleChoiceUIFilterOption($t('%XH'), 'parents'),
                 new MultipleChoiceUIFilterOption($t('%17x'), 'secondParent'),
                 new MultipleChoiceUIFilterOption($t('%17y'), 'emergencyContacts'),
@@ -1194,7 +1194,7 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
                 new MultipleChoiceUIFilterOption($t('%17w'), 'birthDay'),
                 new MultipleChoiceUIFilterOption($t('%Cn'), 'address'),
                 new MultipleChoiceUIFilterOption($t('%wD'), 'phone'),
-                new MultipleChoiceUIFilterOption($t('%1FK'), 'email'),
+                new MultipleChoiceUIFilterOption($t('%1FK'), 'emailAddress'),
                 new MultipleChoiceUIFilterOption($t('%XH'), 'parents'),
                 new MultipleChoiceUIFilterOption($t('%17x'), 'secondParent'),
                 new MultipleChoiceUIFilterOption($t('%17y'), 'emergencyContacts'),
