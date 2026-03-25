@@ -11,7 +11,7 @@
                     <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%3D')" autocomplete="organization">
                 </STInputBox>
 
-                <AddressInput v-model="address" :title="$t('%33')" :validator="errors.validator" />
+                <AddressInput v-model="address" :optional-except-city="STAMHOOFD.userMode !== 'platform'" :title="$t('%33')" :validator="errors.validator" />
             </div>
 
             <div>
