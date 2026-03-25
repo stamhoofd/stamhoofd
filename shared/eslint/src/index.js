@@ -1,19 +1,20 @@
 'use strict';
-import tseslint from 'typescript-eslint';
 import eslint from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import importPlugin from 'eslint-plugin-import';
-import json from '@eslint/json';
+import tseslint from 'typescript-eslint';
 
 // Configs
-import frontend from './configs/frontend.js';
-import typescript from './configs/typescript.js';
-import defaultRules from './configs/default.js';
-import node from './configs/node.js';
 import vitest from '@vitest/eslint-plugin';
+import regexpPlugin from 'eslint-plugin-regexp';
+import defaultRules from './configs/default.js';
+import frontend from './configs/frontend.js';
+import node from './configs/node.js';
+import typescript from './configs/typescript.js';
 
 const baseRules = [
     ...defaultRules,
+    regexpPlugin.configs.recommended,
     {
         settings: {
             'import/parsers': {
@@ -77,7 +78,8 @@ const baseRules = [
         rules: {
             ...vitest.configs.recommended.rules,
             'vitest/no-conditional-expect': 'warn',
-            'vitest/expect-expect': 'warn'
+            'vitest/expect-expect': 'warn',
+            'vitest/valid-expect': ['warn', {maxArgs: 2}] // Allow to pass a message by variable
         },
     },
 
@@ -92,26 +94,6 @@ const baseRules = [
             '@typescript-eslint/no-unsafe-assignment': 'off',
             '@typescript-eslint/no-unsafe-member-access': 'off',
             '@typescript-eslint/no-unsafe-argument': 'off',
-        },
-    },
-    // lint JSON files
-    {
-        plugins: {
-            json,
-        },
-        files: ['**/*.json'],
-        language: 'json/json',
-        rules: {
-            ...json.configs.recommended.rules,
-            'no-irregular-whitespace': 'off', // json bug
-            'json/sort-keys': 'warn',
-            'json/no-empty-keys': 'off'
-        },
-    },
-    {
-        files: ['**/package.json'], // don't sort package.json as order is important for types
-        rules: {
-            'json/sort-keys': 'off'
         },
     }
 ];

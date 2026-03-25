@@ -2,12 +2,6 @@
     "[javascript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
-    "[json]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
-    "[jsonc]": {
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
     "[typescript]": {
         "editor.defaultFormatter": "dbaeumer.vscode-eslint"
     },
@@ -25,8 +19,6 @@
         "typescript",
         "javascript",
         "vue",
-        "json",
-        "jsonc"
     ],
     "eslint.workingDirectories": [
         "./backend/app/*",
