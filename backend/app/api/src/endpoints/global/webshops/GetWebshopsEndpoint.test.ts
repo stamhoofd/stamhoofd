@@ -1,7 +1,7 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, OrganizationTagFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import { CountFilteredRequest, LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetWebshopsCountEndpoint } from './GetWebshopsCountEndpoint.js';
@@ -602,6 +602,184 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             for (const id of allResults) {
                 expect(inaccessibleIds.has(id)).toBe(false);
             }
+        });
+    });
+
+    describe('Status filtering', () => {
+        // Note: WebshopStatus.Open is the default value and is NOT stored in the JSON.
+        // The status column is nullable: null in SQL means 'Open'.
+        // To filter Open webshops, use $or: [$eq: 'Open', $eq: null].
+
+        test('Can filter webshops by closed status', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(user);
+
+            await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
+            const closedWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Closed Webshop',
+                meta: WebshopMetaData.patch({ status: WebshopStatus.Closed }),
+            }).create();
+            await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Archived Webshop',
+                meta: WebshopMetaData.patch({ status: WebshopStatus.Archived }),
+            }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: { status: { $eq: WebshopStatus.Closed } },
+                    limit: 100,
+                }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results).toHaveLength(1);
+            expect(response.body.results[0].id).toBe(closedWebshop.id);
+        });
+
+        test('Can filter open webshops using $or with null (default value)', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(user);
+
+            const openWebshop = await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
+            await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Closed Webshop',
+                meta: WebshopMetaData.patch({ status: WebshopStatus.Closed }),
+            }).create();
+            await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Archived Webshop',
+                meta: WebshopMetaData.patch({ status: WebshopStatus.Archived }),
+            }).create();
+
+            // Open status is not stored in JSON (default value = null in DB).
+            // Use $or to match both the explicit 'Open' value and null (= default Open).
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: { $or: [{ status: { $eq: WebshopStatus.Open } }, { status: { $eq: null } }] },
+                    limit: 100,
+                }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results).toHaveLength(1);
+            expect(response.body.results[0].id).toBe(openWebshop.id);
+        });
+
+        test('Can filter webshops by archived status', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(user);
+
+            await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
+            await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Closed Webshop',
+                meta: WebshopMetaData.patch({ status: WebshopStatus.Closed }),
+            }).create();
+            const archivedWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Archived Webshop',
+                meta: WebshopMetaData.patch({ status: WebshopStatus.Archived }),
+            }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: { status: { $eq: WebshopStatus.Archived } },
+                    limit: 100,
+                }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results).toHaveLength(1);
+            expect(response.body.results[0].id).toBe(archivedWebshop.id);
+        });
+    });
+
+    describe('Organization name filtering', () => {
+        test('Can filter webshops by organization name in platform context', async () => {
+            const orgA = await new OrganizationFactory({ name: 'Groep Blauw' }).create();
+            const orgB = await new OrganizationFactory({ name: 'Groep Rood' }).create();
+
+            const webshopA = await new WebshopFactory({ organizationId: orgA.id, name: 'Webshop A' }).create();
+            await new WebshopFactory({ organizationId: orgB.id, name: 'Webshop B' }).create();
+
+            const platformUser = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(platformUser);
+
+            const request = Request.get({
+                path: baseUrl,
+                host: 'platform.stamhoofd.app',
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        organization: {
+                            name: { $contains: 'Blauw' },
+                        },
+                    },
+                    limit: 100,
+                }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results).toHaveLength(1);
+            expect(response.body.results[0].id).toBe(webshopA.id);
+        });
+
+        test('Search by organization name returns webshops from matching organizations', async () => {
+            const orgA = await new OrganizationFactory({ name: 'Scouts Gent' }).create();
+            const orgB = await new OrganizationFactory({ name: 'Chiro Antwerpen' }).create();
+
+            await new WebshopFactory({ organizationId: orgA.id, name: 'Jaarmarkt' }).create();
+            const webshopB = await new WebshopFactory({ organizationId: orgB.id, name: 'Bazar' }).create();
+
+            const platformUser = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await Token.createToken(platformUser);
+
+            const request = Request.get({
+                path: baseUrl,
+                host: 'platform.stamhoofd.app',
+                query: new LimitedFilteredRequest({
+                    search: 'Antwerpen',
+                    limit: 100,
+                }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            // Should find webshopB because its organization name contains 'Antwerpen'
+            expect(response.body.results.map((r: any) => r.id)).toContain(webshopB.id);
         });
     });
 });

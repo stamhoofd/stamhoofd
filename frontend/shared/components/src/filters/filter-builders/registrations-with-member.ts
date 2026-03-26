@@ -91,7 +91,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
                 new GroupUIFilterBuilder({
                     name: $t('%5E'),
                     description: $t('%1IK'),
-                    builders: getOrganizationUIFilterBuilders(auth.user),
+                    builders: getOrganizationUIFilterBuilders(),
                     wrapper: {
                         organization: {
                             $elemMatch: FilterWrapperMarker,

@@ -94,9 +94,13 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         if (q.search) {
             const searchFilter: StamhoofdFilter = {
-                name: {
-                    $contains: q.search,
-                },
+                $or: [
+                    {
+                        name: {
+                            $contains: q.search,
+                        },
+                    },
+                ],
             };
             query.where(await compileToSQLFilter(searchFilter, filterCompilers));
         }

@@ -88,7 +88,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const configurationId = computed(() => {
     return 'organizations';
 });
-const filterBuilders = computed(() => getOrganizationUIFilterBuilders(auth.user));
+const filterBuilders = computed(() => getOrganizationUIFilterBuilders());
 
 function getRequiredFilter(): StamhoofdFilter | null {
     if (props.tag) {

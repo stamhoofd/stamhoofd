@@ -25,7 +25,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Organisatie') }}
+                        {{ $t('Vereniging') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ props.webshopWithOrganization.organization.name }}
@@ -142,7 +142,10 @@ const dashboardUrl = computed(() => {
     const org = props.webshopWithOrganization.organization;
     const webshop = props.webshopWithOrganization.webshop;
     const base = '/' + appToUri('dashboard') + '/' + org.uri + '/verkoop';
-    return isArchived.value ? base : base + '/' + Formatter.slug(webshop.id);
+    // Archived webshops are filtered from visibleWebshops in the dashboard router,
+    // so navigating to /verkoop/{id} would throw "Webshop not found".
+    // Instead link to the archive page at /verkoop/archief.
+    return isArchived.value ? base + '/archief' : base + '/' + Formatter.slug(webshop.id);
 });
 
 const webshopUrl = computed(() => props.webshopWithOrganization.url);

@@ -1,5 +1,8 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import { organizationFilterCompilers } from './organizations.js';
+
+export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('webshops', 'organizationId'));
 
 export const webshopFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -18,4 +21,13 @@ export const webshopFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.JSONString,
         nullable: false,
     }),
+    status: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('webshops', 'meta'), '$.value.status'),
+        type: SQLValueType.JSONString,
+        nullable: false,
+    }),
+    organization: createJoinedRelationFilter(
+        organizationJoin,
+        organizationFilterCompilers,
+    ),
 };

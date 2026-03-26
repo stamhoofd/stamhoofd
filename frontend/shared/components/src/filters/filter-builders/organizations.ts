@@ -1,6 +1,6 @@
 import type { StamhoofdFilter, User } from '@stamhoofd/structures';
 import { FilterWrapperMarker, SetupStepType } from '@stamhoofd/structures';
-import { usePlatform } from '../../hooks';
+import { usePlatform, useUser } from '../../hooks';
 import { getOrganizationCompanyFilterBuilders } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -32,6 +32,7 @@ const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
 
 export function useGetOrganizationUIFilterBuilders() {
     const platform = usePlatform();
+    const _user = useUser();
 
     const setupStepFilterNameMap: Record<SetupStepType, string> = {
         [SetupStepType.Responsibilities]: $t('%7D'),
@@ -43,7 +44,8 @@ export function useGetOrganizationUIFilterBuilders() {
         [SetupStepType.Registrations]: $t('%1EI'),
     };
 
-    const getOrganizationUIFilterBuilders = (user: User | null) => {
+    const getOrganizationUIFilterBuilders = () => {
+        const user = _user.value;
         const all = [
             new StringFilterBuilder({
                 name: $t(`%Gq`),

@@ -21,15 +21,6 @@ export class WebshopWithOrganization extends AutoEncoder {
      * Convenience getter for the webshop's full public URL (including https:// protocol).
      */
     get url(): string {
-        if (this.webshop.domain && this.webshop.meta.domainActive) {
-            return 'https://' + this.webshop.getDomainUrl();
-        }
-
-        if (!STAMHOOFD.domains.webshop) {
-            return '';
-        }
-
-        const domain = STAMHOOFD.domains.webshop[this.organization.address.country] ?? STAMHOOFD.domains.webshop[''] ?? '';
-        return 'https://' + domain + this.webshop.getDefaultSuffix();
+        return 'https://' + this.webshop.getUrl(this.organization);
     }
 }

@@ -5,6 +5,7 @@
         :filter-builders="filterBuilders"
         :title="title"
         :column-configuration-id="configurationId"
+        :default-filter="defaultFilter"
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
@@ -26,7 +27,7 @@ import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import type { WebshopType, WebshopWithOrganization} from '@stamhoofd/structures';
+import type { StamhoofdFilter, WebshopType, WebshopWithOrganization} from '@stamhoofd/structures';
 import { WebshopStatus, appToUri, getWebshopStatusName, getWebshopTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -46,6 +47,12 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 
 const objectFetcher = useWebshopsObjectFetcher();
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
+
+// Default filter: show Open webshops only.
+// We pass {status: {$eq: 'Open'}} which the MultipleChoiceFilterBuilder can parse.
+// The wrapFilter on the builder emits the correct $or filter to the backend
+// (since Open is stored as null in the DB).
+const defaultFilter: StamhoofdFilter = { status: WebshopStatus.Open };
 
 function getWebshopStatusStyle(status: WebshopStatus): string {
     switch (status) {
@@ -68,11 +75,12 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization',
-        name: $t('Organisatie'),
+        name: $t('Vereniging'),
         getValue: item => item.organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
-        grow: true,
+        grow: false,
+        allowSorting: false
     }),
 
     new Column<ObjectType, Date>({
@@ -144,10 +152,10 @@ const actions: TableAction<ObjectType>[] = [
                 return;
             }
             const base = '/' + appToUri('dashboard') + '/' + item.organization.uri + '/verkoop';
-            // Archived webshops are filtered out of visibleWebshops in dashboard routing,
-            // so link to the webshops list instead of the specific webshop page.
+            // Archived webshops are filtered from visibleWebshops in the dashboard router,
+            // so link to /archief instead of the specific webshop page.
             const url = item.webshop.meta.status === WebshopStatus.Archived
-                ? base
+                ? base + '/archief'
                 : base + '/' + Formatter.slug(item.webshop.id);
             window.open(url, '_blank');
         },
