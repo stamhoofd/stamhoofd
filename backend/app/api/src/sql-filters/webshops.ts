@@ -30,4 +30,9 @@ export const webshopFilterCompilers: SQLFilterDefinitions = {
         organizationJoin,
         organizationFilterCompilers,
     ),
+    createdAt: createColumnFilter({
+        expression: SQL.column('createdAt'),
+        type: SQLValueType.Datetime,
+        nullable: false,
+    }),
 };

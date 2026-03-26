@@ -23,4 +23,12 @@ export class WebshopWithOrganization extends AutoEncoder {
     get url(): string {
         return 'https://' + this.webshop.getUrl(this.organization);
     }
+
+    /**
+     * Returns the URL to the webshop management page in the dashboard.
+     * Delegates to WebshopPreview.getDashboardUrl for deduplication.
+     */
+    get dashboardUrl(): string {
+        return this.webshop.getDashboardUrl(this.organization);
+    }
 }

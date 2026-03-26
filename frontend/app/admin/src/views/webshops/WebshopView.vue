@@ -104,8 +104,7 @@
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import type { WebshopWithOrganization} from '@stamhoofd/structures';
-import { WebshopStatus, appToUri, getWebshopStatusName, getWebshopTypeName } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { WebshopStatus, getWebshopStatusName, getWebshopTypeName } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -133,20 +132,7 @@ const statusIcon = computed(() => {
 
 const isArchived = computed(() => props.webshopWithOrganization.webshop.meta.status === WebshopStatus.Archived);
 
-/**
- * For archived webshops, link to the webshops list instead of the specific webshop,
- * because archived webshops are filtered out of visibleWebshops in the dashboard routing
- * and navigating to /verkoop/{id} would throw "Webshop not found".
- */
-const dashboardUrl = computed(() => {
-    const org = props.webshopWithOrganization.organization;
-    const webshop = props.webshopWithOrganization.webshop;
-    const base = '/' + appToUri('dashboard') + '/' + org.uri + '/verkoop';
-    // Archived webshops are filtered from visibleWebshops in the dashboard router,
-    // so navigating to /verkoop/{id} would throw "Webshop not found".
-    // Instead link to the archive page at /verkoop/archief.
-    return isArchived.value ? base + '/archief' : base + '/' + Formatter.slug(webshop.id);
-});
+const dashboardUrl = computed(() => props.webshopWithOrganization.dashboardUrl);
 
 const webshopUrl = computed(() => props.webshopWithOrganization.url);
 </script>

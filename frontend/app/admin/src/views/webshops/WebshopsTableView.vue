@@ -28,7 +28,7 @@ import type { TableAction } from '@stamhoofd/components/tables/classes/TableActi
 import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import type { StamhoofdFilter, WebshopType, WebshopWithOrganization} from '@stamhoofd/structures';
-import { WebshopStatus, appToUri, getWebshopStatusName, getWebshopTypeName } from '@stamhoofd/structures';
+import { WebshopStatus, getWebshopStatusName, getWebshopTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
@@ -86,7 +86,6 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, Date>({
         id: 'createdAt',
         name: $t('Aangemaakt op'),
-        allowSorting: false,
         getValue: item => item.webshop.createdAt,
         format: (v, width) => width < 200 ? Formatter.dateNumber(v, true) : Formatter.date(v, true),
         minimumWidth: 80,
@@ -151,13 +150,7 @@ const actions: TableAction<ObjectType>[] = [
             if (!item) {
                 return;
             }
-            const base = '/' + appToUri('dashboard') + '/' + item.organization.uri + '/verkoop';
-            // Archived webshops are filtered from visibleWebshops in the dashboard router,
-            // so link to /archief instead of the specific webshop page.
-            const url = item.webshop.meta.status === WebshopStatus.Archived
-                ? base + '/archief'
-                : base + '/' + Formatter.slug(item.webshop.id);
-            window.open(url, '_blank');
+            window.open(item.dashboardUrl, '_blank');
         },
     }),
 ];

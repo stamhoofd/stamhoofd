@@ -1,8 +1,10 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { DNSRecord } from '../DNSRecord.js';
 
+import { appToUri } from '../AppType.js';
 import type { Organization } from '../Organization.js';
 import { Category } from './Category.js';
 import { Product } from './Product.js';
@@ -115,6 +117,19 @@ export class WebshopPreview extends AutoEncoder {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns the URL to the webshop management page in the dashboard.
+     * For archived webshops, this links to the archive route with the specific webshop slug.
+     * For non-archived webshops, this links directly to the webshop detail page.
+     */
+    getDashboardUrl(organization: { uri: string }): string {
+        const base = '/' + appToUri('dashboard') + '/' + organization.uri + '/verkoop';
+        if (this.meta.status === WebshopStatus.Archived) {
+            return base + '/archief/' + Formatter.slug(this.id);
+        }
+        return base + '/' + Formatter.slug(this.id);
     }
 }
 

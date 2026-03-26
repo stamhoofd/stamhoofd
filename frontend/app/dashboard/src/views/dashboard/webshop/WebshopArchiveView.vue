@@ -22,31 +22,72 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, useShow } from '@simonbackx/vue-app-navigation';
-import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import type { WebshopPreview} from '@stamhoofd/structures';
+import type { WebshopPreview } from '@stamhoofd/structures';
 import { WebshopStatus } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const organization = useOrganization();
-const show = useShow();
+const $navigate = useNavigate();
 
 const webshops = computed(() => organization.value?.webshops
     .filter(webshop => webshop.meta.status === WebshopStatus.Archived)
     .sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name)) ?? []);
 
-async function openWebshop(webshop: WebshopPreview) {
-    show({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOverview" */ './WebshopOverview.vue'), { preview: webshop }, { instant: false }),
-            }),
-        ] },
-    ).catch(console.error);
+enum Routes {
+    Webshop = 'webshop',
 }
+
+async function openWebshop(webshop: WebshopPreview) {
+    await $navigate(Routes.Webshop, { properties: { preview: webshop } });
+}
+
+defineRoutes([
+    {
+        url: '@slug',
+        name: Routes.Webshop,
+        params: {
+            slug: String,
+        },
+        show: 'detail',
+        component: async () =>
+            (await import(/* webpackChunkName: "WebshopOverview" */ './WebshopOverview.vue')).default,
+        paramsToProps: ({ slug }: { slug: string }) => {
+            const webshop = webshops.value.find(
+                shop => Formatter.slug(shop.id) === slug,
+            );
+
+            if (!webshop) {
+                throw new Error('Webshop not found');
+            }
+
+            return {
+                preview: webshop,
+            };
+        },
+        propsToParams(props) {
+            const webshop = props.preview as WebshopPreview | undefined;
+
+            if (!webshop) {
+                throw new Error('Missing preview (webshop)');
+            }
+
+            return {
+                params: {
+                    slug: Formatter.slug(webshop.id),
+                },
+            };
+        },
+        isDefault: {
+            properties: {
+                preview: webshops.value[0],
+            },
+        },
+    },
+]);
 </script>
