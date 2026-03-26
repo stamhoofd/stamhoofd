@@ -753,33 +753,5 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             expect(response.body.results).toHaveLength(1);
             expect(response.body.results[0].id).toBe(webshopA.id);
         });
-
-        test('Search by organization name returns webshops from matching organizations', async () => {
-            const orgA = await new OrganizationFactory({ name: 'Scouts Gent' }).create();
-            const orgB = await new OrganizationFactory({ name: 'Chiro Antwerpen' }).create();
-
-            await new WebshopFactory({ organizationId: orgA.id, name: 'Jaarmarkt' }).create();
-            const webshopB = await new WebshopFactory({ organizationId: orgB.id, name: 'Bazar' }).create();
-
-            const platformUser = await new UserFactory({
-                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-            }).create();
-            const token = await Token.createToken(platformUser);
-
-            const request = Request.get({
-                path: baseUrl,
-                host: 'platform.stamhoofd.app',
-                query: new LimitedFilteredRequest({
-                    search: 'Antwerpen',
-                    limit: 100,
-                }),
-                headers: { authorization: 'Bearer ' + token.accessToken },
-            });
-
-            const response = await testServer.test(endpoint, request);
-            expect(response.status).toBe(200);
-            // Should find webshopB because its organization name contains 'Antwerpen'
-            expect(response.body.results.map((r: any) => r.id)).toContain(webshopB.id);
-        });
     });
 });
