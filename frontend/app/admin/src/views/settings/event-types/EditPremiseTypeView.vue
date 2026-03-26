@@ -23,13 +23,9 @@
         </p>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('%5s')" error-fields="minimumDays" :error-box="errors.errorBox">
-                <DeprecatedNumberInput v-model="min" :placeholder="$t('%1FW')" :required="false" />
-            </STInputBox>
+            <NumberInputBox v-model="min" :title="$t('%5s')" error-fields="minimumDays" :error-box="errors.errorBox" :placeholder="$t('%1FW')" :required="false" :validator="errors.validator" />
 
-            <STInputBox :title="$t('%dN')" error-fields="maximumDays" :error-box="errors.errorBox">
-                <DeprecatedNumberInput v-model="max" :placeholder="$t('%4a')" :required="false" />
-            </STInputBox>
+            <NumberInputBox v-model="max" :title="$t('%dN')" error-fields="maximumDays" :error-box="errors.errorBox" :placeholder="$t('%4a')" :required="false" :validator="errors.validator" />
         </div>
     </SaveView>
 </template>
@@ -40,7 +36,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PlatformPremiseType } from '@stamhoofd/structures';
@@ -67,6 +63,10 @@ const save = async () => {
     }
     saving.value = true;
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
         await props.saveHandler(patch.value);
         await pop({ force: true });
     }

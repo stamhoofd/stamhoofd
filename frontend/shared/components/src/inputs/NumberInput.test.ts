@@ -87,7 +87,7 @@ describe('NumberInput', () => {
             inputValue: '5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 5,
                     inputValue: '5',
                 },
                 afterChange: {
@@ -126,7 +126,7 @@ describe('NumberInput', () => {
             inputValue: '3',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 3,
                     inputValue: '3',
                 },
                 afterChange: {
@@ -145,7 +145,7 @@ describe('NumberInput', () => {
             inputValue: '2',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 2,
                     inputValue: '2',
                 },
                 afterChange: {
@@ -183,7 +183,7 @@ describe('NumberInput', () => {
             inputValue: '4',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 4,
                     inputValue: '4',
                 },
                 afterChange: {
@@ -202,7 +202,7 @@ describe('NumberInput', () => {
             inputValue: '5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 5,
                     inputValue: '5',
                 },
                 afterChange: {
@@ -277,7 +277,7 @@ describe('NumberInput', () => {
             inputValue: '5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 500,
                     inputValue: '5',
                 },
                 afterChange: {
@@ -295,7 +295,7 @@ describe('NumberInput', () => {
             inputValue: '-5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: -500,
                     inputValue: '-5',
                 },
                 afterChange: {
@@ -313,7 +313,7 @@ describe('NumberInput', () => {
             inputValue: '5,3',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 530,
                     inputValue: '5,3',
                 },
                 afterChange: {
@@ -331,7 +331,7 @@ describe('NumberInput', () => {
             inputValue: '5,34',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 534,
                     inputValue: '5,34',
                 },
                 afterChange: {
@@ -349,7 +349,7 @@ describe('NumberInput', () => {
             inputValue: '5.3400001',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 534,
                     inputValue: '5.3400001',
                 },
                 afterChange: {
@@ -367,7 +367,7 @@ describe('NumberInput', () => {
             inputValue: '5.34999999999',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 535,
                     inputValue: '5.34999999999',
                 },
                 afterChange: {

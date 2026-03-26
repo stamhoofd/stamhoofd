@@ -172,9 +172,8 @@
                     </STListItem>
                 </STList>
 
-                <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`%Qt`)">
-                    <DeprecatedNumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
-                </STInputBox>
+                <NumberInputBox v-if="numberingType === WebshopNumberingType.Continuous" v-model="startNumber" error-fields="settings.openAt" :error-box="errors.errorBox" :title="$t(`%Qt`)" :min="1" :max="100000000 - 100000" :validator="errors.validator" />
+                
                 <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
                     {{ $t('%Qe') }}
                 </p>
@@ -224,7 +223,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import listIllustrationSrc from '@stamhoofd/assets/images/illustrations/list.svg';
@@ -236,7 +235,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';

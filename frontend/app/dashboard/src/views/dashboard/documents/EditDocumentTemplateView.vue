@@ -19,9 +19,7 @@
             </LoadingButton>
         </STInputBox>
 
-        <STInputBox :title="$t('%1Ic')" error-fields="year" :error-box="errors.errorBox">
-            <DeprecatedNumberInput v-model="year" :title="$t('%1Ic')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
-        </STInputBox>
+        <NumberInputBox v-model="year" :title="$t('%1Ic')" error-fields="year" :error-box="errors.errorBox" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
         <p v-if="hasGroups" class="style-description-small">
             {{ $t('%1Id') }}
         </p>
@@ -76,9 +74,8 @@
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
                 <hr><h2>{{ $t('%Ku') }}</h2>
-                <STInputBox error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`%L2`)">
-                    <DeprecatedNumberInput v-model="maxAge" :required="false" suffix="jaar" :placeholder="$t(`%1FW`)" />
-                </STInputBox>
+
+                <NumberInputBox v-model="maxAge" error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`%L2`)" :required="false" suffix="jaar" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
@@ -138,7 +135,6 @@ import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganiza
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import MultiSelectInput from '@stamhoofd/components/inputs/MultiSelectInput.vue';
 import RecordAnswerInput from '@stamhoofd/components/inputs/RecordAnswerInput.vue';
@@ -159,6 +155,7 @@ import { Country } from "@stamhoofd/types/Country";
 import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
 
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import ChooseDocumentTemplateGroup from './ChooseDocumentTemplateGroup.vue';
 import { fiscal } from './definitions/fiscal';
 import { participation } from './definitions/participation';

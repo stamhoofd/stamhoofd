@@ -25,9 +25,7 @@
             <STInputBox :title="$t('%6q')" error-fields="price" :error-box="errors.errorBox">
                 <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null" />
             </STInputBox>
-            <STInputBox :title="$t('%M4')" error-fields="amount" :error-box="errors.errorBox">
-                <DeprecatedNumberInput v-model="amount" :title="$t('%M4')" :validator="errors.validator" :min="1" :stepper="true" />
-            </STInputBox>
+            <NumberInputBox :title="$t('%M4')" error-fields="amount" :error-box="errors.errorBox" v-model="amount" :validator="errors.validator" :min="1" :stepper="true"  />
         </div>
 
         <div class="split-inputs">
@@ -57,7 +55,6 @@ import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '#inputs/DateSelection.vue';
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
@@ -68,8 +65,9 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { ChargeRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
+import NumberInputBox from '../inputs/NumberInputBox.vue';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
 import { useChargeCount } from './hooks/useChargeCount';
 

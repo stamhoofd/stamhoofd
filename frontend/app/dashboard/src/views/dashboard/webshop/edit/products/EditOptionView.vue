@@ -31,9 +31,7 @@
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <DeprecatedNumberInput v-model="stock" />
-                    </STInputBox>
+                    <NumberInputBox v-model="stock" title="" error-fields="stock" :error-box="errors.errorBox" :validator="errors.validator" />
                 </div>
             </STListItem>
         </STList>
@@ -58,7 +56,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';

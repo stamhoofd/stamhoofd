@@ -10,6 +10,9 @@
             :min="min" :max="max" :stepper="stepper" :required="required" :disabled="disabled" :suffix="suffix" :suffix-singular="suffixSingular" :placeholder="placeholder" :floating-point="floatingPoint"
             :auto-fix="false"
         />
+        <template #right>
+            <slot name="right" />
+        </template>
     </STInputBox>
 </template>
 
@@ -28,7 +31,7 @@ const props = withDefaults(defineProps<{
     title?: string;
     errorFields?: string;
     class?: string | null;
-    validator?: Validator | null;
+    validator: Validator | null;
     errorBox?: ErrorBox | null;
 
     /** Price in cents */
@@ -46,7 +49,6 @@ const props = withDefaults(defineProps<{
     title: undefined,
     errorFields: 'number',
     class: null,
-    validator: null,
     errorBox: null,
     min: null,
     max: null,
@@ -75,7 +77,8 @@ const errorBoxes = computed(() => {
     if (props.errorBox) {
         arr.push(props.errorBox);
     }
-    if (errors.errorBox) {
+    // prevent duplicate messages
+    if (errors.errorBox && !arr.some(e => e.errors.message === errors.errorBox?.errors.message)) {
         arr.push(errors.errorBox);
     }
     return arr.length > 0 ? arr : null;

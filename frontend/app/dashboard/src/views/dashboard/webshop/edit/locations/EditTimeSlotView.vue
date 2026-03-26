@@ -16,16 +16,14 @@
         <TimeMinutesInput v-model="startTime" :validator="errors.validator" :title="$t(`%TA`)" />
         <TimeMinutesInput v-model="endTime" :validator="errors.validator" :title="$t(`%ze`)" />
 
-        <STInputBox error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`%TB`)">
-            <DeprecatedNumberInput v-model="maxOrders" :required="false" :placeholder="$t(`%TC`)" />
-        </STInputBox>
+        <NumberInputBox v-model="maxOrders" error-fields="maxOrders" :error-box="errors.errorBox" :title="$t(`%TB`)" :required="false" :placeholder="$t(`%TC`)" :validator="errors.validator" />
+
         <p v-if="remainingOrders !== null && remainingOrders !== maxOrders" class="style-description">
             {{ $t('%T8', {orders: remainingOrders === 0 ? '0' : remainingOrders?.toString() ?? ''}) }}
         </p>
 
-        <STInputBox error-fields="maxPersons" :error-box="errors.errorBox" :title="$t(`%TD`)">
-            <DeprecatedNumberInput v-model="maxPersons" :required="false" :placeholder="$t(`%TC`)" />
-        </STInputBox>
+        <NumberInputBox v-model="maxPersons" error-fields="maxPersons" :error-box="errors.errorBox" :title="$t(`%TD`)" :required="false" :placeholder="$t(`%TC`)" :validator="errors.validator" />
+
         <p v-if="remainingPersons !== null && remainingPersons !== maxPersons" class="style-description">
             {{ $t('%T9', {persons: remainingPersons === 0 ? '0' : remainingPersons?.toString() ?? ''}) }}
         </p>
@@ -48,7 +46,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeMinutesInput from '@stamhoofd/components/inputs/TimeMinutesInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';

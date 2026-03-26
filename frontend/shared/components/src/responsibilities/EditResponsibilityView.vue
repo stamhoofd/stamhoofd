@@ -22,13 +22,9 @@
             <hr><h2>{{ $t('%9V') }}</h2>
 
             <div class="split-inputs">
-                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)">
-                    <DeprecatedNumberInput v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" />
-                </STInputBox>
+                <NumberInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)"  v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
 
-                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%jY`)">
-                    <DeprecatedNumberInput v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" />
-                </STInputBox>
+                <NumberInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%jY`)" v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" :validator="errors.validator" />
             </div>
         </template>
 
@@ -170,7 +166,6 @@ import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import DefaultAgeGroupIdsInput from '#inputs/DefaultAgeGroupIdsInput.vue';
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import TagIdsInput from '#inputs/TagIdsInput.vue';
 import SaveView from '#navigation/SaveView.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -180,6 +175,7 @@ import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app
 import type { MemberResponsibility } from '@stamhoofd/structures';
 import { PermissionLevel, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
+import NumberInputBox from '../inputs/NumberInputBox.vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -219,6 +215,11 @@ const save = async () => {
                 message: $t('%56'),
                 field: 'name',
             });
+        }
+
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
         }
 
         await props.saveHandler(patch.value);

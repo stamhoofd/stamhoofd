@@ -120,7 +120,7 @@
         </h2>
         <p>{{ $t("%Tx") }}</p>
 
-        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :is-new="isNew" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
+        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :is-new="isNew" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" :validator="errors.validator" @patch="addProductPatch($event)" />
 
         <STList v-else v-model="draggablePrices" :draggable="true">
             <template #item="{item: price}">
@@ -331,9 +331,7 @@
                         </p>
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                                <DeprecatedNumberInput v-model="stock" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
-                            </STInputBox>
+                            <NumberInputBox v-model="stock" title="" error-fields="stock" :error-box="errors.errorBox" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" :validator="errors.validator" />
                         </div>
                     </STListItem>
 
@@ -351,9 +349,7 @@
                         </p>
 
                         <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="showStockBelow" :error-box="showStockBelow">
-                                <DeprecatedNumberInput v-model="showStockBelow" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" />
-                            </STInputBox>
+                            <NumberInputBox v-model="showStockBelow" title="" error-fields="showStockBelow" :error-box="errors.errorBox" :suffix="$t('%12S')" :suffix-singular="$t('%12Q')" :validator="errors.validator" />
                         </div>
                     </STListItem>
 
@@ -367,9 +363,7 @@
                         </h3>
 
                         <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="usedStock" :error-box="errors.errorBox">
-                                <DeprecatedNumberInput v-model="usedStock" />
-                            </STInputBox>
+                            <NumberInputBox v-model="usedStock" title="" error-fields="usedStock" :error-box="errors.errorBox" :validator="errors.validator" />
                         </div>
 
                         <p class="style-description">
@@ -391,9 +385,7 @@
                         </p>
 
                         <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="maxPerOrder" :error-box="errors.errorBox">
-                                <DeprecatedNumberInput v-model="maxPerOrder" :min="1" />
-                            </STInputBox>
+                            <NumberInputBox v-model="maxPerOrder" title="" error-fields="maxPerOrder" :error-box="errors.errorBox" :min="1" :validator="errors.validator" />
                         </div>
                     </STListItem>
                 </template>
@@ -427,7 +419,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ObjectData, PatchableArray, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -436,8 +428,8 @@ import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
@@ -447,7 +439,7 @@ import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { Image, ProductDateRange, ProductLocation} from '@stamhoofd/structures';
+import type { Image, ProductDateRange, ProductLocation } from '@stamhoofd/structures';
 import { OptionMenu, PrivateWebshop, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
 import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';

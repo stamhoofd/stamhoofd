@@ -34,9 +34,7 @@
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <DeprecatedNumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
-                    </STInputBox>
+                    <NumberInputBox v-model="stock" title="" error-fields="stock" :error-box="errors.errorBox" suffix="stuks" suffix-singular="stuk" :validator="errors.validator" />
                 </div>
             </STListItem>
 
@@ -128,7 +126,6 @@ import { useValidation } from '#errors/useValidation.ts';
 import type { Validator } from '#errors/Validator.ts';
 import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
 import DateSelection from '#inputs/DateSelection.vue';
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import TimeInput from '#inputs/TimeInput.vue';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
@@ -141,6 +138,7 @@ import { computed } from 'vue';
 import { ReduceablePriceInput } from '..';
 import { useErrors } from '../../errors/useErrors';
 import { useEmitPatch } from '../../hooks';
+import NumberInputBox from '../../inputs/NumberInputBox.vue';
 
 const props = withDefaults(defineProps<{
     price: GroupPrice;
@@ -149,12 +147,11 @@ const props = withDefaults(defineProps<{
     errors: ReturnType<typeof useErrors>;
     defaultMembershipTypeId?: string | null;
     showNameAlways?: boolean;
-    validator?: Validator | null;
+    validator: Validator | null;
     externalOrganization?: Organization | null;
 }>(), {
     defaultMembershipTypeId: null,
     showNameAlways: false,
-    validator: null,
     externalOrganization: null,
 });
 

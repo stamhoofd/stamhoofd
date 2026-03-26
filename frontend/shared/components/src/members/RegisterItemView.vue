@@ -132,7 +132,7 @@
                     <template #right>
                         <template v-if="option.allowAmount">
                             <template v-if="getOptionSelected(menu, option)">
-                                <DeprecatedNumberInput :model-value="getOptionAmount(menu, option)" suffix="stuks" suffix-singular="stuk" :max="option.getMaximumSelection(item)" :min="1" :stepper="true" @update:model-value="setOptionAmount(menu, option, $event)" />
+                                <NumberInput :model-value="getOptionAmount(menu, option)" suffix="stuks" suffix-singular="stuk" :max="option.getMaximumSelection(item)" :min="1" :stepper="true" @update:model-value="setOptionAmount(menu, option, $event)" />
                             </template>
                         </template>
                         <span v-else-if="option.price.forMember(item.member)" class="style-price-base">
@@ -159,7 +159,6 @@ import { useErrors } from '#errors/useErrors.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import CheckboxListItem from '#inputs/CheckboxListItem.vue';
 import DateSelection from '#inputs/DateSelection.vue';
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import STList from '#layout/STList.vue';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
@@ -172,6 +171,7 @@ import { GroupType, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
+import NumberInput from '../inputs/NumberInput.vue';
 import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
 import SendConfirmationEmailBox from './SendConfirmationEmailBox.vue';
 

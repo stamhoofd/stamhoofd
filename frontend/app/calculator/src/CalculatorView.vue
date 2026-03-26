@@ -34,7 +34,7 @@
 
                         <div>
                             <STInputBox title="Aantal" error-fields="persons">
-                                <DeprecatedNumberInput v-model="product.amount" :min="1" placeholder="bv. 100" :suffix-singular="module === ModuleType.Members ? 'inschrijving' : (module === ModuleType.Webshops ? 'stuk' : 'ticket')" :suffix="module === ModuleType.Members ? 'inschrijvingen' : (module === ModuleType.Webshops ? 'stuks' : 'tickets')" />
+                                <NumberInput v-model="product.amount" :min="1" placeholder="bv. 100" :suffix-singular="module === ModuleType.Members ? 'inschrijving' : (module === ModuleType.Webshops ? 'stuk' : 'ticket')" :suffix="module === ModuleType.Members ? 'inschrijvingen' : (module === ModuleType.Webshops ? 'stuks' : 'tickets')" />
 
                                 <template #right>
                                     <button v-if="products.length > 1" v-tooltip="module === ModuleType.Members ? 'Verwijderen' : 'Dit ticket verwijderen'" type="button" class="button icon small trash" @click="products.splice(index, 1)" />
@@ -46,7 +46,7 @@
                 </div>
 
                 <STInputBox v-if="module === ModuleType.Members && products.length > 1" title="Uniek aantal leden" error-fields="persons">
-                    <DeprecatedNumberInput v-model="persons" :min="minimumPersons" :max="maximumPersons" :placeholder="suggestedPersons + ' leden'" :suffix-singular="'lid'" :suffix="'leden'" />
+                    <NumberInput v-model="persons" :min="minimumPersons" :max="maximumPersons" :placeholder="suggestedPersons + ' leden'" :suffix-singular="'lid'" :suffix="'leden'" />
                 </STInputBox>
                 <p v-if="module === ModuleType.Members" class="style-description-small">
                     Een lid kan inschrijven voor zoveel activiteiten als je wilt, dat kost je niets meer. Je kan activiteiten of onderverdelingen toevoegen via de '+'-knop om ook je omzet en transactiekosten te berekenen.
@@ -81,7 +81,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import { computed, ref } from 'vue';
 import CalculationOutputBox from './CalculationOutputBox.vue';

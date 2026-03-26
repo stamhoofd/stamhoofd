@@ -35,14 +35,22 @@
             </button>
         </p>
 
-        <hr><STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%I3`)">
-            <DeprecatedNumberInput v-model="amountFree" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`%1FW`)" />
-        </STInputBox>
+        <hr>
+
+        <NumberInputBox v-model="amountFree" error-fields="price" :error-box="errors.errorBox" :title="$t(`%I3`)" :suffix="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dagen' : 'leden'" :suffix-singular="type.behaviour === PlatformMembershipTypeBehaviour.Days ? 'dag' : 'lid'" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
 
         <template v-if="$feature('member-trials')">
-            <STInputBox :title="$t('%CG')+ '*'" error-fields="trialDays" :error-box="errors.errorBox">
-                <DeprecatedNumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" />
-            </STInputBox>
+            <NumberInputBox
+                v-model="trialDays"
+                :title="$t('%CG')+ '*'"
+                error-fields="trialDays" :error-box="errors.errorBox"
+                :suffix="$t('%1N6')"
+                :suffix-singular="$t('%1N7')"
+                :min="0"
+                :validator="errors.validator"
+                :placeholder="$t(`%1FW`)"
+                :required="true"
+            />
             <p class="style-description-small">
                 * {{ $t('%I2') }}
             </p>
@@ -59,7 +67,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PlatformMembershipType, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';

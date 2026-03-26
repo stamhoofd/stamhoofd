@@ -68,9 +68,7 @@
         </h2>
         <p>{{ $t('%HZ') }}</p>
 
-        <STInputBox :title="$t(`%Hg`)">
-            <DeprecatedNumberInput v-model="coverBottomLeftOverlayWidth" :validator="errors.validator" :min="10" suffix="px" :title="$t(`%Hh`)" />
-        </STInputBox>
+        <NumberInputBox v-model="coverBottomLeftOverlayWidth" :title="$t(`%Hg`)" :validator="errors.validator" :min="10" suffix="px" />
 
         <ImageComponent v-if="coverBottomLeftOverlayImage" :image="coverBottomLeftOverlayImage" :auto-height="true" :style="'width: ' + coverBottomLeftOverlayWidth + 'px'" />
 
@@ -95,8 +93,8 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import ColorInput from '@stamhoofd/components/inputs/ColorInput.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
@@ -105,7 +103,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import type { Image} from '@stamhoofd/structures';
+import type { Image } from '@stamhoofd/structures';
 import { DarkMode, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 

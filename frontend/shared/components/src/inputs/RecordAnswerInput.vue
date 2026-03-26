@@ -50,9 +50,7 @@
         </STInputBox>
         <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
         <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
-        <STInputBox v-else-if="answer.settings.type === RecordType.Integer" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <DeprecatedNumberInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
-        </STInputBox>
+        <NumberInputBox v-else-if="answer.settings.type === RecordType.Integer" v-model="integerValue" :title="label.toString()" error-fields="input" :error-box="errors.errorBox" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
 
         <p v-else class="error-box">
             {{ $t('%dc') }}
@@ -71,10 +69,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Address, Image, PatchAnswers, RecordChoice, RecordSettings} from '@stamhoofd/structures';
+import type { Address, Image, PatchAnswers, RecordChoice, RecordSettings } from '@stamhoofd/structures';
 import { FileType, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { computed, onMounted } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
@@ -87,10 +85,10 @@ import STListItem from '../layout/STListItem.vue';
 import AddressInput from './AddressInput.vue';
 import Checkbox from './Checkbox.vue';
 import DateSelection from './DateSelection.vue';
-import DeprecatedNumberInput from './DeprecatedNumberInput.vue';
 import EmailInput from './EmailInput.vue';
 import FileInput from './FileInput.vue';
 import ImageInput from './ImageInput.vue';
+import NumberInputBox from './NumberInputBox.vue';
 import PhoneInput from './PhoneInput.vue';
 import PriceInput from './PriceInput.vue';
 import Radio from './Radio.vue';
@@ -330,8 +328,8 @@ function setChoiceSelected(choice: RecordChoice, selected: boolean) {
     }
 }
 
-useValidation(props.validator, () => {
-    const valid = isValid();
+useValidation(props.validator, async () => {
+    const valid = await isValid();
 
     if (valid) {
         if (props.markReviewed) {
@@ -351,7 +349,7 @@ onMounted(() => {
     }
 });
 
-function isValid() {
+async function isValid() {
     if (props.allOptional && answer.value.isEmpty) {
         return true;
     }

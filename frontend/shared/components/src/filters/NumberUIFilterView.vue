@@ -48,10 +48,10 @@
 
 <script lang="ts" setup>
 import { computed, markRaw, nextTick, ref } from 'vue';
-import DeprecatedNumberInput from '../inputs/DeprecatedNumberInput.vue';
+import NumberInput from '../inputs/NumberInput.vue';
 import PriceInput from '../inputs/PriceInput.vue';
 import TimeMinutesInput from '../inputs/TimeMinutesInput.vue';
-import type { NumberUIFilter} from './NumberUIFilter';
+import type { NumberUIFilter } from './NumberUIFilter';
 import { NumberFilterFormat, UINumberFilterMode } from './NumberUIFilter';
 
 const props = defineProps<{
@@ -69,10 +69,10 @@ async function onChange() {
 
 const inputComponent = computed(() => {
     switch (type.value) {
-        case NumberFilterFormat.Number: return markRaw(DeprecatedNumberInput);
+        case NumberFilterFormat.Number: return markRaw(NumberInput);
         case NumberFilterFormat.Currency: return markRaw(PriceInput);
         case NumberFilterFormat.TimeMinutes: return markRaw(TimeMinutesInput);
-        default: return markRaw(DeprecatedNumberInput);
+        default: return markRaw(NumberInput);
     }
 });
 </script>

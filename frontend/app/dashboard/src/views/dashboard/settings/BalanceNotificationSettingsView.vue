@@ -59,13 +59,9 @@
                 <hr><h2>{{ $t('%HQ') }}</h2>
                 <p>{{ $t('%91') }}</p>
 
-                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%Mt`)">
-                    <DeprecatedNumberInput v-model="minimumDaysBetween" placeholder="" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="1" :stepper="true" />
-                </STInputBox>
+                <NumberInputBox v-model="minimumDaysBetween" error-fields="price" :error-box="errors.errorBox" :title="$t(`%Mt`)" placeholder="" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="1" :stepper="true" :validator="errors.validator" />
 
-                <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%Mu`)">
-                    <DeprecatedNumberInput v-model="maximumReminderEmails" placeholder="" suffix="e-mails" suffix-singular="e-mail" :min="1" :stepper="true" />
-                </STInputBox>
+                <NumberInputBox v-model="maximumReminderEmails" error-fields="price" :error-box="errors.errorBox" :title="$t(`%Mu`)" :validator="errors.validator" placeholder="" suffix="e-mails" suffix-singular="e-mail" :min="1" :stepper="true" />
             </div>
 
             <div v-if="$feature('organization-receivable-balances')" class="container">
@@ -86,8 +82,8 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import MultipleChoiceInput from '@stamhoofd/components/inputs/MultipleChoiceInput.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';

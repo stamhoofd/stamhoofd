@@ -380,9 +380,7 @@
                             {{ $t('%ce', {stock: usedStock.toString()}) }}
                         </h3>
                         <div v-if="enableMaxMembers" class="option" @click.stop.prevent>
-                            <STInputBox title="" error-fields="maxMembers" :error-box="errors.errorBox">
-                                <DeprecatedNumberInput v-model="maxMembers" :min="0" suffix="leden" suffix-singular="lid" />
-                            </STInputBox>
+                            <NumberInputBox v-model="maxMembers" title="" error-fields="maxMembers" :error-box="errors.errorBox" :min="0" suffix="leden" suffix-singular="lid" :validator="errors.validator" />
                             <p class="style-description-small">
                                 {{ $t('%cf') }}
                             </p>
@@ -544,9 +542,7 @@
                     <hr><h2>{{ $t('%7r') }}</h2>
                     <p>{{ $t('%7s') }}</p>
 
-                    <STInputBox :title="$t('%CG')" error-fields="settings.trialDays" :error-box="errors.errorBox">
-                        <DeprecatedNumberInput v-model="trialDays" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
-                    </STInputBox>
+                    <NumberInputBox v-model="trialDays" :title="$t('%CG')" error-fields="settings.trialDays" :error-box="errors.errorBox" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" :validator="errors.validator" />
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
                         {{ $t('%7t', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
                     </p>
@@ -596,7 +592,6 @@ import { useValidation } from '#errors/useValidation.ts';
 import { useRegisterItemFilterBuilders } from '#filters/filterBuilders.ts';
 import AgeInput from '#inputs/AgeInput.vue';
 import DateSelection from '#inputs/DateSelection.vue';
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import Dropdown from '#inputs/Dropdown.vue';
 import GroupIdsInput from '#inputs/GroupIdsInput.vue';
 import TimeInput from '#inputs/TimeInput.vue';
@@ -614,6 +609,7 @@ import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
 import { useErrors } from '../errors/useErrors';
 import { useAuth, useDraggableArray, useOrganization, usePatch, usePatchableArray, usePlatform } from '../hooks';
+import NumberInputBox from '../inputs/NumberInputBox.vue';
 import TInput from '../inputs/TInput.vue';
 import TTextarea from '../inputs/TTextarea.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';

@@ -4,7 +4,7 @@
 
 <script lang="ts" setup>
 import { computed, markRaw } from 'vue';
-import DeprecatedNumberInput from '../inputs/DeprecatedNumberInput.vue';
+import NumberInput from '../inputs/NumberInput.vue';
 import PriceInput from '../inputs/PriceInput.vue';
 import TimeMinutesInput from '../inputs/TimeMinutesInput.vue';
 import type { NumberUIFilter } from './NumberUIFilter';
@@ -19,10 +19,10 @@ const floatingPoint = computed(() => props.filter.builder.floatingPoint);
 
 const inputComponent = computed(() => {
     switch (type.value) {
-        case NumberFilterFormat.Number: return markRaw(DeprecatedNumberInput);
+        case NumberFilterFormat.Number: return markRaw(NumberInput);
         case NumberFilterFormat.Currency: return markRaw(PriceInput);
         case NumberFilterFormat.TimeMinutes: return markRaw(TimeMinutesInput);
-        default: return markRaw(DeprecatedNumberInput);
+        default: return markRaw(NumberInput);
     }
 });
 </script>

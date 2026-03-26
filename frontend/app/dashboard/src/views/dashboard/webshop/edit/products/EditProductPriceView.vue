@@ -9,7 +9,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <ProductPriceBox :product-price="patchedProductPrice" :is-new="isNew" :product="patched" :error-box="errors.errorBox" @patch="addPatch($event)" />
+        <ProductPriceBox :product-price="patchedProductPrice" :is-new="isNew" :product="patched" :error-box="errors.errorBox" :validator="errors.validator" @patch="addPatch($event)" />
 
         <div v-if="!isNew" class="container">
             <hr><h2>
@@ -27,12 +27,12 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 
 import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/uitpas/useGetOfficialUitpasSocialTariff.ts';
@@ -71,6 +71,11 @@ function addPricePatch(patch: AutoEncoderPatchType<ProductPrice>, productPriceId
 }
 
 async function save() {
+    const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
+    }
+
     // if price changed and this is an UiTPAS base price we need to update the other product prices
     if (patched.value.uitpasEvent) {
         saveLoading.value = true;

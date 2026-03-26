@@ -48,9 +48,7 @@
                 </h3>
 
                 <div v-if="useMaximum" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="maximum" :error-box="errors.errorBox" :title="$t(`%dN`)">
-                        <DeprecatedNumberInput v-model="maximum" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('%6A')" :min="2" />
-                    </STInputBox>
+                    <NumberInputBox v-model="maximum" error-fields="maximum" :error-box="errors.errorBox" :title="$t(`%dN`)" suffix="stuks" suffix-singular="stuk" :required="false" :placeholder="$t('%6A')" :min="2" :validator="errors.validator" />
                 </div>
             </STListItem>
 
@@ -64,9 +62,7 @@
                 </h3>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <DeprecatedNumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
-                    </STInputBox>
+                    <NumberInputBox v-model="stock" title="" error-fields="stock" :error-box="errors.errorBox" suffix="stuks" suffix-singular="stuk" :validator="errors.validator" />
                 </div>
             </STListItem>
         </STList>
@@ -74,13 +70,13 @@
 </template>
 
 <script setup lang="ts">
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { Group, GroupOption, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';
 import { usePatch } from '../../hooks';
+import NumberInputBox from '../../inputs/NumberInputBox.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import ReduceablePriceInput from './ReduceablePriceInput.vue';
@@ -160,6 +156,10 @@ async function save() {
 
     saving.value = true;
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
         await props.saveHandler(patch.value);
         await pop({ force: true });
     }

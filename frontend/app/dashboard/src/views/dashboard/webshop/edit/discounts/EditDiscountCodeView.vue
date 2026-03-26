@@ -39,9 +39,7 @@
                 </h3>
 
                 <div v-if="useMaximumUsage" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                        <DeprecatedNumberInput v-model="maximumUsage" />
-                    </STInputBox>
+                    <NumberInputBox v-model="maximumUsage" title="" error-fields="stock" :error-box="errors.errorBox" :validator="errors.validator" :min="1" />
                 </div>
             </STListItem>
         </STList>
@@ -99,7 +97,6 @@ import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts'
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -109,6 +106,7 @@ import type { PrivateWebshop } from '@stamhoofd/structures';
 import { Discount, DiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import { computed } from 'vue';
 import EditDiscountView from './EditDiscountView.vue';
 
@@ -246,6 +244,10 @@ async function save() {
     cleanCode();
 
     const isValid = await errors.validator.validate();
+    if (!isValid) {
+        return;
+    }
+    
     errors.errorBox = null;
 
     try {

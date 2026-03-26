@@ -59,9 +59,7 @@
                 </STInputBox>
             </div>
 
-            <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`%M4`)">
-                <DeprecatedNumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`%20`)" />
-            </STInputBox>
+            <NumberInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`%M4`)" v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`%20`)" :validator="errors.validator" />
         </div>
 
         <div class="split-inputs">
@@ -268,7 +266,6 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import IconContainer from '#icons/IconContainer.vue';
 import DateSelection from '#inputs/DateSelection.vue';
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
@@ -285,6 +282,7 @@ import { BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, ge
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
+import NumberInputBox from '../inputs/NumberInputBox.vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import PaymentRow from './components/PaymentRow.vue';
 

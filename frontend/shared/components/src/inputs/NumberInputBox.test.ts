@@ -2,8 +2,8 @@
 import { userEvent } from '@vitest/browser/context';
 import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
-import { ErrorBox } from '../errors/ErrorBox';
-import { Validator } from '../errors/Validator';
+import type { ErrorBox } from '../errors/ErrorBox';
+import type { Validator } from '../errors/Validator';
 import NumberInputBox from './NumberInputBox.vue';
 
 // todo: add tests for comma if no floating point
@@ -46,7 +46,7 @@ describe('NumberInputBox', () => {
             inputValue: '5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 5,
                     inputValue: '5',
                 },
                 afterChange: {
@@ -85,7 +85,7 @@ describe('NumberInputBox', () => {
             inputValue: '3',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 3,
                     inputValue: '3',
                 },
                 afterChange: {
@@ -104,7 +104,7 @@ describe('NumberInputBox', () => {
             inputValue: '2',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 2,
                     inputValue: '2',
                 },
                 afterChange: {
@@ -142,7 +142,7 @@ describe('NumberInputBox', () => {
             inputValue: '4',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 4,
                     inputValue: '4',
                 },
                 afterChange: {
@@ -161,7 +161,7 @@ describe('NumberInputBox', () => {
             inputValue: '5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 5,
                     inputValue: '5',
                 },
                 afterChange: {
@@ -236,7 +236,7 @@ describe('NumberInputBox', () => {
             inputValue: '5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 500,
                     inputValue: '5',
                 },
                 afterChange: {
@@ -254,7 +254,7 @@ describe('NumberInputBox', () => {
             inputValue: '-5',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: -500,
                     inputValue: '-5',
                 },
                 afterChange: {
@@ -272,7 +272,7 @@ describe('NumberInputBox', () => {
             inputValue: '5,3',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 530,
                     inputValue: '5,3',
                 },
                 afterChange: {
@@ -290,7 +290,7 @@ describe('NumberInputBox', () => {
             inputValue: '5,34',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 534,
                     inputValue: '5,34',
                 },
                 afterChange: {
@@ -308,7 +308,7 @@ describe('NumberInputBox', () => {
             inputValue: '5.3400001',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 534,
                     inputValue: '5.3400001',
                 },
                 afterChange: {
@@ -326,7 +326,7 @@ describe('NumberInputBox', () => {
             inputValue: '5.34999999999',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: 535,
                     inputValue: '5.34999999999',
                 },
                 afterChange: {
@@ -467,6 +467,7 @@ async function createWrapper(value: number | null, props: NumberInputBoxProps) {
         attachTo: document.body,
         props: {
             ...props,
+            validator: null,
             'modelValue': value,
             'onUpdate:modelValue': async (e: number | null) => {
                 // make sure the wrapper is initialized

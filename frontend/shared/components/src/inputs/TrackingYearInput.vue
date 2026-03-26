@@ -1,17 +1,15 @@
 <template>
-    <STInputBox :title="$t('%7w')" error-fields="trackingYear" :error-box="errors.errorBox">
-        <DeprecatedNumberInput v-model="trackingYear" :title="$t('%7w')" :validator="errors.validator" :min="1900" :max="max" />
+    <NumberInputBox :title="$t('%7w')" error-fields="trackingYear" :error-box="errors.errorBox" v-model="trackingYear" :validator="errors.validator" :min="1900" :max="max" >
         <template #right>
             <slot name="right" />
         </template>
-    </STInputBox>
+    </NumberInputBox>
 </template>
 
 <script lang="ts" setup>
 import { useErrors } from '../errors/useErrors';
 import type { Validator } from '../errors/Validator';
-import DeprecatedNumberInput from './DeprecatedNumberInput.vue';
-import STInputBox from './STInputBox.vue';
+import NumberInputBox from './NumberInputBox.vue';
 
 const props = withDefaults(defineProps<{
     required: boolean;

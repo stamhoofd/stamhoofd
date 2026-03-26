@@ -37,7 +37,6 @@
 <script lang="ts">
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import DeprecatedNumberInput from '#inputs/DeprecatedNumberInput.vue';
 import Radio from '#inputs/Radio.vue';
 import StepperInput from '#inputs/StepperInput.vue';
 import STList from '#layout/STList.vue';
@@ -64,7 +63,6 @@ import SeatSelectionBox from './SeatSelectionBox.vue';
         STList,
         STListItem,
         Radio,
-        DeprecatedNumberInput,
         OptionMenuBox,
         StepperInput,
         FieldBox,

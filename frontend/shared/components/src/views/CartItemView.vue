@@ -104,7 +104,7 @@
                 <hr><h2>{{ $t('%M4') }}</h2>
 
                 <STInputBox class="max">
-                    <DeprecatedNumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
+                    <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
                 </STInputBox>
 
                 <p v-if="stockText" class="style-description-small" v-text="stockText" />
@@ -175,13 +175,13 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
 import { useContext } from '../hooks';
-import DeprecatedNumberInput from '../inputs/DeprecatedNumberInput.vue';
+import NumberInput from '../inputs/NumberInput.vue';
 import Radio from '../inputs/Radio.vue';
 import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';
 import STList from '../layout/STList.vue';

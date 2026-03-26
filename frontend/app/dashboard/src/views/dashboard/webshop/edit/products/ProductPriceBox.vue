@@ -35,9 +35,7 @@
                         <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`%1Mn`)" />
                     </STInputBox>
 
-                    <STInputBox error-fields="discountAmount" :error-box="errorBox" :title="$t(`%UB`)">
-                        <DeprecatedNumberInput v-model="discountAmount" :min="2" :stepper="true" :placeholder="$t(`%1Mn`)" />
-                    </STInputBox>
+                    <NumberInputBox v-model="discountAmount" error-fields="discountAmount" :error-box="errorBox" :title="$t(`%UB`)" :min="2" :stepper="true" :placeholder="$t(`%1Mn`)" :validator="errors.validator" />
                 </div>
             </STListItem>
 
@@ -68,9 +66,7 @@
                 </p>
 
                 <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="stock" :error-box="errorBox">
-                        <DeprecatedNumberInput v-model="stock" />
-                    </STInputBox>
+                    <NumberInputBox v-model="stock" title="" error-fields="stock" :error-box="errorBox" :validator="errors.validator" />
                 </div>
             </STListItem>
 
@@ -105,11 +101,13 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import type { Validator } from '@stamhoofd/components';
+import { useErrors } from '@stamhoofd/components';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -126,6 +124,7 @@ const { getOfficialUitpasSocialTariff } = useGetOfficialUitpasSocialTariff();
 
 const props = defineProps<{
     errorBox: ErrorBox | null;
+    validator: Validator | null;
     productPrice: ProductPrice;
     product: Product;
     isNew: boolean;
@@ -133,6 +132,8 @@ const props = defineProps<{
 
 const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void }>();
 const uitpasFeature = useFeatureFlag()('uitpas');
+
+const errors = useErrors({ validator: props.validator });
 
 const patchedProductPrice = computed(() => props.productPrice);
 const patchedProduct = computed(() => props.product);

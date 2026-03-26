@@ -197,6 +197,27 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
         return Math.round(parsed * (floatingPoint ? 100 : 1));
     };
 
+    const step = (value: number | null, add: number): number => {
+        const { min, max } = getOptions();
+
+        if (value === null || isNaN(value)) {
+            
+            return min ?? 0;
+        }
+
+        const newValue = value + add;
+
+        if (min !== null && newValue < min) {
+            return min;
+        }
+
+        if (max !== null && newValue > max) {
+            return max;
+        }
+
+        return newValue;
+    }
+
     /**
      * Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
      */
@@ -212,5 +233,6 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
         constrain,
         numberToString,
         stringToNumber,
+        step
     };
 }

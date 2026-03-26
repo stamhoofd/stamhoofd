@@ -58,9 +58,7 @@
         <hr><h2>{{ $t('%9V') }}</h2>
 
         <div class="split-inputs">
-            <STInputBox error-fields="minimumRequiredMembers" :error-box="errors.errorBox" :title="$t(`%Ho`)">
-                <DeprecatedNumberInput v-model="minimumRequiredMembers" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`%1FW`)" />
-            </STInputBox>
+            <NumberInputBox v-model="minimumRequiredMembers" error-fields="minimumRequiredMembers" :error-box="errors.errorBox" :title="$t(`%Ho`)" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
         </div>
 
         <div class="container">
@@ -103,13 +101,13 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import AgeInput from '@stamhoofd/components/inputs/AgeInput.vue';
-import DeprecatedNumberInput from '@stamhoofd/components/inputs/DeprecatedNumberInput.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
+import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import TagIdsInput from '@stamhoofd/components/inputs/TagIdsInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import InheritedRecordsConfigurationBox from '@stamhoofd/components/records/components/InheritedRecordsConfigurationBox.vue';
-import type { DefaultAgeGroup} from '@stamhoofd/structures';
+import type { DefaultAgeGroup } from '@stamhoofd/structures';
 import { OrganizationRecordsConfiguration, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -157,6 +155,10 @@ const save = async () => {
                 message: $t('%56'),
                 field: 'name',
             });
+        }
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
