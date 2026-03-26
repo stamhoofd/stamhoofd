@@ -36,10 +36,9 @@ export class GetWebshopTicketsCountEndpoint extends Endpoint<Params, Query, Body
             throw Context.auth.error();
         }
 
-        const query = GetWebshopTicketsEndpoint.buildQuery(request.query);
+        const query = await GetWebshopTicketsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

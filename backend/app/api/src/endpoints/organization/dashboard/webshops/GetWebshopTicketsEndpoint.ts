@@ -50,7 +50,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
             }, filterCompilers)));
 
         if (q.filter) {
-            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         // currently no search supported, probably not needed?
@@ -59,7 +59,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
