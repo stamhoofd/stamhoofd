@@ -60,6 +60,18 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return [false];
     }
 
+    private static throwDuplicateMemberNumberError(error: unknown): never {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'ER_DUP_ENTRY' && 'message' in error && typeof error.message === 'string' && error.message.includes('memberNumber')) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Member number already in use',
+                human: $t('Dit lidnummer is al in gebruik'),
+                field: 'details.memberNumber',
+            });
+        }
+        throw error;
+    }
+
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
@@ -133,7 +145,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
             }
 
-            await member.save();
+            try {
+                await member.save();
+            }
+            catch (error) {
+                PatchOrganizationMembersEndpoint.throwDuplicateMemberNumberError(error);
+            }
             members.push(member);
             updateMembershipMemberIds.add(member.id);
 
@@ -206,7 +223,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
             }
 
-            await member.save();
+            try {
+                await member.save();
+            }
+            catch (error) {
+                PatchOrganizationMembersEndpoint.throwDuplicateMemberNumberError(error);
+            }
 
             // If parents changed or emergeny contacts: fetch family and merge data
             if (patch.details && (!isEmptyPatch(patch.details?.parents) || !isEmptyPatch(patch.details?.emergencyContacts))) {
