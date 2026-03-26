@@ -1,9 +1,10 @@
-import { Decoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
-import { GetWebshopTicketsEndpoint } from './GetWebshopTicketsEndpoint';
+import { GetWebshopTicketsEndpoint } from './GetWebshopTicketsEndpoint.js';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = CountFilteredRequest;
