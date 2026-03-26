@@ -11,3 +11,4 @@ export * from './useUserEmailsObjectFetcher';
 export * from './useDocumentTemplatesObjectFetcher';
 export * from './useInvoicesObjectFetcher';
 export * from './useBalanceItemsObjectFetcher';
+export * from './useWebshopsObjectFetcher';

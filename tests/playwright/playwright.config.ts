@@ -7,6 +7,8 @@ export default defineConfig({
     globalSetup: './src/setup/global-setup.js',
     globalTeardown: './src/setup/global-teardown.js',
     testDir: './src/tests',
+    /* Exclude tests tagged @extra unless explicitly requested via PLAYWRIGHT_INCLUDE_EXTRA env var */
+    grepInvert: process.env.PLAYWRIGHT_INCLUDE_EXTRA ? undefined : /@extra/,
     /* Run tests in files in parallel */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */

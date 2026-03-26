@@ -8,6 +8,8 @@
         "test:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true yarn -s test",
         "test:trace": "yarn -s test --trace on",
         "test:skip:trace": "yarn -s test:skip --trace on",
+        "test:extra": "PLAYWRIGHT_INCLUDE_EXTRA=1 yarn -s test --grep @extra",
+        "test:extra:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true yarn -s test:extra",
         "lint": "eslint",
         "build": "tsc --build"
     },

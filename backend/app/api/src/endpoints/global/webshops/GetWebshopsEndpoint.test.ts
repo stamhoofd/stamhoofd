@@ -525,4 +525,83 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             expect(countResponse.body.count).toBe(1);
         });
     });
+
+    describe('Pagination with post-query permission filtering', () => {
+        test('Paginating through 100 webshops where only 1 is accessible eventually returns the accessible webshop without looping infinitely', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            // Create 99 inaccessible webshops and 1 accessible one. Their UUIDs are random,
+            // so the accessible webshop can end up anywhere in the sort order (sort key: id).
+            // The test verifies that pagination still finds it regardless of position.
+            const inaccessibleWebshops = await Promise.all(
+                Array.from({ length: 99 }, () =>
+                    new WebshopFactory({ organizationId: organization.id }).create(),
+                ),
+            );
+
+            const accessibleWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Accessible Webshop',
+            }).create();
+
+            // User only has explicit access to the one accessible webshop.
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Webshops,
+                        new Map([[
+                            accessibleWebshop.id,
+                            ResourcePermissions.create({ level: PermissionLevel.Read }),
+                        ]]),
+                    ]]),
+                }),
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            // Use a small page size (10) so we exercise multiple pages.
+            const pageSize = 10;
+            let currentRequest: LimitedFilteredRequest | null = new LimitedFilteredRequest({
+                limit: pageSize,
+                sort: [],
+            });
+
+            const allResults: string[] = [];
+            let pageCount = 0;
+            const maxPages = 20; // safety cap — 100 webshops / 10 per page = at most 10 pages
+
+            while (currentRequest !== null) {
+                expect(pageCount).toBeLessThan(maxPages); // guard against infinite loop
+
+                const request = Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: currentRequest,
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                });
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+
+                for (const result of response.body.results) {
+                    allResults.push(result.id);
+                }
+
+                currentRequest = response.body.next ?? null;
+                pageCount++;
+            }
+
+            // The accessible webshop must appear exactly once.
+            expect(allResults).toContain(accessibleWebshop.id);
+            expect(allResults.filter(id => id === accessibleWebshop.id)).toHaveLength(1);
+
+            // None of the inaccessible webshops should appear.
+            const inaccessibleIds = new Set(inaccessibleWebshops.map(w => w.id));
+            for (const id of allResults) {
+                expect(inaccessibleIds.has(id)).toBe(false);
+            }
+        });
+    });
 });

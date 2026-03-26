@@ -19,6 +19,7 @@ import EventNotificationsTableView from './views/event-notifications/EventNotifi
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import MembersMenu from './views/members/MembersMenu.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
+import WebshopsTableView from './views/webshops/WebshopsTableView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -124,6 +125,15 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         }),
     });
 
+    const webshopsTab = new TabBarItem({
+        id: 'webshops',
+        icon: 'basket',
+        name: $t('Webshops'),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: new ComponentWithProperties(WebshopsTableView, {}),
+        }),
+    });
+
     const settingsTab = new TabBarItem({
         id: 'settings',
         icon: 'settings',
@@ -168,6 +178,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                             moreTab.items.push(settingsTab);
                             moreTab.items.push(communicationTab);
                             moreTab.items.push(financesTab);
+                            moreTab.items.push(webshopsTab);
                             moreTab.items.push(auditLogsTab);
                         }
                         else {

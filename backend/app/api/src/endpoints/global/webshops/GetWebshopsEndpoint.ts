@@ -2,12 +2,13 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Webshop } from '@stamhoofd/models';
+import { Organization, Webshop } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, StamhoofdFilter, Webshop as WebshopStruct } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, PaginatedResponse, PermissionLevel, WebshopWithOrganization, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { organizationFilterCompilers } from '../../../sql-filters/organizations.js';
@@ -17,7 +18,7 @@ import { webshopSorters } from '../../../sql-sorters/webshops.js';
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<WebshopStruct[], LimitedFilteredRequest>;
+type ResponseBody = PaginatedResponse<WebshopWithOrganization[], LimitedFilteredRequest>;
 
 const sorters = webshopSorters;
 const filterCompilers = webshopFilterCompilers;
@@ -113,7 +114,7 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<WebshopStruct[], LimitedFilteredRequest>> {
+    static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<WebshopWithOrganization[], LimitedFilteredRequest>> {
         const query = await GetWebshopsEndpoint.buildQuery(requestQuery);
         let data: SQLResultNamespacedRow[];
 
@@ -141,6 +142,10 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
         }
 
+        // Batch-load organizations for accessible webshops
+        const organizationIds = Formatter.uniqueArray(accessibleWebshops.map(w => w.organizationId));
+        const organizationModels = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
+
         let next: LimitedFilteredRequest | undefined;
 
         if (webshops.length >= requestQuery.limit) {
@@ -161,8 +166,24 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
         }
 
-        return new PaginatedResponse<WebshopStruct[], LimitedFilteredRequest>({
-            results: await Promise.all(accessibleWebshops.map(w => AuthenticatedStructures.webshop(w))),
+        const results: WebshopWithOrganization[] = [];
+        for (const webshop of accessibleWebshops) {
+            const organizationModel = organizationModels.find(o => o.id === webshop.organizationId);
+            if (!organizationModel) {
+                // Skip webshops whose organization cannot be found
+                console.warn('Organization not found for webshop', webshop.id, webshop.organizationId);
+                continue;
+            }
+
+            const webshopStruct = AuthenticatedStructures.webshopPreview(webshop);
+            results.push(WebshopWithOrganization.create({
+                webshop: webshopStruct,
+                organization: organizationModel.getBaseStructure(),
+            }));
+        }
+
+        return new PaginatedResponse<WebshopWithOrganization[], LimitedFilteredRequest>({
+            results,
             next,
         });
     }
