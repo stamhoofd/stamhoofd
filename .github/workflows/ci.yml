@@ -72,6 +72,7 @@ jobs:
           mysql version: '8.0'
           mysql database: 'stamhoofd-tests'
           mysql root password: 'root'
+          collation server: 'utf8mb4_0900_ai_ci'
 
       - name: Install dependencies
         run: yarn install --prefer-offline --frozen-lockfile
@@ -127,6 +128,7 @@ jobs:
           mysql version: '8.0'
           mysql database: 'stamhoofd-tests'
           mysql root password: 'root'
+          collation server: 'utf8mb4_0900_ai_ci'
 
       - name: Install dependencies
         run: yarn install --prefer-offline --frozen-lockfile
@@ -182,6 +184,7 @@ jobs:
           mysql version: '8.0'
           mysql database: 'stamhoofd-tests'
           mysql root password: 'root'
+          collation server: 'utf8mb4_0900_ai_ci'
 
       - name: Install dependencies
         run: yarn install --prefer-offline --frozen-lockfile
@@ -281,6 +284,8 @@ jobs:
           mysql version: '8.0'
           mysql database: 'stamhoofd-tests'
           mysql root password: 'root'
+          collation server: 'utf8mb4_0900_ai_ci'
+
       - name: For building, we need development dependencies - install them
         run: yarn install --prefer-offline --frozen-lockfile
       - name: Build shared packages
@@ -481,6 +486,8 @@ jobs:
         mysql version: '8.0'
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
+        collation server: 'utf8mb4_0900_ai_ci'
+
     - name: Run Playwright tests
       run: cd tests/playwright && yarn -s test
     - name: Upload Playwright artifacts
