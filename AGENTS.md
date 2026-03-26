@@ -58,15 +58,18 @@ stamhoofd/
 ### Commands
 ```bash
 yarn install        # Install all dependencies
+yarn test           # Run all test
+yarn lint           # Run all linting
+yarn typecheck      # Run all typechecks
+
+# Building
+yarn build:shared         # Build all shared packages that require building
+yarn build:global:shared  # Build global shared packages only (no backend shared packages)
 yarn dev:build      # Builds everything: all dependencies and all backends and frontends
 
 # Single app (examples, replace with package you need to build)
 yarn dev:build --scope @stamhoofd/backend    # Builds the api backend
 yarn dev:build --scope @stamhoofd/dashboard    # Builds the dashboard frontend
-
-# Building
-yarn build:shared         # Build all shared packages that require building
-yarn build:global:shared  # Build global shared packages only (no backend shared packages)
 
 # Frontend type checking
 yarn frontend:types
@@ -101,6 +104,7 @@ yarn test --testNamePattern="test name"
 - Our build system will replace all strings with `$t('%ABC')` (don't do this yourself). You can look up the translation in `shared/locales/src/nl.json` if you want to know what the %XYZ means you come across.
 - SimpleError.message should be in English and not translated using $t
 - SimpleError.human should use $t.
+- Test names and code comments should be in English
 
 ### Imports
 
@@ -108,6 +112,11 @@ yarn test --testNamePattern="test name"
 - Use #foldername/file.vue to import a file from the same package located higher in the folder tree.
 - Use @stamhoofd/package-name/foldername/file.vue to import a dependencies from other packages (note: the 'src' folder is skipped in the path and file extensions only required for vue, not ts*)
 - Add `.js` extension when importing `.ts` files.
+
+### Tests
+- New code should be tested.
+- Test code quality is important, think about the most important flows.
+- For bugfixes: write tests to check if the bug is fixed + check if thoses tests fail if you undo your bugfix.
 
 ---
 
