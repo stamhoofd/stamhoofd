@@ -51,6 +51,9 @@ stamhoofd/
     - run `yarn lint` to report linting errors and fix them
     - run `yarn test --ignore @stamhoofd/playwright` to run all tests project wide except Playwright tests
     - run `yarn test --scope @stamhoofd/playwright` to run only the Playwright tests only when everything else succeeded.
+- When writing new UI code (mainly new views) also write Playwright tests, but only for the most important flow. For UI code that covers important edge cases and can't be tested usint vitest component tests, use Playwright tests, but tag them with @extra.
+- Always write tests for changes in backend endpoints
+- Never make changes to @stamhoofd/structures without consulting the documentation around versioning
 
 ### Commands
 ```bash
