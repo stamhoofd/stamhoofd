@@ -1,11 +1,91 @@
 # AGENTS.md
 
-## Project Overview
+## Quick Start Loop
 
-Stamhoofd is a yarn monorepo with:
-- **Backend**: Node.js + TypeScript with custom routing (not Express)
-- **Frontend**: Vue.js 3 + TypeScript + Vite + Capacitor (mobile)
-- **Shared**: Common packages
+For every task, follow this canonical iteration cycle:
+
+1. Read relevant docs in [Notion](https://www.notion.so/Getting-started-20cc403f36798075b190c84c2c21d1ec) before writing any code
+2. Make your changes
+3. Run a scoped build and `yarn typecheck` and `yarn lint` to catch errors early
+4. When done, run the full validation flow (see Validation)
+
+---
+
+## Commands
+
+### Installing
+
+```bash
+yarn install        # Install all dependencies
+```
+
+### Building
+
+```bash
+yarn build:shared         # Build all shared packages (run after modifying any shared package)
+yarn build:global:shared  # Build global shared packages only (excludes backend shared packages)
+```
+
+Prefer the yarn dev:build command to make sure shared packages are also built when building a backend or frontend app.
+
+```bash
+yarn dev:build --scope @stamhoofd/backend      # Builds shared + API backend only
+yarn dev:build --scope @stamhoofd/dashboard    # Builds shared + Dashboard frontend only
+```
+
+> **Rule of thumb**: when changing a shared package, always run `yarn build:shared` first,
+> then your scoped app build. Running only the app build on a stale shared package causes
+> confusing errors.
+
+### Type checking & linting
+
+```bash
+yarn typecheck      # Run all TypeScript typechecks in the frontend
+yarn lint           # Run all linters (fix errors before committing)
+```
+
+### Testing
+
+```bash
+yarn test                    # All unit/integration tests (vitest), project-wide
+yarn test:playwright         # E2E tests — run only after all other tests pass
+```
+
+Run a single test file or filter by name:
+
+```bash
+cd backend/app/api
+yarn test GetGroupsEndpoint.test.ts
+yarn test --testNamePattern="test name"
+yarn test GetGroupsEndpoint.test.ts --testNamePattern="test name"
+```
+
+To simulate environment conditions in tests, use `TestUtils.setEnvironment(...)`.
+---
+
+## Validation Flow
+
+Run this sequence in order when your changes are complete. Start over if you make further changes.
+
+| Step | Command | Notes |
+|------|---------|-------|
+| 1. Full build | `yarn dev:build` | Fix all build errors before proceeding |
+| 2. Lint | `yarn lint` | Linting errors on broken code are misleading — always build first |
+| 3. Unit tests | `yarn test` | Fix failures before running E2E |
+| 4. E2E tests | `yarn test:playwright` | Only once everything above is green |
+
+If tests fail in module internals or during loading, **assume a stale build** before assuming
+a code bug. Re-run `yarn build:shared` or the relevant scoped build and retry. If needed,
+undo your changes and run tests again to confirm whether the failure is pre-existing.
+
+If a test failure seems random, retry until it passes at least once. **Newly written tests
+must never fail randomly.**
+
+---
+
+## Project Structure
+
+Stamhoofd is a yarn monorepo:
 
 ```
 stamhoofd/
@@ -25,101 +105,104 @@ stamhoofd/
 │   │   ├── dashboard/    # Main dashboard SPA
 │   │   ├── registration/ # Registration SPA
 │   │   ├── webshop/      # Webshop SPA
-│   │   └── mobile/      # Mobile app
+│   │   └── mobile/       # Mobile app
 │   └── shared/           # Frontend-only packages
 ├── shared/               # Shared packages (frontend + backend)
 │   ├── structures/       # Data structures (AutoEncoders)
 │   ├── utility/          # Utilities
-│   ├── locales/         # i18n translations
+│   ├── locales/          # i18n translations
 │   └── ...
 └── tests/
     └── playwright/       # E2E tests
 ```
 
-## Rules
-
-- Always list all pages in the documentation in Notion (https://www.notion.so/Getting-started-20cc403f36798075b190c84c2c21d1ec
-) and read the ones relevant for your goal/project.
-- Refer to the documentation if something is unclear, do not guess. Ask if not present in the documentation.
-- Never change package.json files. Avoid it, you are probably on the wrong track if you think this is required.
-- When making changes in frontend apps: run `yarn frontend:types` periodically. 
-- When making changes in frontend shared packages: run `yarn frontend:types` periodically.
-- When making changes in backend apps: run `yarn dev:build --scope @stamhoofd/<backend package name>` (e.g. `yarn dev:build --scope @stamhoofd/backend-backup`) periodically. Fix any errors.
-- When making changes in shared packages (global or backend): build the package periodically. When also adjusting dependencies make sure to run `yarn build:shared` instead.
-- Validation flow: Run when ready with your project or goal (start over every time when changes were made):
-    - run `yarn dev:build` to build the whole project and fix any build errors first.
-    - run `yarn lint` to report linting errors and fix them
-    - run `yarn test --ignore @stamhoofd/playwright` to run all tests project wide except Playwright tests
-    - run `yarn test --scope @stamhoofd/playwright` to run only the Playwright tests only when everything else succeeded.
-- When writing new UI code (mainly new views) also write Playwright tests, but only for the most important flow. For UI code that covers important edge cases and can't be tested usint vitest component tests, use Playwright tests, but tag them with @extra.
-- Always write tests for changes in backend endpoints
-- Never make changes to @stamhoofd/structures without consulting the documentation around versioning
-
-### Commands
-```bash
-yarn install        # Install all dependencies
-yarn test           # Run all test
-yarn lint           # Run all linting
-yarn typecheck      # Run all typechecks
-
-# Building
-yarn build:shared         # Build all shared packages that require building
-yarn build:global:shared  # Build global shared packages only (no backend shared packages)
-yarn dev:build      # Builds everything: all dependencies and all backends and frontends
-
-# Single app (examples, replace with package you need to build)
-yarn dev:build --scope @stamhoofd/backend    # Builds the api backend
-yarn dev:build --scope @stamhoofd/dashboard    # Builds the dashboard frontend
-
-# Playwright tests
-yarn test:playwright
-```
-
-Run tests of individual packages using:
-
-```bash
-cd backend/app/api
-yarn test --testPathPatterns="GetGroupsEndpoint.test.js"
-yarn test --testNamePattern="test name"
-```
+**Stack**: Node.js + TypeScript backend (custom router, not Express) · Vue.js 3 + Vite +
+Capacitor frontend.
 
 ---
 
-## Code Style Guidelines
+## Rules
 
-### General Rules
+### ✅ Do
+
+- Read all relevant Notion docs before starting. Refer to them when something is unclear — do not guess.
+- Write tests for all backend endpoint changes (unit + integration).
+- Write Playwright tests for new UI views, covering the most important happy-path flow.
+- Tag Playwright tests for important edge cases that can't be covered by vitest component tests with `@extra`.
+- Use `TestUtils.setEnvironment(...)` to simulate different environments in tests.
+- Be creative with tests: cover as many situations as possible with as few tests as possible, without writing gigantic single tests.
+- For bugfixes: write a test that reproduces the bug, then verify it fails before the fix and passes after.
+- Ask if something is unclear and not documented in Notion.
+
+### 🚫 Don't
+
+- **Never modify `package.json` files.** If you think this is necessary, you are likely on the wrong track — stop and reconsider.
+- **Never modify `@stamhoofd/structures` without first reading the versioning documentation in Notion.** This package has strict versioning rules.
+- **Never change files unrelated to your current task.**
+
+---
+
+## Code Style
+
+### Formatting
+
 - **Indentation**: 4 spaces (not tabs)
-- **Quotes**: Single quotes, except when avoiding escape (`"it's"`)
+- **Quotes**: Single quotes, except when avoiding escape (e.g. `"it's"`)
 - **Semicolons**: Always required
 
-### Naming Conventions
-- **Classes**: PascalCase (`MemberDetails`, `InvoiceItem`)
-- **Functions/variables**: camelCase (`getUser`, `decodeData`)
-- **Vue Components**: PascalCase (`HelloWorldView.vue`)
-    - For componentst that are views add the 'View' suffix. Refer to https://www.notion.so/Views-and-navigation-Vue-App-Navigation-20cc403f367980219dede4fb44a4251f
-- **Tests**: `*.test.ts` pattern
+### Naming
 
-### Localization
-- When inserting user facing strings, use `$t('Hallo wereld')` and `$t('Welkom {firstName},', {firstName: user.firstName})`. Always create user facing strings in Dutch. 
-- Our build system will replace all strings with `$t('%ABC')` (don't do this yourself). You can look up the translation in `shared/locales/src/nl.json` if you want to know what the %XYZ means you come across.
-- SimpleError.message should be in English and not translated using $t
-- SimpleError.human should use $t.
-- Test names and code comments should be in English
+| Thing | Convention | Example |
+|-------|-----------|---------|
+| Classes | PascalCase | `MemberDetails`, `InvoiceItem` |
+| Functions / variables | camelCase | `getUser`, `decodeData` |
+| Vue components | PascalCase | `HelloWorldView.vue` |
+| Vue views | PascalCase + `View` suffix | `MemberDetailView.vue` |
+| Test files | `*.test.ts` | `GetGroupsEndpoint.test.ts` |
+
+For component and view naming conventions, see [Views and navigation](https://www.notion.so/Views-and-navigation-Vue-App-Navigation-20cc403f367980219dede4fb44a4251f).
+
+### Vue code
+
+Consult [Views and navigation](https://www.notion.so/Views-and-navigation-Vue-App-Navigation-20cc403f367980219dede4fb44a4251f) when creating new views.
 
 ### Imports
 
-- Avoid creating new, extending or referencing barrel files
-- Use #foldername/file.vue to import a file from the same package located higher in the folder tree.
-- Use @stamhoofd/package-name/foldername/file.vue to import a dependencies from other packages (note: the 'src' folder is skipped in the path and file extensions only required for vue, not ts*)
-- Add `.js` extension when importing `.ts` files.
+```ts
+// ✅ Import from the same package, higher in the folder tree
+import { Foo } from '#components/Foo.js';
 
-### Tests
-- New code should be tested.
-- Test code quality is important, think about the most important flows.
-- For bugfixes: write tests to check if the bug is fixed + check if thoses tests fail if you undo your bugfix.
+// ✅ Import from another package (note: skip 'src/', no extension needed for .ts)
+import { Bar } from '@stamhoofd/package-name/components/Bar';
+
+// ✅ Vue files always need the extension
+import MyView from '@stamhoofd/package-name/views/MyView.vue';
+
+// 🚫 Never create, extend, or reference barrel files (legacy pattern)
+```
+
+### Localization
+
+- All user-facing strings must use `$t(...)`:
+  ```ts
+  $t('Hallo wereld')
+  $t('Welkom {firstName},', { firstName: user.firstName })
+  ```
+- Always write new $t's in **Dutch**.
+- The build system replaces all `$t('...')` calls with `$t('%XYZ')` — do not do this manually.
+  Look up translations in `shared/locales/src/nl.json` if you encounter `%XYZ` keys.
+- `SimpleError.message` → English, **not** translated with `$t`.
+- `SimpleError.human` → Dutch, translated with `$t`.
+- Test names and code comments → English.
 
 ---
 
 ## Common Issues
 
-1. **Build errors**: Run `yarn build:shared` after modifying shared packages
+| Symptom | Likely cause | Fix |
+|---------|-------------|-----|
+| Tests fail on module load or internals | Stale build | Run `yarn build:shared` then your scoped build |
+| Type errors after changing shared package | Shared package not rebuilt | `yarn build:shared` |
+| Confusing errors after `yarn dev:build` | Shared dependency out of date | `yarn build:shared` first, then `yarn dev:build` |
+| Lint errors on code that doesn't compile | Built with errors | Fix build errors before running lint |
+| Cached code or files keep running | Cache issue | run `yarn clear && yarn clear-vite-cache && yarn && yarn build:shared` again |

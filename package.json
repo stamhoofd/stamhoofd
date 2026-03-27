@@ -32,7 +32,7 @@
     "dev:jambo": "STAMHOOFD_ENV=jambo yarn -s dev:watch-env",
     "dev:init": "wait-on shared/build-development-env/dist/init.js && node shared/build-development-env/dist/init.js",
     "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
-    "test": "lerna run test",
+    "test": "lerna run test --ignore @stamhoofd/playwright",
     "test:playwright": "yarn -s build:shared && cd backend/app/api && yarn build && cd ../../.. && cd tests/playwright && yarn -s test",
     "lint": "lerna run lint -- --quiet",
     "typecheck": "lerna run typecheck --",
