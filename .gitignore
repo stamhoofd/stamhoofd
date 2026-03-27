@@ -236,3 +236,5 @@ __screenshots__
 /frontend/app/registration/dist-playwright
 /frontend/app/webshop/dist-playwright
 /tests/playwright/src/.auth
+
+/.opencode
