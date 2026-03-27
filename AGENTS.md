@@ -71,8 +71,8 @@ yarn dev:build      # Builds everything: all dependencies and all backends and f
 yarn dev:build --scope @stamhoofd/backend    # Builds the api backend
 yarn dev:build --scope @stamhoofd/dashboard    # Builds the dashboard frontend
 
-# Frontend type checking
-yarn frontend:types
+# Playwright tests
+yarn test:playwright
 ```
 
 Run tests of individual packages using:
