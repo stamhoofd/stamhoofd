@@ -90,7 +90,8 @@
         "**/node_modules": true,
         "**/yarn-error.log": true,
         ".yarn/releases": true,
-        "LICENSE": true
+        "LICENSE": true,
+        ".worktrees": true
     },
     "search.useIgnoreFiles": false,
     "typescript.enablePromptUseWorkspaceTsdk": true,

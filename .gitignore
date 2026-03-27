@@ -238,3 +238,4 @@ __screenshots__
 /tests/playwright/src/.auth
 
 /.opencode
+./worktrees
