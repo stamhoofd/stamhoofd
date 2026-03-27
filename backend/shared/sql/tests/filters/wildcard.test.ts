@@ -37,7 +37,7 @@ describe('Wildcards', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(JSON_EXTRACT(JSON_EXTRACT(`default`.`settings`,"$.records"),?),"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(JSON_EXTRACT(JSON_EXTRACT(`default`.`settings`,"$.records"),?),"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?',
                 params: [
                     '$.a',
                     'rex',

@@ -8,7 +8,7 @@ exports[`$in > JSON > Can check if a JSON string equals values, case insensitive
       "other",
     ],
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IN (?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci IN (?)",
 }
 `;
 
@@ -21,7 +21,7 @@ exports[`$in > JSON > Can check if a JSON string equals values, case insensitive
       "other",
     ],
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IN (?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci IN (?)",
 }
 `;
 
@@ -30,7 +30,7 @@ exports[`$in > JSON > Can check if a JSON string equals values, case insensitive
   "params": [
     "apple",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?",
 }
 `;
 
@@ -335,7 +335,7 @@ exports[`$in > JSON scalars > Can compare case insensitive with string scalars >
   "params": [
     "hello world",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?",
 }
 `;
 
@@ -344,7 +344,7 @@ exports[`$in > JSON scalars > Can compare case insensitive with string scalars >
   "params": [
     "hello world",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?",
 }
 `;
 
@@ -356,7 +356,7 @@ exports[`$in > JSON scalars > Can compare case insensitive with string scalars >
       "world",
     ],
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IN (?)",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci IN (?)",
 }
 `;
 

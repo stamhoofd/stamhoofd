@@ -32,7 +32,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?',
                 params: [
                     'rex',
                 ],
@@ -51,7 +51,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?',
                 params: [
                     'rex',
                 ],
@@ -72,7 +72,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?',
                 params: [
                     'rex',
                 ],
@@ -97,7 +97,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',
@@ -122,7 +122,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',
@@ -155,7 +155,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',
@@ -190,7 +190,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',

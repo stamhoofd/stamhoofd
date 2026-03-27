@@ -1,5 +1,6 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
+import { Database } from '@simonbackx/simple-database';
 import { OrganizationFactory, OrganizationTagFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { CountFilteredRequest, LimitedFilteredRequest, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, SortItemDirection, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -336,6 +337,56 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             expect(response.status).toBe(200);
             expect(response.body.results).toHaveLength(1);
             expect(response.body.results[0].id).toBe(webshop1.id);
+        });
+
+        test('Can search with status filter when collation_connection differs', async () => {
+            await Database.statement('SET collation_connection = \'utf8mb4_general_ci\'');
+
+            try {
+                const organization = await new OrganizationFactory({}).create();
+
+                const user = await new UserFactory({
+                    organization,
+                    permissions: Permissions.create({ level: PermissionLevel.Full }),
+                }).create();
+
+                const token = await Token.createToken(user);
+
+                const closedWebshop = await new WebshopFactory({
+                    organizationId: organization.id,
+                    name: 'Testwebshop 5',
+                    meta: WebshopMetaData.patch({ status: WebshopStatus.Closed }),
+                }).create();
+
+                await new WebshopFactory({
+                    organizationId: organization.id,
+                    name: 'Andere webshop',
+                    meta: WebshopMetaData.patch({ status: WebshopStatus.Closed }),
+                }).create();
+
+                const request = Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({
+                        search: 'Testwebshop 5',
+                        filter: {
+                            status: {
+                                $eq: WebshopStatus.Closed,
+                            },
+                        },
+                        limit: 100,
+                    }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                });
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+                expect(response.body.results).toHaveLength(1);
+                expect(response.body.results[0].id).toBe(closedWebshop.id);
+            }
+            finally {
+                await Database.statement('SET collation_connection = DEFAULT');
+            }
         });
     });
 
