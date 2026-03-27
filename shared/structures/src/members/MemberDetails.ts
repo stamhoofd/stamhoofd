@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
@@ -12,7 +12,7 @@ import { EmergencyContact } from './EmergencyContact.js';
 import { Gender } from './Gender.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { Parent } from './Parent.js';
-import type { RecordAnswer} from './records/RecordAnswer.js';
+import type { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
@@ -199,7 +199,6 @@ export class MemberDetails extends AutoEncoder {
     @field({
         decoder: BooleanStatus,
         version: 256,
-        optional: true,
         nullable: true,
         downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
         upgrade: (oldValue: BooleanStatus | undefined) => {
