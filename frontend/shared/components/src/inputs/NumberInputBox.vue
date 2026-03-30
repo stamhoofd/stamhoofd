@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<{
     floatingPoint: false,
 
 });
-const numberInput = useNumberInput(computed(() => props));
+const numberInput = useNumberInput(computed(() => ({...props, fractionDigits: props.floatingPoint ? 2 : 0, roundFractionDigits: null})));
 
 const errors = useErrors({ validator: props.validator });
 const model = defineModel<number | null>({ default: null });

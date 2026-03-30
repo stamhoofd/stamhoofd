@@ -272,7 +272,7 @@ describe('NumberInputBox', () => {
                 },
                 afterChange: {
                     modelValue: 530,
-                    inputValue: '5.30',
+                    inputValue: '5.3',
                 },
             },
             props: {

@@ -19,7 +19,7 @@
                 @change="updateModelValue()"
                 @input="updateModelValue({ final: false })"
             >
-            <div v-if="!text.length">
+            <div v-if="!text.length" class="placeholder">
                 {{ placeholder }}
             </div>
             <div v-else>
@@ -64,7 +64,7 @@ const props = withDefaults(defineProps<{
     autoFix: true,
 });
 
-const numberInput = useNumberInput(computed(() => props));
+const numberInput = useNumberInput(computed(() => ({...props, fractionDigits: props.floatingPoint ? 2 : 0, roundFractionDigits: null})));
 const model = defineModel<number | null>({ default: null });
 const text = ref<string>(numberInput.numberToString(model.value, { valueIfNaN: '' }));
 const inputElement = useTemplateRef<HTMLInputElement>('input');
