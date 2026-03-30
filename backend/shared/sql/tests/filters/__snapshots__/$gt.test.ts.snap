@@ -176,7 +176,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "alic",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -185,7 +185,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "a",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -194,7 +194,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "alic",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -203,7 +203,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -212,7 +212,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -221,7 +221,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -230,7 +230,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "alice",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -239,7 +239,7 @@ exports[`$gt > MySQL Behaviour > Comparing JSON string values is case insensitiv
   "params": [
     "b",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -408,7 +408,7 @@ exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON st
   "params": [
     "",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
@@ -417,14 +417,14 @@ exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON st
   "params": [
     "aaaa",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) > ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci > ?",
 }
 `;
 
 exports[`$gt > MySQL Behaviour > NULL values are always the smallest for JSON strings > SQL Query for not match filter: {"settings.name":{"$gt":null}} 1`] = `
 {
   "params": [],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) IS NOT NULL",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci IS NOT NULL",
 }
 `;
 

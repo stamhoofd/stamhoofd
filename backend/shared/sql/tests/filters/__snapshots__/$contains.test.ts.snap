@@ -122,7 +122,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Booleans are converted to 
   "params": [
     "%true%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -131,7 +131,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Booleans are converted to 
   "params": [
     "%0%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -140,7 +140,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Booleans are converted to 
   "params": [
     "%1%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -149,7 +149,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Can actually search string
   "params": [
     "%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -158,7 +158,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Can actually search string
   "params": [
     "%0\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -167,7 +167,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Can actually search string
   "params": [
     "%50\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -176,7 +176,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Can actually search string
   "params": [
     "%\\%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -185,7 +185,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Can actually search string
   "params": [
     "%\\%50%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -194,7 +194,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%-%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -203,7 +203,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%-1%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -212,7 +212,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%-15%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -221,7 +221,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%1%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -230,7 +230,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%5%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -239,7 +239,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%15%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -248,7 +248,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%2%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -257,7 +257,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Negative number fields are
   "params": [
     "%151%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -266,7 +266,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Null fields do not match >
   "params": [
     "%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -275,7 +275,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Null fields do not match >
   "params": [
     "%15%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -284,7 +284,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converte
   "params": [
     "%1%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -293,7 +293,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converte
   "params": [
     "%5%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -302,7 +302,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converte
   "params": [
     "%15%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -311,7 +311,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converte
   "params": [
     "%2%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -320,7 +320,7 @@ exports[`$contains > MySQL behaviour > JSON scalars > Number fields are converte
   "params": [
     "%151%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.scalar" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -329,7 +329,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % 
   "params": [
     "%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -338,7 +338,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % 
   "params": [
     "%0\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -347,7 +347,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % 
   "params": [
     "%50\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -356,7 +356,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % 
   "params": [
     "%\\%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -365,7 +365,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for % 
   "params": [
     "%\\%50%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -374,7 +374,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ 
   "params": [
     "%\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -383,7 +383,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ 
   "params": [
     "%\\_doe%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -392,7 +392,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ 
   "params": [
     "%john\\_doe%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -401,7 +401,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ 
   "params": [
     "%\\_\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -410,7 +410,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can actually search for _ 
   "params": [
     "%john\\_\\_doe%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -419,7 +419,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash >
   "params": [
     "%\\\\%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -428,7 +428,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash >
   "params": [
     "%\\\\\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -437,7 +437,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash >
   "params": [
     "%\\\\\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -446,7 +446,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash >
   "params": [
     "%\\\\\\\\%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -455,7 +455,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Can search for backslash >
   "params": [
     "%\\\\\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -464,7 +464,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Does not return values wit
   "params": [
     "%\\%%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -473,7 +473,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Does not return values wit
   "params": [
     "%\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 
@@ -482,7 +482,7 @@ exports[`$contains > MySQL behaviour > JSON strings > Does not return values wit
   "params": [
     "%john\\_%",
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) LIKE ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci LIKE ?",
 }
 `;
 

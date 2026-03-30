@@ -65,6 +65,7 @@ export class SQLJsonValue implements SQLExpression {
             this.path.getSQL(options),
             (this.type ? ' RETURNING ' + this.type + (this.type === 'CHAR' ? ' CHARACTER SET utf8mb4' : '') : ''),
             ' NULL ON ERROR)',
+            ...(this.type === 'CHAR' ? [' COLLATE utf8mb4_0900_ai_ci'] : []),
         ]);
     }
 }
