@@ -16,6 +16,7 @@ import { SetupStepUpdater } from './helpers/SetupStepUpdater.js';
 import { ContextMiddleware } from './middleware/ContextMiddleware.js';
 import { AuditLogService } from './services/AuditLogService.js';
 import { BalanceItemService } from './services/BalanceItemService.js';
+import { BootChecksService } from './services/BootChecksService.js';
 import { CpuService } from './services/CpuService.js';
 import { DocumentService } from './services/DocumentService.js';
 import { FileSignService } from './services/FileSignService.js';
@@ -82,6 +83,7 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     await GlobalHelper.load();
     await UniqueUserService.check();
+    await BootChecksService.checkDatabaseCollation();
 
     // Init platform shared struct: otherwise permissions won't work with missing responsibilities
     productionLog('Loading platform...');
