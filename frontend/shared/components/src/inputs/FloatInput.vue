@@ -37,7 +37,7 @@
     </div>
 </template>
 
-<script lang="ts" setup generic="T extends number | null">
+<script lang="ts" setup>
 import { computed, nextTick, ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -73,7 +73,7 @@ const props = withDefaults(defineProps<{
     roundFractionDigits: null,
 });
 
-const model = defineModel<T>('modelValue', {
+const model = defineModel<number | null>('modelValue', {
     required: true,
 });
 
@@ -95,20 +95,20 @@ watch(model, (newValue, oldValue) => {
 
     if (newValue === null) {
         if (props.required) {
-            model.value = constrain(props.min ?? 0) as T;
+            model.value = constrain(props.min ?? 0);
         }
         clean();
         return;
     }
 
-    model.value = constrain(newValue) as T;
+    model.value = constrain(newValue);
     clean();
 }, { immediate: true });
 
 watch(valueString, (value) => {
     const { valid: v, value: newValue } = stringToValue(value);
     valid.value = v;
-    model.value = newValue as T;
+    model.value = newValue;
 }, { immediate: false });
 
 function roundFractions(v: number) {
@@ -236,7 +236,7 @@ function step(add: number) {
     if (!valid.value) {
         return;
     }
-    model.value = constrain((model.value ?? props.min ?? 0) + add) as T;
+    model.value = constrain((model.value ?? props.min ?? 0) + add);
     nextTick(() => {
         clean();
     }).catch(console.error);
