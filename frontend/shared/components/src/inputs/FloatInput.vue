@@ -59,7 +59,7 @@ const props = withDefaults(defineProps<{
     /**
      * Maximum decimal places to allow.
      * E.g. fraction digits is set to 4, but you won't allow values smaller than 0,01, set this to 2 (= maximum).
-     * when fractino digits is set to 4 and round fraction digits is set to 0, it will round all fractions (0,5 becomes 1)
+     * when fraction digits is set to 4 and round fraction digits is set to 0, it will round all fractions (0,5 becomes 1)
      */
     roundFractionDigits?: number | null;
 }>(), {
