@@ -2,7 +2,7 @@
 import { userEvent } from '@vitest/browser/context';
 import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
-import DeprecatedFloatInput from './DeprecatedFloatInput.vue';
+import FloatInput from './FloatInput.vue';
 
 describe('FloatInput', () => {
     test('Should not update without user input if no min, max or required', async () => {
@@ -618,7 +618,7 @@ async function createWrapper(props: any) {
      * Problem: onUpdate:modelValue cannot set the modelValue on the wrapper because it is not initialized yet.
      * Solution: we use a promise to wait for the wrapper to be initialized.
      */
-    const wrapper = mount(DeprecatedFloatInput, {
+    const wrapper = mount(FloatInput, {
         attachTo: document.body,
         props: {
             ...props,
