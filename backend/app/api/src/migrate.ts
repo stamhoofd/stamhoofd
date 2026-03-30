@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { Column, DatabaseInstance, Migration } from '@simonbackx/simple-database';
+import { Column, Database, DatabaseInstance, Migration } from '@simonbackx/simple-database';
 import { Version } from '@stamhoofd/structures';
 import path from 'path';
 
@@ -23,6 +23,10 @@ const start = async () => {
     if (!STAMHOOFD.DB_DATABASE) {
         throw new Error('STAMHOOFD.DB_DATABASE is not set');
     }
+
+    // Reload database so we are sure we are running on the correct database in the
+    // environment
+    await Database.reload({})
 
     let killSignalReceived = false;
     const handler = () => {
@@ -61,6 +65,9 @@ const start = async () => {
         console.error(chalk.red('Killing process due to received signal during migration'));
         process.exit(1);
     }
+
+    // Reload database to prevent connection state leakage
+    await Database.reload({})
 
     process.off('SIGTERM', handler);
     process.off('SIGINT', handler);

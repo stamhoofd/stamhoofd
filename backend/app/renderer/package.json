@@ -31,7 +31,7 @@
         "formidable": "3.5.4",
         "luxon": "3.4.4",
         "mockdate": "^3.0.2",
-        "mysql2": "^3.14.1",
+        "mysql2": "^3.20.0",
         "puppeteer": "^24.11.0"
     },
     "publishConfig": {

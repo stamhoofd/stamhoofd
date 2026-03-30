@@ -72,6 +72,9 @@ function productionLog(message: string) {
 }
 
 export const boot = async (options: { killProcess: boolean }) => {
+    // Make sure we use the current environment for connecting to the database
+    await Database.reload({})
+
     productionLog('Running server at v' + Version);
     productionLog('Running server at port ' + STAMHOOFD.PORT);
     productionLog('Running server on DB ' + process.env.DB_DATABASE); // note, should always use process env here

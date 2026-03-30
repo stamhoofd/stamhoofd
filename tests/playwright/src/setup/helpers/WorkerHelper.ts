@@ -67,13 +67,26 @@ class WorkerHelperInstance {
 
     /**
      * The playwright tests use the test environment in shared/test-utils/src/env.json, with some minor tweaks to domains and ports for multiple playwright workers
-     * This method changes the defaults for this worker.
      */
-    overrideDefaultEvironment() {
+    loadEnvironment() {
+        if (this._isInitialized) {
+            console.log('Environment already loaded');
+            return;
+        }
+
+        this._isInitialized = true;
+
+        if (!WorkerData.isInWorkerProcess) {
+            throw new Error('Loading env not possible: not in a worker process');
+        }
+
         if (WorkerData.id === undefined) {
             throw new Error('WorkerData.id is not set');
         }
-
+        
+        console.log('Loading environment');
+        TestUtils.loadEnvironment();
+        
         const config: Partial<BackendEnvironment> = {
             PORT: CaddyConfigHelper.getPort('api', WorkerData.id),
             domains: {
@@ -115,30 +128,6 @@ class WorkerHelperInstance {
 
         for (const key in config) {
             TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment]);
-        }
-    }
-
-    /**
-     * The playwright tests use the test environment in shared/test-utils/src/env.json, with some minor tweaks to domains and ports for multiple playwright workers
-     */
-    loadEnvironment() {
-        if (this._isInitialized) {
-            console.log('Environment already loaded');
-            return;
-        }
-
-        this._isInitialized = true;
-
-        if (!WorkerData.isInWorkerProcess) {
-            throw new Error('Loading env not possible: not in a worker process');
-        }
-
-        if (WorkerData.isInWorkerProcess) {
-            // set environment variables
-            console.log('Loading environment');
-            this.overrideDefaultEvironment();
-            // EmailMocker.infect();
-            console.log('Environment has been loaded');
         }
     }
 }
