@@ -4,8 +4,6 @@ import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
 import NumberInput from './NumberInput.vue';
 
-// todo: add tests for stepper, placeholder and suffix/suffixSingular
-
 describe('NumberInput', () => {
     test('Should not update without user input if no min, max or required', async () => {
         const wrapper = await createWrapper({
@@ -454,6 +452,152 @@ describe('NumberInput', () => {
             });
         }
     });
+
+    describe('key up', () => {
+        test('should add 1', async () => {
+          const wrapper = await createWrapper({
+                    min: 2,
+                    max: 4,
+                    modelValue: null,
+                });
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Enter arrow up
+            await userEvent.keyboard('[ArrowUp]');
+
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(3);
+            // Check input value after input
+            expect(inputEl).toHaveValue('3');
+
+            // Enter arrow up again
+            await userEvent.keyboard('[ArrowUp]');
+
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(4);
+            // Check input value after input
+            expect(inputEl).toHaveValue('4');
+        })
+
+        test('should not add 1 if max reached', async () => {
+          const wrapper = await createWrapper({
+                    min: 2,
+                    max: 4,
+                    modelValue: 4,
+                });
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Enter arrow up
+            await userEvent.keyboard('[ArrowUp]');
+
+            // Check model value after input (should not have changed)
+            expect(wrapper.props('modelValue')).toBe(4);
+            // Check input value after input
+            expect(inputEl).toHaveValue('4');
+        })
+
+        test('should work if model value NaN', async () => {
+          const wrapper = await createWrapper({
+                    min: 2,
+                    max: 4,
+                    modelValue: NaN,
+                });
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Enter arrow up
+            await userEvent.keyboard('[ArrowUp]');
+
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(3);
+            // Check input value after input
+            expect(inputEl).toHaveValue('3');
+        })
+    })
+
+    describe('key down', () => {
+        test('should deduct 1', async () => {
+          const wrapper = await createWrapper({
+                    min: 2,
+                    max: 4,
+                    modelValue: 4,
+                });
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Enter arrow down
+            await userEvent.keyboard('[ArrowDown]');
+
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(3);
+            // Check input value after input
+            expect(inputEl).toHaveValue('3');
+
+            // Enter arrow down again
+            await userEvent.keyboard('[ArrowDown]');
+
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(2);
+            // Check input value after input
+            expect(inputEl).toHaveValue('2');
+        })
+
+        test('should not deduct 1 if min reached', async () => {
+          const wrapper = await createWrapper({
+                    min: 2,
+                    max: 4,
+                    modelValue: 2,
+                });
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Enter arrow up
+            await userEvent.keyboard('[ArrowDown]');
+
+            // Check model value after input (should not have changed)
+            expect(wrapper.props('modelValue')).toBe(2);
+            // Check input value after input
+            expect(inputEl).toHaveValue('2');
+        })
+
+        test('should set model value to min if model value is NaN', async () => {
+          const wrapper = await createWrapper({
+                    min: 2,
+                    max: 4,
+                    modelValue: NaN,
+                });
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Enter arrow up
+            await userEvent.keyboard('[ArrowDown]');
+
+            // Check model value after input
+            expect(wrapper.props('modelValue')).toBe(2);
+            // Check input value after input
+            expect(inputEl).toHaveValue('2');
+        })
+    })
 });
 
 /**
