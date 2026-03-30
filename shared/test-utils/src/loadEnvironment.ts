@@ -24,6 +24,7 @@ export function updateLinkedEnvs() {
     process.env.DB_HOST = (STAMHOOFD as any).DB_HOST + '';
     process.env.DB_PASS = (STAMHOOFD as any).DB_PASS + '';
     process.env.DB_USER = (STAMHOOFD as any).DB_USER + '';
+    process.env.DB_CHARSET = 'utf8mb4_0900_ai_ci';
 
     // Database
     process.env.DB_MULTIPLE_STATEMENTS = 'true';
