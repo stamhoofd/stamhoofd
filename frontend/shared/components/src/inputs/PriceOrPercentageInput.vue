@@ -1,15 +1,15 @@
 <template>
-    <FloatInput v-bind="props" v-model="model" :suffix="suffix" :fraction-digits="type === 'percentage' ? 2 : 4" :round-fraction-digits="2">
+    <DeprecatedFloatInput v-bind="props" v-model="model" :suffix="suffix" :fraction-digits="type === 'percentage' ? 2 : 4" :round-fraction-digits="2">
         <template #right>
             <button class="button icon arrow-down-small" type="button" @click="toggleType" />
         </template>
-    </FloatInput>
+    </DeprecatedFloatInput>
 </template>
 
 <script lang="ts" setup>
-import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import FloatInput from './FloatInput.vue';
 import { computed } from 'vue';
+import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
+import DeprecatedFloatInput from './DeprecatedFloatInput.vue';
 
 const props = withDefaults(defineProps<{
     min?: number | null;

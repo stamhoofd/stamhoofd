@@ -1,9 +1,9 @@
 <template>
-    <FloatInput v-bind="props" v-model="model" suffix="%" />
+    <DeprecatedFloatInput v-bind="props" v-model="model" suffix="%" />
 </template>
 
 <script lang="ts" setup generic="T extends number | null">
-import FloatInput from './FloatInput.vue';
+import DeprecatedFloatInput from './DeprecatedFloatInput.vue';
 
 const props = withDefaults(defineProps<{
     min?: number | null;

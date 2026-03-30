@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
 import DeprecatedFloatInput from './DeprecatedFloatInput.vue';
 
-describe('FloatInput', () => {
+describe('DeprecatedFloatInput', () => {
     test('Should not update without user input if no min, max or required', async () => {
         const wrapper = await createWrapper({
             min: null,
