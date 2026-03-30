@@ -1,5 +1,5 @@
 <template>
-    <div ref="errorElement" :class="{'input-errors': errors.length > 0}">
+    <div ref="errorElement" :class="{'input-errors': errors.length > 0}" data-testid="input-errors">
         <slot />
         <div>
             <STErrorBox v-for="(error, index) of errors" :key="index" :error="error" />

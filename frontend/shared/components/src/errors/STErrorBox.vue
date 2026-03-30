@@ -10,7 +10,7 @@
     >
         <div>
             <div class="error-box-parent">
-                <div ref="error-box" class="error-box">
+                <div ref="error-box" class="error-box" data-testid="input-error">
                     {{ errorMessage }}
                 </div>
             </div>
@@ -20,8 +20,8 @@
 
 <script lang="ts" setup>
 import type { SimpleError } from '@simonbackx/simple-errors';
-import { computed, useTemplateRef, watch } from 'vue';
 import { Request } from '@simonbackx/simple-networking';
+import { computed, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     error: SimpleError;

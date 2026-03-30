@@ -6,11 +6,6 @@ import type { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
 import NumberInputBox from './NumberInputBox.vue';
 
-// todo: add tests for comma if no floating point
-// todo: add tests for validation and error boxes
-// todo: add tests for repeated changes
-// todo: add tests for stepper (should be constrained)
-
 describe('NumberInputBox', () => {
     test('Should not update without user input if no min, max or required', async () => {
         const wrapper = await createWrapperWithDefaultProps(null);
@@ -411,6 +406,232 @@ describe('NumberInputBox', () => {
                 expect(inputEl).toHaveValue(expected.afterChange.inputValue);
             });
         }
+    });
+
+    test('Should correctly update model on repeated changes', async () => {
+                const wrapper = await createWrapperWithDefaultProps(null);
+
+                const inputEl = wrapper.find('input').element;
+
+                // Click the input;
+                await userEvent.click(inputEl);
+
+                // Clear the input
+                await userEvent.clear(inputEl);
+
+                const inputValues: {
+                    text: string,
+                    expected: {
+                        modelValue: number | null,
+                        inputValue: string
+                    }
+                } [] = [
+                {
+                    text: '5',
+                    expected: {
+                        modelValue: 5,
+                        inputValue: '5',
+                    },
+                },
+                {
+                    text: '6',
+                    expected: {
+                        modelValue: 6,
+                        inputValue: '6',
+                    }
+                },
+                {
+                    text: 'abc',
+                    expected: {
+                        modelValue: NaN,
+                        inputValue: 'abc',
+                    }
+                },
+                {
+                    text: '1',
+                    expected: {
+                        modelValue: 1,
+                        inputValue: '1',
+                    }
+                },
+            ];
+
+            for(const {text, expected} of inputValues) {
+                // clear input
+                await userEvent.clear(inputEl);
+
+                // Type the value
+                await userEvent.keyboard(text);
+
+                // blur
+                await userEvent.click(document.body);
+
+                // Check model value after change
+                expect(wrapper.props('modelValue')).toBe(expected.modelValue);
+                // Check input value after change
+                expect(inputEl).toHaveValue(expected.inputValue);
+            }
+
+    });
+
+    test('Should not immediately show an error on mounted', async () => {
+        const wrapper = await createWrapperWithDefaultProps(6, {max: 3});
+
+        const inputError = wrapper.find('[data-testid="input-error"]')
+
+        // Should not exist before change
+        expect(inputError.exists()).toBe(false);
+    });
+
+    describe('Should only update error on change', () => {
+        test('not a number', async () => {
+               const wrapper = await createWrapperWithDefaultProps(null);
+
+                const inputEl = wrapper.find('input').element;
+
+                // Click the input;
+                await userEvent.click(inputEl);
+
+                // Clear the input
+                await userEvent.clear(inputEl);
+
+                // Type the value
+                await userEvent.keyboard('abc');
+
+                let inputError = wrapper.find('[data-testid="input-error"]')
+    
+                // Should not exist before change
+                expect(inputError.exists()).toBe(false);
+
+                // blur
+                await userEvent.click(document.body);
+
+                inputError = wrapper.find('[data-testid="input-error"]');
+
+                // should exist after change and contain the correct error message
+                expect(inputError.exists()).toBe(true);
+                expect(inputError.element).toHaveTextContent('Vul een geldig getal in');
+        });
+
+        test('min', async () => {
+            const wrapper = await createWrapperWithDefaultProps(null, {min: 5});
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Clear the input
+            await userEvent.clear(inputEl);
+
+            // Type the value
+            await userEvent.keyboard('3');
+
+            let inputError = wrapper.find('[data-testid="input-error"]')
+
+            // Should not exist before change
+            expect(inputError.exists()).toBe(false);
+
+            // blur
+            await userEvent.click(document.body);
+
+            inputError = wrapper.find('[data-testid="input-error"]');
+
+            // should exist after change and contain the correct error message
+            expect(inputError.exists()).toBe(true);
+            expect(inputError.element).toHaveTextContent('Het minimum is');
+        });
+
+        test('max', async () => {
+            const wrapper = await createWrapperWithDefaultProps(null, {max: 5});
+
+            const inputEl = wrapper.find('input').element;
+
+            // Click the input;
+            await userEvent.click(inputEl);
+
+            // Clear the input
+            await userEvent.clear(inputEl);
+
+            // Type the value
+            await userEvent.keyboard('6');
+
+            let inputError = wrapper.find('[data-testid="input-error"]')
+
+            // Should not exist before change
+            expect(inputError.exists()).toBe(false);
+
+            // blur
+            await userEvent.click(document.body);
+
+            inputError = wrapper.find('[data-testid="input-error"]');
+
+            // should exist after change and contain the correct error message
+            expect(inputError.exists()).toBe(true);
+            expect(inputError.element).toHaveTextContent('Het maximum is');
+        });
+    });
+
+    describe('Should correctly round value', () => {
+        test('floor', async () => {
+                const wrapper = await createWrapperWithDefaultProps(null, {
+                    floatingPoint: false
+                });
+
+                const inputEl = wrapper.find('input').element;
+
+                // Click the input;
+                await userEvent.click(inputEl);
+
+                // Clear the input
+                await userEvent.clear(inputEl);
+
+                // Type the value
+                await userEvent.keyboard('1,45');
+
+                // Check model value after input
+                expect(wrapper.props('modelValue')).toBe(1);
+                // Check input value after input
+                expect(inputEl).toHaveValue('1,45');
+
+                // blur
+                await userEvent.click(document.body);
+
+                // Check model value after change
+                expect(wrapper.props('modelValue')).toBe(1);
+                // Check input value after change
+                expect(inputEl).toHaveValue('1');
+        });
+
+        test('ceil', async () => {
+                const wrapper = await createWrapperWithDefaultProps(null, {
+                    floatingPoint: false
+                });
+
+                const inputEl = wrapper.find('input').element;
+
+                // Click the input;
+                await userEvent.click(inputEl);
+
+                // Clear the input
+                await userEvent.clear(inputEl);
+
+                // Type the value
+                await userEvent.keyboard('1,55');
+
+                // Check model value after input
+                expect(wrapper.props('modelValue')).toBe(2);
+                // Check input value after input
+                expect(inputEl).toHaveValue('1,55');
+
+                // blur
+                await userEvent.click(document.body);
+
+                // Check model value after change
+                expect(wrapper.props('modelValue')).toBe(2);
+                // Check input value after change
+                expect(inputEl).toHaveValue('2');
+        });
     });
 });
 
