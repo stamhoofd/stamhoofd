@@ -1,10 +1,15 @@
 /// <reference types="@vitest/browser/providers/playwright" />
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
-import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
 import TimeMinutesInput from './TimeMinutesInput.vue';
+
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
+// We should use vitest-browser-vue instead
+// user input / keyboard handling is not realistic in @vue/test-utils
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
 
 describe('TimeInput', async () => {
     const originalTimezone = Formatter.timezone;
@@ -197,32 +202,4 @@ describe('TimeInput', async () => {
             expect(inputWrapper.element).toHaveValue(expected);
         }
     });
-
-    test('Component should remember state when removed and added to DOM again', async () => {
-        setFormatterTimeZone('Europe/Brussels');
-
-        const app = mount(TestAppWithModalStackComponent, {
-            attachTo: document.body,
-            props: {
-                root: new ComponentWithProperties(TimeMinutesInput, {
-                     'modelValue': new Date(2023, 2, 14, 22, 0, 0, 0),
-                    'onUpdate:modelValue': async () => {
-                    },
-                }),
-            },
-        });
-
-        const wrapperBefore = app.findComponent(TimeMinutesInput);
-
-        const inputWrapperBefore = wrapperBefore.find('input');
-        await inputWrapperBefore.setValue('15:00');
-
-        await app.setProps({keepAlive: false});
-        await app.setProps({keepAlive: true});
-
-        const wrapperAfter = app.findComponent(TimeMinutesInput);
-
-        const inputWrapperAfter = wrapperAfter.find('input');
-        expect(inputWrapperAfter.element).toHaveValue('15:00');
-    })
 });

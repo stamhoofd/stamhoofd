@@ -375,6 +375,51 @@ jobs:
                   url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
                   action_id: "button-action"
 
+  job_test_components_vitest:
+    name: 'Components Browser Tests'
+    runs-on: ubuntu-latest
+    needs: [job_setup]
+    if: needs.job_setup.outputs.changed_frontend == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - name: Use correct yarn version
+        run: yarn policies set-version 1.22.19
+      - name: Install dependencies
+        run: yarn install --prefer-offline --frozen-lockfile
+      - name: Install Playwright Browsers
+        run: yarn playwright install --with-deps chromium
+      - name: Build shared packages
+        run: yarn build:shared
+      - name: Run components browser tests
+        run: cd frontend/shared/components && yarn vitest run
+      - name: Notify Slack of failure
+        uses: slackapi/slack-github-action@v2.0.0
+        if: failure() && github.event_name != 'pull_request'
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "Components browser tests failed"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "@channel *Components browser tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
+                accessory:
+                  type: "button"
+                  text:
+                    type: "plain_text"
+                    text: "Open commit"
+                    emoji: false
+                  value: "click_me"
+                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
+                  action_id: "button-action"
+
   job_test_playwright:
     name: 'Playwright Tests'
     timeout-minutes: 60

@@ -6,6 +6,13 @@ import type { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
 import NumberInputBox from './NumberInputBox.vue';
 
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
+// We should use vitest-browser-vue instead
+// user input / keyboard handling is not realistic in @vue/test-utils
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
+
 describe('NumberInputBox', () => {
     test('Should not update without user input if no min, max or required', async () => {
         const wrapper = await createWrapperWithDefaultProps(null);
@@ -456,7 +463,7 @@ describe('NumberInputBox', () => {
                 },
             ];
 
-            for(const {text, expected} of inputValues) {
+            for (const {text, expected} of inputValues) {
                 // clear input
                 await userEvent.clear(inputEl);
 

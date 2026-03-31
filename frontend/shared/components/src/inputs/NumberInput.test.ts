@@ -4,6 +4,13 @@ import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
 import NumberInput from './NumberInput.vue';
 
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
+// We should use vitest-browser-vue instead
+// user input / keyboard handling is not realistic in @vue/test-utils
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
+
 describe('NumberInput', () => {
     test('Should not update without user input if no min, max or required', async () => {
         const wrapper = await createWrapper({

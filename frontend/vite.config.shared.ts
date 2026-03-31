@@ -157,6 +157,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                         }),
         publicDir: resolve(import.meta.dirname, './public'),
         test: {
+            watch: false,
             globals: true,
             setupFiles: ['vitest-browser-vue', import.meta.dirname + '/tests/vitest.setup.ts'],
             browser: {

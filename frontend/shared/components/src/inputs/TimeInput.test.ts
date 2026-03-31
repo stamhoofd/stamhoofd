@@ -6,6 +6,13 @@ import { describe, expect, test } from 'vitest';
 import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
 import TimeInput from './TimeInput.vue';
 
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
+// We should use vitest-browser-vue instead
+// user input / keyboard handling is not realistic in @vue/test-utils
+// DO NOT COPY THIS PATTERN!
+// DO NOT COPY THIS PATTERN!
+
 describe('TimeInput', async () => {
     const originalTimezone = Formatter.timezone;
     enableAutoUnmount(afterEach);
