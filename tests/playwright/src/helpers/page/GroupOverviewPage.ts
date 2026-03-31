@@ -18,6 +18,7 @@ export class GroupOverviewPage {
 
     async goto() {
         await this.page.goto(this.url);
+        await this.page.locator('main').getByRole('heading', { name: this.group.settings.name.toString() }).first().waitFor();
     }
 
     async gotoRegistrations() {

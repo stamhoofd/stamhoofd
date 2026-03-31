@@ -24,6 +24,7 @@ export class AdminPermissionChecker {
 
     organizationCache: Map<string, Organization | Promise<Organization | undefined>> = new Map();
     groupsCache: Map<string, Group | null | Promise<Group | null>> = new Map();
+    webshopsCache: Map<string, Webshop | null | Promise<Webshop | null>> = new Map();
 
     constructor(user: User, platform: PlatformStruct, organization?: Organization) {
         this.user = user;
@@ -77,7 +78,6 @@ export class AdminPermissionChecker {
             return await cache;
         }
 
-        console.log('Get group', groupId);
         const promise = Group.select()
             .where('id', groupId)
             .first(false);
@@ -109,7 +109,6 @@ export class AdminPermissionChecker {
         }
 
         if (remainingIds.length > 0) {
-            console.log('Get groups', remainingIds);
             const promise = Group.select()
                 .where('id', remainingIds)
                 .fetch();
@@ -126,6 +125,22 @@ export class AdminPermissionChecker {
         }
 
         return cached;
+    }
+
+    async getWebshop(webshopId: string): Promise<Webshop | null> {
+        const cache = this.webshopsCache.get(webshopId);
+        if (cache !== undefined) {
+            return await cache;
+        }
+
+        const promise = Webshop.select()
+            .where('id', webshopId)
+            .first(false);
+
+        this.webshopsCache.set(webshopId, promise);
+        const webshop = await promise;
+        this.webshopsCache.set(webshopId, webshop);
+        return webshop;
     }
 
     cacheGroup(group: Group) {
@@ -802,7 +817,7 @@ export class AdminPermissionChecker {
         }
 
         if (template.webshopId) {
-            const webshop = await Webshop.getByID(template.webshopId);
+            const webshop = await this.getWebshop(template.webshopId);
             if (!webshop || !(await this.canAccessWebshop(webshop, PermissionLevel.Full))) {
                 return false;
             }
@@ -811,7 +826,7 @@ export class AdminPermissionChecker {
         }
 
         if (template.groupId) {
-            const group = await Group.getByID(template.groupId);
+            const group = await this.getGroup(template.groupId);
             if (!group || !(await this.canAccessGroup(group, PermissionLevel.Full))) {
                 return false;
             }

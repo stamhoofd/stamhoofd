@@ -9,7 +9,7 @@
             </p>
 
             <button
-                v-for="webshop in visibleWebshops" :key="webshop.id" class="menu-button button" :class="{
+                v-for="webshop in visibleWebshops" :key="webshop.id" class="menu-button button" data-testid="webshop-menu-item" :data-webshop-id="webshop.id" :class="{
                     selected: isSelected(webshop),
                 }" type="button" @click="openWebshop(webshop)"
             >

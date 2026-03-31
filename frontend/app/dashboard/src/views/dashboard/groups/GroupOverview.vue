@@ -133,7 +133,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
+                    <STListItem data-testid="group-email-templates-button" :selectable="true" class="left-center" @click="editEmails(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                         </template>

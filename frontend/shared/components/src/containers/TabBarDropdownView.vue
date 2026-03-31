@@ -7,7 +7,7 @@
                 {{ group.name }}
             </h1>
             <STList>
-                <STListItem v-for="(item, index) in group.items" :key="index" :selectable="true" element-name="button" class="left-center" :class="{ selected: item.isSelected(selectedItem) }" @click="selectTab(item)">
+                <STListItem v-for="(item, index) in group.items" :key="index" data-testid="tab-dropdown-item" :data-tab-id="item.id" :selectable="true" element-name="button" class="left-center" :class="{ selected: item.isSelected(selectedItem) }" @click="selectTab(item)">
                     <template #left>
                         <span :class="'icon '+item.icon" />
                     </template>

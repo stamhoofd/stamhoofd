@@ -4,6 +4,7 @@ import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { EmailTemplate } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StringArrayDecoder } from '../../../../decoders/StringArrayDecoder.js';
@@ -103,7 +104,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                     },
                 }));
 
-        if (organization && (request.query.webshopId || request.query.groupIds)) {
+        if (organization && defaultTemplateTypes.length > 0 && (request.query.webshopId || request.query.groupIds)) {
             const orgDefaults = (await EmailTemplate.where({
                 organizationId: organization.id,
                 webshopId: null,
@@ -118,8 +119,14 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         const allTemplates: EmailTemplate[] = [];
+        const allCandidates = templates.concat(defaultTemplates);
 
-        for (const template of templates.concat(defaultTemplates)) {
+        const groupIds = Formatter.uniqueArray(allCandidates.map(t => t.groupId).filter((id): id is string => id !== null));
+        if (groupIds.length > 0) {
+            await Context.auth.getGroups(groupIds);
+        }
+
+        for (const template of allCandidates) {
             if (await Context.auth.canAccessEmailTemplate(template)) {
                 allTemplates.push(template);
             }

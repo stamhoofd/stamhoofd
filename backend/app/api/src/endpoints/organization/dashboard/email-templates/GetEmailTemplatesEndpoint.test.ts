@@ -87,4 +87,38 @@ describe('Endpoint.GetEmailTemplatesEndpoint', () => {
         expect(response.body).toBeDefined();
         expect(response.body).toHaveLength(1);
     });
+
+    test('Saved templates with groupIds should not throw SQL syntax error', async () => {
+        const organization = await new OrganizationFactory({ period }).create();
+        const group = await new GroupFactory({ organization }).create();
+
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }),
+        }).create();
+
+        const token = await Token.createToken(user);
+
+        const template = new EmailTemplate();
+        template.subject = 'saved template';
+        template.type = EmailTemplateType.SavedMembersEmail;
+        template.json = {};
+        template.html = 'html test';
+        template.text = 'text test';
+        template.organizationId = organization.id;
+        template.groupId = group.id;
+        await template.save();
+
+        const response = await getEmailTemplates({
+            token,
+            organization,
+            types: [EmailTemplateType.SavedMembersEmail],
+            groupIds: [group.id],
+        });
+
+        expect(response.body).toBeDefined();
+        expect(response.body).toHaveLength(1);
+    });
 });

@@ -324,7 +324,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
+                    <STListItem data-testid="webshop-email-templates-button" :selectable="true" class="left-center" @click="editEmails(true)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
