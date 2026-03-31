@@ -11,7 +11,15 @@
                 {{ group.name }}
             </h2>
             <STList>
-                <STListItem v-for="emailTemplate in group.templates" :key="emailTemplate.type + ':' + emailTemplate.id" :selectable="true" class="right-stack" @click="doSelectItem(emailTemplate)">
+                <STListItem
+                    v-for="emailTemplate in group.templates"
+                    :key="emailTemplate.type + ':' + emailTemplate.id"
+                    data-testid="email-template-item"
+                    :data-template-type="emailTemplate.type"
+                    :selectable="true"
+                    class="right-stack"
+                    @click="doSelectItem(emailTemplate)"
+                >
                     <template #left>
                         <figure class="style-image-with-icon" :class="{gray: !emailTemplate.id && !!emailTemplate.html, error: !emailTemplate.id && !emailTemplate.html}">
                             <figure>

@@ -6,7 +6,7 @@
             </div>
             <div class="middle">
                 <template v-if="tabs.length > 1">
-                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" data-testid="tab-button" @click="(event) => selectTab(event, item)">
+                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" data-testid="tab-button" :data-tab-id="item.isGroup ? 'more' : ('id' in item ? item.id : 'more')" @click="(event) => selectTab(event, item)">
                         <div class="button text" :class="{ selected: item.isSelected(selectedItem) }">
                             <span :class="'icon '+item.icon" />
                             <span>{{ item.name }}</span>
@@ -25,7 +25,7 @@
         </div>
 
         <footer v-if="showBottomBar" :class="{hidden: shouldHideBottomBar}">
-            <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" @click="(event) => selectTab(event, item)">
+            <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" data-testid="tab-button" :data-tab-id="item.isGroup ? 'more' : ('id' in item ? item.id : 'more')" @click="(event) => selectTab(event, item)">
                 <div class="button text small column" :class="{ selected: item.isSelected(selectedItem) }">
                     <span :class="'icon '+item.icon" />
                     <span>
