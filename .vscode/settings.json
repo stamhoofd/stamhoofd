@@ -91,7 +91,8 @@
         "**/yarn-error.log": true,
         ".yarn/releases": true,
         "LICENSE": true,
-        ".worktrees": true
+        ".worktrees": true,
+        "tests/playwright/playwright.log": true
     },
     "search.useIgnoreFiles": false,
     "typescript.enablePromptUseWorkspaceTsdk": true,
