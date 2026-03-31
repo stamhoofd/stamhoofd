@@ -1,19 +1,17 @@
 <template>
     <STErrorsDefault :error-box="ownErrors.errorBox" />
     <div class="split-inputs">
-        <STInputBox :title="title" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="price" :min="min" :placeholder="$t(`%1Mn`)" />
+        <PriceInputBox :title="title" error-fields="price" :error-box="errorBox" v-model="price" :min="min" :placeholder="$t(`%1Mn`)" :validator="validator" >
             <p v-if="defaultMembershipTypeId" class="style-description-small">
                 {{ formatPriceForPlatform(platformMembershipPrice, platformMembershipPriceNow) }}
             </p>
-        </STInputBox>
+        </PriceInputBox>
 
-        <STInputBox v-if="showReducedPrice" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="reducedPrice" :placeholder="formatPrice(price)" :min="min" :required="false" />
+        <PriceInputBox v-if="showReducedPrice" :title="financialSupportSettings.priceName" error-fields="price" :error-box="errorBox" :validator="validator" v-model="reducedPrice" :placeholder="formatPrice(isNaN(price) ? 0 : price)" :min="min" :required="false" >
             <p v-if="defaultMembershipTypeId" class="style-description-small">
                 {{ formatPriceForPlatform(platformMembershipReducedPrice, platformMembershipReducedPriceNow) }}
             </p>
-        </STInputBox>
+        </PriceInputBox>
 
         <slot v-else-if="$slots.end" name="end" />
     </div>
@@ -24,18 +22,18 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import PriceInput from '#inputs/PriceInput.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import { useErrors } from '#errors/useErrors.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import { useValidation } from '#errors/useValidation.ts';
 import type { Validator } from '#errors/Validator.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { SimpleError } from '@simonbackx/simple-errors';
 import type { Group, Organization, ReduceablePrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
+import PriceInputBox from '../../inputs/PriceInputBox.vue';
 import { useFinancialSupportSettings } from '../hooks';
 
 const props = withDefaults(
