@@ -123,7 +123,11 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             prefix += '/';
         }
 
-        prefix += (STAMHOOFD.environment ?? 'development') === 'development' ? ('development/') : ('');
+        const envPrefix = STAMHOOFD.environment !== 'production' ? STAMHOOFD.environment : null;
+
+        if (envPrefix && envPrefix !== (STAMHOOFD.SPACES_PREFIX ?? '')) {
+            prefix += envPrefix + '/';
+        }
 
         // Prepend user id to the file path
         if (request.query.isPrivate && user) {
