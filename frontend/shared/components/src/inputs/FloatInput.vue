@@ -74,7 +74,7 @@ const props = withDefaults(defineProps<{
     autoFix: true,
 });
 
-const numberInput = useNumberInput(computed(() => ({...props})));
+const numberInput = useNumberInput(computed(() => props));
 const model = defineModel<number | null>({ default: null });
 const text = ref<string>(numberInput.numberToString(model.value, { valueIfNaN: '' }));
 const inputElement = useTemplateRef<HTMLInputElement>('input');
