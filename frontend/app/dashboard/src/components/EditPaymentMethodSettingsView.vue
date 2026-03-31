@@ -76,9 +76,7 @@
                 </h3>
 
                 <div v-if="useMinimumAmount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`%JD`)">
-                        <PriceInput v-model="minimumAmount" :min="2" :validator="errors.validator" />
-                    </STInputBox>
+                    <PriceInputBox error-fields="minimumAmount" :error-box="errors.errorBox" :title="$t(`%JD`)" v-model="minimumAmount" :min="2" :validator="errors.validator" />
                 </div>
             </STListItem>
 
@@ -108,9 +106,7 @@
                 </h3>
 
                 <div v-if="useWarningAmount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="warningAmount" :error-box="errors.errorBox">
-                        <PriceInput v-model="warningAmount" class="input" type="text" :min="1" :validator="errors.validator" />
-                    </STInputBox>
+                    <PriceInputBox title="" error-fields="warningAmount" :error-box="errors.errorBox" v-model="warningAmount" class="input" type="text" :min="1" :validator="errors.validator" />
                 </div>
             </STListItem>
         </STList>
@@ -125,7 +121,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import IBANInput from '@stamhoofd/components/inputs/IBANInput.vue';
-import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentMethodSettings, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
