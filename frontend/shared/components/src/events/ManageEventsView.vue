@@ -321,19 +321,21 @@ async function onSaveDuplicateEvent(event: Event) {
 function getRequiredFilter(): StamhoofdFilter | null {
     const org = organization.value;
 
-    const filters: StamhoofdFilter = {};
+    const andFilters: StamhoofdFilter[] = [];
 
     // filter on start date
     if (selectedYear.value === null) {
         const d = new Date();
         d.setHours(0, 0, 0, 0);
 
-        filters['startDate'] = {
-            $gt: d,
-        };
+        andFilters.push({
+            startDate: {
+                $gt: d,
+            },
+        });
     }
     else {
-        filters['$and'] = [
+        andFilters.push(
             {
                 startDate: {
                     $gte: new Date(selectedYear.value, 0, 1),
@@ -344,25 +346,60 @@ function getRequiredFilter(): StamhoofdFilter | null {
                     $lt: new Date(selectedYear.value + 1, 0, 1),
                 },
             },
-        ];
+        );
     }
 
     // filter on organization tag ids, if organization lvl
     if (org) {
-        filters['$or'] = [
-            {
-                organizationTagIds: {
-                    $in: [null, ...org.meta.tags],
+        andFilters.push({
+            $or: [
+                {
+                    organizationTagIds: {
+                        $in: [null, ...org.meta.tags],
+                    },
+                }, {
+                    group: {
+                        organizationId: org.id,
+                    },
                 },
-            }, {
-                group: {
+            ],
+        });
+
+        andFilters.push({
+            $or: [
+                {
                     organizationId: org.id,
                 },
-            },
-        ];
+                {
+                    $and: [
+                        {
+                            organizationId: null,
+                        },
+                        {
+                            $or: [
+                                {
+                                    'meta.visible': true,
+                                },
+                                {
+                                    group: {
+                                        organizationId: org.id,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        });
     }
 
-    return filters;
+    if (andFilters.length === 1) {
+        return andFilters[0];
+    }
+
+    return {
+        $and: andFilters,
+    };
 }
 
 function getDefaultStamhoofdFilter(): StamhoofdFilter {
