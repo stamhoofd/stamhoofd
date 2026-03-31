@@ -72,6 +72,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
     process.env.DB_HOST = STAMHOOFD.DB_HOST + '';
     process.env.DB_PASS = STAMHOOFD.DB_PASS + '';
     process.env.DB_USER = STAMHOOFD.DB_USER + '';
+    process.env.DB_CHARSET = 'utf8mb4_0900_ai_ci';
 
     // AWS
     process.env.AWS_ACCESS_KEY_ID = STAMHOOFD.AWS_ACCESS_KEY_ID + '';

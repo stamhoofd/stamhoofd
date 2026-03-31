@@ -1,8 +1,9 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CpuService } from '../../services/CpuService.js';
+import { StartupHealthService } from '../../services/StartupHealthService.js';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -15,6 +16,9 @@ class Query extends AutoEncoder {
 export class ResponseBody extends AutoEncoder {
     @field({ decoder: StringDecoder })
     status: 'ok' | 'error';
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
+    errors?: string[];
 }
 
 /**
@@ -58,13 +62,16 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             });
         }
 
-        const health = ResponseBody.create({
-            status: 'ok',
-        });
+        const errors = [...StartupHealthService.getErrors()];
 
         if (CpuService.getAverage(60) > 80) {
-            health.status = 'error';
+            errors.push('CPU usage is too high');
         }
+
+        const health = ResponseBody.create({
+            status: errors.length > 0 ? 'error' : 'ok',
+            errors: errors.length > 0 ? errors : undefined,
+        });
 
         const response = new Response(
             health,

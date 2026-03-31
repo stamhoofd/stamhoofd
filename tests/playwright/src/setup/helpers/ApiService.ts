@@ -8,10 +8,6 @@ export class ApiService implements ServiceHelper {
     async start(): Promise<ServiceProcess> {
         const domain = CaddyConfigHelper.getDomain('api', this.workerId);
 
-        // Reload database so we have the right one
-        const { Database } = await import('@simonbackx/simple-database');
-        await Database.reload();
-
         // Start api
         const { run: runMigrations }
             = await import('@stamhoofd/backend/migrate');
