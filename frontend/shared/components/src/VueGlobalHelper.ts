@@ -220,21 +220,26 @@ export class VueGlobalHelper {
                 Request.cancelAll(this);
             },
             created() {
-                const directives = {
-                    currentComponent: useCurrentComponent(),
-                    $url: useUrl(),
-                    $user: useUser(),
-                    $organization: useOrganization(),
-                    $context: useContext(),
-                    $platform: usePlatform(),
-                    $app: useAppContext(),
-                    $feature: useFeatureFlag(),
+                console.error('Created', this.component)
+                try {
+                    const directives = {
+                        currentComponent: useCurrentComponent(),
+                        $url: useUrl(),
+                        $user: useUser(),
+                        $organization: useOrganization(),
+                        $context: useContext(),
+                        $platform: usePlatform(),
+                        $app: useAppContext(),
+                        $feature: useFeatureFlag(),
 
-                    // Temporary for legacy code
-                    $patchOrganizationPeriod: usePatchOrganizationPeriod(),
-                };
+                        // Temporary for legacy code
+                        $patchOrganizationPeriod: usePatchOrganizationPeriod(),
+                    };
 
-                injectHooks(this as unknown as ComponentPublicInstance, directives);
+                    injectHooks(this as unknown as ComponentPublicInstance, directives);
+                } catch (e) {
+                    console.error(e);
+                }
             },
             methods: {
                 formatPrice: Formatter.price.bind(Formatter),
