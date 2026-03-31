@@ -130,7 +130,6 @@ function updateModelValue(options: {final: boolean} = { final: true }) {
 function validate(value: string, {final}: {final: boolean} = { final: true }) {
     let number = numberInput.stringToNumber(value, { valueIfNaN: props.autoFix ? null : NaN });
 
-
     if (final) {
         if (props.autoFix) {
             number = numberInput.constrain(number);

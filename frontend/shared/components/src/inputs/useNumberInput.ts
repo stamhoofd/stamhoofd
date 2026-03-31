@@ -264,6 +264,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         constrain,
         numberToString,
         stringToNumber,
-        step
+        step,
+        multipier
     };
 }

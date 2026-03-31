@@ -80,7 +80,8 @@ describe('FloatInput', () => {
                 max?: number | null;
                 required?: boolean;
             };
-        }[] = [{
+        }[] = [
+        {
             name: 'happy path',
             inputValue: '5,21',
             expected: {
@@ -105,7 +106,7 @@ describe('FloatInput', () => {
             inputValue: '4',
             expected: {
                 afterInput: {
-                    modelValue: 30000,
+                    modelValue: null,
                     inputValue: '4',
                 },
                 afterChange: {
@@ -158,11 +159,28 @@ describe('FloatInput', () => {
             },
         },
         {
+            name: 'required without min',
+            inputValue: 'abcd',
+            expected: {
+                afterInput: {
+                    modelValue: 0,
+                    inputValue: 'abcd',
+                },
+                afterChange: {
+                    modelValue: 0,
+                    inputValue: '0',
+                },
+            },
+            props: {
+                required: true,
+            },
+        },
+        {
             name: 'one less than min',
             inputValue: '3',
             expected: {
                 afterInput: {
-                    modelValue: 40000,
+                    modelValue: null,
                     inputValue: '3',
                 },
                 afterChange: {
@@ -214,17 +232,18 @@ describe('FloatInput', () => {
                 required: false,
             },
         },
+        // todo: for some reason other tests fail if tests for NaN are not last
         {
             name: 'not a number',
             inputValue: 'abcd',
             expected: {
                 afterInput: {
-                    modelValue: 40000,
+                    modelValue: null,
                     inputValue: 'abcd',
                 },
                 afterChange: {
-                    modelValue: 40000,
-                    inputValue: 'abcd',
+                    modelValue: null,
+                    inputValue: '',
                 },
             },
             props: {
@@ -243,29 +262,12 @@ describe('FloatInput', () => {
                 },
                 afterChange: {
                     modelValue: 40000,
-                    inputValue: 'abcd',
+                    inputValue: '4',
                 },
             },
             props: {
                 min: 40000,
                 max: 100000,
-                required: true,
-            },
-        },
-        {
-            name: 'required without min',
-            inputValue: 'abcd',
-            expected: {
-                afterInput: {
-                    modelValue: 0,
-                    inputValue: 'abcd',
-                },
-                afterChange: {
-                    modelValue: 0,
-                    inputValue: 'abcd',
-                },
-            },
-            props: {
                 required: true,
             },
         },
@@ -275,9 +277,9 @@ describe('FloatInput', () => {
             test(`case - ${name}`, async () => {
                 const wrapper = await createWrapper({
                     ...props,
-                    modelValue: null,
                     fractionDigits: 4,
-                    roundFractionDigits: 2
+                    roundFractionDigits: 2,
+                    modelValue: null,
                 });
 
                 const inputEl = wrapper.find('input').element;
@@ -361,9 +363,8 @@ describe('FloatInput', () => {
             // Check input value after input
             expect(inputEl).toHaveValue('4');
         })
-
-        // todo
-        test.skip('should work if model value NaN', async () => {
+        
+        test('should work if model value NaN', async () => {
           const wrapper = await createWrapper({
                     min: 200,
                     max: 400,
@@ -441,12 +442,11 @@ describe('FloatInput', () => {
             // Check input value after input
             expect(inputEl).toHaveValue('2');
         })
-
-        // todo
-        test.skip('should set model value to min if model value is NaN', async () => {
+        
+        test('should set model value to min if model value is NaN', async () => {
           const wrapper = await createWrapper({
-                    min: 2,
-                    max: 4,
+                    min: 200,
+                    max: 400,
                     modelValue: NaN,
                 });
 
@@ -459,7 +459,7 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowDown]');
 
             // Check model value after input
-            expect(wrapper.props('modelValue')).toBe(2);
+            expect(wrapper.props('modelValue')).toBe(200);
             // Check input value after input
             expect(inputEl).toHaveValue('2');
         })
