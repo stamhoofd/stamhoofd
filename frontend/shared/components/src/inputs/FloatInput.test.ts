@@ -1,12 +1,12 @@
 /// <reference types="@vitest/browser/providers/playwright" />
 import { userEvent } from '@vitest/browser/context';
-import { mount } from '@vue/test-utils';
 import { expect, test } from 'vitest';
+import { render, type RenderResult } from 'vitest-browser-vue';
 import FloatInput from './FloatInput.vue';
 
 describe('FloatInput', () => {
     test('Should not update without user input if no min, max or required', async () => {
-        const wrapper = await createWrapper({
+        const result = await renderComponent(null, {
             min: null,
             max: null,
             required: false,
@@ -14,13 +14,11 @@ describe('FloatInput', () => {
             modelValue: null,
         });
 
-        await wrapper.vm.$nextTick();
-        expect(wrapper.emitted()).not.toHaveProperty('update:modelValue');
-        expect(wrapper.props('modelValue')).toBe(null);
+        expect(result.emitted()).not.toHaveProperty('update:modelValue');
     });
 
     describe('Should correctly initialize the modelValue', () => {
-        const cases: { name: string; expected: number | null; props: {
+        const cases: { name: string; expected: number | null | undefined; props: {
             min?: number | null;
             max?: number | null;
             required?: boolean;
@@ -47,15 +45,13 @@ describe('FloatInput', () => {
 
         for (const { name, expected, props } of cases) {
             test(`case - ${name}`, async () => {
-                const wrapper = await createWrapper({
+                const result = await renderComponent(null, {
                     ...props,
-                    modelValue: null,
                     fractionDigits: 2,
                     roundFractionDigits: 4
                 });
 
-                await wrapper.vm.$nextTick();
-                expect(wrapper.props('modelValue')).toBe(expected);
+                expect(lastEmittedModelValue(result)).toBe(expected);
             });
         }
     });
@@ -67,11 +63,11 @@ describe('FloatInput', () => {
             inputValue: string;
             expected: {
                 afterInput: {
-                    modelValue: number | null;
+                    modelValue: number | null | undefined;
                     inputValue: string;
                 };
                 afterChange: {
-                    modelValue: number | null;
+                    modelValue: number | null | undefined;
                     inputValue: string;
                 };
             };
@@ -106,7 +102,7 @@ describe('FloatInput', () => {
             inputValue: '4',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: undefined,
                     inputValue: '4',
                 },
                 afterChange: {
@@ -180,7 +176,7 @@ describe('FloatInput', () => {
             inputValue: '3',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: undefined,
                     inputValue: '3',
                 },
                 afterChange: {
@@ -232,17 +228,16 @@ describe('FloatInput', () => {
                 required: false,
             },
         },
-        // todo: for some reason other tests fail if tests for NaN are not last
         {
             name: 'not a number',
             inputValue: 'abcd',
             expected: {
                 afterInput: {
-                    modelValue: null,
+                    modelValue: undefined,
                     inputValue: 'abcd',
                 },
                 afterChange: {
-                    modelValue: null,
+                    modelValue: undefined,
                     inputValue: '',
                 },
             },
@@ -275,14 +270,13 @@ describe('FloatInput', () => {
 
         for (const { name, props, inputValue, expected } of cases) {
             test(`case - ${name}`, async () => {
-                const wrapper = await createWrapper({
+                const result = await renderComponent(null, {
                     ...props,
                     fractionDigits: 4,
                     roundFractionDigits: 2,
-                    modelValue: null,
                 });
 
-                const inputEl = wrapper.find('input').element;
+                const inputEl = document.querySelector('input')!;
 
                 // Click the input;
                 await userEvent.click(inputEl);
@@ -294,7 +288,7 @@ describe('FloatInput', () => {
                 await userEvent.keyboard(inputValue);
 
                 // Check model value after input
-                expect(wrapper.props('modelValue')).toBe(expected.afterInput.modelValue);
+                expect(lastEmittedModelValue(result)).toBe(expected.afterInput.modelValue);
                 // Check input value after input
                 expect(inputEl).toHaveValue(expected.afterInput.inputValue);
 
@@ -302,7 +296,7 @@ describe('FloatInput', () => {
                 await userEvent.click(document.body);
 
                 // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(expected.afterChange.modelValue);
+                expect(lastEmittedModelValue(result)).toBe(expected.afterChange.modelValue);
                 // Check input value after change
                 expect(inputEl).toHaveValue(expected.afterChange.inputValue);
             });
@@ -311,15 +305,14 @@ describe('FloatInput', () => {
 
     describe('key up', () => {
         test('should add 1', async () => {
-          const wrapper = await createWrapper({
+          const result = await renderComponent(null, {
                     min: 200,
                     max: 400,
-                    modelValue: null,
                     fractionDigits: 2,
                     roundFractionDigits: 4
                 });
 
-            const inputEl = wrapper.find('input').element;
+            const inputEl = document.querySelector('input')!;
 
             // Click the input;
             await userEvent.click(inputEl);
@@ -328,7 +321,7 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowUp]');
 
             // Check model value after input
-            expect(wrapper.props('modelValue')).toBe(300);
+            expect(lastEmittedModelValue(result)).toBe(300);
             // Check input value after input
             expect(inputEl).toHaveValue('3');
 
@@ -336,21 +329,20 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowUp]');
 
             // Check model value after input
-            expect(wrapper.props('modelValue')).toBe(400);
+            expect(lastEmittedModelValue(result)).toBe(400);
             // Check input value after input
             expect(inputEl).toHaveValue('4');
         })
 
         test('should not add 1 if max reached', async () => {
-          const wrapper = await createWrapper({
+          const result = await renderComponent(400, {
                     min: 200,
                     max: 400,
-                    modelValue: 400,
                     fractionDigits: 2,
                     roundFractionDigits: 4
                 });
 
-            const inputEl = wrapper.find('input').element;
+            const inputEl = document.querySelector('input')!;
 
             // Click the input;
             await userEvent.click(inputEl);
@@ -359,21 +351,20 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowUp]');
 
             // Check model value after input (should not have changed)
-            expect(wrapper.props('modelValue')).toBe(400);
+            expect(lastEmittedModelValue(result)).toBe(undefined);
             // Check input value after input
             expect(inputEl).toHaveValue('4');
         })
         
         test('should work if model value NaN', async () => {
-          const wrapper = await createWrapper({
+          const result = await renderComponent(NaN, {
                     min: 200,
                     max: 400,
-                    modelValue: NaN,
                     fractionDigits: 2,
                     roundFractionDigits: 4
                 });
 
-            const inputEl = wrapper.find('input').element;
+            const inputEl = document.querySelector('input')!;
 
             // Click the input;
             await userEvent.click(inputEl);
@@ -382,7 +373,7 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowUp]');
 
             // Check model value after input
-            expect(wrapper.props('modelValue')).toBe(300);
+            expect(lastEmittedModelValue(result)).toBe(300);
             // Check input value after input
             expect(inputEl).toHaveValue('3');
         })
@@ -390,15 +381,14 @@ describe('FloatInput', () => {
 
     describe('key down', () => {
         test('should deduct 1', async () => {
-          const wrapper = await createWrapper({
+          const result = await renderComponent(400, {
                     min: 200,
                     max: 400,
-                    modelValue: 400,
                     fractionDigits: 2,
                     roundFractionDigits: 4
                 });
 
-            const inputEl = wrapper.find('input').element;
+            const inputEl = document.querySelector('input')!;
 
             // Click the input;
             await userEvent.click(inputEl);
@@ -407,7 +397,7 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowDown]');
 
             // Check model value after input
-            expect(wrapper.props('modelValue')).toBe(300);
+            expect(lastEmittedModelValue(result)).toBe(300);
             // Check input value after input
             expect(inputEl).toHaveValue('3');
 
@@ -415,21 +405,20 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowDown]');
 
             // Check model value after input
-            expect(wrapper.props('modelValue')).toBe(200);
+            expect(lastEmittedModelValue(result)).toBe(200);
             // Check input value after input
             expect(inputEl).toHaveValue('2');
         })
 
         test('should not deduct 1 if min reached', async () => {
-          const wrapper = await createWrapper({
+          const result = await renderComponent(200, {
                     min: 200,
                     max: 400,
-                    modelValue: 200,
                     fractionDigits: 2,
                     roundFractionDigits: 4
                 });
 
-            const inputEl = wrapper.find('input').element;
+            const inputEl = document.querySelector('input')!;
 
             // Click the input;
             await userEvent.click(inputEl);
@@ -438,19 +427,18 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowDown]');
 
             // Check model value after input (should not have changed)
-            expect(wrapper.props('modelValue')).toBe(200);
+            expect(lastEmittedModelValue(result)).toBe(undefined);
             // Check input value after input
             expect(inputEl).toHaveValue('2');
         })
         
         test('should set model value to min if model value is NaN', async () => {
-          const wrapper = await createWrapper({
+          const result = await renderComponent(NaN, {
                     min: 200,
-                    max: 400,
-                    modelValue: NaN,
+                    max: 400
                 });
 
-            const inputEl = wrapper.find('input').element;
+            const inputEl = document.querySelector('input')!;
 
             // Click the input;
             await userEvent.click(inputEl);
@@ -459,7 +447,7 @@ describe('FloatInput', () => {
             await userEvent.keyboard('[ArrowDown]');
 
             // Check model value after input
-            expect(wrapper.props('modelValue')).toBe(200);
+            expect(lastEmittedModelValue(result)).toBe(200);
             // Check input value after input
             expect(inputEl).toHaveValue('2');
         })
@@ -468,13 +456,12 @@ describe('FloatInput', () => {
     describe('Should correctly round value', () => {
         describe('4 fraction digits', () => {
             test('floor', async () => {
-                const wrapper = await createWrapper({
+                const result = await renderComponent(null, {
                     fractionDigits: 4,
-                    roundFractionDigits: 2,
-                    modelValue: null
+                    roundFractionDigits: 2
                 });
 
-                const inputEl = wrapper.find('input').element;
+                const inputEl = document.querySelector('input')!;
 
                 // Click the input;
                 await userEvent.click(inputEl);
@@ -486,7 +473,7 @@ describe('FloatInput', () => {
                 await userEvent.keyboard('1,4545');
 
                 // Check model value after input
-                expect(wrapper.props('modelValue')).toBe(14500);
+                expect(lastEmittedModelValue(result)).toBe(14500);
                 // Check input value after input
                 expect(inputEl).toHaveValue('1,4545');
 
@@ -494,19 +481,18 @@ describe('FloatInput', () => {
                 await userEvent.click(document.body);
 
                 // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(14500);
+                expect(lastEmittedModelValue(result)).toBe(14500);
                 // Check input value after change
                 expect(inputEl).toHaveValue('1.45');
             });
 
             test('ceil', async () => {
-                const wrapper = await createWrapper({
+                const result = await renderComponent(null, {
                     fractionDigits: 4,
-                    roundFractionDigits: 2,
-                    modelValue: null
+                    roundFractionDigits: 2
                 });
 
-                const inputEl = wrapper.find('input').element;
+                const inputEl = document.querySelector('input')!;
 
                 // Click the input;
                 await userEvent.click(inputEl);
@@ -518,7 +504,7 @@ describe('FloatInput', () => {
                 await userEvent.keyboard('1,5555');
 
                 // Check model value after input
-                expect(wrapper.props('modelValue')).toBe(15600);
+                expect(lastEmittedModelValue(result)).toBe(15600);
                 // Check input value after input
                 expect(inputEl).toHaveValue('1,5555');
 
@@ -526,7 +512,7 @@ describe('FloatInput', () => {
                 await userEvent.click(document.body);
 
                 // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(15600);
+                expect(lastEmittedModelValue(result)).toBe(15600);
                 // Check input value after change
                 expect(inputEl).toHaveValue('1.56');
             });
@@ -534,13 +520,12 @@ describe('FloatInput', () => {
 
         describe('2 fraction digits', () => {
             test('floor', async () => {
-                const wrapper = await createWrapper({
+                const result = await renderComponent(null, {
                     fractionDigits: 2,
                     roundFractionDigits: 2,
-                    modelValue: null
                 });
 
-                const inputEl = wrapper.find('input').element;
+                const inputEl = document.querySelector('input')!;
 
                 // Click the input;
                 await userEvent.click(inputEl);
@@ -552,7 +537,7 @@ describe('FloatInput', () => {
                 await userEvent.keyboard('1,4545');
 
                 // Check model value after input
-                expect(wrapper.props('modelValue')).toBe(145);
+                expect(lastEmittedModelValue(result)).toBe(145);
                 // Check input value after input
                 expect(inputEl).toHaveValue('1,4545');
 
@@ -560,19 +545,18 @@ describe('FloatInput', () => {
                 await userEvent.click(document.body);
 
                 // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(145);
+                expect(lastEmittedModelValue(result)).toBe(145);
                 // Check input value after change
                 expect(inputEl).toHaveValue('1.45');
             });
 
             test('ceil', async () => {
-                const wrapper = await createWrapper({
+                const result = await renderComponent(null, {
                     fractionDigits: 2,
                     roundFractionDigits: 2,
-                    modelValue: null
                 });
 
-                const inputEl = wrapper.find('input').element;
+                const inputEl = document.querySelector('input')!;
 
                 // Click the input;
                 await userEvent.click(inputEl);
@@ -584,7 +568,7 @@ describe('FloatInput', () => {
                 await userEvent.keyboard('1,5555');
 
                 // Check model value after input
-                expect(wrapper.props('modelValue')).toBe(156);
+                expect(lastEmittedModelValue(result)).toBe(156);
                 // Check input value after input
                 expect(inputEl).toHaveValue('1,5555');
 
@@ -592,7 +576,7 @@ describe('FloatInput', () => {
                 await userEvent.click(document.body);
 
                 // Check model value after change
-                expect(wrapper.props('modelValue')).toBe(156);
+                expect(lastEmittedModelValue(result)).toBe(156);
                 // Check input value after change
                 expect(inputEl).toHaveValue('1.56');
             });
@@ -601,35 +585,25 @@ describe('FloatInput', () => {
     });
 });
 
+function lastEmittedModelValue(result: RenderResult<any>): number | null | undefined {
+    const emitted = result.emitted<(number | null)[]>('update:modelValue');
+    if(emitted === undefined) {
+        return undefined;
+    }
+
+    return emitted[emitted.length - 1][0];
+}
+
 /**
  * Helper to create a NumberInput wrapper (recreating the model)
  * @param props
  * @returns
  */
-async function createWrapper(props: any) {
-    // does not use the correct type of the wrapper because it is too complicated
-    let resolveWrapper: ((wrapper: any) => void);
-
-    const getWrapper = new Promise<any>((resolve) => {
-        resolveWrapper = resolve;
-    });
-
-    /**
-     * Problem: onUpdate:modelValue cannot set the modelValue on the wrapper because it is not initialized yet.
-     * Solution: we use a promise to wait for the wrapper to be initialized.
-     */
-    const wrapper = mount(FloatInput, {
-        attachTo: document.body,
+async function renderComponent(modelValue: number | null, props: any): Promise<RenderResult<any>> {    
+    return render(FloatInput, {
         props: {
-            ...props,
-            'onUpdate:modelValue': async (e: number | null) => {
-                // make sure the wrapper is initialized
-                (await getWrapper).setProps({ modelValue: e });
-            },
-        } });
-
-    resolveWrapper!(wrapper);
-    await getWrapper;
-
-    return wrapper;
+        ...props,
+        modelValue,
+    }
+    });
 }
