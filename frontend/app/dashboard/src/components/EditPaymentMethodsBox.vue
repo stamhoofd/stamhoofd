@@ -61,9 +61,7 @@
                 <p>{{ $t('%1') }}</p>
 
                 <div class="split-inputs">
-                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%JN`)">
-                        <PriceInput v-model="fixed" :min="0" :required="true" :placeholder="$t(`%JN`)" />
-                    </STInputBox>
+                    <PriceInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%JN`)" v-model="fixed" :min="0" :required="true" :placeholder="$t(`%JN`)" :validator="errors.validator"/>
 
                     <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)">
                         <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`%2I`)" />
@@ -88,7 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
@@ -104,7 +102,7 @@ import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganiza
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import PermyriadInput from '@stamhoofd/components/inputs/PermyriadInput.vue';
-import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -501,7 +499,7 @@ const fixed = computed({
     set: (value) => {
         patchConfig(PaymentConfiguration.patch({
             administrationFee: AdministrationFeeSettings.patch({
-                fixed: Math.max(0, value),
+                fixed: value,
             }),
         }));
     },
