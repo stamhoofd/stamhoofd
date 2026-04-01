@@ -194,7 +194,7 @@ declare global {
         readonly VERSION: string;
         readonly NOLT_URL?: string;
         readonly FEEDBACK_URL?: string;
-        readonly MOLLIE_CLIENT_ID: string;
+        readonly MOLLIE_CLIENT_ID?: string;
         readonly APP_UPDATE_SERVER_URL?: string;
 
         // Switching envs
