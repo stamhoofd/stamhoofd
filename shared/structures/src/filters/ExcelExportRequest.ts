@@ -9,6 +9,7 @@ export enum ExcelExportType {
     ReceivableBalances = 'receivable-balances',
     EventNotifications = 'event-notifications',
     BalanceItems = 'BalanceItems',
+    PlatformMemberships = 'platform-memberships',
 }
 
 export class ExcelSheetColumnFilter extends AutoEncoder {

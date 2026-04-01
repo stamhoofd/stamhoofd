@@ -16,19 +16,29 @@
                     {{ $t("%1EI") }}
                 </span>
             </button>
+
+            <!-- todo: add feature flag -->
+            <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.PlatformMemberships) }" @click="navigate(Routes.PlatformMemberships)">
+                <span class="icon membership" />
+                <span>
+                    {{ $t("Aansluitingen") }}
+                </span>
+            </button>
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
-import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import PlatformMembershipsTableView from '@stamhoofd/components/platform-memberships/PlatformMembershipsTableView.vue';
+import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
 
 enum Routes {
     Members = 'members',
     Registrations = 'registrations',
+    PlatformMemberships = 'platformMemberships',
 }
 
 defineRoutes([
@@ -46,6 +56,12 @@ defineRoutes([
         name: Routes.Registrations,
         show: 'detail',
         component: RegistrationsTableView,
+    },
+    {
+        url: 'aansluitingen',
+        name: Routes.PlatformMemberships,
+        show: 'detail',
+        component: PlatformMembershipsTableView,
     },
 ]);
 

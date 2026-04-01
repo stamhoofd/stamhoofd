@@ -51,6 +51,7 @@ export * from './LoginMethod.js';
 export * from './MemberResponsibility.js';
 export * from './members/MemberPlatformMembership.js';
 export * from './members/MemberResponsibilityRecord.js';
+export * from './members/PlatformMembership.js';
 export * from './members/NationalRegisterNumberOptOut.js';
 export * from './OldGroupPrices.js';
 export * from './OpenID.js';
