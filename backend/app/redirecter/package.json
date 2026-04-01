@@ -7,7 +7,7 @@
     "scripts": {
         "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/src/data/belgium.csv && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "build": "tsc --build tsconfig.build.json && yarn -s copy-assets",
-        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' -r --checksum ./src/ ./dist/",
+        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && yarn -s build",
         "start": "yarn build && node ./dist/index.js",
         "lint": "eslint"

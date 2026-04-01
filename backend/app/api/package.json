@@ -34,7 +34,7 @@
         "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --delay 2000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM",
         "dev:backend": "yarn -s dev",
         "build": "tsc --build tsconfig.build.json --clean && yarn -s copy-assets && tsc --build tsconfig.build.json",
-        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' -r --checksum ./src/ ./dist/src/",
+        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
         "build:full": "yarn -s clear && yarn -s build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
         "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
