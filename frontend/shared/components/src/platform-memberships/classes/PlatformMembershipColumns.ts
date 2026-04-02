@@ -1,12 +1,24 @@
 import { Column } from '#tables/classes/Column.ts';
+import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import type { PlatformMembership } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { ref } from 'vue';
 import { usePlatform } from '../../hooks';
 
 type ObjectType = PlatformMembership;
 
 export function useGetPlatformMembershipColumns() {
     const platform = usePlatform();
+
+    const manager = usePlatformManager();
+    const owner = useRequestOwner();
+    const loading = ref(true);
+
+    manager.value.loadPeriods(false, true, owner).then(() => {
+        loading.value = false;
+    }).catch((e) => {
+        console.error('Failed to load periods in useAdvancedPlatformMembershipUIFilterBuilders', e);
+    });
 
     function getMembershipType(id: string) {
         return platform.value.config.membershipTypes.find(mt => mt.id === id);
@@ -162,6 +174,24 @@ export function useGetPlatformMembershipColumns() {
             allowSorting: true,
             getValue: (v) => v.freeAmount,
             format: v => v ? v.toString() : $t('Geen'),
+            getStyle: v => v ?  '' : 'gray',
+            minimumWidth: 80,
+            recommendedWidth: 220,
+            enabled: false
+        }),
+        new Column<ObjectType, string>({
+            id: 'period',
+            name: $t('%7Z'),
+            allowSorting: false,
+            getValue: (v) => {
+                const periodId = v.periodId;
+                const period = platform.value.periods?.find(p => p.id === periodId);
+                if (period) {
+                    return period.name;
+                }
+                return '';
+            },
+            format: v => v ? v.toString() : $t('?'),
             getStyle: v => v ?  '' : 'gray',
             minimumWidth: 80,
             recommendedWidth: 220,
