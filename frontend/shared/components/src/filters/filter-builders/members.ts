@@ -1,8 +1,8 @@
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompareValue, StamhoofdFilter} from '@stamhoofd/structures';
+import type { MemberResponsibility, Organization, RecordCategory, StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, Gender, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
-import type { ComputedRef, Ref} from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
@@ -1126,28 +1126,32 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
     return builders;
 };
 
-export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration) {
+export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration, options: {groupNameFilters?: boolean} = {groupNameFilters: true}) {
     const all: UIFilterBuilders = [];
 
-    const nameFilter = new GroupUIFilterBuilder({
-        name: $t('%Gq'),
-        builders: [
-            new StringFilterBuilder({
-                name: $t('%1MS'),
-                key: 'name',
-            }),
-            new StringFilterBuilder({
-                name: $t('%1MT'),
-                key: 'firstName',
-            }),
-            new StringFilterBuilder({
-                name: $t('%1MU'),
-                key: 'lastName',
-            }),
-        ],
-    });
+    const nameFilters: UIFilterBuilders = [
+        new StringFilterBuilder({
+            name: $t('%1MS'),
+            key: 'name',
+        }),
+        new StringFilterBuilder({
+            name: $t('%1MT'),
+            key: 'firstName',
+        }),
+        new StringFilterBuilder({
+            name: $t('%1MU'),
+            key: 'lastName',
+        })
+    ];
 
-    all.push(nameFilter);
+    if (options.groupNameFilters) {
+        all.push(new GroupUIFilterBuilder({
+            name: $t('%Gq'),
+            builders: nameFilters
+        }));
+    } else {
+        all.push(...nameFilters);
+    }
 
     if (!recordConfiguration || recordConfiguration.birthDay) {
         all.push(new DateFilterBuilder({

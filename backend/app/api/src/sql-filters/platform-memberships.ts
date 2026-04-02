@@ -2,12 +2,17 @@ import { MemberPlatformMembership } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members.js';
-import { registrationFilterCompilers } from './registrations.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
-    'id': createColumnFilter({
+    id: createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'id'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+    membershipTypeId: createColumnFilter({
+        expression: SQL.column(MemberPlatformMembership.table, 'membershipTypeId'),
         type: SQLValueType.String,
         nullable: false,
     }),
@@ -31,6 +36,16 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: true,
     }),
+    createdAt: createColumnFilter({
+        expression: SQL.column(MemberPlatformMembership.table, 'createdAt'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
+    freeAmount: createColumnFilter({
+        expression: SQL.column(MemberPlatformMembership.table, 'freeAmount'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
     organization: createExistsFilter(
         SQL.select()
             .from(SQL.table('organizations'))
@@ -38,7 +53,7 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('organizations', 'id'),
                 SQL.column(MemberPlatformMembership.table, 'organizationId'),
             ),
-        registrationFilterCompilers
+        organizationFilterCompilers
     ),
     member: createExistsFilter(
         SQL.select()

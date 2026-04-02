@@ -1,11 +1,11 @@
-import type { StamhoofdFilter, User } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, SetupStepType } from '@stamhoofd/structures';
 import { usePlatform, useUser } from '../../hooks';
 import { getOrganizationCompanyFilterBuilders } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
-import type { UIFilterBuilders } from '../UIFilter';
+import type { UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 
 const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
@@ -30,7 +30,7 @@ const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
     return builders;
 };
 
-export function useGetOrganizationUIFilterBuilders() {
+export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: boolean} = {onlyBaseFilters: false}) {
     const platform = usePlatform();
     const _user = useUser();
 
@@ -43,6 +43,14 @@ export function useGetOrganizationUIFilterBuilders() {
         [SetupStepType.Payment]: $t('%O7'),
         [SetupStepType.Registrations]: $t('%1EI'),
     };
+
+    function ifNotBase(filter: UIFilterBuilder) {
+        if (options.onlyBaseFilters) {
+            return null;
+        }
+
+        return filter;
+    }
 
     const getOrganizationUIFilterBuilders = () => {
         const user = _user.value;
@@ -67,7 +75,7 @@ export function useGetOrganizationUIFilterBuilders() {
                 key: 'uri',
             }),
 
-            new GroupUIFilterBuilder({
+            ifNotBase(new GroupUIFilterBuilder({
                 name: $t(`%1EH`),
                 description: $t('%7f'),
                 builders: getOrganizationMemberUIFilterBuilders(),
@@ -76,7 +84,7 @@ export function useGetOrganizationUIFilterBuilders() {
                         $elemMatch: FilterWrapperMarker,
                     },
                 },
-            }),
+            })),
             new MultipleChoiceFilterBuilder({
                 name: $t(`%1H0`),
                 options: [
@@ -90,7 +98,7 @@ export function useGetOrganizationUIFilterBuilders() {
                 },
             }),
 
-            new MultipleChoiceFilterBuilder({
+            ifNotBase(new MultipleChoiceFilterBuilder({
                 name: $t(`%c6`),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
@@ -172,8 +180,8 @@ export function useGetOrganizationUIFilterBuilders() {
 
                     return null;
                 },
-            }),
-            new GroupUIFilterBuilder({
+            })),
+            ifNotBase(new GroupUIFilterBuilder({
                 name: $t(`%1Ke`),
                 description: $t('%1CI'),
                 builders: getOrganizationCompanyFilterBuilders(),
@@ -182,7 +190,7 @@ export function useGetOrganizationUIFilterBuilders() {
                         $elemMatch: FilterWrapperMarker,
                     },
                 },
-            }),
+            })),
         ];
 
         if (user?.permissions?.platform !== null) {
@@ -204,14 +212,16 @@ export function useGetOrganizationUIFilterBuilders() {
             );
         }
 
+        const builders  = all.filter(b => b !== null);
+
         // Recursive: self referencing groups
-        all.unshift(
+        builders.unshift(
             new GroupUIFilterBuilder({
-                builders: all,
+                builders
             }),
         );
 
-        return all;
+        return builders;
     };
 
     return { getOrganizationUIFilterBuilders };

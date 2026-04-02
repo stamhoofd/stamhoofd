@@ -16,6 +16,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<PlatformMembership[], LimitedFilteredRequest>;
 
+
 const sorters = platformMembershipSorters;
 const filterCompilers = platformMembershipFilterCompilers;
 
@@ -41,7 +42,8 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
        }
 
         const query = MemberPlatformMembership.select()
-            .setMaxExecutionTime(15 * 1000);
+            .setMaxExecutionTime(15 * 1000)
+            .where('deletedAt', null);
 
         if (q.filter) {
             query.where(await compileToSQLFilter(q.filter, filterCompilers));
@@ -66,40 +68,35 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
         return query;
     }
 
-    // todo
     static buildSearchFilter(search: string | null): StamhoofdFilter | null {
         if (!search) {
             return null;
         }
 
-        let searchFilter: StamhoofdFilter | null = null;
-
         // Is member number?
-        if (!searchFilter && (search.match(/^\d{4}-\d{6}-\d{1,2}$/) || search.match(/^\d{9,10}$/))) {
-            searchFilter = {
+        if (search.match(/^\d{4}-\d{6}-\d{1,2}$/) || search.match(/^\d{9,10}$/)) {
+            return {
                 member: {
-                    memberNumber: {
+                        memberNumber: {
                         $eq: search,
                     },
+                    
                 }
             };
         }
 
-        if (!searchFilter) {
-            searchFilter = {
+        return {
                 member: {
                     name: {
                         $contains: search,
                     }
                 }
-            }
-        }
-
-        return searchFilter;
+            };
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
         const query = await GetPlatformMembershipsEndpoint.buildQuery(requestQuery, permissionLevel);
+
         let data: MemberPlatformMembership[];
 
         try {
@@ -150,15 +147,6 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 organization: PlatformMembershipOrganizationDetails.create(organization)
             }));
         }
-
-        // const memberships = await MemberPlatformMembership.loadMemberAndOrganization(data, true);
-
-        // for (const member of members) {
-        //     if (!await Context.auth.canAccessMember(member, permissionLevel)) {
-        //         console.error('Unexpected member returned', member.id, requestQuery, query.getSQL());
-        //         throw Context.auth.error();
-        //     }
-        // }
 
         let next: LimitedFilteredRequest | undefined;
 
