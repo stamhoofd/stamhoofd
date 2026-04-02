@@ -7,20 +7,23 @@
             </template>
         </STInputBox>
 
-        <STInputBox v-if="showReducedPrice" :title="financialSupportSettings.priceName">
-            <PriceInput v-if="type === 'price'" v-model="reducedPrice" :placeholder="formatPrice(price)" :required="false" />
-            <PermyriadInput v-else-if="type === 'percentage'" v-model="reducedPrice" :placeholder="formatPercentage(price)" :required="false" />
-        </STInputBox>
+        <template v-if="showReducedPrice">
+            <PriceInputBox v-if="type === 'price'" v-model="reducedPrice" :title="financialSupportSettings.priceName" :validator="validator" :placeholder="formatPrice(price)" :required="false" />
+            <STInputBox v-else-if="type === 'percentage'" :title="financialSupportSettings.priceName">
+                <PermyriadInput v-model="reducedPrice" :placeholder="formatPercentage(price)" :required="false" />
+            </STInputBox>
+        </template>
     </div>
 </template>
 
 <script setup lang="ts">
-import PriceInput from '#inputs/PriceInput.vue';
 import PermyriadInput from '#inputs/PermyriadInput.vue';
 import PriceOrPercentageInput from '#inputs/PriceOrPercentageInput.vue';
-import type { Group, GroupPriceDiscount} from '@stamhoofd/structures';
+import type { Group, GroupPriceDiscount } from '@stamhoofd/structures';
 import { GroupPriceDiscountType, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import type { Validator } from '../../errors/Validator';
+import PriceInputBox from '../../inputs/PriceInputBox.vue';
 import { useFinancialSupportSettings } from '../hooks';
 
 const props = withDefaults(
@@ -31,6 +34,7 @@ const props = withDefaults(
          * Helps to determine if reduced prices are enabled or not
          */
         group?: Group | null;
+        validator: Validator | null;
     }>(),
     {
         group: null,

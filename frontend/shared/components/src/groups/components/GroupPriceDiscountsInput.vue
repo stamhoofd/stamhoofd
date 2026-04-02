@@ -1,5 +1,5 @@
 <template>
-    <GroupPriceDiscountInput v-for="(discount, index) of model" :key="index" :model-value="discount" :title="getTitle(index)" @update:model-value="setDiscount(index, $event)">
+    <GroupPriceDiscountInput v-for="(discount, index) of model" :key="index" :model-value="discount" :title="getTitle(index)" :validator="validator" @update:model-value="setDiscount(index, $event)">
         <template v-if="index === model.length - 1" #right>
             <button v-if="index > 0" class="button icon trash small" type="button" @click="deleteDiscount(index)" />
             <button class="button icon add small" type="button" @click="addDiscount" />
@@ -8,18 +8,20 @@
 </template>
 
 <script setup lang="ts">
-import type { Group} from '@stamhoofd/structures';
+import type { Group } from '@stamhoofd/structures';
 import { GroupPriceDiscount } from '@stamhoofd/structures';
 import { watch } from 'vue';
+import type { Validator } from '../../errors/Validator';
 import GroupPriceDiscountInput from './GroupPriceDiscountInput.vue';
 
-const props = withDefaults(
+withDefaults(
     defineProps<{
 
         /**
          * Helps to determine if reduced prices are enabled or not
          */
         group?: Group | null;
+        validator: Validator | null;
     }>(),
     {
         group: null,

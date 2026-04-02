@@ -93,7 +93,7 @@
         <h2>{{ $t('%16G') }}</h2>
         <p>{{ $t('%16H') }}</p>
 
-        <GroupPriceDiscountsInput v-model="discounts" />
+        <GroupPriceDiscountsInput v-model="discounts" :validator="errors.validator" />
 
         <hr>
         <h2>{{ $t('%16I') }}</h2>
@@ -129,23 +129,23 @@
 </template>
 
 <script setup lang="ts">
+import GroupAvatar from '#GroupAvatar.vue';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useValidation } from '#errors/useValidation.ts';
+import EditGroupView from '#groups/EditGroupView.vue';
+import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
+import { useContext } from '#hooks/useContext.ts';
+import { usePatch } from '#hooks/usePatch.ts';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import GroupAvatar from '#GroupAvatar.vue';
-import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInput.vue';
-import { useErrors } from '#errors/useErrors.ts';
-import { usePatch } from '#hooks/usePatch.ts';
-import { useValidation } from '#errors/useValidation.ts';
-import { useContext } from '#hooks/useContext.ts';
-import EditGroupView from '#groups/EditGroupView.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import { BundleDiscount, Group, LimitedFilteredRequest, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PaginatedResponseDecoder } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(
