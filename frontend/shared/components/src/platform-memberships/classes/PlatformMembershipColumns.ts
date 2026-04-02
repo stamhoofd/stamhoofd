@@ -41,12 +41,12 @@ export function useGetPlatformMembershipColumns() {
             format: val => val ? val : $t(`%1FW`),
             minimumWidth: 100,
             recommendedWidth: 200,
-            enabled: true,
+            enabled: false,
             allowSorting: false
         }),
         new Column<ObjectType, string>({
             id: 'organization.name',
-            name: $t('Naam vereniging'),
+            name: $t('Aangerekend aan'),
             getValue: m => m.organization.name,
             minimumWidth: 100,
             recommendedWidth: 200,
@@ -59,7 +59,7 @@ export function useGetPlatformMembershipColumns() {
             getValue: m => m.organization.uri,
             minimumWidth: 60,
             recommendedWidth: 100,
-            enabled: true,
+            enabled: false,
             allowSorting: false
         }),
         new Column<ObjectType, string>({
@@ -85,7 +85,7 @@ export function useGetPlatformMembershipColumns() {
             format: formatDate,
             minimumWidth: 80,
             recommendedWidth: 200,
-            enabled: false,
+            enabled: true,
             allowSorting: true
         }),
         new Column<ObjectType, Date>({
@@ -95,7 +95,7 @@ export function useGetPlatformMembershipColumns() {
             format: formatDate,
             minimumWidth: 80,
             recommendedWidth: 200,
-            enabled: false,
+            enabled: true,
             allowSorting: true
         }),
         new Column<ObjectType, Date | null>({
@@ -133,13 +133,13 @@ export function useGetPlatformMembershipColumns() {
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 220,
+            enabled: false
         }),
         new Column<ObjectType, Date | null>({
             id: 'trialUntil',
             name: $t(`Proefperiode`),
             allowSorting: true,
             getValue: m => m.trialUntil,
-            // todo: test
             format: (value, width) => {
                 if (!value) {
                     return $t('Geen');
@@ -165,6 +165,7 @@ export function useGetPlatformMembershipColumns() {
             getStyle: v => v ?  '' : 'gray',
             minimumWidth: 80,
             recommendedWidth: 220,
+            enabled: false
         }),
     ];
 
