@@ -5,7 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Member, MemberPlatformMembership, Organization } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, PlatformMembershiMemberDetails, PlatformMembership, PlatformMembershipOrganizationDetails } from '@stamhoofd/structures';
+import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PlatformMembershiMemberDetails, PlatformMembership, PlatformMembershipOrganizationDetails } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context.js';
 import { platformMembershipFilterCompilers } from '../../../sql-filters/platform-memberships.js';
@@ -36,8 +36,8 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
         return [false];
     }
 
-    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        if (!Context.auth.canAccessAllPlatformMembers(permissionLevel)) {
+    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
+       if (!Context.auth.hasPlatformFullAccess()) {
            throw Context.auth.error();
        }
 
@@ -94,8 +94,8 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             };
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
-        const query = await GetPlatformMembershipsEndpoint.buildQuery(requestQuery, permissionLevel);
+    static async buildData(requestQuery: LimitedFilteredRequest) {
+        const query = await GetPlatformMembershipsEndpoint.buildQuery(requestQuery);
 
         let data: MemberPlatformMembership[];
 
@@ -177,12 +177,11 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.authenticate();
 
-        // todo: check if access to finance?
-       if (!Context.auth.canAccessAllPlatformMembers(PermissionLevel.Read)) {
+       if (!Context.auth.hasPlatformFullAccess()) {
            throw Context.auth.error();
        }
 
-        const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
+        const maxLimit = 1000;
 
         if (request.query.limit > maxLimit) {
             throw new SimpleError({

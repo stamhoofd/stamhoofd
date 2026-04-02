@@ -16,9 +16,8 @@
                     {{ $t("%1EI") }}
                 </span>
             </button>
-
-            <!-- todo: add feature flag -->
-            <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.PlatformMemberships) }" @click="navigate(Routes.PlatformMemberships)">
+            
+            <button v-if="showMemberships" type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.PlatformMemberships) }" @click="navigate(Routes.PlatformMemberships)">
                 <span class="icon membership" />
                 <span>
                     {{ $t("Aansluitingen") }}
@@ -30,10 +29,12 @@
 
 <script setup lang="ts">
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { useAuth } from '@stamhoofd/components';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
 import PlatformMembershipsTableView from '@stamhoofd/components/platform-memberships/PlatformMembershipsTableView.vue';
 import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+import { computed } from 'vue';
 
 enum Routes {
     Members = 'members',
@@ -68,4 +69,9 @@ defineRoutes([
 const checkRoute = useCheckRoute();
 const navigate = useNavigate();
 const platform = usePlatform();
+const auth = useAuth();
+
+const showMemberships = computed(() => {
+    return auth.hasPlatformFullAccess();
+})
 </script>
