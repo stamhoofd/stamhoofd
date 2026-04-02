@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { CountFilteredRequest, CountResponse, PermissionLevel } from '@stamhoofd/structures';
+import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 import { GetPlatformMembershipsEndpoint } from './GetPlatformMembershipsEndpoint.js';
 
@@ -27,11 +27,9 @@ export class GetPlatformMembershipsCountEndpoint extends Endpoint<Params, Query,
        }
    
        async handle(request: DecodedRequest<Params, Query, Body>) {
-           await Context.setOptionalOrganizationScope();
            await Context.authenticate();
 
-            // todo: check if access to finance?
-            if (!Context.auth.canAccessAllPlatformMembers(PermissionLevel.Read)) {
+            if (!Context.auth.hasPlatformFullAccess()) {
                 throw Context.auth.error();
             }
                   
