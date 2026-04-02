@@ -22,10 +22,8 @@
         </div>
 
         <div class="split-inputs">
-            <STInputBox :title="$t('%6q')" error-fields="price" :error-box="errors.errorBox">
-                <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null" />
-            </STInputBox>
-            <NumberInputBox :title="$t('%M4')" error-fields="amount" :error-box="errors.errorBox" v-model="amount" :validator="errors.validator" :min="1" :stepper="true"  />
+            <PriceInputBox v-model="price" :title="$t('%6q')" error-fields="price" :error-box="errors.errorBox" :placeholder="formatPrice(0)" :required="true" :min="null" :validator="errors.validator" />
+            <NumberInputBox v-model="amount" :title="$t('%M4')" error-fields="amount" :error-box="errors.errorBox" :validator="errors.validator" :min="1" :stepper="true" />
         </div>
 
         <div class="split-inputs">
@@ -55,7 +53,6 @@ import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '#inputs/DateSelection.vue';
-import PriceInput from '#inputs/PriceInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
@@ -68,6 +65,7 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
+import PriceInputBox from '../inputs/PriceInputBox.vue';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
 import { useChargeCount } from './hooks/useChargeCount';
 
