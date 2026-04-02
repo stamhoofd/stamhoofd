@@ -10,10 +10,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%SK`)">
-                <PriceInput v-model="fixedDiscount" :min="0" :required="true" :placeholder="$t(`%JN`)" />
-            </STInputBox>
-
+            <PriceInputBox v-model="fixedDiscount" error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%SK`)" :validator="errors.validator" :min="0" :required="true" :placeholder="$t(`%JN`)" />
+                
             <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)">
                 <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`%2I`)" />
             </STInputBox>
@@ -112,20 +110,20 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import PermyriadInput from '@stamhoofd/components/inputs/PermyriadInput.vue';
-import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import type { PrivateWebshop} from '@stamhoofd/structures';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import type { PrivateWebshop } from '@stamhoofd/structures';
 import { Discount, DiscountRequirement, GeneralDiscount, ProductDiscountSettings, ProductSelector, ProductsSelector } from '@stamhoofd/structures';
 
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import { computed } from 'vue';
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
 import EditProductDiscountView from './EditProductDiscountView.vue';
