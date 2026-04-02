@@ -31,9 +31,7 @@
                 </p>
 
                 <div v-if="useDiscount" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`%UA`)">
-                        <PriceInput v-model="discountPrice" :min="null" :placeholder="$t(`%1Mn`)" />
-                    </STInputBox>
+                    <PriceInputBox v-model="discountPrice" error-fields="discountPrice" :error-box="errorBox" :title="$t(`%UA`)" :min="null" :placeholder="$t(`%1Mn`)" :validator="validator" />
 
                     <NumberInputBox v-model="discountAmount" error-fields="discountAmount" :error-box="errorBox" :title="$t(`%UB`)" :min="2" :stepper="true" :placeholder="$t(`%1Mn`)" :validator="errors.validator" />
                 </div>
@@ -109,6 +107,7 @@ import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
