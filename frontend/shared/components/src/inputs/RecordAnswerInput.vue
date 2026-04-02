@@ -45,9 +45,7 @@
         <STInputBox v-else-if="answer.settings.type === RecordType.Date" :title="label" error-fields="input" :error-box="errors.errorBox">
             <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type === RecordType.Price" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <PriceInput v-model="priceValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
-        </STInputBox>
+        <PriceInputBox v-else-if="answer.settings.type === RecordType.Price" v-model="priceValue" :title="label.toString()" error-fields="input" :error-box="errors.errorBox" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
         <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
         <NumberInputBox v-else-if="answer.settings.type === RecordType.Integer" v-model="integerValue" :title="label.toString()" error-fields="input" :error-box="errors.errorBox" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
@@ -90,7 +88,7 @@ import FileInput from './FileInput.vue';
 import ImageInput from './ImageInput.vue';
 import NumberInputBox from './NumberInputBox.vue';
 import PhoneInput from './PhoneInput.vue';
-import PriceInput from './PriceInput.vue';
+import PriceInputBox from './PriceInputBox.vue';
 import Radio from './Radio.vue';
 import STInputBox from './STInputBox.vue';
 import { useLinkableText } from './hooks/useLinkableText';
