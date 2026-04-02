@@ -1,23 +1,44 @@
 <template>
-    <DeprecatedFloatInput v-bind="props" v-model="model" :suffix="suffix" :fraction-digits="type === 'percentage' ? 2 : 4" :round-fraction-digits="2">
-        <template #right>
+    <FloatInputBox v-if="type === 'percentage'" v-bind="props" v-model="model" :suffix="'%'" :fraction-digits="2" :round-fraction-digits="2">
+        <template #input-right>
             <button class="button icon arrow-down-small" type="button" @click="toggleType" />
         </template>
-    </DeprecatedFloatInput>
+        <template #box-right>
+            <slot name="box-right" />
+        </template>
+    </FloatInputBox>
+    <FloatInputBox v-else v-bind="props" v-model="model" :suffix="'euro'" :fraction-digits="4" :round-fraction-digits="2">
+        <template #input-right>
+            <button class="button icon arrow-down-small" type="button" @click="toggleType" />
+        </template>
+        <template #box-right>
+            <slot name="box-right" />
+        </template>
+    </FloatInputBox>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import type { ErrorBox } from '../errors/ErrorBox';
+import type { Validator } from '../errors/Validator';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import DeprecatedFloatInput from './DeprecatedFloatInput.vue';
+import FloatInputBox from './FloatInputBox.vue';
 
 const props = withDefaults(defineProps<{
+     title?: string;
+    errorFields?: string;
+    class?: string | null;
+    validator: Validator | null;
+    errorBox?: ErrorBox | null;
     min?: number | null;
     max?: number | null;
     placeholder?: string;
     disabled?: boolean;
     required?: boolean;
 }>(), {
+    title: undefined,
+    errorFields: 'number',
+    class: null,
+    errorBox: null,
     min: null,
     max: null,
     placeholder: '',
@@ -25,23 +46,10 @@ const props = withDefaults(defineProps<{
     required: true,
 });
 
-const model = defineModel<number | null>('modelValue', {
-    required: true,
-});
+const model = defineModel<number | null>({default: null});
 
 const type = defineModel<'percentage' | 'price'>('type', {
     required: true,
-});
-
-const suffix = computed(() => {
-    switch (type.value) {
-        case 'percentage':
-            return '%';
-        case 'price':
-            return 'euro';
-        default:
-            return '';
-    }
 });
 
 async function toggleType(event: MouseEvent) {
@@ -68,5 +76,4 @@ async function toggleType(event: MouseEvent) {
         button: event.currentTarget as HTMLButtonElement,
     });
 }
-
 </script>
