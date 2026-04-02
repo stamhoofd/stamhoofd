@@ -23,7 +23,7 @@
         </EditTimeSlotsSection>
 
         <hr><h2>{{ $t('%Sn') }}</h2>
-        <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errors.errorBox" @patch="patchPrice" />
+        <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errors.errorBox" :validator="errors.validator" @patch="patchPrice" />
 
         <div v-if="!isNew" class="container">
             <hr><h2>
@@ -41,12 +41,12 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { CheckoutMethodPrice, WebshopTimeSlots } from '@stamhoofd/structures';
 import { PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData } from '@stamhoofd/structures';
 

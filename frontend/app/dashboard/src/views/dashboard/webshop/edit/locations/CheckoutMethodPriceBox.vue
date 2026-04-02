@@ -1,40 +1,33 @@
 <template>
     <div class="container">
-        <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`%Sn`)">
-            <PriceInput v-model="price" :placeholder="$t(`%1Mn`)" />
-        </STInputBox>
+        <PriceInputBox v-model="price" error-fields="price" :error-box="errorBox" :title="$t(`%Sn`)" :validator="validator" :placeholder="$t(`%1Mn`)" />
 
         <Checkbox v-model="useMinimumPrice">
             {{ $t('%Sm') }}
         </Checkbox>
 
         <div v-if="useMinimumPrice" class="split-inputs">
-            <STInputBox error-fields="minimumPrice" :error-box="errorBox" :title="$t(`%So`)">
-                <PriceInput v-model="minimumPrice" :placeholder="$t(`%Sp`)" />
-            </STInputBox>
+            <PriceInputBox v-model="minimumPrice" error-fields="minimumPrice" :error-box="errorBox" :title="$t(`%So`)" :placeholder="$t(`%Sp`)" :validator="validator" />
 
-            <STInputBox error-fields="discountPrice" :error-box="errorBox" :title="$t(`%Sq`)">
-                <PriceInput v-model="discountPrice" :placeholder="$t(`%1Mn`)" />
-            </STInputBox>
+            <PriceInputBox v-model="discountPrice" error-fields="discountPrice" :error-box="errorBox" :title="$t(`%Sq`)" :placeholder="$t(`%1Mn`)" :validator="validator" />
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import type { Validator } from '@stamhoofd/components';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import { CheckoutMethodPrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
     checkoutMethodPrice: CheckoutMethodPrice;
+    validator: Validator | null,
     errorBox: ErrorBox | null;
-}>(), {
-    errorBox: null,
-});
+}>();
 
 const emits = defineEmits<{
     (e: 'patch', patch: AutoEncoderPatchType<CheckoutMethodPrice>): void;
