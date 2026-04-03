@@ -5,19 +5,21 @@
         :error-box="errorBoxes"
         :class="props.class"
     >
-        <FloatInput
-            v-model="model"
-            :min="min" :max="max" :required="required" :disabled="disabled" :suffix="suffix" :placeholder="placeholder" :fraction-digits="fractionDigits" :round-fraction-digits="roundFractionDigits"
-            :auto-fix="false"
-        >
-            <template #right>
-                <slot name="input-right" />
-            </template>
-        </FloatInput>
+        <template #default>
+            <FloatInput
+                v-model="model"
+                :min="min" :max="max" :required="required" :disabled="disabled" :suffix="suffix" :placeholder="placeholder" :fraction-digits="fractionDigits" :round-fraction-digits="roundFractionDigits"
+                :auto-fix="false"
+            >
+                <template #right>
+                    <slot name="input-right" />
+                </template>
+            </FloatInput>
+            <slot />
+        </template>
         <template #right>
             <slot name="box-right" />
         </template>
-        <slot />
     </STInputBox>
 </template>
 

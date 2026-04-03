@@ -1,5 +1,9 @@
 <template>
-    <FloatInputBox v-bind="props" v-model="model" :suffix="currency" :fraction-digits="4" :round-fraction-digits="2" />
+    <FloatInputBox v-bind="props" v-model="model" :suffix="currency" :fraction-digits="4" :round-fraction-digits="2">
+        <template #default>
+            <slot />
+        </template>
+    </FloatInputBox>
 </template>
 
 <script lang="ts" setup>
