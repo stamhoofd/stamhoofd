@@ -8,21 +8,19 @@
 
         <template v-if="showReducedPrice">
             <PriceInputBox v-if="type === 'price'" v-model="reducedPrice" :title="financialSupportSettings.priceName" :validator="validator" :placeholder="formatPrice(price)" :required="false" :error-box="errorBox" />
-            <STInputBox v-else-if="type === 'percentage'" :title="financialSupportSettings.priceName">
-                <PermyriadInput v-model="reducedPrice" :placeholder="formatPercentage(price)" :required="false" />
-            </STInputBox>
+            <PermyriadInputBox v-else-if="type === 'percentage'" v-model="reducedPrice" :title="financialSupportSettings.priceName" :placeholder="formatPercentage(price)" :required="false" :validator="validator" :error-box="errorBox" />
         </template>
     </div>
 </template>
 
 <script setup lang="ts">
-import PermyriadInput from '#inputs/PermyriadInput.vue';
 import PriceOrPercentageInputBox from '#inputs/PriceOrPercentageInputBox.vue';
 import type { Group, GroupPriceDiscount } from '@stamhoofd/structures';
 import { GroupPriceDiscountType, ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import type { ErrorBox } from '../../errors/ErrorBox';
 import type { Validator } from '../../errors/Validator';
+import PermyriadInputBox from '../../inputs/PermyriadInputBox.vue';
 import PriceInputBox from '../../inputs/PriceInputBox.vue';
 import { useFinancialSupportSettings } from '../hooks';
 
