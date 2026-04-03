@@ -61,11 +61,9 @@
                 <p>{{ $t('%1') }}</p>
 
                 <div class="split-inputs">
-                    <PriceInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%JN`)" v-model="fixed" :min="0" :required="true" :placeholder="$t(`%JN`)" :validator="errors.validator"/>
+                    <PriceInputBox v-model="fixed" error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%JN`)" :min="0" :required="true" :placeholder="$t(`%JN`)" :validator="errors.validator" />
 
-                    <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)">
-                        <PermyriadInput v-model="percentage" :required="true" :placeholder="$t(`%2I`)" />
-                    </STInputBox>
+                    <PermyriadInputBox v-model="percentage" error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)" :required="true" :placeholder="$t(`%2I`)" :validator="errors.validator" />
                 </div>
 
                 <Checkbox v-if="fixed > 0" v-model="zeroIfZero">
@@ -101,7 +99,7 @@ import { useCountry } from '@stamhoofd/components/hooks/useCountry.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
-import PermyriadInput from '@stamhoofd/components/inputs/PermyriadInput.vue';
+import PermyriadInputBox from '@stamhoofd/components/inputs/PermyriadInputBox.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
