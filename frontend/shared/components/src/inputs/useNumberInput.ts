@@ -115,13 +115,17 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         return errorMessage + optionalText;
     }
 
+    const formatValue = (value: number) => {
+        return (value / multipier.value).toString();
+    }
+
     const validateConstraints = (value: number): { isValid: false; errorMessage: string; value: number } | { isValid: true; value: number } => {
         const { min, max, required } = options.value;
 
         if (min !== null && value < min) {
             return {
                 isValid: false,
-                errorMessage: addOptionalTextToErrorMessage($t(`Het minimum is {min}`, { min: min }), required),
+                errorMessage: addOptionalTextToErrorMessage($t(`Het minimum is {min}`, { min: formatValue(min) }), required),
                 value: min,
             };
         }
@@ -129,7 +133,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         if (max !== null && value > max) {
             return {
                 isValid: false,
-                errorMessage: addOptionalTextToErrorMessage($t(`Het maximum is {max}`, { max: max }), required),
+                errorMessage: addOptionalTextToErrorMessage($t(`Het maximum is {max}`, { max: formatValue(max) }), required),
                 value: max,
             };
         }
