@@ -24,9 +24,7 @@
         <STList>
             <STListItem v-for="[tagId, reduceablePrice] of patched.prices" :key="tagId">
                 <PlatformMembershipTypeReduceablePriceEditRow :model-value="reduceablePrice" :tag-id="tagId" :show-price-per-day="showPricePerDay" :error-box="errorBox" :validator="validator" @update:model-value="patchReduceablePrice(tagId, $event)">
-                    <STInputBox v-if="!tagId && (showPricePerDay || pricePerDay)" :error-box="errorBox" :title="$t(`%IB`)">
-                        <PriceInput v-model="pricePerDay" :placeholder="$t(`%IB`)" />
-                    </STInputBox>
+                    <PriceInputBox v-if="!tagId && (showPricePerDay || pricePerDay)" :error-box="errorBox" :title="$t(`%IB`)" v-model="pricePerDay" :placeholder="$t(`%IB`)" :validator="validator" />
                 </PlatformMembershipTypeReduceablePriceEditRow>
                 <template #right>
                     <div>
@@ -51,16 +49,16 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import OrganizationTagSelectorView from '@stamhoofd/components/organizations/OrganizationTagSelectorView.vue';
-import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
-import { useEmitPatch } from '@stamhoofd/components/hooks/useEmitPatch.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import type { OrganizationTag, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice} from '@stamhoofd/structures';
+import { useEmitPatch } from '@stamhoofd/components/hooks/useEmitPatch.ts';
+import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
+import OrganizationTagSelectorView from '@stamhoofd/components/organizations/OrganizationTagSelectorView.vue';
+import type { OrganizationTag, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice } from '@stamhoofd/structures';
 import { ReduceablePrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import PlatformMembershipTypeReduceablePriceEditRow from './PlatformMembershipTypeReduceablePriceEditRow.vue';

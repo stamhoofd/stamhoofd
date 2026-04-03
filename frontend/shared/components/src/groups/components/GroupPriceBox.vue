@@ -95,7 +95,7 @@
 
                     <div v-if="getOverrideBundleDiscountSelected(bundleDiscount)" class="split-inputs option" @click.stop>
                         <div>
-                            <GroupPriceDiscountsInput :model-value="getCustomBundleDiscounts(bundleDiscount)" @update:model-value="setCustomBundleDiscounts(bundleDiscount, $event)" />
+                            <GroupPriceDiscountsInput :model-value="getCustomBundleDiscounts(bundleDiscount)" :validator="errors.validator" @update:model-value="setCustomBundleDiscounts(bundleDiscount, $event)" />
                         </div>
                     </div>
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="float-input input" :class="{ error: !valid, disabled }">
+    <div class="float-input input" :class="{ error: !isValid, disabled }">
         <div class="clear">
             <div class="left">
                 <!--
@@ -10,23 +10,21 @@
                 -->
                 <input
                     ref="input"
-                    v-model="valueString"
+                    v-model="text"
                     type="text"
                     inputmode="decimal"
                     step="any"
                     :disabled="disabled"
-                    @blur="clean"
-                    @keydown.up.prevent="step(multipier)"
-                    @keydown.down.prevent="step(-multipier)"
+                    @keydown.up.prevent="step(1)"
+                    @keydown.down.prevent="step(-1)"
+                    @change="updateModelValue()"
+                    @input="updateModelValue({ final: false })"
                 >
-                <div v-if="!valid">
-                    <span>{{ valueString }}</span>
-                </div>
-                <div v-else-if="valueString !== ''">
-                    <span>{{ valueString }}</span> {{ suffix }}
-                </div>
-                <div v-else class="placeholder">
+                 <div v-if="!text.length" class="placeholder">
                     {{ placeholder }}
+                </div>
+                <div v-else>
+                    <span>{{ text }}</span> {{ suffix }}
                 </div>
             </div>
 
@@ -37,8 +35,9 @@
     </div>
 </template>
 
-<script lang="ts" setup generic="T extends number | null">
-import { computed, nextTick, ref, watch } from 'vue';
+<script lang="ts" setup>
+import { computed, ref, useTemplateRef, watch } from 'vue';
+import { useNumberInput } from './useNumberInput';
 
 const props = withDefaults(defineProps<{
     min?: number | null;
@@ -62,6 +61,7 @@ const props = withDefaults(defineProps<{
      * when fraction digits is set to 4 and round fraction digits is set to 0, it will round all fractions (0,5 becomes 1)
      */
     roundFractionDigits?: number | null;
+    autoFix?: boolean;
 }>(), {
     min: null,
     max: null,
@@ -71,175 +71,92 @@ const props = withDefaults(defineProps<{
     required: true,
     fractionDigits: 2,
     roundFractionDigits: null,
+    autoFix: true,
 });
 
-const model = defineModel<T>('modelValue', {
-    required: true,
+const numberInput = useNumberInput(computed(() => props));
+const model = defineModel<number | null>({ default: null });
+const text = ref<string>(numberInput.numberToString(model.value, { valueIfNaN: '' }));
+const inputElement = useTemplateRef<HTMLInputElement>('input');
+
+const isValid = computed(() => props.autoFix ? numberInput.validateText(text.value, { valueIfNaN: null }).isValid : true);
+
+if (props.autoFix) {
+    updateModelValue();
+}
+
+watch(() => numberInput.multipier, () => {
+    updateModelValue();
 });
 
-const valueString = ref('');
-const valid = ref(true);
-
-const multipier = computed(() => Math.pow(10, props.fractionDigits));
-
-watch(multipier, (newValue, oldValue) => {
-    clean();
+watch(() => model.value, (value) => {
+    // do not update text while focused
+    if (isInputFocused()) {
+        return;
+    }
+    const valueAsString = numberInput.numberToString(value, { valueIfNaN: text.value });
+    if (valueAsString !== text.value) {
+        text.value = valueAsString;
+    }
 });
 
-watch(model, (newValue, oldValue) => {
-    const { value: currentValue, valid: wasValid } = stringToValue(valueString.value);
-
-    if (currentValue === newValue && wasValid) {
-        return;
+function setModelValue(value: number | null, {final}: {final: boolean} = { final: true }) {
+    if (value !== model.value) {
+        model.value = value;
+        return
     }
-
-    if (newValue === null) {
-        if (props.required) {
-            model.value = constrain(props.min ?? 0) as T;
-        }
-        clean();
-        return;
-    }
-
-    model.value = constrain(newValue) as T;
-    clean();
-}, { immediate: true });
-
-watch(valueString, (value) => {
-    const { valid: v, value: newValue } = stringToValue(value);
-    valid.value = v;
-    model.value = newValue as T;
-}, { immediate: false });
-
-function roundFractions(v: number) {
-    if (props.roundFractionDigits === null) {
-        return v;
-    }
-
-    if (props.roundFractionDigits >= props.fractionDigits) {
-        return v;
-    }
-
-    const multiplyAmount = props.fractionDigits - props.roundFractionDigits;
-    const roundMultiplier = Math.pow(10, multiplyAmount);
-
-    return Math.round(v / roundMultiplier) * roundMultiplier;
-}
-
-function stringToValue(str: string) {
-    // We need the modelValue string here! Vue does some converting to numbers automatically
-    // but for our placeholder system we need exactly the same string
-    if (str === '') {
-        if (props.required) {
-            return {
-                value: Math.max(0, props.min ?? 0),
-                valid: false,
-            };
-        }
-        else {
-            return {
-                value: null,
-                valid: true,
-            };
-        }
-    }
-    else {
-        if (!str.includes('.')) {
-            // We do this for all locales since some browsers report the language locale instead of the formatting locale
-            str = str.replace(',', '.');
-        }
-        const v = parseFloat(str);
-        if (isNaN(v)) {
-            return {
-                value: props.min ?? 0,
-                valid: false,
-            };
-        }
-        else {
-            // Remove extra decimals
-            return {
-                value: constrain(roundFractions(Math.round(v * multipier.value))),
-                valid: true,
-            };
-        }
+    else if (final) {
+        updateText(value);
     }
 }
 
-/// Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.
-function whatDecimalSeparator(): string {
-    const n = 1.1;
-    const str = n.toLocaleString().substring(1, 2);
-    return str;
-}
-
-// Restore invalid input, make the input value again
-// And set valueString
-function clean() {
-    if (!valid.value) {
-        return;
-    }
-
-    const value = model.value;
-
-    if (value === null) {
-        valueString.value = '';
-        return;
-    }
-
-    // Check if has decimals
-    const float = value / multipier.value;
-    const decimals = float % 1;
-    const abs = Math.abs(float);
-
-    if (decimals !== 0) {
-        const fractions = Math.round(Math.abs(decimals) * multipier.value);
-        let q = (float < 0 ? '-' : '')
-            + Math.floor(abs)
-            + whatDecimalSeparator()
-            + ('' + fractions).padStart(props.fractionDigits, '0');
-
-        // Trim trailing zeros up until roundFractionDigits
-        if (fractions % 100 === 0) {
-            q = (float < 0 ? '-' : '')
-                + Math.floor(abs)
-                + whatDecimalSeparator()
-                + ('' + fractions / 100).padStart(props.fractionDigits - 2, '0');
-        }
-        else if (fractions % 10 === 0) {
-            q = (float < 0 ? '-' : '')
-                + Math.floor(abs)
-                + whatDecimalSeparator()
-                + ('' + fractions / 10).padStart(props.fractionDigits - 1, '0');
-        }
-
-        // Include decimals
-        valueString.value = q;
-    }
-    else {
-        // Hide decimals
-        valueString.value = float + '';
-    }
-}
-
-// Limit value to bounds
-function constrain(value: number): number {
-    if (props.min !== null && value < props.min) {
-        value = props.min;
-    }
-    else if (props.max !== null && value > props.max) {
-        value = props.max;
-    }
-    return value;
+function updateText(value: number | null) {
+    text.value = numberInput.numberToString(value, { valueIfNaN: 
+            props.autoFix ? '' : text.value
+         });
 }
 
 function step(add: number) {
-    if (!valid.value) {
+    const newValue = numberInput.step(model.value, add * numberInput.multipier.value);
+    setModelValue(newValue);
+
+    // necesary because input is in focus
+    updateText(newValue);
+}
+
+function updateModelValue(options: {final: boolean} = { final: true }) {
+    validate(text.value, options);
+}
+
+function validate(value: string, {final}: {final: boolean} = { final: true }) {
+    let number = numberInput.stringToNumber(value, { valueIfNaN: props.autoFix ? null : NaN });
+
+    if (final) {
+        if (props.autoFix) {
+            number = numberInput.constrain(number);
+        }
+        // If required the model value should never be null because a patch will not be able to set null as a value on the structure.
+        else if (props.required && number === null) {
+            number = props.min ?? 0;
+        }
+
+        setModelValue(number);
         return;
     }
-    model.value = constrain((model.value ?? props.min ?? 0) + add) as T;
-    nextTick(() => {
-        clean();
-    }).catch(console.error);
+
+    const {isValid} = numberInput.validateNumber(number);
+    if (isValid) {
+        setModelValue(number, {final});
+    }
+}
+
+function isInputFocused(): boolean {
+    if (!inputElement.value) {
+        return false;
+    }
+    const inputEl = inputElement.value;
+    const activeElement = (('getRootNode' in inputEl ? (inputEl.getRootNode() ?? document) : document) as any).activeElement as HTMLElement;
+    return activeElement === inputEl;
 }
 
 </script>

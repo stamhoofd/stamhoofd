@@ -12,9 +12,7 @@
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sk`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%TQ`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`%2f`)" />
-        </STInputBox>
+        <PriceInputBox v-model="price" error-fields="price" :error-box="errors.errorBox" :title="$t(`%TQ`)" :validator="errors.validator" :min="null" :placeholder="$t(`%2f`)" />
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -57,7 +55,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
-import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';

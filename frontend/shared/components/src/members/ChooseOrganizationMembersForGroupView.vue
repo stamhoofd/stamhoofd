@@ -55,9 +55,8 @@
                 {{ $t('%8r') }}
             </p>
 
-            <STInputBox :title="$t(`%2I`)">
-                <PermyriadInput v-model="checkout.cancellationFeePercentage" :min="0" :max="10000" :placeholder="$t(`%L`)" />
-            </STInputBox>
+            <PermyriadInputBox v-model="checkout.cancellationFeePercentage" :title="$t(`%2I`)" :min="0" :max="10000" :placeholder="$t(`%L`)" :validator="errors.validator" :error-box="errors.errorBox" />
+            
             <p v-if="checkout.cancellationFeePercentage !== 0 && checkout.cancellationFeePercentage !== 10000" class="style-description-small">
                 {{ $t('%dt') }}
             </p>
@@ -68,20 +67,20 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import PermyriadInput from '#inputs/PermyriadInput.vue';
-import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import { Toast } from '#overlays/Toast.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import type { Group, Organization, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { PlatformFamily } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
 import { startCheckout, useAddMember, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
-import type { NavigationActions} from '../types/NavigationActions';
+import PermyriadInputBox from '../inputs/PermyriadInputBox.vue';
+import type { NavigationActions } from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';
 import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';

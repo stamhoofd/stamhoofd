@@ -1,13 +1,30 @@
 import type { ComputedRef } from 'vue';
-import { unref } from 'vue';
+import { computed } from 'vue';
 
-type UseNumberInputOptions = { required: boolean; min: number | null; max: number | null; floatingPoint: boolean };
+type UseNumberInputOptions = { required: boolean; min: number | null; max: number | null; fractionDigits: number; roundFractionDigits: number | null;  };
 
-export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | UseNumberInputOptions) {
-    const getOptions = () => unref(options);
+export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
+    const multipier = computed(() => Math.pow(10, options.value.fractionDigits));
+
+    const roundFractions = (v: number) => {
+        const {roundFractionDigits, fractionDigits} = options.value;
+
+        if (roundFractionDigits === null) {
+            return v;
+        }
+
+        if (roundFractionDigits >= fractionDigits) {
+            return v;
+        }
+
+        const multiplyAmount = fractionDigits - roundFractionDigits;
+        const roundMultiplier = Math.pow(10, multiplyAmount);
+
+        return Math.round(v / roundMultiplier) * roundMultiplier;
+    } 
 
     const validateText = (value: string, { valueIfNaN }: { valueIfNaN: number | null }): { isValid: boolean; value: number | null } => {
-        const { required, floatingPoint } = getOptions();
+        const { required } = options.value;
 
         if (!value.length) {
             if (required) {
@@ -42,7 +59,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
             };
         }
 
-        const corrected = Math.round(parsed * (floatingPoint ? 100 : 1));
+        const corrected = roundFractions(Math.round(parsed * multipier.value));
         const constrainedResult = constrain(corrected);
         const isValid = constrainedResult === corrected;
 
@@ -53,7 +70,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
     };
 
     const validateNumber = (value: number | null): { isValid: false; errorMessage: string } | { isValid: true } => {
-        const { required } = getOptions();
+        const { required } = options.value;
 
         if (value === null) {
             if (required) {
@@ -98,13 +115,17 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
         return errorMessage + optionalText;
     }
 
+    const formatValue = (value: number) => {
+        return (value / multipier.value).toString();
+    }
+
     const validateConstraints = (value: number): { isValid: false; errorMessage: string; value: number } | { isValid: true; value: number } => {
-        const { min, max, required } = getOptions();
+        const { min, max, required } = options.value;
 
         if (min !== null && value < min) {
             return {
                 isValid: false,
-                errorMessage: addOptionalTextToErrorMessage($t(`Het minimum is {min}`, { min: min }), required),
+                errorMessage: addOptionalTextToErrorMessage($t(`Het minimum is {min}`, { min: formatValue(min) }), required),
                 value: min,
             };
         }
@@ -112,7 +133,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
         if (max !== null && value > max) {
             return {
                 isValid: false,
-                errorMessage: addOptionalTextToErrorMessage($t(`Het maximum is {max}`, { max: max }), required),
+                errorMessage: addOptionalTextToErrorMessage($t(`Het maximum is {max}`, { max: formatValue(max) }), required),
                 value: max,
             };
         }
@@ -124,7 +145,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
     };
 
     const constrain = (value: number | null): number | null => {
-        const { min, max, required } = getOptions();
+        const { min, max, required } = options.value;
 
         if (value === null) {
             if (required) {
@@ -145,7 +166,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
     };
 
     const numberToString = (value: number | null, { valueIfNaN }: { valueIfNaN: string }) => {
-        const { floatingPoint } = getOptions();
+        const {fractionDigits} = options.value;
 
         if (value === null) {
             return '';
@@ -156,16 +177,32 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
         }
 
         // Check if has decimals
-        const float = value / (floatingPoint ? 100 : 1);
+        const float = value / multipier.value;
         const decimals = float % 1;
         const abs = Math.abs(float);
 
         if (decimals !== 0) {
-            // include decimals
+            const fractions = Math.round(Math.abs(decimals) * multipier.value);
+
+            // Trim trailing zeros up until roundFractionDigits
+            if (fractions % 100 === 0) {
+                return (float < 0 ? '-' : '')
+                    + Math.floor(abs)
+                    + getDecimalSeparator()
+                    + ('' + fractions / 100).padStart(fractionDigits - 2, '0');
+            }
+            
+            if (fractions % 10 === 0) {
+                return (float < 0 ? '-' : '')
+                    + Math.floor(abs)
+                    + getDecimalSeparator()
+                    + ('' + fractions / 10).padStart(fractionDigits - 1, '0');
+            }
+
             return (float < 0 ? '-' : '')
                 + Math.floor(abs)
                 + getDecimalSeparator()
-                + ('' + Math.round(Math.abs(decimals) * (floatingPoint ? 100 : 1))).padStart(2, '0');
+                + ('' + fractions).padStart(fractionDigits, '0');
         }
 
         // Hide decimals
@@ -173,8 +210,6 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
     };
 
     const stringToNumber = (value: string, { valueIfNaN }: { valueIfNaN: number | null }): number | null => {
-        const { floatingPoint } = getOptions();
-
         if (!value.length) {
             return null;
         }
@@ -194,11 +229,11 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
             return valueIfNaN;
         }
 
-        return Math.round(parsed * (floatingPoint ? 100 : 1));
+        return roundFractions(Math.round(parsed * multipier.value));
     };
 
     const step = (value: number | null, add: number): number => {
-        const { min, max } = getOptions();
+        const { min, max } = options.value;
 
         if (value === null || isNaN(value)) {
             
@@ -233,6 +268,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions> | Use
         constrain,
         numberToString,
         stringToNumber,
-        step
+        step,
+        multipier
     };
 }

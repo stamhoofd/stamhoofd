@@ -12,9 +12,7 @@
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sk`)">
         </STInputBox>
 
-        <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`%TQ`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`%2f`)" />
-        </STInputBox>
+        <PriceInputBox v-model="price" error-fields="price" :error-box="errors.errorBox" :title="$t(`%TQ`)" :min="null" :placeholder="$t(`%2f`)" :validator="errors.validator" />
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -47,16 +45,16 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { SeatingPlan, SeatingPlanCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

@@ -5,13 +5,20 @@
         :error-box="errorBoxes"
         :class="props.class"
     >
-        <NumberInput
-            v-model="model"
-            :min="min" :max="max" :stepper="stepper" :required="required" :disabled="disabled" :suffix="suffix" :suffix-singular="suffixSingular" :placeholder="placeholder" :floating-point="floatingPoint"
-            :auto-fix="false"
-        />
+        <template #default>
+            <FloatInput
+                v-model="model"
+                :min="min" :max="max" :required="required" :disabled="disabled" :suffix="suffix" :placeholder="placeholder" :fraction-digits="fractionDigits" :round-fraction-digits="roundFractionDigits"
+                :auto-fix="false"
+            >
+                <template #right>
+                    <slot name="input-right" />
+                </template>
+            </FloatInput>
+            <slot />
+        </template>
         <template #right>
-            <slot name="right" />
+            <slot name="box-right" />
         </template>
     </STInputBox>
 </template>
@@ -23,7 +30,7 @@ import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
 import type { Validator } from '../errors/Validator';
-import NumberInput from './NumberInput.vue';
+import FloatInput from './FloatInput.vue';
 import STInputBox from './STInputBox.vue';
 import { useNumberInput } from './useNumberInput';
 
@@ -34,17 +41,27 @@ const props = withDefaults(defineProps<{
     validator: Validator | null;
     errorBox?: ErrorBox | null;
 
-    /** Price in cents */
     min?: number | null;
-    /** Price in cents */
     max?: number | null;
-    stepper?: boolean;
-    required?: boolean;
-    disabled?: boolean;
-    suffix?: string;
-    suffixSingular?: string | null;
     placeholder?: string;
-    floatingPoint?: boolean; // In cents if floating point, never returns floats!
+    suffix?: string;
+    disabled?: boolean;
+    required?: boolean;
+
+    /**
+     * Defines how the values are stored as integers.
+     *
+     * 2 means that a value of 1 represents 0,01
+     * 4 means that a value of 1 represents 0,0001
+     */
+    fractionDigits?: number;
+
+    /**
+     * Maximum decimal places to allow.
+     * E.g. fraction digits is set to 4, but you won't allow values smaller than 0,01, set this to 2 (= maximum).
+     * when fraction digits is set to 4 and round fraction digits is set to 0, it will round all fractions (0,5 becomes 1)
+     */
+    roundFractionDigits?: number | null;
 }>(), {
     title: undefined,
     errorFields: 'number',
@@ -52,16 +69,15 @@ const props = withDefaults(defineProps<{
     errorBox: null,
     min: null,
     max: null,
-    stepper: false,
-    required: true,
-    disabled: false,
-    suffix: '',
-    suffixSingular: null,
     placeholder: '',
-    floatingPoint: false,
+    suffix: '',
+    disabled: false,
+    required: true,
+    fractionDigits: 2,
+    roundFractionDigits: null
 
 });
-const numberInput = useNumberInput(computed(() => ({...props, fractionDigits: props.floatingPoint ? 2 : 0, roundFractionDigits: null})));
+const numberInput = useNumberInput(computed(() => props));
 
 const errors = useErrors({ validator: props.validator });
 const model = defineModel<number | null>({ default: null });
