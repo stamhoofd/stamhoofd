@@ -12,9 +12,7 @@
         <div class="split-inputs">
             <PriceInputBox v-model="fixedDiscount" error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%SK`)" :validator="errors.validator" :min="0" :required="true" :placeholder="$t(`%JN`)" />
                 
-            <STInputBox error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)">
-                <PermyriadInput v-model="percentageDiscount" :required="true" :placeholder="$t(`%2I`)" />
-            </STInputBox>
+            <PermyriadInputBox v-model="percentageDiscount" error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)" :required="true" :placeholder="$t(`%2I`)" :validator="errors.validator" />
         </div>
 
         <p class="style-description-small">
@@ -114,8 +112,6 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import PermyriadInput from '@stamhoofd/components/inputs/PermyriadInput.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
@@ -123,6 +119,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import type { PrivateWebshop } from '@stamhoofd/structures';
 import { Discount, DiscountRequirement, GeneralDiscount, ProductDiscountSettings, ProductSelector, ProductsSelector } from '@stamhoofd/structures';
 
+import PermyriadInputBox from '@stamhoofd/components/inputs/PermyriadInputBox.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import { computed } from 'vue';
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
