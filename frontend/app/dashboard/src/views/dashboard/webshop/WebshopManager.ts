@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
@@ -110,7 +110,7 @@ export class WebshopManager {
 
         // Clone data and keep references
         this.context.organization!.webshops.find(w => w.id === this.preview.id)?.deepSet(webshop);
-        this.preview.deepSet(webshop);
+        this.updatePreview(webshop);
         new OrganizationManager(this.context).save().catch(console.error);
 
         try {
@@ -219,7 +219,7 @@ export class WebshopManager {
             const webshop = await this.fetchWebshop(shouldRetry);
             // Clone data and keep references
             this.context.organization!.webshops.find(w => w.id === this.preview.id)?.deepSet(webshop);
-            this.preview.deepSet(webshop);
+            this.updatePreview(webshop);
 
             this.lastFetchedWebshop = new Date();
             return webshop;
@@ -315,6 +315,17 @@ export class WebshopManager {
         }
 
         return PrivateWebshop.decode(new ObjectData(raw, { version: Version }));
+    }
+
+    private updatePreview(webshop: PrivateWebshop) {
+        // deepset does clear the products and categories on the webshop, therefore we need to restore them
+        const products = webshop.products.slice();
+        const categories = webshop.categories.slice();
+
+        this.preview.deepSet(webshop);
+
+        webshop.products = products;
+        webshop.categories = categories;
     }
 }
 
