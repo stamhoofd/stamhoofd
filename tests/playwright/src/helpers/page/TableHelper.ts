@@ -16,6 +16,10 @@ export class TableHelper {
             .click();
     }
 
+    async waitForFirstRow() {
+        return this.locator.getByTestId('table-row').first().waitFor();
+    }
+
     getRow(hasText?: HasTextFilter) {
         return this.locator.getByTestId('table-row').filter({ hasText });
     }

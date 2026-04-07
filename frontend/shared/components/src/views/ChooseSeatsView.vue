@@ -1,5 +1,5 @@
 <template>
-    <form class="st-view choose-seats-view shade" @submit.prevent="save">
+    <form class="st-view choose-seats-view shade" data-testid="choose-seats-view" @submit.prevent="save">
         <STNavigationBar :title="title" />
         <main v-if="seatingPlan">
             <h1>
@@ -25,7 +25,7 @@
 
         <STToolbar>
             <template #right>
-                <button class="button primary" type="submit" :disabled="selectedAmount !== amount">
+                <button class="button primary" type="submit" :disabled="selectedAmount !== amount" data-testid="confirm-seats-button">
                     <span>{{ $t('%X9') }}</span>
                     <span class="icon arrow-right" />
                 </button>

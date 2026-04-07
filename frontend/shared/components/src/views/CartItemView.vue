@@ -1,5 +1,5 @@
 <template>
-    <form class="st-view cart-item-view" @submit.prevent="addToCart">
+    <form class="st-view cart-item-view" data-testid="cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name">
             <template #left>
                 <p v-if="!webshop.isAllFree || pricedItem.getPriceWithDiscounts()">
@@ -104,7 +104,7 @@
                 <hr><h2>{{ $t('%M4') }}</h2>
 
                 <STInputBox class="max">
-                    <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
+                    <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" data-testid="amount-number-input" />
                 </STInputBox>
 
                 <p v-if="stockText" class="style-description-small" v-text="stockText" />
@@ -145,15 +145,15 @@
         <STToolbar v-if="canOrder">
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button v-if="willNeedSeats" class="button primary" type="submit">
+                    <button v-if="willNeedSeats" class="button primary" type="submit" data-testid="save-button">
                         <span>{{ $t('%k5') }}</span>
                         <span class="icon arrow-right" />
                     </button>
-                    <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
+                    <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit" data-testid="save-button">
                         <span class="icon basket" />
                         <span>{{ $t('%v7') }}</span>
                     </button>
-                    <button v-else class="button primary" type="submit">
+                    <button v-else class="button primary" type="submit" data-testid="save-button">
                         <span v-if="cartEnabled" class="icon basket" />
                         <span v-if="cartEnabled">{{ $t('%SN') }}</span>
                         <span v-else>{{ $t('%16p') }}</span>

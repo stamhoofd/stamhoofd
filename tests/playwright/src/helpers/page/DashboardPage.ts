@@ -4,10 +4,12 @@ import { WorkerData } from '../worker/WorkerData.js';
 
 export enum DashboardTab {
     Events = 'events',
+    Webshops = 'webshops',
 }
 
 const dashboardTabLabels: Record<DashboardTab, string> = {
     [DashboardTab.Events]: 'Activiteiten',
+    [DashboardTab.Webshops]: 'Verkoop',
 };
 
 export class DashboardPage {

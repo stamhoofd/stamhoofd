@@ -1,5 +1,5 @@
 <template>
-    <article class="product-box" :class="{ selected: count > 0}" @click="onClicked">
+    <article class="product-box" :class="{ selected: count > 0}" data-testid="product-box" @click="onClicked">
         <div class="left" />
         <div class="content">
             <div>

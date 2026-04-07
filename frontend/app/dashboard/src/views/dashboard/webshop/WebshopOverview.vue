@@ -57,7 +57,7 @@
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
             <STList class="illustration-list">
-                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openOrders(true)">
+                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" data-testid="open-orders-button" @click="openOrders(true)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                     </template>

@@ -2,7 +2,7 @@
 import { test as base } from './base.js';
 
 // All other imports perferably later
-import { Token, UserFactory } from '@stamhoofd/models';
+import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import fs from 'fs';
@@ -10,7 +10,7 @@ import path from 'path';
 import { WorkerData } from '../helpers/index.js';
 
 /**
- * Platform test fixture (authenticated)
+ * Organization test fixture (authenticated)
  */
 export const test = base.extend<
     object,
@@ -37,13 +37,18 @@ export const test = base.extend<
             const email = `email-${WorkerData.id}@domain.com`;
             const password = 'testAbc123456';
 
-            TestUtils.setPermanentEnvironment('userMode', 'platform');
+            TestUtils.setPermanentEnvironment('userMode', 'organization');
+
+            const organization = await new OrganizationFactory({
+                name: `Organization ${WorkerData.id}`,
+            }).create();
 
             const user = await new UserFactory({
                 firstName: `Firstname${WorkerData.id}`,
                 lastName: `Lastname${WorkerData.id}`,
                 email,
-                password
+                password,
+                organization,
             }).create();
 
             // create token
@@ -63,7 +68,7 @@ export const test = base.extend<
                             origin: WorkerData.urls.dashboard,
                             localStorage: [
                                 {
-                                    name: 'token-platform',
+                                    name: `token-${organization.id}`,
                                     value: tokenString,
                                 },
                             ],

@@ -14,6 +14,7 @@
             type="tel"
             :disabled="disabled"
             v-bind="$attrs"
+            data-testid="phone-input"
             @change="validate(false)"
             @input="onTyping"
         >

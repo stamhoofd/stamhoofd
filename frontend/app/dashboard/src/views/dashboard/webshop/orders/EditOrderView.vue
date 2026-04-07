@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" class="edit-order-view" :disabled="!isChanged" :loading="saving" @save="save">
+    <SaveView :title="title" class="edit-order-view" :disabled="!isChanged" :loading="saving" data-testid="edit-order-view" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -17,10 +17,10 @@
             <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Uy`)">
                 <div class="input-group">
                     <div>
-                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)">
+                        <input v-model="firstName" class="input" name="fname" type="text" required autocomplete="given-name" :placeholder="$t(`%1MT`)" data-testid="first-name-input">
                     </div>
                     <div>
-                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)">
+                        <input v-model="lastName" class="input" name="lname" type="text" required autocomplete="family-name" :placeholder="$t(`%1MU`)" data-testid="last-name-input">
                     </div>
                 </div>
             </STInputBox>
@@ -139,7 +139,7 @@
             </STList>
 
             <p v-if="(webshopFull && webshopFull.shouldEnableCart) || patchedOrder.data.cart.items.length === 0">
-                <button class="button text" type="button" @click="addProduct">
+                <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
                     <span class="icon add" />
                     <span>{{ $t('%1IY') }}</span>
                 </button>
@@ -156,33 +156,33 @@
     </SaveView>
 </template>
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
-import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
-import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
-import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
-import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
-import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
-import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
-import Radio from '@stamhoofd/components/inputs/Radio.vue';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import PhoneInput from '@stamhoofd/components/inputs/PhoneInput.vue';
+import Radio from '@stamhoofd/components/inputs/Radio.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import FillRecordCategoryBox from '@stamhoofd/components/records/components/FillRecordCategoryBox.vue';
+import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
+import CartItemView from '@stamhoofd/components/views/CartItemView.vue';
+import FieldBox from '@stamhoofd/components/views/FieldBox.vue';
+import PaymentSelectionList from '@stamhoofd/components/views/PaymentSelectionList.vue';
+import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import type { CartItem, CheckoutMethod, DiscountCode, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod} from '@stamhoofd/structures';
+import type { CartItem, CheckoutMethod, DiscountCode, PatchAnswers, ValidatedAddress, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { CheckoutMethodType, Customer, OrderData, PaymentConfiguration, PaymentMethod, PrivateOrder, RecordCategory, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -511,6 +511,7 @@ async function save() {
 
 async function addProduct() {
     const clone = patchedOrder.value.data.clone();
+
     const w = await props.webshopManager.loadWebshopIfNeeded();
 
     present(new ComponentWithProperties(NavigationController, {

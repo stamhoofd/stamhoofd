@@ -48,6 +48,7 @@
                                     '--y': seat.y + 'px',
                                     '--color': getSeatColor(seat),
                                 }"
+                                data-testid="seat-button"
                                 @click="onClick(row, seat)"
                                 @mouseover="onHover(row, seat)"
                             >

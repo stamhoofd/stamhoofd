@@ -7,7 +7,7 @@
         <STList class="payment-selection-list">
             <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
-                    <Radio v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" />
+                    <Radio v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" data-testid="payment-method-option" />
                 </template>
 
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
