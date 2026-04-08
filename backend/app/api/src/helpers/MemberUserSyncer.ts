@@ -1,8 +1,8 @@
-import type { MemberWithUsers} from '@stamhoofd/models';
+import type { MemberWithUsers } from '@stamhoofd/models';
 import { CachedBalance, Member, MemberResponsibilityRecord, Organization, Platform, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
-import type { MemberDetails, PermissionRole} from '@stamhoofd/structures';
+import type { MemberDetails, PermissionRole } from '@stamhoofd/structures';
 import { AuditLogSource, Permissions, ReceivableBalanceType, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
@@ -98,7 +98,8 @@ export class MemberUserSyncerStatic {
                     }
                 }
 
-                if (member.details.securityCode === null) {
+                // Generate security code (only for userMode platform)
+                if (STAMHOOFD.userMode !== 'organization' && member.details.securityCode === null) {
                     console.log('Generating security code for member ' + member.id);
 
                     const length = 16;
