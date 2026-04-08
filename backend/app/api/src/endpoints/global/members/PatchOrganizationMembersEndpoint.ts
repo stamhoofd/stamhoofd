@@ -169,9 +169,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
 
-            if (!(await Context.auth.canAccessMember(member, PermissionLevel.Write))) {
-                await PatchOrganizationMembersEndpoint.checkSecurityCode(member, securityCode, 'patch');
-            }
+            await PatchOrganizationMembersEndpoint.checkCanAccessMember(member, securityCode, 'patch');
 
             patch = await Context.auth.filterMemberPatch(member, patch);
             const originalDetails = member.details.clone();
@@ -957,7 +955,27 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkSecurityCode(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
+    static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
+        // do not check security code for user mode organization (throw error if not allowed)
+        if (STAMHOOFD.userMode === 'organization') {
+            if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+                console.log('checkSecurityCode: allowed for ' + member.id);
+                return;
+            }
+
+            if (type === 'patch') {
+                throw Context.auth.memberNotFoundOrNoAccess();
+            }
+
+            throw new SimpleError({
+                code: 'known_member_missing_rights',
+                message: 'Creating known member without sufficient access rights',
+                // different message for userMode organization because security codes are not available in that mode
+                human: $t(`{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de vereniging.`, { member: member.details.firstName }),
+                statusCode: 400,
+            });
+        }
+
         if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         }
@@ -1024,6 +1042,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (type === 'patch') {
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
+
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
@@ -1059,7 +1078,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             console.error(member.details.parents);
             console.error(duplicate.details.parents);
 
-            await this.checkSecurityCode(duplicate, securityCode, type);
+            await this.checkCanAccessMember(duplicate, securityCode, type);
 
             // Merge data
             // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
