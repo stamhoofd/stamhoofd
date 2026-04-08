@@ -1,17 +1,17 @@
 import { Column, Database } from '@simonbackx/simple-database';
-import type { PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
-import type { Endpoint} from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { PatchAnswers} from '@stamhoofd/structures';
+import type { PatchAnswers } from '@stamhoofd/structures';
 import { Address, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
+import { Country } from '@stamhoofd/types/Country';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
-import { Country } from '@stamhoofd/types/Country';
 
 const baseUrl = `/organization/members`;
 const endpoint = new PatchOrganizationMembersEndpoint();
@@ -33,7 +33,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
     });
 
     describe('Duplicate members', () => {
-        test('The security code should be a requirement', async () => {
+        test('The security code should be a requirement in userMode platform', async () => {
             const organization = await new OrganizationFactory({ }).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -64,6 +64,192 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await expect(testServer.test(endpoint, request))
                 .rejects
                 .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+        });
+
+        test('Should throw if duplicate member without rights in userMode organization - put', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            const organization = await new OrganizationFactory({ }).create();
+
+            const resources = new Map();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    'id-does-not-matter',
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.None, resources  }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: true,
+                // should be member of the same organization
+                organization
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+        });
+
+        test('Should throw if duplicate member without rights in userMode organization - patch', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            const organization = await new OrganizationFactory({ }).create();
+
+            const resources = new Map();
+
+            const group = await new GroupFactory({
+                organization,
+            }).create();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.None, resources  }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            // existing member
+            await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: true,
+                // should be member of the same organization
+                organization
+            }).create();
+
+            const memberToPatch = await new MemberFactory({
+                firstName: 'otherName',
+                lastName,
+                birthDay,
+                generateData: true,
+                // should be member of the same organization
+                organization
+            }).create();
+
+            // Register this member
+            await new RegistrationFactory({
+                member: memberToPatch,
+                group,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+
+            // create a patch that sets the firstName to the same as the existing member
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: memberToPatch.id,
+                details: MemberDetails.patch({
+                    firstName
+                })
+            });
+
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('not_found'));
+        });
+
+        test('Should be able to create duplicate from another organization in userMode organization', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            const organization = await new OrganizationFactory({ }).create();
+            const otherOrganization = await new OrganizationFactory({ }).create();
+
+            const resources = new Map();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    'id-does-not-matter',
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.None, resources  }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: true,
+                // member of other organization
+                organization: otherOrganization,
+                details: MemberDetails.create({
+                    email: 'existing@test.be'
+                })
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    birthDay: newBirthDay,
+                    email: 'anewemail@example.com',
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+
+            // Check id of the returned memeber does not match the existing member (should not merge)
+            expect(response.body.members.length).toBe(1);
+            expect(response.body.members[0].id).not.toBe(existingMember.id);
+
+            // Check data matches the original data + changes from the put
+            const member = response.body.members[0];
+            expect(member.details.firstName).toBe(firstName);
+            expect(member.details.lastName).toBe(lastName);
+            expect(member.details.birthDay).toEqual(newBirthDay);
+            expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
+            expect(member.details.alternativeEmails).toHaveLength(0);
         });
 
         test('The security code is not a requirement for members without additional data', async () => {
