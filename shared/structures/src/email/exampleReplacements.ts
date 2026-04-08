@@ -194,7 +194,13 @@ function getReplacements() {
         }),
         loginDetails: Replacement.create({
             token: 'loginDetails',
-            html: `<p class="description"><em>${$t('%1EA', {
+            html: STAMHOOFD.userMode === 'organization' ?
+            // without security code if user mode is organization
+            `<p class="description"><em>${$t('%1EA', {
+                email: '<strong>' + $t(`%13a`) + '</strong>' },
+            )}</em></p>` :
+            // with security code if user mode is platform
+            `<p class="description"><em>${$t('%1EA', {
                 email: '<strong>' + $t(`%13a`) + '</strong>' },
             )} ${$t('%1EC', {
                 firstName: $t(`%13h`),
