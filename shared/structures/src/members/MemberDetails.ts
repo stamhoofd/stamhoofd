@@ -80,6 +80,8 @@ export class MemberDetails extends AutoEncoder {
      * Code needed to get access to this member when detecting duplicates. It is only visible for admins, otherwise it will be null.
      *
      * Set this value if you want to gain access to a member but receive the known_member_missing_rights error code
+     * 
+     * For userMode organization this code will always be null.
      */
     @field({ decoder: StringDecoder, nullable: true, version: 331 })
     securityCode: string | null;

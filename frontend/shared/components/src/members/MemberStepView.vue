@@ -45,9 +45,9 @@
 <script setup lang="ts">
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
 import { useDismiss, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import type { Address, PlatformMember, ReviewTimeType} from '@stamhoofd/structures';
+import type { Address, PlatformMember, ReviewTimeType } from '@stamhoofd/structures';
 import { Version } from '@stamhoofd/structures';
-import type { ComponentOptions, Ref} from 'vue';
+import type { ComponentOptions, Ref } from 'vue';
 import { computed, onActivated, ref } from 'vue';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
@@ -182,7 +182,8 @@ async function save() {
     }
     catch (e) {
         if (isSimpleError(e) || isSimpleErrors(e)) {
-            if (e.hasCode('known_member_missing_rights')) {
+            // security codes are not available for userMode organization
+            if (STAMHOOFD.userMode !== 'organization' && e.hasCode('known_member_missing_rights')) {
                 isDuplicate.value = true;
                 loading.value = false;
                 return;

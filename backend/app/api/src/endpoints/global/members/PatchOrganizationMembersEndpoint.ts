@@ -169,9 +169,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
 
-            if (!(await Context.auth.canAccessMember(member, PermissionLevel.Write))) {
-                await PatchOrganizationMembersEndpoint.checkSecurityCode(member, securityCode, 'patch');
-            }
+            await PatchOrganizationMembersEndpoint.checkCanAccessMember(member, securityCode, 'patch');
 
             patch = await Context.auth.filterMemberPatch(member, patch);
             const originalDetails = member.details.clone();
@@ -957,73 +955,98 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkSecurityCode(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
+    private static async checkSecurityCode(member: MemberWithUsersRegistrationsAndGroups, securityCode: string) {
+        try {
+            securityCodeLimiter.track(member.details.name, 1);
+        }
+        catch (e) {
+            Email.sendWebmaster({
+                subject: $t(`%E9`),
+                text: $t(`%EA`) + ' ' + member.details.name + ' ' + $t(`%1G`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
+            });
+
+            throw new SimpleError({
+                code: 'too_many_tries',
+                message: 'Too many securityCodes limited',
+                human: $t(`%EB`),
+                field: 'details.securityCode',
+            });
+        }
+
+        // Entered the security code, so we can link the user to the member
+        if (STAMHOOFD.environment !== 'development') {
+            if (!member.details.securityCode || securityCode !== member.details.securityCode) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    field: 'details.securityCode',
+                    message: 'Invalid security code',
+                    human: Context.i18n.$t('%2i'),
+                    statusCode: 400,
+                });
+            }
+        }
+
+        console.log('checkSecurityCode: security code is correct - for ' + member.id);
+
+        // Grant temporary access to this member without needing to enter the security code again
+        await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Full);
+
+        const log = new AuditLog();
+
+        // a member has multiple organizations, so this is difficult to determine - for now it is only visible in the admin panel
+        log.organizationId = member.organizationId;
+
+        log.type = AuditLogType.MemberSecurityCodeUsed;
+        log.source = AuditLogSource.Anonymous;
+
+        if (Context.user) {
+            log.userId = Context.user.id;
+            log.source = AuditLogSource.User;
+        }
+
+        log.objectId = member.id;
+        log.replacements = new Map([
+            ['m', AuditLogReplacement.create({
+                value: member.details.name,
+                type: AuditLogReplacementType.Member,
+                id: member.id,
+            })],
+        ]);
+        await log.save();
+    }
+
+    static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
+        // do not check security code for user mode organization (throw error if not allowed)
+        if (STAMHOOFD.userMode === 'organization') {
+            if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+                console.log('checkSecurityCode: allowed for ' + member.id);
+                return;
+            }
+
+            if (type === 'patch') {
+                throw Context.auth.memberNotFoundOrNoAccess();
+            }
+
+            throw new SimpleError({
+                code: 'known_member_missing_rights',
+                message: 'Creating known member without sufficient access rights',
+                // different message for userMode organization because security codes are not available in that mode
+                human: $t(`{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de vereniging.`, { member: member.details.firstName }),
+                statusCode: 400,
+            });
+        }
+
         if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         }
         else if (securityCode) {
-            try {
-                securityCodeLimiter.track(member.details.name, 1);
-            }
-            catch (e) {
-                Email.sendWebmaster({
-                    subject: $t(`%E9`),
-                    text: $t(`%EA`) + ' ' + member.details.name + ' ' + $t(`%1G`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
-                });
-
-                throw new SimpleError({
-                    code: 'too_many_tries',
-                    message: 'Too many securityCodes limited',
-                    human: $t(`%EB`),
-                    field: 'details.securityCode',
-                });
-            }
-
-            // Entered the security code, so we can link the user to the member
-            if (STAMHOOFD.environment !== 'development') {
-                if (!member.details.securityCode || securityCode !== member.details.securityCode) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        field: 'details.securityCode',
-                        message: 'Invalid security code',
-                        human: Context.i18n.$t('%2i'),
-                        statusCode: 400,
-                    });
-                }
-            }
-
-            console.log('checkSecurityCode: security code is correct - for ' + member.id);
-
-            // Grant temporary access to this member without needing to enter the security code again
-            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Full);
-
-            const log = new AuditLog();
-
-            // a member has multiple organizations, so this is difficult to determine - for now it is only visible in the admin panel
-            log.organizationId = member.organizationId;
-
-            log.type = AuditLogType.MemberSecurityCodeUsed;
-            log.source = AuditLogSource.Anonymous;
-
-            if (Context.user) {
-                log.userId = Context.user.id;
-                log.source = AuditLogSource.User;
-            }
-
-            log.objectId = member.id;
-            log.replacements = new Map([
-                ['m', AuditLogReplacement.create({
-                    value: member.details.name,
-                    type: AuditLogReplacementType.Member,
-                    id: member.id,
-                })],
-            ]);
-            await log.save();
+           await this.checkSecurityCode(member, securityCode);
         }
         else {
             if (type === 'patch') {
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
+
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
@@ -1059,7 +1082,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             console.error(member.details.parents);
             console.error(duplicate.details.parents);
 
-            await this.checkSecurityCode(duplicate, securityCode, type);
+            await this.checkCanAccessMember(duplicate, securityCode, type);
 
             // Merge data
             // NOTE: We use mergeTwoMembers instead of mergeMultipleMembers, because we should never safe 'member' , because that one does not exist in the database
