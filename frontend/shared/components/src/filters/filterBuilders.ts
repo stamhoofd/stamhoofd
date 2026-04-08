@@ -1,5 +1,5 @@
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, PrivateWebshop, RecordCategory, WebshopPreview } from '@stamhoofd/structures';
-import { Gender, AuditLogType, BalanceItemStatus, BalanceItemType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, RecordType, Webshop } from '@stamhoofd/structures';
+import { AuditLogType, BalanceItemStatus, BalanceItemType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, RecordType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useContext, useOrganization, usePlatform } from '../hooks';
@@ -593,11 +593,16 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
 export function useAuditLogUIFilterBuilders() {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
+    let options: MultipleChoiceUIFilterOption[] = Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type));
+
+    if (STAMHOOFD.userMode === 'organization') {
+        // remove option for member security code (not available in organization mode)
+        options = options.filter(option => option.value !== AuditLogType.MemberSecurityCodeUsed);
+    }
+
     const typeFilter = new MultipleChoiceFilterBuilder({
         name: $t(`%1B`),
-        options: [
-            ...Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type)),
-        ],
+        options,
         wrapper: {
             type: {
                 $in: FilterWrapperMarker,
