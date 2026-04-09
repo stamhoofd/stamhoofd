@@ -204,7 +204,7 @@ const hasBeenExported = calculateHasBeenExported();
 
 function isDocumentFieldEditable(field: RecordSettings) {
     if (hasBeenExported) {
-        // When the document has been exported, prevnet changing duplicate export fields and organization details
+        // When the document has been exported, prevent changing duplicate export fields and organization details
         for (const f of patchedDocument.value.privateSettings.templateDefinition.exportFieldCategories.flatMap(c => c.getAllRecords())) {
             if (f.id === field.id) {
                 return true;
