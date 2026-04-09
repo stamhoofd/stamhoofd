@@ -5,19 +5,25 @@ import type { RecordSettings } from '@stamhoofd/structures';
 
 export type RecordCacheEntry = { record: RecordSettings; rootCategoryId: string; organizationId: string | null };
 
+interface IMemberRecordStore {
+    init(): void
+    getRecord(id: string): Promise<RecordCacheEntry | null>
+}
+
 /**
  * Service that caches all available member records in the system.
- * - It verified whether ids are unique system wide
+ * - It verifies whether ids are unique system wide
  * - It allows fast retrieving of record settings by id (for permission checking)
  */
-export class MemberRecordStore {
-    private static cache = new Map<string, RecordCacheEntry>();
+class MemberRecordStoreService implements IMemberRecordStore {
+    private  cache = new Map<string, RecordCacheEntry>();
 
-    constructor() {
+    init() {
+        // Do not cache records if userMode organization
+        if (STAMHOOFD.userMode === 'organization') {
+            return;
+        }
 
-    }
-
-    static init() {
         // Load initial data
         this.loadIfNeeded().catch(console.error);
 
@@ -25,9 +31,9 @@ export class MemberRecordStore {
         this.listen();
     }
 
-    private static listening = false;
+    private  listening = false;
 
-    private static listen() {
+    private  listen() {
         // Create listeners to update data as organizations and platform is updated
         if (this.listening) {
             return;
@@ -66,7 +72,7 @@ export class MemberRecordStore {
             }
 
             if (event.model instanceof Organization) {
-                // Delete all records with organizationId = null
+                // Delete all records where organizationId equals the organization
                 for (const [id, entry] of this.cache) {
                     if (entry.organizationId === event.model.id) {
                         this.cache.delete(id);
@@ -88,10 +94,10 @@ export class MemberRecordStore {
         });
     }
 
-    static _loadAllPromise: Promise<void> | null = null;
-    static _didLoadAll = false;
+    private  _loadAllPromise: Promise<void> | null = null;
+    private  _didLoadAll = false;
 
-    static async loadIfNeeded() {
+    private async loadIfNeeded() {
         if (this._didLoadAll) {
             return;
         }
@@ -116,7 +122,7 @@ export class MemberRecordStore {
         }
     }
 
-    static async loadAll() {
+    private async loadAll() {
         this.cache = new Map<string, RecordCacheEntry>();
 
         // We use a queue here so we can abort this long running task properly
@@ -157,8 +163,28 @@ export class MemberRecordStore {
         });
     }
 
-    static async getRecord(id: string): Promise<RecordCacheEntry | null> {
+     async getRecord(id: string): Promise<RecordCacheEntry | null> {
         await this.loadIfNeeded();
         return this.cache.get(id) ?? null;
     }
 }
+
+/**
+ * Dummy implementation for userMode organization to prevent loading records in cache by accident.
+ * In userMode organization records should not be cached.
+ */
+class MemberRecordStoreDummy implements IMemberRecordStore {
+    init() {
+        // do nothing
+    }
+
+    /**
+     * This method should never be used in userMode organization because
+     * records are not cached.
+     */
+    getRecord(_id: string): Promise<RecordCacheEntry | null> {
+        throw new Error('Do not use this method in userMode organization.')
+    }
+}
+
+export const MemberRecordStore: IMemberRecordStore = STAMHOOFD.userMode === 'organization' ? new MemberRecordStoreDummy() : new MemberRecordStoreService();

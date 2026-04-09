@@ -1,11 +1,12 @@
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User} from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
-import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordSettings, ResourcePermissions} from '@stamhoofd/structures';
+import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
+import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
+import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
 
@@ -14,7 +15,7 @@ import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryM
  * This helps when dependencies of permissions change, such as parent categories for groups
  */
 export class AdminPermissionChecker {
-    organization: Organization | null;
+    readonly organization: Organization | null;
     user: User;
     /**
      * The member that is linked to this user = is this user
@@ -1273,8 +1274,33 @@ export class AdminPermissionChecker {
         return false;
     }
 
+    private async getSingleRecord(id: string): Promise<RecordCacheEntry | null> {
+        // For userMode organization the records should not be cached
+        if (STAMHOOFD.userMode === 'organization') {
+            if (this.organization) {
+                for (const recordCategory of this.organization.meta.recordsConfiguration.recordCategories) {
+                    for (const record of recordCategory.getAllRecords()) {
+                        if (id === record.id) {
+                            return {
+                                record,
+                                rootCategoryId: recordCategory.id,
+                                organizationId: this.organization.id
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+            // should never get called if no organization
+            console.error('getRecord called without an organization');
+            return null;
+        }
+
+        return MemberRecordStore.getRecord(id);
+    }
+
     async canFilterMembersOnRecordId(recordId: string): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
-        const record = await MemberRecordStore.getRecord(recordId);
+        const record = await this.getSingleRecord(recordId);
         if (!record) {
             return {
                 canAccess: false,
@@ -1340,87 +1366,90 @@ export class AdminPermissionChecker {
         };
     }
 
-    async checkRecordAccess(member: MemberWithUsersRegistrationsAndGroups, recordId: string, level: PermissionLevel = PermissionLevel.Read): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
-        const record = await MemberRecordStore.getRecord(recordId);
-        if (!record) {
-            return {
-                canAccess: false,
-                record: null,
-            };
-        }
+    private async loopRecordAnswerSettingsAccess<T extends RecordAnswer | AutoEncoderPatchType<RecordAnswer>>({member, level, recordAnswers, callback }:
+        {
+            member: MemberWithUsersRegistrationsAndGroups,
+            level: PermissionLevel,
+            recordAnswers: {entries: () =>  MapIterator<[string, T | null | undefined]>},
+            callback: (result: { canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }, entry: [keys: string, value: T | null | undefined]) => void
+        }): Promise<RecordSettings | null>
+    {
+        if (STAMHOOFD.userMode !== 'platform') {
+            // todo: for organzation
+            throw new Error('Not implemented')
 
-        if (!this.checkScope(record.organizationId)) {
-            return {
-                canAccess: false,
-                record: record.record,
-            };
+        } else {
+            for (const entry of recordAnswers.entries()) {
+                const key = entry[0];
+                const cachedRecordEntry = await MemberRecordStore.getRecord(key);
+                if (cachedRecordEntry) {
+                    const canAccess = await this.checkRecordAccess({
+                        member,
+                        record: cachedRecordEntry.record,
+                        organizationId: cachedRecordEntry.organizationId,
+                        rootCategoryId: cachedRecordEntry.rootCategoryId,
+                        level
+                    });
+                    callback({canAccess, record: cachedRecordEntry.record}, entry);
+                } else {
+                    callback({canAccess: false, record: null}, entry);
+                }
+                
+            }
+
+            return null;
+        }
+    }
+
+    private async checkRecordAccess({member, level, record, organizationId, rootCategoryId}: {member: MemberWithUsersRegistrationsAndGroups, record: RecordSettings, organizationId: string | null, rootCategoryId: string, level: PermissionLevel}): Promise<boolean> {
+        if (!this.checkScope(organizationId)) {
+            return false
         }
 
         const isUserManager = this.isUserManager(member);
         if (isUserManager) {
-            if (record.record.checkPermissionForUserManager(level)) {
-                return {
-                    canAccess: true,
-                    record: record.record,
-                };
+            if (record.checkPermissionForUserManager(level)) {
+                return true;
             }
         }
 
         if (!this.user.permissions) {
-            return {
-                canAccess: false,
-                record: record.record,
-            };
+            return false;
         }
 
-        if (record.organizationId) {
-            const organizationPermissions = await this.getOrganizationPermissions(record.organizationId);
-            if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
-                return {
-                    canAccess: true,
-                    record: record.record,
-                };
+        if (organizationId) {
+            const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+            if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
+                return true;
             }
         }
         else {
             // Also check current scoped organization
             if (this.organization) {
                 const organizationPermissions = await this.getOrganizationPermissions(this.organization.id);
-                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
-                    return {
-                        canAccess: true,
-                        record: record.record,
-                    };
+                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
+                    return true;
                 }
             }
         }
 
         // 2. Check platform permissions
-        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
-            return {
-                canAccess: true,
-                record: record.record,
-            };
+        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
+            return true;
         }
 
         // All member access, means also having access to record categories of non-registered members
         if (this.canAccessAllPlatformMembers(level)) { // needs to be full to also inherit record category access
-            return {
-                canAccess: true,
-                record: record.record,
-            };
+            return true;
         }
 
         if (hasTemporaryMemberAccess(this.user.id, member.id, PermissionLevel.Full)) {
             // You created this member, so temporary can read all records in order to set the member up correctly
-            return {
-                canAccess: true,
-                record: record.record,
-            };
+            return true;
         }
 
         // It is possible that this is a platform admin (or an admin that has access to multiple organizations), and inherits automatic permissions for tags. So'll need to loop all the organizations where this member has an active registration for
-        if (!record.organizationId && !this.organization) {
+        if (!organizationId && !this.organization) {
             const checkedOrganizations = new Map<string, boolean>();
             for (const registration of member.registrations) {
                 const permissions = checkedOrganizations.get(registration.organizationId);
@@ -1428,22 +1457,16 @@ export class AdminPermissionChecker {
                 // Checking the organization permissions is faster (and less data lookups required), so we do that first before doing the more expensive registration access check
                 if (permissions !== undefined) {
                     if (permissions === true && await this.canAccessRegistration(registration, level)) {
-                        return {
-                            canAccess: true,
-                            record: record.record,
-                        };
+                        return true;
                     }
                     continue;
                 }
 
                 const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
-                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
                     checkedOrganizations.set(registration.organizationId, true);
                     if (await this.canAccessRegistration(registration, level)) {
-                        return {
-                            canAccess: true,
-                            record: record.record,
-                        };
+                        return true;
                     }
                 }
                 else {
@@ -1452,10 +1475,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        return {
-            canAccess: false,
-            record: record.record,
-        };
+        return false;
     }
 
     /**
@@ -1476,18 +1496,22 @@ export class AdminPermissionChecker {
     async filterMemberData(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean }): Promise<MemberWithRegistrationsBlob> {
         const cloned = data.clone();
 
-        for (const [key, value] of cloned.details.recordAnswers.entries()) {
-            const { canAccess, record } = await this.checkRecordAccess(member, key, PermissionLevel.Read);
-            if (!canAccess) {
-                cloned.details.recordAnswers.delete(key);
-            }
-            else {
-                if (value) {
-                    // Force update
-                    value.settings = record;
+        await this.loopRecordAnswerSettingsAccess({
+            member,
+            level: PermissionLevel.Read,
+            recordAnswers: cloned.details.recordAnswers,
+            callback: ({ canAccess, record }, [key, value]) => {
+                if (!canAccess) {
+                    cloned.details.recordAnswers.delete(key);
+                }
+                else {
+                    if (value) {
+                        // Force update
+                        value.settings = record;
+                    }
                 }
             }
-        }
+        });
 
         const isUserManager = this.isUserManager(member);
         if (isUserManager) {
@@ -1615,21 +1639,25 @@ export class AdminPermissionChecker {
                 });
             }
 
-            for (const [key, value] of data.details.recordAnswers.entries()) {
-                const { canAccess, record } = await this.checkRecordAccess(member, key, PermissionLevel.Write);
-                if (!canAccess) {
-                    throw new SimpleError({
-                        code: 'permission_denied',
-                        message: $t('%Ff', { name: record?.name ?? 'deze vraag' }),
-                        statusCode: 400,
-                    });
-                }
+            await this.loopRecordAnswerSettingsAccess({
+                member,
+                level: PermissionLevel.Write,
+                recordAnswers: data.details.recordAnswers,
+                callback: ({canAccess, record}, [_key, value]) => {
+                    if (!canAccess) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: $t('%Ff', { name: record?.name ?? 'deze vraag' }),
+                            statusCode: 400,
+                        });
+                    }
 
-                // Force set the value settings
-                if (value) {
-                    value.settings = record;
+                    // Force set the value settings
+                    if (value) {
+                        value.settings = record;
+                    }
                 }
-            }
+            })
         }
 
         const isUserManager = this.isUserManager(member);
