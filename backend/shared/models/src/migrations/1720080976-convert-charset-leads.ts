@@ -32,7 +32,6 @@ export default new Migration(async () => {
     return Promise.resolve();
 });
 
-
 async function tableExists(tableName: string): Promise<boolean> {
     const [rows] = await Database.select(
         `

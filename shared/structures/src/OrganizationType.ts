@@ -20,6 +20,7 @@ export enum OrganizationType {
     Student = 'Student',
     HorseRiding = 'HorseRiding',
     Neighborhood = 'Neighborhood',
+    Gymnastics = 'Gymnastics',
     Nature = 'Nature',
     Music = 'Music',
     Professional = 'Professional',
@@ -28,8 +29,14 @@ export enum OrganizationType {
     LGBTQ = 'LGBTQ',
     Politics = 'Politics',
     Union = 'Union',
+    ParentsCommittee = 'ParentsCommittee',
     GoodCause = 'GoodCause',
+    Kids = 'Kids',
     Other = 'Other',
+    City = 'City',
+    Events = 'Events',
+    Business = 'Business',
+    Stage = 'Stage',
 }
 
 export class OrganizationTypeHelper {
@@ -55,6 +62,10 @@ export class OrganizationTypeHelper {
             {
                 value: OrganizationType.Golf,
                 name: $t(`%27`),
+            },
+            {
+                value: OrganizationType.Gymnastics,
+                name: $t('Turnen'),
             },
             {
                 value: OrganizationType.Athletics,
@@ -117,6 +128,10 @@ export class OrganizationTypeHelper {
                 name: $t(`%mO`),
             },
             {
+                value: OrganizationType.Events,
+                name: $t('Evenementen'),
+            },
+            {
                 value: OrganizationType.Professional,
                 name: $t(`%mP`),
             },
@@ -125,28 +140,48 @@ export class OrganizationTypeHelper {
                 name: $t(`%mQ`),
             },
             {
+                value: OrganizationType.Stage,
+                name: $t('Theater (toneel, musical, ...)'),
+            },
+            {
                 value: OrganizationType.Culture,
                 name: $t(`%mR`),
             },
-            {
-                value: OrganizationType.LGBTQ,
-                name: $t(`%t`),
-            },
+            // {
+            //     value: OrganizationType.LGBTQ,
+            //     name: $t(`%t`),
+            // },
             {
                 value: OrganizationType.Politics,
                 name: $t(`%mS`),
             },
+            // {
+            //     value: OrganizationType.Union,
+            //     name: $t(`%mT`),
+            // },
             {
-                value: OrganizationType.Union,
-                name: $t(`%mT`),
+                value: OrganizationType.School,
+                name: $t(`%p`),
+            },
+            {
+                value: OrganizationType.Kids,
+                name: $t('Kinderen (kampen, speelpleinwerking, ...)'),
+            },
+            {
+                value: OrganizationType.ParentsCommittee,
+                name: $t('Oudercomité'),
             },
             {
                 value: OrganizationType.GoodCause,
                 name: $t('Goed doel'),
             },
             {
-                value: OrganizationType.School,
-                name: $t(`%p`),
+                value: OrganizationType.City,
+                name: $t('Gemeente of stad'),
+            },
+            {
+                value: OrganizationType.Business,
+                name: $t('Bedrijf'),
             },
             {
                 value: OrganizationType.Other,
@@ -159,6 +194,7 @@ export class OrganizationTypeHelper {
         switch (type) {
             case OrganizationType.Youth:
             case OrganizationType.Student:
+            case OrganizationType.Kids:
                 return $t(`%mU`);
 
             case OrganizationType.Sport:
@@ -170,19 +206,26 @@ export class OrganizationTypeHelper {
             case OrganizationType.Hockey:
             case OrganizationType.Cycling:
             case OrganizationType.Swimming:
-            case OrganizationType.Dance:
             case OrganizationType.Volleyball:
             case OrganizationType.Basketball:
             case OrganizationType.Judo:
             case OrganizationType.HorseRiding:
+            case OrganizationType.Gymnastics:
                 return $t(`%1I`);
 
             case OrganizationType.Culture:
             case OrganizationType.Art:
             case OrganizationType.Music:
+            case OrganizationType.Stage:
+            case OrganizationType.Events:
+            case OrganizationType.Dance:
                 return $t(`%mR`);
 
+            case OrganizationType.School:
+                return $t('Onderwijs');
+
             case OrganizationType.Other:
+            case OrganizationType.ParentsCommittee:
             case OrganizationType.LGBTQ:
             case OrganizationType.Politics:
             case OrganizationType.Union:
@@ -190,7 +233,8 @@ export class OrganizationTypeHelper {
             case OrganizationType.Professional:
             case OrganizationType.Neighborhood:
             case OrganizationType.GoodCause:
-            case OrganizationType.School:
+            case OrganizationType.City:
+            case OrganizationType.Business:
                 return $t(`%mV`);
         }
     }
