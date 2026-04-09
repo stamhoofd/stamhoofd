@@ -81,7 +81,5 @@ ALTER TABLE `webshop_tickets` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `webshop_tickets` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `webshops` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER TABLE `webshops` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `leads` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-ALTER TABLE `leads` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ALTER DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 set foreign_key_checks=1; 
