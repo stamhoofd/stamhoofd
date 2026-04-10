@@ -1370,18 +1370,53 @@ export class AdminPermissionChecker {
         {
             member: MemberWithUsersRegistrationsAndGroups,
             level: PermissionLevel,
-            recordAnswers: {entries: () =>  MapIterator<[string, T | null | undefined]>},
+            recordAnswers: PatchMap<string, T | null | undefined> |  Map<string, T>
             callback: (result: { canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }, entry: [keys: string, value: T | null | undefined]) => void
-        }): Promise<RecordSettings | null>
+        }): Promise<void>
     {
         if (STAMHOOFD.userMode !== 'platform') {
-            // todo: for organzation
-            throw new Error('Not implemented')
+            let organization = this.organization;
 
-        } else {
+            if (!organization) {
+                // normally this should not happen
+                console.error('loopRecordAnswerSettingsAccess called without an organization set');
+                let organizationId = member.organizationId;
+
+                if (!organizationId) {
+                    if (member.registrations.length === 0) {
+                        // no access to any records (theoretically a global admin should have access, but normally this case should not happen)
+                        for (const entry of recordAnswers.entries()) {
+                            callback({canAccess: false, record: null}, entry);
+                        }
+                        return;
+                    }
+                    
+                    // in userMode organization a member can only be linked to 1 organization
+                    organizationId = member.registrations[0].organizationId;
+                }
+
+                organization = await this.getOrganization(organizationId);
+            }
+
+            const organizationId = organization.id;
+            const map = new Map<string, RecordCacheEntry>()
+
+            // create map
+            for (const category of organization.meta.recordsConfiguration.recordCategories) {
+                const rootCategoryId = category.id;
+
+                for (const record of category.getAllRecords()) {
+                    map.set(record.id, {
+                        record,
+                        organizationId,
+                        rootCategoryId,
+                    });
+                }
+            }
+            
             for (const entry of recordAnswers.entries()) {
                 const key = entry[0];
-                const cachedRecordEntry = await MemberRecordStore.getRecord(key);
+                const cachedRecordEntry = map.get(key);
                 if (cachedRecordEntry) {
                     const canAccess = await this.checkRecordAccess({
                         member,
@@ -1394,10 +1429,27 @@ export class AdminPermissionChecker {
                 } else {
                     callback({canAccess: false, record: null}, entry);
                 }
-                
             }
 
-            return null;
+            return;
+        }
+
+        // userMode platform
+         for (const entry of recordAnswers.entries()) {
+            const key = entry[0];
+            const cachedRecordEntry = await MemberRecordStore.getRecord(key);
+            if (cachedRecordEntry) {
+                const canAccess = await this.checkRecordAccess({
+                    member,
+                    record: cachedRecordEntry.record,
+                    organizationId: cachedRecordEntry.organizationId,
+                    rootCategoryId: cachedRecordEntry.rootCategoryId,
+                    level
+                });
+                callback({canAccess, record: cachedRecordEntry.record}, entry);
+            } else {
+                callback({canAccess: false, record: null}, entry);
+            }
         }
     }
 
