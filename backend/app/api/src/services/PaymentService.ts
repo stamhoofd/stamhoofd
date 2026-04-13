@@ -582,7 +582,7 @@ export class PaymentService {
         const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, privatePaymentConfiguration);
         payment.provider = provider;
         payment.stripeAccountId = stripeAccount?.id ?? null;
-        ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
+        ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => ({price: p, amount: 1})));
 
         await payment.save();
         let paymentUrl: string | null = null;

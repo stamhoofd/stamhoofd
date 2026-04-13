@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Data, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Data, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
@@ -8,10 +8,10 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
-import { AuditLogService } from '../../../../services/AuditLogService.js';
-import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper.js';
+import { AuditLogService } from '../../../../services/AuditLogService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
+import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -166,7 +166,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                             payment,
                             organization,
                             webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
-                            order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
+                            order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => ({price: p.discountedPrice, amount: p.amount}))),
                         );
 
                         await payment.save();

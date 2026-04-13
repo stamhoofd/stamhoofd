@@ -2,7 +2,7 @@ import type { Organization, Payment } from '@stamhoofd/models';
 import { calculateVATPercentage, PaymentProvider, STPackageType } from '@stamhoofd/structures';
 
 export class ServiceFeeHelper {
-    static setServiceFee(payment: Payment, organization: Organization, type: 'webshop' | 'members' | 'tickets' | 'system', itemPrices: number[]): void {
+    static setServiceFee(payment: Payment, organization: Organization, type: 'webshop' | 'members' | 'tickets' | 'system', itemPrices: {price: number, amount: number}[]): void {
         if (type === 'system') {
             return;
         }
@@ -42,14 +42,16 @@ export class ServiceFeeHelper {
             console.log('Service fee settings for payment', payment.id, type, 'are', fees);
 
             if (fees && (fees.fixed > 0 || fees.percentage > 0)) {
-                serviceFee = itemPrices.reduce((total, price) => {
-                    return total + calculateFee(
+                serviceFee = itemPrices.reduce((total, {price, amount}) => {
+                    const fee = calculateFee(
                         price,
                         fees.minimum,
                         fees.maximum,
                         fees.fixed,
                         fees.percentage,
                     );
+                    
+                    return total + (fee * amount);
                 }, 0);
             }
         }

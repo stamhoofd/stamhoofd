@@ -1,12 +1,13 @@
-import type { Data, EncodeContext, PlainObject} from '@simonbackx/simple-encoding';
+import type { Data, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
-import type { CartItem, CartItemPrice } from './CartItem.js';
-import { v4 as uuidv4 } from 'uuid';
-import type { Checkout } from './Checkout.js';
-import type { Webshop } from './Webshop.js';
 import { Formatter } from '@stamhoofd/utility';
-import type { OptionMenu, Option } from './Product.js';
+import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import type { CartItem, CartItemPrice } from './CartItem.js';
+import type { Checkout } from './Checkout.js';
+import type { Option, OptionMenu } from './Product.js';
+import { CartItemQueue } from './TestDiscount.js';
+import type { Webshop } from './Webshop.js';
 
 export enum OptionSelectionRequirement {
     Required = 'Required',
@@ -43,7 +44,7 @@ export class ProductSelector extends AutoEncoder {
      * - new options are optional
      *
      * For choose one:
-     * - new options are exluded unless all options are optional
+     * - new options are excluded unless all options are optional
      */
     @field({ decoder: new MapDecoder(StringDecoder, new EnumDecoder(OptionSelectionRequirement)) })
     optionIds: Map<string, OptionSelectionRequirement> = new Map();
@@ -437,7 +438,8 @@ export class ProductDiscountSettings extends AutoEncoder {
 export class ProductDiscountTracker {
     discount: ProductDiscountSettings;
     usageCount = 0;
-    cartItemQueue: { price: CartItemPrice; item: CartItem }[] = [];
+    // cartItemQueue: { price: CartItemPrice; item: CartItem }[] = [];
+    private queue: CartItemQueue = new CartItemQueue();
 
     constructor(discount: ProductDiscountSettings) {
         this.discount = discount;
@@ -451,25 +453,26 @@ export class ProductDiscountTracker {
         return null;
     }
 
-    sortQueue() {
-        // Sort queue from highest price to lowest price
-        this.cartItemQueue.sort((a, b) => {
-            return b.price.discountedPrice - a.price.discountedPrice;
-        });
-    }
+    // sortQueue() {
+    //     // Sort queue from highest price to lowest price
+    //     this.cartItemQueue.sort((a, b) => {
+    //         return b.price.discountedPrice - a.price.discountedPrice;
+    //     });
+    // }
 
-    get filteredQueue() {
+    private get filteredQueue() {
         if (this.discount.allowMultipleDiscountsToSameItem) {
-            return this.cartItemQueue;
+            return this.queue.items;
         }
-        return this.cartItemQueue.filter(i => i.price.fixedDiscount === 0 && i.price.percentageDiscount === 0);
+        return this.queue.itemsWithoutDiscounts;
     }
 
     apply() {
         // Make sure we use the next one in the discount applicable discounts
-        this.sortQueue();
-        this.cartItemQueue = this.filteredQueue;
-        const item = this.cartItemQueue.shift();
+        // this.sortQueue();
+        this.queue.sort();
+        this.queue = new CartItemQueue(this.filteredQueue);
+        const item = this.queue.poll();
         if (item) {
             const discount = this.getNextDiscount();
             if (discount) {
@@ -483,17 +486,19 @@ export class ProductDiscountTracker {
         }
     }
 
-    addItemToQueue(cartItem: CartItem) {
-        this.cartItemQueue.push(...cartItem.calculatedPrices.map((price) => {
-            return { price, item: cartItem };
-        }));
-    }
+    // addItemToQueue(cartItem: CartItem) {
+    //     // todo
+    //     this.cartItemQueue.push(...cartItem.calculatedPrices.flatMap((price) => {
+    //         return price.unGroup().map(p => ({ price: p, item: cartItem }));
+    //     }));
+    // }
 
     getPotentialDiscount() {
         let offset = 0;
         let potential = 0;
 
-        this.sortQueue();
+        // this.sortQueue();
+        this.queue.sort();
         for (const item of this.filteredQueue) {
             const d = this.getNextDiscount(offset);
             if (d) {

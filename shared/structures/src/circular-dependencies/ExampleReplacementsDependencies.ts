@@ -84,8 +84,7 @@ function fillReplacements(replacements: Replacement[]) {
                         amount: 2,
                         calculatedPrices: [CartItemPrice.create({
                             price: 550_00,
-                        }), CartItemPrice.create({
-                            price: 550_00,
+                            amount: 2
                         })],
                     }),
                     CartItem.create({

@@ -1,6 +1,6 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
@@ -11,11 +11,11 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
 import { Context } from '../../../helpers/Context.js';
+import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../../../helpers/StripeHelper.js';
 import { AuditLogService } from '../../../services/AuditLogService.js';
-import { UitpasService } from '../../../services/uitpas/UitpasService.js';
-import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { PaymentService } from '../../../services/PaymentService.js';
+import { UitpasService } from '../../../services/uitpas/UitpasService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -198,7 +198,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     payment,
                     organization,
                     webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
-                    order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
+                    order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => ({price: p.discountedPrice, amount: p.amount}))),
                 );
 
                 await payment.save();

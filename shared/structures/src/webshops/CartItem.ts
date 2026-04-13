@@ -1,19 +1,19 @@
-import type { PartialWithoutMethods} from '@simonbackx/simple-encoding';
+import type { PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CartReservedSeat, ReservedSeat } from '../SeatingPlan.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import type { Cart } from './Cart.js';
 import type { StockDefinition } from './CartStockHelper.js';
 import { CartStockHelper } from './CartStockHelper.js';
 import { ProductDiscountSettings } from './Discount.js';
 import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product.js';
+import { UitpasNumberAndPrice } from './UitpasNumberAndPrice.js';
 import type { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
-import { UitpasNumberAndPrice } from './UitpasNumberAndPrice.js';
-import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class CartItemPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -26,6 +26,9 @@ export class CartItemPrice extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     percentageDiscount = 0;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    amount = 1;
 
     get discountedPrice() {
         let price = this.price;
@@ -284,32 +287,50 @@ export class CartItem extends AutoEncoder {
      * Note: this resets any discounts that are applied to the cart item
      */
     calculatePrices(cart: Cart) {
-        const prices: CartItemPrice[] = [];
         const unitPrice = this.calculateUnitPrice(cart);
-        for (let i = 0; i < this.amount; i++) {
-            let p: number;
-            if (i < this.uitpasNumbers.length && this.product.uitpasEvent) {
-                p = this.calculateOptionsPrice(cart, this.uitpasNumbers[i].price);
-            }
-            else {
-                p = unitPrice;
-            }
-            if (i < this.seats.length) {
-                // Seats
-                const seatPrice = p + this.seats[i].price;
 
-                prices.push(CartItemPrice.create({
-                    price: seatPrice,
-                }));
+        if (!this.uitpasNumbers.length && !this.seats.length) {
+            this.calculatedPrices = [
+                CartItemPrice.create({
+                    price: unitPrice,
+                    amount: this.amount
+                })
+            ];
+            return;
+        }
+
+        const priceMap = new Map<number, number>();
+
+        const addPrice = (price: number) => {
+            const totalAmount = (priceMap.get(price) ?? 0) + 1;
+            priceMap.set(price, totalAmount);
+        }
+
+        for (let i = 0; i < this.amount; i++) {
+            let price: number;
+
+            if (i < this.uitpasNumbers.length && this.product.uitpasEvent) {
+                price = this.calculateOptionsPrice(cart, this.uitpasNumbers[i].price);
             }
             else {
-                // Others (non seats)
-                prices.push(CartItemPrice.create({
-                    price: p,
-                }));
+                price = unitPrice;
             }
+
+            // Seats
+            if (i < this.seats.length) {
+                const seatPrice = price + this.seats[i].price;
+                addPrice(seatPrice);
+                continue;
+            }
+
+            // Other
+            addPrice(price);
         }
-        this.calculatedPrices = prices;
+
+        this.calculatedPrices = Array.from(priceMap.entries()).map(([price, amount]) => CartItemPrice.create({
+            price,
+            amount
+        }));
     }
 
     private calculateUnitPrice(cart: Cart): number {
@@ -346,11 +367,11 @@ export class CartItem extends AutoEncoder {
     }
 
     getPriceWithDiscounts(): number {
-        return this.calculatedPrices.reduce((a, b) => a + b.discountedPrice, 0);
+        return this.calculatedPrices.reduce((a, b) => a + (b.discountedPrice * b.amount), 0);
     }
 
     getPriceWithoutDiscounts() {
-        return this.calculatedPrices.reduce((a, b) => a + b.price, 0);
+        return this.calculatedPrices.reduce((a, b) => a + (b.price * b.amount), 0);
     }
 
     /**
@@ -372,23 +393,11 @@ export class CartItem extends AutoEncoder {
     }
 
     private getUnitPriceCombinationsWithoutDiscount() {
-        const priceCombinations = new Map<number, number>();
-        for (const calculatedPrice of this.calculatedPrices) {
-            const price = calculatedPrice.price;
-            priceCombinations.set(price, (priceCombinations.get(price) || 0) + 1);
-        }
-
-        return priceCombinations;
+        return new Map<number, number>(this.calculatedPrices.map(p => [p.price, p.amount]));
     }
 
     private getUnitPriceCombinationsWithDiscount() {
-        const priceCombinations = new Map<number, number>();
-        for (const calculatedPrice of this.calculatedPrices) {
-            const price = calculatedPrice.discountedPrice;
-            priceCombinations.set(price, (priceCombinations.get(price) || 0) + 1);
-        }
-
-        return priceCombinations;
+        return new Map<number, number>(this.calculatedPrices.map(p => [p.discountedPrice, p.amount]));
     }
 
     get formattedAmount(): string | null {
