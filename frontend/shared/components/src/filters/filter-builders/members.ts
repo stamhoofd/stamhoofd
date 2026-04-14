@@ -7,13 +7,13 @@ import { computed, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
-import { getFilterBuildersForRecordCategories } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from './helpers';
+import { getFilterBuildersForRecordCategories } from './record-categories';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {

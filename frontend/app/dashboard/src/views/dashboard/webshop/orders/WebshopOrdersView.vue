@@ -18,22 +18,22 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/orders.ts';
 import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate} from '@stamhoofd/structures';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
