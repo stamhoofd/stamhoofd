@@ -70,6 +70,8 @@ interface DateFilter {
     maximumDate?: number;
 }
 
+type RecordAnswerFilterType = StringFilter | NumberFilter | DateFilter | ChoicesFilter;
+
 enum GroupFilterMode {
     Or = 'Or',
     And = 'And',
@@ -97,7 +99,6 @@ interface FilterGroupEncoded {
 interface OldPropertyFilter {
     enabledWhen: FilterGroupEncoded;
     requiredWhen: FilterGroupEncoded | null;
-
 }
 
 enum RegistrationsFilterMode {
@@ -184,19 +185,28 @@ function getSQLFilterId(filter: Filter & { definitionId?: string }): string {
     return result;
 }
 
-function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
-    if (filter.definitionId.startsWith('record_')) {
-        throw new Error(`Number filter not supported: ${filter.definitionId}`);
+function isFilterForRecordAnswer(filter: Filter): boolean {
+    const definitionId: string | undefined = filter['definitionId'];
+    if (!definitionId) {
+        return false;
     }
 
-    const supported = new Set(['member_age']);
+    return definitionId.startsWith('record_');
+}
 
-    if (!supported.has(filter.definitionId)) {
-        throw new Error(`Number filter not supported: ${filter.definitionId}`);
+function wrapRecordAnswerFilter<T extends RecordAnswerFilterType>(filter: T, getInnerFilter: (filter: T, recordId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter) => StamhoofdFilter) {
+    const recordId = filter.definitionId.replace('record_', '');
+
+    return {
+        recordAnswers: getInnerFilter(filter, recordId, (f: StamhoofdFilter) => {
+            return {
+                value: f
+            }
+        })
     }
+}
 
-    const sqlFilterId = getSQLFilterId(filter);
-
+function getInnerStamhoofdFilterForNumberFilter(filter: NumberFilter, sqlFilterId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f): StamhoofdFilter {
     switch (filter.mode) {
         case NumberFilterMode.LessThan: {
             if (filter.end === undefined) {
@@ -204,9 +214,9 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
             }
 
             return {
-                [sqlFilterId]: {
+                [sqlFilterId]: wrapFilter({
                     $lte: filter.end,
-                },
+                }),
             };
         }
         case NumberFilterMode.GreaterThan: {
@@ -214,9 +224,9 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
                 throw new Error('GreaterThan filter has no start');
             }
             return {
-                [sqlFilterId]: {
+                [sqlFilterId]: wrapFilter({
                     $gte: filter.start,
-                },
+                }),
             };
         }
         case NumberFilterMode.Between: {
@@ -226,12 +236,12 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
 
             return {
                 $and: [
-                    { [sqlFilterId]: {
+                    { [sqlFilterId]: wrapFilter({
                         $gte: filter.start,
-                    } },
-                    { [sqlFilterId]: {
+                    }) },
+                    { [sqlFilterId]: wrapFilter({
                         $lte: filter.end,
-                    } },
+                    }) },
                 ],
             };
         }
@@ -242,12 +252,12 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
 
             return {
                 $or: [
-                    { [sqlFilterId]: {
+                    { [sqlFilterId]: wrapFilter({
                         $lt: filter.start,
-                    } },
-                    { [sqlFilterId]: {
+                    }) },
+                    { [sqlFilterId]: wrapFilter({
                         $gt: filter.end,
-                    } },
+                    }) },
                 ],
             };
         }
@@ -256,9 +266,9 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
                 throw new Error('Equal filter has no value: ' + JSON.stringify(filter));
             }
             return {
-                [sqlFilterId]: {
+                [sqlFilterId]: wrapFilter({
                     $eq: filter.start,
-                },
+                }),
             };
         }
         case NumberFilterMode.NotEqual: {
@@ -266,8 +276,94 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
                 throw new Error('Not equal filter has no value');
             }
             return {
-                [sqlFilterId]: {
+                [sqlFilterId]: wrapFilter({
                     $neq: filter.start,
+                }),
+            };
+        }
+    }
+}
+
+function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
+    if (isFilterForRecordAnswer(filter)) {
+        return wrapRecordAnswerFilter<NumberFilter>(filter, getInnerStamhoofdFilterForNumberFilter);
+    }
+
+    const supported = new Set(['member_age']);
+
+    if (!supported.has(filter.definitionId)) {
+        throw new Error(`Number filter not supported: ${filter.definitionId}`);
+    }
+
+    const sqlFilterId = getSQLFilterId(filter);
+
+    return getInnerStamhoofdFilterForNumberFilter(filter, sqlFilterId);
+}
+
+function getInnerStamhoofdFilterForStringFilter(filter: StringFilter, sqlFilterId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f): StamhoofdFilter {
+    switch (filter.mode) {
+        case StringFilterMode.Contains: {
+            return {
+                [sqlFilterId]: wrapFilter({
+                    $contains: filter.value,
+                }),
+            };
+        }
+        case StringFilterMode.NotContains: {
+            return {
+                $not: {
+                    [sqlFilterId]: wrapFilter({
+                        $contains: filter.value,
+                    }),
+                },
+            };
+        }
+        case StringFilterMode.Empty: {
+            return {
+                $or: [
+                    {
+                        [sqlFilterId]: wrapFilter({
+                            $eq: '',
+                        }),
+                    },
+                    {
+                        [sqlFilterId]: wrapFilter({
+                            $eq: null,
+                        }),
+                    },
+                ],
+            };
+        }
+        case StringFilterMode.NotEmpty: {
+            return {
+                $not: {
+                    $or: [
+                        {
+                            [sqlFilterId]: wrapFilter({
+                                $eq: '',
+                            }),
+                        },
+                        {
+                            [sqlFilterId]: wrapFilter({
+                                $eq: null,
+                            }),
+                        },
+                    ],
+                },
+            }; }
+        case StringFilterMode.Equals: {
+            return {
+                [sqlFilterId]: wrapFilter({
+                    $eq: filter.value,
+                }),
+            };
+        }
+        case StringFilterMode.NotEquals: {
+            return {
+                $not: {
+                    [sqlFilterId]: wrapFilter({
+                        $eq: filter.value,
+                    }),
                 },
             };
         }
@@ -275,16 +371,8 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
 }
 
 function stringFilterToStamhoofdFilter(filter: StringFilter): StamhoofdFilter {
-    if (filter.definitionId.startsWith('record_')) {
-        const recordId = filter.definitionId.replace('record_', '');
-
-        return {
-            recordAnswers: {
-                [recordId]: {
-                    value: { $eq: filter.value },
-                },
-            },
-        };
+    if (isFilterForRecordAnswer(filter)) {
+        return wrapRecordAnswerFilter<StringFilter>(filter, getInnerStamhoofdFilterForStringFilter);
     }
 
     const supported = new Set(['member_name']);
@@ -295,77 +383,11 @@ function stringFilterToStamhoofdFilter(filter: StringFilter): StamhoofdFilter {
 
     const sqlFilterId = getSQLFilterId(filter);
 
-    switch (filter.mode) {
-        case StringFilterMode.Contains: {
-            return {
-                [sqlFilterId]: {
-                    $contains: filter.value,
-                },
-            };
-        }
-        case StringFilterMode.NotContains: {
-            return {
-                $not: {
-                    [sqlFilterId]: {
-                        $contains: filter.value,
-                    },
-                },
-            };
-        }
-        case StringFilterMode.Empty: {
-            return {
-                $or: [
-                    {
-                        [sqlFilterId]: {
-                            $eq: '',
-                        },
-                    },
-                    {
-                        [sqlFilterId]: {
-                            $eq: null,
-                        },
-                    },
-                ],
-            };
-        }
-        case StringFilterMode.NotEmpty: {
-            return {
-                $not: {
-                    $or: [
-                        {
-                            [sqlFilterId]: {
-                                $eq: '',
-                            },
-                        },
-                        {
-                            [sqlFilterId]: {
-                                $eq: null,
-                            },
-                        },
-                    ],
-                },
-            }; }
-        case StringFilterMode.Equals: {
-            return {
-                [sqlFilterId]: {
-                    $eq: filter.value,
-                },
-            };
-        }
-        case StringFilterMode.NotEquals: {
-            return {
-                $not: {
-                    [sqlFilterId]: {
-                        $eq: filter.value,
-                    },
-                },
-            };
-        }
-    }
+    return getInnerStamhoofdFilterForStringFilter(filter, sqlFilterId);
 }
 
 function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter {
-    if (filter.definitionId.startsWith('record_')) {
+    if (isFilterForRecordAnswer(filter)) {
         const choiceIds = filter.choiceIds;
         const isCheckbox = choiceIds.includes('checked') || choiceIds.includes('not_checked');
 
@@ -713,28 +735,16 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
     }
 }
 
-function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
-    if (filter.definitionId.startsWith('record_')) {
-        throw new Error(`Date filter not supported: ${filter.definitionId}`);
-    }
-
-    const supported = new Set(['member_birthDay']);
-
-    if (!supported.has(filter.definitionId)) {
-        throw new Error(`Date filter not supported: ${filter.definitionId}`);
-    }
-
-    const sqlFilterId = getSQLFilterId(filter);
-
+function getInnerStamhoofdFilterForDateFilter(filter: DateFilter, sqlFilterId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f): StamhoofdFilter {
     function msToFilterValue(ms: number) {
         return { $: '$date', value: ms };
     }
 
     if (filter.minimumDate) {
         return {
-            [sqlFilterId]: {
+            [sqlFilterId]: wrapFilter({
                 $gte: filter.minimumDate,
-            },
+            }),
         };
     }
 
@@ -744,9 +754,9 @@ function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
                 throw new Error('GreaterThan filter has no minimumDate');
             }
             return {
-                [sqlFilterId]: {
+                [sqlFilterId]: wrapFilter({
                     $gte: msToFilterValue(filter.minimumDate),
-                },
+                }),
             };
         }
         case DateFilterMode.LessThan: {
@@ -754,9 +764,9 @@ function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
                 throw new Error('LessThan filter has no maximumDate');
             }
             return {
-                [sqlFilterId]: {
+                [sqlFilterId]: wrapFilter({
                     $lte: msToFilterValue(filter.maximumDate),
-                },
+                }),
             };
         }
         case DateFilterMode.Between: {
@@ -767,14 +777,14 @@ function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
             return {
                 $and: [
                     {
-                        [sqlFilterId]: {
+                        [sqlFilterId]: wrapFilter({
                             $gte: msToFilterValue(filter.minimumDate),
-                        },
+                        }),
                     },
                     {
-                        [sqlFilterId]: {
+                        [sqlFilterId]: wrapFilter({
                             $lte: msToFilterValue(filter.maximumDate),
-                        },
+                        }),
                     },
                 ],
             };
@@ -787,14 +797,14 @@ function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
             return {
                 $or: [
                     {
-                        [sqlFilterId]: {
+                        [sqlFilterId]: wrapFilter({
                             $lt: msToFilterValue(filter.minimumDate),
-                        },
+                        }),
                     },
                     {
-                        [sqlFilterId]: {
+                        [sqlFilterId]: wrapFilter({
                             $gt: msToFilterValue(filter.maximumDate),
-                        },
+                        }),
                     },
                 ],
             };
@@ -805,9 +815,9 @@ function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
             }
 
             return {
-                [sqlFilterId]: {
+                [sqlFilterId]: wrapFilter({
                     $eq: msToFilterValue(filter.minimumDate),
-                },
+                }),
             };
         }
         case DateFilterMode.NotEqual: {
@@ -817,13 +827,29 @@ function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
 
             return {
                 $not: {
-                    [sqlFilterId]: {
+                    [sqlFilterId]: wrapFilter({
                         $eq: msToFilterValue(filter.minimumDate),
-                    },
+                    }),
                 },
             };
         }
     }
+}
+
+function dateFilterToStamhoofdFilter(filter: DateFilter): StamhoofdFilter {
+    if (isFilterForRecordAnswer(filter)) {
+        return wrapRecordAnswerFilter<DateFilter>(filter, getInnerStamhoofdFilterForDateFilter);
+    }
+
+    const supported = new Set(['member_birthDay']);
+
+    if (!supported.has(filter.definitionId)) {
+        throw new Error(`Date filter not supported: ${filter.definitionId}`);
+    }
+
+    const sqlFilterId = getSQLFilterId(filter);
+
+    return getInnerStamhoofdFilterForDateFilter(filter, sqlFilterId);
 }
 
 function getFilterType(filter: Filter): FilterType {
