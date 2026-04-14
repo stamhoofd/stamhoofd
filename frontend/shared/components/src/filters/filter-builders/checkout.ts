@@ -1,4 +1,4 @@
-import type { Webshop } from '@stamhoofd/structures';
+import type { RecordCategory, Webshop } from '@stamhoofd/structures';
 import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
@@ -55,7 +55,7 @@ export function getCartFilterBuilder(webshop: Webshop) {
 }
 
 export function useCheckoutInMemoryFilterBuilders() {
-    return (webshop: Webshop) => {
+    return (webshop: Webshop, categories: RecordCategory[]) => {
         const all: UIFilterBuilders = [
             getCartFilterBuilder(webshop),
         ];
@@ -79,7 +79,7 @@ export function useCheckoutInMemoryFilterBuilders() {
         }
 
         // Also include complex filters
-        all.push(...getFilterBuildersForRecordCategories(webshop.meta.recordCategories));
+        all.push(...getFilterBuildersForRecordCategories(categories));
 
         // Recursive: self referencing groups
         all.unshift(

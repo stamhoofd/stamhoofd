@@ -157,7 +157,7 @@ const present = usePresent();
 // Data
 const saving = ref(false);
 const deleting = ref(false);
-const filterBuilder = computed(() => props.settings.filterBuilder(props.rootCategories));
+const filterBuilder = computed(() => props.settings.filterBuilder(patchedRootCategories.value));
 const app = useAppContext();
 const type = props.settings.type;
 const isRootCategory = computed(() => patchedRootCategories.value.some(c => c.id === props.categoryId));

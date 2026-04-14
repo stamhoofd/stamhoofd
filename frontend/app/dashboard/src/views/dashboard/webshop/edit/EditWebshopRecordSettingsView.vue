@@ -106,13 +106,13 @@ const editorSettings = computed(() => {
     return new RecordEditorSettings({
         type: RecordEditorType.Webshop,
         dataPermission: false,
-        filterBuilder: (_categories: RecordCategory[]) => {
+        filterBuilder: (categories: RecordCategory[]) => {
             if (!props.webshopManager?.webshop) {
                 return new GroupUIFilterBuilder({
                     builders: [],
                 });
             }
-            return getCheckoutFilterDefinitions(props.webshopManager?.webshop)[0];
+            return getCheckoutFilterDefinitions(webshop.value, categories)[0];
         },
         exampleValue: Checkout.create({}),
     });
