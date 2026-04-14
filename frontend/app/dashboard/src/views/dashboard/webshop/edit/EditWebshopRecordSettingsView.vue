@@ -68,7 +68,7 @@
 <script lang="ts" setup>
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import { useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components/filters/filter-builders/checkout.ts';
 import { GroupUIFilterBuilder } from '@stamhoofd/components/filters/GroupUIFilter.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -76,10 +76,10 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
 import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
-import type { RecordCategory} from '@stamhoofd/structures';
+import type { RecordCategory } from '@stamhoofd/structures';
 import { Checkout, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import type { UseEditWebshopProps} from './useEditWebshop';
+import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
