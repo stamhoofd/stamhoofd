@@ -63,10 +63,11 @@ import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { EmailPreview, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { isEmptyFilter, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, PermissionLevel, PermissionsResourceType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
+import { useAuth } from '../hooks';
 import EmailRow from './components/EmailRow.vue';
 import EmailOverview from './EmailOverview.vue';
 
@@ -86,6 +87,7 @@ const buildFilters = useAdminEmailFilterBuilders();
 const filterBuilders = buildFilters();
 const organization = useOrganization();
 const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
+const auth = useAuth();
 
 enum Routes {
     Email = 'bericht',
@@ -216,8 +218,10 @@ async function editFilter(event: MouseEvent) {
 }
 
 function getRequiredFilter(): StamhoofdFilter | null {
+    const filters: StamhoofdFilter[] = [];
+
     if (props.members && props.members.length > 0) {
-        return {
+        filters.push({
             recipients: {
                 $elemMatch: {
                     memberId: {
@@ -225,9 +229,23 @@ function getRequiredFilter(): StamhoofdFilter | null {
                     },
                 },
             },
-        };
+        });
     }
-    return null;
+
+
+    if (!auth.hasFullAccess()) {
+        const canReadAllEmails = auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read);
+        if (!canReadAllEmails) {
+            const userId = auth.user?.id;
+            if (userId) {
+                filters.push({
+                    userId
+                })
+            }
+        }
+    }
+
+    return mergeFilters(filters);
 }
 
 function getDefaultStamhoofdFilter(): StamhoofdFilter {

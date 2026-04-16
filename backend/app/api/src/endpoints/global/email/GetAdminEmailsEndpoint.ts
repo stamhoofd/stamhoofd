@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { CountFilteredRequest, EmailPreview, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse, PermissionLevel } from '@stamhoofd/structures';
@@ -61,24 +61,24 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
                     ids.push(sender.id);
                 }
             }
-            if (ids.length === 0) {
-                throw Context.auth.error();
+
+            const filters: StamhoofdFilter[] = [{
+                userId: user.id,
+            }];
+
+            if (ids.length !== 0) {
+                filters.push({
+                    senderId: {
+                        $in: ids,
+                    },
+                    status: {
+                        $neq: EmailStatus.Draft,
+                    },
+                });
             }
 
             scopeFilter = mergeFilters([scopeFilter, {
-                $or: [
-                    {
-                        senderId: {
-                            $in: ids,
-                        },
-                        status: {
-                            $neq: EmailStatus.Draft,
-                        },
-                    },
-                    {
-                        userId: user.id,
-                    },
-                ],
+                $or: filters,
             }]);
         }
         else {

@@ -1,6 +1,6 @@
 import type { EmailPreview, Event, Group, GroupCategory, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, Permissions, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { AccessRight, EventPermissionChecker, GroupType, PermissionLevel, PermissionsResourceType, Platform } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { toRaw, unref } from 'vue';
 
 export class ContextPermissions {
@@ -122,6 +122,19 @@ export class ContextPermissions {
 
     hasAccessForSomeResourceOfType(resourceType: PermissionsResourceType, level: PermissionLevel = PermissionLevel.Read) {
         return this.permissions?.hasAccessForSomeResourceOfType(resourceType, level) ?? false;
+    }
+
+    canSendEmails() {
+        return this.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false
+    }
+
+    canReadEmails() {
+        if (this.canSendEmails()) {
+            // A user can reads its own emails, so they can read.
+            return true;
+        }
+
+        return this.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read);
     }
 
     canManagePayments() {

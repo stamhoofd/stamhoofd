@@ -1,16 +1,16 @@
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuditLogsView from '@stamhoofd/components/audit-logs/AuditLogsView.vue';
-import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
-import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
-import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
-import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import NoPermissionsView from '@stamhoofd/components/auth/NoPermissionsView.vue';
+import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
+import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
 import { TabBarItem, TabBarItemGroup } from '@stamhoofd/components/containers/TabBarItem.ts';
+import ManageEventsView from '@stamhoofd/components/events/ManageEventsView.vue';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { getScopedAutoRootComponent, wrapContext } from '@stamhoofd/dashboard';
-import type {useTranslate} from '@stamhoofd/frontend-i18n/I18nController';
+import type { useTranslate } from '@stamhoofd/frontend-i18n/I18nController';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
@@ -182,7 +182,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                             moreTab.items.push(auditLogsTab);
                         }
                         else {
-                            if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)) {
+                            if (reactiveSession.auth.canReadEmails()) {
                                 moreTab.items.push(communicationTab);
                             }
                         }
