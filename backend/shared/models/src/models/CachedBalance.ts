@@ -1,11 +1,11 @@
 import { column } from '@simonbackx/simple-database';
-import type { SQLWhere } from '@stamhoofd/sql';
+import type { SQLWhere} from '@stamhoofd/sql';
 import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem.js';
 import { MemberUser } from './MemberUser.js';
+import { Formatter } from '@stamhoofd/utility';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -459,8 +459,7 @@ export class CachedBalance extends QueryableModel {
                     result[1].amountPaid += memberCachedBalance.amountPaid;
                     result[1].amountOpen += memberCachedBalance.amountOpen;
                     result[1].amountPending += memberCachedBalance.amountPending;
-
-                    if (result[1].nextDueAt !== null && memberCachedBalance.nextDueAt && memberCachedBalance.nextDueAt > result[1].nextDueAt) {
+                    if (memberCachedBalance.nextDueAt && (!result[1].nextDueAt || memberCachedBalance.nextDueAt > result[1].nextDueAt)) {
                         result[1].nextDueAt = memberCachedBalance.nextDueAt;
                     }
                 }
