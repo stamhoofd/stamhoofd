@@ -1,4 +1,4 @@
-import type { InMemoryFilterDefinitions} from './InMemoryFilter.js';
+import type { InMemoryFilterDefinitions } from './InMemoryFilter.js';
 import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector } from './InMemoryFilter.js';
 
 // This should match the backend logica. Some things that might be possible in the 'in memory' compilers, are not possible in the SQL compilers.
@@ -21,6 +21,14 @@ export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
     recordAnswers: createInMemoryFilterCompiler('recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
 
+export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    group: createInMemoryFilterCompiler('group', {
+        ...baseInMemoryFilterCompilers,
+        id: createInMemoryFilterCompiler('id'),
+    }),
+};
+
 export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     age: createInMemoryFilterCompiler('details.defaultAge'),
@@ -28,10 +36,7 @@ export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterD
     birthDay: createInMemoryFilterCompiler('details.birthDay'),
     missingData: createInMemoryFilterCompiler('details.missingData'),
     recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
-};
-
-export const registrationInMemoryFilterCompilers: InMemoryFilterDefinitions = {
-    ...baseInMemoryFilterCompilers,
+    registrations: createInMemoryFilterCompiler('registrations', registrationInMemoryFilterCompilers),
 };
 
 export const registerItemInMemoryFilterCompilers: InMemoryFilterDefinitions = {

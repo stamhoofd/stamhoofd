@@ -3,7 +3,7 @@ import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 
 import { markRaw } from 'vue';
 import GroupUIFilterView from './GroupUIFilterView.vue';
-import type { StyledDescription, UIFilterBuilder, UIFilterWrapper} from './UIFilter';
+import type { StyledDescription, UIFilterBuilder, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 import { UnknownFilterBuilder, UnknownUIFilter } from './UnknownUIFilter';
 
@@ -143,13 +143,15 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     description = '';
     wrapFilter?: UIFilterWrapper | null;
     wrapper?: WrapperFilter;
+    allowCreation?: boolean;
 
-    constructor(data: { builders: UIFilterBuilder[]; name?: string; description?: string; wrapFilter?: UIFilterWrapper | null; wrapper?: WrapperFilter }) {
+    constructor(data: { builders: UIFilterBuilder[]; name?: string; description?: string; wrapFilter?: UIFilterWrapper | null; wrapper?: WrapperFilter; allowCreation?: boolean }) {
         this.builders = data.builders;
         this.name = data.name ?? this.name;
         this.description = data.description ?? this.description;
         this.wrapFilter = data.wrapFilter ?? null;
         this.wrapper = data.wrapper;
+        this.allowCreation = data.allowCreation;
 
         markRaw(this);
     }
