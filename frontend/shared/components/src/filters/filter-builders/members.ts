@@ -1096,6 +1096,25 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         ...getMemberBaseFilters(),
+        new GroupUIFilterBuilder({
+                name: $t('Inschrijvingen'),
+                allowCreation: false,
+                builders: [
+                    new StringFilterBuilder({
+                            name: $t('Groep ID'),
+                            key: 'id',
+                            allowCreation: false,
+                            wrapper: {
+                                group: FilterWrapperMarker
+                            },
+                    })
+                ],
+                wrapper: {
+                    registrations: {
+                        $elemMatch: FilterWrapperMarker
+                    }
+                },
+        }),
         new MultipleChoiceFilterBuilder({
             name: $t(`%17z`),
             options: [
@@ -1190,6 +1209,26 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
 export function useMemberWithRegistrationsBlobFilterBuilders() {
     return (recordConfiguration: OrganizationRecordsConfiguration) => {
         const all: UIFilterBuilders = getMemberBaseFilters(recordConfiguration);
+
+        all.push(new GroupUIFilterBuilder({
+                name: $t('Inschrijvingen'),
+                allowCreation: false,
+                builders: [
+                    new StringFilterBuilder({
+                            name: $t('Groep ID'),
+                            key: 'id',
+                            allowCreation: false,
+                            wrapper: {
+                                group: FilterWrapperMarker
+                            },
+                    })
+                ],
+                wrapper: {
+                    registrations: {
+                        $elemMatch: FilterWrapperMarker
+                    }
+                },
+        }));
 
         all.push(new MultipleChoiceFilterBuilder({
             name: $t(`%17z`),
