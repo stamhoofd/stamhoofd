@@ -971,18 +971,22 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
 
     const mode = filter.mode;
 
+    function createGroupIdFilter(id: string) {
+        return {
+            group: {
+                id: {
+                    $eq: id,
+                },
+            }
+        }
+    }
+
     switch (mode) {
         case RegistrationsFilterMode.Or: {
             return {
                 registrations: {
                     $elemMatch: {
-                        $or: filter.choices.map((c) => {
-                            return {
-                                $groupId: {
-                                    $eq: c.id,
-                                },
-                            };
-                        }),
+                        $or: filter.choices.map((c) => createGroupIdFilter(c.id)),
                     },
                 },
             };
@@ -991,13 +995,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
             return {
                 registrations: {
                     $elemMatch: {
-                        $and: filter.choices.map((c) => {
-                            return {
-                                $groupId: {
-                                    $eq: c.id,
-                                },
-                            };
-                        }),
+                        $and: filter.choices.map((c) => createGroupIdFilter(c.id)),
                     },
                 },
             };
@@ -1007,13 +1005,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
                 registrations: {
                     $not: {
                         $elemMatch: {
-                            $or: filter.choices.map((c) => {
-                                return {
-                                    $groupId: {
-                                        $eq: c.id,
-                                    },
-                                };
-                            }),
+                            $or: filter.choices.map((c) => createGroupIdFilter(c.id)),
                         },
                     },
                 },
@@ -1024,13 +1016,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
                 registrations: {
                     $not: {
                         $elemMatch: {
-                            $and: filter.choices.map((c) => {
-                                return {
-                                    $groupId: {
-                                        $eq: c.id,
-                                    },
-                                };
-                            }),
+                            $and: filter.choices.map((c) => createGroupIdFilter(c.id)),
                         },
                     },
                 },
