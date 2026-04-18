@@ -10,7 +10,7 @@ import { GroupPrice } from '../GroupSettings.js';
 import { StockReservation } from '../StockReservation.js';
 import { RegisterItemOption } from './checkout/RegisterItem.js';
 import type { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
-import type { RecordAnswer} from './records/RecordAnswer.js';
+import type { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordAnswerDecoder } from './records/RecordAnswer.js';
 import type { RecordSettings } from './records/RecordSettings.js';
 
@@ -28,6 +28,13 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
 
     @field({ decoder: Group, version: 266 })
     group: Group;
+
+    /**
+     * If a registration for a waiting list:
+     * the id of the group the member wanted to register for.
+     */
+    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    waitingForGroupId: string | null = null;
 
     @field({ decoder: GroupPrice, version: 305 })
     groupPrice: GroupPrice;

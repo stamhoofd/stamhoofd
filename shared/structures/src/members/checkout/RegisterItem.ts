@@ -7,24 +7,24 @@ import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
 import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import type { Group } from '../../Group.js';
+import type { GroupCategory } from '../../GroupCategory.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
-import type {Organization} from '../../Organization.js';
+import type { Organization } from '../../Organization.js';
 import { Platform, PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
-import type {PlatformMember} from '../PlatformMember.js';
-import type { RecordAnswer} from '../records/RecordAnswer.js';
+import type { PlatformMember } from '../PlatformMember.js';
+import type { RecordAnswer } from '../records/RecordAnswer.js';
 import { RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
 import type { RecordSettings } from '../records/RecordSettings.js';
-import type {Registration} from '../Registration.js';
-import type {RegisterCart} from './RegisterCart.js';
-import type {RegisterContext} from './RegisterCheckout.js';
+import type { Registration } from '../Registration.js';
+import type { RegisterCart } from './RegisterCart.js';
+import type { RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
-import type { GroupCategory } from '../../GroupCategory.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -46,6 +46,13 @@ export class IDRegisterItem extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     groupId: string;
+
+    /**
+     * If a registration for a waiting list:
+     * the id of the group the member wanted to register for.
+     */
+    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    waitingForGroupId: string | null = null;
 
     @field({ decoder: StringDecoder })
     organizationId: string;
@@ -81,6 +88,12 @@ export class RegisterItem implements ObjectWithRecords {
 
     member: PlatformMember;
     group: Group;
+    
+    /**
+     * If a registration for a waiting list:
+     * the id of the group the member wanted to register for.
+     */
+    waitingForGroupId: string | null = null;
     organization: Organization;
     trial = false;
 
@@ -140,6 +153,7 @@ export class RegisterItem implements ObjectWithRecords {
         id?: string;
         member: PlatformMember;
         group: Group;
+        waitingForGroupId?: string | null;
         organization: Organization;
         groupPrice?: GroupPrice;
         options?: RegisterItemOption[];
@@ -156,6 +170,10 @@ export class RegisterItem implements ObjectWithRecords {
         this.id = data.id ?? uuidv4();
         this.member = data.member;
         this.group = data.group;
+        if (data.waitingForGroupId) {
+            this.waitingForGroupId = data.waitingForGroupId;
+        }
+
         if (data.customStartDate !== undefined) {
             this.customStartDate = data.customStartDate;
         }
@@ -255,6 +273,7 @@ export class RegisterItem implements ObjectWithRecords {
             id: registration.id,
             member,
             group: registration.group,
+            waitingForGroupId: registration.waitingForGroupId,
             organization,
             groupPrice: registration.groupPrice,
             recordAnswers: registration.recordAnswers,
@@ -270,6 +289,7 @@ export class RegisterItem implements ObjectWithRecords {
             id: this.id,
             member: this.member,
             group: this.group,
+            waitingForGroupId: this.waitingForGroupId,
             organization: this.organization,
             groupPrice: this.groupPrice.clone(),
             options: this.options.map(o => o.clone()),
@@ -295,6 +315,7 @@ export class RegisterItem implements ObjectWithRecords {
         this.trial = item.trial;
         this.customStartDate = item.customStartDate;
         this.customEndDate = item.customEndDate;
+        this.waitingForGroupId = item.waitingForGroupId;
     }
 
     static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
@@ -332,6 +353,7 @@ export class RegisterItem implements ObjectWithRecords {
             id: idRegisterItem.id,
             member,
             group,
+            waitingForGroupId: idRegisterItem.waitingForGroupId,
             organization,
             groupPrice: idRegisterItem.groupPrice,
             options: idRegisterItem.options,
@@ -348,6 +370,7 @@ export class RegisterItem implements ObjectWithRecords {
             id: this.id,
             memberId: this.member.member.id,
             groupId: this.group.id,
+            waitingForGroupId: this.waitingForGroupId,
             organizationId: this.organization.id,
             groupPrice: this.groupPrice,
             options: this.options,

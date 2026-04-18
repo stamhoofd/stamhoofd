@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Group, PlatformFamily, PlatformMember, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
 import { ChooseGroupForMemberView, loadFamilyIfNeeded } from '..';
@@ -9,11 +9,11 @@ import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
 import { useContext } from '../../hooks';
 import { Toast } from '../../overlays/Toast';
-import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
 import ChooseFamilyMembersForGroupView from '../ChooseFamilyMembersForGroupView.vue';
 import ChooseOrganizationMembersForGroupView from '../ChooseOrganizationMembersForGroupView.vue';
-import type { EditMemberStep} from '../classes/MemberStepManager';
+import type { EditMemberStep } from '../classes/MemberStepManager';
 import { MemberStepManager } from '../classes/MemberStepManager';
 import { getAllMemberSteps } from '../classes/steps';
 import { RegisterItemStep } from '../classes/steps/RegisterItemStep';
@@ -78,8 +78,10 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
 
     if (item.group.waitingList && item.validationError && !item.validationErrorForWaitingList) {
         // Should register for the waiting list
+        const originalGroupId = item.group.id;
         item = RegisterItem.defaultFor(item.member, item.group.waitingList, item.organization);
         item.cartError = originalItem.cartError;
+        item.waitingForGroupId = originalGroupId;
     }
 
     if (item.groupPrice.bundleDiscounts.size > 0) {

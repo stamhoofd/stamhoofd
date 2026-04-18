@@ -1,12 +1,12 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
-import type { RecordAnswer} from '@stamhoofd/structures';
+import type { RecordAnswer } from '@stamhoofd/structures';
 import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import type {Group} from './Group.js';
+import type { Group } from './Group.js';
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -32,6 +32,13 @@ export class Registration extends QueryableModel {
 
     @column({ type: 'string' })
     groupId: string;
+
+    /**
+     * If a registration for a waiting list:
+     * the id of the group the member wanted to register for.
+     */
+    @column({ type: 'string', nullable: true })
+    waitingForGroupId: string | null = null;
 
     @column({ type: 'json', decoder: GroupPrice })
     groupPrice: GroupPrice;
