@@ -459,7 +459,7 @@ export class CachedBalance extends QueryableModel {
                     result[1].amountPaid += memberCachedBalance.amountPaid;
                     result[1].amountOpen += memberCachedBalance.amountOpen;
                     result[1].amountPending += memberCachedBalance.amountPending;
-                    if (memberCachedBalance.nextDueAt && (!result[1].nextDueAt || memberCachedBalance.nextDueAt > result[1].nextDueAt)) {
+                    if (memberCachedBalance.nextDueAt && (!result[1].nextDueAt || memberCachedBalance.nextDueAt < result[1].nextDueAt)) {
                         result[1].nextDueAt = memberCachedBalance.nextDueAt;
                     }
                 }
