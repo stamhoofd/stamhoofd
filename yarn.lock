@@ -2756,10 +2756,10 @@
     "@simonbackx/simple-logging" "^1.0.0"
     mysql2 "3.14.1"
 
-"@simonbackx/simple-encoding@2.26.4":
-  version "2.26.4"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.26.4.tgz#c17cbdb4ab9f5b342009814ad8a91985c2acb6f5"
-  integrity sha512-YGhhn3DM/zxQLLK2hiZOTezCiOZI27I9XZ2i+Xs9V4lrYa6EGs5K9hMiKAAeCOg+DUHgmfshFnSTKjlpdNzycA==
+"@simonbackx/simple-encoding@2.26.5":
+  version "2.26.5"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.26.5.tgz#04c350e1887063906be3ebbe01850f058c5ebae9"
+  integrity sha512-kYObGVQedTciJTng5fGkMJAD4j1sXP5DcwpUsd8anaS4+upBK1RglnkG1Q637E5n0tIQH0Kxj5zoJ6o7/jU0gw==
 
 "@simonbackx/simple-endpoints@1.20.1":
   version "1.20.1"
