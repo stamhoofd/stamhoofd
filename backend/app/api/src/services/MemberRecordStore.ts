@@ -7,27 +7,25 @@ export type RecordCacheEntry = { record: RecordSettings; rootCategoryId: string;
 
 /**
  * Service that caches all available member records in the system.
- * - It verified whether ids are unique system wide
+ * - It verifies whether ids are unique system wide
  * - It allows fast retrieving of record settings by id (for permission checking)
  */
-export class MemberRecordStore {
-    private static cache = new Map<string, RecordCacheEntry>();
+class MemberRecordStoreService {
+    private  cache = new Map<string, RecordCacheEntry>();
 
-    constructor() {
+    init() {
+        // Should only be used in userMode platform
+        if (STAMHOOFD.userMode !== 'platform') {
+            return;
+        }
 
-    }
-
-    static init() {
         // Load initial data
         this.loadIfNeeded().catch(console.error);
-
-        // Create listeners to update data as organizations and platform is updated
-        this.listen();
     }
 
-    private static listening = false;
+    private  listening = false;
 
-    private static listen() {
+    private  listen() {
         // Create listeners to update data as organizations and platform is updated
         if (this.listening) {
             return;
@@ -66,7 +64,7 @@ export class MemberRecordStore {
             }
 
             if (event.model instanceof Organization) {
-                // Delete all records with organizationId = null
+                // Delete all records where organizationId equals the organization
                 for (const [id, entry] of this.cache) {
                     if (entry.organizationId === event.model.id) {
                         this.cache.delete(id);
@@ -88,10 +86,10 @@ export class MemberRecordStore {
         });
     }
 
-    static _loadAllPromise: Promise<void> | null = null;
-    static _didLoadAll = false;
+    private  _loadAllPromise: Promise<void> | null = null;
+    private  _didLoadAll = false;
 
-    static async loadIfNeeded() {
+    private async loadIfNeeded() {
         if (this._didLoadAll) {
             return;
         }
@@ -100,6 +98,11 @@ export class MemberRecordStore {
             await this._loadAllPromise;
         }
         else {
+            if (STAMHOOFD.userMode !== 'platform') {
+                // Important to throw an error because in tests the userMode can change in between tests
+                throw new Error('Should only be loaded in userMode platform.');
+            }
+
             this._loadAllPromise = (async () => {
                 try {
                     await this.loadAll();
@@ -116,7 +119,7 @@ export class MemberRecordStore {
         }
     }
 
-    static async loadAll() {
+    private async loadAll() {
         this.cache = new Map<string, RecordCacheEntry>();
 
         // We use a queue here so we can abort this long running task properly
@@ -155,10 +158,16 @@ export class MemberRecordStore {
                 abort.throwIfAborted();
             }
         });
+
+        // Create listeners to update data as organizations and platform is updated.
+        // Should be checked on every loadAll because the userMode can change for tests.
+        this.listen();
     }
 
-    static async getRecord(id: string): Promise<RecordCacheEntry | null> {
+     async getRecord(id: string): Promise<RecordCacheEntry | null> {
         await this.loadIfNeeded();
         return this.cache.get(id) ?? null;
     }
 }
+
+export const MemberRecordStore = new MemberRecordStoreService();
