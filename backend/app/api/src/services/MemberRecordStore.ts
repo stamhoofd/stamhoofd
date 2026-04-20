@@ -5,25 +5,22 @@ import type { RecordSettings } from '@stamhoofd/structures';
 
 export type RecordCacheEntry = { record: RecordSettings; rootCategoryId: string; organizationId: string | null };
 
-interface IMemberRecordStore {
-    init(): void
-    getRecord(id: string): Promise<RecordCacheEntry | null>
-}
-
 /**
  * Service that caches all available member records in the system.
  * - It verifies whether ids are unique system wide
  * - It allows fast retrieving of record settings by id (for permission checking)
  */
-class MemberRecordStoreService implements IMemberRecordStore {
+class MemberRecordStoreService {
     private  cache = new Map<string, RecordCacheEntry>();
 
     init() {
+        // Should only be used in userMode platform
+        if (STAMHOOFD.userMode !== 'platform') {
+            return;
+        }
+
         // Load initial data
         this.loadIfNeeded().catch(console.error);
-
-        // Create listeners to update data as organizations and platform is updated
-        this.listen();
     }
 
     private  listening = false;
@@ -101,6 +98,11 @@ class MemberRecordStoreService implements IMemberRecordStore {
             await this._loadAllPromise;
         }
         else {
+            if (STAMHOOFD.userMode !== 'platform') {
+                // Important to throw an error because in tests the userMode can change in between tests
+                throw new Error('Should only be loaded in userMode platform.');
+            }
+
             this._loadAllPromise = (async () => {
                 try {
                     await this.loadAll();
@@ -156,6 +158,10 @@ class MemberRecordStoreService implements IMemberRecordStore {
                 abort.throwIfAborted();
             }
         });
+
+        // Create listeners to update data as organizations and platform is updated.
+        // Should be checked on every loadAll because the userMode can change for tests.
+        this.listen();
     }
 
      async getRecord(id: string): Promise<RecordCacheEntry | null> {
@@ -164,22 +170,4 @@ class MemberRecordStoreService implements IMemberRecordStore {
     }
 }
 
-/**
- * Dummy implementation for userMode organization to prevent loading records in cache by accident.
- * In userMode organization records should not be cached.
- */
-class MemberRecordStoreDummy implements IMemberRecordStore {
-    init() {
-        // do nothing
-    }
-
-    /**
-     * This method should never be used in userMode organization because
-     * records are not cached.
-     */
-    getRecord(_id: string): Promise<RecordCacheEntry | null> {
-        throw new Error('Do not use this method in userMode organization.')
-    }
-}
-
-export const MemberRecordStore: IMemberRecordStore = STAMHOOFD.userMode === 'organization' ? new MemberRecordStoreDummy() : new MemberRecordStoreService();
+export const MemberRecordStore = new MemberRecordStoreService();
