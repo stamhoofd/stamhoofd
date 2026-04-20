@@ -97,7 +97,7 @@ export class BalanceItem extends QueryableModel {
     }
 
     set quantity(quantity: number) {
-        this.amount = this.quantity;
+        this.amount = quantity;
     }
 
     /**
