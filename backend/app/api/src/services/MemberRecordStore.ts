@@ -19,11 +19,6 @@ class MemberRecordStoreService implements IMemberRecordStore {
     private  cache = new Map<string, RecordCacheEntry>();
 
     init() {
-        // Do not cache records if userMode organization
-        if (STAMHOOFD.userMode === 'organization') {
-            return;
-        }
-
         // Load initial data
         this.loadIfNeeded().catch(console.error);
 

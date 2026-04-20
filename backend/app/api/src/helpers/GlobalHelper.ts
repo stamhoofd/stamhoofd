@@ -10,9 +10,7 @@ export class GlobalHelper {
         this.loadGlobalTranslateFunction();
         await FileSignService.load();
         
-        if (STAMHOOFD.userMode !== 'organization') {
-            MemberRecordStore.init();
-        }
+        MemberRecordStore.init();
         
         BalanceItemService.listen();
     }
