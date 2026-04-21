@@ -1,10 +1,13 @@
 import type { Organization, Webshop } from '@stamhoofd/models';
 import { WebshopFactory } from '@stamhoofd/models';
-import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { PaymentConfiguration, PaymentMethod, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { WorkerData } from '../worker/WorkerData.js';
 
 export class TestWebshops {
-    static async webshopWithTicketsAndSeatingPlan({organization, stripeAccountId, seatCount}:{organization: Organization, stripeAccountId?: string, seatCount?: number}): Promise<{webshop: Webshop}> {
+    static async webshopWithTicketsAndSeatingPlan({organization, stripeAccountId, seatCount, ticketType}:{organization: Organization, stripeAccountId?: string, seatCount?: number, ticketType?: WebshopTicketType}): Promise<{webshop: Webshop}> {
+        if (!ticketType) {
+            ticketType = WebshopTicketType.SingleTicket;
+        }
 
         let meta = WebshopMetaData.patch({});
 
@@ -76,6 +79,8 @@ export class TestWebshops {
 
         meta = meta.patch({
             paymentConfiguration: paymentConfigurationPatch,
+            type: WebshopType.Performance,
+            ticketType
         });
 
         const privatePaymentConfiguration = PrivatePaymentConfiguration.patch({

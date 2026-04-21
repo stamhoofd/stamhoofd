@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view order-view">
+    <div class="st-view order-view" data-testid="order-view">
         <STNavigationBar :title="$t(`%x3`) + order.number">
             <template #right>
                 <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('%VO')" @click="goBack" />
@@ -79,7 +79,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" @click="tickets.length > 0 ? openTickets() : null">
+                <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" data-testid="tickets-button" @click="tickets.length > 0 ? openTickets() : null">
                     <h3 v-if="tickets.length > 1 || (!hasSingleTickets && tickets.length === 0)" class="style-definition-label">
                         {{ $t('%1t') }}
                     </h3>
@@ -296,29 +296,29 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonback
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
-import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
-import EditPaymentView from '@stamhoofd/components/payments/EditPaymentView.vue';
 import EmailAddress from '@stamhoofd/components/email/EmailAddress.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
-import type { TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useArrowUpDown } from '@stamhoofd/components/hooks/useArrowUpDown.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
+import EditPaymentView from '@stamhoofd/components/payments/EditPaymentView.vue';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
-import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod} from '@stamhoofd/structures';
+import type { TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
+import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
+import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
+import type { BalanceItemWithPrivatePayments, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, TicketPrivate, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { AccessRight, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, RecordCategory, RecordWarning, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import OrderView from './OrderView.vue';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { ComputedRef} from 'vue';
+import type { ComputedRef } from 'vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from './OrderActionBuilder';

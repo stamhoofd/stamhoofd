@@ -2,7 +2,7 @@
 import { test } from '../test-fixtures/platform.js';
 
 // other imports
-import { devices } from '@playwright/test';
+import { devices, expect } from '@playwright/test';
 import type {
     Organization,
     RegistrationPeriod,
@@ -13,17 +13,18 @@ import {
     OrganizationFactory,
     RegistrationPeriodFactory
 } from '@stamhoofd/models';
-import { PermissionLevel, Permissions, PropertyFilter, UserPermissions } from '@stamhoofd/structures';
+import { PaymentMethod, PermissionLevel, Permissions, PropertyFilter, UserPermissions } from '@stamhoofd/structures';
 import {
     DashboardPage,
     DashboardTab,
+    TableHelper,
     WorkerData
 } from '../helpers/index.js';
 import { WebshopOrdersView } from '../helpers/page/webshop/WebshopOrdersView.js';
+import { simulateNetworkOffline } from '../helpers/simulateNetworkOffline.js';
 import { TestWebshops } from '../helpers/test-data/TestWebshops.js';
 
-// does not work currently -> fails to load module
-test.describe.skip('Webshops offline', () => {
+test.describe('Webshops offline', () => {
     let organization: Organization;
     let period: RegistrationPeriod;
     let user: User;
@@ -102,47 +103,67 @@ test.describe.skip('Webshops offline', () => {
                     lastName: 'Doe-'+i,
                     email: `john.doe-${i}@test.be`,
                     product: webshop.products[0],
+                    // point of sale to make sure tickets are added immediately
+                    paymentMethod: PaymentMethod.PointOfSale
                 });
             }
         });
 
-        // todo: does not work currently -> fails to load module
-        await page.reload();
+        // go to start
         await dashboard.openOrganizationDashboard({organizationUri: organization.uri});
-        await context.setOffline(true);
 
-        await dashboard.openTab(DashboardTab.Webshops);
+        // mock offline behaviour
+        await simulateNetworkOffline(page);
 
-        // open webshop overview
-        await page.getByTestId(`webshop-menu-item`)
-            .filter({ hasText: webshop.meta.name })
-            .click();
+        await test.step('open webshop orders', async () => {
+            await dashboard.openTab(DashboardTab.Webshops);
+        
+            await page.getByTestId(`webshop-menu-item`)
+                .filter({ hasText: webshop.meta.name })
+                .click();
 
-        // open orders
-        await page.getByTestId('open-orders-button').click();
+            // open orders
+            await page.getByTestId('open-orders-button').click();
+        });
 
-        // await test.step('open dashboard', async () => {
-        //     throw new Error('Not implemented yet');
-        // });
+        const table = new TableHelper(page);
 
-        // await test.step('open webshop orders', async () => {
-        //     throw new Error('Not implemented yet');
-        // });
+        await test.step('open order detail', async () => {
+            const row = table.getRow('John Doe-0');
+            await row.click();
 
-        // await test.step('open webshop detail', async () => {
-        //     throw new Error('Not implemented yet');
-        // });
+            const orderView = page.getByTestId('order-view');
 
-        // await test.step('open ticket', async () => {
-        //     throw new Error('Not implemented yet');
-        // });
+            // should be able to see correct details, such as the email
+            await expect(orderView).toContainText('john.doe-0@test.be');
+        });
 
-        // await test.step('scan ticket', async () => {
-        //     throw new Error('Not implemented yet');
-        // });
+        await test.step('open ticket', async () => {
+            const ticketsButton = page.getByTestId('tickets-button');
+            await ticketsButton.click();
+
+            const ticketRow = page.getByTestId('ticket-row');
+            await ticketRow.click();
+
+            const validTicketView = page.getByTestId('valid-ticket-view');
+            await expect(validTicketView).toContainText($t('%WA'));
+        });
+
+        await test.step('scan ticket', async () => {
+            const scanButton = page.getByTestId('scan-button');
+            await scanButton.click();
+
+            // click ticket again
+            const ticketRow = page.getByTestId('ticket-row');
+            await ticketRow.click();
+
+            const ticketAlreadyScannedView = page.getByTestId('ticket-already-scanned-view');
+            await expect(ticketAlreadyScannedView).toBeVisible();
+        });
     });
 
     test.skip('Should be able to scan orders if no internet', async ({page, pages}) => {
         throw new Error('Not implemented yet');
     });
 });
+

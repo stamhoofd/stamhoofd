@@ -46,7 +46,9 @@ export class EditOrderView {
     }
 
     async selectPaymentMethod(paymentMethod: PaymentMethod) {
-        await this.page.getByTestId('payment-method-option').locator('[value="' + paymentMethod + '"]').click();
+        await this.page.getByTestId('payment-method-option').filter({
+            has: this.page.locator('[value="' + paymentMethod + '"]')
+        }).click();
     }
 
     async save() {

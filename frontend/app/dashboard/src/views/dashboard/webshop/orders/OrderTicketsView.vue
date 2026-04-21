@@ -10,7 +10,7 @@
             </h1>
 
             <STList>
-                <TicketRow v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop-manager="webshopManager" :order="order" />
+                <TicketRow v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop-manager="webshopManager" :order="order" data-testid="ticket-row" />
             </STList>
         </main>
 
@@ -26,11 +26,11 @@
 </template>
 
 <script lang="ts" setup>
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import type { PrivateOrderWithTickets} from '@stamhoofd/structures';
+import type { PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { TicketPublic } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

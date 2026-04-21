@@ -1,5 +1,5 @@
 <template>
-    <div ref="root" class="st-view valid-ticket-view">
+    <div ref="root" class="st-view valid-ticket-view" data-testid="valid-ticket-view">
         <STNavigationBar :title="$t(`%WB`)" />
 
         <main v-if="!publicTicket.isSingle">
@@ -354,10 +354,10 @@
 
         <STToolbar>
             <template #right>
-                <button v-if="ticket.scannedAt" class="button secundary" type="button" @click="cancelScan">
+                <button v-if="ticket.scannedAt" class="button secundary" type="button" data-testid="cancel-scan-button" @click="cancelScan">
                     {{ $t('%W9') }}
                 </button>
-                <button class="button primary" type="button" @click="markScanned">
+                <button class="button primary" type="button" data-testid="scan-button" @click="markScanned">
                     <span class="icon qr-code" />
                     <span>{{ $t('%WA') }}</span>
                 </button>
@@ -370,19 +370,19 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
-import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
-import EditPaymentView from '@stamhoofd/components/payments/EditPaymentView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
-import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import AsyncPaymentView from '@stamhoofd/components/payments/AsyncPaymentView.vue';
+import EditPaymentView from '@stamhoofd/components/payments/EditPaymentView.vue';
 import ViewRecordCategoryAnswersBox from '@stamhoofd/components/records/components/ViewRecordCategoryAnswersBox.vue';
+import TableActionsContextMenu from '@stamhoofd/components/tables/TableActionsContextMenu.vue';
+import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import type { Payment, PrivateOrder, ProductDateRange, TicketPublicPrivate } from '@stamhoofd/structures';
 import { AccessRight, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

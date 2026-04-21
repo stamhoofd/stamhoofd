@@ -1,5 +1,5 @@
 <template>
-    <div ref="root" class="st-view ticket-already-scanned-view">
+    <div ref="root" class="st-view ticket-already-scanned-view" data-testid="ticket-already-scanned-view">
         <STNavigationBar :title="$t(`%Vv`)" />
 
         <main>
