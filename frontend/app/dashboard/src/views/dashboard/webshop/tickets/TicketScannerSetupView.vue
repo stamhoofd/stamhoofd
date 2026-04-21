@@ -47,7 +47,7 @@
 
         <STToolbar v-if="!noDatabaseSupport">
             <template #right>
-                <button class="button primary" type="button" @click="start">
+                <button class="button primary" type="button" data-testid="start-scan-tickets-button" @click="start">
                     <span class="icon play" />
                     <span>{{ $t('%Vm') }}</span>
                 </button>
@@ -59,12 +59,12 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import Spinner from '@stamhoofd/components/Spinner.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
-import type { Product, ProductDateRange} from '@stamhoofd/structures';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import type { Product, ProductDateRange } from '@stamhoofd/structures';
 import { Category, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

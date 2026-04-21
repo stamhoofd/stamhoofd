@@ -36,7 +36,7 @@
             <div class="container">
                 <h1 class="style-navigation-title with-icons">
                     <span>{{ title }}</span>
-                    <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('%17b')" type="button" class="button icon earth-off red" @click="refreshOnline" />
+                    <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('%17b')" type="button" class="button icon earth-off red" data-testid="offline-icon" @click="refreshOnline" />
                     <span v-if="titleSuffix" class="title-suffix">
                         {{ titleSuffix }}
                     </span>
@@ -145,33 +145,33 @@
 </template>
 
 <script lang="ts" setup generic="Value extends TableListable">
-import type { Decoder} from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, defineRoutes, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import BackButton from '#navigation/BackButton.vue';
+import type { UIFilter, UIFilterBuilders } from '#filters/UIFilter.ts';
+import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
+import { useIsIOS } from '#hooks/useIsIOS.ts';
+import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
 import Checkbox from '#inputs/Checkbox.vue';
+import BackButton from '#navigation/BackButton.vue';
 import STButtonToolbar from '#navigation/STButtonToolbar.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
-import { useDeviceWidth } from '#hooks/useDeviceWidth.ts';
-import { useIsIOS } from '#hooks/useIsIOS.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
-import type { UIFilter, UIFilterBuilders } from '#filters/UIFilter.ts';
+import type { Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, defineRoutes, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { Storage } from '@stamhoofd/networking/Storage';
-import type { StamhoofdFilter} from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import type { Component, ComputedRef, Ref} from 'vue';
+import type { Component, ComputedRef, Ref } from 'vue';
 import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, ref, watch, watchEffect } from 'vue';
 
-import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import type { Column } from '#tables/classes/Column.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { TableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
+import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import ColumnSelectorContextMenu from './ColumnSelectorContextMenu.vue';
 import ColumnSortingContextMenu from './ColumnSortingContextMenu.vue';
 import { useShallowMap } from './hooks/useShallowMap';

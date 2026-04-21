@@ -6,7 +6,7 @@
         <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
             <div class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
                 <div v-if="hasLeft || hasRight" class="left">
-                    <BackButton v-if="canPop && !disablePop" @click="pop()" />
+                    <BackButton v-if="canPop && !disablePop" data-testid="close-button" @click="pop()" />
                     <button v-else-if="canDismiss && !disableDismiss && ($isAndroid)" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
                     <slot name="left" />
                 </div>

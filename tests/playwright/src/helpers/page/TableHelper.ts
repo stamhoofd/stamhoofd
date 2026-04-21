@@ -46,4 +46,8 @@ export class TableHelper {
     async clickAction(hasText?: HasTextFilter) {
         await this.clickActions([hasText]);
     }
+
+    getOfflineIcon() {
+        return this.page.getByTestId('offline-icon');
+    }
 }

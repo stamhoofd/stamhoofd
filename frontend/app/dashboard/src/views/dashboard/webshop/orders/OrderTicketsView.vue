@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view order-tickets-view">
+    <div class="st-view order-tickets-view" data-testid="order-tickets-view">
         <STNavigationBar :title="$t(`%j`)" />
         <main>
             <h1 v-if="tickets.length > 1">

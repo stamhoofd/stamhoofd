@@ -94,7 +94,7 @@ test.describe('Webshops offline', () => {
             await ordersView.waitForFirstRow();
 
             // place some orders
-            const ordersCount = 2;
+            const ordersCount = 1;
 
             for (let i = 0; i < ordersCount; i++) {
 
@@ -129,6 +129,9 @@ test.describe('Webshops offline', () => {
         const table = new TableHelper(page);
 
         await test.step('open order detail', async () => {
+            // make sure the webshop is offline
+            await expect(table.getOfflineIcon()).toBeVisible();
+
             const row = table.getRow('John Doe-0');
             await row.click();
 
@@ -149,7 +152,7 @@ test.describe('Webshops offline', () => {
             await expect(validTicketView).toContainText($t('%WA'));
         });
 
-        await test.step('scan ticket', async () => {
+        await test.step('scan ticket manually', async () => {
             const scanButton = page.getByTestId('scan-button');
             await scanButton.click();
 
@@ -160,10 +163,33 @@ test.describe('Webshops offline', () => {
             const ticketAlreadyScannedView = page.getByTestId('ticket-already-scanned-view');
             await expect(ticketAlreadyScannedView).toBeVisible();
         });
-    });
 
-    test.skip('Should be able to scan orders if no internet', async ({page, pages}) => {
-        throw new Error('Not implemented yet');
+        await test.step('go back to webshop overview', async () => {
+            // close already scanned view
+            await page.getByTestId('close-button').first().click();
+
+            await page.getByTestId('order-tickets-view').waitFor();
+            // close order tickets view
+            await page.getByTestId('close-button').first().click();
+
+            await page.getByTestId('order-view').waitFor();
+            // close order view
+            await page.getByTestId('close-button').first().click();
+
+            await page.getByTestId('table').waitFor();
+            // close webshop orders view
+            await page.locator('.button.icon.navigation.arrow-back').first().click();
+        })
+
+        await test.step('open ticket scanner', async () => {
+            const scanTicketsButton = page.getByTestId('scan-tickets-button');
+            await scanTicketsButton.click();
+
+            const startScanTicketsButton = page.getByTestId('start-scan-tickets-button');
+            await startScanTicketsButton.click();
+
+            // should show message if offline
+            await expect(page.getByTestId('ticket-scanner-view')).toContainText($t('%Vq'));
+        })
     });
 });
-

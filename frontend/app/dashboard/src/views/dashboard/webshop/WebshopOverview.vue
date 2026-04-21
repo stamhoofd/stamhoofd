@@ -87,7 +87,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" @click="openTickets(true)">
+                <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" data-testid="scan-tickets-button" @click="openTickets(true)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/scanner.svg">
                     </template>
@@ -479,7 +479,7 @@ import AccountSettingsView from '@stamhoofd/components/views/AccountSettingsView
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { WebshopPreview} from '@stamhoofd/structures';
+import type { WebshopPreview } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate, EmailTemplateType, PaymentMethod, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { Country } from "@stamhoofd/types/Country";
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';

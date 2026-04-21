@@ -1,5 +1,5 @@
 <template>
-    <div ref="rootRef" class="st-view scanner-view">
+    <div ref="rootRef" class="st-view scanner-view" data-testid="ticket-scanner-view">
         <STNavigationBar :show-title="true" :title="$t(`%Vu`)">
             <template #left>
                 <button class="icon button close" type="button" @click="() => dismiss()" />
