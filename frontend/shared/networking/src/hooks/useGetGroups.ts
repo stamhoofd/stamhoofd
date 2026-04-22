@@ -5,11 +5,11 @@ import { Group, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamho
 import { Formatter } from '@stamhoofd/utility';
 import { useRequestOwner } from './useRequestOwner';
 
-export function useGetGroups() {
+export function useGetGroupsById() {
     const context = useContext();
     const owner = useRequestOwner();
 
-    const getGroups = async (groupIds: string[], shouldRetry?: boolean) => {
+    const getGroupsById = async (groupIds: string[], shouldRetry?: boolean) => {
         if (groupIds.length === 0) {
             return [];
         }
@@ -35,5 +35,5 @@ export function useGetGroups() {
         return response.data.results;
     };
 
-    return getGroups;
+    return getGroupsById;
 }

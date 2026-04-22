@@ -49,6 +49,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'membership',
             name: $t(`%1Ny`),
+            enabled: !waitingList,
             getValue: (member) => {
                 return {
                     status: member.membershipStatus,
@@ -438,6 +439,32 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             enabled: false,
         }),
     );
+
+    if (waitingList) {
+        allColumns.push(
+            new Column<ObjectType, string[]>({
+                name: $t('Uitgenodigd voor'),
+                enabled: true,
+                // todo?
+                allowSorting: false,
+                getValue: (v) => {
+                    if (organization) {
+                        return v.member.registrationInvitations.filter(r => r.organizationId === organization.id).map(i => i.group.name.toString());
+                    }
+                    return v.member.registrationInvitations.map(i => i.group.name.toString());
+                },
+                format: (v) => {
+                    if (v.length === 0) {
+                        return $t('Nog niet uitgenodigd');
+                    }
+                    return Formatter.joinLast(v.sort(), ', ', ' ' + $t(`%M1`) + ' ');
+                },
+                getStyle: v => v.length === 0 ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 200
+            })
+        )
+    }
 
     allColumns.push(
         new Column<ObjectType, Date | null>({

@@ -1,5 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { CountFilteredRequest, LimitedFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest } from '@stamhoofd/structures';
 
 export interface ObjectFetcher<O> {
     extendSort?(list: SortList): SortList;
@@ -76,4 +77,14 @@ export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, object
     }
 
     return results;
+}
+
+export async function countAll<T>(objectFetcher: ObjectFetcher<T>, data?: CountFilteredRequest): Promise<number> {
+    if (!data) {
+        data = new CountFilteredRequest({
+            filter: objectFetcher.requiredFilter ?? null,
+        });
+    }
+    
+    return await objectFetcher.fetchCount(data);
 }

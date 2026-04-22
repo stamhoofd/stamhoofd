@@ -1,12 +1,12 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { Organization} from '@stamhoofd/models';
-import { Event, Group, OrganizationRegistrationPeriod, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
+import { Event, Group, OrganizationRegistrationPeriod, Platform, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -377,6 +377,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             event.groupId = null;
             await event.save();
         }
+
+        // delete invitations
+        await RegistrationInvitation.delete().where('groupId', id);
     }
 
     static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null, options: { allowPatchWaitingListPeriod?: boolean; isPatchingEvent?: boolean } = {}) {

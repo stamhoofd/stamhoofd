@@ -32,6 +32,5 @@ withDefaults(
 
 :slotted(.image-component) img {
     object-fit: cover;
-
 }
 </style>

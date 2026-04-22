@@ -70,7 +70,7 @@ export abstract class TableAction<T extends { id: string }> {
         }
     }
 
-    isDisabled(hasSelection: boolean) {
+    isDisabled(hasSelection: boolean, _selection: TableActionSelection<T>) {
         if (!this.allowAutoSelectAll && !hasSelection && this.needsSelection) {
             return true;
         }
@@ -136,20 +136,45 @@ export class AsyncTableAction<T extends { id: string }> extends TableAction<T> {
 }
 
 export class InMemoryTableAction<T extends { id: string }> extends TableAction<T> {
-    handler: (item: T[]) => Promise<void> | void;
+    handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void;
     fetchLimitSettings?: FetchLimitSettings;
 
-    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[]) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings }) {
+    /**
+     * Disable the action if every item in the selection matches this filter.
+     * If an async fetchAll is needed disableIfAll will be ignored.
+     */
+    disableIfAll?: (item: T) => boolean;
+
+    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings, disableIfAll?: (item: T) => boolean }) {
         super(settings);
         this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
         this.fetchLimitSettings = settings.fetchLimitSettings;
+        this.disableIfAll = settings.disableIfAll;
+    }
+
+    override isDisabled(hasSelection: boolean, selection: TableActionSelection<T>) {
+        if (super.isDisabled(hasSelection, selection)) {
+            return true;
+        }
+
+        if (!this.disableIfAll) {
+            return false;
+        }
+
+        // disable if all items match the disableIfAll filter
+        // if an async fetchAll is needed always return false
+        const items = this.getSelectionSync(selection);
+        if (items.length === 0) {
+            return false;
+        }
+        return items.every(this.disableIfAll);
     }
 
     async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions<T>) {
         return await fetchAll(initialRequest, objectFetcher, { ...options, fetchLimitSettings: this.fetchLimitSettings });
     }
 
-    async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions<T>) {
+    private getSelectionSync(selection: TableActionSelection<T>) {        
         if (selection.cachedAllValues) {
             return selection.cachedAllValues;
         }
@@ -158,8 +183,21 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
             // No async needed
             return Array.from(selection.markedRows.values());
         }
+
+        return [];
+    }
+
+    async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions<T>): Promise<{items: T[], wereItemsFetched: boolean}> {
+        if (selection.cachedAllValues) {
+            return {items: selection.cachedAllValues, wereItemsFetched: false};
+        }
+
+        if (selection.markedRows.size && selection.markedRowsAreSelected === true) {
+            // No async needed
+            return {items: Array.from(selection.markedRows.values()), wereItemsFetched: false};
+        }
         else {
-            return await this.fetchAll(selection.filter, selection.fetcher, options);
+            return {items: await this.fetchAll(selection.filter, selection.fetcher, options), wereItemsFetched: true};
         }
     }
 
@@ -170,16 +208,16 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
         }, 1000);
 
         try {
-            const items = this.needsSelection
+            const {items, wereItemsFetched} = this.needsSelection
                 ? (await this.getSelection(data, {
                         onProgress(count, total) {
                             toast.setProgress(total !== 0 ? (count / total) : 0);
                         },
                     }))
-                : [];
+                : {items: [], wereItemsFetched: false};
             toast.setProgress(1);
             toast.message = $t(`%jg`);
-            await this.handler(items);
+            await this.handler(items, wereItemsFetched);
         }
         finally {
             clearTimeout(timer);
