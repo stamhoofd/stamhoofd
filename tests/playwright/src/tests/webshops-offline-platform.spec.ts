@@ -178,7 +178,7 @@ test.describe('Webshops offline', () => {
 
             await page.getByTestId('table').waitFor();
             // close webshop orders view
-            await page.locator('.button.icon.navigation.arrow-back').first().click();
+            await page.locator('.button.navigation').first().click();
         })
 
         await test.step('open ticket scanner', async () => {
