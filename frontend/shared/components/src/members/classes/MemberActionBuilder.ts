@@ -6,8 +6,8 @@ import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember} from '@stamhoofd/structures';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
@@ -26,7 +26,7 @@ import type { TableAction, TableActionSelection } from '../../tables/classes';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '../../tables/classes';
 import type { NavigationActions } from '../../types/NavigationActions';
 import DeleteView from '../../views/DeleteView.vue';
-import type { PlatformFamilyManager} from '../PlatformFamilyManager';
+import type { PlatformFamilyManager } from '../PlatformFamilyManager';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
@@ -370,7 +370,7 @@ export class MemberActionBuilder {
             new InMemoryTableAction({
                 name: $t(`%1KS`),
                 priority: 1,
-                groupIndex: 6,
+                groupIndex: 7,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
@@ -392,7 +392,7 @@ export class MemberActionBuilder {
         ];
     }
 
-    getMessagesAction(): TableAction<PlatformMember>[] {
+    getShowMessagesAction(): TableAction<PlatformMember>[] {
         if (!this.context.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read)) {
             return [];
         }
@@ -401,7 +401,7 @@ export class MemberActionBuilder {
             new InMemoryTableAction({
                 name: $t(`%1GU`),
                 priority: 1,
-                groupIndex: 6,
+                groupIndex: 7,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
@@ -492,22 +492,26 @@ export class MemberActionBuilder {
         presentEditMember({ member, present: this.present, context: this.context }).catch(console.error);
     }
 
-    getActions(options: { includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
-        const actions = [
-            new InMemoryTableAction({
-                name: $t(`%XO`),
-                icon: 'edit',
-                priority: 2,
-                groupIndex: 1,
-                needsSelection: true,
-                singleSelection: true,
-                enabled: this.hasWrite,
-                handler: (members: PlatformMember[]) => {
-                    this.editMember(members[0]);
-                },
-            }),
+    getActions(options: { includeMove?: boolean; includeEdit?: boolean; includeOnlyIfRelevantForWaitingList?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
+        const allActions: TableAction<PlatformMember>[] = [];
 
-            new InMemoryTableAction({
+        const includeOnlyRelevantForWaitingList = options.includeOnlyIfRelevantForWaitingList && this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
+
+        allActions.push(new InMemoryTableAction({
+            name: $t(`%XO`),
+            icon: 'edit',
+            priority: 2,
+            groupIndex: 1,
+            needsSelection: true,
+            singleSelection: true,
+            enabled: this.hasWrite,
+            handler: (members: PlatformMember[]) => {
+                this.editMember(members[0]);
+            },
+        }));
+        
+        if (!includeOnlyRelevantForWaitingList) {
+            allActions.push(new InMemoryTableAction({
                 name: $t(`%ej`),
                 icon: 'star',
                 priority: 0,
@@ -518,40 +522,132 @@ export class MemberActionBuilder {
                 handler: (members: PlatformMember[]) => {
                     this.editResponsibilities(members[0]);
                 },
-            }),
+            }));
+        }
 
-            new AsyncTableAction({
-                name: $t(`%1GW`),
-                icon: 'email',
-                priority: 12,
-                groupIndex: 3,
-                handler: async (selection: TableActionSelection<PlatformMember>) => {
-                    await this.openMail(selection);
-                },
-            }),
-            this.getSmsAction(),
-            this.getExportAction(),
+        allActions.push(new AsyncTableAction({
+            name: $t(`%1GW`),
+            icon: 'email',
+            priority: 12,
+            groupIndex: 3,
+            handler: async (selection: TableActionSelection<PlatformMember>) => {
+                await this.openMail(selection);
+            },
+        }));
+
+        allActions.push(this.getSmsAction());
+        allActions.push(this.getExportAction());
+
+        allActions.push(new MenuTableAction({
+            name: $t(`%dh`),
+            priority: 1,
+            groupIndex: 5,
+            needsSelection: true,
+            allowAutoSelectAll: false,
+            enabled: this.hasWrite && !!this.context.organization,
+            childActions: () => this.getRegisterActions(),
+        }));
+
+        if (options.includeMove) {
+            allActions.push(...this.getMoveAction(options.selectedOrganizationRegistrationPeriod));
+        }
+
+        if (options.includeEdit) {
+            allActions.push(...this.getEditAction());
+        }
+
+        if (STAMHOOFD.environment === 'development') {
+            allActions.push(...this.getClearDataAction());
+        }
+
+        allActions.push(...this.getInviteMemberForGroupActions());
+        allActions.push(...this.getDeleteAction());
+        allActions.push(...this.getUnsubscribeAction());
+        allActions.push(...this.getAuditLogAction());
+        allActions.push(...this.getShowMessagesAction());
+
+        return allActions;
+    }
+
+    private getCategoryTreeOfGroupsLinkedToWaitingList(): null | GroupCategoryTree {
+        const waitingList = this.groups[0];
+        const isWaitingList = this.groups.length === 1 && waitingList.type === GroupType.WaitingList && this.organizations.length === 1;
+        if (!isWaitingList) {
+            return null;
+        }
+
+        const organization = this.organizations[0];
+        const periods = organization.periods && this.context.auth.hasFullAccess() ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [organization.period];
+        const period = periods.find(p => p.period.id === waitingList.periodId);
+        if (!period) {
+            return null;
+        }
+
+        return period.getCategoryTree({
+            admin: true,
+            filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id
+        });
+    }
+
+    private getInviteMemberForGroupActions(): TableAction<PlatformMember>[] {
+        const filteredCategoryTree = this.getCategoryTreeOfGroupsLinkedToWaitingList();
+
+        if (!filteredCategoryTree) {
+            return [];
+        }
+
+        const enabled = this.hasWrite;
+
+        const allGroups = filteredCategoryTree.getAllGroups();
+        if (allGroups.length === 0) {
+            return [];
+        }
+        
+        if (allGroups.length === 1) {
+            const group = allGroups[0];
+            return [
+                new InMemoryTableAction({
+                    name: $t('Toelaten om in te schrijven'),
+                    icon: 'success',
+                    priority: 15,
+                    groupIndex: 2,
+                    enabled,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    handler: async (members: PlatformMember[]) => {
+                        // todo
+                        await this.inviteForGroup(members, group)
+                    }
+                }),
+
+                new InMemoryTableAction({
+                    name: $t('Toelating intrekken'),
+                    icon: 'canceled',
+                    priority: 14,
+                    groupIndex: 2,
+                    enabled,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    handler: async (members: PlatformMember[]) => {
+                        // todo
+                        await this.inviteForGroup(members, group)
+                    }
+                }),
+            ]
+        }
+
+        return [
             new MenuTableAction({
-                name: $t(`%dh`),
-                priority: 1,
-                groupIndex: 5,
+                name: $t(`Inschrijven toelaten voor`),
+                priority: 2,
+                groupIndex: 2,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite && !!this.context.organization,
-                childActions: () => this.getRegisterActions(),
-            }),
-            ...(options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : []),
-            ...(options.includeEdit ? this.getEditAction() : []),
-
-            ...(STAMHOOFD.environment === 'development' ? this.getClearDataAction() : []),
-
-            ...this.getDeleteAction(),
-            ...this.getUnsubscribeAction(),
-            ...this.getAuditLogAction(),
-            ...this.getMessagesAction(),
-        ];
-
-        return actions;
+                enabled,
+                // send / success / key
+                icon: 'send',
+                childActions: () => getActionsForCategory<PlatformMember>(filteredCategoryTree, async (members, group) => await this.inviteForGroup(members, group))
+            })];
     }
 
     private getSmsAction() {
@@ -863,6 +959,47 @@ export class MemberActionBuilder {
                 dismiss: () => Promise.resolve(),
             },
         });
+    }
+
+    private async inviteForGroup(members: PlatformMember[], group: Group) {
+        // const waitingListId = waitingList.id;
+
+        // todo
+        if (members.length === 1) {
+            // return await checkoutDefaultItem({
+            //     member: members[0],
+            //     group,
+            //     admin: true,
+            //     groupOrganization: this.organizations.find(o => o.id === group.organizationId)!,
+            //     context: this.context,
+            //     navigate: {
+            //         present: this.present,
+            //         show: this.present,
+            //         pop: () => Promise.resolve(),
+            //         dismiss: () => Promise.resolve(),
+            //     },
+            //     displayOptions: {
+            //         action: 'present',
+            //         modalDisplayStyle: 'popup',
+            //     },
+
+            //     // Immediately checkout instead of only adding it to the cart
+            //     startCheckoutFlow: true,
+            // });
+        }
+
+        // return await chooseOrganizationMembersForGroup({
+        //     members,
+        //     group,
+        //     context: this.context,
+        //     owner: this.owner,
+        //     navigate: {
+        //         present: this.present,
+        //         show: this.present,
+        //         pop: () => Promise.resolve(),
+        //         dismiss: () => Promise.resolve(),
+        //     },
+        // });
     }
 }
 

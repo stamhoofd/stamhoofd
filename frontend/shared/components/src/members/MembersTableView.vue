@@ -13,23 +13,22 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import type { TableAction} from '#tables/classes/TableAction.ts';
-import { InMemoryTableAction  } from '#tables/classes/TableAction.ts';
-import type {TableActionSelection} from '#tables/classes/TableAction.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import ModernTableView from '#tables/ModernTableView.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { useAuth } from '#hooks/useAuth.ts';
-import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
+import ModernTableView from '#tables/ModernTableView.vue';
+import type { ComponentExposed } from '#VueGlobalHelper.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, GroupType } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
@@ -294,10 +293,11 @@ const actions: TableAction<ObjectType>[] = [
         selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
         includeMove: true,
         includeEdit: !excludeEdit,
+        includeOnlyIfRelevantForWaitingList: true
     }),
 ];
 
-if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
+if (((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) && props.group?.type !== GroupType.WaitingList) {
     actions.push(actionBuilder.getChargeAction());
 }
 </script>
