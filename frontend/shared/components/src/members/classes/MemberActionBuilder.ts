@@ -1,5 +1,5 @@
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
@@ -622,7 +622,6 @@ export class MemberActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
-                        // todo
                         await this.inviteForGroup(members, group, waitingList.id)
                     }
                 }),
@@ -636,8 +635,7 @@ export class MemberActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
-                        // todo
-                        await this.deleteInvitations(members, group)
+                        await this.deleteInvitations(members, group, waitingList.id)
                     }
                 }),
             ]
@@ -651,8 +649,6 @@ export class MemberActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
-                // send / success / key
-                icon: 'send',
                 childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group, waitingList.id))
             })];
     }
@@ -986,12 +982,23 @@ export class MemberActionBuilder {
         }
 
         try {
-            await this.context.authenticatedServer.request({
+            const response = await this.context.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/registration-invitations',
                 body: invitations,
-                owner: this.owner
+                owner: this.owner,
+                decoder: new ArrayDecoder(RegistrationInvitation as Decoder<RegistrationInvitation>)
             });
+
+            const responseInvitations: RegistrationInvitation[] = response.data;
+
+            // update invitations
+            for (const invitation of responseInvitations) {
+                const member = members.find(m => m.member.id === invitation.memberId);
+                if (member && !member.member.registrationInvitations.find(i => i.id === invitation.id)) {
+                    member.member.registrationInvitations.push(invitation);
+                }
+            }
         } catch (e) {
             console.error(e);
             Toast.fromError(e).show();
@@ -1002,8 +1009,46 @@ export class MemberActionBuilder {
         new Toast(successMessage, 'success green').show();
     }
 
-    private async deleteInvitations(members: PlatformMember[], group: Group) {
-        // todo
+    private async deleteInvitations(members: PlatformMember[], group: Group, waitingListId: string) {
+        const invitations: PatchableArrayAutoEncoder<RegistrationInvitation> = new PatchableArray();
+
+        for (const member of members) {
+            for (const invitation of member.member.registrationInvitations.filter(i => i.groupId === group.id)) {
+                invitations.addDelete(invitation.id);
+            }
+        }
+
+        if (invitations.getDeletes().length === 0) {
+            new Toast(members.length === 1 ? $t('Dit lid is nog niet toegestaan') : $t('Deze leden zijn nog niet toegestaan'), 'info').show();
+            return;
+        }
+
+        try {
+            await this.context.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/registration-invitations',
+                body: invitations,
+                owner: this.owner
+            });
+
+            for (const invitationId of invitations.getDeletes()) {
+                for (const registrationInvitations of members.map(m => m.member.registrationInvitations)) {
+                    const indexOfInvitation = registrationInvitations.findIndex(i => i.id === invitationId);
+                    if (indexOfInvitation !== -1) {
+                        registrationInvitations.splice(indexOfInvitation, 1);
+                        break;
+                    }
+                }
+                
+            }
+        } catch (e) {
+            console.error(e);
+            Toast.fromError(e).show();
+            return;
+        }
+
+        const successMessage = members.length === 1 ? $t('Uitnodiging voor {name} is ingetrokken', { name: members[0].member.name }) : $t('Uitnodiging voor {count} leden zijn ingetrokken', { count: members.length });
+        new Toast(successMessage, 'success green').show();
     }
 }
 
