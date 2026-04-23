@@ -2,12 +2,15 @@ import { column } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
+import { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
 
 /**
  * Invitation to register for a group. If an invitation exists the member can always register even if he does not meet the requirements of the group.
  * Used for allowing members who are on a waiting list to register for a group.
  */
 export class RegistrationInvitation extends QueryableModel {
+    static table = 'registration_invitations';
+
     @column({
         primary: true, type: 'string', beforeSave(value) {
             return value ?? uuidv4();
@@ -42,4 +45,8 @@ export class RegistrationInvitation extends QueryableModel {
      */
     @column({ type: 'string', nullable: true })
     autoRemoveFromWaitingListWithId: string | null = null;
+
+    getStructure() {
+        return RegistrationInvitationStruct.create(this);
+    }
 }

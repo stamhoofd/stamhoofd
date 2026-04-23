@@ -1,9 +1,9 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
+import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, RegistrationInvitation, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
-import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
+import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationInvitation as RegistrationInvitationStruct, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
@@ -1893,5 +1893,28 @@ export class AdminPermissionChecker {
 
     canManagePlatformAdmins() {
         return this.hasPlatformFullAccess();
+    }
+
+    /**
+     * Will throw if not allowed to invite.
+     * @param invitation
+     * @param organizationId id of organization to invite for, should match the organizationId in the invitation
+     */
+    async checkCanInvite(invitation: RegistrationInvitationStruct | RegistrationInvitation, organizationId: string) {
+        if (organizationId !== invitation.organizationId) {
+            throw this.error($t('Je kan enkel iemand uitnodigen voor je eigen vereniging.'));
+        }
+
+        const group = await Group.getByID(invitation.groupId);
+
+        if (!group || group.organizationId !== organizationId || !await this.canAccessGroup(group, PermissionLevel.Write)) {
+            throw this.error($t(`Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.`));
+        }
+
+        const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
+        // read access is suficient
+        if (!member || member.organizationId !== organizationId || !await this.canAccessMember(member, PermissionLevel.Read)) {
+            throw this.error($t(`Je hebt geen toegansrechten om dit lid uit te nodigen.`));
+        }    
     }
 }
