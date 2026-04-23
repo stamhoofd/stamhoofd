@@ -1928,9 +1928,14 @@ export class AdminPermissionChecker {
         }
 
         const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
-        // read access is suficient
-        if (!member || member.organizationId !== organizationId || !await this.canAccessMember(member, PermissionLevel.Read)) {
-            throw this.error($t(`Je hebt geen toegansrechten om dit lid uit te nodigen.`));
+        
+        if (!member
+            // in userMode 'organization' we can only invite members from the same organization
+            || (STAMHOOFD.userMode === 'organization' && member.organizationId !== organizationId)
+            // read access is suficient
+            || !await this.canAccessMember(member, PermissionLevel.Read)
+            ) {
+                throw this.error($t(`Je hebt geen toegansrechten om dit lid uit te nodigen.`));
         }
     }
 }

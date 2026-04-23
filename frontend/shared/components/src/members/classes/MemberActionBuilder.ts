@@ -7,7 +7,7 @@ import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
@@ -569,7 +569,7 @@ export class MemberActionBuilder {
         return allActions;
     }
 
-    private getCategoryTreeOfGroupsLinkedToWaitingList(): null | GroupCategoryTree {
+    private getCategoryTreeOfGroupsLinkedToWaitingList(): null | {categoryTree: GroupCategoryTree, waitingList: Group} {
         const waitingList = this.groups[0];
         const isWaitingList = this.groups.length === 1 && waitingList.type === GroupType.WaitingList && this.organizations.length === 1;
         if (!isWaitingList) {
@@ -583,22 +583,29 @@ export class MemberActionBuilder {
             return null;
         }
 
-        return period.getCategoryTree({
+        const categoryTree = period.getCategoryTree({
             admin: true,
             filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id
         });
+
+        return {
+            categoryTree,
+            waitingList
+        }
     }
 
     private getInviteMemberForGroupActions(): TableAction<PlatformMember>[] {
-        const filteredCategoryTree = this.getCategoryTreeOfGroupsLinkedToWaitingList();
+        const result = this.getCategoryTreeOfGroupsLinkedToWaitingList();
 
-        if (!filteredCategoryTree) {
+        if (!result) {
             return [];
         }
 
+        const {categoryTree, waitingList} = result;
+
         const enabled = this.hasWrite;
 
-        const allGroups = filteredCategoryTree.getAllGroups();
+        const allGroups = categoryTree.getAllGroups();
         if (allGroups.length === 0) {
             return [];
         }
@@ -616,7 +623,7 @@ export class MemberActionBuilder {
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
                         // todo
-                        await this.inviteForGroup(members, group)
+                        await this.inviteForGroup(members, group, waitingList.id)
                     }
                 }),
 
@@ -630,7 +637,7 @@ export class MemberActionBuilder {
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
                         // todo
-                        await this.inviteForGroup(members, group)
+                        await this.deleteInvitations(members, group)
                     }
                 }),
             ]
@@ -646,7 +653,7 @@ export class MemberActionBuilder {
                 enabled,
                 // send / success / key
                 icon: 'send',
-                childActions: () => getActionsForCategory<PlatformMember>(filteredCategoryTree, async (members, group) => await this.inviteForGroup(members, group))
+                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group, waitingList.id))
             })];
     }
 
@@ -961,45 +968,42 @@ export class MemberActionBuilder {
         });
     }
 
-    private async inviteForGroup(members: PlatformMember[], group: Group) {
-        // const waitingListId = waitingList.id;
-
-        // todo
-        if (members.length === 1) {
-            // return await checkoutDefaultItem({
-            //     member: members[0],
-            //     group,
-            //     admin: true,
-            //     groupOrganization: this.organizations.find(o => o.id === group.organizationId)!,
-            //     context: this.context,
-            //     navigate: {
-            //         present: this.present,
-            //         show: this.present,
-            //         pop: () => Promise.resolve(),
-            //         dismiss: () => Promise.resolve(),
-            //     },
-            //     displayOptions: {
-            //         action: 'present',
-            //         modalDisplayStyle: 'popup',
-            //     },
-
-            //     // Immediately checkout instead of only adding it to the cart
-            //     startCheckoutFlow: true,
-            // });
+    private async inviteForGroup(members: PlatformMember[], group: Group, waitingListId: string) {
+        if (members.length === 0) {
+            return;
         }
 
-        // return await chooseOrganizationMembersForGroup({
-        //     members,
-        //     group,
-        //     context: this.context,
-        //     owner: this.owner,
-        //     navigate: {
-        //         present: this.present,
-        //         show: this.present,
-        //         pop: () => Promise.resolve(),
-        //         dismiss: () => Promise.resolve(),
-        //     },
-        // });
+        const invitations: PatchableArrayAutoEncoder<RegistrationInvitation> = new PatchableArray();
+        for (const member of members) {
+            const invitation = RegistrationInvitation.create({
+                groupId: group.id,
+                memberId: member.member.id,
+                organizationId: group.organizationId,
+                autoRemoveFromWaitingListWithId: waitingListId,
+            })
+
+            invitations.addPut(invitation);
+        }
+
+        try {
+            await this.context.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/registration-invitations',
+                body: invitations,
+                owner: this.owner
+            });
+        } catch (e) {
+            console.error(e);
+            Toast.fromError(e).show();
+            return;
+        }
+
+        const successMessage = members.length === 1 ? $t('{name} is uitgenodigd', { name: members[0].member.name }) : $t('{count} leden zijn uitgenodigd', { count: members.length });
+        new Toast(successMessage, 'success green').show();
+    }
+
+    private async deleteInvitations(members: PlatformMember[], group: Group) {
+        // todo
     }
 }
 
