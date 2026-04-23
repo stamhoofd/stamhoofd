@@ -2,10 +2,10 @@ import type { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder }
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
+import { PermissionLevel, RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { RegistrationInvitation } from '@stamhoofd/models';
+import { Group, RegistrationInvitation } from '@stamhoofd/models';
 import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
@@ -42,7 +42,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
         const invitations: RegistrationInvitation[] = [];
 
         for (const { put } of request.body.getPuts()) {
-            await Context.auth.checkCanInvite(put, organization.id);
+            await Context.auth.checkCanCreateRegistrationInvitation(put, organization.id);
 
             const invitation = new RegistrationInvitation();
             invitation.id = put.id;
@@ -74,8 +74,12 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 });
             }
 
-            // if creating is allowed, delete is allowed also
-            await Context.auth.checkCanInvite(invitation, organization.id);
+            // Anyone with write access to the group can delete invitations for the group
+            const group = await Group.getByID(invitation.groupId);
+    
+            if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+                throw Context.auth.error($t(`Je hebt geen toegansrechten om deze uitnodiging te verwijderen.`));
+            }
 
             await invitation.delete();
         }
