@@ -149,15 +149,21 @@ export const STExpect = {
         code?: string;
         message?: string | RegExp;
         field?: string;
+        statusCode?: number
     }) => {
         const d = {
             code: data.code ?? expect.any(String),
             message: data.message ? expect.stringMatching(data.message) : expect.any(String),
             field: data.field ?? expect.anything(),
+            statusCode: data.statusCode ?? expect.anything(),
         };
 
         if (!data.field) {
             delete d.field;
+        }
+
+        if (!data.statusCode) {
+            delete d.statusCode;
         }
         return expect.objectContaining(d);
     },

@@ -143,10 +143,10 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         return response;
     }
 
-    browsers: ({ browser: Browser; count: number } | null)[] = [null, null, null, null];
-    nextBrowserIndex = 0;
+    static browsers: ({ browser: Browser; count: number } | null)[] = [null, null, null, null];
+    static nextBrowserIndex = 0;
 
-    async useBrowser<T>(callback: (browser: Browser) => Promise<T>): Promise<T> {
+    static async useBrowser<T>(callback: (browser: Browser) => Promise<T>): Promise<T> {
         console.log('Requesting browser');
         this.nextBrowserIndex++;
         if (this.nextBrowserIndex >= this.browsers.length) {
@@ -171,7 +171,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         });
     }
 
-    async clearBrowser(browser: Browser) {
+    static async clearBrowser(browser: Browser) {
         try {
             await browser.close();
         }
@@ -188,7 +188,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
      * This will move to a different external service
      */
     async htmlToPdf(html: string, options: { retryCount: number; startDate: Date }): Promise<Uint8Array | null> {
-        const response = await this.useBrowser(async (browser) => {
+        const response = await HtmlToPdfEndpoint.useBrowser(async (browser) => {
             try {
                 // Create a new page
                 const page = await browser.newPage();

@@ -1,6 +1,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { promises as fs } from 'fs';
 
+/**
+ * This cache does not use a TTL. 
+ * Instead it uses the updatedAt timestamp of a resource when caching. So we keep the cache forever unless the resource itself has changed.
+ * The cache requester passes the updatedAt timestamp, so this works flawlessly.
+ */
 export class FileCache {
     static async write(cacheId: string, timestamp: Date, data: Uint8Array | Buffer) {
         if (cacheId.includes('/')) {
