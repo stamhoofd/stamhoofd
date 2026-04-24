@@ -8,6 +8,7 @@ import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
 
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';
 import { registrationInvitationFilterCompilers } from '../../../sql-filters/registration-invitations.js';
@@ -125,10 +126,6 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
 
         const query = RegistrationInvitation.select().setMaxExecutionTime(15 * 1000);
 
-        // const query = this.selectRegistrationWithGroup()
-        //     .setMaxExecutionTime(15 * 1000)
-        //     .where('registeredAt', '!=', null);
-
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
@@ -180,27 +177,6 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
             throw error;
         }
 
-        // for (const invitation of data) {
-        //     if (registration.group.settings.implicitlyAllowViewRegistrations) {
-        //         // okay, only need to check if we can access the members (next step)
-        //     }
-        //     else {
-        //         if (!await Context.auth.canAccessRegistration(registration, permissionLevel)) {
-        //             throw Context.auth.error();
-        //         }
-        //     }
-        // }
-
-        // const members = await Member.getBlobByIds(...data.map(r => r.memberId));
-
-        // for (const member of members) {
-        //     if (!await Context.auth.canAccessMember(member, permissionLevel)) {
-        //         throw Context.auth.error();
-        //     }
-        // }
-
-        // const registrationsBlob = await AuthenticatedStructures.registrationsBlob(data, members);
-
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
             request: requestQuery,
             results: data,
@@ -208,7 +184,7 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
         });
 
         return new PaginatedResponse<RegistrationInvitationStruct[], LimitedFilteredRequest>({
-            results: data.map(r => r.getStructure()),
+            results: await AuthenticatedStructures.registrationInvitations(data),
             next,
         });
     }

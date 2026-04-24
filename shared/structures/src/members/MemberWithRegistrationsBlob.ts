@@ -12,7 +12,7 @@ import { Member } from './Member.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { Registration } from './Registration.js';
-import { RegistrationInvitation } from './RegistrationInvitation.js';
+import { MemberRegistrationInvitation } from './RegistrationInvitation.js';
 import type { Filterable } from './records/RecordCategory.js';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
@@ -31,8 +31,8 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(GenericBalance), version: 375 })
     balances: GenericBalance[] = [];
 
-    @field({ decoder: new ArrayDecoder(RegistrationInvitation), ...NextVersion })
-    registrationInvitations: RegistrationInvitation[] = [];
+    @field({ decoder: new ArrayDecoder(MemberRegistrationInvitation), ...NextVersion })
+    registrationInvitations: MemberRegistrationInvitation[] = [];
 
     doesMatchFilter(filter: StamhoofdFilter) {
         try {

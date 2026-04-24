@@ -7,7 +7,7 @@ import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember } from '@stamhoofd/structures';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, MemberDetails, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, RegistrationInvitation, RegistrationInvitationRequest, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
@@ -622,7 +622,7 @@ export class MemberActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
-                        await this.inviteForGroup(members, group, waitingList.id)
+                        await this.inviteForGroup(members, group)
                     }
                 }),
 
@@ -635,7 +635,7 @@ export class MemberActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
-                        await this.deleteInvitations(members, group, waitingList.id)
+                        await this.deleteInvitations(members, group)
                     }
                 }),
             ]
@@ -649,7 +649,7 @@ export class MemberActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
-                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group, waitingList.id))
+                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group))
             })];
     }
 
@@ -964,18 +964,16 @@ export class MemberActionBuilder {
         });
     }
 
-    private async inviteForGroup(members: PlatformMember[], group: Group, waitingListId: string) {
+    private async inviteForGroup(members: PlatformMember[], group: Group) {
         if (members.length === 0) {
             return;
         }
 
-        const invitations: PatchableArrayAutoEncoder<RegistrationInvitation> = new PatchableArray();
+        const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
         for (const member of members) {
-            const invitation = RegistrationInvitation.create({
+            const invitation = RegistrationInvitationRequest.create({
                 groupId: group.id,
                 memberId: member.member.id,
-                organizationId: group.organizationId,
-                autoRemoveFromWaitingListWithId: waitingListId,
             })
 
             invitations.addPut(invitation);
@@ -994,7 +992,7 @@ export class MemberActionBuilder {
 
             // update invitations
             for (const invitation of responseInvitations) {
-                const member = members.find(m => m.member.id === invitation.memberId);
+                const member = members.find(m => m.member.id === invitation.member.id);
                 if (member && !member.member.registrationInvitations.find(i => i.id === invitation.id)) {
                     member.member.registrationInvitations.push(invitation);
                 }
@@ -1009,8 +1007,8 @@ export class MemberActionBuilder {
         new Toast(successMessage, 'success green').show();
     }
 
-    private async deleteInvitations(members: PlatformMember[], group: Group, waitingListId: string) {
-        const invitations: PatchableArrayAutoEncoder<RegistrationInvitation> = new PatchableArray();
+    private async deleteInvitations(members: PlatformMember[], group: Group) {
+        const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
         for (const member of members) {
             for (const invitation of member.member.registrationInvitations.filter(i => i.groupId === group.id)) {

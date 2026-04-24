@@ -2,7 +2,6 @@ import { column } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
 
 /**
  * Invitation to register for a group. If an invitation exists the member can always register even if he does not meet the requirements of the group.
@@ -40,13 +39,10 @@ export class RegistrationInvitation extends QueryableModel {
     })
     createdAt: Date;
 
+    // todo: remove
     /**
      * The member will be removed from the waiting list with this id, if this property is not null, when he is registered for the group he was invited for.
      */
     @column({ type: 'string', nullable: true })
     autoRemoveFromWaitingListWithId: string | null = null;
-
-    getStructure() {
-        return RegistrationInvitationStruct.create(this);
-    }
 }

@@ -1,21 +1,26 @@
-import type { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { PermissionLevel, RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
+import type { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
+import { PermissionLevel, RegistrationInvitationRequest } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, RegistrationInvitation } from '@stamhoofd/models';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<RegistrationInvitationStruct>;
+type Body = PatchableArrayAutoEncoder<RegistrationInvitationRequest>;
 type ResponseBody = RegistrationInvitationStruct[];
 
 export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    bodyDecoder = new PatchableArrayDecoder(RegistrationInvitationStruct as any, RegistrationInvitationStruct.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<RegistrationInvitationStruct[]>>;
+     
+    bodyDecoder = new PatchableArrayDecoder(
+        RegistrationInvitationRequest as Decoder<RegistrationInvitationRequest>,
+        RegistrationInvitationRequest.patchType() as Decoder<AutoEncoderPatchType<RegistrationInvitationRequest>>,
+        StringDecoder);
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -40,20 +45,30 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
         }
 
         const invitations: RegistrationInvitation[] = [];
+        let duplicateCount = 0;
 
-        for (const { put } of request.body.getPuts()) {
+        const puts = request.body.getPuts();
+        for (const { put } of puts) {
             await Context.auth.checkCanCreateRegistrationInvitation(put, organization.id);
 
             const invitation = new RegistrationInvitation();
             invitation.id = put.id;
-            invitation.organizationId = put.organizationId;
+            invitation.organizationId = organization.id;
             invitation.groupId = put.groupId;
             invitation.memberId = put.memberId;
-            invitation.createdAt = put.createdAt;
-            invitation.autoRemoveFromWaitingListWithId = put.autoRemoveFromWaitingListWithId;
 
-            await invitation.save();
-            invitations.push(invitation);
+            try {
+                await invitation.save();
+                invitations.push(invitation);
+            } catch (e) {
+                // ignore if duplicate entry (already exists)
+                if (e.code === 'ER_DUP_ENTRY') {
+                    duplicateCount += 1;
+                    continue;
+                } else {
+                    throw e;
+                }
+            }
         }
 
         if (request.body.getPatches().length > 0) {
@@ -84,8 +99,18 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             await invitation.delete();
         }
 
+        // show an error if all puts were duplicates
+        if (puts.length > 0 && puts.length === duplicateCount) {
+            throw new SimpleError({
+                code: 'duplicate_entry',
+                statusCode: 409,
+                message: 'Duplicate entry',
+                human: puts.length === 1 ? $t(`Het lid is al uitgenodigd voor deze groep.`) : $t(`De leden werden al uitgenodigd.`),
+            });
+        }
+
         return new Response(
-            invitations.map(p => p.getStructure()),
+            await AuthenticatedStructures.registrationInvitations(invitations),
         );
     }
 }

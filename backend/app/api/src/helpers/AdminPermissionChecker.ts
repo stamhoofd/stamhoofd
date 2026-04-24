@@ -1,9 +1,9 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, RegistrationInvitation, User } from '@stamhoofd/models';
+import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
-import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationInvitation as RegistrationInvitationStruct, ResourcePermissions } from '@stamhoofd/structures';
+import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationInvitationRequest, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
@@ -1900,31 +1900,11 @@ export class AdminPermissionChecker {
      * @param invitation
      * @param organizationId id of organization to invite for, should match the organizationId in the invitation
      */
-    async checkCanCreateRegistrationInvitation(invitation: RegistrationInvitationStruct | RegistrationInvitation, organizationId: string) {
-        if (organizationId !== invitation.organizationId) {
-            throw this.error($t('Je kan enkel iemand uitnodigen voor je eigen vereniging.'));
-        }
-
+    async checkCanCreateRegistrationInvitation(invitation: RegistrationInvitationRequest, organizationId: string) {
         const group = await Group.getByID(invitation.groupId);
 
         if (!group || group.organizationId !== organizationId || !await this.canAccessGroup(group, PermissionLevel.Write)) {
             throw this.error($t(`Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.`));
-        }
-
-        if (invitation.autoRemoveFromWaitingListWithId) {
-            if (group.waitingListId !== invitation.autoRemoveFromWaitingListWithId) {
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: 'Invalid autoRemoveFromWaitingListWithId: this waiting list is not linked with the group of this invitation',
-                    field: 'autoRemoveFromWaitingListWithId',
-                })
-            }
-
-            const waitingList = await Group.getByID(invitation.autoRemoveFromWaitingListWithId);
-            // waiting list should exist, should be a waiting list and should be accessible
-            if (!waitingList || waitingList.organizationId !== organizationId || waitingList.type !== GroupType.WaitingList || !await this.canAccessGroup(waitingList, PermissionLevel.Write)) {
-                throw this.error($t(`Je hebt geen toegansrechten om iemand die op deze wachtlijst staat uit te nodigen.`));
-            }
         }
 
         const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
