@@ -7,24 +7,24 @@ import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
 import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import type { Group } from '../../Group.js';
+import type { GroupCategory } from '../../GroupCategory.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
-import type {Organization} from '../../Organization.js';
+import type { Organization } from '../../Organization.js';
 import { Platform, PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
-import type {PlatformMember} from '../PlatformMember.js';
-import type { RecordAnswer} from '../records/RecordAnswer.js';
+import type { PlatformMember } from '../PlatformMember.js';
+import type { RecordAnswer } from '../records/RecordAnswer.js';
 import { RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
 import type { RecordSettings } from '../records/RecordSettings.js';
-import type {Registration} from '../Registration.js';
-import type {RegisterCart} from './RegisterCart.js';
-import type {RegisterContext} from './RegisterCheckout.js';
+import type { Registration } from '../Registration.js';
+import type { RegisterCart } from './RegisterCart.js';
+import type { RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
-import type { GroupCategory } from '../../GroupCategory.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -657,7 +657,12 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     isInvited() {
-        return !!this.member.member.registrations.find(r => r.groupId === this.group.id && r.registeredAt === null && r.canRegister);
+        const deprecatedLogic = this.member.member.registrations.some(r => r.groupId === this.group.id && r.registeredAt === null && r.canRegister);
+        if (deprecatedLogic) {
+            return true;
+        }
+
+        return this.member.member.registrationInvitations.some(r => r.groupId === this.group.id);
     }
 
     getRequireGroupIdsError() {
