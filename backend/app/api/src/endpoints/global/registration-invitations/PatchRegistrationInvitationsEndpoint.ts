@@ -105,7 +105,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 code: 'duplicate_entry',
                 statusCode: 409,
                 message: 'Duplicate entry',
-                human: puts.length === 1 ? $t(`Het lid is al uitgenodigd voor deze groep.`) : $t(`De leden werden al uitgenodigd.`),
+                human: puts.length === 1 ? $t(`Het lid is al toegelaten voor deze groep.`) : $t(`De leden werden al toegelaten.`),
             });
         }
 

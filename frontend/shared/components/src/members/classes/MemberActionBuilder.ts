@@ -650,7 +650,17 @@ export class MemberActionBuilder {
                 allowAutoSelectAll: false,
                 enabled,
                 childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group))
-            })];
+            }),
+            new MenuTableAction({
+                name: $t(`Toelating intrekken voor`),
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled,
+                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.deleteInvitations(members, group))
+            })
+        ];
     }
 
     private getSmsAction() {
@@ -971,12 +981,23 @@ export class MemberActionBuilder {
 
         const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
         for (const member of members) {
+            if (member.member.registrationInvitations.some(r => r.groupId === group.id)) {
+                // already invited
+                continue;
+            }
+
             const invitation = RegistrationInvitationRequest.create({
                 groupId: group.id,
                 memberId: member.member.id,
             })
 
             invitations.addPut(invitation);
+        }
+
+        if (invitations.getPuts().length === 0) {
+             const groupName = group.settings.name.toString();
+            Toast.warning(members.length === 1 ? $t('Dit lid is is al toegelaten voor {group}', { group: groupName }) : $t('Deze leden zijn al niet toegelaten voor {group}', {group: groupName})).show();
+            return;
         }
 
         try {
@@ -1003,7 +1024,7 @@ export class MemberActionBuilder {
             return;
         }
 
-        const successMessage = members.length === 1 ? $t('{name} is uitgenodigd', { name: members[0].member.name }) : $t('{count} leden zijn uitgenodigd', { count: members.length });
+        const successMessage = members.length === 1 ? $t('{name} is toegelaten', { name: members[0].member.name }) : $t('{count} leden zijn toegelaten', { count: members.length });
         new Toast(successMessage, 'success green').show();
     }
 
@@ -1017,7 +1038,8 @@ export class MemberActionBuilder {
         }
 
         if (invitations.getDeletes().length === 0) {
-            new Toast(members.length === 1 ? $t('Dit lid is nog niet toegestaan') : $t('Deze leden zijn nog niet toegestaan'), 'info').show();
+            const groupName = group.settings.name.toString();
+            Toast.warning(members.length === 1 ? $t('Dit lid is nog niet toegelaten voor {group}', { group: groupName }) : $t('Deze leden zijn nog niet toegelaten voor {group}', {group: groupName})).show();
             return;
         }
 
@@ -1045,7 +1067,7 @@ export class MemberActionBuilder {
             return;
         }
 
-        const successMessage = members.length === 1 ? $t('Uitnodiging voor {name} is ingetrokken', { name: members[0].member.name }) : $t('Uitnodiging voor {count} leden zijn ingetrokken', { count: members.length });
+        const successMessage = members.length === 1 ? $t('Toelating voor {name} is ingetrokken', { name: members[0].member.name }) : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
         new Toast(successMessage, 'success green').show();
     }
 }
