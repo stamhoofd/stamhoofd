@@ -44,18 +44,18 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import type { NavigationActions } from '#types/NavigationActions.ts';
-import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
-import { Toast } from '#overlays/Toast.ts';
 import { useAppContext } from '#context/appContext.ts';
-import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUninheritedPermissions } from '#hooks/useUninheritedPermissions.ts';
+import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
+import { Toast } from '#overlays/Toast.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import type { Group, Organization, PlatformMember } from '@stamhoofd/structures';
 import { GroupCategoryTree, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import SearchOrganizationView from './SearchOrganizationView.vue';
@@ -63,6 +63,7 @@ import SearchOrganizationView from './SearchOrganizationView.vue';
 const props = defineProps<{
     member: PlatformMember;
     selectionHandler: (data: { group: Group; groupOrganization: Organization }, navigate: NavigationActions) => Promise<void> | void;
+    defaultOrganization?: Organization;
 }>();
 
 const selectedOrganization = ref((props.member.organizations[0] ?? null) as any) as Ref<Organization | null>;
@@ -99,6 +100,7 @@ onMounted(() => {
 const items = computed(() => {
     return props.member.organizations;
 });
+
 const labels = computed(() => {
     return items.value.map(o => o.name);
 });
@@ -167,6 +169,10 @@ const noGroupsMessage = computed(() => {
 function addOrganization(organization: Organization) {
     props.member.insertOrganization(organization);
     selectedOrganization.value = organization;
+}
+
+if (props.defaultOrganization) {
+    addOrganization(props.defaultOrganization);
 }
 
 async function openGroup(group: Group) {

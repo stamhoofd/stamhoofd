@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Group, PlatformFamily, PlatformMember, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { GroupType, Organization, RegisterCheckout, RegisterItem } from '@stamhoofd/structures';
 import { ChooseGroupForMemberView, loadFamilyIfNeeded } from '..';
@@ -9,11 +9,11 @@ import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
 import { useContext } from '../../hooks';
 import { Toast } from '../../overlays/Toast';
-import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
 import ChooseFamilyMembersForGroupView from '../ChooseFamilyMembersForGroupView.vue';
 import ChooseOrganizationMembersForGroupView from '../ChooseOrganizationMembersForGroupView.vue';
-import type { EditMemberStep} from '../classes/MemberStepManager';
+import type { EditMemberStep } from '../classes/MemberStepManager';
 import { MemberStepManager } from '../classes/MemberStepManager';
 import { getAllMemberSteps } from '../classes/steps';
 import { RegisterItemStep } from '../classes/steps/RegisterItemStep';
@@ -426,12 +426,13 @@ export function useChooseOrganizationMembersForGroup() {
 // ----------------------------
 // --------- Flow 4 -----------
 
-export async function chooseGroupForMember({ member, navigate, context, displayOptions, startCheckoutFlow, admin }: { admin?: boolean; member: PlatformMember; navigate: NavigationActions; context: SessionContext; displayOptions?: DisplayOptions; startCheckoutFlow?: boolean }) {
+export async function chooseGroupForMember({ member, navigate, context, displayOptions, startCheckoutFlow, admin, defaultOrganization }: { admin?: boolean; member: PlatformMember; navigate: NavigationActions; context: SessionContext; displayOptions?: DisplayOptions; startCheckoutFlow?: boolean, defaultOrganization?: Organization }) {
     await runDisplayOptions({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseGroupForMemberView, {
                     member,
+                    defaultOrganization,
                     selectionHandler: async ({ group, groupOrganization }: { group: Group; groupOrganization: Organization }, navigate: NavigationActions) => {
                         await checkoutDefaultItem({
                             member,
@@ -455,7 +456,7 @@ export function useChooseGroupForMember() {
     const context = useContext();
     const app = useAppContext();
 
-    return async ({ member, displayOptions, customNavigate, startCheckoutFlow }: { member: PlatformMember; displayOptions?: DisplayOptions; customNavigate?: NavigationActions; startCheckoutFlow?: boolean }) => {
+    return async ({ member, displayOptions, customNavigate, startCheckoutFlow, defaultOrganization}: { member: PlatformMember; displayOptions?: DisplayOptions; customNavigate?: NavigationActions; startCheckoutFlow?: boolean; defaultOrganization?: Organization }) => {
         if (app !== 'registration') {
             member.family.checkout.clear();
         }
@@ -467,6 +468,7 @@ export function useChooseGroupForMember() {
             context: context.value,
             displayOptions,
             startCheckoutFlow: startCheckoutFlow ?? (app !== 'registration'),
+            defaultOrganization
         });
     };
 }

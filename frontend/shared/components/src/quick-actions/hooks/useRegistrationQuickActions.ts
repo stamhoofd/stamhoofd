@@ -1,9 +1,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Platform, PlatformFamily, PlatformMember, StamhoofdFilter} from '@stamhoofd/structures';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Group, Organization, Platform, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -12,7 +12,7 @@ import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
 import { useContext, useUser } from '../../hooks';
-import { useEditMember } from '../../members';
+import { useChooseGroupForMember, useEditMember } from '../../members';
 import { MemberStepManager } from '../../members/classes/MemberStepManager';
 import { getAllMemberSteps } from '../../members/classes/steps';
 import { useNavigationActions } from '../../types/NavigationActions';
@@ -26,6 +26,7 @@ import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstan
 import { EventView } from '../../events';
 import EventIcon from '../../events/components/EventIcon.vue';
 import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
+import GroupIconWithWaitingList from '../../members/components/group/GroupIconWithWaitingList.vue';
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
@@ -38,6 +39,7 @@ export function useRegistrationQuickActions(): QuickActions {
     const errors = useErrors();
     const $navigate = useNavigate();
     const show = useShow();
+    const chooseGroupForMember = useChooseGroupForMember();
 
     async function openCart() {
         await GlobalEventBus.sendEvent('selectTabById', 'cart');
@@ -196,8 +198,59 @@ export function useRegistrationQuickActions(): QuickActions {
                 });
             }
 
-            let eventCount = 0;
+            // todo: should be loaded first?
+            // todo: what if event?
+            // todo: sort on createdAt?
+            let registrationSuggestionsCount = 0;
+            for (const member of memberManager.family.members) {
+                if (registrationSuggestionsCount >= 3) {
+                    break;
+                }
+                
+                const invitations = member.member.registrationInvitations;
+                if (invitations.length === 0) {
+                    continue;
+                }
+
+                invitations.sort((a, b) => a.groupName.toString().localeCompare(b.groupName.toString()));
+
+                const groupsText = Formatter.joinLast(invitations.map(i => i.groupName.toString()), ', ', ' ' + $t(`%M1`) + ' ');
+
+                let groupWithImage: Group | null = null;
+                let defaultOrganization: Organization | undefined = undefined;
+
+                for (const invitation of invitations) {
+                    const organization = memberManager.family.getOrganization(invitation.organizationId);
+                    if (organization && !defaultOrganization) {
+                        defaultOrganization = organization;
+                    }
+                    
+                    const group = organization?.period.groups.find(g => g.id === invitation.groupId);
+                    if (group && group.squareImage) {
+                        groupWithImage = group;
+                        // prefer organization of group with image
+                        defaultOrganization = organization;
+                        break;
+                    }
+                }
+
+                registrationSuggestionsCount += 1;
+                arr.push({
+                    ...(groupWithImage ? { leftComponent: GroupIconWithWaitingList, leftProps: { group: groupWithImage, organization: defaultOrganization } } : {}),
+                    prefix: $t('toegelaten', {firstName: member.member.firstName}),
+                    title: $t('Schrijf {firstName} in voor {groups}', {firstName: member.member.firstName, groups: groupsText}),
+                    description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),
+                    action: () => {
+                        chooseGroupForMember({member, defaultOrganization, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}}).catch(console.error);
+                        // todo
+                    },
+                });
+            }
+            
             for (const event of featuredEvents.value ?? []) {
+                if (registrationSuggestionsCount >= 3) {
+                    break;
+                }
                 const group = event.group;
 
                 if (group) {
@@ -230,7 +283,7 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 const groupText = getGroupDescriptionForEvent(event, memberManager.family.platform);
                 const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
-                eventCount += 1;
+                registrationSuggestionsCount += 1;
                 arr.push({
                     leftComponent: EventIcon,
                     leftProps: { event },
@@ -241,10 +294,6 @@ export function useRegistrationQuickActions(): QuickActions {
                         openEvent(event).catch(console.error);
                     },
                 });
-
-                if (eventCount >= 3) {
-                    break;
-                }
             }
 
             return arr;
