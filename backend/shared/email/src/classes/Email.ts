@@ -125,10 +125,10 @@ class EmailStatic {
         // verify connection configuration
         this.transactionalTransporter.verify((error) => {
             if (error) {
-                console.error('Transactinoal SMTP server not working', error);
+                console.error('Transactional SMTP server not working', error);
             }
             else {
-                console.log('Transactinoal SMTP server is ready to take our messages');
+                console.log('Transactional SMTP server is ready to take our messages');
             }
         });
     }
