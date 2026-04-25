@@ -12,7 +12,7 @@ export class TTLFileCache {
         this.cachePath = STAMHOOFD.CACHE_PATH + '/' + Formatter.slug(name)
 
         // Clear on boot
-        this.purgeCache(ttl).catch(console.error)
+        this.clear().catch(console.error)
     }
 
      keyToFilePath(key: string): string {
