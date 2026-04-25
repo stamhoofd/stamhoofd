@@ -1,4 +1,5 @@
 import { Router, RouterServer } from '@simonbackx/simple-endpoints';
+import { LogMiddleware } from '@stamhoofd/backend-middleware';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from './classes/Geolocator.js';
 
@@ -30,6 +31,10 @@ const start = async () => {
     const routerServer = new RouterServer(router);
     routerServer.verbose = false;
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+
+    // Send the app version along
+    routerServer.addRequestMiddleware(LogMiddleware);
+    routerServer.addResponseMiddleware(LogMiddleware);
 
     const shutdown = async () => {
         console.log('Shutting down...');
