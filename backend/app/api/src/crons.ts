@@ -143,7 +143,7 @@ async function checkWebshopDNS() {
 }
 
 async function checkReplies() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment !== "production") {
         return;
     }
 
@@ -203,7 +203,7 @@ async function checkReplies() {
 let lastPostmarkCheck: Date | null = null
 let lastPostmarkId: string | null = null
 async function checkPostmarkBounces() {
-    if (STAMHOOFD.environment === "development") {
+    if (STAMHOOFD.environment !== "staging") {
         return;
     }
     
