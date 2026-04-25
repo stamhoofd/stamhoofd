@@ -2761,10 +2761,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.26.5.tgz#04c350e1887063906be3ebbe01850f058c5ebae9"
   integrity sha512-kYObGVQedTciJTng5fGkMJAD4j1sXP5DcwpUsd8anaS4+upBK1RglnkG1Q637E5n0tIQH0Kxj5zoJ6o7/jU0gw==
 
-"@simonbackx/simple-endpoints@1.20.1":
-  version "1.20.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.20.1.tgz#798b024587c945a60ac26a0b6c66bde7cd202213"
-  integrity sha512-hmd7iNyb5kop1DZ4vkd/78Stzsaz1K9L07C9Q5gGTS4evPlwb5RIfZDNdH+dQFC/fP6L40sujNaBHSSol/i2KA==
+"@simonbackx/simple-endpoints@1.21.0":
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.21.0.tgz#a658e26e41618f91d783b11903f7deb8164dadb8"
+  integrity sha512-tgcH2itlmImalXIqaVdqls2s+btJZ3FrIXf19FoDW0qICus90AJ9T5u1eck3Czxa84vwctHEarzH5TbejXca9w==
 
 "@simonbackx/simple-errors@^1.5", "@simonbackx/simple-errors@^1.5.0":
   version "1.5.0"
