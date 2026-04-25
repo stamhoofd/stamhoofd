@@ -10,7 +10,8 @@
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && yarn -s build",
         "start": "yarn build && node ./dist/index.js",
-        "lint": "eslint"
+        "lint": "eslint",
+        "test": "vitest"
     },
     "devDependencies": {
         "@types/node": "^22"
