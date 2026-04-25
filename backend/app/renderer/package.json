@@ -23,7 +23,7 @@
         "@simonbackx/simple-logging": "^1.0.1",
         "luxon": "^2.2.0",
         "mockdate": "^3.0.2",
-        "mysql": "^2.18.1",
+        "mysql2": "^3.14.1",
         "puppeteer": "22.6.5",
         "formidable": "3.5.1"
     }

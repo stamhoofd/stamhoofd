@@ -26,6 +26,6 @@
         "aws-sdk": "^2.885.0"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.24.0"
+        "@simonbackx/simple-database": "1.24.1"
     }
 }

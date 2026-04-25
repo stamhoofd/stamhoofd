@@ -27,7 +27,7 @@
     },
     "dependencies": {
         "@mollie/api-client": "4.3.3",
-        "@simonbackx/simple-database": "1.24.0",
+        "@simonbackx/simple-database": "1.24.1",
         "@simonbackx/simple-endpoints": "1.13.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "aws-sdk": "^2.885.0",
@@ -39,7 +39,7 @@
         "luxon": "^2.2.0",
         "mailparser": "3.7.0",
         "mockdate": "^3.0.2",
-        "mysql": "^2.18.1",
+        "mysql2": "^3.14.1",
         "node-rsa": "1.1.1",
         "openid-client": "^5.4.0",
         "postmark": "4.0.2",

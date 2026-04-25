@@ -140,9 +140,9 @@ declare global {
      */
     type FrontendSpecificEnvironment = {
         readonly VERSION: string
-        readonly NOLT_URL: string
-        readonly MOLLIE_CLIENT_ID: string
-        readonly APP_UPDATE_SERVER_URL: string
+        readonly NOLT_URL?: string;
+        readonly MOLLIE_CLIENT_ID?: string
+        readonly APP_UPDATE_SERVER_URL?: string;
     }
 
     /** 
