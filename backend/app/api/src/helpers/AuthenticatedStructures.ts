@@ -1248,6 +1248,7 @@ export class AuthenticatedStructures {
                 groupName: group.settings.name,
                 organizationId: invitation.organizationId,
                 createdAt: invitation.createdAt,
+                waitingListId: invitation.waitingListId
             })
 
             let array = results.get(invitation.memberId);
@@ -1296,6 +1297,7 @@ export class AuthenticatedStructures {
                     lastName: member.lastName
                 }),
                 createdAt: invitation.createdAt,
+                waitingListId: invitation.waitingListId
             });
         });
     }

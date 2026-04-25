@@ -16,6 +16,10 @@ export class RegistrationInvitationRequest extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     memberId: string;
+
+    // For now every request should have a waitingListId
+    @field({ decoder: StringDecoder })
+    waitingListId: string;
 }
 
 /**
@@ -38,14 +42,11 @@ export class RegistrationInvitation extends AutoEncoder {
     @field({ decoder: StringDecoder })
     organizationId: string;
 
+    @field({ decoder: StringDecoder, nullable: true })
+    waitingListId: string | null;
+
     @field({ decoder: DateDecoder })
     createdAt: Date = new Date();
-
-    // /**
-    //  * The member will be removed from the waiting list with this id, if this property is not null, when he is registered for the group he was invited for.
-    //  */
-    // @field({decoder: StringDecoder, nullable: true})
-    // autoRemoveFromWaitingListWithId: string | null = null;
 }
 
 /**
@@ -64,6 +65,9 @@ export class MemberRegistrationInvitation extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     organizationId: string;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    waitingListId: string | null;
 
     @field({ decoder: DateDecoder })
     createdAt: Date = new Date();

@@ -440,8 +440,9 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         }),
     );
 
-    if (waitingList) {
-        // todo: filter only invitations for groups linked to this waiting list
+    if (waitingList && group) {
+        const waitingListId = group.id;
+
         allColumns.push(
             new Column<ObjectType, string[]>({
                 name: $t('Toegelaten voor'),
@@ -449,8 +450,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 // todo?
                 allowSorting: false,
                 getValue: (v) => {
-                    const inviations = organization ? v.member.registrationInvitations.filter(i => i.organizationId === organization.id) : v.member.registrationInvitations;
-                    return inviations.map(i => i.groupName.toString());
+                    return v.member.registrationInvitations.filter(i => i.waitingListId === waitingListId).map(i => i.groupName.toString());
                 },
                 format: (v) => {
                     if (v.length === 0) {

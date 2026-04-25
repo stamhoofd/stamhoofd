@@ -1907,6 +1907,35 @@ export class AdminPermissionChecker {
             throw this.error($t(`Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.`));
         }
 
+        // cannot invite for waiting list
+        if (group.type === GroupType.WaitingList) {
+            throw new SimpleError({
+                code: 'bad_group',
+                statusCode: 400,
+                message: 'Not allowed to invite for waiting list',
+            });
+        }
+
+        const waitingListId: string = invitation.waitingListId;
+
+        // waiting list should be linked to the group
+        if (group.waitingListId !== waitingListId) {
+            throw new SimpleError({
+                code: 'bad_group',
+                statusCode: 400,
+                message: 'The group is not linked with the waiting list',
+            })
+        }
+
+        const waitingList = await Group.getByID(waitingListId);
+        if (!waitingList || waitingList.type !== GroupType.WaitingList) {
+            throw new SimpleError({
+                code: 'not_found',
+                statusCode: 404,
+                message: 'No waiting list with this id is found',
+            });
+        }
+
         const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
         
         if (!member

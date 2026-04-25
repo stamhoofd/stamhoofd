@@ -23,6 +23,7 @@ import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
+import OrganizationAvatar from '../../context/OrganizationAvatar.vue';
 import { EventView } from '../../events';
 import EventIcon from '../../events/components/EventIcon.vue';
 import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
@@ -234,9 +235,28 @@ export function useRegistrationQuickActions(): QuickActions {
                     }
                 }
 
+                let leftComponentSettings: {leftComponent?: any, leftProps?: any} = {};
+
+                if (groupWithImage) {
+                    leftComponentSettings = {
+                        leftComponent: GroupIconWithWaitingList,
+                        leftProps: {
+                            group: groupWithImage,
+                            organization: defaultOrganization
+                        }
+                    }
+                } else if (defaultOrganization) {
+                    leftComponentSettings = {
+                        leftComponent: OrganizationAvatar,
+                        leftProps: {
+                            organization: defaultOrganization,
+                        }
+                    }
+                }
+
                 registrationSuggestionsCount += 1;
                 arr.push({
-                    ...(groupWithImage ? { leftComponent: GroupIconWithWaitingList, leftProps: { group: groupWithImage, organization: defaultOrganization } } : {}),
+                    ...leftComponentSettings,
                     prefix: $t('toegelaten', {firstName: member.member.firstName}),
                     title: $t('Schrijf {firstName} in voor {groups}', {firstName: member.member.firstName, groups: groupsText}),
                     description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),

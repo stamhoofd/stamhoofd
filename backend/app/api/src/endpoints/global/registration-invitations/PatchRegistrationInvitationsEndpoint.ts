@@ -56,6 +56,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             invitation.organizationId = organization.id;
             invitation.groupId = put.groupId;
             invitation.memberId = put.memberId;
+            invitation.waitingListId = put.waitingListId;
 
             try {
                 await invitation.save();

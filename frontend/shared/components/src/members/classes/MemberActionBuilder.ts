@@ -622,7 +622,7 @@ export class MemberActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     handler: async (members: PlatformMember[]) => {
-                        await this.inviteForGroup(members, group)
+                        await this.inviteForGroup(members, group, waitingList.id)
                     }
                 }),
 
@@ -649,7 +649,7 @@ export class MemberActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
-                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group))
+                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group, waitingList.id))
             }),
             new MenuTableAction({
                 name: $t(`Toelating intrekken voor`),
@@ -974,14 +974,14 @@ export class MemberActionBuilder {
         });
     }
 
-    private async inviteForGroup(members: PlatformMember[], group: Group) {
+    private async inviteForGroup(members: PlatformMember[], group: Group, waitingListId: string) {
         if (members.length === 0) {
             return;
         }
 
         const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
         for (const member of members) {
-            if (member.member.registrationInvitations.some(r => r.groupId === group.id)) {
+            if (member.member.registrationInvitations.some(invitation => invitation.groupId === group.id)) {
                 // already invited
                 continue;
             }
@@ -989,6 +989,7 @@ export class MemberActionBuilder {
             const invitation = RegistrationInvitationRequest.create({
                 groupId: group.id,
                 memberId: member.member.id,
+                waitingListId
             })
 
             invitations.addPut(invitation);

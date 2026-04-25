@@ -1,12 +1,12 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
-import { BalanceItem, Document, Group, Member, Organization, Registration, sendEmailTemplate } from '@stamhoofd/models';
-import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, Recipient, Replacement, StockReservation, TranslatedString, Version } from '@stamhoofd/structures';
+import { encodeObject } from '@simonbackx/simple-encoding';
+import { BalanceItem, Document, Group, Member, Organization, Registration, RegistrationInvitation, sendEmailTemplate } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
+import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, GroupType, Recipient, Replacement, StockReservation, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService.js';
 import { GroupService } from './GroupService.js';
 import { PlatformMembershipService } from './PlatformMembershipService.js';
-import { QueueHandler } from '@stamhoofd/queues';
-import { Formatter } from '@stamhoofd/utility';
-import { encodeObject } from '@simonbackx/simple-encoding';
 
 export const RegistrationService = {
     /**
@@ -55,6 +55,8 @@ export const RegistrationService = {
         await registration.save();
         RegistrationService.scheduleStockUpdate(registration.id);
 
+        await this.handleInvitations(registration);
+
         await PlatformMembershipService.updateMembershipsForId(registration.memberId);
 
         if (registration.sendConfirmationEmail) {
@@ -74,6 +76,80 @@ export const RegistrationService = {
         await GroupService.updateOccupancy(registration.groupId);
 
         return true;
+    },
+
+    /**
+     * Delete all the invitations for the group and member linked to the registration.
+     * Will not throw if it fails.
+     * @param registration 
+     */
+    async handleInvitations(registration: Registration): Promise<void> {
+        const group = await Group.getByID(registration.groupId);
+
+        if (!group || group.type === GroupType.WaitingList) {
+            // skip if waiting list (waiting lists cannot have invitations)
+            return;
+        }
+
+        // get invitation for this group and member (can only be 1)
+        const invitation = await RegistrationInvitation.select()
+            .where('groupId', registration.groupId)
+            .andWhere('memberId', registration.memberId)
+            .first(false);
+        
+        const waitingListIds = new Set<string>();
+
+        if (group.waitingListId) {
+            // we should check if the member is on the waiting list of this group
+            waitingListIds.add(group.waitingListId);
+        }
+
+        if (invitation) {
+            if (invitation.waitingListId) {
+                // we should remove the member from this waiting list later on
+                waitingListIds.add(invitation.waitingListId);
+            }
+
+            // delete the invitation
+            try {
+                await invitation.delete();
+            } catch (e) {
+                // an error should not stop other logic (impact of an error is low)
+                console.error(e);
+            }
+        }
+
+        // unsubscribe from waiting lists (should only be 1)
+        for (const waitingListId of waitingListIds.values()) {
+            try {
+                // count all invitations for the waiting list for this member
+                const invitationsForMemberForWaitingList = await RegistrationInvitation.select()
+                    .where('memberId', registration.memberId)
+                    .where('waitingListId', waitingListId)
+                    .count();
+
+                // only unsubscribe if the member has no other invitations from the waiting list
+                if (invitationsForMemberForWaitingList > 0) {
+                    continue;
+                }
+            
+                // get the registration for the waiting list (should only be 1)
+                const waitingListRegistration = await Registration.select()
+                    .where('groupId', waitingListId)
+                    .andWhere('memberId', registration.memberId)
+                    .andWhereNot('registeredAt', null)
+                    .first(false);
+                
+                if (waitingListRegistration) {
+                    // unsubscribe for waiting list (waiting lists cannot have a price -> balance items should not be updated)
+                    await RegistrationService.deactivate(waitingListRegistration);
+                    await GroupService.updateOccupancy(waitingListId);
+                }
+            } catch (e) {
+                // an error should not stop other logic (impact of an error is low)
+                console.error(e);
+            }
+        }
     },
 
     async getRecipients(registration: Registration, organization: Organization, group: Group) {
