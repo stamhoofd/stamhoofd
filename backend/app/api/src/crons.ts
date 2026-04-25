@@ -771,8 +771,8 @@ async function checkReservedUntil() {
 let lastSGVCheck: Date | null = null
 
 async function checkSGV() {
-    if (STAMHOOFD.environment === "development") {
-        //return
+    if (STAMHOOFD.environment !== "production") {
+        return
     }
 
     // Wait for the next day before doing a new check
@@ -780,9 +780,7 @@ async function checkSGV() {
         console.log("[S&GV] Skipped.")
         return
     }
-
   
-    
     // Check if between 2 - 3 AM
     if (new Date().getHours() < 2 || new Date().getHours() >= 3) {
         console.log("[S&GV] Not between 2 and 3 AM, skipping.")
