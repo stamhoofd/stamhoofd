@@ -979,10 +979,20 @@ export class MemberActionBuilder {
             return;
         }
 
+        let alreadyRegisteredCount = 0;
+        let alreadyInvitedCount = 0;
+
         const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
         for (const member of members) {
             if (member.member.registrationInvitations.some(invitation => invitation.groupId === group.id)) {
                 // already invited
+                alreadyInvitedCount += 1;
+                continue;
+            }
+
+            if (member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null)) {
+                // already registered
+                alreadyRegisteredCount += 1;
                 continue;
             }
 
@@ -995,9 +1005,32 @@ export class MemberActionBuilder {
             invitations.addPut(invitation);
         }
 
+        if (alreadyRegisteredCount || alreadyInvitedCount) {
+            const groupName = group.settings.name.toString();
+
+            if (members.length === 1) {
+                if (alreadyInvitedCount) {
+                    Toast.warning($t('Dit lid is is al toegelaten voor {group}', { group: groupName })).show();
+
+                } else {
+                    Toast.warning($t('Dit lid is al ingeschreven voor {group}', {group: groupName})).show();
+                }
+            } else {
+                if (alreadyInvitedCount === 1) {
+                    Toast.warning($t('1 lid is al toegelaten voor {group}', {group: groupName})).show();
+                } else if (alreadyInvitedCount) {
+                    Toast.warning($t('{count} leden zijn al toegelaten voor {group}', {count: alreadyInvitedCount, group: groupName})).show();
+                }
+
+                if (alreadyRegisteredCount === 1) {
+                    Toast.warning($t('1 lid is al ingeschreven voor {group}', {group: groupName})).show();
+                } else if (alreadyRegisteredCount) {
+                    Toast.warning($t('{count} leden zijn al ingeschreven voor {group}', {count: alreadyRegisteredCount, group: groupName})).show();   
+                }
+            }
+        }
+
         if (invitations.getPuts().length === 0) {
-             const groupName = group.settings.name.toString();
-            Toast.warning(members.length === 1 ? $t('Dit lid is is al toegelaten voor {group}', { group: groupName }) : $t('Deze leden zijn al niet toegelaten voor {group}', {group: groupName})).show();
             return;
         }
 

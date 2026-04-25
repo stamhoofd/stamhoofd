@@ -1946,5 +1946,15 @@ export class AdminPermissionChecker {
             ) {
                 throw this.error($t(`Je hebt geen toegansrechten om dit lid uit te nodigen.`));
         }
+
+        // cannot invite if already registered
+        if (member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null)) {
+            throw new SimpleError({
+                code: 'bad_group',
+                statusCode: 400,
+                message: 'The member is already registered for this group',
+                human: $t('Dit lid is al ingeschreven voor deze groep'),
+            })
+        }
     }
 }
