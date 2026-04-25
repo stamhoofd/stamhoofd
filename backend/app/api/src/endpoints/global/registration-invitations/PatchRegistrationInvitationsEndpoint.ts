@@ -35,6 +35,22 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
         return [false];
     }
 
+    private async updateInvitation(invitation: RegistrationInvitation) {
+        try {
+            const duplicate = await RegistrationInvitation.select()
+                .where('groupId', invitation.groupId)
+                .andWhere('memberId', invitation.memberId).first(false);
+
+            if (duplicate) {
+                duplicate.waitingListId = invitation.waitingListId;
+                duplicate.createdAt = invitation.createdAt;
+                await duplicate.save();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
@@ -62,8 +78,10 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 await invitation.save();
                 invitations.push(invitation);
             } catch (e) {
-                // ignore if duplicate entry (already exists)
+                // update if duplicate
                 if (e.code === 'ER_DUP_ENTRY') {
+                    await this.updateInvitation(invitation);
+
                     duplicateCount += 1;
                     continue;
                 } else {
