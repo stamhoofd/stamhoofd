@@ -45,6 +45,8 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const url = request.query.url.href
 
+        console.log('Prerendering ' + url)
+
         let data: Data | null = null;
         try {
             data = await PrerenderEndpoint.getUrlHtml(url, { retryCount: 2, startDate: new Date() });
@@ -157,7 +159,7 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     document.querySelectorAll('script').forEach((el) => el.remove());
 
                     // Remove preload / modulepreload link tags (removePreloads plugin)
-                    document.querySelectorAll('link[rel="preload"][as="script"], link[rel="prefetch"][as="script"], link[rel="modulepreload"][as="script"]')
+                    document.querySelectorAll('link[rel="preload"][as="script"], link[rel="prefetch"][as="script"], link[rel="prefetch"][as="style"], link[rel="modulepreload"][as="script"]')
                         .forEach((el) => el.remove());
                 });
 
