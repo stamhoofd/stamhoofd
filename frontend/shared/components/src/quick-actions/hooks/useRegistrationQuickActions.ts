@@ -1,6 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import type { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Group, Organization, Platform, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
@@ -198,9 +199,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     action: () => checkAllMemberData(member),
                 });
             }
-
-            // todo: should be loaded first?
-            // todo: what if event?
+            
             // todo: sort on createdAt?
             let registrationSuggestionsCount = 0;
             for (const member of memberManager.family.members) {
@@ -208,7 +207,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     break;
                 }
                 
-                const invitations = member.member.registrationInvitations.filter(i => !i.group.isClosed);
+                const invitations = member.member.registrationInvitations.filter(i => !i.group.isClosed && i.group.type === GroupType.Membership);
                 if (invitations.length === 0) {
                     continue;
                 }
@@ -257,7 +256,7 @@ export function useRegistrationQuickActions(): QuickActions {
                 registrationSuggestionsCount += 1;
                 arr.push({
                     ...leftComponentSettings,
-                    prefix: $t('toegelaten', {firstName: member.member.firstName}),
+                    prefix: $t('toegelaten'),
                     title: $t('Schrijf {firstName} in voor {groups}', {firstName: member.member.firstName, groups: groupsText}),
                     description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),
                     action: () => {
@@ -266,55 +265,42 @@ export function useRegistrationQuickActions(): QuickActions {
                     },
                 });
             }
-            
-            for (const event of featuredEvents.value ?? []) {
-                if (registrationSuggestionsCount >= 3) {
-                    break;
-                }
-                const group = event.group;
 
-                if (group) {
-                    /**
-                     * check if at least 1 member can register for this group, because:
-                     * - the query does cannot check all cases
-                     * - the suggestion should disappear after registering
-                     */
-                    const organization = memberManager.family.getOrganization(group.organizationId);
-                    if (!organization) {
-                        console.error(`Could not find organization with id ${group.organizationId} for group with id ${group.id}`);
+            if (featuredEvents.value) {
+                // first get the events where members are invited for
+                const {invited, notInvited} = getEventsWhereInvited({events: featuredEvents.value, memberManager});
+
+                // first create actions for events where members are invited
+                for (const event of invited) {
+                    if (registrationSuggestionsCount >= 3) {
+                        break;
+                    }
+
+                    const quickAction = createQuickActionForEvent({event, memberManager, show, areSomeInvited: true});
+                    if (quickAction === null) {
                         continue;
                     }
-                    const canSomeMemberRegister = memberManager.family.members.some((member) => {
-                        if (member.canRegister(group, organization) || member.canRegisterForWaitingList(group, organization)) {
-                            return true;
-                        }
 
-                        return false;
-                    });
+                    registrationSuggestionsCount += 1;
+                    arr.push(quickAction);
+                }
 
-                    if (!canSomeMemberRegister) {
+                // add extra actions for left over events if limit is not reached
+                for (const event of notInvited) {
+                    if (registrationSuggestionsCount >= 3) {
+                        break;
+                    }
+
+                    const quickAction = createQuickActionForEvent({event, memberManager, show, areSomeInvited: false});
+                    if (quickAction === null) {
                         continue;
                     }
-                }
-                else if (!event.webshopId) {
-                    // event should have webshop or group
-                    continue;
-                }
 
-                const groupText = getGroupDescriptionForEvent(event, memberManager.family.platform);
-                const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
-                registrationSuggestionsCount += 1;
-                arr.push({
-                    leftComponent: EventIcon,
-                    leftProps: { event },
-                    prefix: groupText,
-                    title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
-                    description,
-                    action: () => {
-                        openEvent(event).catch(console.error);
-                    },
-                });
+                    registrationSuggestionsCount += 1;
+                    arr.push(quickAction);
+                }
             }
+            
 
             return arr;
         }),
@@ -352,16 +338,93 @@ function getGroupDescriptionForEvent(event: Event, platform: Platform) {
     return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
 }
 
+function getEventsWhereInvited({events, memberManager}: {events: Event[], memberManager: MemberManager}): {notInvited: Event[], invited: Event[]} {
+    const groupInvites = new Set(memberManager.family.members.flatMap(m => m.member.registrationInvitations.map(r => r.group.id)));
+
+    const invited: Event[] = [];
+    const notInvited: Event[] = [];
+
+    for (const event of events) {
+        if (event.group && groupInvites.has(event.group.id)) {
+            invited.push(event);
+        } else {
+            notInvited.push(event);
+        }
+    }
+
+    return {
+        invited,
+        notInvited
+    }
+}
+
+function createQuickActionForEvent({event, memberManager, show, areSomeInvited}: {event: Event, memberManager: MemberManager, show: ReturnType<typeof useShow>, areSomeInvited: boolean} ): QuickAction | null {
+    const group = event.group;
+
+    if (group) {
+        /**
+         * check if at least 1 member can register for this group, because:
+         * - the query does cannot check all cases
+         * - the suggestion should disappear after registering
+         */
+        const organization = memberManager.family.getOrganization(group.organizationId);
+        if (!organization) {
+            console.error(`Could not find organization with id ${group.organizationId} for group with id ${group.id}`);
+            return null;
+        }
+        const canSomeMemberRegister = memberManager.family.members.some((member) => {
+            if (member.canRegister(group, organization) || member.canRegisterForWaitingList(group, organization)) {
+                return true;
+            }
+
+            return false;
+        });
+
+        if (!canSomeMemberRegister) {
+            return null;
+        }
+    }
+    else if (!event.webshopId) {
+        // event should have webshop or group
+        return null;
+    }
+
+    const prefix = areSomeInvited ? $t('toegelaten') : getGroupDescriptionForEvent(event, memberManager.family.platform);
+    const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
+
+    return {
+        leftComponent: EventIcon,
+        leftProps: { event },
+        prefix,
+        title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
+        description,
+        action: () => {
+            const component = new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EventView, {
+                    event,
+                }),
+            });
+
+            show({
+                components: [component],
+            }).catch(console.error);
+        },
+    };
+}
+
 export async function getFeaturedEventsForFamily({ context, family, owner }: { context: SessionContext; family: PlatformFamily; owner?: object }) {
     if (family.members.length === 0) {
         return [];
     }
 
     function createFilter(family: PlatformFamily): StamhoofdFilter | null {
+        // filter on groups that can register for this event
         const groupIds = new Set<string>();
         const defaultGroupIds = new Set<string>();
         const organizationIds = new Set<string>();
         const ages = new Set<number>();
+        // filter on the group that is linked to this event
+        const eventGroupIds = new Set<string>();
         const periodIds = getActivePeriodIds(null, null, family.platform);
         for (const org of family.organizations) {
             const ids = getActivePeriodIds(null, org);
@@ -390,6 +453,16 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                         ages.add(d2);
                     }
                 }
+            }
+
+            // also add the events this member is invited for
+            for (const invitation of member.member.registrationInvitations) {
+                if (invitation.group.isClosed) {
+                    continue;
+                }
+
+                eventGroupIds.add(invitation.group.id);
+                organizationIds.add(invitation.organizationId);
             }
         }
 
@@ -420,6 +493,15 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                     ],
                 })),
             };
+        }
+
+        let eventGroupsFilter: StamhoofdFilter | null = null;
+        if (eventGroupIds.size > 0) {
+            eventGroupsFilter = {
+                groupId: {
+                    $in: [...eventGroupIds],
+                }
+            }
         }
 
         const uniqueOrganizationIds = [...organizationIds];
@@ -465,14 +547,25 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                 },
                 // visible
                 'meta.visible': true,
-                'groupIds': {
-                    $in: [null, ...groupIds.values()],
-                },
-                'defaultAgeGroupIds': {
-                    $in: [null, ...defaultGroupIds.values()],
-                },
             },
-            ...(ageFilter ? [ageFilter] : []),
+            {
+                $or: [
+                    {
+                        $and: [
+                            {
+                                'groupIds': {
+                                    $in: [null, ...groupIds.values()],
+                                },
+                                'defaultAgeGroupIds': {
+                                    $in: [null, ...defaultGroupIds.values()],
+                                }
+                            },
+                            ...(ageFilter ? [ageFilter] : []),
+                        ]
+                    },
+                    ...eventGroupsFilter ? [eventGroupsFilter] : []
+                ]
+            },
             {
             // add this filter last because it is more expensive (exists filter)
                 $or: [
