@@ -58,7 +58,7 @@ function ipv6ToBigInt(ip: string): bigint {
         throw new Error(`Invalid IPv6 address: ${ip}`);
     }
 
-    const groups = [
+    const groups: string[] = [
         ...left,
         ...Array(missing).fill('0'),
         ...right,
