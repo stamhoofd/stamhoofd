@@ -406,6 +406,34 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         }),
     );
 
+    if (waitingList && group) {
+        const waitingListId = group.id;
+
+        allColumns.push(
+            new Column<ObjectType, string[]>({
+                name: $t('Toegelaten voor'),
+                enabled: true,
+                // todo?
+                allowSorting: false,
+                getValue: (v) => {
+                    if (organization) {
+                        return v.member.member.registrationInvitations.filter(r => r.organizationId === organization.id).map(i => i.group.name.toString());
+                    }
+                    return v.member.member.registrationInvitations.filter(i => i.waitingListId === waitingListId).map(i => i.group.name.toString());
+                },
+                format: (v) => {
+                    if (v.length === 0) {
+                        return $t('Nog niet toegelaten');
+                    }
+                    return Formatter.joinLast(v.sort(), ', ', ' ' + $t(`%M1`) + ' ');
+                },
+                getStyle: v => v.length === 0 ? 'gray' : '',
+                minimumWidth: 100,
+                recommendedWidth: 200
+            })
+        )
+    }
+
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'registeredAt',

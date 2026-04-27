@@ -278,7 +278,7 @@ if (!organization.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!organization.value && props.group.organizationId !== organization.value.id;
 
-async function createActions(): Promise<TableAction<ObjectType>[]> {
+async function createActions(): Promise<void> {
     const results: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
         name: $t(`%zh`),
@@ -301,7 +301,6 @@ async function createActions(): Promise<TableAction<ObjectType>[]> {
         includeOnlyIfRelevantForWaitingList: true
     }),
     ];
-
     
     if (waitingList.value && props.group) {
         const request = new LimitedFilteredRequest({
@@ -325,12 +324,11 @@ async function createActions(): Promise<TableAction<ObjectType>[]> {
         results.push(...actionBuilder.getInviteMemberForGroupActions(eventGroups));
     }
 
-
     if (((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) && props.group?.type !== GroupType.WaitingList) {
         results.push(actionBuilder.getChargeAction());
     }
 
-    return actions.value = results;
+    actions.value = results;
 }
 
 createActions().catch(console.error);

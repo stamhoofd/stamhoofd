@@ -2,8 +2,8 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration} from '@stamhoofd/structures';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import type { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, Platform, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, GroupType, mergeFilters, PermissionLevel, PermissionsResourceType, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogsView } from '../../audit-logs';
 import { CommunicationView } from '../../communication';
@@ -11,8 +11,8 @@ import { LoadComponent } from '../../containers/AsyncComponent';
 import type { RecipientChooseOneOption } from '../../email';
 import { EmailView } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
-import type { PlatformFamilyManager} from '../../members';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
+import type { PlatformFamilyManager } from '../../members';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, deleteInvitationsForMembers, getActionsForCategory, inviteMembersForGroup, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { Toast } from '../../overlays/Toast';
 import type { TableAction, TableActionSelection } from '../../tables';
@@ -759,6 +759,143 @@ export class RegistrationActionBuilder {
             groups: this.groups,
             present: this.present,
         });
+    }
+
+    private getCategoryTreeOfGroupsLinkedToWaitingList(): null | {categoryTree: GroupCategoryTree, waitingList: Group} {
+        const waitingList = this.groups[0];
+        const isWaitingList = this.groups.length === 1 && waitingList.type === GroupType.WaitingList && this.organizations.length === 1;
+        if (!isWaitingList) {
+            return null;
+        }
+
+        const organization = this.organizations[0];
+        const periods = organization.periods && this.context.auth.hasFullAccess() ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [organization.period];
+        const period = periods.find(p => p.period.id === waitingList.periodId);
+        if (!period) {
+            return null;
+        }
+
+        const categoryTree = period.getCategoryTree({
+            admin: true,
+            filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id
+        });
+
+        return {
+            categoryTree,
+            waitingList
+        }
+    }
+
+    private async inviteForGroup(registrations: PlatformRegistration[], group: Group, waitingListId: string) {
+        return await inviteMembersForGroup({
+            members: getUniqueMembersFromRegistrations(registrations),
+            group,
+            waitingListId,
+            context: this.context,
+            owner: this.owner
+        })
+    }
+
+    private async deleteInvitations(registrations: PlatformRegistration[], group: Group) {
+        await deleteInvitationsForMembers({
+            members: getUniqueMembersFromRegistrations(registrations),
+            group,
+            context: this.context,
+            owner: this.owner
+        })
+    }
+
+    getInviteMemberForGroupActions(eventGroups: Group[]): TableAction<PlatformRegistration>[] {
+        const result = this.getCategoryTreeOfGroupsLinkedToWaitingList();
+
+        if (!result) {
+            return [];
+        }
+
+        const {categoryTree, waitingList} = result;
+
+        const enabled = this.hasWrite;
+
+        const allGroups = categoryTree.getAllGroups().concat(eventGroups);
+        if (allGroups.length === 0) {
+            return [];
+        }
+        
+        if (allGroups.length === 1) {
+            const group = allGroups[0];
+            return [
+                new InMemoryTableAction({
+                    name: $t('Toelaten om in te schrijven'),
+                    icon: 'success',
+                    priority: 15,
+                    groupIndex: 2,
+                    enabled,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    handler: async (registrations: PlatformRegistration[]) => {
+                        await this.inviteForGroup(registrations, group, waitingList.id)
+                    }
+                }),
+
+                new InMemoryTableAction({
+                    name: $t('Toelating intrekken'),
+                    icon: 'canceled',
+                    priority: 14,
+                    groupIndex: 2,
+                    enabled,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    handler: async (registrations: PlatformRegistration[]) => {
+                        await this.deleteInvitations(registrations, group)
+                    }
+                }),
+            ]
+        }
+
+        const getChildActions = (action: (items: PlatformRegistration[], group: Group) => void | Promise<void>) => {
+            const childActions = [];
+
+            if (eventGroups.length > 0) {
+                childActions.push(new MenuTableAction({
+                    name: $t('Activiteiten'),
+                    groupIndex: 0,
+                    enabled,
+                    childActions: () => eventGroups.map((g) => {
+                        return new InMemoryTableAction({
+                            name: g.settings.name.toString(),
+                            needsSelection: true,
+                            allowAutoSelectAll: false,
+                            handler: async (items: PlatformRegistration[]) => {
+                                await action(items, g);
+                            },
+                        })
+                    }),
+                }));
+            }
+
+            return childActions.concat(getActionsForCategory<PlatformRegistration>(categoryTree, action));
+        }
+
+        return [
+            new MenuTableAction({
+                name: $t(`Inschrijven toelaten voor`),
+                priority: 2,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled,
+                childActions: () => getChildActions(async (registrations, group) => await this.inviteForGroup(registrations, group, waitingList.id))
+            }),
+            new MenuTableAction({
+                name: $t(`Toelating intrekken voor`),
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled,
+                childActions: () => getChildActions(async (registrations, group) => await this.deleteInvitations(registrations, group))
+            })
+        ];
     }
 }
 

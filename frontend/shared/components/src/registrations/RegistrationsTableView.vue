@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
+        <ModernTableView v-if="!isLoading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
             <p v-if="isLimitedGroup" class="style-description-block">
                 {{ $t('%1HO') }}
             </p>
@@ -15,28 +15,30 @@
 </template>
 
 <script lang="ts" setup>
-import type { Column } from '#tables/classes/Column.ts';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import type { TableAction } from '#tables/classes/TableAction.ts';
-import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import ModernTableView from '#tables/ModernTableView.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { useAuth } from '#hooks/useAuth.ts';
-import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import ModernTableView from '#tables/ModernTableView.vue';
+import type { Column } from '#tables/classes/Column.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import { AccessRight, GroupType, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { useGroupsObjectFetcher } from '../fetchers/useGroupsObjectsFetcher';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
+import { fetchAll } from '../tables/classes/ObjectFetcher';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
 type ObjectType = PlatformRegistration;
@@ -65,9 +67,12 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const { filterBuilders, loading } = useAdvancedRegistrationWithMemberUIFilterBuilders({
+const { filterBuilders, loading: isLoadingFilters } = useAdvancedRegistrationWithMemberUIFilterBuilders({
     multipleGroups: props.organization === null || props.category !== null,
 });
+
+const actions: Ref<TableAction<ObjectType>[]> = ref([]);
+const isLoading = computed(() => isLoadingFilters.value && actions.value.length === 0);
 
 const title = computed(() => {
     if (props.customTitle) {
@@ -339,25 +344,53 @@ const isLimitedGroup = computed(() => {
     return false;
 });
 
-const actions: TableAction<ObjectType>[] = [
-    new InMemoryTableAction({
-        name: $t(`%zh`),
-        icon: 'add',
-        priority: 0,
-        groupIndex: 1,
-        needsSelection: false,
-        enabled: canAdd,
-        handler: async () => {
-            await chooseOrganizationMembersForGroup({
-                members: [],
-                group: props.group!,
-            });
-        },
-    }),
-    ...registrationActions,
-];
+async function createActions(): Promise<void> {
+    const results: TableAction<ObjectType>[] = [
+        new InMemoryTableAction({
+                name: $t(`%zh`),
+                icon: 'add',
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                enabled: canAdd,
+                handler: async () => {
+                    await chooseOrganizationMembersForGroup({
+                        members: [],
+                        group: props.group!,
+                    });
+                },
+            }),
+            ...registrationActions,
+    ];
 
-if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
-    actions.push(actionBuilder.getChargeAction());
+    if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
+        results.push(actionBuilder.getChargeAction());
+    }
+
+    if (waitingList.value && props.group) {
+        const request = new LimitedFilteredRequest({
+            limit: 100,
+            filter: {
+                waitingListId: props.group.id,
+                // only get events
+                type: GroupType.EventRegistration
+            }
+        })
+
+        const groupsObjectFetcher = useGroupsObjectFetcher();
+        
+        let eventGroups: Group[] = [];
+        try {
+            eventGroups = await fetchAll(request, groupsObjectFetcher);
+        } catch (e) {
+            console.error(e);
+        }
+
+        results.push(...actionBuilder.getInviteMemberForGroupActions(eventGroups));
+
+        actions.value = results;
+    }
 }
+
+createActions().catch(console.error);
 </script>

@@ -1003,134 +1003,22 @@ export class MemberActionBuilder {
     }
 
     private async inviteForGroup(members: PlatformMember[], group: Group, waitingListId: string) {
-        if (members.length === 0) {
-            return;
-        }
-
-        let alreadyRegisteredCount = 0;
-        let alreadyInvitedCount = 0;
-
-        const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
-        for (const member of members) {
-            if (member.member.registrationInvitations.some(invitation => invitation.group.id === group.id)) {
-                // already invited
-                alreadyInvitedCount += 1;
-                continue;
-            }
-
-            if (member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
-                // already registered
-                alreadyRegisteredCount += 1;
-                continue;
-            }
-
-            const invitation = RegistrationInvitationRequest.create({
-                groupId: group.id,
-                memberId: member.member.id,
-                waitingListId
-            })
-
-            invitations.addPut(invitation);
-        }
-
-        if (alreadyRegisteredCount || alreadyInvitedCount) {
-            const groupName = group.settings.name.toString();
-
-            if (members.length === 1) {
-                if (alreadyInvitedCount) {
-                    Toast.warning($t('Dit lid is is al toegelaten voor {group}', { group: groupName })).show();
-
-                } else {
-                    Toast.warning($t('Dit lid is al ingeschreven voor {group}', {group: groupName})).show();
-                }
-            } else {
-                if (alreadyInvitedCount === 1) {
-                    Toast.warning($t('1 lid is al toegelaten voor {group}', {group: groupName})).show();
-                } else if (alreadyInvitedCount) {
-                    Toast.warning($t('{count} leden zijn al toegelaten voor {group}', {count: alreadyInvitedCount, group: groupName})).show();
-                }
-
-                if (alreadyRegisteredCount === 1) {
-                    Toast.warning($t('1 lid is al ingeschreven voor {group}', {group: groupName})).show();
-                } else if (alreadyRegisteredCount) {
-                    Toast.warning($t('{count} leden zijn al ingeschreven voor {group}', {count: alreadyRegisteredCount, group: groupName})).show();   
-                }
-            }
-        }
-
-        if (invitations.getPuts().length === 0) {
-            return;
-        }
-
-        try {
-            const response = await this.context.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/registration-invitations',
-                body: invitations,
-                owner: this.owner,
-                decoder: new ArrayDecoder(RegistrationInvitation as Decoder<RegistrationInvitation>)
-            });
-
-            const responseInvitations: RegistrationInvitation[] = response.data;
-
-            // update invitations
-            for (const invitation of responseInvitations) {
-                const member = members.find(m => m.member.id === invitation.member.id);
-                if (member && !member.member.registrationInvitations.find(i => i.id === invitation.id)) {
-                    member.member.registrationInvitations.push(invitation);
-                }
-            }
-        } catch (e) {
-            console.error(e);
-            Toast.fromError(e).show();
-            return;
-        }
-
-        const successMessage = members.length === 1 ? $t('{name} is toegelaten', { name: members[0].member.name }) : $t('{count} leden zijn toegelaten', { count: members.length });
-        new Toast(successMessage, 'success green').show();
+        return await inviteMembersForGroup({
+            members,
+            group,
+            waitingListId,
+            context: this.context,
+            owner: this.owner
+        })
     }
 
     private async deleteInvitations(members: PlatformMember[], group: Group) {
-        const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
-
-        for (const member of members) {
-            for (const invitation of member.member.registrationInvitations.filter(i => i.group.id === group.id)) {
-                invitations.addDelete(invitation.id);
-            }
-        }
-
-        if (invitations.getDeletes().length === 0) {
-            const groupName = group.settings.name.toString();
-            Toast.warning(members.length === 1 ? $t('Dit lid is nog niet toegelaten voor {group}', { group: groupName }) : $t('Deze leden zijn nog niet toegelaten voor {group}', {group: groupName})).show();
-            return;
-        }
-
-        try {
-            await this.context.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/registration-invitations',
-                body: invitations,
-                owner: this.owner
-            });
-
-            for (const invitationId of invitations.getDeletes()) {
-                for (const registrationInvitations of members.map(m => m.member.registrationInvitations)) {
-                    const indexOfInvitation = registrationInvitations.findIndex(i => i.id === invitationId);
-                    if (indexOfInvitation !== -1) {
-                        registrationInvitations.splice(indexOfInvitation, 1);
-                        break;
-                    }
-                }
-                
-            }
-        } catch (e) {
-            console.error(e);
-            Toast.fromError(e).show();
-            return;
-        }
-
-        const successMessage = members.length === 1 ? $t('Toelating voor {name} is ingetrokken', { name: members[0].member.name }) : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
-        new Toast(successMessage, 'success green').show();
+        await deleteInvitationsForMembers({
+            members,
+            group,
+            context: this.context,
+            owner: this.owner
+        })
     }
 }
 
@@ -1259,4 +1147,136 @@ export async function presentExportMembersToPdf({ members, platform, organizatio
         ],
         modalDisplayStyle: 'popup',
     });
+}
+
+
+export async function inviteMembersForGroup({members, group, waitingListId, context, owner}: {members: PlatformMember[], group: Group, waitingListId: string, context: SessionContext, owner: any}) {
+        if (members.length === 0) {
+            return;
+        }
+
+        let alreadyRegisteredCount = 0;
+        let alreadyInvitedCount = 0;
+
+        const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+        for (const member of members) {
+            if (member.member.registrationInvitations.some(invitation => invitation.group.id === group.id)) {
+                // already invited
+                alreadyInvitedCount += 1;
+                continue;
+            }
+
+            if (member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
+                // already registered
+                alreadyRegisteredCount += 1;
+                continue;
+            }
+
+            const invitation = RegistrationInvitationRequest.create({
+                groupId: group.id,
+                memberId: member.member.id,
+                waitingListId
+            })
+
+            invitations.addPut(invitation);
+        }
+
+        if (alreadyRegisteredCount || alreadyInvitedCount) {
+            const groupName = group.settings.name.toString();
+
+            if (members.length === 1) {
+                if (alreadyInvitedCount) {
+                    Toast.warning($t('Dit lid is is al toegelaten voor {group}', { group: groupName })).show();
+
+                } else {
+                    Toast.warning($t('Dit lid is al ingeschreven voor {group}', {group: groupName})).show();
+                }
+            } else {
+                if (alreadyInvitedCount === 1) {
+                    Toast.warning($t('1 lid is al toegelaten voor {group}', {group: groupName})).show();
+                } else if (alreadyInvitedCount) {
+                    Toast.warning($t('{count} leden zijn al toegelaten voor {group}', {count: alreadyInvitedCount, group: groupName})).show();
+                }
+
+                if (alreadyRegisteredCount === 1) {
+                    Toast.warning($t('1 lid is al ingeschreven voor {group}', {group: groupName})).show();
+                } else if (alreadyRegisteredCount) {
+                    Toast.warning($t('{count} leden zijn al ingeschreven voor {group}', {count: alreadyRegisteredCount, group: groupName})).show();   
+                }
+            }
+        }
+
+        if (invitations.getPuts().length === 0) {
+            return;
+        }
+
+        try {
+            const response = await context.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/registration-invitations',
+                body: invitations,
+                owner,
+                decoder: new ArrayDecoder(RegistrationInvitation as Decoder<RegistrationInvitation>)
+            });
+
+            const responseInvitations: RegistrationInvitation[] = response.data;
+
+            // update invitations
+            for (const invitation of responseInvitations) {
+                const member = members.find(m => m.member.id === invitation.member.id);
+                if (member && !member.member.registrationInvitations.find(i => i.id === invitation.id)) {
+                    member.member.registrationInvitations.push(invitation);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            Toast.fromError(e).show();
+            return;
+        }
+
+        const successMessage = members.length === 1 ? $t('{name} is toegelaten', { name: members[0].member.name }) : $t('{count} leden zijn toegelaten', { count: members.length });
+        new Toast(successMessage, 'success green').show();
+}
+
+export async function deleteInvitationsForMembers({members, group, context, owner}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any}) {
+    const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+
+    for (const member of members) {
+        for (const invitation of member.member.registrationInvitations.filter(i => i.group.id === group.id)) {
+            invitations.addDelete(invitation.id);
+        }
+    }
+
+    if (invitations.getDeletes().length === 0) {
+        const groupName = group.settings.name.toString();
+        Toast.warning(members.length === 1 ? $t('Dit lid is nog niet toegelaten voor {group}', { group: groupName }) : $t('Deze leden zijn nog niet toegelaten voor {group}', {group: groupName})).show();
+        return;
+    }
+
+    try {
+        await context.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/registration-invitations',
+            body: invitations,
+            owner
+        });
+
+        for (const invitationId of invitations.getDeletes()) {
+            for (const registrationInvitations of members.map(m => m.member.registrationInvitations)) {
+                const indexOfInvitation = registrationInvitations.findIndex(i => i.id === invitationId);
+                if (indexOfInvitation !== -1) {
+                    registrationInvitations.splice(indexOfInvitation, 1);
+                    break;
+                }
+            }
+            
+        }
+    } catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
+        return;
+    }
+
+    const successMessage = members.length === 1 ? $t('Toelating voor {name} is ingetrokken', { name: members[0].member.name }) : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
+    new Toast(successMessage, 'success green').show();
 }
