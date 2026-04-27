@@ -209,35 +209,34 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
-import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
-import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
 import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
-import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useGetGroups } from '@stamhoofd/networking/hooks/useGetGroups';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
 import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { GroupCategoryTree, MemberResponsibility, Organization, PlatformEventType, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
 import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupSettings, GroupStatus, NamedObject, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import type { ComponentOptions} from 'vue';
 import { computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
@@ -261,7 +260,7 @@ const isLocked = computed(() => props.period.period.locked);
 const platform = usePlatform();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
 const context = useContext();
-const getGroups = useGetGroups();
+const getGroupsById = useGetGroupsById();
 const getPeriods = useGetPeriods();
 const featureFlag = useFeatureFlag();
 
@@ -810,7 +809,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
 
         // next get the missing groups and periods from the server
         if (missingGroupIds.length > 0) {
-            const missingGroups = await getGroups(missingGroupIds, true);
+            const missingGroups = await getGroupsById(missingGroupIds, true);
 
             // extra validation to make sure all groups are found
             for (const missingGroupId of missingGroupIds) {

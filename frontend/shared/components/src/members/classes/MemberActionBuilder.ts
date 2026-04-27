@@ -77,6 +77,8 @@ export class MemberActionBuilder {
 
     forceWriteAccess: boolean | null = null;
 
+    private eventGroupsLinkedToWaitingList?: Group[];
+
     constructor(settings: {
         present: ReturnType<typeof usePresent>;
         context: SessionContext;
@@ -86,6 +88,8 @@ export class MemberActionBuilder {
         platformFamilyManager: PlatformFamilyManager;
         owner: any;
         forceWriteAccess?: boolean | null;
+        // groups of type event that are linked to the waiting list (if the group is a waitingList)
+        eventGroupsLinkedToWaitingList?: Group[];
     }) {
         this.present = settings.present;
         this.context = settings.context;
@@ -95,6 +99,7 @@ export class MemberActionBuilder {
         this.platformFamilyManager = settings.platformFamilyManager;
         this.owner = settings.owner;
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
+        this.eventGroupsLinkedToWaitingList = settings.eventGroupsLinkedToWaitingList;
     }
 
     get hasWrite() {
@@ -560,7 +565,6 @@ export class MemberActionBuilder {
             allActions.push(...this.getClearDataAction());
         }
 
-        allActions.push(...this.getInviteMemberForGroupActions());
         allActions.push(...this.getDeleteAction());
         allActions.push(...this.getUnsubscribeAction());
         allActions.push(...this.getAuditLogAction());
@@ -594,7 +598,7 @@ export class MemberActionBuilder {
         }
     }
 
-    private getInviteMemberForGroupActions(): TableAction<PlatformMember>[] {
+    getInviteMemberForGroupActions(eventGroups: Group[]): TableAction<PlatformMember>[] {
         const result = this.getCategoryTreeOfGroupsLinkedToWaitingList();
 
         if (!result) {
@@ -605,7 +609,7 @@ export class MemberActionBuilder {
 
         const enabled = this.hasWrite;
 
-        const allGroups = categoryTree.getAllGroups();
+        const allGroups = categoryTree.getAllGroups().concat(eventGroups);
         if (allGroups.length === 0) {
             return [];
         }
@@ -641,6 +645,30 @@ export class MemberActionBuilder {
             ]
         }
 
+        const getChildActions = (action: (items: PlatformMember[], group: Group) => void | Promise<void>) => {
+            const childActions = [];
+
+            if (eventGroups.length > 0) {
+                childActions.push(new MenuTableAction({
+                    name: $t('Activiteiten'),
+                    groupIndex: 0,
+                    enabled,
+                    childActions: () => eventGroups.map((g) => {
+                        return new InMemoryTableAction({
+                            name: g.settings.name.toString(),
+                            needsSelection: true,
+                            allowAutoSelectAll: false,
+                            handler: async (items: PlatformMember[]) => {
+                                await action(items, g);
+                            },
+                        })
+                    }),
+                }));
+            }
+
+            return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action));
+        }
+
         return [
             new MenuTableAction({
                 name: $t(`Inschrijven toelaten voor`),
@@ -649,7 +677,7 @@ export class MemberActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
-                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.inviteForGroup(members, group, waitingList.id))
+                childActions: () => getChildActions(async (members, group) => await this.inviteForGroup(members, group, waitingList.id))
             }),
             new MenuTableAction({
                 name: $t(`Toelating intrekken voor`),
@@ -658,7 +686,7 @@ export class MemberActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
-                childActions: () => getActionsForCategory<PlatformMember>(categoryTree, async (members, group) => await this.deleteInvitations(members, group))
+                childActions: () => getChildActions(async (members, group) => await this.deleteInvitations(members, group))
             })
         ];
     }

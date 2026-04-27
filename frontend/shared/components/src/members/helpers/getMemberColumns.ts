@@ -450,6 +450,9 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 // todo?
                 allowSorting: false,
                 getValue: (v) => {
+                    if (organization) {
+                        return v.member.registrationInvitations.filter(r => r.organizationId === organization.id).map(i => i.groupName.toString());
+                    }
                     return v.member.registrationInvitations.filter(i => i.waitingListId === waitingListId).map(i => i.groupName.toString());
                 },
                 format: (v) => {

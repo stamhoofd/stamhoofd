@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLValueType } from '@stamhoofd/sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
@@ -31,6 +31,16 @@ export const groupFilterCompilers: SQLFilterDefinitions = {
     }),
     defaultAgeGroupId: createColumnFilter({
         expression: SQL.column('defaultAgeGroupId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
+    type: createColumnFilter({
+        expression: SQL.column('type'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+    waitingListId: createColumnFilter({
+        expression: SQL.column('waitingListId'),
         type: SQLValueType.String,
         nullable: true,
     }),

@@ -1,6 +1,6 @@
 <template>
-    <LoadingViewTransition>
-        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
+    <LoadingViewTransition :loading="isLoading">
+        <ModernTableView v-if="!isLoading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
             <p v-if="isLimitedGroup" class="style-description-block">
                 {{ $t('%1HO') }}
             </p>
@@ -27,11 +27,13 @@ import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType } from '@stamhoofd/structures';
+import { AccessRight, GroupType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { useGroupsObjectFetcher } from '../fetchers/useGroupsObjectsFetcher';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
+import { fetchAll } from '../tables';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from './helpers';
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -62,7 +64,9 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
+const { filterBuilders, loading: isLoadingFilters } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
+const actions: Ref<TableAction<ObjectType>[]> = ref([]);
+const isLoading = computed(() => isLoadingFilters.value && actions.value.length === 0);
 
 const title = computed(() => {
     if (props.customTitle) {
@@ -274,7 +278,8 @@ if (!organization.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!organization.value && props.group.organizationId !== organization.value.id;
 
-const actions: TableAction<ObjectType>[] = [
+async function createActions(): Promise<TableAction<ObjectType>[]> {
+    const results: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
         name: $t(`%zh`),
         icon: 'add',
@@ -295,9 +300,38 @@ const actions: TableAction<ObjectType>[] = [
         includeEdit: !excludeEdit,
         includeOnlyIfRelevantForWaitingList: true
     }),
-];
+    ];
 
-if (((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) && props.group?.type !== GroupType.WaitingList) {
-    actions.push(actionBuilder.getChargeAction());
+    
+    if (waitingList.value && props.group) {
+        const request = new LimitedFilteredRequest({
+            limit: 100,
+            filter: {
+                waitingListId: props.group.id,
+                // only get events
+                type: GroupType.EventRegistration
+            }
+        })
+
+        const groupsObjectFetcher = useGroupsObjectFetcher();
+        
+        let eventGroups: Group[] = [];
+        try {
+            eventGroups = await fetchAll(request, groupsObjectFetcher);
+        } catch (e) {
+            console.error(e);
+        }
+
+        results.push(...actionBuilder.getInviteMemberForGroupActions(eventGroups));
+    }
+
+
+    if (((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) && props.group?.type !== GroupType.WaitingList) {
+        results.push(actionBuilder.getChargeAction());
+    }
+
+    return actions.value = results;
 }
+
+createActions().catch(console.error);
 </script>
