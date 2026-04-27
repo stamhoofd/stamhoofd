@@ -451,9 +451,9 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 allowSorting: false,
                 getValue: (v) => {
                     if (organization) {
-                        return v.member.registrationInvitations.filter(r => r.organizationId === organization.id).map(i => i.groupName.toString());
+                        return v.member.registrationInvitations.filter(r => r.organizationId === organization.id).map(i => i.group.name.toString());
                     }
-                    return v.member.registrationInvitations.filter(i => i.waitingListId === waitingListId).map(i => i.groupName.toString());
+                    return v.member.registrationInvitations.filter(i => i.waitingListId === waitingListId).map(i => i.group.name.toString());
                 },
                 format: (v) => {
                     if (v.length === 0) {

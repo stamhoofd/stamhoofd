@@ -459,6 +459,41 @@ export class GroupSettings extends AutoEncoder {
     })
     waitingListSize: number | null = null;
 
+    /**
+     * Return the pre registration date only if is is active right now
+     */
+    get activePreRegistrationDate() {
+        if (!this.registrationStartDate) {
+            // Registration start date is a requirement for pre registrations
+            return null;
+        }
+        if (this.registrationStartDate < new Date() || this.waitingListType !== WaitingListType.PreRegistrations) {
+            // Start date is in the past: registrations are open
+            return null;
+        }
+        return this.preRegistrationsDate;
+    }
+
+    /**
+     * Closed now, but will open in the future
+     */
+    get notYetOpen() {
+        if (!this.registrationStartDate) {
+            return false;
+        }
+
+        const now = new Date();
+        const preRegistrationDate = this.activePreRegistrationDate;
+
+        if (this.registrationStartDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
+            // Start date or pre registration date are in the future
+
+            return true;
+        }
+
+        return false;
+    }
+
     getUsedStock(group: Group) {
         const groupStockReservations = group.stockReservations;
         return StockReservation.getAmount('GroupPrice', null, groupStockReservations);

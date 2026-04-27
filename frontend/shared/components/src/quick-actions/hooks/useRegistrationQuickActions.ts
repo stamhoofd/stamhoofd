@@ -208,14 +208,14 @@ export function useRegistrationQuickActions(): QuickActions {
                     break;
                 }
                 
-                const invitations = member.member.registrationInvitations;
+                const invitations = member.member.registrationInvitations.filter(i => !i.group.isClosed);
                 if (invitations.length === 0) {
                     continue;
                 }
 
-                invitations.sort((a, b) => a.groupName.toString().localeCompare(b.groupName.toString()));
+                invitations.sort((a, b) => a.group.name.toString().localeCompare(b.group.name.toString()));
 
-                const groupsText = Formatter.joinLast(invitations.map(i => i.groupName.toString()), ', ', ' ' + $t(`%M1`) + ' ');
+                const groupsText = Formatter.joinLast(invitations.map(i => i.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
 
                 let groupWithImage: Group | null = null;
                 let defaultOrganization: Organization | undefined = undefined;
@@ -226,7 +226,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         defaultOrganization = organization;
                     }
                     
-                    const group = organization?.period.groups.find(g => g.id === invitation.groupId);
+                    const group = organization?.period.groups.find(g => g.id === invitation.group.id);
                     if (group && group.squareImage) {
                         groupWithImage = group;
                         // prefer organization of group with image

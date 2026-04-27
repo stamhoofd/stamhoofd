@@ -7,7 +7,7 @@ import { getActivePeriodIds } from './getActivePeriods.js';
 import type { GroupCategory } from './GroupCategory.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { GroupPrivateSettings } from './GroupPrivateSettings.js';
-import { GroupSettings, WaitingListType } from './GroupSettings.js';
+import { GroupSettings } from './GroupSettings.js';
 import { GroupType } from './GroupType.js';
 import { Gender } from './members/Gender.js';
 import type { Organization } from './Organization.js';
@@ -133,35 +133,14 @@ export class Group extends AutoEncoder {
      * Return the pre registration date only if is is active right now
      */
     get activePreRegistrationDate() {
-        if (!this.settings.registrationStartDate) {
-            // Registration start date is a requirement for pre registrations
-            return null;
-        }
-        if (this.settings.registrationStartDate < new Date() || this.settings.waitingListType !== WaitingListType.PreRegistrations) {
-            // Start date is in the past: registrations are open
-            return null;
-        }
-        return this.settings.preRegistrationsDate;
+        return this.settings.activePreRegistrationDate;
     }
 
     /**
      * Closed now, but will open in the future
      */
     get notYetOpen() {
-        if (!this.settings.registrationStartDate) {
-            return false;
-        }
-
-        const now = new Date();
-        const preRegistrationDate = this.activePreRegistrationDate;
-
-        if (this.settings.registrationStartDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
-            // Start date or pre registration date are in the future
-
-            return true;
-        }
-
-        return false;
+        return this.settings.notYetOpen;
     }
 
     /**
@@ -172,7 +151,7 @@ export class Group extends AutoEncoder {
             return true;
         }
 
-        if (this.notYetOpen) {
+        if (this.settings.notYetOpen) {
             // Start date or pre registration date are in the future
             return true;
         }

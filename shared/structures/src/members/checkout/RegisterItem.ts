@@ -662,7 +662,7 @@ export class RegisterItem implements ObjectWithRecords {
             return true;
         }
 
-        return this.member.member.registrationInvitations.some(r => r.groupId === this.group.id);
+        return this.member.member.registrationInvitations.some(r => r.group.id === this.group.id);
     }
 
     getRequireGroupIdsError() {

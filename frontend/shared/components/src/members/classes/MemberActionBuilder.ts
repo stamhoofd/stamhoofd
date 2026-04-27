@@ -1012,7 +1012,7 @@ export class MemberActionBuilder {
 
         const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
         for (const member of members) {
-            if (member.member.registrationInvitations.some(invitation => invitation.groupId === group.id)) {
+            if (member.member.registrationInvitations.some(invitation => invitation.group.id === group.id)) {
                 // already invited
                 alreadyInvitedCount += 1;
                 continue;
@@ -1094,7 +1094,7 @@ export class MemberActionBuilder {
         const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
         for (const member of members) {
-            for (const invitation of member.member.registrationInvitations.filter(i => i.groupId === group.id)) {
+            for (const invitation of member.member.registrationInvitations.filter(i => i.group.id === group.id)) {
                 invitations.addDelete(invitation.id);
             }
         }
