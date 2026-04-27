@@ -24,11 +24,10 @@ import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
-import OrganizationAvatar from '../../context/OrganizationAvatar.vue';
 import { EventView } from '../../events';
 import EventIcon from '../../events/components/EventIcon.vue';
 import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
-import GroupIconWithWaitingList from '../../members/components/group/GroupIconWithWaitingList.vue';
+import RegistrationInvitationIcon from '../RegistrationInvitationIcon.vue';
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
@@ -200,46 +199,37 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 const groupsText = Formatter.joinLast(invitations.map(i => i.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
 
-                let groupWithImage: Group | null = null;
+                let groupForIcon: Group | undefined = undefined;
                 let defaultOrganization: Organization | undefined = undefined;
 
+                // find the group to show in the icon
                 for (const invitation of invitations) {
                     const organization = memberManager.family.getOrganization(invitation.organizationId);
-                    if (organization && !defaultOrganization) {
+                    if (organization) {
                         defaultOrganization = organization;
-                    }
-                    
-                    const group = organization?.period.groups.find(g => g.id === invitation.group.id);
-                    if (group && group.squareImage) {
-                        groupWithImage = group;
-                        // prefer organization of group with image
-                        defaultOrganization = organization;
-                        break;
+
+                        const group = organization.period.groups.find(g => g.id === invitation.group.id);
+                        if (group) {
+                            groupForIcon = group;
+                            if (group.squareImage !== null) {
+                                // stop if a group with an image is found
+                                break;
+                            }
+                        }
                     }
                 }
 
-                let leftComponentSettings: {leftComponent?: any, leftProps?: any} = {};
-
-                if (groupWithImage) {
-                    leftComponentSettings = {
-                        leftComponent: GroupIconWithWaitingList,
-                        leftProps: {
-                            group: groupWithImage,
-                            organization: defaultOrganization
-                        }
-                    }
-                } else if (defaultOrganization) {
-                    leftComponentSettings = {
-                        leftComponent: OrganizationAvatar,
-                        leftProps: {
-                            organization: defaultOrganization,
-                        }
-                    }
+                if (!groupForIcon) {
+                    continue;
                 }
 
                 arr.push({
-                    ...leftComponentSettings,
-                    prefix: $t('toegelaten'),
+                    leftComponent: RegistrationInvitationIcon,
+                    leftProps: {
+                        group: groupForIcon,
+                        organization: defaultOrganization,
+                    },
+                    prefix: $t('Uitnodiging'),
                     title: $t('Schrijf {firstName} in voor {groups}', {firstName: member.member.firstName, groups: groupsText}),
                     description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),
                     action: () => {
@@ -257,12 +247,21 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 // first create actions for events where members are invited
                 for (const event of invited) {
-                    const quickAction = createQuickActionForEvent({event, memberManager, show, areSomeInvited: true});
-                    if (quickAction === null) {
+                    if (!event.group) {
+                        // should not happen
                         continue;
                     }
+                    
+                    const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
                     suggestionCount += 1;
-                    arr.push(quickAction);
+                    arr.push({
+                        leftComponent: RegistrationInvitationIcon,
+                        leftProps: { event, group: event.group },
+                        prefix: $t('Uitnodiging'),
+                        title: $t('%1Mp', { event: event.name }),
+                        description,
+                        action: () => openEvent({event, show}),
+                    });
                 }
 
                 // add extra actions for left over events if limit is not reached
@@ -271,7 +270,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         break;
                     }
 
-                    const quickAction = createQuickActionForEvent({event, memberManager, show, areSomeInvited: false});
+                    const quickAction = createQuickActionForEvent({event, memberManager, show});
                     if (quickAction === null) {
                         continue;
                     }
@@ -312,7 +311,19 @@ function getEventsWhereInvited({events, memberManager}: {events: Event[], member
     }
 }
 
-function createQuickActionForEvent({event, memberManager, show, areSomeInvited}: {event: Event, memberManager: MemberManager, show: ReturnType<typeof useShow>, areSomeInvited: boolean} ): QuickAction | null {
+function openEvent({event, show}: {event: Event, show: ReturnType<typeof useShow>} ) {
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(EventView, {
+            event,
+        }),
+    });
+
+    show({
+        components: [component],
+    }).catch(console.error);
+}
+
+function createQuickActionForEvent({event, memberManager, show}: {event: Event, memberManager: MemberManager, show: ReturnType<typeof useShow>} ): QuickAction | null {
     const group = event.group;
 
     if (group) {
@@ -343,26 +354,15 @@ function createQuickActionForEvent({event, memberManager, show, areSomeInvited}:
         return null;
     }
 
-    const prefix = areSomeInvited ? $t('toegelaten') : $t('Aankomende activiteit');
     const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
 
     return {
         leftComponent: EventIcon,
         leftProps: { event },
-        prefix,
+        prefix: $t('Aankomende activiteit'),
         title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
         description,
-        action: () => {
-            const component = new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(EventView, {
-                    event,
-                }),
-            });
-
-            show({
-                components: [component],
-            }).catch(console.error);
-        },
+        action: () => openEvent({event, show}),
     };
 }
 
