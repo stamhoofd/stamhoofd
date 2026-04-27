@@ -4,7 +4,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { Group, Organization, Platform, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Group, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -45,18 +45,6 @@ export function useRegistrationQuickActions(): QuickActions {
 
     async function openCart() {
         await GlobalEventBus.sendEvent('selectTabById', 'cart');
-    }
-
-    async function openEvent(event: Event) {
-        const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EventView, {
-                event,
-            }),
-        });
-
-        await show({
-            components: [component],
-        });
     }
 
     async function fillInMemberMissingData(member: PlatformMember) {
@@ -199,13 +187,9 @@ export function useRegistrationQuickActions(): QuickActions {
                     action: () => checkAllMemberData(member),
                 });
             }
-            
+
             // todo: sort on createdAt?
-            let registrationSuggestionsCount = 0;
             for (const member of memberManager.family.members) {
-                if (registrationSuggestionsCount >= 3) {
-                    break;
-                }
                 
                 const invitations = member.member.registrationInvitations.filter(i => !i.group.isClosed && i.group.type === GroupType.Membership);
                 if (invitations.length === 0) {
@@ -253,7 +237,6 @@ export function useRegistrationQuickActions(): QuickActions {
                     }
                 }
 
-                registrationSuggestionsCount += 1;
                 arr.push({
                     ...leftComponentSettings,
                     prefix: $t('toegelaten'),
@@ -261,33 +244,30 @@ export function useRegistrationQuickActions(): QuickActions {
                     description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),
                     action: () => {
                         chooseGroupForMember({member, defaultOrganization, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}}).catch(console.error);
-                        // todo
                     },
                 });
             }
 
             if (featuredEvents.value) {
+                const maxSuggestions = 3 - arr.length;
+                let suggestionCount = 0;
+
                 // first get the events where members are invited for
                 const {invited, notInvited} = getEventsWhereInvited({events: featuredEvents.value, memberManager});
 
                 // first create actions for events where members are invited
                 for (const event of invited) {
-                    if (registrationSuggestionsCount >= 3) {
-                        break;
-                    }
-
                     const quickAction = createQuickActionForEvent({event, memberManager, show, areSomeInvited: true});
                     if (quickAction === null) {
                         continue;
                     }
-
-                    registrationSuggestionsCount += 1;
+                    suggestionCount += 1;
                     arr.push(quickAction);
                 }
 
                 // add extra actions for left over events if limit is not reached
                 for (const event of notInvited) {
-                    if (registrationSuggestionsCount >= 3) {
+                    if (suggestionCount >= maxSuggestions) {
                         break;
                     }
 
@@ -296,11 +276,10 @@ export function useRegistrationQuickActions(): QuickActions {
                         continue;
                     }
 
-                    registrationSuggestionsCount += 1;
+                    suggestionCount += 1;
                     arr.push(quickAction);
                 }
             }
-            
 
             return arr;
         }),
@@ -311,31 +290,6 @@ export function useRegistrationQuickActions(): QuickActions {
             return errors.errorBox;
         }),
     };
-}
-
-function getGroupDescriptionForEvent(event: Event, platform: Platform) {
-    const prefixes: string[] = [];
-
-    if (event.meta.defaultAgeGroupIds !== null) {
-        for (const ageGroupId of event.meta.defaultAgeGroupIds) {
-            const ageGroup = platform.config.defaultAgeGroups.find(g => g.id === ageGroupId);
-            if (ageGroup) {
-                prefixes.push(ageGroup.name);
-            }
-        }
-    }
-
-    if (event.meta.groups !== null) {
-        for (const group of event.meta.groups) {
-            prefixes.push(group.name);
-        }
-    }
-
-    if (prefixes.length === 0) {
-        return null;
-    }
-
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
 }
 
 function getEventsWhereInvited({events, memberManager}: {events: Event[], memberManager: MemberManager}): {notInvited: Event[], invited: Event[]} {
@@ -389,7 +343,7 @@ function createQuickActionForEvent({event, memberManager, show, areSomeInvited}:
         return null;
     }
 
-    const prefix = areSomeInvited ? $t('toegelaten') : getGroupDescriptionForEvent(event, memberManager.family.platform);
+    const prefix = areSomeInvited ? $t('toegelaten') : $t('Aankomende activiteit');
     const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
 
     return {

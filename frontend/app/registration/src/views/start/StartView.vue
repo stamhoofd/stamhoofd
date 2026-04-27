@@ -30,7 +30,7 @@
                 </a>
             </p>
 
-            <QuickActionsBox :quick-actions="quickActions" />
+            <QuickActionsBox :quick-actions="quickActions" :max-actions-to-show="5" />
 
             <div v-if="members.length > 0" class="container">
                 <hr><h2>
@@ -162,22 +162,22 @@
 
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
-import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useAddMember } from '@stamhoofd/components/members/hooks/useAddMember.ts';
-import { useChooseGroupForMember } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
-import { useRegistrationQuickActions } from '@stamhoofd/components/quick-actions/hooks/useRegistrationQuickActions.ts';
 import { useUser } from '@stamhoofd/components/hooks/useUser';
+import { useChooseGroupForMember } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
+import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
+import { useAddMember } from '@stamhoofd/components/members/hooks/useAddMember.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
+import { useRegistrationQuickActions } from '@stamhoofd/components/quick-actions/hooks/useRegistrationQuickActions.ts';
 import { downloadDocument } from '@stamhoofd/document-helper';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Document, PlatformMember} from '@stamhoofd/structures';
+import type { Document, PlatformMember } from '@stamhoofd/structures';
 import { DocumentStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
 enum Routes {
