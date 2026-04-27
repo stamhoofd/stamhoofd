@@ -1018,7 +1018,7 @@ export class MemberActionBuilder {
                 continue;
             }
 
-            if (member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null)) {
+            if (member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
                 // already registered
                 alreadyRegisteredCount += 1;
                 continue;

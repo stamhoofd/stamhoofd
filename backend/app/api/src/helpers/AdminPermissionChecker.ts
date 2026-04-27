@@ -1948,7 +1948,7 @@ export class AdminPermissionChecker {
         }
 
         // cannot invite if already registered
-        if (member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null)) {
+        if (member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
             throw new SimpleError({
                 code: 'bad_group',
                 statusCode: 400,
