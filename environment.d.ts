@@ -115,13 +115,6 @@ declare global {
         readonly TRANSACTIONAL_SMTP_HEADERS?: Record<string, string>;
         readonly TRANSACTIONAL_WHITELIST?: string[]; // E-mails we are allowed to send transactional e-mails from
 
-        // Postmark
-        // To catch email bounces
-        /**
-         * @deprecated not used anymore
-         */
-        readonly POSTMARK_SERVER_TOKEN?: string;
-
         // AWS
         // Mapped to process.env for dependencies
         readonly AWS_ACCESS_KEY_ID: string;
@@ -169,6 +162,18 @@ declare global {
         readonly FILE_SIGNING_ALG?: string;
 
         readonly CRONS_DISABLED?: boolean;
+
+         // RECOMMAND
+        readonly RECOMMAND_TEAM_ID?: string;        
+        readonly RECOMMAND_COMPANY_ID?: string;
+        readonly RECOMMAND_KEY?: string;
+        readonly RECOMMAND_SECRET?: string;
+        readonly PEPPOL_EMAIL_HANDLERS?: string[];
+
+        /**
+         * Send each invoice in bcc to these recipients
+         */
+        readonly INVOICE_BCC?: string[];
 
         readonly WHITELISTED_EMAIL_DESTINATIONS?: string[]; // E-mails we are allowed to send e-mails to in case of staging or development environment
         readonly CACHE_PATH: string;
