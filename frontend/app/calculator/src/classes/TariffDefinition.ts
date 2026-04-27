@@ -124,7 +124,7 @@ export class Tier {
         if (!input.withVAT) {
             return price;
         }
-        return Math.round(price * 1.21); // 21% VAT
+        return Math.round(price * 1.21 /100) * 100; // 21% VAT
     }
 
     calculate(input: CalculationInput): CalculationOutput {

@@ -28,11 +28,12 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
             loadedEnv = STAMHOOFD;
         }
         else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-            console.log('Building for development...', process.env.NODE_ENV);
+            console.log('Building env for development...', process.env.NODE_ENV);
             const builder = await import('@stamhoofd/build-development-env');
             const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
                 frontend: options.name,
             });
+            console.log('Built env for development.', process.env.NODE_ENV);
 
             loadedEnv = builtEnv;
         }
@@ -148,7 +149,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                             },
                             rollupOptions: {
                                 treeshake: 'smallest', // Increases performance
-                            },
+                            }
                         }
                     : {
                             sourcemap: true,

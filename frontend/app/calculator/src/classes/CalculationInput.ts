@@ -72,19 +72,19 @@ export class CalculationInput {
             return 3;
         }
 
-        if (product.unitPrice < 5_00) {
+        if (product.unitPrice < 5_0000) {
             return 5;
         }
 
-        if (product.unitPrice < 10_00) {
+        if (product.unitPrice < 10_0000) {
             return 4;
         }
 
-        if (product.unitPrice < 30_00) {
+        if (product.unitPrice < 30_0000) {
             return 3;
         }
 
-        if (product.unitPrice < 80_00) {
+        if (product.unitPrice < 80_0000) {
             return 2.6;
         }
 

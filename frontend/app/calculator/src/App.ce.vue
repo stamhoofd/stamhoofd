@@ -20,14 +20,12 @@ const root = new ComponentWithProperties(NavigationController, {
     root: new ComponentWithProperties(CalculatorView, {}),
 });
 
-console.log('Webfonts string:', webfontsString);
-
-const boundaryString = '/** @preserve SHADOW-DOM */';
-
-// And as a bit of a unique situation, we also need to register the font outside of the shadow DOM
-const splitted = webfontsString.split(boundaryString);
-const fontFaceDefinition = splitted.shift()!;
-const restOfCss = splitted.join('\n');
+// And as a bit of a unique situation, we also need to register the font outside of the shadow DOM (otherwise fonts don't work)
+const splitted = webfontsString.split(/(^@font-face\{[^}]*\})/, 3);
+const [, fontFaceDefinition, restOfCss] = splitted;
+if (!fontFaceDefinition || !restOfCss) {
+    console.error('Could not split font face css', splitted, webfontsString)
+}
 
 // Get shadow dom and inject a new style element with webfontsString as content
 const instance = getCurrentInstance();

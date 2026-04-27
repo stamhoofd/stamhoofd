@@ -62,7 +62,7 @@ export class VolumePercentageCalculationLine implements CalculationLine {
     }
 
     get totalPrice() {
-        return Math.ceil(this.volume * this.percentage * (this.vatPercentage + 100) / 1000000);
+        return Math.ceil(this.volume * this.percentage * (this.vatPercentage + 100) / 1000000 / 100) * 100;
     }
 
     get calculationDescription() {
@@ -161,19 +161,19 @@ export class CalculationOutput {
                         {
                             title: 'Vaste kosten per inschrijving',
                             description: '',
-                            totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
+                            totalPrice: Math.round(this.fixedFees.totalPrice / input.amount / 100) * 100,
                         },
 
                         {
                             title: 'Servicekosten per inschrijving',
                             description: 'Kost voor het gebruik van Stamhoofd',
-                            totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
+                            totalPrice: Math.round(this.serviceFees.totalPrice / input.amount / 100) * 100,
                         },
 
                         {
                             title: 'Gemiddelde transactiekost per inschrijving',
                             description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
-                            totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
+                            totalPrice: Math.round(this.transactionFees.totalPrice / input.amount / 100) * 100,
                         },
                     ],
                 });
@@ -185,19 +185,19 @@ export class CalculationOutput {
                     {
                         title: 'Vaste kosten per inschrijving',
                         description: '',
-                        totalPrice: Math.round(this.fixedFees.totalPrice / input.persons),
+                        totalPrice: Math.round(this.fixedFees.totalPrice / input.persons / 100) * 100,
                     },
 
                     {
                         title: 'Servicekosten per lid, per jaar',
                         description: 'Kost voor het gebruik van Stamhoofd',
-                        totalPrice: Math.round(this.serviceFees.totalPrice / input.persons),
+                        totalPrice: Math.round(this.serviceFees.totalPrice / input.persons / 100) * 100,
                     },
 
                     {
                         title: 'Gemiddelde transactiekost per inschrijving',
                         description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
-                        totalPrice: Math.round(this.transactionFees.totalPrice / input.persons),
+                        totalPrice: Math.round(this.transactionFees.totalPrice / input.persons / 100) * 100,
                     },
                 ],
             });
@@ -211,19 +211,19 @@ export class CalculationOutput {
                     {
                         title: 'Vaste kosten per stuk',
                         description: '',
-                        totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
+                        totalPrice: Math.round(this.fixedFees.totalPrice / input.amount / 100) * 100,
                     },
 
                     {
                         title: 'Servicekosten per stuk',
                         description: 'Kost voor het gebruik van Stamhoofd',
-                        totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
+                        totalPrice: Math.round(this.serviceFees.totalPrice / input.amount / 100) * 100,
                     },
 
                     {
                         title: 'Gemiddelde transactiekost',
                         description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
-                        totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
+                        totalPrice: Math.round(this.transactionFees.totalPrice / input.amount / 100) * 100,
                     },
                 ],
             });
@@ -236,19 +236,19 @@ export class CalculationOutput {
                 {
                     title: 'Vaste kosten per ticket',
                     description: '',
-                    totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
+                    totalPrice: Math.round(this.fixedFees.totalPrice / input.amount / 100) * 100,
                 },
 
                 {
                     title: 'Servicekosten per ticket',
                     description: 'Kost voor het gebruik van Stamhoofd',
-                    totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
+                    totalPrice: Math.round(this.serviceFees.totalPrice / input.amount / 100) * 100,
                 },
 
                 {
                     title: 'Gemiddelde transactiekost',
                     description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
-                    totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
+                    totalPrice: Math.round(this.transactionFees.totalPrice / input.amount / 100) * 100,
                 },
             ],
         });

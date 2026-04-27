@@ -31,7 +31,7 @@
                         Sommige verenigingen zijn niet BTW-plichtig en moeten dus ook BTW betalen op hun kosten. Aangezien de meeste andere platformen ook altijd hun prijzen excl. BTW tonen, zijn we helaas genoodzaakt om dit standaard ook zo te tonen om vergelijken eerlijker te doen verlopen. Schakel dit aan als je de prijs wel met BTW wil zien.
                     </p>
                 </STListItem>
-                <STListItem v-if="unregisteredBusiness || input.options.country === Country.BE" class="right-stack" :selectable="true" element-name="label">
+                <!--<STListItem v-if="unregisteredBusiness || input.options.country === Country.BE" class="right-stack" :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox v-model="unregisteredBusiness" />
                     </template>
@@ -41,7 +41,7 @@
                     <p class="style-description-small">
                         Als feitelijke vereniging (= je hebt geen VZW of andere rechtspersoonlijkheid) kan je niet aansluiten bij Mollie, en laten we dat bij die betaalprovider in de berekeningen buiten beschouwing. Enkel voor hogere bedragen kan Mollie iets voordeliger zijn.
                     </p>
-                </STListItem>
+                </STListItem>-->
             </STList>
 
             <hr>

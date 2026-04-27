@@ -10,6 +10,6 @@ process.env.TZ = 'UTC';
 export default defineConfig({
     ...await buildConfig({
         name: 'calculator',
-        port: 8089,
+        port: 8083,
     }),
 } as any);

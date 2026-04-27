@@ -57,7 +57,10 @@
                     <CalculationOutputBox v-if="result" :output="result.output" :input="input" />
 
                     <template #right>
-                        <button v-tooltip="'Meer instellingen'" type="button" class="button icon settings small" @click="showSettingsView" />
+                        <button v-tooltip="'Meer instellingen'" type="button" class="button text small" @click="showSettingsView">
+                            <span class="icon settings small" />
+                            <span>Instellingen</span>
+                        </button>
                     </template>
                 </STInputBox>
 

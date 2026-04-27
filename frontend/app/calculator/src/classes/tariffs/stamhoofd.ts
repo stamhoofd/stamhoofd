@@ -4,7 +4,7 @@ import { Fees, TariffDefinition, Tier, Tiers, TransactionFee } from '../TariffDe
 
 const membersTier = new Tier({
     fees: new Fees({
-        perPerson: 100,
+        perPerson: 1_0000,
     }),
     transactionFees: new Map([
         [PaymentMethod.Payconiq, [new TransactionFee({ fixed: 2000 })]],
@@ -28,7 +28,7 @@ const webshopsTier = new Tier({
     fees: new Fees({
         perUnit: 0,
         percentage: 200,
-        maxPerUnit: 20,
+        maxPerUnit: 20_00,
     }),
     transactionFees: new Map([
         [PaymentMethod.Payconiq, [new TransactionFee({ fixed: 2000 })]],
@@ -52,10 +52,10 @@ const ticketsTier = new Tier({
     fees: new Fees({
         perUnit: 0,
         percentage: 200,
-        maxPerUnit: 20,
+        maxPerUnit: 20_00,
     }),
     transactionFees: new Map([
-        [PaymentMethod.Payconiq, [new TransactionFee({ fixed: 20 })]],
+        [PaymentMethod.Payconiq, [new TransactionFee({ fixed: 2000 })]],
         [PaymentMethod.Bancontact, [
             new TransactionFee({ fixed: 2400, percentage: 20, provider: 'Stripe' }),
             new TransactionFee({ fixed: 3300, percentage: 0, provider: 'Mollie', onlyRegisteredBusinesses: true }),
