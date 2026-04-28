@@ -1,7 +1,7 @@
 <template>
     <STListItem :selectable="true" :class="'right-stack ' +payment.theme" @click="navigate(Route.Detail)">
         <template #left>
-            <PaymentMethodIcon :method="payment.method" :type="payment.type">
+            <PaymentMethodIcon :method="payment.method" :type="payment.type" :boxed="true">
                 <span v-if="payment.type !== PaymentType.Payment && payment.method !== PaymentMethod.Unknown" :class="'icon small stroke primary ' + PaymentTypeHelper.getIcon(payment.type)" />
                 <span v-if="payment.status === PaymentStatus.Failed" class="icon disabled small error stroke" />
                 <span v-if="payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created" class="icon hourglass small primary stroke" />

@@ -20,7 +20,7 @@
                 </p>
 
                 <template #right>
-                    <PaymentMethodIcon :method="paymentMethod" :type="PaymentType.Payment" />
+                    <PaymentMethodIcon :method="paymentMethod" :type="PaymentType.Payment" :boxed="false" />
                 </template>
             </STListItem>
         </STList>
