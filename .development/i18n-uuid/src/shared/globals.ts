@@ -40,7 +40,7 @@ function getGlobals(): Globals {
         I18NUUID_ROOT: root,
         I18NUUID_LOCALES_ROOT: root + '/shared/locales',
         I18NUUID_LOCALES_DIR: root + '/shared/locales/src',
-        I18NUUID_LOCALES_DIR_DIST: root + '/shared/locales/dist',
+        I18NUUID_LOCALES_DIR_DIST: root + '/shared/locales/dist/locales',
         COMPARE_OUTPUT_DIR: 'output',
         // This is the only environment variable we'll read for now, because the other once should always stay the same
         I18NUUID_EXCLUDE_DIRS_ARRAY: ['dist', 'esm', 'node_modules'],
