@@ -569,7 +569,7 @@ function openWebshopUrl() {
 }
 
 function openSeatDocs() {
-    window.open('https://' + LocalizedDomains.marketing + '/docs/zaalplan/', '_blank');
+    window.open(LocalizedDomains.getDocs('zaalplan'), '_blank');
 }
 
 function toggleTodoList() {
