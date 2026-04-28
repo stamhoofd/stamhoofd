@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import type { CycleInformation} from '@stamhoofd/structures';
+import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
+import type { CycleInformation } from '@stamhoofd/structures';
 import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 
 export default new Migration(async () => {
@@ -419,6 +419,8 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
         .fetch();
 
     for (const registration of registrations) {
+        let invitation: RegistrationInvitation | null = null;
+
         if (registration.waitingList) {
             const waitingList = await getOrCreateWaitingList();
             if (newGroup.waitingListId !== waitingList.id) {
@@ -430,6 +432,19 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
             }
 
             registration.groupId = waitingList.id;
+
+            if (registration.canRegister) {
+                // we should create an invitation
+                invitation = new RegistrationInvitation();
+                invitation.groupId = newGroup.id;
+                invitation.memberId = registration.memberId;
+                invitation.organizationId = organization.id;
+                invitation.createdAt = registration.createdAt;
+                invitation.waitingListId = waitingList.id;
+
+                // deprecated -> set to false
+                registration.canRegister = false;
+            }
         }
         else {
             registration.groupId = newGroup.id;
@@ -440,6 +455,9 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
 
         if (!dryRun) {
             await registration.save();
+            if (invitation) {
+                await invitation.save();
+            }
         }
     }
 }

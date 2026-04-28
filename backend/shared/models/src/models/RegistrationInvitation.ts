@@ -23,7 +23,6 @@ export class RegistrationInvitation extends QueryableModel {
     @column({ type: 'string' })
     memberId: string;
 
-
     @column({ type: 'string' })
     organizationId: string;
 
