@@ -36,7 +36,7 @@ export class PlatformMembership extends MemberPlatformMembership {
     @field({ decoder: PlatformMembershipMemberDetails })
     member: PlatformMembershipMemberDetails;
 
-    @field({ decoder: BalanceItemWithPayments, nullable: true, ...NextVersion })
+    @field({ decoder: BalanceItemWithPayments, nullable: true, version: 396 })
     balanceItem: BalanceItemWithPayments | null;
 
     @field({ decoder: PlatformMembershipOrganizationDetails })
