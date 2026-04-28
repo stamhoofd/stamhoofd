@@ -10,7 +10,7 @@ import { GroupPrice } from '../GroupSettings.js';
 import { StockReservation } from '../StockReservation.js';
 import { RegisterItemOption } from './checkout/RegisterItem.js';
 import type { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
-import type { RecordAnswer} from './records/RecordAnswer.js';
+import type { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordAnswerDecoder } from './records/RecordAnswer.js';
 import type { RecordSettings } from './records/RecordSettings.js';
 
@@ -100,6 +100,9 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: BooleanDecoder, version: 16, optional: true })
     waitingList = false;
 
+    /**
+     * @deprecated - use RegistrationInvitation instead
+     */
     @field({ decoder: BooleanDecoder, version: 20 })
     canRegister = false;
 

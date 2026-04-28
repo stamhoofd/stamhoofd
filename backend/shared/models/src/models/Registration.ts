@@ -1,12 +1,12 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
-import type { RecordAnswer} from '@stamhoofd/structures';
+import type { RecordAnswer } from '@stamhoofd/structures';
 import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import type {Group} from './Group.js';
+import type { Group } from './Group.js';
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -117,6 +117,7 @@ export class Registration extends QueryableModel {
     waitingList = false;
 
     /**
+     * @deprecated - use RegistrationInvitation instead
      * When a registration is on the waiting list or is invite only, set this to true to allow the user to
      * register normally.
      */
