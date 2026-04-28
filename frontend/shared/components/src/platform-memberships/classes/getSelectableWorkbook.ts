@@ -1,87 +1,87 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
 
 export function getSelectableColumns() {
-    const memberCategory = $t('Lid');
-    const organizationCategory = $t('Vereniging');
-    const balanceItemCategory = $t('Aanrekening');
+    const memberCategory = $t('%1PM');
+    const organizationCategory = $t('%1PI');
+    const balanceItemCategory = $t('%1P6');
 
     const columns: SelectableColumn[] = [
         new SelectableColumn({
             id: 'id',
-            name: $t(`ID aansluiting`),
-            description: $t(`Unieke identificatie van de aansluiting`),
+            name: $t(`%1P2`),
+            description: $t(`%1O2`),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'type',
-            name: $t(`Type`),
+            name: $t(`%1PC`),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'startDate',
-            name: $t(`Startdatum`),
+            name: $t(`%1Of`),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'endDate',
-            name: $t(`Einddatum`),
+            name: $t(`%1P8`),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'price',
-            name: $t(`Prijs`),
+            name: $t(`%1PO`),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'priceWithoutDiscount',
-            name: $t(`Prijs zonder korting`),
+            name: $t(`%1Nm`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'trialUntil',
-            name: $t(`Einde proefperiode`),
+            name: $t(`%1PU`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'freeAmount',
-            name: $t(`Dagen gratis`),
+            name: $t(`%1Oo`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'createdAt',
-            name: $t(`Aanmaakdatum`),
+            name: $t(`%1Oh`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'expireDate',
-            name: $t(`Vervaldatum`),
+            name: $t(`%1O0`),
             enabled: false,
         }),
 
         new SelectableColumn({
             id: 'balanceItem.createdAt',
-            name: $t(`Aanrekeningsdatum`),
+            name: $t(`%1OM`),
             category: balanceItemCategory,
             enabled: true,
         }),
 
         new SelectableColumn({
             id: 'balanceItem.priceOpen',
-            name: $t(`Openstaand`),
+            name: $t(`%1Ni`),
             category: balanceItemCategory,
             enabled: true,
         }),
 
         new SelectableColumn({
             id: 'balanceItem.pricePaid',
-            name: $t(`Betaald`),
+            name: $t(`%1OD`),
             category: balanceItemCategory,
             enabled: true,
         }),
 
         new SelectableColumn({
             id: 'balanceItem.pricePending',
-            name: $t(`In verwerking`),
+            name: $t(`%1PL`),
             category: balanceItemCategory,
             enabled: true,
         }),
@@ -108,13 +108,13 @@ export function getSelectableColumns() {
         // organization
         new SelectableColumn({
             id: 'organization.name',
-            name: $t(`Naam`),
+            name: $t(`%1Os`),
             category: organizationCategory,
             enabled: true
         }),
         new SelectableColumn({
             id: 'organization.uri',
-            name: $t(`Groepsnummer`),
+            name: $t(`%1O1`),
             category: organizationCategory,
             enabled: true
         }),
@@ -128,7 +128,7 @@ export function getSelectableWorkbook() {
         sheets: [
             new SelectableSheet({
                 id: 'platform-memberships',
-                name: $t(`Aansluitingen`),
+                name: $t(`%1Nt`),
                 columns: getSelectableColumns(),
             }),
         ],

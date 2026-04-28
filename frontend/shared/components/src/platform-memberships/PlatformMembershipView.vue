@@ -3,8 +3,8 @@
         <div class="st-view">
             <STNavigationBar :title="title">
                 <template #right>
-                    <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('Vorige aansluiting')" @click="goBack" />
-                    <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('Volgende aansluiting')" @click="goForward" />
+                    <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%1Pc')" @click="goBack" />
+                    <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%1Pb')" @click="goForward" />
                 </template>
             </STNavigationBar>
 
@@ -20,7 +20,7 @@
                 <hr><h2>{{ $t('%1JH') }}</h2>
 
                 <p v-if="!sortedPayments.length" class="info-box">
-                    {{ $t('Er werden nog geen betalingen aangemaakt voor deze aansluiting') }}
+                    {{ $t('%1PE') }}
                 </p>
 
                 <STList v-else>
@@ -55,7 +55,7 @@ const props = withDefaults(
 );
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('platformMembership', props);
 
-const title = $t('Aansluiting');
+const title = $t('%1Ny');
 
 const sortedPayments = computed(() => {
     if (!props.platformMembership.balanceItem) {

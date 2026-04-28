@@ -2,8 +2,8 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('Vorige')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('Volgende')" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%1O5')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%1Og')" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -15,7 +15,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Status') }}
+                        {{ $t('%1P1') }}
                     </h3>
                     <p class="style-definition-text with-icons">
                         <span>{{ statusLabel }}</span>
@@ -25,7 +25,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Vereniging') }}
+                        {{ $t('%1PI') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ props.webshopWithOrganization.organization.name }}
@@ -34,7 +34,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Type') }}
+                        {{ $t('%1PC') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ typeLabel }}
@@ -43,7 +43,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Aangemaakt op') }}
+                        {{ $t('%1PV') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(props.webshopWithOrganization.webshop.createdAt) }}
@@ -52,7 +52,7 @@
             </STList>
 
             <hr>
-            <h2>{{ $t('Acties') }}</h2>
+            <h2>{{ $t('%1Pa') }}</h2>
 
             <STList>
                 <STListItem
@@ -65,10 +65,10 @@
                         <IconContainer icon="settings" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Bestellingen beheren') }}
+                        {{ $t('%1PJ') }}
                     </h3>
                     <p class="style-description">
-                        {{ isArchived ? $t('Ga naar het dashboard om archief van bestellingen te bekijken') : $t('Ga naar het dashboard om bestellingen te bekijken en te beheren') }}
+                        {{ isArchived ? $t('%1O3') : $t('%1P5') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />
@@ -86,10 +86,10 @@
                         <IconContainer icon="link" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Webshop openen') }}
+                        {{ $t('%1Pf') }}
                     </h3>
                     <p class="style-description">
-                        {{ $t('Open de publieke webshop pagina') }}
+                        {{ $t('%1PY') }}
                     </p>
                     <template #right>
                         <span class="icon external gray" />

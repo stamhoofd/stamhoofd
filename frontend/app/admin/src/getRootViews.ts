@@ -128,7 +128,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     const webshopsTab = new TabBarItem({
         id: 'webshops',
         icon: 'basket',
-        name: $t('Webshops'),
+        name: $t('%1Pd'),
         component: new ComponentWithProperties(SplitViewController, {
             root: new ComponentWithProperties(WebshopsTableView, {}),
         }),

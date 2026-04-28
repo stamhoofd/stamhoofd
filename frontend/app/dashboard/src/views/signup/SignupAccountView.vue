@@ -4,7 +4,7 @@
 
         <main class="center small">
             <aside class="style-title-prefix">
-                {{ $t('STAP {current} / {total}', {current: 2, total: 2}) }}
+                {{ $t('%1PQ', {current: 2, total: 2}) }}
             </aside>
             <h1>
                 {{ $t('%WQ') }}

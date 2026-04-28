@@ -65,7 +65,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Member number already in use',
-                human: $t('Dit lidnummer is al in gebruik'),
+                human: $t('%1Oe'),
                 field: 'details.memberNumber',
             });
         }
@@ -1031,7 +1031,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
                 // different message for userMode organization because security codes are not available in that mode
-                human: $t(`{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de vereniging.`, { member: member.details.firstName }),
+                human: $t(`%1Oz`, { member: member.details.firstName }),
                 statusCode: 400,
             });
         }

@@ -15,7 +15,7 @@
 
             <main class="center small">
                 <aside class="style-title-prefix">
-                    {{ $t('STAP {current} / {total}', {current: 1, total: 2}) }}
+                    {{ $t('%1PQ', {current: 1, total: 2}) }}
                 </aside>
                 <h1>
                     {{ $t("%5W") }}
@@ -37,7 +37,7 @@
 
                 <STErrorsDefault :error-box="errors.errorBox" />
 
-                <STInputBox :title="$t(`Wat voor vereniging?`)" error-fields="type" :error-box="errors.errorBox" class="max">
+                <STInputBox :title="$t(`%1P9`)" error-fields="type" :error-box="errors.errorBox" class="max">
                     <div class="illustration-radio-container">
                         <label v-for="{value, title, imgSrc} in typeOptions" :key="value" class="illustration-radio-box" data-testid="organization-type-option">
                             <div>
@@ -481,7 +481,7 @@ async function goNext() {
 const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] = [
     {
         value: OrganizationType.Sport,
-        title: $t('Sport'),
+        title: $t('%1OI'),
         imgSrc: bikeIllustration,
     },
     {
@@ -490,7 +490,7 @@ const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] 
         imgSrc: stageIllustration,
     }, {
         value: OrganizationType.Youth,
-        title: $t('Jeugd'),
+        title: $t('%1PF'),
         imgSrc: tentIllustration,
     },
     {
@@ -500,7 +500,7 @@ const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] 
     },
     {
         value: OrganizationType.GoodCause,
-        title: $t('Goed doel'),
+        title: $t('%1OY'),
         imgSrc: charityIllustration,
     },
     {

@@ -1097,11 +1097,11 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
     const builders: UIFilterBuilders = [
         ...getMemberBaseFilters(),
         new GroupUIFilterBuilder({
-                name: $t('Inschrijvingen'),
+                name: $t('%1PS'),
                 allowCreation: false,
                 builders: [
                     new StringFilterBuilder({
-                            name: $t('Groep ID'),
+                            name: $t('%1ON'),
                             key: 'id',
                             allowCreation: false,
                             wrapper: {
@@ -1211,11 +1211,11 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
         const all: UIFilterBuilders = getMemberBaseFilters(recordConfiguration);
 
         all.push(new GroupUIFilterBuilder({
-                name: $t('Inschrijvingen'),
+                name: $t('%1PS'),
                 allowCreation: false,
                 builders: [
                     new StringFilterBuilder({
-                            name: $t('Groep ID'),
+                            name: $t('%1ON'),
                             key: 'id',
                             allowCreation: false,
                             wrapper: {

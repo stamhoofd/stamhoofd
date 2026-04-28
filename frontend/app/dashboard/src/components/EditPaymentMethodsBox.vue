@@ -23,14 +23,14 @@
             </p>
 
             <p v-if="!getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
-                {{ $t("We raden het gebruik van Payconiq af. Het is tijd om over te schakelen en Bancontact te gebruiken. Dit is veel stabieler en geeft minder problemen.") }}
+                {{ $t("%1Np") }}
                 <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
                     {{ $t('%19t') }}
                 </a>
             </p>
 
             <p v-if="getPaymentMethod(PaymentMethod.Bancontact) && getPaymentMethod(PaymentMethod.Payconiq)" :class="'warning-box'">
-                {{ $t("Je kan Payconiq (nu Bancontact Pay | Wero) niet langer combineren met Bancontact. Bancontact is nu voldoende.") }}
+                {{ $t("%1PB") }}
                 <a :href="$domains.getDocs('payconiq')" target="_blank" class="button text">
                     {{ $t('%19t') }}
                 </a>
@@ -49,7 +49,7 @@
 
                     <template v-if="!canEnablePaymentMethod(method)" #right>
                         <button class="button text selected" type="button" @click.stop="openPaymentSettings">
-                            <span>{{ $t('Activeren') }}</span>
+                            <span>{{ $t('%1OA') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>

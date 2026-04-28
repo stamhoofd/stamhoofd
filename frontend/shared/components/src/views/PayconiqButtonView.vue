@@ -1,9 +1,9 @@
 <template>
     <div class="st-view payconiq-button-view">
-        <STNavigationBar :title="$t(`Bancontact Pay`)" />
+        <STNavigationBar :title="$t(`%1P4`)" />
 
         <main>
-            <h1>{{ $t('Betaal met Bancontact Pay') }}</h1>
+            <h1>{{ $t('%1OO') }}</h1>
             <p class="style-description">
                 {{ $t('%kH') }}
             </p>

@@ -377,20 +377,20 @@ export enum WebshopStatus {
 
 export function getWebshopTypeName(type: WebshopType): string {
     switch (type) {
-        case WebshopType.Performance: return $t('Zaalvoorstelling');
-        case WebshopType.Event: return $t('Evenement met tickets');
-        case WebshopType.Registrations: return $t('Inschrijvingen');
-        case WebshopType.TakeawayAndDelivery: return $t('Take-away of levering');
-        case WebshopType.Donations: return $t('Donaties of inzameling');
-        case WebshopType.Webshop: return $t('Webshop / andere');
+        case WebshopType.Performance: return $t('%1Nl');
+        case WebshopType.Event: return $t('%1PG');
+        case WebshopType.Registrations: return $t('%1PS');
+        case WebshopType.TakeawayAndDelivery: return $t('%1OT');
+        case WebshopType.Donations: return $t('%1O4');
+        case WebshopType.Webshop: return $t('%1OV');
     }
 }
 
 export function getWebshopStatusName(status: WebshopStatus): string {
     switch (status) {
-        case WebshopStatus.Open: return $t('Open');
-        case WebshopStatus.Closed: return $t('Gesloten');
-        case WebshopStatus.Archived: return $t('Gearchiveerd');
+        case WebshopStatus.Open: return $t('%1Nw');
+        case WebshopStatus.Closed: return $t('%1PH');
+        case WebshopStatus.Archived: return $t('%1Pg');
     }
 }
 

@@ -20,7 +20,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'type',
-            name: $t('Type'),
+            name: $t('%1PC'),
             width: 40,
             getValue: (membership: PlatformMembership) => {
                 const membershipType = Platform.shared.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
@@ -30,7 +30,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'startDate',
-            name: $t('Startdatum'),
+            name: $t('%1Of'),
             width: 20,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -45,7 +45,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'endDate',
-            name: $t('Einddatum'),
+            name: $t('%1P8'),
             width: 20,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -60,7 +60,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'price',
-            name: $t('Prijs'),
+            name: $t('%1PO'),
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -75,7 +75,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'priceWithoutDiscount',
-            name:  $t(`Prijs zonder korting`),
+            name:  $t(`%1Nm`),
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -90,7 +90,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'trialUntil',
-            name: $t(`Einde proefperiode`),
+            name: $t(`%1PU`),
             width: 20,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -105,7 +105,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'freeAmount',
-            name: $t(`Dagen gratis`),
+            name: $t(`%1Oo`),
             width: 40,
             getValue: (membership: PlatformMembership) => ({
                 value: membership.freeAmount,
@@ -113,7 +113,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'createdAt',
-            name: $t(`Aanmaakdatum`),
+            name: $t(`%1Oh`),
             width: 20,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -128,7 +128,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'expireDate',
-            name: $t(`Vervaldatum`),
+            name: $t(`%1O0`),
             width: 20,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -144,7 +144,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         // balance item
         {
             id: 'balanceItem.createdAt',
-            name: $t(`Aanrekeningsdatum`),
+            name: $t(`%1OM`),
             width: 20,
             getValue: (membership: PlatformMembership) => ({
                 value: membership.balanceItem?.createdAt ?? null,
@@ -157,7 +157,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'balanceItem.priceOpen',
-            name: $t('Openstaand'),
+            name: $t('%1Ni'),
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -172,7 +172,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'balanceItem.pricePaid',
-            name: $t('Betaald'),
+            name: $t('%1OD'),
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -187,7 +187,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'balanceItem.pricePending',
-            name: $t('In vewerking'),
+            name: $t('%1OL'),
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -204,7 +204,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         // member
         {
             id: 'member.memberNumber',
-            name: $t(`Lidnummer`),
+            name: $t(`%1PT`),
             width: 20,
             getValue: (membership: PlatformMembership) => ({
                 value: membership.member.memberNumber,
@@ -212,7 +212,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'member.firstName',
-            name: $t(`Voornaam lid`),
+            name: $t(`%1O8`),
             width: 20,
             getValue:(membership: PlatformMembership) => ({
                 value: membership.member.firstName,
@@ -220,7 +220,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'member.lastName',
-            name: $t(`Achternaam lid`),
+            name: $t(`%1Or`),
             width: 20,
             getValue:(membership: PlatformMembership) => ({
                 value: membership.member.lastName,
@@ -229,7 +229,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         // organization
         {
             id: 'organization.name',
-            name: $t(`Naam vereniging`),
+            name: $t(`%1PW`),
             width: 20,
             getValue:(membership: PlatformMembership) => ({
                 value: membership.organization.name,
@@ -237,7 +237,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'organization.uri',
-            name: $t(`Nummer vereniging`),
+            name: $t(`%1PZ`),
             width: 20,
             getValue:(membership: PlatformMembership) => ({
                 value: membership.organization.uri,

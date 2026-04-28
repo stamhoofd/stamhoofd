@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="viewTitle" :save-text="isNew ? $t('Aanmaken') : $t('Opslaan')" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="viewTitle" :save-text="isNew ? $t('%1Pj') : $t('%1Op')" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <!-- name -->
-        <STInputBox error-fields="meta.name" :error-box="errors.errorBox" :title="$t(`Naam`)">
+        <STInputBox error-fields="meta.name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
             <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="namePlaceholder">
         </STInputBox>
 

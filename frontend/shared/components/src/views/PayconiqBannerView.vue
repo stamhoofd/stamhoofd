@@ -1,7 +1,7 @@
 <template>
     <div class="payconiq-banner-view">
         <button class="payconiq-close button icon close white" type="button" @click="close" />
-        <h1>{{ $t('Scan en betaal met Bancontact Pay') }}</h1>
+        <h1>{{ $t('%1P0') }}</h1>
 
         <div class="qr-code" :class="{ scanned: payment.status === 'Pending'}">
             <img v-if="payment.status === 'Pending' || payment.status === 'Created'" :src="qrCodeSrc" draggable="false">

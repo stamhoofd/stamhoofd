@@ -589,7 +589,7 @@ const nameWarning = computed(() => {
     const lowerName = name.value.toLowerCase().trim();
     for (const p of patchedWebshop.value.products) {
         if (p.id !== props.product.id && p.name && p.name.toLowerCase().trim() === lowerName) {
-            return $t('Er bestaat al een artikel met dezelfde naam in deze webshop, je gebruikt best unieke namen.');
+            return $t('%1PX');
         }
     }
     return null;
@@ -605,7 +605,7 @@ const seatingWarning = computed(() => {
 
     for (const p of patchedWebshop.value.products) {
         if (p.id !== props.product.id && p.seatingPlanId === patchedProduct.value.seatingPlanId && p.dateRange && p.dateRange.toString() === patchedProduct.value.dateRange.toString()) {
-            return $t("Er bestaat al een ander ticket met hetzelfde zaalplan maar een andere datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.");
+            return $t("%1Od");
         }
     }
 

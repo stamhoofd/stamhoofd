@@ -6,12 +6,10 @@
         <p>{{ $t('%Rk') }}</p>
 
         <p v-if="webshop.meta.isTicketBased" class="info-box">
-            {{ $t(`Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.
-            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.`) }}
+            {{ $t(`%1OE`) }}
         </p>
         <p v-else-if="webshop.meta.isRegistrations" class="info-box">
-            {{ $t(`Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.
-            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.`) }}
+            {{ $t(`%1Pi`) }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -27,10 +25,10 @@
                     <Checkbox :checked="true" :disabled="true" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('Naam') }}
+                    {{ $t('%1Os') }}
                 </p>
                 <p class="style-description-small">
-                    {{ $t('Deze is altijd verplicht per bestelling.') }}
+                    {{ $t('%1Nj') }}
                 </p>
             </STListItem>
             <STListItem element-name="label" :selectable="false">
@@ -38,10 +36,10 @@
                     <Checkbox :checked="true" :disabled="true" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('E-mailadres') }}
+                    {{ $t('%1Oa') }}
                 </p>
                 <p class="style-description-small">
-                    {{ $t('Hierop ontvangen bestellers hun bestelbevestiging. Deze is altijd verplicht per bestelling.') }}
+                    {{ $t('%1PA') }}
                 </p>
             </STListItem>
             <STListItem element-name="label" :selectable="true">

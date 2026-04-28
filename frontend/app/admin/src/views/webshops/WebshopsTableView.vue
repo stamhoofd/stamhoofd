@@ -13,7 +13,7 @@
         :Route="Route"
     >
         <template #empty>
-            {{ $t('Geen webshops gevonden') }}
+            {{ $t('%1OP') }}
         </template>
     </ModernTableView>
 </template>
@@ -36,7 +36,7 @@ import WebshopView from './WebshopView.vue';
 
 type ObjectType = WebshopWithOrganization;
 
-const title = $t('Webshops');
+const title = $t('%1Pd');
 const estimatedRows = 30;
 const configurationId = 'webshops';
 
@@ -66,7 +66,7 @@ function getWebshopStatusStyle(status: WebshopStatus): string {
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'name',
-        name: $t('Naam'),
+        name: $t('%1Os'),
         getValue: item => item.webshop.meta.name,
         minimumWidth: 100,
         recommendedWidth: 250,
@@ -75,7 +75,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization',
-        name: $t('Vereniging'),
+        name: $t('%1PI'),
         getValue: item => item.organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -85,7 +85,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'createdAt',
-        name: $t('Aangemaakt op'),
+        name: $t('%1PV'),
         getValue: item => item.webshop.createdAt,
         format: (v, width) => width < 200 ? Formatter.dateNumber(v, true) : Formatter.date(v, true),
         minimumWidth: 80,
@@ -94,7 +94,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, WebshopType>({
         id: 'type',
-        name: $t('Type'),
+        name: $t('%1PC'),
         allowSorting: false,
         getValue: item => item.webshop.meta.type,
         format: type => getWebshopTypeName(type),
@@ -104,7 +104,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, WebshopStatus>({
         id: 'status',
-        name: $t('Status'),
+        name: $t('%1P1'),
         allowSorting: false,
         getValue: item => item.webshop.meta.status,
         format: status => getWebshopStatusName(status),
@@ -121,7 +121,7 @@ const Route = {
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
-        name: $t('Webshop openen'),
+        name: $t('%1Pf'),
         icon: 'external',
         priority: 10,
         groupIndex: 2,
@@ -138,7 +138,7 @@ const actions: TableAction<ObjectType>[] = [
     }),
 
     new InMemoryTableAction({
-        name: $t('Beheer'),
+        name: $t('%1Nh'),
         icon: 'settings',
         priority: 11,
         groupIndex: 2,

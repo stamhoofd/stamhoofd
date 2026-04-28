@@ -11,12 +11,12 @@ export function useGetWebshopUIFilterBuilders() {
     const getWebshopUIFilterBuilders = (): UIFilterBuilders => {
         const builders: UIFilterBuilders = [
             new StringFilterBuilder({
-                name: $t('Naam'),
+                name: $t('%1Os'),
                 key: 'name',
             }),
 
             new MultipleChoiceFilterBuilder({
-                name: $t('Status'),
+                name: $t('%1P1'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: false,
                     mode: MultipleChoiceUIFilterMode.Or,
@@ -36,7 +36,7 @@ export function useGetWebshopUIFilterBuilders() {
             }),
 
             new GroupUIFilterBuilder({
-                name: $t(`Vereniging`),
+                name: $t(`%1PI`),
                 builders: getOrganizationUIFilterBuilders().slice(1),
                 wrapper: {
                     organization: {

@@ -64,10 +64,10 @@
         <hr><h2>{{ $t('%NR') }}</h2>
 
         <Checkbox key="payconiq" v-model="forcePayconiq">
-            {{ $t('Payconiq API-key gebruiken') }}
+            {{ $t('%1O9') }}
         </Checkbox>
         <p class="style-description-small">
-            {{ $t('Lees ') }}<a :href="$domains.getDocs('payconiq')" class="inline-link" target="_blank">{{ $t('de gids') }}</a>{{ $t(' door voor meer informatie.') }}
+            {{ $t('%1OH') }}<a :href="$domains.getDocs('payconiq')" class="inline-link" target="_blank">{{ $t('%1Ol') }}</a>{{ $t('%1OF') }}
         </p>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">

@@ -65,7 +65,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Gymnastics,
-                name: $t('Turnen'),
+                name: $t('%1Nq'),
             },
             {
                 value: OrganizationType.Athletics,
@@ -129,7 +129,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Events,
-                name: $t('Evenementen'),
+                name: $t('%1Ph'),
             },
             {
                 value: OrganizationType.Professional,
@@ -141,7 +141,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Stage,
-                name: $t('Theater (toneel, musical, ...)'),
+                name: $t('%1O6'),
             },
             {
                 value: OrganizationType.Culture,
@@ -165,23 +165,23 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Kids,
-                name: $t('Kinderen (kampen, speelpleinwerking, ...)'),
+                name: $t('%1OB'),
             },
             {
                 value: OrganizationType.ParentsCommittee,
-                name: $t('Oudercomité'),
+                name: $t('%1OK'),
             },
             {
                 value: OrganizationType.GoodCause,
-                name: $t('Goed doel'),
+                name: $t('%1OY'),
             },
             {
                 value: OrganizationType.City,
-                name: $t('Gemeente of stad'),
+                name: $t('%1Nx'),
             },
             {
                 value: OrganizationType.Business,
-                name: $t('Bedrijf'),
+                name: $t('%1Ns'),
             },
             {
                 value: OrganizationType.Other,
@@ -222,7 +222,7 @@ export class OrganizationTypeHelper {
                 return $t(`%mR`);
 
             case OrganizationType.School:
-                return $t('Onderwijs');
+                return $t('%1OC');
 
             case OrganizationType.Other:
             case OrganizationType.ParentsCommittee:

@@ -4,7 +4,7 @@
             {{ $t('%40') }}
         </h1>
 
-        <p>{{ $t('%NY') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('%K') }}</a> {{ $t('%GT') }} <a class="inline-link" :href="$domains.getDocs('mollie')" target="_blank">{{ $t('Mollie') }}</a>  {{ $t('%NZ') }} <a class="inline-link" :href="$domains.getDocs('bancontact')" target="_blank">{{ $t('%19t') }}</a>.</p>
+        <p>{{ $t('%NY') }} <a class="inline-link" :href="$domains.getDocs('stripe')" target="_blank">{{ $t('%K') }}</a> {{ $t('%GT') }} <a class="inline-link" :href="$domains.getDocs('mollie')" target="_blank">{{ $t('%1Ox') }}</a>  {{ $t('%NZ') }} <a class="inline-link" :href="$domains.getDocs('bancontact')" target="_blank">{{ $t('%19t') }}</a>.</p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -168,13 +168,13 @@
         <template v-if="!enableBuckaroo && (organization.privateMeta?.mollieOnboarding || mollieEnabled)">
             <hr>
             <aside class="style-title-prefix">
-                {{ $t('Mollie') }}
+                {{ $t('%1Ox') }}
             </aside>
             <h2 v-if="isBelgium">
-                {{ $t('Bancontact of kredietkaart via Mollie ') }}<span class="style-tag">{{ $t('Europees') }}</span> <span class="style-tag discount">{{ $t('Soms goedkoper') }}</span>
+                {{ $t('%1P7') }}<span class="style-tag">{{ $t('%1OQ') }}</span> <span class="style-tag discount">{{ $t('%1Nu') }}</span>
             </h2>
             <h2 v-else>
-                {{ $t('iDEAL en kredietkaart via Mollie ') }}<span class="style-tag">{{ $t('Europees') }}</span> <span class="style-tag discount">{{ $t('Soms goedkoper') }}</span>
+                {{ $t('%1P3') }}<span class="style-tag">{{ $t('%1OQ') }}</span> <span class="style-tag discount">{{ $t('%1Nu') }}</span>
             </h2>
 
             <template v-if="!organization.privateMeta?.mollieOnboarding">
@@ -183,12 +183,12 @@
                 </p>
 
                 <p class="info-box">
-                    {{ $t('Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt.') }}
+                    {{ $t('%1PK') }}
                 </p>
 
                 <div class="style-button-bar">
                     <button type="button" class="button primary" @click="linkMollie">
-                        <span>{{ $t('Aansluiten bij Mollie') }}</span>
+                        <span>{{ $t('%1Nr') }}</span>
                     </button>
 
                     <a class="button secundary" :href="$domains.getDocs('mollie')" target="_blank">
@@ -225,7 +225,7 @@
 
                     <a class="button text" :href="$domains.getDocs('mollie')" target="_blank">
                         <span class="icon book" />
-                        <span>{{ $t('Mollie Documentatie') }}</span>
+                        <span>{{ $t('%1Om') }}</span>
                     </a>
                 </p>
                 <p class="style-button-bar">
@@ -266,7 +266,7 @@
         <template v-if="payconiqApiKey || forcePayconiq">
             <hr>
             <aside class="style-title-prefix">
-                {{ $t('Payconiq') }}
+                {{ $t('%1PN') }}
             </aside>
             <h2>{{ $t('%Nq') }}</h2>
             <p>
@@ -274,10 +274,10 @@
             </p>
 
             <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="$domains.getDocs('oude-payconiq-accounts')" target="_blank">
-                {{ $t('Jouw API-key van Payconiq vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.') }}
+                {{ $t('%1Nn') }}
 
                 <span class="button text">
-                    {{ $t('Meer lezen') }}
+                    {{ $t('%1Ow') }}
                 </span>
             </a>
 
@@ -556,13 +556,13 @@ let didReadMollie = false;
 
 async function linkMollie() {
     const time = new Date();
-    if (!await CenteredMessage.confirm($t('Let op met wat je invult'), $t('Ja, gelezen'), $t('Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\n\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.'))) {
+    if (!await CenteredMessage.confirm($t('%1Pe'), $t('%1Oj'), $t('%1PR'))) {
         return;
     }
     const end = new Date();
 
     if (!didReadMollie && end.getTime() - time.getTime() < 5_000) {
-        new Toast($t('Koppel Mollie niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen. We doen dit voor je eigen bestwil.'), 'error red').setHide(10_000).show();
+        new Toast($t('%1OW'), 'error red').setHide(10_000).show();
         return;
     }
     didReadMollie = true;

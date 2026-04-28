@@ -2,7 +2,7 @@
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :Route="Route">
             <template #empty>
-                {{ $t('Geen aansluitingen') }}
+                {{ $t('%1OS') }}
             </template>
         </ModernTableView>
     </LoadingViewTransition>
@@ -41,7 +41,7 @@ const props = withDefaults(
 const { getWebshopUIFilterBuilders, loading } = useGetPlatformMembershipsUIFilterBuilders();
 const filterBuilders = computed(() => getWebshopUIFilterBuilders());
 
-const title = props.customTitle ?? $t('Aansluitingen');
+const title = props.customTitle ?? $t('%1Nt');
 
 const platform = usePlatform();
 

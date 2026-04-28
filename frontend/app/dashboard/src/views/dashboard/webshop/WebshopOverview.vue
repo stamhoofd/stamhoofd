@@ -3,7 +3,7 @@
         <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
             <template #right>
                 <button type="button" class="button text selected" @click="openWebshopUrl()">
-                    <span>{{ $t('Bekijk shop') }}</span>
+                    <span>{{ $t('%1OZ') }}</span>
                     <span class="icon external" />
                 </button>
             </template>
@@ -22,7 +22,7 @@
                 <div class="style-onboarding-checklist" :class="{closed: !openTodoList}">
                     <h2 class="button" @click="toggleTodoList">
                         <button type="button" class="button icon" :class="{'arrow-down-small': openTodoList, 'arrow-right-small': !openTodoList}" />
-                        <span>{{ $t('Stappenplan') }}</span>
+                        <span>{{ $t('%1Ob') }}</span>
                     </h2>
 
                     <div v-if="openTodoList">

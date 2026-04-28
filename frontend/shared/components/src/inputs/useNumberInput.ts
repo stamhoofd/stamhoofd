@@ -88,7 +88,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         if (isNaN(value)) {
             return {
                 isValid: false,
-                errorMessage: addOptionalTextToErrorMessage($t(`Vul een geldig getal in`), required),
+                errorMessage: addOptionalTextToErrorMessage($t(`%1Nv`), required),
             };
         }
 
@@ -111,7 +111,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
             return errorMessage;
         }
 
-        const optionalText = $t(`. Dit veld is optioneel.`);
+        const optionalText = $t(`%1Nk`);
         return errorMessage + optionalText;
     }
 
@@ -125,7 +125,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         if (min !== null && value < min) {
             return {
                 isValid: false,
-                errorMessage: addOptionalTextToErrorMessage($t(`Het minimum is {min}`, { min: formatValue(min) }), required),
+                errorMessage: addOptionalTextToErrorMessage($t(`%1OG`, { min: formatValue(min) }), required),
                 value: min,
             };
         }
@@ -133,7 +133,7 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         if (max !== null && value > max) {
             return {
                 isValid: false,
-                errorMessage: addOptionalTextToErrorMessage($t(`Het maximum is {max}`, { max: formatValue(max) }), required),
+                errorMessage: addOptionalTextToErrorMessage($t(`%1Oy`, { max: formatValue(max) }), required),
                 value: max,
             };
         }

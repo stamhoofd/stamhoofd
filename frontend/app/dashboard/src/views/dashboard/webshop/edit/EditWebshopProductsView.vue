@@ -80,7 +80,7 @@ const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway 
 });
 
 const description = computed(() => {
-    return webshop.value.meta.ticketType === WebshopTicketType.Tickets ? $t('Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.') : $t('Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.');
+    return webshop.value.meta.ticketType === WebshopTicketType.Tickets ? $t('%1Ov') : $t('%1Oq');
 });
 
 const viewTitle = computed(() => {

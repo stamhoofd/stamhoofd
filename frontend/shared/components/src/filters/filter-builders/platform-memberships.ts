@@ -43,7 +43,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
 
         if (platform.value.config.membershipTypes.length > 1) {
             builders.push(new MultipleChoiceFilterBuilder({
-                name: $t('Type'),
+                name: $t('%1PC'),
                 options: platform.value.config.membershipTypes.map((membershipType) => {
                     return new MultipleChoiceUIFilterOption(membershipType.name, membershipType.id);
                 }),
@@ -57,38 +57,38 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
 
         builders.push(...[
              new DateFilterBuilder({
-                name: $t('Startdatum'),
+                name: $t('%1Of'),
                 key: 'startDate',
             }),
             new DateFilterBuilder({
-                name: $t('Einddatum'),
+                name: $t('%1P8'),
                 key: 'endDate',
             }),
             new DateFilterBuilder({
-                name: $t('Vervaldatum'),
+                name: $t('%1O0'),
                 key: 'expiredDate',
             }),
             new DateFilterBuilder({
-                name: $t('Aanmaakdatum'),
+                name: $t('%1Oh'),
                 key: 'createdAt',
             }),
             new DateFilterBuilder({
-                name: $t('Proefperiode tot'),
+                name: $t('%1OU'),
                 key: 'trialUntil',
             }),
             new NumberFilterBuilder({
                 key: 'price',
-                name: $t('Prijs'),
+                name: $t('%1PO'),
                 type: NumberFilterFormat.Currency
             }),
 
             new NumberFilterBuilder({
                 key: 'freeAmount',
-                name: $t('Dagen gratis'),
+                name: $t('%1Oo'),
             }),
             // member
             new GroupUIFilterBuilder({
-                name: $t('Aangesloten lid'),
+                name: $t('%1Oi'),
                 builders: getMemberBaseFilters(platform.value.config.recordsConfiguration, { groupNameFilters: false }),
                 wrapper: {
                     member: {
@@ -98,8 +98,8 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
             }),
             // group
              new GroupUIFilterBuilder({
-                name: $t('Aangerekende vereniging'),
-                description: $t('Vereniging waar de aansluiting aan aangrekend is'),
+                name: $t('%1Ok'),
+                description: $t('%1PD'),
                 builders: organizationFilterBuilders.getOrganizationUIFilterBuilders(),
                 wrapper: {
                     organization: {

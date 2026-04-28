@@ -116,7 +116,7 @@ const hasNonBancontact = computed(() => {
 
 function getName(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
-        case PaymentMethod.Payconiq: return $t('"Bancontact Pay | Wero"');
+        case PaymentMethod.Payconiq: return 'Bancontact Pay | Wero'; // not translateable
         case PaymentMethod.Transfer: return $t(`%12j`);
         case PaymentMethod.DirectDebit: return $t(`%12k`);
     }
@@ -132,7 +132,7 @@ function getDescription(paymentMethod: PaymentMethod): string {
             return $t(`%12l`);
         }
         case PaymentMethod.Transfer: return $t(`%12m`);
-        case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? $t('Betaal met je Bancontact-app of met je bankapp die Bancontact-betalingen ondersteunt') : '';
+        case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? $t('%1Ou') : '';
         case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? $t(`%12n`) : '';
         case PaymentMethod.Unknown: return '';
         case PaymentMethod.DirectDebit: return $t(`%12o`);

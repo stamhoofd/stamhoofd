@@ -129,7 +129,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Member not found',
-                    human: $t(`Het lid dat bij de aansluiting hoort is niet gevonden.`),
+                    human: $t(`%1Nz`),
                     statusCode: 404,
                 });
             }
@@ -139,7 +139,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Organization not found',
-                    human: $t(`De vereniging die bij de aansluiting hoort is niet gevonden.`),
+                    human: $t(`%1OX`),
                     statusCode: 404,
                 });
             }

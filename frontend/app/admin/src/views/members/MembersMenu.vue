@@ -20,7 +20,7 @@
             <button v-if="showMemberships" type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.PlatformMemberships) }" @click="navigate(Routes.PlatformMemberships)">
                 <span class="icon membership" />
                 <span>
-                    {{ $t("Aansluitingen") }}
+                    {{ $t("%1Nt") }}
                 </span>
             </button>
         </main>
