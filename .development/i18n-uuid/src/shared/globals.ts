@@ -34,7 +34,7 @@ function getGlobals(): Globals {
         MISTRAL_API_KEY: '',
     });
 
-    const root = path.normalize(import.meta.dirname + '/../../../../..'); // (note we should build relative to the compiled output file in .development/i18n-uuid/dist/src/shared/globals.js)
+    const root = path.normalize(import.meta.dirname + '/../../../..'); // (note we should build relative to the compiled output file in .development/i18n-uuid/dist/src/shared/globals.js)
 
     const globals: Globals = {
         I18NUUID_ROOT: root,
