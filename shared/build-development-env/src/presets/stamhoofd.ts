@@ -31,7 +31,9 @@ export function build(service: Service): any {
                 '': 'stamhoofd.email',
             },
             webshopCname: 'shop.stamhoofd',
-            registrationCname: 'registration.stamhoofd',
+            registrationCname: {
+                '': 'registration.stamhoofd',
+            }
         },
         userMode: 'organization',
         translationNamespace: 'stamhoofd',

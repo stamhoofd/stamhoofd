@@ -55,7 +55,7 @@ declare global {
         webshopCname?: string;
 
         // MX + SPF (both for email) + A record for registration
-        registrationCname: string;
+        registrationCname: LocalizedDomain;
 
         // Default email domain for emails sent from organizations
         defaultTransactionalEmail?: LocalizedDomain;

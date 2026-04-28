@@ -116,7 +116,9 @@ class WorkerHelperInstance {
 
                 // Todo: these don't work yet
                 webshopCname: CaddyConfigHelper.getDomain('webshop', WorkerData.id),
-                registrationCname: CaddyConfigHelper.getDomain('registration', WorkerData.id),
+                registrationCname: {
+                    '': CaddyConfigHelper.getDomain('registration', WorkerData.id)
+                },
             },
             translationNamespace: 'stamhoofd',
             platformName: 'stamhoofd',
