@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/build-development-env",
-    "version": "2.120.1",
+    "version": "2.120.2",
     "type": "module",
     "types": "./dist/index.d.ts",
     "module": "./dist/index.js",
