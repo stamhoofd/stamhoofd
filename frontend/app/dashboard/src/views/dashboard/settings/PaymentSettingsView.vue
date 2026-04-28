@@ -165,7 +165,7 @@
             </div>
         </div>
 
-        <template v-if="!enableBuckaroo">
+        <template v-if="!enableBuckaroo && (organization.privateMeta?.mollieOnboarding || forceMollie)">
             <hr>
             <aside class="style-title-prefix">
                 {{ $t('Mollie') }}
