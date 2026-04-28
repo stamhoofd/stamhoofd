@@ -1,5 +1,5 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="'registration-invitations'" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :estimated-rows="estimatedRows">
+    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :title="title" :column-configuration-id="'registration-invitations'" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :estimated-rows="estimatedRows">
         <template #empty>
             {{ $t('Geen uitnodigingen') }}
         </template>
@@ -15,7 +15,6 @@ import type { Group, RegistrationInvitation, StamhoofdFilter } from '@stamhoofd/
 import { SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { useRegistrationInvitationsObjectFetcher } from '../fetchers/useRegistrationInvitationsObjectFetcher';
-import { getRegistrationInvitationUIFilterBuilders } from '../filters/filter-builders/registration-invitations';
 import { useRegistrationInvitationActionBuilder } from './classes/RegistrationInvitationActionBuilder';
 import { useRegistrationInvitationEventListener } from './classes/useRegistrationInvitationEventListener';
 
@@ -26,9 +25,7 @@ const props = withDefaults(defineProps<{
     estimatedRows?: number | null;
 }>(), {
     estimatedRows: null
-})
-
-const filterBuilders = getRegistrationInvitationUIFilterBuilders();
+});
 
 const getActionBuilder = useRegistrationInvitationActionBuilder();
 const actions = getActionBuilder({group: props.group}).getActions();
