@@ -1166,7 +1166,7 @@ export async function presentExportMembersToPdf({ members, platform, organizatio
     });
 }
 
-function isMemberInvited(member: PlatformMember, group: Group) {
+export function isMemberInvited(member: PlatformMember, group: Group) {
     return member.member.registrationInvitations.some(invitation => invitation.group.id === group.id);
 }
 
