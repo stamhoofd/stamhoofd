@@ -1,13 +1,14 @@
 /**
  * Search all occurrences of @field({*, ...NextVersion}) (multiple lines) in the code
  */
-const {promises: fs} = require('fs');
-const path = require('path');
-const chalk = require('chalk');
+import fs from 'fs/promises'
+import path from 'path'
+import chalk from 'chalk'
+import util from 'node:util';
+import child_process from 'node:child_process'
 const excludedFolder = ['node_modules', 'dist'];
 
-const util = require('node:util');
-const exec = util.promisify(require('node:child_process').exec);
+const exec = util.promisify(child_process.exec);
 
 // Note: we should not import the compiled structures directly here, since they would need to be compiled first
 let currentVersion = 0;
@@ -159,7 +160,7 @@ async function processFile(filePath) {
 }
 
 async function readVersion() {
-    const versionPath = path.join(__dirname, '..', 'shared/structures/src/Version.ts');
+    const versionPath = path.join(import.meta.dirname, '..', 'shared/structures/src/Version.ts');
     const content = await fs.readFile(versionPath, 'utf8');
     const match = content.match(/Version = (\d+)/);
     if (match) {
@@ -233,13 +234,13 @@ async function run() {
         }
     }
 
-    await loopFolder(path.join(__dirname, '..'));
+    await loopFolder(path.join(import.meta.dirname, '..'));
 
     if (!foundUsage) {
         console.log(chalk.green('No new fields found. Structures version not bumped.'));
     } else {
         // Write new version to shared/structures/src/Version.ts
-        const versionPath = path.join(__dirname, '..', 'shared/structures/src/Version.ts');
+        const versionPath = path.join(import.meta.dirname, '..', 'shared/structures/src/Version.ts');
         const currentContent = await fs.readFile(versionPath, 'utf8');
         const newContent = currentContent.replace('Version = ' + currentVersion, 'Version = ' + nextVersion);
 
