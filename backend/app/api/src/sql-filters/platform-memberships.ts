@@ -46,6 +46,11 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
+    price: createColumnFilter({
+        expression: SQL.column(MemberPlatformMembership.table, 'price'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
     organization: createExistsFilter(
         SQL.select()
             .from(SQL.table('organizations'))

@@ -2089,6 +2089,7 @@ defineExpose({
 
     &[data-style="code"] > span {
         font-family: monospace;
+        font-size: 12px;
     }
 }
 

@@ -25,16 +25,18 @@ export function useGetPlatformMembershipColumns() {
     }
 
     const now = new Date();
-    const formatDate = (v: Date | null, width: number) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`%Gr`);
+    const formatDate = (placeholder = $t(`%Gr`)) => (v: Date | null, width: number) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : placeholder;
+    const styleDate = (v: Date | null) => v ? '' : 'gray';
 
     const columns: Column<ObjectType, any>[] = [
         new Column<ObjectType, PlatformMembership>({
             id: 'id',
-            name: $t('Id'),
+            name: 'ID',
             getValue: m => m,
             format: m => m.id,
             minimumWidth: 60,
             recommendedWidth: 100,
+            getStyle: () => 'code',
             index: 0,
         }),
         new Column<ObjectType, string>({
@@ -51,15 +53,31 @@ export function useGetPlatformMembershipColumns() {
             name: $t('Lidnummer'),
             getValue: m => m.member.memberNumber ?? '',
             format: val => val ? val : $t(`%1FW`),
+            getStyle: val => val ? 'code' : 'gray',
             minimumWidth: 100,
             recommendedWidth: 200,
             enabled: false,
             allowSorting: false
         }),
+        new Column<ObjectType, Date | null>({
+            id: 'balanceItem.createdAt',
+            name: $t('Aanrekeningsdatum'),
+            getValue: m => m.balanceItem?.createdAt ?? null,
+            format: formatDate($t('Nog niet aangerekend')),
+            getStyle: styleDate,
+            minimumWidth: 100,
+            recommendedWidth: 200,
+            enabled: true,
+            allowSorting: false
+        }),
         new Column<ObjectType, string>({
             id: 'organization.name',
-            name: $t('Aangerekend aan'),
+            name: $t('Vereniging'),
             getValue: m => m.organization.name,
+            getStyleForObject: (m) => {
+                // Gray if not yet charged
+                return m.balanceItemId ? '' : 'gray'
+            },
             minimumWidth: 100,
             recommendedWidth: 200,
             enabled: true,
@@ -67,7 +85,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, string>({
             id: 'organization.uri',
-            name: $t('Nummer vereniging'),
+            name: $t('Groepsnummer'),
             getValue: m => m.organization.uri,
             minimumWidth: 60,
             recommendedWidth: 100,
@@ -94,7 +112,8 @@ export function useGetPlatformMembershipColumns() {
             id: 'startDate',
             name: $t('Startdatum'),
             getValue: m => m.startDate,
-            format: formatDate,
+            format: formatDate(),
+            getStyle: styleDate,
             minimumWidth: 80,
             recommendedWidth: 200,
             enabled: true,
@@ -104,7 +123,8 @@ export function useGetPlatformMembershipColumns() {
             id: 'endDate',
             name: $t('Einddatum'),
             getValue: m => m.endDate,
-            format: formatDate,
+            format: formatDate(),
+            getStyle: styleDate,
             minimumWidth: 80,
             recommendedWidth: 200,
             enabled: true,
@@ -112,9 +132,11 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, Date | null>({
             id: 'expiredDate',
+            description: $t('Datum vóór de einddatum waarop de aansluitingstatus overschakelt op \'verlopen\''),
             name: $t('Vervaldatum'),
             getValue: m => m.expireDate,
-            format: formatDate,
+            format: formatDate('N.v.t.'),
+            getStyle: styleDate,
             minimumWidth: 80,
             recommendedWidth: 200,
             enabled: false,
@@ -141,8 +163,8 @@ export function useGetPlatformMembershipColumns() {
             name: $t('Aanmaakdatum'),
             allowSorting: true,
             getValue: (v) => v.createdAt,
-            format: formatDate,
-            getStyle: v => v === null ? 'gray' : '',
+            format: formatDate(),
+            getStyle: styleDate,
             minimumWidth: 80,
             recommendedWidth: 220,
             enabled: false
@@ -180,7 +202,7 @@ export function useGetPlatformMembershipColumns() {
             enabled: false
         }),
         new Column<ObjectType, string>({
-            id: 'period',
+            id: 'periodId',
             name: $t('%7Z'),
             allowSorting: false,
             getValue: (v) => {

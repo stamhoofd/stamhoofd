@@ -2,10 +2,10 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, MemberPlatformMembership, Organization } from '@stamhoofd/models';
+import { BalanceItem, Member, MemberPlatformMembership, Organization } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PlatformMembershiMemberDetails, PlatformMembership, PlatformMembershipOrganizationDetails } from '@stamhoofd/structures';
+import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PlatformMembershipMemberDetails, PlatformMembership, PlatformMembershipOrganizationDetails } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context.js';
 import { platformMembershipFilterCompilers } from '../../../sql-filters/platform-memberships.js';
@@ -115,8 +115,11 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
 
         const memberIds = Formatter.uniqueArray(data.map(d => d.memberId));
         const organizationIds = Formatter.uniqueArray(data.map(d => d.organizationId));
+        const balanceItemIds = Formatter.uniqueArray(data.map(d => d.balanceItemId));
         const members = await Member.getByIDs(...memberIds);
         const organizations = await Organization.getByIDs(...organizationIds);
+        const balanceItems = await BalanceItem.getByIDs(...balanceItemIds)
+        const balanceItemStructures = await BalanceItem.getStructureWithPayments(balanceItems);
 
         const results: PlatformMembership[] = [];
 
@@ -141,9 +144,11 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 });
             }
 
+            const balanceItem = model.balanceItemId ? balanceItemStructures.find(o => o.id === model.balanceItemId) : null;
             results.push(PlatformMembership.create({
                 ...model,
-                member: PlatformMembershiMemberDetails.create(member),
+                balanceItem: balanceItem,
+                member: PlatformMembershipMemberDetails.create(member),
                 organization: PlatformMembershipOrganizationDetails.create(organization)
             }));
         }

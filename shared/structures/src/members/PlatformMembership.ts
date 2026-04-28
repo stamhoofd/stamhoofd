@@ -1,7 +1,8 @@
 import { AutoEncoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
+import { BalanceItem, BalanceItemWithPayments } from '../BalanceItem.js';
 
-export class PlatformMembershiMemberDetails extends AutoEncoder {
+export class PlatformMembershipMemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder })
     firstName = '';
 
@@ -32,8 +33,11 @@ export class PlatformMembershipOrganizationDetails extends AutoEncoder {
 }
 
 export class PlatformMembership extends MemberPlatformMembership {
-    @field({ decoder: PlatformMembershiMemberDetails })
-    member: PlatformMembershiMemberDetails;
+    @field({ decoder: PlatformMembershipMemberDetails })
+    member: PlatformMembershipMemberDetails;
+
+    @field({ decoder: BalanceItemWithPayments, nullable: true, ...NextVersion })
+    balanceItem: BalanceItemWithPayments | null;
 
     @field({ decoder: PlatformMembershipOrganizationDetails })
     organization: PlatformMembershipOrganizationDetails;

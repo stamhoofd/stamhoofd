@@ -5,7 +5,7 @@ import { usePlatform } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
-import { NumberFilterBuilder } from '../NumberUIFilter';
+import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getMemberBaseFilters } from './members';
 import { useGetOrganizationUIFilterBuilders } from './organizations';
@@ -76,6 +76,12 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
                 name: $t('Proefperiode tot'),
                 key: 'trialUntil',
             }),
+            new NumberFilterBuilder({
+                key: 'price',
+                name: $t('Prijs'),
+                type: NumberFilterFormat.Currency
+            }),
+
             new NumberFilterBuilder({
                 key: 'freeAmount',
                 name: $t('Dagen gratis'),
