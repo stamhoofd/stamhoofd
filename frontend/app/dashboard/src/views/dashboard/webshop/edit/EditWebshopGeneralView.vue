@@ -90,7 +90,7 @@
 
         <!-- ticket access control -->
         <template v-if="accessControlList.length > 1">
-            <STInputBox :title="accessControlLabel" error-fields="type" :error-box="errors.errorBox">
+            <STInputBox :title="accessControlLabel" error-fields="type" :error-box="errors.errorBox" :class="accessControlList.length > 2 ? 'max' : ''">
                 <div class="illustration-radio-container">
                     <label v-for="option in accessControlList" :key="option.value" class="illustration-radio-box">
                         <div>
@@ -401,13 +401,12 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
     ) {
         return [
             {
-                label: 'Zonder scanners',
+                label: 'Geen',
                 value: WebshopTicketType.None,
                 src: listIllustrationSrc,
-                tag: 'Meest gekozen',
             },
             {
-                label: 'Bestelling scannen',
+                label: 'Scannen',
                 value: WebshopTicketType.SingleTicket,
                 src: scannerIllustrationSrc,
             },
@@ -417,7 +416,7 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
     if (webshop.value.meta.type === WebshopType.Donations) {
         return [
             {
-                label: 'Zonder scannen',
+                label: 'Geen',
                 value: WebshopTicketType.None,
                 src: listIllustrationSrc,
             },
@@ -427,7 +426,7 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
     if (webshop.value.meta.type === WebshopType.Performance) {
         return [
             {
-                label: 'Ticket per persoon',
+                label: 'Per persoon',
                 value: WebshopTicketType.Tickets,
                 src: teamIllustrationSrc,
             },
@@ -438,23 +437,23 @@ const accessControlList = computed<{ label: string; value: WebshopTicketType; sr
 
     if (webshop.value.meta.type !== WebshopType.Event) {
         list.push({
-            label: 'Zonder scanners',
+            label: 'Geen',
             value: WebshopTicketType.None,
             src: listIllustrationSrc,
-            tag: 'Meest gekozen',
+           // tag: 'Meest gekozen',
         });
     }
 
     return [
         ...list,
         {
-            label: 'Ticket per persoon',
+            label: 'Per persoon',
             value: WebshopTicketType.Tickets,
             src: userIllustrationSrc,
-            tag: list.length === 0 ? 'Meest gekozen' : undefined,
+            //tag: list.length === 0 ? 'Meest gekozen' : undefined,
         },
         {
-            label: 'Ticket per bestelling',
+            label: 'Per bestelling',
             value: WebshopTicketType.SingleTicket,
             src: teamIllustrationSrc,
         },
