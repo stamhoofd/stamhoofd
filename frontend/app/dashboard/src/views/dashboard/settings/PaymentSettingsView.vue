@@ -165,7 +165,7 @@
             </div>
         </div>
 
-        <template v-if="!enableBuckaroo && (organization.privateMeta?.mollieOnboarding || forceMollie)">
+        <template v-if="!enableBuckaroo && (organization.privateMeta?.mollieOnboarding || mollieEnabled)">
             <hr>
             <aside class="style-title-prefix">
                 {{ $t('Mollie') }}
@@ -464,6 +464,8 @@ const forcePayconiq = computed({
     },
 });
 
+const mollieEnabled = !!STAMHOOFD.MOLLIE_CLIENT_ID
+
 function setFeatureFlag(flag: string, value: boolean) {
     const featureFlags = patchedOrganization.value.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
     if (value) {
@@ -664,7 +666,7 @@ onMounted(() => {
         }
     }
     else {
-        if ((patchedOrganization.value.privateMeta && patchedOrganization.value.privateMeta.mollieOnboarding) || featureFlag('forceMollie')) {
+        if (patchedOrganization.value.privateMeta && patchedOrganization.value.privateMeta.mollieOnboarding) {
             updateMollie().catch(console.error);
         }
     }
