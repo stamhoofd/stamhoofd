@@ -662,7 +662,9 @@ export class RegisterItem implements ObjectWithRecords {
             return true;
         }
 
-        return this.member.member.registrationInvitations.some(r => r.group.id === this.group.id);
+        return this.member.member.registrationInvitations.some(invitation => invitation.group.id === this.group.id &&
+            // ignore invitation if already registered (for trial period the invitation will be only removed on final registration)
+            !this.member.member.registrations.some(r => r.groupId === invitation.group.id && r.registeredAt === null));
     }
 
     getRequireGroupIdsError() {
