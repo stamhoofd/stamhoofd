@@ -65,11 +65,11 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
                 key: 'endDate',
             }),
             new DateFilterBuilder({
-                name: $t('Verloopt op'),
+                name: $t('Vervaldatum'),
                 key: 'expiredDate',
             }),
             new DateFilterBuilder({
-                name: $t('Toegevoegd op'),
+                name: $t('Aanmaakdatum'),
                 key: 'createdAt',
             }),
             new DateFilterBuilder({

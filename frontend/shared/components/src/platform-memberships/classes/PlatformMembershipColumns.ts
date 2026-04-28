@@ -112,7 +112,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, Date | null>({
             id: 'expiredDate',
-            name: $t('Verloopt op'),
+            name: $t('Vervaldatum'),
             getValue: m => m.expireDate,
             format: formatDate,
             minimumWidth: 80,
@@ -138,7 +138,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, Date>({
             id: 'createdAt',
-            name: $t('Toegevoegd'),
+            name: $t('Aanmaakdatum'),
             allowSorting: true,
             getValue: (v) => v.createdAt,
             format: formatDate,
