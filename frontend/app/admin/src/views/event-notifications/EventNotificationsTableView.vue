@@ -110,7 +110,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'startDate',
-        name: $t('%7e'),
+        name: $t('%1Of'),
         getValue: e => e.startDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -120,7 +120,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'endDate',
-        name: $t('%wB'),
+        name: $t('%1P8'),
         getValue: e => e.endDate,
         format: d => Formatter.date(d, true),
         minimumWidth: 60,
@@ -163,7 +163,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.name',
-        name: $t('%5E'),
+        name: $t('%1PI'),
         getValue: notification => notification.organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -171,7 +171,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'organization.uriPadded',
-        name: $t('%7C'),
+        name: $t('%1O1'),
         getValue: notification => notification.organization.uri,
         minimumWidth: 100,
         recommendedWidth: 200,

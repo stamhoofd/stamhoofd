@@ -75,7 +75,7 @@ const props = withDefaults(
         markReviewed?: ReviewTimeType[];
         saveHandler?: ((navigate: NavigationActions) => Promise<void> | void) | null;
     }>(), {
-        saveText: () => $t(`%v7`),
+        saveText: () => $t(`%1Op`),
         saveHandler: null,
         markReviewed: () => [],
     },

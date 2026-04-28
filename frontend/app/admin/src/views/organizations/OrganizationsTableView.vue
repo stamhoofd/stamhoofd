@@ -138,7 +138,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: $t(`%Gq`),
+        name: $t(`%1Os`),
         getValue: organization => organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -160,7 +160,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'city',
-        name: $t(`%CQ`),
+        name: $t(`%1PP`),
         getValue: organization => organization.address.city,
         minimumWidth: 100,
         recommendedWidth: 200,

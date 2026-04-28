@@ -518,7 +518,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
     all.push(
         new StringFilterBuilder({
-            name: $t('%CQ'),
+            name: $t('%1PP'),
             key: 'city',
             wrapper: {
                 $or: [
@@ -686,14 +686,14 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
         responsibilitiesFilters.push(
             new DateFilterBuilder({
-                name: $t('%7e'),
+                name: $t('%1Of'),
                 key: 'startDate',
             }),
         );
 
         responsibilitiesFilters.push(
             new DateFilterBuilder({
-                name: $t('%wB'),
+                name: $t('%1P8'),
                 key: 'endDate',
             }),
         );
@@ -908,14 +908,14 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 
             all.push(
                 new DateFilterBuilder({
-                    name: $t('%7e'),
+                    name: $t('%1Of'),
                     key: 'startDate',
                 }),
             );
 
             all.push(
                 new DateFilterBuilder({
-                    name: $t('%wB'),
+                    name: $t('%1P8'),
                     key: 'endDate',
                 }),
             );
@@ -930,7 +930,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
 
             all.push(
                 new NumberFilterBuilder({
-                    name: $t('%Bj'),
+                    name: $t('%1Nm'),
                     key: 'priceWithoutDiscount',
                     type: NumberFilterFormat.Currency,
                 }),
@@ -941,7 +941,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
                     name: $t('%BO'),
                     options: [
                         new MultipleChoiceUIFilterOption($t('%BO'), true),
-                        new MultipleChoiceUIFilterOption($t('%Bk'), false),
+                        new MultipleChoiceUIFilterOption($t('%1OR'), false),
                     ],
                     wrapFilter: (f: StamhoofdFilter) => {
                         const choices = Array.isArray(f) ? f : [f];
@@ -1097,7 +1097,7 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
     const builders: UIFilterBuilders = [
         ...getMemberBaseFilters(),
         new GroupUIFilterBuilder({
-                name: $t('%1PS'),
+                name: $t('%1EI'),
                 allowCreation: false,
                 builders: [
                     new StringFilterBuilder({
@@ -1165,7 +1165,7 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
 
     if (options.groupNameFilters) {
         all.push(new GroupUIFilterBuilder({
-            name: $t('%Gq'),
+            name: $t('%1Os'),
             builders: nameFilters
         }));
     } else {
@@ -1211,7 +1211,7 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
         const all: UIFilterBuilders = getMemberBaseFilters(recordConfiguration);
 
         all.push(new GroupUIFilterBuilder({
-                name: $t('%1PS'),
+                name: $t('%1EI'),
                 allowCreation: false,
                 builders: [
                     new StringFilterBuilder({

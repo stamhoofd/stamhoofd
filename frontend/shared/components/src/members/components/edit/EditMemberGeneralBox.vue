@@ -6,7 +6,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%1Os`)">
                     <div class="input-group">
                         <div>
                             <input v-model="firstName" class="input" data-testid="first-name-input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">

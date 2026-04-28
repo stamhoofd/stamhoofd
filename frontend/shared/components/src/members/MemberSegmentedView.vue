@@ -85,7 +85,7 @@ const tabs = computed(() => {
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
-            name: $t(`%Wq`),
+            name: $t(`%1Ny`),
             component: new ComponentWithProperties(MemberPlatformMembershipTab),
         });
     }

@@ -610,7 +610,7 @@ async function showExample() {
                     defaultEnabled: true,
                 }),
                 value: reactiveValue,
-                saveText: $t(`%v7`),
+                saveText: $t(`%1Op`),
                 saveHandler: async (_patch: PatchAnswers, navigationActions: NavigationActions) => {
                     await navigationActions.pop({ force: true });
                 },

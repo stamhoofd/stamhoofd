@@ -18,7 +18,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
                 }
 
                 if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                    return $t(`%TW`);
+                    return $t(`%8a`);
                 }
 
                 return $t(`%Us`);
@@ -56,7 +56,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
             value: order.data.timeSlot?.timeRangeString() ?? '',
         },
         {
-            title: $t(`%Gq`),
+            title: $t(`%1Os`),
             value: order.data.customer.name,
         },
         ...(order.data.customer.phone

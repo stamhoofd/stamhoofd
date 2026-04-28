@@ -49,7 +49,7 @@
 
                     <template v-if="!canEnablePaymentMethod(method)" #right>
                         <button class="button text selected" type="button" @click.stop="openPaymentSettings">
-                            <span>{{ $t('%1OA') }}</span>
+                            <span>{{ $t('%1Lx') }}</span>
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>

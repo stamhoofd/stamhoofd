@@ -8,7 +8,7 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%TM`)">
         </STInputBox>
 

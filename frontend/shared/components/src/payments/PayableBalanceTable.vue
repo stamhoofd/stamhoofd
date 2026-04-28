@@ -1,7 +1,7 @@
 <template>
     <div v-if="filteredItems.length !== 0 || !showName" class="container">
         <hr><h2>
-            {{ !showName ? $t('%h8') : $t('%vX', {organization: item.organization.name}) }}
+            {{ !showName ? $t('%1Ni') : $t('%vX', {organization: item.organization.name}) }}
         </h2>
 
         <p v-if="filteredItems.length === 0" class="info-box">

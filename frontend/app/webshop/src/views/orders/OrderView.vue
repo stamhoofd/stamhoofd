@@ -56,7 +56,7 @@
                                 <div class="hover-show">
                                     <button v-if="!loadingTickets" class="button text limit-space" type="button" @click="downloadAllTickets">
                                         <span class="icon download" />
-                                        <span>{{ $t('%v7') }}</span>
+                                        <span>{{ $t('%1Op') }}</span>
                                     </button>
                                 </div>
                             </h2>
@@ -145,7 +145,7 @@
                             </STListItem>
                             <STListItem v-if="order.data.customer.name" class="right-description">
                                 <h3 class="style-definition-label">
-                                    {{ $t('%Gq') }}
+                                    {{ $t('%1Os') }}
                                 </h3>
 
                                 <p class="style-definition-text">
@@ -214,7 +214,7 @@
                                             {{ $t('%Uq') }}
                                         </template>
                                         <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                            {{ $t('%TW') }}
+                                            {{ $t('%8a') }}
                                         </template>
                                         <template v-else>
                                             {{ $t('%Va') }}

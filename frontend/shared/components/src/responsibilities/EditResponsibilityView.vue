@@ -6,8 +6,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('%Gq') ">
-            <input v-model="name" class="input" type="text" :placeholder="$t('%Gq') ">
+        <STInputBox :title="$t('%1Os') ">
+            <input v-model="name" class="input" type="text" :placeholder="$t('%1Os') ">
         </STInputBox>
 
         <STInputBox :title="$t('%6o')" error-fields="settings.description" :error-box="errors.errorBox" class="max">

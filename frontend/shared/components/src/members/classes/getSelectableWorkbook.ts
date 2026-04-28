@@ -105,7 +105,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     }),
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`%7C`),
+                        name: $t(`%1O1`),
                         enabled: false,
                     }),
                 ]

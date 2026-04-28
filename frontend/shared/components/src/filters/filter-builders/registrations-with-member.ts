@@ -89,7 +89,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
         if (organization.value === null) {
             all.push(
                 new GroupUIFilterBuilder({
-                    name: $t('%5E'),
+                    name: $t('%1PI'),
                     description: $t('%1IK'),
                     builders: getOrganizationUIFilterBuilders(),
                     wrapper: {
@@ -106,7 +106,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
 
             const groupFilters: UIFilterBuilder[] = [
                 new StringFilterBuilder({
-                    name: $t(`%Gq`),
+                    name: $t(`%1Os`),
                     key: 'name',
                 }),
                 new MultipleChoiceFilterBuilder({

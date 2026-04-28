@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('%v7')" :replacements="replacements" :title="$t(`%aP`)" @save="save">
+    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('%1Op')" :replacements="replacements" :title="$t(`%aP`)" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
             {{ $t('%aM') }}

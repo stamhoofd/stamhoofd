@@ -173,7 +173,7 @@ const props = withDefaults(
         loading: false,
         disabled: false,
         title: '',
-        saveText: () => $t(`%v7`),
+        saveText: () => $t(`%1Op`),
         saveIcon: null,
         saveIconMobile: null,
         cancelText: () => $t(`%1Lh`),

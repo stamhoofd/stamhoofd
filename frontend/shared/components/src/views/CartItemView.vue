@@ -51,7 +51,7 @@
             <STList v-if="(cartItem.product.type === 'Ticket' || cartItem.product.type === 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('%TW') }}
+                        {{ $t('%8a') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -151,7 +151,7 @@
                     </button>
                     <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit" data-testid="save-button">
                         <span class="icon basket" />
-                        <span>{{ $t('%v7') }}</span>
+                        <span>{{ $t('%1Op') }}</span>
                     </button>
                     <button v-else class="button primary" type="submit" data-testid="save-button">
                         <span v-if="cartEnabled" class="icon basket" />

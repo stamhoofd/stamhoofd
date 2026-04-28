@@ -13,7 +13,7 @@
 
         <div class="split-inputs">
             <div>
-                <TInput v-model="name" :placeholder="$t(`%16R`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)" />
+                <TInput v-model="name" :placeholder="$t(`%16R`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
                 <p class="style-description-small">
                     {{ $t('%161') }}
                 </p>

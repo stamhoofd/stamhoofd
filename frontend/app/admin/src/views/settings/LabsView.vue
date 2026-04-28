@@ -28,7 +28,7 @@
             {{ $t('%CV') }}
         </Checkbox>
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
-            {{ $t('%HI') }}
+            {{ $t('%1Pd') }}
         </Checkbox>
 
         <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('webshop-advanced-settings')" @update:model-value="setFeatureFlag('webshop-advanced-settings', !!$event)">

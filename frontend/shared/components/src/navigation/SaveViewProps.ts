@@ -27,7 +27,7 @@ export const SaveViewDefaults = {
     deleting: false,
     disabled: false,
     title: '',
-    saveText: () => $t(`%v7`),
+    saveText: () => $t(`%1Op`),
     saveIcon: null,
     saveButtonClass: 'primary',
     saveIconRight: null,

@@ -146,7 +146,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
         },
         {
             id: 'pricePending',
-            name: $t(`%wc`),
+            name: $t(`%1PL`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
                 value: object.balanceItem.pricePending / 1_0000,
@@ -252,7 +252,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'uri',
-            name: $t(`%7C`),
+            name: $t(`%1O1`),
             width: 16,
             getValue: (object: ReceivableBalance) => ({
                 value: object.object.uri,
@@ -273,7 +273,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
         },
         {
             id: 'amountPending',
-            name: $t(`%wc`),
+            name: $t(`%1PL`),
             width: 18,
             getValue: (object: ReceivableBalance) => ({
                 value: object.amountPending / 1_0000,

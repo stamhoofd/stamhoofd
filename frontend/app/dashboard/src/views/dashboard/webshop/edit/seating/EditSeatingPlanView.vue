@@ -57,7 +57,7 @@
                 </div>
             </h2>
 
-            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" :error-box="errors.errorBox" :error-fields="'sections['+section.id+'].name'" :title="$t(`%Gq`)">
+            <STInputBox v-if="patchedSeatingPlan.sections.length > 1" :error-box="errors.errorBox" :error-fields="'sections['+section.id+'].name'" :title="$t(`%1Os`)">
                 <input :value="section.name" class="input" type="text" :placeholder="$t(`%Uh`)" autocomplete="off" enterkeyhint="next" @input="setSectionName(section, ($event as any).target.value)">
             </STInputBox>
 

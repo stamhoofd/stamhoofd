@@ -263,9 +263,45 @@
     "original": "Er ging iets mis bij het ophalen van de groep",
     "translation": "Something went wrong while fetching the group"
   },
+  "%1OX": {
+    "original": "De groep die bij de aansluiting hoort is niet gevonden.",
+    "translation": "The group linked to this affiliation could not be found."
+  },
+  "%1Ok": {
+    "original": "Aangerekende groep",
+    "translation": "Charged group"
+  },
+  "%1Oz": {
+    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de groep.",
+    "translation": "{member} is already known in our system, but your email address is not. Please contact the group."
+  },
+  "%1P9": {
+    "original": "Wat voor groep?",
+    "translation": "What type of group?"
+  },
+  "%1PD": {
+    "original": "Groep waar de aansluiting aan aangrekend is",
+    "translation": "Group the affiliation is charged to"
+  },
+  "%1PI": {
+    "original": "Groep",
+    "translation": "Group"
+  },
+  "%1PW": {
+    "original": "Naam groep",
+    "translation": "Group name"
+  },
+  "%1PZ": {
+    "original": "Nummer groep",
+    "translation": "Group number"
+  },
   "%2": {
     "original": "Aansluiting/verzekering KSA Nationaal*",
     "translation": "Affiliation/insurance KSA National*"
+  },
+  "%2g": {
+    "original": "Mijn account",
+    "translation": "My account"
   },
   "%2i": {
     "original": "Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw groep om de juiste code te ontvangen.",
@@ -284,8 +320,8 @@
     "translation": "e.g. jouwgroep.be"
   },
   "%2r": {
-    "original": "Je kan online betalingen gebruiken in Ravot door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner.",
-    "translation": "You can use online payments in Ravot by linking with Mollie via the button below. This allows you to activate payments via Bancontact, iDEAL and credit card. However, you will pay higher transaction costs than with our current partner."
+    "original": "Je kan online betalingen gebruiken in Ravot door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren.",
+    "translation": "You can use online payments in Ravot by connecting to Mollie via the button below. This lets you activate payments with Bancontact, iDEAL, and credit card."
   },
   "%2t": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
@@ -372,8 +408,8 @@
     "translation": "Sometimes you want to give people who are not members access to Ravot. This can be done by creating external administrator roles and then assigning those roles to external administrators."
   },
   "%3s": {
-    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Ravot instellingen > Betaalaccounts.",
-    "translation": "You cannot activate {paymentMethod}, you must first connect to a payment provider via the Ravot settings > Payment accounts."
+    "original": "Sluit eerst aan bij Stripe via de Ravot instellingen > Betaalaccounts, daarna kan je {paymentMethod} activeren.",
+    "translation": "First connect with Stripe via the Ravot settings > Payment accounts, after that you can activate {paymentMethod}."
   },
   "%3x": {
     "original": "Dit lid is bij geen enkele groep ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
@@ -459,10 +495,6 @@
     "original": "Alle groepen",
     "translation": "All groups"
   },
-  "%5E": {
-    "original": "Groep",
-    "translation": "Group"
-  },
   "%5G": {
     "original": "Zoek een groep waar je {firstName} wilt inschrijven",
     "translation": "Search for a group where you want to register {firstName}"
@@ -480,8 +512,8 @@
     "translation": "Find your group"
   },
   "%5O": {
-    "original": "Je moet elke betaling zelf controleren en markeren als betaald in Ravot",
-    "translation": "You must check each payment yourself and mark it as paid in Ravot"
+    "original": "Je controleert en markeert manueel elke betaling als betaald in Ravot",
+    "translation": "You manually review and mark each payment as paid in Ravot."
   },
   "%5P": {
     "original": "Maak API-keys aan om toegang te krijgen tot de Ravot-API.",
@@ -494,10 +526,6 @@
   "%5R": {
     "original": "Vertel Ravot door aan andere groepen",
     "translation": "Tell Ravot about other groups"
-  },
-  "%5S": {
-    "original": "Gebruikt jouw groep Ravot al?",
-    "translation": "Does your group already use Ravot?"
   },
   "%5T": {
     "original": "De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Ravot",
@@ -512,8 +540,8 @@
     "translation": "Read more about Ravot here."
   },
   "%5W": {
-    "original": "Sluit jouw groep aan bij Ravot",
-    "translation": "Join your group to Ravot"
+    "original": "Groep registreren",
+    "translation": "Register group"
   },
   "%5X": {
     "original": "Terug naar Ravot",
@@ -599,10 +627,6 @@
     "original": "Jouw leiding kan in Ravot jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
     "translation": "Your leadership can look up your security code in Ravot and pass it on to you. If you are a leader yourself, ask your co-leader or KSA National."
   },
-  "%7k": {
-    "original": "Mijn account",
-    "translation": "My account"
-  },
   "%7l": {
     "original": "De link naar deze activiteit in ‘Mijn account’. Deel deze link met leden.",
     "translation": "The link to this activity in ‘My account’. Share this link with members."
@@ -644,12 +668,8 @@
     "translation": "Choose what information you collect from groups"
   },
   "%8B": {
-    "original": "Naam van jouw groep",
-    "translation": "Name of your group"
-  },
-  "%8C": {
-    "original": "De naam van je groep",
-    "translation": "The name of your group"
+    "original": "Naam groep of organisatie",
+    "translation": "Group or organization name"
   },
   "%8D": {
     "original": "Naam van je groep (kort)",
@@ -678,10 +698,6 @@
   "%8Z": {
     "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.",
     "translation": "All members with this role automatically get access rights to the age group of a local group for which the role was added – only for one specific work year."
-  },
-  "%8a": {
-    "original": "Adres van je groep",
-    "translation": "Address of your group"
   },
   "%8b": {
     "original": "De link naar de website van jouw groep.",
@@ -1051,9 +1067,13 @@
     "original": "Deze periode is niet beschikbaar voor jouw groep.",
     "translation": "This period is not available for your group."
   },
+  "%Wb": {
+    "original": "Je locatie maakt je groep makkelijker vindbaar als je de volgende keer wilt inloggen. Je kan het later nog wijzigen.",
+    "translation": "Adding your location makes it easier to find your group next time you log in. You can change it later if needed."
+  },
   "%Wd": {
-    "original": "Hoe ken je Ravot?",
-    "translation": "How do you know Ravot?"
+    "original": "Hoe ken je Ravot? (optioneel)",
+    "translation": "How did you hear about Ravot? (optional)"
   },
   "%We": {
     "original": "Op aanraden van andere groep / persoon",
@@ -1062,14 +1082,6 @@
   "%Wf": {
     "original": "Gezien bij andere groep",
     "translation": "Seen at another group"
-  },
-  "%Wi": {
-    "original": "Groep aanmaken",
-    "translation": "Create group"
-  },
-  "%Wj": {
-    "original": "Type groep",
-    "translation": "Group type"
   },
   "%Yz": {
     "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw groep.",
@@ -1143,10 +1155,6 @@
     "original": "Het lid zal deze stap terug moeten doorlopen via ‘Mijn account’",
     "translation": "The member will have to go through this step again via ‘My account’"
   },
-  "%gO": {
-    "original": "Naam groep",
-    "translation": "Group name"
-  },
   "%gQ": {
     "original": "bv. Ruimtereis groep",
     "translation": "e.g. Space travel group"
@@ -1179,17 +1187,13 @@
     "original": "Natuurgroep",
     "translation": "Nature group"
   },
-  "%mO": {
-    "original": "Muziekgroep",
-    "translation": "Music group"
-  },
   "%mP": {
     "original": "Beroepsgroep",
     "translation": "Professional group"
   },
-  "%mQ": {
-    "original": "Kunstgroep",
-    "translation": "Art group"
+  "%mR": {
+    "original": "Andere culturele groep",
+    "translation": "Other cultural group"
   },
   "%nZ": {
     "original": "adres van je groep",

@@ -54,7 +54,7 @@
                     </template>
                     <h2 class="style-title-list">
                         {{ $t('%1IQ') }}
-                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('%cR') }}</span>
+                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('%1PH') }}</span>
                         <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('%1EN') }}</span>
                     </h2>
                     <p class="style-description">

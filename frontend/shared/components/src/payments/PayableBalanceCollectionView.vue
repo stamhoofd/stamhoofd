@@ -8,7 +8,7 @@
             <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('%wc') }}</h2>
+                <hr><h2>{{ $t('%1PL') }}</h2>
                 <p>{{ $t('%h6') }}</p>
 
                 <STList>

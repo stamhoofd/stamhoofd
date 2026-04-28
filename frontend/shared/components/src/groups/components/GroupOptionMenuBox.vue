@@ -14,7 +14,7 @@
         </template>
 
         <template v-if="level === 1">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
                 <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%dG`)">
             </STInputBox>
 

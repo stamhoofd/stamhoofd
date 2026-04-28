@@ -19,7 +19,7 @@
                         </div>
                     </div>
                 </STInputBox>
-                <EmailInput v-model="email" :validator="validator" autocomplete="username" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
+                <EmailInput v-model="email" :validator="validator" autocomplete="username" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
                 <div class="split-inputs">
                     <div>
                         <STInputBox :title="$t(`%ZV`)">

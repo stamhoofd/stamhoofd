@@ -339,7 +339,7 @@ export class RecordSettings extends BaseRecordSettings {
                     width: 20,
                 },
                 {
-                    name: prefix + $t('%CQ'),
+                    name: prefix + $t('%1PP'),
                     defaultCategory, // Ignore this name
                     width: 20,
                 },

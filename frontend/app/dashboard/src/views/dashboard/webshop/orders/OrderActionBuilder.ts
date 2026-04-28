@@ -97,7 +97,7 @@ export class OrderActionBuilder {
     getPaymentActions(): TableAction<PrivateOrder>[] {
         return [
             new InMemoryTableAction({
-                name: $t(`%Kw`),
+                name: $t(`%1OD`),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrder[]) => {

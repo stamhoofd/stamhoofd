@@ -1,6 +1,6 @@
 <template>
     <div>
-        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errorBox" :title="$t(`%Gq`)">
+        <STInputBox v-if="!isSingle" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)">
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%Sk`)">
         </STInputBox>
 

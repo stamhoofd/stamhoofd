@@ -142,7 +142,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }), [AccessRight.MemberManageNRN]),
         new SelectableColumn({
             id: 'member.membership',
-            name: $t(`%Wq`),
+            name: $t(`%1Ny`),
             enabled: false,
         }),
         groups.some(group => group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization)
@@ -165,13 +165,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             ? [
                     new SelectableColumn({
                         id: 'organization',
-                        name: hasEvent ? $t('%cL') : $t('%5E'),
+                        name: hasEvent ? $t('%cL') : $t('%1PI'),
                         description: $t('%1Jh'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'uri',
-                        name: hasEvent ? $t('%1KP') : $t('%7C'),
+                        name: hasEvent ? $t('%1KP') : $t('%1O1'),
                         description: $t('%1Ji'),
                         enabled: false,
                     }),
@@ -240,12 +240,12 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'startDate',
-            name: $t(`%7e`),
+            name: $t(`%1Of`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'endDate',
-            name: $t(`%wB`),
+            name: $t(`%1P8`),
             enabled: false,
         }),
         new SelectableColumn({

@@ -23,7 +23,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
         new Column<ObjectType, string>({
             id: 'name',
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             getValue: member => member.member.name,
             minimumWidth: 100,
             recommendedWidth: 200,
@@ -48,7 +48,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         }),
         new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'membership',
-            name: $t(`%Wq`),
+            name: $t(`%1Ny`),
             getValue: (member) => {
                 return {
                     status: member.membershipStatus,
@@ -305,7 +305,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             new Column<ObjectType, Organization[]>({
                 id: 'organization',
                 allowSorting: false,
-                name: $t('%5E'),
+                name: $t('%1PI'),
                 getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
                 format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%5D'),
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
@@ -319,7 +319,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             new Column<ObjectType, Organization[]>({
                 id: 'uri',
                 allowSorting: false,
-                name: $t('%7C'),
+                name: $t('%1O1'),
                 getValue: member => member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
                 format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%1FW'),
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
@@ -389,7 +389,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: $t(`%7e`),
+            name: $t(`%1Of`),
             allowSorting: false,
             getValue: (v) => {
                 const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -415,7 +415,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: $t(`%wB`),
+            name: $t(`%1P8`),
             allowSorting: false,
             getValue: (v) => {
                 const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
@@ -512,7 +512,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                         return Formatter.price(outstandingBalance);
                     }
                     if (outstandingBalance <= 0) {
-                        return $t(`%Kw`);
+                        return $t(`%1OD`);
                     }
                     return Formatter.price(outstandingBalance);
                 },

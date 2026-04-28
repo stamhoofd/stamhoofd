@@ -31,7 +31,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
                     }),
                     new SelectableColumn({
                         id: 'amountPending',
-                        name: $t(`%wc`),
+                        name: $t(`%1PL`),
                     }),
                 ],
             }),
@@ -96,7 +96,7 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'pricePending',
-                        name: $t(`%wc`),
+                        name: $t(`%1PL`),
                     }),
 
                     new SelectableColumn({
@@ -141,7 +141,7 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
                 ? [
                         new SelectableColumn({
                             id: 'uri',
-                            name: $t('%7C'),
+                            name: $t('%1O1'),
                             ...options,
                         }),
                     ]

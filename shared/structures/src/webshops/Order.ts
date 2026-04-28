@@ -250,7 +250,7 @@ export class Order extends AutoEncoder {
                     }
 
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                        return $t(`%TW`);
+                        return $t(`%8a`);
                     }
 
                     return $t(`%Us`);
@@ -288,7 +288,7 @@ export class Order extends AutoEncoder {
                 value: this.data.timeSlot?.timeRangeString() ?? '',
             },
             {
-                title: $t(`%Gq`),
+                title: $t(`%1Os`),
                 value: this.data.customer.name,
             },
             ...(this.data.customer.phone

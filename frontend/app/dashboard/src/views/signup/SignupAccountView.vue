@@ -25,7 +25,7 @@
                     </div>
                 </div>
             </STInputBox>
-            <EmailInput v-model="email" class="max" enterkeyhint="next" data-testid="email-input" name="username" :validator="errors.validator" autocomplete="username" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
+            <EmailInput v-model="email" class="max" enterkeyhint="next" data-testid="email-input" name="username" :validator="errors.validator" autocomplete="username" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
 
             <PasswordInput v-model="password" :error-box="errors.errorBox" :nullable="false" enterkeyhint="next" class="max" title="Wachtwoord" :validator="errors.validator" />
 

@@ -10,7 +10,7 @@ import type { UIFilter, UIFilterBuilder } from '../UIFilter';
 export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>[] {
     const all: UIFilterBuilder<UIFilter>[] = [
         new StringFilterBuilder({
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             key: 'name',
         }),
         new NumberFilterBuilder({

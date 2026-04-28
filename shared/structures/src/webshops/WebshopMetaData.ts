@@ -379,7 +379,7 @@ export function getWebshopTypeName(type: WebshopType): string {
     switch (type) {
         case WebshopType.Performance: return $t('%1Nl');
         case WebshopType.Event: return $t('%1PG');
-        case WebshopType.Registrations: return $t('%1PS');
+        case WebshopType.Registrations: return $t('%1EI');
         case WebshopType.TakeawayAndDelivery: return $t('%1OT');
         case WebshopType.Donations: return $t('%1O4');
         case WebshopType.Webshop: return $t('%1OV');

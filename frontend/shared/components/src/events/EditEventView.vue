@@ -10,8 +10,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('%Gq')" error-fields="name" :error-box="errors.errorBox">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%Gq')" autocomplete="off" enterkeyhint="next">
+            <STInputBox :title="$t('%1Os')" error-fields="name" :error-box="errors.errorBox">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%1Os')" autocomplete="off" enterkeyhint="next">
             </STInputBox>
 
             <STInputBox v-if="platform.config.eventTypes.length" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
@@ -37,14 +37,14 @@
         </Checkbox>
 
         <div class="split-inputs">
-            <STInputBox :title="multipleDays ? $t(`%7e`) : $t(`%7R`)" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="multipleDays ? $t(`%1Of`) : $t(`%7R`)" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" />
             </STInputBox>
             <TimeInput v-if="multipleDays" v-model="startDate" :title="$t('%5M')" :validator="errors.validator" />
         </div>
 
         <div class="split-inputs">
-            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%wB`)">
+            <STInputBox v-if="multipleDays || (type && type.minimumDays !== null && type.minimumDays > 1)" error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%1P8`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
             <TimeInput v-else v-model="startDate" :title="$t('%5M')" :validator="errors.validator" />
@@ -139,7 +139,7 @@
 
         <JumpToContainer :visible="!!location">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('%TW') }}</div>
+                <div>{{ $t('%8a') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteLocation" />
                 </div>

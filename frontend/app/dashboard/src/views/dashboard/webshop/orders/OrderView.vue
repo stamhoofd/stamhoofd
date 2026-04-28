@@ -148,7 +148,7 @@
                                 {{ $t('%Uq') }}
                             </template>
                             <template v-else-if="order.data.checkoutMethod.type === 'OnSite'">
-                                {{ $t('%TW') }}
+                                {{ $t('%8a') }}
                             </template>
                             <template v-else>
                                 {{ $t('%Va') }}
@@ -211,7 +211,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('%Gq') }}
+                        {{ $t('%1Os') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ order.data.customer.name }}

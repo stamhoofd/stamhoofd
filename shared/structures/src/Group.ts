@@ -30,9 +30,9 @@ export function getGroupStatusName(status: GroupStatus) {
         case GroupStatus.Open:
             return $t(`%1EN`);
         case GroupStatus.Closed:
-            return $t(`%cR`);
+            return $t(`%1PH`);
         case GroupStatus.Archived:
-            return $t(`%m6`);
+            return $t(`%1Pg`);
     }
 }
 

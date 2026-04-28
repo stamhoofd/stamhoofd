@@ -523,7 +523,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
     return [
         {
             id: 'customer.name',
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {

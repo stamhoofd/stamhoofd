@@ -9,7 +9,7 @@
             <dt>{{ $t('%1B') }}</dt>
             <dd>{{ record.type }}</dd>
 
-            <dt>{{ $t('%Gq') }}</dt>
+            <dt>{{ $t('%1Os') }}</dt>
             <dd v-copyable class="selectable" :v-tooltip="$t('%Ip')">
                 {{ record.name }}
             </dd>

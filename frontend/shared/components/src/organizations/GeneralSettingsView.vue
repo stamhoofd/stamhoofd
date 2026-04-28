@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <STInputBox v-if="STAMHOOFD.userMode === 'platform'" :title="$t('%7C')" error-fields="uri" :error-box="errors.errorBox">
+                <STInputBox v-if="STAMHOOFD.userMode === 'platform'" :title="$t('%1O1')" error-fields="uri" :error-box="errors.errorBox">
                     <input id="organization-uri" :value="uri" class="input" type="text" disabled>
                 </STInputBox>
 

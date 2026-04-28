@@ -12,7 +12,7 @@
             <STListItemGridRow :value="prices" :label="$t(`%62`)" />
             <STListItemGridRow :value="ageRestriction" :label="$t(`%9S`)" />
             <STListItemGridRow :value="genderRestriction" :label="$t(`%19i`)" />
-            <STListItemGridRow v-if="$defaultAgeGroups.length" :value="defaultAgeGroupName" :label="$t(`%Wq`)" />
+            <STListItemGridRow v-if="$defaultAgeGroups.length" :value="defaultAgeGroupName" :label="$t(`%1Ny`)" />
             <STListItemGridRow :value="status" :label="$t(`%1A`)" />
         </STListItemGrid>
 

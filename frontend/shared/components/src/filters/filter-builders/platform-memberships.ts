@@ -43,7 +43,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
 
         if (platform.value.config.membershipTypes.length > 1) {
             builders.push(new MultipleChoiceFilterBuilder({
-                name: $t('%1PC'),
+                name: $t('%1LP'),
                 options: platform.value.config.membershipTypes.map((membershipType) => {
                     return new MultipleChoiceUIFilterOption(membershipType.name, membershipType.id);
                 }),
@@ -65,11 +65,11 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
                 key: 'endDate',
             }),
             new DateFilterBuilder({
-                name: $t('%1O0'),
+                name: $t('%1J7'),
                 key: 'expiredDate',
             }),
             new DateFilterBuilder({
-                name: $t('%1Oh'),
+                name: $t('%1Jc'),
                 key: 'createdAt',
             }),
             new DateFilterBuilder({
@@ -78,7 +78,7 @@ export function useGetPlatformMembershipsUIFilterBuilders() {
             }),
             new NumberFilterBuilder({
                 key: 'price',
-                name: $t('%1PO'),
+                name: $t('%1IP'),
                 type: NumberFilterFormat.Currency
             }),
 

@@ -176,7 +176,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePending',
-        name: $t('%wc'),
+        name: $t('%1PL'),
         getValue: object => object.pricePending,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),

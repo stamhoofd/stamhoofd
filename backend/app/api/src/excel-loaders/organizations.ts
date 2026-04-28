@@ -41,7 +41,7 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
         },
         {
             id: 'uri',
-            name: $t(`%7C`),
+            name: $t(`%1O1`),
             width: 20,
             getValue: (object: Object) => ({
                 value: object.uri,
@@ -49,7 +49,7 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
         },
         {
             id: 'name',
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             width: 50,
             getValue: (object: Object) => ({
                 value: object.name,
@@ -106,7 +106,7 @@ const responsibilities: XlsxTransformerSheet<Object, MemberResponsibilityRecordW
         },
         {
             id: 'organization.uri',
-            name: $t(`%7C`),
+            name: $t(`%1O1`),
             width: 20,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => ({
                 value: object.organization.uri,
@@ -191,7 +191,7 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
         },
         {
             id: 'organization.uri',
-            name: $t(`%7C`),
+            name: $t(`%1O1`),
             width: 20,
             getValue: (object: PremiseWithOrganization) => ({
                 value: object.organization.uri,
@@ -207,7 +207,7 @@ const premises: XlsxTransformerSheet<Object, PremiseWithOrganization> = {
         },
         {
             id: 'premise.name',
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             width: 20,
             getValue: (object: PremiseWithOrganization) => ({
                 value: object.premise.name,

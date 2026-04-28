@@ -7,8 +7,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         <div class="split-inputs">
             <div>
-                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
-                    <input v-model="name" class="input" nmae="name" type="text" autocomplete="name" :placeholder="$t(`%Gq`)">
+                <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
+                    <input v-model="name" class="input" nmae="name" type="text" autocomplete="name" :placeholder="$t(`%1Os`)">
                 </STInputBox>
 
                 <STInputBox error-fields="title" :error-box="errors.errorBox" :title="$t(`%f5`)+'*'">
@@ -64,7 +64,7 @@ const details = computed(() => props.member.patchedMember.details);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`%v7`));
+const saveText = ref($t(`%1Op`));
 const title = computed(() => !props.isNew ? `${patched.value.name || $t(`%zw`)} bewerken` : $t(`%zx`));
 
 const name = computed({

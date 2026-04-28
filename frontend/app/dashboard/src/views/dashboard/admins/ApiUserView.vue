@@ -5,8 +5,8 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
-            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`%Gq`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
+            <input v-model="name" enterkeyhint="next" class="input" type="text" :placeholder="$t(`%1Os`)">
         </STInputBox>
 
         <div class="container">

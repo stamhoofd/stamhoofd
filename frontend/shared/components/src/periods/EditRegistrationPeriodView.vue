@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('%Gq')" error-fields="notes" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('%1Os')" error-fields="notes" :error-box="errors.errorBox" class="max">
             <input v-model="customName" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="200" :placeholder="patched.name">
         </STInputBox>
 
@@ -15,11 +15,11 @@
         </p>
 
         <div class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`%7e`)">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`%1Of`)">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%wB`)">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%1P8`)">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :min="startDate" />
             </STInputBox>
         </div>

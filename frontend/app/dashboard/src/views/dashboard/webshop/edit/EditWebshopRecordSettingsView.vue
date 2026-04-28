@@ -36,7 +36,7 @@
                     <Checkbox :checked="true" :disabled="true" />
                 </template>
                 <p class="style-title-list">
-                    {{ $t('%1Oa') }}
+                    {{ $t('%1FK') }}
                 </p>
                 <p class="style-description-small">
                     {{ $t('%1PA') }}

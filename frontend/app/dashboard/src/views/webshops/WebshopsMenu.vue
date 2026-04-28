@@ -2,7 +2,7 @@
     <div class="st-menu st-view">
         <STNavigationBar :title="$t(`%2V`)" />
         <main>
-            <h1>{{ $t('%HI') }}</h1>
+            <h1>{{ $t('%1Pd') }}</h1>
 
             <p v-if="visibleWebshops.length === 0" class="info-box">
                 {{ $t('%Wv') }}

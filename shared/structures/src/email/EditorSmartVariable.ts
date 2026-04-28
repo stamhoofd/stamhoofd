@@ -290,7 +290,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'organizationName',
-            name: $t('%gO'),
+            name: $t('%1PW'),
         }));
 
         variables.push(EditorSmartVariable.create({

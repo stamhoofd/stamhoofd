@@ -16,7 +16,7 @@ export function useGetWebshopUIFilterBuilders() {
             }),
 
             new MultipleChoiceFilterBuilder({
-                name: $t('%1P1'),
+                name: $t('%1JM'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: false,
                     mode: MultipleChoiceUIFilterMode.Or,

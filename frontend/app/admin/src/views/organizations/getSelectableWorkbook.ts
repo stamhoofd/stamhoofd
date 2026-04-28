@@ -22,13 +22,13 @@ export function getSelectableWorkbook(_platform: Platform) {
                     // todo: only if platform?
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`%7C`),
+                        name: $t(`%1O1`),
                         description: $t(`%H1`),
                     }),
 
                     new SelectableColumn({
                         id: 'name',
-                        name: $t(`%Gq`),
+                        name: $t(`%1Os`),
                     }),
 
                     new SelectableColumn({
@@ -66,7 +66,7 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`%7C`),
+                        name: $t(`%1O1`),
                         description: $t(`%H1`),
                     }),
 
@@ -114,7 +114,7 @@ export function getSelectableWorkbook(_platform: Platform) {
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`%7C`),
+                        name: $t(`%1O1`),
                         description: $t(`%H1`),
                     }),
 

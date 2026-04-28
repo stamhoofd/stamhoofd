@@ -125,7 +125,7 @@
             </div>
 
             <div v-if="enableWebshopModule" class="container">
-                <hr><h2>{{ $t('%HI') }}</h2>
+                <hr><h2>{{ $t('%1Pd') }}</h2>
                 <p>{{ $t('%Z8') }}</p>
 
                 <STList>

@@ -5,7 +5,7 @@
         :loading="saving"
         :save-icon-mobile="willSend ? 'send' : undefined"
         :save-icon="willSend ? 'send' : undefined"
-        :save-text="willSend ? (sendAsEmail ? $t('%1DC') : $t('%1Fe')) : $t('%v7')"
+        :save-text="willSend ? (sendAsEmail ? $t('%1DC') : $t('%1Fe')) : $t('%1Op')"
         :prefer-large-button="false"
         :disabled="willSend && (!showInMemberPortal && !sendAsEmail)"
         @save="save"

@@ -14,7 +14,7 @@ export function getSelectableColumns() {
         }),
         new SelectableColumn({
             id: 'type',
-            name: $t(`%1PC`),
+            name: $t(`%1LP`),
             enabled: true,
         }),
         new SelectableColumn({
@@ -29,7 +29,7 @@ export function getSelectableColumns() {
         }),
         new SelectableColumn({
             id: 'price',
-            name: $t(`%1PO`),
+            name: $t(`%1IP`),
             enabled: true,
         }),
         new SelectableColumn({
@@ -49,12 +49,12 @@ export function getSelectableColumns() {
         }),
         new SelectableColumn({
             id: 'createdAt',
-            name: $t(`%1Oh`),
+            name: $t(`%1Jc`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'expireDate',
-            name: $t(`%1O0`),
+            name: $t(`%1J7`),
             enabled: false,
         }),
 

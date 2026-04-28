@@ -38,7 +38,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'organization.uri',
-            name: $t(`%7C`),
+            name: $t(`%1O1`),
             width: 30,
             getValue: (notification: EventNotification) => ({
                 value: notification.organization.uri,
@@ -67,7 +67,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'startDate',
-            name: $t(`%7e`),
+            name: $t(`%1Of`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.startDate,
@@ -80,7 +80,7 @@ const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {
         },
         {
             id: 'endDate',
-            name: $t(`%wB`),
+            name: $t(`%1P8`),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.endDate,

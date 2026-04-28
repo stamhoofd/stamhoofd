@@ -35,7 +35,7 @@
         </p>
 
         <STErrorsDefault :error-box="$errors.errorBox" />
-        <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`%Gq`)">
+        <STInputBox error-fields="firstName,lastName" :error-box="$errors.errorBox" :title="$t(`%1Os`)">
             <div class="input-group">
                 <div>
                     <input v-model="firstName" enterkeyhint="next" class="input" type="text" autocomplete="given-name" :disabled="!canEditDetails" :placeholder="$t(`%1MT`)">

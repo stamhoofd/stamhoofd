@@ -10,7 +10,7 @@ import type { UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             key: 'name',
         }),
         new StringFilterBuilder({
@@ -56,12 +56,12 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
         const user = _user.value;
         const all = [
             new StringFilterBuilder({
-                name: $t(`%Gq`),
+                name: $t(`%1Os`),
                 key: 'name',
             }),
 
             new StringFilterBuilder({
-                name: $t(`%CQ`),
+                name: $t(`%1PP`),
                 key: 'city',
             }),
 
@@ -71,7 +71,7 @@ export function useGetOrganizationUIFilterBuilders(options: {onlyBaseFilters?: b
             }),
 
             new StringFilterBuilder({
-                name: $t('%7C'),
+                name: $t('%1O1'),
                 key: 'uri',
             }),
 

@@ -20,7 +20,7 @@
                 </p>
 
                 <div class="split-inputs">
-                    <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%Gq`)" />
+                    <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
 
                     <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('%2')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                         <Dropdown v-model="defaultAgeGroupId">
@@ -40,7 +40,7 @@
 
             <template v-if="type === GroupType.WaitingList">
                 <div class="split-inputs">
-                    <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%Gq`)" />
+                    <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
                 </div>
             </template>
 
@@ -61,14 +61,14 @@
 
                     <template v-if="hasCustomDates">
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('%7e')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('%1Of')" error-fields="settings.startDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
                             </STInputBox>
                             <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('%1GD')" />
                         </div>
 
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('%wB')" error-fields="settings.endDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('%1P8')" error-fields="settings.endDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
                             </STInputBox>
                             <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('%1GD')" />
@@ -186,7 +186,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('%cR') }}
+                        {{ $t('%1PH') }}
                     </h3>
                     <p class="style-description-small">
                         {{ $t('%cS') }}
@@ -278,7 +278,7 @@
                     </STList>
                 </STInputBox>
 
-                <STInputBox v-if="requirePlatformMembershipOnRegistrationDate || (!defaultAgeGroupId)" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`%Wq`)">
+                <STInputBox v-if="requirePlatformMembershipOnRegistrationDate || (!defaultAgeGroupId)" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`%1Ny`)">
                     <STList>
                         <STListItem :selectable="true" element-name="label">
                             <template #left>
@@ -1469,7 +1469,7 @@ const recordEditorSettings = computed(() => {
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
                 firstName: $t(`%ID`),
-                lastName: $t(`%ym`),
+                lastName: $t(`%1PM`),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),

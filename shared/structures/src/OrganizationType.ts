@@ -195,7 +195,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.Youth:
             case OrganizationType.Student:
             case OrganizationType.Kids:
-                return $t(`%mU`);
+                return $t(`%1PF`);
 
             case OrganizationType.Sport:
             case OrganizationType.Football:

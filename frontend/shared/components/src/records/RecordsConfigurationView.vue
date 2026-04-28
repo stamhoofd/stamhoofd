@@ -115,7 +115,7 @@ const settings = computed(() => {
             member: MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
                     firstName: $t('%ID'),
-                    lastName: $t('%ym'),
+                    lastName: $t('%1PM'),
                     dataPermissions: BooleanStatus.create({ value: true }),
                     birthDay: new Date('2020-01-01'),
                 }),

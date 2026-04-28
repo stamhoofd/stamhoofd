@@ -7,8 +7,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('%Gq') ">
-                <input v-model="name" class="input" type="text" :placeholder="$t('%Gq') ">
+            <STInputBox :title="$t('%1Os') ">
+                <input v-model="name" class="input" type="text" :placeholder="$t('%1Os') ">
             </STInputBox>
             <STInputBox error-fields="behaviour" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="behaviour">

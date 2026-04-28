@@ -30,7 +30,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
             },
         }),
         new StringFilterBuilder({
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             key: 'name',
         }),
         new StringFilterBuilder({

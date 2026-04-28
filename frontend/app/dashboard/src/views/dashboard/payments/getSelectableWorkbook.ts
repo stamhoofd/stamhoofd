@@ -272,7 +272,7 @@ function getInvoiceColumns() {
     return [
         new SelectableColumn({
             id: 'customer.name',
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             description: $t(`%MU`),
             category: $t(`%1Ke`),
         }),

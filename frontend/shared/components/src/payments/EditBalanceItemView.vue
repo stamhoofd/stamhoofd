@@ -142,7 +142,7 @@
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="patchedBalanceItem.relations.size === 0 && family && family.members.length >= (originalMemberId ? 2 : 1)">
-            <hr><h2>{{ $t('%ym') }}</h2>
+            <hr><h2>{{ $t('%1PM') }}</h2>
             <p>{{ $t('%gk') }}</p>
 
             <p v-if="!memberId" class="warning-box">
@@ -159,7 +159,7 @@
                         {{ m.patchedMember.name }}
                     </h3>
                     <p v-if="!memberId" class="style-description-small">
-                        {{ $t('%ym') }}
+                        {{ $t('%1PM') }}
                     </p>
                 </STListItem>
 

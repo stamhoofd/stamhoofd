@@ -311,6 +311,42 @@
     "original": "Er ging iets mis bij het ophalen van de eenheid",
     "translation": "Une erreur s'est produite lors de la récupération de l'unité."
   },
+  "%1O1": {
+    "original": "Eenheidsnummer",
+    "translation": "Numéro d’unité"
+  },
+  "%1OX": {
+    "original": "De eenheid die bij de aansluiting hoort is niet gevonden.",
+    "translation": "L’unité liée à cette affiliation n’a pas été trouvée."
+  },
+  "%1Ok": {
+    "original": "Aangerekende eenheid",
+    "translation": "Unité facturée"
+  },
+  "%1Oz": {
+    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de eenheid.",
+    "translation": "{member} est déjà connu dans notre système, mais pas ton adresse e-mail. Contacte l’unité."
+  },
+  "%1P9": {
+    "original": "Wat voor eenheid?",
+    "translation": "Quel type d’unité ?"
+  },
+  "%1PD": {
+    "original": "Eenheid waar de aansluiting aan aangrekend is",
+    "translation": "Unité à laquelle l'affiliation est facturée"
+  },
+  "%1PI": {
+    "original": "Eenheid",
+    "translation": "Unité"
+  },
+  "%1PW": {
+    "original": "Naam eenheid",
+    "translation": "Nom de l’unité"
+  },
+  "%1PZ": {
+    "original": "Nummer eenheid",
+    "translation": "Numéro de l’unité"
+  },
   "%2": {
     "original": "Aansluiting/verzekering Keeo*",
     "translation": "Connexion/assurance Keeo*"
@@ -344,8 +380,8 @@
     "translation": "par ex. votreunité.be"
   },
   "%2r": {
-    "original": "Je kan online betalingen gebruiken in Keeo door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner.",
-    "translation": "Vous pouvez utiliser les paiements en ligne dans Keeo en vous connectant à Mollie via le bouton ci-dessous. Cela vous permet d'activer les paiements via Bancontact, iDEAL et carte de crédit. Vous paierez cependant des frais de transaction plus élevés qu'avec notre partenaire actuel."
+    "original": "Je kan online betalingen gebruiken in Keeo door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren.",
+    "translation": "Vous pouvez utiliser les paiements en ligne sur Keeo en connectant votre compte Mollie via le bouton ci-dessous. Ceci vous permet d’activer les paiements via Bancontact, iDEAL et carte de crédit."
   },
   "%2t": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijneenheid.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
@@ -468,8 +504,8 @@
     "translation": "Années scoutes"
   },
   "%3s": {
-    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
-    "translation": "Vous ne pouvez pas activer {paymentMethod}, vous devez d'abord vous connecter à un fournisseur de paiement via les paramètres Keeo > Comptes de paiement."
+    "original": "Sluit eerst aan bij Stripe via de Keeo instellingen > Betaalaccounts, daarna kan je {paymentMethod} activeren.",
+    "translation": "Connectez d’abord Stripe via les paramètres Keeo > Comptes de paiement, ensuite vous pourrez activer {paymentMethod}."
   },
   "%3v": {
     "original": "Het bedrag wordt achteraf door FOS Open Scouting aan je groep gefactureerd.",
@@ -579,10 +615,6 @@
     "original": "Dit lid is niet aangesloten bij FOS Open Scouting, en is daardoor ook niet verzekerd",
     "translation": "Ce membre n'est pas affilié à FOS Open Scouting et n'est donc pas assuré."
   },
-  "%5E": {
-    "original": "Eenheid",
-    "translation": "Unité"
-  },
   "%5G": {
     "original": "Zoek een eenheid waar je {firstName} wilt inschrijven",
     "translation": "Recherchez une unité où vous souhaitez inscrire {firstName}"
@@ -600,8 +632,8 @@
     "translation": "Recherchez votre unité"
   },
   "%5O": {
-    "original": "Je moet elke betaling zelf controleren en markeren als betaald in Keeo",
-    "translation": "Vous devez contrôler chaque paiement vous-même et le marquer comme payé dans Keeo."
+    "original": "Je controleert en markeert manueel elke betaling als betaald in Keeo",
+    "translation": "Vous devez contrôler et marquer chaque paiement comme payé manuellement dans Keeo."
   },
   "%5P": {
     "original": "Maak API-keys aan om toegang te krijgen tot de Keeo-API.",
@@ -614,10 +646,6 @@
   "%5R": {
     "original": "Vertel Keeo door aan andere eenheden",
     "translation": "Faites découvrir Keeo à d'autres unités"
-  },
-  "%5S": {
-    "original": "Gebruikt jouw eenheid Keeo al?",
-    "translation": "Votre unité utilise-t-elle déjà Keeo ?"
   },
   "%5T": {
     "original": "De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Keeo",
@@ -632,8 +660,8 @@
     "translation": "En savoir plus sur Keeo."
   },
   "%5W": {
-    "original": "Sluit jouw eenheid aan bij Keeo",
-    "translation": "Connectez votre unité à Keeo"
+    "original": "Eenheid registreren",
+    "translation": "Enregistrer une unité"
   },
   "%5X": {
     "original": "Terug naar Keeo",
@@ -694,10 +722,6 @@
   "%78": {
     "original": "eenheid",
     "translation": "unité"
-  },
-  "%7C": {
-    "original": "Eenheidsnummer",
-    "translation": "Numéro d'unité"
   },
   "%7V": {
     "original": "Elke eenheid moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de eenheid gekoppeld worden aan de algemene benaming van de koepel.",
@@ -776,12 +800,8 @@
     "translation": "Choisissez les informations que vous collectez auprès des unités"
   },
   "%8B": {
-    "original": "Naam van jouw eenheid",
-    "translation": "Nom de votre unité"
-  },
-  "%8C": {
-    "original": "De naam van je eenheid",
-    "translation": "Le nom de votre unité"
+    "original": "Naam eenheid of organisatie",
+    "translation": "Nom de l’unité ou de l’organisation"
   },
   "%8D": {
     "original": "Naam van je eenheid (kort)",
@@ -870,10 +890,6 @@
   "%8Z": {
     "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een eenheid waarvoor de functie werd toegevoegd - enkel voor één specifiek scoutsjaar.",
     "translation": "Tous les membres ayant cette fonction obtiennent automatiquement des droits d'accès au groupe d'âge d'une unité pour laquelle la fonction a été ajoutée - uniquement pour une année scoute spécifique."
-  },
-  "%8a": {
-    "original": "Adres van je eenheid",
-    "translation": "Adresse de votre unité"
   },
   "%8b": {
     "original": "De link naar de website van jouw eenheid.",
@@ -1311,9 +1327,13 @@
     "original": "Deze periode is niet beschikbaar voor jouw eenheid.",
     "translation": "Cette période n'est pas disponible pour votre unité."
   },
+  "%Wb": {
+    "original": "Je locatie maakt je eenheid makkelijker vindbaar als je de volgende keer wilt inloggen. Je kan het later nog wijzigen.",
+    "translation": "Renseigner votre lieu facilite la recherche de votre unité lors de la connexion. Vous pourrez le modifier plus tard."
+  },
   "%Wd": {
-    "original": "Hoe ken je Keeo?",
-    "translation": "Comment connaissez-vous Keeo?"
+    "original": "Hoe ken je Keeo? (optioneel)",
+    "translation": "Comment avez-vous connu Keeo ? (optionnel)"
   },
   "%We": {
     "original": "Op aanraden van andere eenheid / persoon",
@@ -1322,14 +1342,6 @@
   "%Wf": {
     "original": "Gezien bij andere eenheid",
     "translation": "Vu chez une autre unité"
-  },
-  "%Wi": {
-    "original": "Eenheid aanmaken",
-    "translation": "Créer une unité"
-  },
-  "%Wj": {
-    "original": "Type eenheid",
-    "translation": "Type d'unité"
   },
   "%Yz": {
     "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw eenheid.",
@@ -1367,10 +1379,6 @@
     "original": "Eenheid",
     "translation": "Unité"
   },
-  "%gO": {
-    "original": "Naam eenheid",
-    "translation": "Nom de l'unité"
-  },
   "%gQ": {
     "original": "bv. Ruimtereis eenheid",
     "translation": "p. ex. unité Voyage spatial"
@@ -1395,17 +1403,13 @@
     "original": "Natuureenheid",
     "translation": "Unité nature"
   },
-  "%mO": {
-    "original": "Muziekeenheid",
-    "translation": "Unité musique"
-  },
   "%mP": {
     "original": "Beroepseenheid",
     "translation": "Unité professionnelle"
   },
-  "%mQ": {
-    "original": "Kunsteenheid",
-    "translation": "Unité artistique"
+  "%mR": {
+    "original": "Andere culturele eenheid",
+    "translation": "Autre unité culturelle"
   },
   "%nZ": {
     "original": "adres van je eenheid",

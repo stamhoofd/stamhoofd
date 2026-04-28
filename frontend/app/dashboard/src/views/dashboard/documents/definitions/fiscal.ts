@@ -8,12 +8,12 @@ export const fiscal = DocumentTemplateDefinition.create({
     fieldCategories: [
         RecordCategory.create({
             id: 'organization',
-            name: TranslatedString.create($t(`%5E`)),
+            name: TranslatedString.create($t(`%1PI`)),
             description: TranslatedString.create($t(`%xY`)),
             records: [
                 RecordSettings.create({
                     id: 'organization.companyName',
-                    name: TranslatedString.create($t(`%Gq`)),
+                    name: TranslatedString.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),
@@ -73,7 +73,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             records: [
                 RecordSettings.create({
                     id: 'certification.name',
-                    name: TranslatedString.create($t(`%Gq`)),
+                    name: TranslatedString.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),
@@ -105,7 +105,7 @@ export const fiscal = DocumentTemplateDefinition.create({
             records: [
                 RecordSettings.create({
                     id: 'signature.name',
-                    name: TranslatedString.create($t(`%Gq`)),
+                    name: TranslatedString.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),

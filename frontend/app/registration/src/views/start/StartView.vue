@@ -1,9 +1,9 @@
 <template>
     <section class="st-view">
-        <STNavigationBar :title="$t('%7k')" />
+        <STNavigationBar :title="$t('%2g')" />
         <main class="center">
             <h1>
-                {{ $t('%7k') }}
+                {{ $t('%2g') }}
             </h1>
 
             <p>{{ $t('%7') }}</p>

@@ -52,7 +52,7 @@
             </button>
         </template>
         <template v-else>
-            <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`%Gq`)">
+            <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`%1Os`)">
                 <div class="input-group">
                     <div>
                         <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">

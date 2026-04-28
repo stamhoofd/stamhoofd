@@ -59,7 +59,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
 
             all.push(
                 new StringFilterBuilder({
-                    name: $t('%7C'),
+                    name: $t('%1O1'),
                     key: 'uri',
                     allowCreation: hasPlatformPermissions,
                     wrapper: {

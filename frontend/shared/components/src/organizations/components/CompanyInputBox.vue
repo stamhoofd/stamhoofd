@@ -8,7 +8,7 @@
 
     <div class="split-inputs">
         <div>
-            <STInputBox :title="hasCompanyNumber ? $t(`%gN`) : $t(`%gO`)" error-fields="companyName" :error-box="errors.errorBox">
+            <STInputBox :title="hasCompanyNumber ? $t(`%gN`) : $t(`%1PW`)" error-fields="companyName" :error-box="errors.errorBox">
                 <input id="business-name" v-model="companyName" class="input" type="text" :placeholder="country === Country.Belgium ? $t(`%gP`) : $t(`%gQ`)" autocomplete="organization">
             </STInputBox>
             <p v-if="hasCompanyNumber && country === Country.Belgium" class="style-description-small">

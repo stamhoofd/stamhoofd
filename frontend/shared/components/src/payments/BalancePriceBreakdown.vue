@@ -36,7 +36,7 @@ const priceBreakdown = computed(() => {
             price: balance.pricePaid + laterBalance.pricePaid,
         },
         {
-            name: $t(`%wc`),
+            name: $t(`%1PL`),
             price: balance.pricePending + laterBalance.pricePending,
         },
     ].filter(a => a.price !== 0);

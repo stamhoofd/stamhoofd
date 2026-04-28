@@ -3,7 +3,7 @@
         <STNavigationBar :title="title">
             <template #right>
                 <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('%1O5')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%1Og')" @click="goForward" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('%19q')" @click="goForward" />
             </template>
         </STNavigationBar>
 
@@ -15,7 +15,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('%1P1') }}
+                        {{ $t('%1JM') }}
                     </h3>
                     <p class="style-definition-text with-icons">
                         <span>{{ statusLabel }}</span>
@@ -34,7 +34,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('%1PC') }}
+                        {{ $t('%1LP') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ typeLabel }}
@@ -43,7 +43,7 @@
 
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('%1PV') }}
+                        {{ $t('%1JJ') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(props.webshopWithOrganization.webshop.createdAt) }}
@@ -52,7 +52,7 @@
             </STList>
 
             <hr>
-            <h2>{{ $t('%1Pa') }}</h2>
+            <h2>{{ $t('%16X') }}</h2>
 
             <STList>
                 <STListItem

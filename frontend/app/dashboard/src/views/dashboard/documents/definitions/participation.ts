@@ -8,12 +8,12 @@ export const participation = DocumentTemplateDefinition.create({
     fieldCategories: [
         RecordCategory.create({
             id: 'organization',
-            name: TranslatedString.create($t(`%5E`)),
+            name: TranslatedString.create($t(`%1PI`)),
             description: TranslatedString.create($t(`%yC`)),
             records: [
                 RecordSettings.create({
                     id: 'organization.name',
-                    name: TranslatedString.create($t(`%Gq`)),
+                    name: TranslatedString.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),
@@ -60,7 +60,7 @@ export const participation = DocumentTemplateDefinition.create({
             records: [
                 RecordSettings.create({
                     id: 'signature.name',
-                    name: TranslatedString.create($t(`%Gq`)),
+                    name: TranslatedString.create($t(`%1Os`)),
                     required: false,
                     type: RecordType.Text,
                 }),

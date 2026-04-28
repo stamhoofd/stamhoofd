@@ -18,7 +18,7 @@
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <span v-if="payment.isPending" v-tooltip="$t('%wc')" class="icon small hourglass primary" />
+                <span v-if="payment.isPending" v-tooltip="$t('%1PL')" class="icon small hourglass primary" />
                 <span v-if="payment.isFailed" v-tooltip="$t('%1D5')" class="icon small disabled error" />
             </h1>
 

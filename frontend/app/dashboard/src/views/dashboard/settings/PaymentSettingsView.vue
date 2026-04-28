@@ -148,7 +148,7 @@
             </p>
 
             <p class="info-box">
-                {{ $t('%Nn') }}
+                {{ $t('%1PK') }}
             </p>
 
             <div class="style-button-bar">

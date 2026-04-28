@@ -317,7 +317,7 @@ export const getCachedOutstandingBalanceUIFilterBuilders: () => UIFilterBuilders
 export function getOrganizationCompanyFilterBuilders() {
     const all: UIFilterBuilder[] = [
         new StringFilterBuilder({
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             key: 'name',
         }),
         new StringFilterBuilder({
@@ -667,11 +667,11 @@ export function useEventNotificationBackendFilterBuilders() {
     return () => {
         const all: UIFilterBuilders = [
             new DateFilterBuilder({
-                name: $t('%7e'),
+                name: $t('%1Of'),
                 key: 'startDate',
             }),
             new DateFilterBuilder({
-                name: $t('%wB'),
+                name: $t('%1P8'),
                 key: 'endDate',
             }),
             new MultipleChoiceFilterBuilder({
@@ -724,7 +724,7 @@ export function useEventNotificationBackendFilterBuilders() {
                 },
             }),
             new StringFilterBuilder({
-                name: $t('%7C'),
+                name: $t('%1O1'),
                 key: 'uri',
                 wrapper: {
                     organization: {
@@ -764,11 +764,11 @@ export function useEventNotificationInMemoryFilterBuilders() {
     return (type: EventNotificationType) => {
         const all: UIFilterBuilders = [
             new DateFilterBuilder({
-                name: $t('%7e'),
+                name: $t('%1Of'),
                 key: 'startDate',
             }),
             new DateFilterBuilder({
-                name: $t('%wB'),
+                name: $t('%1P8'),
                 key: 'endDate',
             }),
             new MultipleChoiceFilterBuilder({
@@ -818,7 +818,7 @@ export function useEmailRecipientsFilterBuilders() {
             }),
 
             new StringFilterBuilder({
-                name: $t('%Gq'),
+                name: $t('%1Os'),
                 key: 'name',
             }),
 

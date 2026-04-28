@@ -7,11 +7,11 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('%7e')" error-fields="startDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%1Of')" error-fields="startDate" :error-box="errors.errorBox">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox :title="$t('%wB')" error-fields="endDate" :error-box="errors.errorBox">
+            <STInputBox :title="$t('%1P8')" error-fields="endDate" :error-box="errors.errorBox">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
             </STInputBox>
         </div>

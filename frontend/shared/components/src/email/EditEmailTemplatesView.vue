@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading-view="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? $t('%9b') : $t('%v7')" @save="save">
+    <SaveView :loading-view="loading" :title="viewTitle" :loading="saving" :save-text="onSelect ? $t('%9b') : $t('%1Op')" @save="save">
         <h1>{{ viewTitle }}</h1>
         <SegmentedControl v-if="tabItems.length > 1" v-model="tab" :items="tabItems.map(i => i.id)" :labels="tabItems.map(i => i.label)" />
 

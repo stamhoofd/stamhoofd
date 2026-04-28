@@ -31,7 +31,7 @@
                 <div v-if="usesPassword" class="style-button-bar">
                     <LoadingButton :loading="saving">
                         <button id="submit" class="button primary" type="submit" :disabled="!hasChanges">
-                            <span>{{ $t('%v7') }}</span>
+                            <span>{{ $t('%1Op') }}</span>
                         </button>
                     </LoadingButton>
                 </div>

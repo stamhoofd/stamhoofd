@@ -103,7 +103,7 @@ export class PaymentGeneral extends Payment {
 
         if (customer) {
             replacements.push({
-                title: $t(`%Gq`),
+                title: $t(`%1Os`),
                 value: customer.dynamicName,
             });
 

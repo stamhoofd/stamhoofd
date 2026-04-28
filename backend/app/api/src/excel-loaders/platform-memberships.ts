@@ -20,7 +20,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'type',
-            name: $t('%1PC'),
+            name: $t('%1LP'),
             width: 40,
             getValue: (membership: PlatformMembership) => {
                 const membershipType = Platform.shared.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
@@ -60,7 +60,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'price',
-            name: $t('%1PO'),
+            name: $t('%1IP'),
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -113,7 +113,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'createdAt',
-            name: $t(`%1Oh`),
+            name: $t(`%1Jc`),
             width: 20,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -128,7 +128,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         },
         {
             id: 'expireDate',
-            name: $t(`%1O0`),
+            name: $t(`%1J7`),
             width: 20,
             getValue: (membership: PlatformMembership) => {
                 return {
@@ -204,7 +204,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
         // member
         {
             id: 'member.memberNumber',
-            name: $t(`%1PT`),
+            name: $t(`%19j`),
             width: 20,
             getValue: (membership: PlatformMembership) => ({
                 value: membership.member.memberNumber,

@@ -85,7 +85,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'createdAt',
-        name: $t('%1PV'),
+        name: $t('%1JJ'),
         getValue: item => item.webshop.createdAt,
         format: (v, width) => width < 200 ? Formatter.dateNumber(v, true) : Formatter.date(v, true),
         minimumWidth: 80,
@@ -94,7 +94,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, WebshopType>({
         id: 'type',
-        name: $t('%1PC'),
+        name: $t('%1LP'),
         allowSorting: false,
         getValue: item => item.webshop.meta.type,
         format: type => getWebshopTypeName(type),
@@ -104,7 +104,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, WebshopStatus>({
         id: 'status',
-        name: $t('%1P1'),
+        name: $t('%1JM'),
         allowSorting: false,
         getValue: item => item.webshop.meta.status,
         format: status => getWebshopStatusName(status),

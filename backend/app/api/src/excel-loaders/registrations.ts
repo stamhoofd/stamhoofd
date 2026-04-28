@@ -95,7 +95,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'startDate',
-            name: $t(`%7e`),
+            name: $t(`%1Of`),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.startDate,
@@ -108,7 +108,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'endDate',
-            name: $t(`%wB`),
+            name: $t(`%1P8`),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.endDate,
@@ -134,7 +134,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'organization',
-            name: $t('%5E'),
+            name: $t('%1PI'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 const organization = registration.member.family.getOrganization(registration.group.organizationId);
@@ -145,7 +145,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'uri',
-            name: $t('%7C'),
+            name: $t('%1O1'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 const organization = registration.member.family.getOrganization(registration.group.organizationId);
@@ -307,7 +307,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'uri',
-            name: $t(`%7C`),
+            name: $t(`%1O1`),
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {

@@ -2,7 +2,7 @@
     <div class="hover-box container">
         <hr><dl class="details-grid">
             <template v-if="member.patchedMember.details.name">
-                <dt>{{ $t('%Gq') }}</dt>
+                <dt>{{ $t('%1Os') }}</dt>
                 <dd>
                     <span v-copyable class="style-copyable">{{ member.patchedMember.details.name }}</span>
                 </dd>

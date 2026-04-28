@@ -23,7 +23,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
         new Column<ObjectType, string>({
             id: 'member.name',
-            name: $t(`%Gq`),
+            name: $t(`%1Os`),
             getValue: registration => registration.member.member.name,
             minimumWidth: 100,
             recommendedWidth: 200,
@@ -51,7 +51,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         // todo
         new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'member.membership',
-            name: $t(`%Wq`),
+            name: $t(`%1Ny`),
             getValue: (registration) => {
                 return {
                     status: registration.member.membershipStatus,
@@ -259,7 +259,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             new Column<ObjectType, Organization | undefined>({
                 id: 'organization.name',
                 allowSorting: true,
-                name: group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration ? $t('%cL') : $t('%5E'),
+                name: group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration ? $t('%cL') : $t('%1PI'),
                 description: $t('%1Jh'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
                 format: organization => organization?.name ?? $t('%Gr'),
@@ -274,7 +274,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             new Column<ObjectType, Organization | undefined>({
                 id: 'organization.uri',
                 allowSorting: true,
-                name: group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration ? $t('%1KP') : $t('%7C'),
+                name: group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration ? $t('%1KP') : $t('%1O1'),
                 description: $t('%1Ji'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
                 format: organization => organization?.uri ?? $t('%Gr'),
@@ -367,7 +367,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'startDate',
-            name: $t(`%7e`),
+            name: $t(`%1Of`),
             allowSorting: true,
             getValue: (registration) => {
                 const startDate = registration.startDate;
@@ -388,7 +388,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'endDate',
-            name: $t(`%wB`),
+            name: $t(`%1P8`),
             allowSorting: true,
             getValue: (registration) => {
                 const endDate = registration.endDate;
@@ -471,7 +471,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                         return Formatter.price(outstandingBalance);
                     }
                     if (outstandingBalance <= 0) {
-                        return $t(`%Kw`);
+                        return $t(`%1OD`);
                     }
                     return Formatter.price(outstandingBalance);
                 },

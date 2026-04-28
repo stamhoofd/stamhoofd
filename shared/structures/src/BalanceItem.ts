@@ -85,7 +85,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.FreeContribution: return $t(`%Ot`);
         case BalanceItemType.Order: return $t(`%ld`);
         case BalanceItemType.Other: return $t(`%1JG`);
-        case BalanceItemType.PlatformMembership: return $t(`%Wq`);
+        case BalanceItemType.PlatformMembership: return $t(`%1Ny`);
         case BalanceItemType.CancellationFee: return $t(`%17G`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`%16L`);
         case BalanceItemType.Rounding: return $t('%1I6');
@@ -128,7 +128,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.GroupPrice: return $t(`%62`);
         case BalanceItemRelationType.GroupOptionMenu: return $t(`%Tb`);
         case BalanceItemRelationType.GroupOption: return $t(`%TE`);
-        case BalanceItemRelationType.Member: return $t(`%ym`);
+        case BalanceItemRelationType.Member: return $t(`%1PM`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
         case BalanceItemRelationType.Discount: return $t(`%176`);
         case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
@@ -616,7 +616,7 @@ export class BalanceItem extends AutoEncoder {
                 price: this.pricePaid,
             },
             {
-                name: $t(`%wc`),
+                name: $t(`%1PL`),
                 price: this.pricePending,
             },
         ].filter(a => a.price !== 0);

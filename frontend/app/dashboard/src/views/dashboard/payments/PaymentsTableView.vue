@@ -79,7 +79,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer',
-        name: $t('%Gq'),
+        name: $t('%1Os'),
         getValue: object => object.customer?.dynamicName ?? '',
         format: value => value || $t('%Gr'),
         getStyle: value => !value ? 'gray' : '',

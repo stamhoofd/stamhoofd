@@ -613,7 +613,7 @@ export class RecordFactory {
             type: RecordType.Text,
             required: true,
             sensitive: true,
-            label: TranslatedString.create($t(`%Gq`)),
+            label: TranslatedString.create($t(`%1Os`)),
         });
     }
 

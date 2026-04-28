@@ -154,7 +154,7 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
     },
     {
         id: 'membership',
-        name: $t(`%Wq`),
+        name: $t(`%1Ny`),
         width: 20,
         getValue: (member: PlatformMember) => {
             return {
@@ -177,7 +177,7 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
     },
     {
         id: 'uri',
-        name: $t(`%7C`),
+        name: $t(`%1O1`),
         width: 30,
         getValue: (member: PlatformMember) => {
             const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });

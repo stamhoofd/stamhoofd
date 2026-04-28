@@ -31,7 +31,7 @@ export function getSelectableWorkbook(platform: Platform) {
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t('%7C'),
+                        name: $t('%1O1'),
                     }),
 
                     new SelectableColumn({
@@ -46,12 +46,12 @@ export function getSelectableWorkbook(platform: Platform) {
 
                     new SelectableColumn({
                         id: 'startDate',
-                        name: $t('%7e'),
+                        name: $t('%1Of'),
                     }),
 
                     new SelectableColumn({
                         id: 'endDate',
-                        name: $t('%wB'),
+                        name: $t('%1P8'),
                     }),
 
                     new SelectableColumn({

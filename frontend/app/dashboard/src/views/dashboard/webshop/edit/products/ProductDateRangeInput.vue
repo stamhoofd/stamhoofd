@@ -1,13 +1,13 @@
 <template>
     <div>
         <div class="split-inputs">
-            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`%7e`)">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`%1Of`)">
                 <DateSelection v-model="startDate" />
             </STInputBox>
             <TimeInput v-model="startDate" :validator="errors.validator" :title="$t(`%U4`)" />
         </div>
         <div class="split-inputs">
-            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%wB`)">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`%1P8`)">
                 <DateSelection v-model="endDate" />
             </STInputBox>
             <TimeInput v-model="endDate" :validator="errors.validator" :title="$t(`%5L`)" />

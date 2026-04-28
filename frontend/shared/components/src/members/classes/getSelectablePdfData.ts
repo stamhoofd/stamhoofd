@@ -154,7 +154,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
                     }),
                     new SelectablePdfData<PlatformMember>({
                         id: 'uri',
-                        name: $t(`%7C`),
+                        name: $t(`%1O1`),
                         enabled: false,
                         getValue: (member: PlatformMember) => {
                             const organizations = member.filterOrganizations({

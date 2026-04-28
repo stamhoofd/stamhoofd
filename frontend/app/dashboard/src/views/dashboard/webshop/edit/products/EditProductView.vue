@@ -29,8 +29,8 @@
         </button>
 
         <div class="split-inputs">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`%Gq`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
+                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`%1Os`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
                 <p v-if="nameWarning" class="warning-box">
                     {{ nameWarning }}
                 </p>
@@ -63,7 +63,7 @@
         </STInputBox>
 
         <template v-if="isTicket">
-            <hr><h2>{{ $t('%TW') }}</h2>
+            <hr><h2>{{ $t('%8a') }}</h2>
             <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="errors.validator" @modify="modifyLocation" />
 
             <hr><h2>{{ $t('%TX') }}</h2>

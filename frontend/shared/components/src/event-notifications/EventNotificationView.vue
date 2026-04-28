@@ -446,7 +446,7 @@ async function editFeedbackText() {
             new ComponentWithProperties(InputSheet, {
                 title: $t('%BI'),
                 description: $t('%BG'),
-                saveText: $t('%v7'),
+                saveText: $t('%1Op'),
                 placeholder: $t('%YT'),
                 defaultValue: notification.value.feedbackText ?? '',
                 multiline: true,

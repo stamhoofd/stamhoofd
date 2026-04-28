@@ -38,7 +38,7 @@
             <STList>
                 <STListItem v-if="cartItem.product.location">
                     <h3 class="style-definition-label">
-                        {{ $t('%TW') }}
+                        {{ $t('%8a') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
@@ -88,7 +88,7 @@
             <template #right>
                 <button class="button primary" type="button" @click="download">
                     <span class="icon download" />
-                    <span>{{ $t('%v7') }}</span>
+                    <span>{{ $t('%1Op') }}</span>
                 </button>
             </template>
         </STToolbar>

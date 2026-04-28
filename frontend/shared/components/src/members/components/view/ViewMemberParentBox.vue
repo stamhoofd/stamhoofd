@@ -5,7 +5,7 @@
         </h2>
 
         <dl class="details-grid">
-            <dt>{{ $t('%Gq') }}</dt>
+            <dt>{{ $t('%1Os') }}</dt>
             <dd>
                 <span v-copyable class="style-copyable">{{ parent.name }}</span>
             </dd>

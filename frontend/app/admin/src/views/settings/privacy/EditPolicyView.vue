@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t(`%Gq`)">
+        <STInputBox :title="$t(`%1Os`)">
             <input v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%IK`)">
         </STInputBox>
 

@@ -78,7 +78,7 @@
                 </p>
 
                 <p v-if="selectedMethod.type === 'OnSite'">
-                    {{ $t('%TW') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopOnSiteMethod).address }}
+                    {{ $t('%8a') }}: {{ selectedMethod.name ? selectedMethod.name + ',' : '' }} {{ (selectedMethod as WebshopOnSiteMethod).address }}
                 </p>
 
                 <STErrorsDefault :error-box="errors.errorBox" />

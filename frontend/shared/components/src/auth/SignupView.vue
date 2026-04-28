@@ -16,7 +16,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="true" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`%WS`)" :placeholder="$t(`%WT`)" />
+            <EmailInput id="username" ref="emailInput" v-model="email" :autofocus="true" name="username" :validator="errors.validator" autocomplete="username" :disabled="lock !== null" :title="$t(`%1FK`)" :placeholder="$t(`%WT`)" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>

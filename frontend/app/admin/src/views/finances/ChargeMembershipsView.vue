@@ -175,7 +175,7 @@
                     <p v-if="hasChanges" class="style-button-bar">
                         <LoadingButton :loading="saving">
                             <button class="button primary" type="button" @click="save">
-                                {{ $t('%v7') }}
+                                {{ $t('%1Op') }}
                             </button>
                         </LoadingButton>
                     </p>

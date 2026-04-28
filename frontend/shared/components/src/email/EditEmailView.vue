@@ -8,7 +8,7 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`%aW`)">
         </STInputBox>
         <p class="style-description-small">
@@ -101,7 +101,7 @@
 
         <template v-if="enableWebshopModule && webshops.length">
             <hr>
-            <h2>{{ $t('%HI') }}</h2>
+            <h2>{{ $t('%1Pd') }}</h2>
             <p>
                 {{ $t('%aV') }}
             </p>

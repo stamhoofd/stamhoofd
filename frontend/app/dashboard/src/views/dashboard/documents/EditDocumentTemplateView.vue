@@ -28,7 +28,7 @@
         </p>
 
         <template v-if="(editingType || !isNew)">
-            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+            <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
                 <input v-model="name" class="input" type="text" :placeholder="$t(`%L0`)">
             </STInputBox>
 
@@ -86,7 +86,7 @@
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPricePaid">
-                <hr><h2>{{ $t('%Kw') }}</h2>
+                <hr><h2>{{ $t('%1OD') }}</h2>
                 <Checkbox v-model="paidOnly">
                     {{ $t('%Kx') }}
                 </Checkbox>

@@ -10,7 +10,7 @@
             </div>
         </h2>
 
-        <STInputBox :title="$t(`%Gq`)">
+        <STInputBox :title="$t(`%1Os`)">
             <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`%QD`)" autocomplete="off">
         </STInputBox>
 

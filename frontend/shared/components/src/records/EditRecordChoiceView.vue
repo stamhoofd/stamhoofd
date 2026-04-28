@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <TInput v-model="name" :placeholder="$t(`%Sk`)" error-fields="name" :error-box="errorBox" :title="$t(`%Gq`)" />
+        <TInput v-model="name" :placeholder="$t(`%Sk`)" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)" />
         <TTextarea v-model="description" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`%6o`)" />
 
         <hr><h2>{{ $t('%zJ') }}</h2>

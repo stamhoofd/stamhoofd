@@ -15,7 +15,7 @@
                     </Dropdown>
                 </STInputBox>
 
-                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%Gq`)">
+                <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`%1Os`)">
                     <div class="input-group">
                         <div>
                             <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`%1MT`)">
@@ -133,7 +133,7 @@ const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`%v7`));
+const saveText = ref($t(`%1Op`));
 const app = useAppContext();
 const parentTypes = ParentTypeHelper.getPublicTypes();
 const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`%14u`)} bewerken` : $t(`%fV`));

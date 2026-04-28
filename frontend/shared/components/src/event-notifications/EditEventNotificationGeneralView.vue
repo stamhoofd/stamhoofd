@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="viewModel.type.title" :prefer-large-button="true" :loading="saving" :save-text="viewModel.isNew ? $t('%bB') : $t('%v7')" save-icon-right="arrow-right" @save="save">
+    <SaveView :title="viewModel.type.title" :prefer-large-button="true" :loading="saving" :save-text="viewModel.isNew ? $t('%bB') : $t('%1Op')" save-icon-right="arrow-right" @save="save">
         <h1>
             {{ viewModel.type.title }}
         </h1>

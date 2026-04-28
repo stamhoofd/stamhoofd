@@ -25,7 +25,7 @@ const props = withDefaults(
         saveText?: string;
         forceMarkReviewed?: boolean | null;
     }>(), {
-        saveText: () => $t(`%v7`),
+        saveText: () => $t(`%1Op`),
         forceMarkReviewed: null,
     },
 );

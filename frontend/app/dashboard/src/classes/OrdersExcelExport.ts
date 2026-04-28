@@ -179,7 +179,7 @@ export class OrdersExcelExport {
                 $t(`%7R`),
                 $t(`%1GD`),
                 $t(`%M7`),
-                $t(`%Kw`),
+                $t(`%1OD`),
                 $t(`%1A`),
                 $t(`%1MX`),
             ],
@@ -319,7 +319,7 @@ export class OrdersExcelExport {
                     order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime) + ' - ' + Formatter.minutes(order.data.timeSlot.endTime) : '/',
                     PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
                     // should be replaced by amount in the future if not 0
-                    order.openBalance <= 0 ? $t(`%Kw`) : $t(`%xI`),
+                    order.openBalance <= 0 ? $t(`%1OD`) : $t(`%xI`),
                     OrderStatusHelper.getName(order.status),
                     order.data.discountCodes.map(d => d.code).join(', '),
                 ]);
@@ -444,7 +444,7 @@ export class OrdersExcelExport {
                 $t(`%xK`),
                 $t(`%xL`),
                 $t(`%M7`),
-                $t(`%Kw`),
+                $t(`%1OD`),
                 $t(`%1A`),
                 $t(`%1MX`),
                 ...(shouldIncludeSettements ? [$t(`%MB`), $t(`%M8`)] : []),
@@ -535,7 +535,7 @@ export class OrdersExcelExport {
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
                 // should be replaced by amount in the future if not 0
-                order.openBalance <= 0 ? $t(`%Kw`) : $t(`%xI`),
+                order.openBalance <= 0 ? $t(`%1OD`) : $t(`%xI`),
                 OrderStatusHelper.getName(order.status),
                 order.data.discountCodes.map(d => d.code).join(', '),
                 ...(shouldIncludeSettements

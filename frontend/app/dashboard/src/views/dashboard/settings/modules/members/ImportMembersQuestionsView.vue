@@ -582,7 +582,7 @@ function openResultView() {
                 const patched = member.patchedDetails;
 
                 if (patched.name) {
-                    description.push($t(`%Gq`) + ': ' + patched.name);
+                    description.push($t(`%1Os`) + ': ' + patched.name);
                 }
                 if (patched.nationalRegisterNumber) {
                     description.push($t(`%wK`) + ': ' + patched.nationalRegisterNumber.toString());

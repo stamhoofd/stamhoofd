@@ -32,7 +32,7 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('%Gq') }}
+                        {{ $t('%1Os') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.data.name }}

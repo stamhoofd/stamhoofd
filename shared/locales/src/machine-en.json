@@ -692,8 +692,8 @@
     "translation": "Direct debit"
   },
   "%12l": {
-    "original": "Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app",
-    "translation": "Pay with the Payconiq by Bancontact app, the KBC app, Belfius, BNP Paribas Fortis, ING app, Fintro, Hello bank!, Argenta or Crelan app"
+    "original": "Betaal met je Bancontact Pay-app of met je bankapp die Bancontact of Wero-betalingen ondersteunt",
+    "translation": "Pay with your Bancontact Pay app or with your banking app that supports Bancontact or Wero payments"
   },
   "%12m": {
     "original": "Betaalbevestiging kan enkele dagen duren",
@@ -5879,6 +5879,462 @@
     "original": "Bestellingen verwijderen?",
     "translation": "Delete orders?"
   },
+  "%1Nh": {
+    "original": "Beheer",
+    "translation": "Manage"
+  },
+  "%1Ni": {
+    "original": "Openstaand",
+    "translation": "Open"
+  },
+  "%1Nj": {
+    "original": "Deze is altijd verplicht per bestelling.",
+    "translation": "This is always required per order."
+  },
+  "%1Nk": {
+    "original": ". Dit veld is optioneel.",
+    "translation": ". This field is optional."
+  },
+  "%1Nl": {
+    "original": "Zaalvoorstelling",
+    "translation": "Stage performance"
+  },
+  "%1Nm": {
+    "original": "Prijs zonder korting",
+    "translation": "Price without discount"
+  },
+  "%1Nn": {
+    "original": "Jouw API-key van Payconiq vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.",
+    "translation": "Your API key for Payconiq needs your attention. Your Payconiq account has not been transferred to the new merchant portal. You may only have a contract with Payconiq for the sticker solution, not for the online solution. Read the guide (click here) to resolve this. We cannot guarantee your current Payconiq connection will keep working in the future."
+  },
+  "%1No": {
+    "original": "?",
+    "translation": "?"
+  },
+  "%1Np": {
+    "original": "We raden het gebruik van Payconiq af. Het is tijd om over te schakelen en Bancontact te gebruiken. Dit is veel stabieler en geeft minder problemen.",
+    "translation": "We do not recommend using Payconiq. It's time to switch and use Bancontact. This is much more stable and leads to fewer issues."
+  },
+  "%1Nq": {
+    "original": "Turnen",
+    "translation": "Gymnastics"
+  },
+  "%1Nr": {
+    "original": "Aansluiten bij Mollie",
+    "translation": "Connect with Mollie"
+  },
+  "%1Ns": {
+    "original": "Bedrijf",
+    "translation": "Company"
+  },
+  "%1Nt": {
+    "original": "Aansluitingen",
+    "translation": "Affiliations"
+  },
+  "%1Nu": {
+    "original": "Soms goedkoper",
+    "translation": "Sometimes cheaper"
+  },
+  "%1Nv": {
+    "original": "Vul een geldig getal in",
+    "translation": "Enter a valid number"
+  },
+  "%1Nw": {
+    "original": "Open",
+    "translation": "Open"
+  },
+  "%1Nx": {
+    "original": "Gemeente of stad",
+    "translation": "Municipality or city"
+  },
+  "%1Ny": {
+    "original": "Aansluiting",
+    "translation": "Affiliation"
+  },
+  "%1Nz": {
+    "original": "Het lid dat bij de aansluiting hoort is niet gevonden.",
+    "translation": "The member associated with the affiliation was not found."
+  },
+  "%1O1": {
+    "original": "Groepsnummer",
+    "translation": "Group number"
+  },
+  "%1O2": {
+    "original": "Unieke identificatie van de aansluiting",
+    "translation": "Unique identification of the affiliation"
+  },
+  "%1O3": {
+    "original": "Ga naar het dashboard om archief van bestellingen te bekijken",
+    "translation": "Go to the dashboard to view your order history"
+  },
+  "%1O4": {
+    "original": "Donaties of inzameling",
+    "translation": "Donations or fundraising"
+  },
+  "%1O5": {
+    "original": "Vorige",
+    "translation": "Previous"
+  },
+  "%1O6": {
+    "original": "Theater (toneel, musical, ...)",
+    "translation": "Theater (play, musical, ...)"
+  },
+  "%1O8": {
+    "original": "Voornaam lid",
+    "translation": "Member's first name"
+  },
+  "%1O9": {
+    "original": "Payconiq API-key gebruiken",
+    "translation": "Use Payconiq API key"
+  },
+  "%1OB": {
+    "original": "Kinderen (kampen, speelpleinwerking, ...)",
+    "translation": "Children (camps, playground activities, ...)"
+  },
+  "%1OC": {
+    "original": "Onderwijs",
+    "translation": "Education"
+  },
+  "%1OD": {
+    "original": "Betaald",
+    "translation": "Paid"
+  },
+  "%1OE": {
+    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
+    "translation": "If you want to collect this information per ticket (not per order), you can disable the shopping cart and limit the maximum quantity of a ticket to one. If you only need selection menus, it's best to use the selection menus in the settings of a ticket, as this is a bit easier to set up."
+  },
+  "%1OF": {
+    "original": " door voor meer informatie.",
+    "translation": " for more information."
+  },
+  "%1OG": {
+    "original": "Het minimum is {min}",
+    "translation": "The minimum is {min}"
+  },
+  "%1OH": {
+    "original": "Lees ",
+    "translation": "Read "
+  },
+  "%1OI": {
+    "original": "Sport",
+    "translation": "Sports"
+  },
+  "%1OJ": {
+    "original": "Wacht op aanrekening",
+    "translation": "Waiting for charge"
+  },
+  "%1OK": {
+    "original": "Oudercomité",
+    "translation": "Parent committee"
+  },
+  "%1OL": {
+    "original": "In vewerking",
+    "translation": "In processing"
+  },
+  "%1OM": {
+    "original": "Aanrekeningsdatum",
+    "translation": "Charge date"
+  },
+  "%1ON": {
+    "original": "Groep ID",
+    "translation": "Group ID"
+  },
+  "%1OO": {
+    "original": "Betaal met Bancontact Pay",
+    "translation": "Pay with Bancontact Pay"
+  },
+  "%1OP": {
+    "original": "Geen webshops gevonden",
+    "translation": "No webshops found"
+  },
+  "%1OQ": {
+    "original": "Europees",
+    "translation": "European"
+  },
+  "%1OR": {
+    "original": "Nog niet aangerekend",
+    "translation": "Not yet charged"
+  },
+  "%1OS": {
+    "original": "Geen aansluitingen",
+    "translation": "No affiliations"
+  },
+  "%1OT": {
+    "original": "Take-away of levering",
+    "translation": "Take-away or delivery"
+  },
+  "%1OU": {
+    "original": "Proefperiode tot",
+    "translation": "Trial period until"
+  },
+  "%1OV": {
+    "original": "Webshop / andere",
+    "translation": "Webshop / other"
+  },
+  "%1OW": {
+    "original": "Koppel Mollie niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen. We doen dit voor je eigen bestwil.",
+    "translation": "Do not link Mollie if you are in a hurry. You clicked through in less than 5 seconds, so you couldn't have read all the warnings. We're doing this for your own good."
+  },
+  "%1OX": {
+    "original": "De vereniging die bij de aansluiting hoort is niet gevonden.",
+    "translation": "The association linked to this affiliation could not be found."
+  },
+  "%1OY": {
+    "original": "Goed doel",
+    "translation": "Charity"
+  },
+  "%1OZ": {
+    "original": "Bekijk shop",
+    "translation": "View shop"
+  },
+  "%1Ob": {
+    "original": "Stappenplan",
+    "translation": "Step-by-step plan"
+  },
+  "%1Od": {
+    "original": "Er bestaat al een ander ticket met hetzelfde zaalplan maar een andere datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie.",
+    "translation": "There is already another ticket with the same seating plan but a different date. This will not work because the reserved seats are not shared between both tickets. Please use selection menus in the same ticket instead (e.g. adults, children, volunteers). Be sure to read the documentation on seat selection for more information."
+  },
+  "%1Oe": {
+    "original": "Dit lidnummer is al in gebruik",
+    "translation": "This member number is already in use"
+  },
+  "%1Of": {
+    "original": "Startdatum",
+    "translation": "Start date"
+  },
+  "%1Oi": {
+    "original": "Aangesloten lid",
+    "translation": "Affiliated member"
+  },
+  "%1Oj": {
+    "original": "Ja, gelezen",
+    "translation": "Yes, read"
+  },
+  "%1Ok": {
+    "original": "Aangerekende vereniging",
+    "translation": "Charged association"
+  },
+  "%1Ol": {
+    "original": "de gids",
+    "translation": "the guide"
+  },
+  "%1Om": {
+    "original": "Mollie Documentatie",
+    "translation": "Mollie Documentation"
+  },
+  "%1Oo": {
+    "original": "Dagen gratis",
+    "translation": "Free days"
+  },
+  "%1Op": {
+    "original": "Opslaan",
+    "translation": "Save"
+  },
+  "%1Oq": {
+    "original": "Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.",
+    "translation": "You can choose whether to offer a choice between different articles or just add a single article."
+  },
+  "%1Or": {
+    "original": "Achternaam lid",
+    "translation": "Member’s last name"
+  },
+  "%1Os": {
+    "original": "Naam",
+    "translation": "Name"
+  },
+  "%1Ot": {
+    "original": "Naam lid",
+    "translation": "Member’s name"
+  },
+  "%1Ou": {
+    "original": "Betaal met je Bancontact-app of met je bankapp die Bancontact-betalingen ondersteunt",
+    "translation": "Pay with your Bancontact app or your banking app that supports Bancontact payments"
+  },
+  "%1Ov": {
+    "original": "Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.",
+    "translation": "You can choose whether to offer a choice between different tickets, or just add a single ticket."
+  },
+  "%1Ow": {
+    "original": "Meer lezen",
+    "translation": "Read more"
+  },
+  "%1Ox": {
+    "original": "Mollie",
+    "translation": "Mollie"
+  },
+  "%1Oy": {
+    "original": "Het maximum is {max}",
+    "translation": "The maximum is {max}"
+  },
+  "%1Oz": {
+    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Neem contact op met de vereniging.",
+    "translation": "{member} is already known in our system, but your email address is not. Please contact the association."
+  },
+  "%1P0": {
+    "original": "Scan en betaal met Bancontact Pay",
+    "translation": "Scan and pay with Bancontact Pay"
+  },
+  "%1P1": {
+    "original": "Status",
+    "translation": "Status"
+  },
+  "%1P2": {
+    "original": "ID aansluiting",
+    "translation": "Affiliation ID"
+  },
+  "%1P3": {
+    "original": "iDEAL en kredietkaart via Mollie ",
+    "translation": "iDEAL and credit card via Mollie "
+  },
+  "%1P4": {
+    "original": "Bancontact Pay",
+    "translation": "Bancontact Pay"
+  },
+  "%1P5": {
+    "original": "Ga naar het dashboard om bestellingen te bekijken en te beheren",
+    "translation": "Go to the dashboard to view and manage orders"
+  },
+  "%1P6": {
+    "original": "Aanrekening",
+    "translation": "Charge"
+  },
+  "%1P7": {
+    "original": "Bancontact of kredietkaart via Mollie ",
+    "translation": "Bancontact or credit card via Mollie "
+  },
+  "%1P8": {
+    "original": "Einddatum",
+    "translation": "End date"
+  },
+  "%1P9": {
+    "original": "Wat voor vereniging?",
+    "translation": "What kind of association?"
+  },
+  "%1PA": {
+    "original": "Hierop ontvangen bestellers hun bestelbevestiging. Deze is altijd verplicht per bestelling.",
+    "translation": "Order confirmation is sent to buyers at this address. This is always required for each order."
+  },
+  "%1PB": {
+    "original": "Je kan Payconiq (nu Bancontact Pay | Wero) niet langer combineren met Bancontact. Bancontact is nu voldoende.",
+    "translation": "You can no longer combine Payconiq (now Bancontact Pay | Wero) with Bancontact. Bancontact alone is now sufficient."
+  },
+  "%1PC": {
+    "original": "Type",
+    "translation": "Type"
+  },
+  "%1PD": {
+    "original": "Vereniging waar de aansluiting aan aangrekend is",
+    "translation": "Association to which the affiliation is charged"
+  },
+  "%1PE": {
+    "original": "Er werden nog geen betalingen aangemaakt voor deze aansluiting",
+    "translation": "No payments have yet been created for this affiliation"
+  },
+  "%1PF": {
+    "original": "Jeugd",
+    "translation": "Youth"
+  },
+  "%1PG": {
+    "original": "Evenement met tickets",
+    "translation": "Event with tickets"
+  },
+  "%1PH": {
+    "original": "Gesloten",
+    "translation": "Closed"
+  },
+  "%1PI": {
+    "original": "Vereniging",
+    "translation": "Association"
+  },
+  "%1PJ": {
+    "original": "Bestellingen beheren",
+    "translation": "Manage orders"
+  },
+  "%1PK": {
+    "original": "Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt.",
+    "translation": "First read our guide before you start! Take your time to fill in everything carefully and completely. If you make mistakes, the affiliation process might take much longer."
+  },
+  "%1PL": {
+    "original": "In verwerking",
+    "translation": "In processing"
+  },
+  "%1PM": {
+    "original": "Lid",
+    "translation": "Member"
+  },
+  "%1PN": {
+    "original": "Payconiq",
+    "translation": "Payconiq"
+  },
+  "%1PP": {
+    "original": "Gemeente",
+    "translation": "Municipality"
+  },
+  "%1PQ": {
+    "original": "STAP {current} / {total}",
+    "translation": "STEP {current} / {total}"
+  },
+  "%1PR": {
+    "original": "Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\\n\\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.",
+    "translation": "You may need to upload documents in Mollie that are only available in our documentation. Without a new account, higher transaction costs may apply.\\n\\nSo read the documentation first: mistakes can result in your affiliation being rejected and a much longer processing time."
+  },
+  "%1PU": {
+    "original": "Einde proefperiode",
+    "translation": "End of trial period"
+  },
+  "%1PW": {
+    "original": "Naam vereniging",
+    "translation": "Association name"
+  },
+  "%1PX": {
+    "original": "Er bestaat al een artikel met dezelfde naam in deze webshop, je gebruikt best unieke namen.",
+    "translation": "There is already an item with this name in this webshop; it's best to use unique names."
+  },
+  "%1PY": {
+    "original": "Open de publieke webshop pagina",
+    "translation": "Open the public webshop page"
+  },
+  "%1PZ": {
+    "original": "Nummer vereniging",
+    "translation": "Association number"
+  },
+  "%1Pb": {
+    "original": "Volgende aansluiting",
+    "translation": "Next affiliation"
+  },
+  "%1Pc": {
+    "original": "Vorige aansluiting",
+    "translation": "Previous affiliation"
+  },
+  "%1Pd": {
+    "original": "Webshops",
+    "translation": "Webshops"
+  },
+  "%1Pe": {
+    "original": "Let op met wat je invult",
+    "translation": "Be careful with what you enter"
+  },
+  "%1Pf": {
+    "original": "Webshop openen",
+    "translation": "Open webshop"
+  },
+  "%1Pg": {
+    "original": "Gearchiveerd",
+    "translation": "Archived"
+  },
+  "%1Ph": {
+    "original": "Evenementen",
+    "translation": "Events"
+  },
+  "%1Pi": {
+    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\n            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
+    "translation": "If you'd like to collect this information per registered person, you can disable the shopping cart and set the maximum quantity of an item to 1.\n            If you only need selection menus, it's easier to use the selection options in the item settings."
+  },
+  "%1Pj": {
+    "original": "Aanmaken",
+    "translation": "Create"
+  },
   "%2": {
     "original": "Aansluiting/verzekering Stamhoofd*",
     "translation": "Affiliation/insurance Stamhoofd*"
@@ -5928,8 +6384,8 @@
     "translation": "+ 0 pounds"
   },
   "%2g": {
-    "original": "Mijn account",
-    "translation": "My account"
+    "original": "Ledenportaal",
+    "translation": "Member portal"
   },
   "%2h": {
     "original": "Weet je zeker dat je {total} wilt aanrekenen aan {count} groep(en)?",
@@ -5972,8 +6428,8 @@
     "translation": "Online payments (via Bancontact, iDEAL or credit card) are possible. Tick the payment methods you want to activate, and make sure they are also activated in Mollie."
   },
   "%2r": {
-    "original": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren. Je betaalt hier wel hogere transactiekosten dan via onze huidige partner.",
-    "translation": "You can use online payments in Stamhoofd by linking with Mollie via the button below. This allows you to activate payments via Bancontact, iDEAL and credit card. However, you will pay higher transaction costs than with our current partner."
+    "original": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de onderstaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren.",
+    "translation": "You can use online payments in Stamhoofd by linking to Mollie via the button below. This lets you activate payments with Bancontact, iDEAL, and credit card."
   },
   "%2s": {
     "original": "Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
@@ -6228,8 +6684,8 @@
     "translation": "Description of the premises (optional)"
   },
   "%3s": {
-    "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts.",
-    "translation": "You cannot activate {paymentMethod}, you must first connect to a payment provider via Stamhoofd settings > Payment accounts."
+    "original": "Sluit eerst aan bij Stripe via de Stamhoofd instellingen > Betaalaccounts, daarna kan je {paymentMethod} activeren.",
+    "translation": "First connect with Stripe via the Stamhoofd settings > Payment accounts, after that you can activate {paymentMethod}."
   },
   "%3t": {
     "original": "Aansluiten",
@@ -6567,10 +7023,6 @@
     "original": "Niet ingeschreven",
     "translation": "Not registered"
   },
-  "%5E": {
-    "original": "Vereniging",
-    "translation": "Association"
-  },
   "%5F": {
     "original": "Wijzigingen zijn opgeslagen",
     "translation": "Changes have been saved"
@@ -6608,8 +7060,8 @@
     "translation": "Find your association"
   },
   "%5O": {
-    "original": "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd",
-    "translation": "You must check each payment yourself and mark it as paid in Stamhoofd"
+    "original": "Je controleert en markeert manueel elke betaling als betaald in Stamhoofd",
+    "translation": "You manually review and mark each payment as paid in Stamhoofd."
   },
   "%5P": {
     "original": "Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.",
@@ -6622,10 +7074,6 @@
   "%5R": {
     "original": "Vertel Stamhoofd door aan andere verenigingen",
     "translation": "Tell Stamhoofd about other associations"
-  },
-  "%5S": {
-    "original": "Gebruikt jouw vereniging Stamhoofd al?",
-    "translation": "Does your association already use Stamhoofd?"
   },
   "%5T": {
     "original": "De velden {unlinkedAnswersText} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Stamhoofd",
@@ -6640,8 +7088,8 @@
     "translation": "Read more about Stamhoofd here."
   },
   "%5W": {
-    "original": "Sluit jouw vereniging aan bij Stamhoofd",
-    "translation": "Connect your association to Stamhoofd"
+    "original": "Vereniging registreren",
+    "translation": "Register association"
   },
   "%5X": {
     "original": "Terug naar Stamhoofd",
@@ -6760,8 +7208,8 @@
     "translation": "New premise"
   },
   "%6": {
-    "original": "Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.",
-    "translation": "Welcome to the dashboard for administrators of associations on Stamhoofd. If your association is already affiliated with Stamhoofd, you can search for it below."
+    "original": "Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging is aangesloten bij Stamhoofd, kan je die hieronder zoeken.",
+    "translation": "Welcome to the dashboard for administrators of associations on Stamhoofd. If your association is affiliated with Stamhoofd, you can search for it below."
   },
   "%60": {
     "original": "Wijzig lokaal",
@@ -7036,8 +7484,8 @@
     "translation": "Payments take up to 5 working days, no immediate payment confirmation. Failed payments may incur costs."
   },
   "%75": {
-    "original": "Er zijn nog geen bestellingen.",
-    "translation": "There are no orders yet."
+    "original": "Hier komt een lijst met alle bestellingen. Plaats zelf een test-bestelling om het eens uit te proberen.",
+    "translation": "A list of all orders will appear here. Place a test order yourself to try it out."
   },
   "%76": {
     "original": "Openstaand bedrag",
@@ -7062,10 +7510,6 @@
   "%7B": {
     "original": "Standaard leeftijdsgroep bewerken",
     "translation": "Edit default age group"
-  },
-  "%7C": {
-    "original": "Groepsnummer",
-    "translation": "Group number"
   },
   "%7D": {
     "original": "Functies",
@@ -7175,10 +7619,6 @@
     "original": "Telefoonnummer ouder",
     "translation": "Parent phone number"
   },
-  "%7e": {
-    "original": "Startdatum",
-    "translation": "Start date"
-  },
   "%7f": {
     "original": "Filter alle verenigingen die een lid hebben die aan deze voorwaarden voldoet.",
     "translation": "Filter all associations that have a member who meets these conditions."
@@ -7198,10 +7638,6 @@
   "%7j": {
     "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
     "translation": "Members you register in an age group that you link to a default KSA National age group are automatically affiliated. For other members, you can request affiliation manually here."
-  },
-  "%7k": {
-    "original": "Ledenportaal",
-    "translation": "Member portal"
   },
   "%7l": {
     "original": "De link naar deze activiteit in het ledenportaal. Deel deze link met leden.",
@@ -7312,12 +7748,12 @@
     "translation": "Choose what information you collect from associations"
   },
   "%8B": {
-    "original": "Naam van jouw vereniging",
-    "translation": "Name of your association"
+    "original": "Naam vereniging of organisatie",
+    "translation": "Name of association or organization"
   },
   "%8C": {
-    "original": "De naam van je vereniging",
-    "translation": "The name of your association"
+    "original": "bv. Scouts De Vliegende Hollander",
+    "translation": "e.g. Scouts The Flying Dutchman"
   },
   "%8D": {
     "original": "Naam van je vereniging (kort)",
@@ -7412,8 +7848,8 @@
     "translation": "All members with this role automatically get access rights to the age group of an association for which the role was added – only for one specific work year."
   },
   "%8a": {
-    "original": "Adres van je vereniging",
-    "translation": "Address of your association"
+    "original": "Locatie",
+    "translation": "Location"
   },
   "%8b": {
     "original": "De link naar de website van jouw vereniging.",
@@ -8203,14 +8639,6 @@
     "original": "Uit het archief",
     "translation": "From the archive"
   },
-  "%Bj": {
-    "original": "Prijs zonder korting",
-    "translation": "Price without discount"
-  },
-  "%Bk": {
-    "original": "Nog niet aangerekend",
-    "translation": "Not yet charged"
-  },
   "%Bl": {
     "original": "Je hebt succesvol toegang gekregen tot de gegevens van {name}",
     "translation": "You have successfully gained access to the data of {name}"
@@ -8378,10 +8806,6 @@
   "%CP": {
     "original": "Voor nationale activiteiten moet je kiezen via welke vereniging alle betalingen verlopen. De betaalinstellingen van die vereniging worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die vereniging.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
     "translation": "For national activities, you must choose through which association all payments will be processed. The payment settings of that association will then be used, and all registrations will be recorded under the bookkeeping of that association.\n\nIn addition, the organizer can also set options that affect data collection and other more subtle aspects."
-  },
-  "%CQ": {
-    "original": "Gemeente",
-    "translation": "Municipality"
   },
   "%CR": {
     "original": "Prullenmand",
@@ -9479,10 +9903,6 @@
     "original": "Onbekende tag",
     "translation": "Unknown tag"
   },
-  "%Gq": {
-    "original": "Naam",
-    "translation": "Name"
-  },
   "%Gr": {
     "original": "Onbekend",
     "translation": "Unknown"
@@ -9690,10 +10110,6 @@
   "%Hg": {
     "original": "Breedte",
     "translation": "Width"
-  },
-  "%Hh": {
-    "original": "Transparantie",
-    "translation": "Transparency"
   },
   "%Hi": {
     "original": "Tekst en links die onderaan in de footer zichtbaar zijn",
@@ -10160,8 +10576,8 @@
     "translation": "You must accept at least one payment method"
   },
   "%Ja": {
-    "original": "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie.",
-    "translation": "You must first activate Payconiq via the payment settings (Settings > Payment methods). You will also find more information there."
+    "original": "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalaccounts).",
+    "translation": "You must first activate Payconiq via the payment settings (Settings > Payment accounts)."
   },
   "%Jb": {
     "original": "Er ging iets mis: te veel doorverwijzingen.",
@@ -10494,10 +10910,6 @@
   "%Kv": {
     "original": "Enkel aanmaken indien inschrijvingsbedrag groter is dan 0 euro",
     "translation": "Only create if the registration amount is greater than 0 euros"
-  },
-  "%Kw": {
-    "original": "Betaald",
-    "translation": "Paid"
   },
   "%Kx": {
     "original": "Enkel aanmaken indien inschrijving betaald is",
@@ -11119,14 +11531,6 @@
     "original": "Geavanceerde instellingen",
     "translation": "Advanced settings"
   },
-  "%NS": {
-    "original": "Mollie (betaalprovider)",
-    "translation": "Mollie (payment provider)"
-  },
-  "%NT": {
-    "original": "Hou er rekening mee dat de tarieven van Mollie anders zijn dan die van Stripe.",
-    "translation": "Please note that Mollie's tariffs are different from Stripe's."
-  },
   "%NU": {
     "original": "Platforminstellingen (enkel voor platformbeheerders)",
     "translation": "Platform settings (only for platform administrators)"
@@ -11200,12 +11604,8 @@
     "translation": "Stripe Documentation"
   },
   "%Nm": {
-    "original": "Online betalingen via Stripe",
-    "translation": "Online payments via Stripe"
-  },
-  "%Nn": {
-    "original": "Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt.",
-    "translation": "Read our guide first before you start! Take your time to fill in everything neatly and completely. If you make mistakes, you risk the connection taking much longer."
+    "original": "Stripe",
+    "translation": "Stripe"
   },
   "%No": {
     "original": "Lees de gids",
@@ -11226,18 +11626,6 @@
   "%Ns": {
     "original": "Op naam van",
     "translation": "In the name of"
-  },
-  "%Nt": {
-    "original": "Online betalingen via Mollie",
-    "translation": "Online payments via Mollie"
-  },
-  "%Nu": {
-    "original": "Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)",
-    "translation": "For Mollie you need a non-profit organisation. An informal association is not sufficient (will not be accepted)"
-  },
-  "%Nv": {
-    "original": "Mollie koppelen",
-    "translation": "Link Mollie"
   },
   "%Nw": {
     "original": "Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.",
@@ -11664,8 +12052,8 @@
     "translation": "Your webshop is accessible via"
   },
   "%Pe": {
-    "original": "Naam, type en beschikbaarheid.",
-    "translation": "Name, type and availability."
+    "original": "Naam, type, openingsdatum en nummering.",
+    "translation": "Name, type, opening date, and numbering."
   },
   "%Pf": {
     "original": "Productaanbod",
@@ -11724,8 +12112,8 @@
     "translation": "Stay informed about new orders yourself."
   },
   "%Pt": {
-    "original": "Tekst, uiterlijk, en externe links",
-    "translation": "Text, appearance, and external links"
+    "original": "Omslagfoto, beschrijving, kleur, en externe links",
+    "translation": "Cover photo, description, color, and external links"
   },
   "%Pu": {
     "original": "Wijzig de teksten en uitzicht van jouw webshop.",
@@ -11867,26 +12255,6 @@
     "original": "Geen tickets",
     "translation": "No tickets"
   },
-  "%QT": {
-    "original": "Webshop zonder scanners. Er worden geen tickets aangemaakt.",
-    "translation": "Webshop without scanners. No tickets are created."
-  },
-  "%QU": {
-    "original": "Ticketverkoop voor groepen",
-    "translation": "Ticket sales for groups"
-  },
-  "%QV": {
-    "original": "Eén ticket per bestelling. Ideaal voor een eetfestijn",
-    "translation": "One ticket per order. Ideal for a feast"
-  },
-  "%QW": {
-    "original": "Ticketverkoop voor personen",
-    "translation": "Ticket sales for individuals"
-  },
-  "%QX": {
-    "original": "Eén ticket per artikel. Ideaal voor een fuif",
-    "translation": "One ticket per item. Ideal for a party"
-  },
   "%QY": {
     "original": "Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).",
     "translation": "The webshop offers tickets and vouchers for sale, each with its own QR code and must be scanned separately. Ideal for a party or event where access is payable per person. Less ideal for large groups because you then have to scan each ticket separately (so best not to use for a feast)."
@@ -11954,10 +12322,6 @@
   "%Qo": {
     "original": "Naam (kort)",
     "translation": "Name (short)"
-  },
-  "%Qp": {
-    "original": "bv. Wafelverkoop",
-    "translation": "e.g. Waffle sale"
   },
   "%Qq": {
     "original": "Stop bestellingen op",
@@ -12147,10 +12511,6 @@
     "original": "Ticketvoorbeeld",
     "translation": "Ticket example"
   },
-  "%Rb": {
-    "original": "bv. Bestel je wafels",
-    "translation": "e.g. Order your waffles"
-  },
   "%Rc": {
     "original": "Beschrijving die op jouw webshop staat",
     "translation": "Description shown on your webshop"
@@ -12176,16 +12536,16 @@
     "translation": "Add category"
   },
   "%Ri": {
-    "original": "Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.",
-    "translation": "With a shopping basket, visitors can order multiple item combinations at once. If you switch it off, visitors can checkout immediately after selecting an item. For forms where you only expect one completed form (= item), it is often useful to switch it off."
+    "original": "Met een winkelmandje kunnen bezoekers meerdere artikelcombinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.",
+    "translation": "A shopping cart allows visitors to order multiple combinations of articles at once. If you turn it off, visitors can check out immediately after selecting an article. For forms where you only expect one completed form (= article), it's often helpful to turn this off."
   },
   "%Rj": {
     "original": "Winkelmandje gebruiken",
     "translation": "Use shopping basket"
   },
   "%Rk": {
-    "original": "Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen.",
-    "translation": "You can choose which extra information you want to collect from orderers."
+    "original": "Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen. Dit wordt maar één keer per bestelling gevraagd.",
+    "translation": "You can choose which extra information you want to collect from buyers. This is only asked once per order."
   },
   "%Rl": {
     "original": "Ingebouwde gegevens",
@@ -12622,10 +12982,6 @@
   "%TV": {
     "original": "Personen",
     "translation": "People"
-  },
-  "%TW": {
-    "original": "Locatie",
-    "translation": "Location"
   },
   "%TX": {
     "original": "Datum en tijd",
@@ -13344,24 +13700,16 @@
     "translation": "You are now viewing"
   },
   "%WQ": {
-    "original": "Maak jouw account",
-    "translation": "Create your account"
+    "original": "Jouw account",
+    "translation": "Your account"
   },
   "%WR": {
     "original": "Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres en wachtwoord dat niet gedeeld wordt.",
     "translation": "You can add other administrators later, so choose a personal email address and password that is not shared."
   },
-  "%WS": {
-    "original": "Persoonlijk e-mailadres",
-    "translation": "Personal email address"
-  },
   "%WT": {
     "original": "Vul jouw e-mailadres hier in",
     "translation": "Enter your email address here"
-  },
-  "%WU": {
-    "original": "Kies een persoonlijk wachtwoord",
-    "translation": "Choose a personal password"
   },
   "%WV": {
     "original": "Kies een wachtwoord",
@@ -13379,25 +13727,17 @@
     "original": "Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen.",
     "translation": "You can try out all the features for free without having to fill in your payment details."
   },
-  "%WZ": {
-    "original": "Log dan hier in",
-    "translation": "Then log in here"
-  },
   "%Wa": {
     "original": "Je ontvangt {value} tegoed van {organization} als je nu registreert",
     "translation": "You will receive {value} credit from {organization} if you register now"
   },
   "%Wb": {
-    "original": "Geen adres? Vul dan een adres in dat in de buurt ligt",
-    "translation": "No address? Then enter an address nearby"
-  },
-  "%Wc": {
-    "original": "Hiermee stellen we automatisch al enkele instellingen goed in.",
-    "translation": "This automatically sets up some settings correctly."
+    "original": "Je locatie maakt je vereniging makkelijker vindbaar als je de volgende keer wilt inloggen. Je kan het later nog wijzigen.",
+    "translation": "Your location helps make your association easier to find next time you want to log in. You can still change it later."
   },
   "%Wd": {
-    "original": "Hoe ken je Stamhoofd?",
-    "translation": "How do you know Stamhoofd?"
+    "original": "Hoe ken je Stamhoofd? (optioneel)",
+    "translation": "How did you hear about Stamhoofd? (optional)"
   },
   "%We": {
     "original": "Op aanraden van andere vereniging / persoon",
@@ -13414,18 +13754,6 @@
   "%Wh": {
     "original": "Via opzoekwerk (bv. Google)",
     "translation": "Via research (e.g. Google)"
-  },
-  "%Wi": {
-    "original": "Vereniging aanmaken",
-    "translation": "Create association"
-  },
-  "%Wj": {
-    "original": "Type vereniging",
-    "translation": "Type of association"
-  },
-  "%Wk": {
-    "original": "Koepelorganisatie",
-    "translation": "Umbrella organisation"
   },
   "%Wl": {
     "original": "Kies de functies die je wilt uitproberen",
@@ -13446,10 +13774,6 @@
   "%Wp": {
     "original": "Functies uitproberen",
     "translation": "Try out features"
-  },
-  "%Wq": {
-    "original": "Aansluiting",
-    "translation": "Affiliation"
   },
   "%Wr": {
     "original": "Er zijn geen ingebouwde functies.",
@@ -14835,10 +15159,6 @@
     "original": "Leden kunnen zelf inschrijven via het ledenportaal als je deze optie open zet. Ze betalen het opgegeven tarief dan zelf via de betaalmethodes die je hebt ingesteld bij de instellingen van jouw groep.",
     "translation": "Members can register themselves via the member portal if you open this option. They then pay the specified tariff themselves via the payment methods you have set up in the settings of your group."
   },
-  "%cR": {
-    "original": "Gesloten",
-    "translation": "Closed"
-  },
   "%cS": {
     "original": "De inschrijvingen zijn gesloten en openen niet automatisch.",
     "translation": "Registrations are closed and will not open automatically."
@@ -15078,10 +15398,6 @@
   "%dP": {
     "original": "Naam van dit tarief",
     "translation": "Name of this tariff"
-  },
-  "%dQ": {
-    "original": "Straat en nummer",
-    "translation": "Street and number"
   },
   "%dR": {
     "original": "Geen items",
@@ -15687,10 +16003,6 @@
     "original": "Uitgeschreven op",
     "translation": "Deregistered on"
   },
-  "%fs": {
-    "original": "Proefperiode tot",
-    "translation": "Trial period until"
-  },
   "%ft": {
     "original": "Had een proefperiode van",
     "translation": "Had a trial period of"
@@ -15814,10 +16126,6 @@
   "%gN": {
     "original": "Bedrijfsnaam en rechtsvorm",
     "translation": "Company name and legal form"
-  },
-  "%gO": {
-    "original": "Naam vereniging",
-    "translation": "Association name"
   },
   "%gP": {
     "original": "bv. Ruimtereis VZW",
@@ -15998,10 +16306,6 @@
   "%h7": {
     "original": "Je hebt nog geen betalingen gedaan",
     "translation": "You have not made any payments yet"
-  },
-  "%h8": {
-    "original": "Openstaand",
-    "translation": "Outstanding"
   },
   "%h9": {
     "original": "Je hebt geen openstaande schulden",
@@ -16767,21 +17071,13 @@
     "original": "Horizontaal op donkere achtergrond",
     "translation": "Horizontal on dark background"
   },
-  "%kE": {
-    "original": "Scan en betaal met Payconiq by Bancontact",
-    "translation": "Scan and pay with Payconiq by Bancontact"
-  },
   "%kF": {
     "original": "Of scan met een bank app",
     "translation": "Or scan with your banking app"
   },
-  "%kG": {
-    "original": "Betaal met Payconiq by Bancontact",
-    "translation": "Pay with Payconiq by Bancontact"
-  },
   "%kH": {
-    "original": "Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.",
-    "translation": "You need one of the following apps to be able to pay: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta or Crelan."
+    "original": "Je hebt één van volgende apps nodig om te kunnen betalen: Bancontact Pay, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.",
+    "translation": "You need one of the following apps to make a payment: Bancontact Pay, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta or Crelan."
   },
   "%kI": {
     "original": "Het lukt niet",
@@ -17231,10 +17527,6 @@
     "original": "Gepubliceerd",
     "translation": "Published"
   },
-  "%m6": {
-    "original": "Gearchiveerd",
-    "translation": "Archived"
-  },
   "%m7": {
     "original": "alles lezen",
     "translation": "read all"
@@ -17304,20 +17596,20 @@
     "translation": "Nature association"
   },
   "%mO": {
-    "original": "Muziekvereniging",
-    "translation": "Music association"
+    "original": "Muziek (orkest, zang, band, fanfare, harmonie...)",
+    "translation": "Music (orchestra, singing, band, brass band, harmony...)"
   },
   "%mP": {
     "original": "Beroepsvereniging",
     "translation": "Professional association"
   },
   "%mQ": {
-    "original": "Kunstvereniging",
-    "translation": "Art association"
+    "original": "Beeldende kunst (schilderen, beeldhouwen, fotografie...)",
+    "translation": "Visual arts (painting, sculpture, photography...)"
   },
   "%mR": {
-    "original": "Cultuur",
-    "translation": "Culture"
+    "original": "Andere culturele vereniging",
+    "translation": "Other cultural association"
   },
   "%mS": {
     "original": "Politiek",
@@ -17326,10 +17618,6 @@
   "%mT": {
     "original": "Vakbond",
     "translation": "Trade union"
-  },
-  "%mU": {
-    "original": "Jeugd",
-    "translation": "Youth"
   },
   "%mV": {
     "original": "Overige",
@@ -19404,8 +19692,8 @@
     "translation": "Close and do not complete"
   },
   "%ur": {
-    "original": "Account aanmaken",
-    "translation": "Create account"
+    "original": "Voltooien",
+    "translation": "Complete"
   },
   "%us": {
     "original": "Stel een nieuw wachtwoord in voor jouw account.",
@@ -19466,10 +19754,6 @@
   "%v6": {
     "original": "Standaard",
     "translation": "Default"
-  },
-  "%v7": {
-    "original": "Opslaan",
-    "translation": "Save"
   },
   "%v8": {
     "original": "Selecteer eerst tekst die je klikbaar wilt maken",
@@ -19731,10 +20015,6 @@
     "original": "Groep",
     "translation": "Group"
   },
-  "%wB": {
-    "original": "Einddatum",
-    "translation": "End date"
-  },
   "%wC": {
     "original": "Ingediend door",
     "translation": "Submitted by"
@@ -19838,10 +20118,6 @@
   "%wb": {
     "original": "E-mailadres administratie",
     "translation": "Administration email address"
-  },
-  "%wc": {
-    "original": "In verwerking",
-    "translation": "In process"
   },
   "%wd": {
     "original": "ID schuldenaar",
@@ -20374,10 +20650,6 @@
   "%yl": {
     "original": "(niet automatisch)",
     "translation": "(not automatic)"
-  },
-  "%ym": {
-    "original": "Lid",
-    "translation": "Member"
   },
   "%yn": {
     "original": "Omhoog verplaatsen",

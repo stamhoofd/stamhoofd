@@ -31,7 +31,7 @@
             {{ $t('%fr') }} {{ formatDate(registration.deactivatedAt) }}
         </p>
         <p v-if="registration.isTrial && registration.trialUntil" class="style-description-small">
-            {{ $t('%fs') }} {{ formatDate(registration.trialUntil) }}
+            {{ $t('%1OU') }} {{ formatDate(registration.trialUntil) }}
         </p>
         <p v-else-if="registration.startDate && registration.trialUntil" class="style-description-small">
             {{ $t('%ft') }} {{ Formatter.dateNumber(registration.startDate) }} tot {{ Formatter.dateNumber(registration.trialUntil) }}

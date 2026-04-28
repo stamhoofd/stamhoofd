@@ -51,7 +51,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, string>({
             id: 'member.name',
-            name: $t('%1PT'),
+            name: $t('%19j'),
             getValue: m => m.member.memberNumber ?? '',
             format: val => val ? val : $t(`%1FW`),
             getStyle: val => val ? 'code' : 'gray',
@@ -84,7 +84,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, string>({
             id: 'membershipTypeId',
-            name: $t('%1PC'),
+            name: $t('%1LP'),
             getValue: m => m.membershipTypeId,
             format: (id) => {
                 const type = getMembershipType(id);
@@ -123,7 +123,7 @@ export function useGetPlatformMembershipColumns() {
         new Column<ObjectType, Date | null>({
             id: 'expiredDate',
             description: $t('Datum vóór de einddatum waarop de aansluitingstatus overschakelt op \'verlopen\''),
-            name: $t('%1O0'),
+            name: $t('%1J7'),
             getValue: m => m.expireDate,
             format: formatDate('N.v.t.'),
             getStyle: styleDate,
@@ -194,7 +194,7 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, Date>({
             id: 'createdAt',
-            name: $t('%1Oh'),
+            name: $t('%1Jc'),
             allowSorting: true,
             getValue: (v) => v.createdAt,
             format: formatDate(),
@@ -205,12 +205,12 @@ export function useGetPlatformMembershipColumns() {
         }),
         new Column<ObjectType, Date | null>({
             id: 'trialUntil',
-            name: $t(`%1O7`),
+            name: $t(`%1IH`),
             allowSorting: true,
             getValue: m => m.trialUntil,
             format: (value, width) => {
                 if (!value) {
-                    return $t('%1Oc');
+                    return $t('%1FW');
                 }
                 const date = formatDate()(value, width);
 
@@ -229,7 +229,7 @@ export function useGetPlatformMembershipColumns() {
             name: $t('%1Oo'),
             allowSorting: true,
             getValue: (v) => v.freeAmount,
-            format: v => v ? v.toString() : $t('%1Oc'),
+            format: v => v ? v.toString() : $t('%1FW'),
             getStyle: v => v ?  '' : 'gray',
             minimumWidth: 80,
             recommendedWidth: 220,
