@@ -22,6 +22,7 @@ import { useContext, useOrganization, usePlatform } from '../../hooks';
 import ChargeMembersView from '../../members/ChargeMembersView.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
+import { RegistrationInvitationEventBus } from '../../registrations/classes';
 import type { TableAction, TableActionSelection } from '../../tables/classes';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '../../tables/classes';
 import type { NavigationActions } from '../../types/NavigationActions';
@@ -573,80 +574,59 @@ export class MemberActionBuilder {
         return allActions;
     }
 
-    private getCategoryTreeOfGroupsLinkedToWaitingList(): null | {categoryTree: GroupCategoryTree, waitingList: Group} {
-        const waitingList = this.groups[0];
-        const isWaitingList = this.groups.length === 1 && waitingList.type === GroupType.WaitingList && this.organizations.length === 1;
-        if (!isWaitingList) {
+    getInviteMemberForGroupActionsWithGroups(eventGroups: Group[]): {actions: TableAction<PlatformMember>[], groups: Group[]} | null {
+        const categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess()});
+
+        if (!categoryTree) {
             return null;
         }
-
-        const organization = this.organizations[0];
-        const periods = organization.periods && this.context.auth.hasFullAccess() ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [organization.period];
-        const period = periods.find(p => p.period.id === waitingList.periodId);
-        if (!period) {
-            return null;
-        }
-
-        const categoryTree = period.getCategoryTree({
-            admin: true,
-            filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id
-        });
-
-        return {
-            categoryTree,
-            waitingList
-        }
-    }
-
-    getInviteMemberForGroupActions(eventGroups: Group[]): TableAction<PlatformMember>[] {
-        const result = this.getCategoryTreeOfGroupsLinkedToWaitingList();
-
-        if (!result) {
-            return [];
-        }
-
-        const {categoryTree, waitingList} = result;
 
         const enabled = this.hasWrite;
 
         const allGroups = categoryTree.getAllGroups().concat(eventGroups);
         if (allGroups.length === 0) {
-            return [];
+            return null;
         }
         
         if (allGroups.length === 1) {
             const group = allGroups[0];
-            return [
-                new InMemoryTableAction({
-                    name: $t('Toelaten om in te schrijven'),
-                    icon: 'success',
-                    priority: 15,
-                    groupIndex: 2,
-                    enabled,
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    // disable if already invited
-                    disableIfSome: (member: PlatformMember) => isMemberInvited(member, group),
-                    handler: async (members: PlatformMember[]) => {
-                        await this.inviteForGroup(members, group)
-                    }
-                }),
 
-                new InMemoryTableAction({
-                    name: $t('Toelating intrekken'),
-                    icon: 'canceled',
-                    priority: 14,
-                    groupIndex: 2,
-                    enabled,
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    // disable if not invited
-                    disableIfSome: (member: PlatformMember) => !isMemberInvited(member, group),
-                    handler: async (members: PlatformMember[]) => {
-                        await this.deleteInvitations(members, group)
-                    }
-                }),
-            ]
+            const actions = [
+                    new InMemoryTableAction({
+                        name: $t('Toelaten om in te schrijven'),
+                        icon: 'success',
+                        priority: 15,
+                        groupIndex: 2,
+                        enabled,
+                        needsSelection: true,
+                        allowAutoSelectAll: false,
+                        // disable if already invited
+                        disableIfSome: (member: PlatformMember) => isMemberInvited(member, group),
+                        handler: async (members: PlatformMember[]) => {
+                            await this.inviteForGroup(members, group)
+                        }
+                    }),
+
+                    new InMemoryTableAction({
+                        name: $t('Toelating intrekken'),
+                        icon: 'canceled',
+                        priority: 14,
+                        groupIndex: 2,
+                        enabled,
+                        needsSelection: true,
+                        allowAutoSelectAll: false,
+                        // disable if not invited
+                        disableIfSome: (member: PlatformMember) => !isMemberInvited(member, group),
+                        handler: async (members: PlatformMember[]) => {
+                            await this.deleteInvitations(members, group)
+                        }
+                    }),
+            ];
+
+            return {
+                actions,
+                groups: allGroups
+            }
         }
 
         const getChildActions = ({action, disableIfSome}: {action: (items: PlatformMember[], group: Group) => void | Promise<void>, disableIfSome: (item: PlatformMember, group: Group) => boolean}) => {
@@ -674,7 +654,7 @@ export class MemberActionBuilder {
             return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action, disableIfSome));
         }
 
-        return [
+        const actions = [
             new MenuTableAction({
                 name: $t(`Inschrijven toelaten voor`),
                 priority: 2,
@@ -702,6 +682,11 @@ export class MemberActionBuilder {
                 })
             })
         ];
+
+        return {
+            actions,
+            groups: allGroups
+        }
     }
 
     private getSmsAction() {
@@ -1250,6 +1235,10 @@ export async function inviteMembersForGroup({members, group, context, owner}: {m
                     member.member.registrationInvitations.push(invitation);
                 }
             }
+
+            if (responseInvitations.length > 0) {
+                RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set([group.id])}).catch(console.error);
+            }
         } catch (e) {
             console.error(e);
             Toast.fromError(e).show();
@@ -1291,8 +1280,9 @@ export async function deleteInvitationsForMembers({members, group, context, owne
                     break;
                 }
             }
-            
         }
+
+        RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set([group.id])}).catch(console.error);
     } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
@@ -1301,4 +1291,22 @@ export async function deleteInvitationsForMembers({members, group, context, owne
 
     const successMessage = members.length === 1 ? $t('Toelating voor {name} is ingetrokken', { name: members[0].member.name }) : $t('Toelatingen voor {count} leden zijn ingetrokken', { count: members.length });
     new Toast(successMessage, 'success green').show();
+}
+
+function getCategoryTreeOfGroupsLinkedToWaitingList({waitingList, organization, hasFullAccess}: {waitingList: Group, organization: Organization, hasFullAccess: boolean}): null | GroupCategoryTree {
+    const isWaitingList = waitingList.type === GroupType.WaitingList
+    if (!isWaitingList) {
+        return null;
+    }
+
+    const periods = organization.periods && hasFullAccess ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [organization.period];
+    const period = periods.find(p => p.period.id === waitingList.periodId);
+    if (!period) {
+        return null;
+    }
+
+    return period.getCategoryTree({
+        admin: true,
+        filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id
+    });
 }

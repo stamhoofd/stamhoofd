@@ -33,6 +33,7 @@ import { computed, ref } from 'vue';
 import { useGroupsObjectFetcher } from '../fetchers/useGroupsObjectsFetcher';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
+import { useRegistrationInvitationEventListener } from '../registrations';
 import { fetchAll } from '../tables';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from './helpers';
@@ -278,6 +279,8 @@ if (!organization.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!organization.value && props.group.organizationId !== organization.value.id;
 
+const groupsLinkedToWaitingList = ref<Group[]>([]);
+
 async function createActions(): Promise<void> {
     const results: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
@@ -321,7 +324,11 @@ async function createActions(): Promise<void> {
             console.error(e);
         }
 
-        results.push(...actionBuilder.getInviteMemberForGroupActions(eventGroups));
+        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups(eventGroups);
+        if (actionsWithGroups) {
+            results.push(...actionsWithGroups.actions);
+            groupsLinkedToWaitingList.value = actionsWithGroups.groups;
+        }
     }
 
     if (((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) && props.group?.type !== GroupType.WaitingList) {
@@ -332,4 +339,12 @@ async function createActions(): Promise<void> {
 }
 
 createActions().catch(console.error);
+
+if (waitingList.value) {
+    useRegistrationInvitationEventListener('updated', async (value) => {
+        if (groupsLinkedToWaitingList.value.some(group => value.groupIds.has(group.id))) {
+            tableObjectFetcher.reset(true, true);
+        }
+    })
+}
 </script>

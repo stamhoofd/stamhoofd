@@ -1,208 +1,226 @@
 <template>
-    <div id="webshop-overview" class="st-view background">
-        <STNavigationBar :title="title" />
+    <LoadingViewTransition>
+        <div v-if="invitationsCount !== null" id="webshop-overview" class="st-view background">
+            <STNavigationBar :title="title" />
 
-        <main>
-            <h1 class="style-navigation-title">
-                {{ title }}
+            <main>
+                <h1 class="style-navigation-title">
+                    {{ title }}
 
-                <span v-if="group.settings.period" class="title-suffix">
-                    {{ group.settings.period.nameShort }}
-                </span>
-            </h1>
-            <p v-if="canCreateEvent" class="info-box">
-                {{ $t('%1NE') }}
-                <span class="button text inherit-color" @click="convertToEvent">
-                    <span class="icon calendar" />
-                    <span>{{ $t('%1NF') }}</span>
-                </span>
-            </p>
-            <p v-if="isLocked" class="warning-box">
-                {{ $t('%8Q') }}
-            </p>
-            <p v-if="!isPublic" class="info-box">
-                {{ $t('%LU') }}
-            </p>
-            <p v-if="!isArchive && !isOpen" class="info-box">
-                {{ $t('%LV') }} <template v-if="hasFullPermissions">
-                    {{ $t('%LW') }}
-                </template>
-            </p>
-
-            <BillingWarningBox filter-types="members" class="data-table-prefix" />
-
-            <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
+                    <span v-if="group.settings.period" class="title-suffix">
+                        {{ group.settings.period.nameShort }}
+                    </span>
+                </h1>
+                <p v-if="canCreateEvent" class="info-box">
+                    {{ $t('%1NE') }}
+                    <span class="button text inherit-color" @click="convertToEvent">
+                        <span class="icon calendar" />
+                        <span>{{ $t('%1NF') }}</span>
+                    </span>
+                </p>
+                <p v-if="isLocked" class="warning-box">
+                    {{ $t('%8Q') }}
+                </p>
+                <p v-if="!isPublic" class="info-box">
+                    {{ $t('%LU') }}
+                </p>
+                <p v-if="!isArchive && !isOpen" class="info-box">
+                    {{ $t('%LV') }} <template v-if="hasFullPermissions">
+                        {{ $t('%LW') }}
                     </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%LX') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%LY') }}
-                    </p>
-                    <template #right>
-                        <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
+                </p>
 
-                <STListItem v-if="group.waitingList && auth.canAccessGroup(group.waitingList, PermissionLevel.Read)" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/clock.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%1IQ') }}
-                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('%cR') }}</span>
-                        <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('%1EN') }}</span>
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%LZ') }}
-                    </p>
-                    <template #right>
-                        <span v-if="group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.waitingList.getMemberCount()!) }}</span>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-for="responsibility of linkedResponsibilities" :key="responsibility.id" :selectable="true" class="left-center right-stack" @click="openResponsibility(responsibility)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ responsibility.name }} van {{ group.settings.name }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%La') }}
-                    </p>
-
-                    <template #right>
-                        <MemberCountSpan :filter="getResponsibilityFilter(responsibility)" class="style-description-small" />
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
-
-            <template v-if="hasFullPermissions">
-                <hr><h2>{{ $t('%xU') }}</h2>
+                <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
                 <STList class="illustration-list">
-                    <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/flag.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/group.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('%Lb') }}
+                            {{ $t('%LX') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('%Lc') }}
+                            {{ $t('%LY') }}
                         </p>
                         <template #right>
+                            <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.getMemberCount()!) }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
+                    <STListItem v-if="group.waitingList && auth.canAccessGroup(group.waitingList, PermissionLevel.Read)" :selectable="true" class="left-center right-stack" @click="navigate(Routes.WaitingList)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/lock.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('%Ld') }}
+                            {{ $t('%1IQ') }}
+                            <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('%cR') }}</span>
+                            <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('%1EN') }}</span>
                         </h2>
                         <p class="style-description">
-                            {{ $t('%Le') }}
+                            {{ $t('%LZ') }}
                         </p>
                         <template #right>
+                            <span v-if="group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(group.waitingList.getMemberCount()!) }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editPage(true)">
+                    <STListItem v-if="invitationsCount > 0" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Invitations)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/palette.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/user.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t("%Ln") }}
+                            {{ $t('Uitnodigingen') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('%Lf') }}
+                            {{ $t('Bekijk de uitnodigingen voor deze groep.') }}
                         </p>
                         <template #right>
+                            <span class="style-description-small">{{ formatInteger(invitationsCount) }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
 
-                    <STListItem data-testid="group-email-templates-button" :selectable="true" class="left-center" @click="editEmails(true)">
+                    <STListItem v-for="responsibility of linkedResponsibilities" :key="responsibility.id" :selectable="true" class="left-center right-stack" @click="openResponsibility(responsibility)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/responsibility.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('%1DD') }}
+                            {{ responsibility.name }} van {{ group.settings.name }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('%Lg') }}
+                            {{ $t('%La') }}
                         </p>
+
                         <template #right>
+                            <MemberCountSpan :filter="getResponsibilityFilter(responsibility)" class="style-description-small" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('%16X') }}</h2>
+                <template v-if="hasFullPermissions">
+                    <hr><h2>{{ $t('%xU') }}</h2>
 
-                <STList>
-                    <STListItem v-if="!isArchive && !isOpen" :selectable="true" @click="openGroup()">
-                        <h2 class="style-title-list">
-                            {{ $t('%Lh') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Li') }}
-                        </p>
-                        <template #right>
-                            <button type="button" class="button secundary green hide-smartphone">
-                                <span class="icon power" />
-                                <span>{{ $t('%28') }}</span>
-                            </button>
-                            <button type="button" class="button icon power only-smartphone" />
-                        </template>
-                    </STListItem>
+                    <STList class="illustration-list">
+                        <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/flag.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('%Lb') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Lc') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
 
-                    <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
-                        <h2 class="style-title-list">
-                            {{ $t('%Lj') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Lk') }}
-                        </p>
-                        <template #right>
-                            <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon power" />
-                                <span>{{ $t('%9b') }}</span>
-                            </button>
-                            <button type="button" class="button icon power only-smartphone" />
-                        </template>
-                    </STListItem>
+                        <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/lock.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('%Ld') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Le') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
 
-                    <STListItem :selectable="true" @click="deleteGroup()">
-                        <h2 class="style-title-list">
-                            {{ $t('%Ll') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Lm') }}
-                        </p>
-                        <template #right>
-                            <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon trash" />
-                                <span>{{ $t('%CJ') }}</span>
-                            </button>
-                            <button type="button" class="button icon trash only-smartphone" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
-        </main>
-    </div>
+                        <STListItem :selectable="true" class="left-center" @click="editPage(true)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/palette.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t("%Ln") }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Lf') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem data-testid="group-email-templates-button" :selectable="true" class="left-center" @click="editEmails(true)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('%1DD') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Lg') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
+
+                    <hr><h2>{{ $t('%16X') }}</h2>
+
+                    <STList>
+                        <STListItem v-if="!isArchive && !isOpen" :selectable="true" @click="openGroup()">
+                            <h2 class="style-title-list">
+                                {{ $t('%Lh') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Li') }}
+                            </p>
+                            <template #right>
+                                <button type="button" class="button secundary green hide-smartphone">
+                                    <span class="icon power" />
+                                    <span>{{ $t('%28') }}</span>
+                                </button>
+                                <button type="button" class="button icon power only-smartphone" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
+                            <h2 class="style-title-list">
+                                {{ $t('%Lj') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Lk') }}
+                            </p>
+                            <template #right>
+                                <button type="button" class="button secundary danger hide-smartphone">
+                                    <span class="icon power" />
+                                    <span>{{ $t('%9b') }}</span>
+                                </button>
+                                <button type="button" class="button icon power only-smartphone" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem :selectable="true" @click="deleteGroup()">
+                            <h2 class="style-title-list">
+                                {{ $t('%Ll') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%Lm') }}
+                            </p>
+                            <template #right>
+                                <button type="button" class="button secundary danger hide-smartphone">
+                                    <span class="icon trash" />
+                                    <span>{{ $t('%CJ') }}</span>
+                                </button>
+                                <button type="button" class="button icon trash only-smartphone" />
+                            </template>
+                        </STListItem>
+                    </STList>
+                </template>
+            </main>
+        </div>
+    </LoadingViewTransition>
 </template>
 
 <script lang="ts" setup>
@@ -236,8 +254,10 @@ import type { GroupCategoryTree, MemberResponsibility, Organization, PlatformEve
 import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupSettings, GroupStatus, NamedObject, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
+import { countAll, LoadingViewTransition, RegistrationInvitationsTableView, useRegistrationInvitationEventListener } from '@stamhoofd/components';
+import { useRegistrationInvitationsObjectFetcher } from '@stamhoofd/components/fetchers/useRegistrationInvitationsObjectFetcher';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
 
@@ -264,6 +284,8 @@ const getGroupsById = useGetGroupsById();
 const getPeriods = useGetPeriods();
 const featureFlag = useFeatureFlag();
 
+const invitationsCount = ref<number | null>(null);
+
 // should be reactive because this can change
 const canCreateEvent = computed(() => checkCanCreateEvent(props.group));
 
@@ -272,6 +294,7 @@ enum Routes {
     Members = 'Members',
     WaitingList = 'WaitingList',
     Responsibility = 'Responsibility',
+    Invitations = 'Invitations',
 }
 
 defineRoutes([{
@@ -282,6 +305,17 @@ defineRoutes([{
         return {
             group: props.group,
             organization: organization.value,
+        };
+    },
+},
+{
+    url: 'uitnodigingen',
+    name: Routes.Invitations,
+    component: RegistrationInvitationsTableView,
+    paramsToProps: () => {
+        return {
+            group: props.group,
+            estimatedRows: invitationsCount.value,
         };
     },
 },
@@ -901,4 +935,27 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         group,
     });
 }
+
+const invitationsFetcher = useRegistrationInvitationsObjectFetcher({
+    requiredFilter: {
+        groupId: props.group.id
+    }
+});
+
+async function fetchInvitationCount() {
+    try {
+        invitationsCount.value = await countAll(invitationsFetcher);
+    } catch (e) {
+        console.error(e);
+        invitationsCount.value = 0;
+    }
+}
+
+fetchInvitationCount().catch(console.error);
+
+useRegistrationInvitationEventListener('updated', async (value) => {
+    if (value.groupIds.has(props.group.id)) {
+        fetchInvitationCount().catch(console.error);
+    }
+});
 </script>

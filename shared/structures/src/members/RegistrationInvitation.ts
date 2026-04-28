@@ -2,7 +2,6 @@ import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDec
 import { v4 as uuidv4 } from 'uuid';
 import { GroupType } from '../GroupType.js';
 import { TranslatedString } from '../TranslatedString.js';
-import { TinyMember } from './Member.js';
 
 /**
  * Invitation to register for a group. If an invitation exists the member can always register even if he does not meet the requirements of the group.
@@ -33,6 +32,31 @@ export class InvitationGroupData extends AutoEncoder {
     isClosed: boolean;
 }
 
+export class InvitationMemberData extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    firstName = '';
+
+    @field({ decoder: StringDecoder })
+    lastName = '';
+
+    // in case there are members with the same name
+    @field({ decoder: DateDecoder, nullable: true })
+    birthDay: Date | null;
+
+    get name() {
+        if (!this.firstName) {
+            return this.lastName;
+        }
+        if (!this.lastName) {
+            return this.firstName;
+        }
+        return this.firstName + ' ' + this.lastName;
+    }
+}
+
 /**
  * Invitation to register for a group. If an invitation exists the member can always register even if he does not meet the requirements of the group.
  * Used for allowing members who are on a waiting list to register for a group.
@@ -44,8 +68,8 @@ export class RegistrationInvitation extends AutoEncoder {
     @field({ decoder: InvitationGroupData })
     group: InvitationGroupData;
 
-    @field({ decoder: TinyMember })
-    member: TinyMember;
+    @field({ decoder: InvitationMemberData })
+    member: InvitationMemberData;
 
     @field({ decoder: StringDecoder })
     organizationId: string;
