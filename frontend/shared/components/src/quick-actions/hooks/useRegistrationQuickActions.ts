@@ -4,7 +4,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { MemberManager } from '@stamhoofd/networking/MemberManager';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { Group, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Group, MemberRegistrationInvitation, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -189,51 +189,53 @@ export function useRegistrationQuickActions(): QuickActions {
 
             // todo: sort on createdAt?
             for (const member of memberManager.family.members) {
-                
-                const invitations = member.member.registrationInvitations.filter(i => !i.group.isClosed && i.group.type === GroupType.Membership);
-                if (invitations.length === 0) {
+                const invitationData: {invitation: MemberRegistrationInvitation, group: Group, organization: Organization}[] = member.member.registrationInvitations
+                    .filter(i => !i.group.isClosed && i.group.type === GroupType.Membership)
+                    .sort((a, b) => a.group.name.toString().localeCompare(b.group.name.toString()))
+                    .flatMap((invitation) => {
+                        const organization = memberManager.family.getOrganization(invitation.organizationId);
+                        if (!organization) {
+                            return [];
+                        }
+
+                        const group = organization.period.groups.find(g => g.id === invitation.group.id);
+                        if (!group) {
+                            return [];
+                        }
+
+                        return [{
+                            invitation,
+                            group,
+                            organization
+                        }];
+                    })
+                    .filter(({group, organization}) => {
+                        return member.canRegister(group, organization);
+                    })
+
+                if (invitationData.length === 0) {
                     continue;
                 }
 
-                invitations.sort((a, b) => a.group.name.toString().localeCompare(b.group.name.toString()));
+                const groupsText = Formatter.joinLast(invitationData.map(i => i.invitation.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
 
-                const groupsText = Formatter.joinLast(invitations.map(i => i.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
+                const invitationDataForIcon = invitationData.find(({group}) => group.squareImage !== null) ?? invitationData[0];
 
-                let groupForIcon: Group | undefined = undefined;
-                let defaultOrganization: Organization | undefined = undefined;
-
-                // find the group to show in the icon
-                for (const invitation of invitations) {
-                    const organization = memberManager.family.getOrganization(invitation.organizationId);
-                    if (organization) {
-                        defaultOrganization = organization;
-
-                        const group = organization.period.groups.find(g => g.id === invitation.group.id);
-                        if (group) {
-                            groupForIcon = group;
-                            if (group.squareImage !== null) {
-                                // stop if a group with an image is found
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (!groupForIcon) {
+                if (!invitationDataForIcon) {
                     continue;
                 }
 
                 arr.push({
                     leftComponent: RegistrationInvitationIcon,
                     leftProps: {
-                        group: groupForIcon,
-                        organization: defaultOrganization,
+                        group: invitationDataForIcon.group,
+                        organization: invitationDataForIcon.organization,
                     },
                     prefix: $t('Uitnodiging'),
                     title: $t('Schrijf {firstName} in voor {groups}', {firstName: member.member.firstName, groups: groupsText}),
                     description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),
                     action: () => {
-                        chooseGroupForMember({member, defaultOrganization, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}}).catch(console.error);
+                        chooseGroupForMember({member, defaultOrganization: invitationDataForIcon.organization, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}}).catch(console.error);
                     },
                 });
             }
@@ -249,6 +251,10 @@ export function useRegistrationQuickActions(): QuickActions {
                 for (const event of invited) {
                     if (!event.group) {
                         // should not happen
+                        continue;
+                    }
+
+                    if (!canRegisterForEvent({event, memberManager})) {
                         continue;
                     }
                     
@@ -270,13 +276,19 @@ export function useRegistrationQuickActions(): QuickActions {
                         break;
                     }
 
-                    const quickAction = createQuickActionForEvent({event, memberManager, show});
-                    if (quickAction === null) {
+                    if (!canRegisterForEvent({event, memberManager})) {
                         continue;
                     }
 
                     suggestionCount += 1;
-                    arr.push(quickAction);
+                    arr.push({
+                        leftComponent: EventIcon,
+                        leftProps: { event },
+                        prefix: $t('Aankomende activiteit'),
+                        title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
+                        description: Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate)),
+                        action: () => openEvent({event, show}),
+                    });
                 }
             }
 
@@ -323,7 +335,7 @@ function openEvent({event, show}: {event: Event, show: ReturnType<typeof useShow
     }).catch(console.error);
 }
 
-function createQuickActionForEvent({event, memberManager, show}: {event: Event, memberManager: MemberManager, show: ReturnType<typeof useShow>} ): QuickAction | null {
+function canRegisterForEvent({event, memberManager}: {event: Event, memberManager: MemberManager}): boolean {
     const group = event.group;
 
     if (group) {
@@ -335,7 +347,7 @@ function createQuickActionForEvent({event, memberManager, show}: {event: Event, 
         const organization = memberManager.family.getOrganization(group.organizationId);
         if (!organization) {
             console.error(`Could not find organization with id ${group.organizationId} for group with id ${group.id}`);
-            return null;
+            return false;
         }
         const canSomeMemberRegister = memberManager.family.members.some((member) => {
             if (member.canRegister(group, organization) || member.canRegisterForWaitingList(group, organization)) {
@@ -346,24 +358,15 @@ function createQuickActionForEvent({event, memberManager, show}: {event: Event, 
         });
 
         if (!canSomeMemberRegister) {
-            return null;
+            return false;
         }
     }
     else if (!event.webshopId) {
         // event should have webshop or group
-        return null;
+        return false;
     }
 
-    const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
-
-    return {
-        leftComponent: EventIcon,
-        leftProps: { event },
-        prefix: $t('Aankomende activiteit'),
-        title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
-        description,
-        action: () => openEvent({event, show}),
-    };
+    return true;
 }
 
 export async function getFeaturedEventsForFamily({ context, family, owner }: { context: SessionContext; family: PlatformFamily; owner?: object }) {
