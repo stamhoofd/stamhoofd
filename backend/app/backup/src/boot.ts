@@ -97,7 +97,7 @@ const start = async () => {
 
     // Register crons
     await import('./crons.js');
-    startCrons();
+    startCrons({allowReadOnly: true});
 
     // Clean backups on boot (bit faster to retrieve the timestamp of the last backup for the health endpoint)
     await cleanBackups();

@@ -87,13 +87,13 @@ function areCronsRunning(): boolean {
     return false;
 }
 
-async function crons() {
+async function crons(options: {allowReadOnly: boolean}) {
     if (STAMHOOFD.CRONS_DISABLED) {
         console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('Crons are disabled. Make sure to enable them in the environment variables.').addClass('error'));
         return;
     }
 
-    if (await checkReadOnly()) {
+    if (!options.allowReadOnly && await checkReadOnly()) {
         console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'));
         return;
     }
@@ -119,7 +119,7 @@ async function crons() {
         if (STAMHOOFD.environment !== 'development') {
             await sleep(10 * 1000);
 
-            if (await checkReadOnly()) {
+            if (!options.allowReadOnly && await checkReadOnly()) {
                 console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are interrupted.').addClass('error'));
                 return;
             }
@@ -130,15 +130,15 @@ async function crons() {
 
 let cronInterval: NodeJS.Timeout | null = null;
 
-export function startCrons() {
+export function startCrons(options: {allowReadOnly: boolean} = {allowReadOnly: false}) {
     if (registeredCronJobs.length === 0) {
         throw new Error('No crons registered');
     }
 
     cronInterval = setInterval(() => {
-        crons().catch(console.error);
+        crons(options).catch(console.error);
     }, STAMHOOFD.environment === 'development' ? 10 * 1000 : 5 * 60 * 1000);
-    crons().catch(console.error);
+    crons(options).catch(console.error);
 }
 
 export function stopCrons() {
