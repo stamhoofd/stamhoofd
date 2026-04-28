@@ -3,7 +3,7 @@ import { PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, OrganizationRegistrationPeriod, User } from '@stamhoofd/models';
 import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, Organization, Payment, Registration, Webshop } from '@stamhoofd/models';
-import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationInvitationRequest, ResourcePermissions } from '@stamhoofd/structures';
+import type { GroupCategory, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionLevel, PermissionsResourceType, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
@@ -1893,68 +1893,5 @@ export class AdminPermissionChecker {
 
     canManagePlatformAdmins() {
         return this.hasPlatformFullAccess();
-    }
-
-    /**
-     * Will throw if not allowed to invite.
-     * @param invitation
-     * @param organizationId id of organization to invite for, should match the organizationId in the invitation
-     */
-    async checkCanCreateRegistrationInvitation(invitation: RegistrationInvitationRequest, organizationId: string) {
-        const group = await Group.getByID(invitation.groupId);
-
-        if (!group || group.organizationId !== organizationId || !await this.canAccessGroup(group, PermissionLevel.Write)) {
-            throw this.error($t(`Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.`));
-        }
-
-        // cannot invite for waiting list
-        if (group.type === GroupType.WaitingList) {
-            throw new SimpleError({
-                code: 'bad_group',
-                statusCode: 400,
-                message: 'Not allowed to invite for waiting list',
-            });
-        }
-
-        const waitingListId: string = invitation.waitingListId;
-
-        // waiting list should be linked to the group
-        if (group.waitingListId !== waitingListId) {
-            throw new SimpleError({
-                code: 'bad_group',
-                statusCode: 400,
-                message: 'The group is not linked with the waiting list',
-            })
-        }
-
-        const waitingList = await Group.getByID(waitingListId);
-        if (!waitingList || waitingList.type !== GroupType.WaitingList) {
-            throw new SimpleError({
-                code: 'not_found',
-                statusCode: 404,
-                message: 'No waiting list with this id is found',
-            });
-        }
-
-        const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
-        
-        if (!member
-            // in userMode 'organization' we can only invite members from the same organization
-            || (STAMHOOFD.userMode === 'organization' && member.organizationId !== organizationId)
-            // read access is suficient
-            || !await this.canAccessMember(member, PermissionLevel.Read)
-            ) {
-                throw this.error($t(`Je hebt geen toegansrechten om dit lid uit te nodigen.`));
-        }
-
-        // cannot invite if already registered
-        if (member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
-            throw new SimpleError({
-                code: 'bad_group',
-                statusCode: 400,
-                message: 'The member is already registered for this group',
-                human: $t('Dit lid is al ingeschreven voor deze groep'),
-            })
-        }
     }
 }

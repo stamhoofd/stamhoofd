@@ -17,10 +17,6 @@ export class RegistrationInvitationRequest extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     memberId: string;
-
-    // For now every request should have a waitingListId
-    @field({ decoder: StringDecoder })
-    waitingListId: string;
 }
 
 export class InvitationGroupData extends AutoEncoder {
@@ -54,9 +50,6 @@ export class RegistrationInvitation extends AutoEncoder {
     @field({ decoder: StringDecoder })
     organizationId: string;
 
-    @field({ decoder: StringDecoder, nullable: true })
-    waitingListId: string | null;
-
     @field({ decoder: DateDecoder })
     createdAt: Date = new Date();
 }
@@ -74,9 +67,6 @@ export class MemberRegistrationInvitation extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     organizationId: string;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    waitingListId: string | null;
 
     @field({ decoder: DateDecoder })
     createdAt: Date = new Date();

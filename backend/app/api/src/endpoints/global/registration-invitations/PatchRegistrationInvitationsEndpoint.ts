@@ -3,10 +3,10 @@ import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encodin
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
-import { PermissionLevel, RegistrationInvitationRequest } from '@stamhoofd/structures';
+import { GroupType, PermissionLevel, RegistrationInvitationRequest } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, RegistrationInvitation } from '@stamhoofd/models';
+import { Group, Member, RegistrationInvitation } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 
@@ -42,7 +42,6 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 .andWhere('memberId', invitation.memberId).first(false);
 
             if (duplicate) {
-                duplicate.waitingListId = invitation.waitingListId;
                 duplicate.createdAt = invitation.createdAt;
                 await duplicate.save();
             }
@@ -65,14 +64,13 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
 
         const puts = request.body.getPuts();
         for (const { put } of puts) {
-            await Context.auth.checkCanCreateRegistrationInvitation(put, organization.id);
+            await this.checkCanCreateRegistrationInvitation(put, organization.id);
 
             const invitation = new RegistrationInvitation();
             invitation.id = put.id;
             invitation.organizationId = organization.id;
             invitation.groupId = put.groupId;
             invitation.memberId = put.memberId;
-            invitation.waitingListId = put.waitingListId;
 
             try {
                 await invitation.save();
@@ -131,5 +129,48 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
         return new Response(
             await AuthenticatedStructures.registrationInvitations(invitations),
         );
+    }
+
+    /**
+     * Will throw if not allowed to invite.
+     * @param invitation
+     * @param organizationId id of organization to invite for, should match the organizationId in the invitation
+     */
+    private async checkCanCreateRegistrationInvitation(invitation: RegistrationInvitationRequest, organizationId: string) {
+        const group = await Group.getByID(invitation.groupId);
+
+        if (!group || group.organizationId !== organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+            throw Context.auth.error($t(`Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.`));
+        }
+
+        // cannot invite for waiting list
+        if (group.type === GroupType.WaitingList) {
+            throw new SimpleError({
+                code: 'bad_group',
+                statusCode: 400,
+                message: 'Not allowed to invite for waiting list',
+            });
+        }
+
+        const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
+        
+        if (!member
+            // in userMode 'organization' we can only invite members from the same organization
+            || (STAMHOOFD.userMode === 'organization' && member.organizationId !== organizationId)
+            // read access is suficient
+            || !await Context.auth.canAccessMember(member, PermissionLevel.Read)
+            ) {
+                throw Context.auth.error($t(`Je hebt geen toegansrechten om dit lid uit te nodigen.`));
+        }
+
+        // cannot invite if already registered
+        if (member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
+            throw new SimpleError({
+                code: 'bad_group',
+                statusCode: 400,
+                message: 'The member is already registered for this group',
+                human: $t('Dit lid is al ingeschreven voor deze groep'),
+            })
+        }
     }
 }

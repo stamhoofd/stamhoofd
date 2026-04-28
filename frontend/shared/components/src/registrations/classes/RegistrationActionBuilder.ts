@@ -786,11 +786,10 @@ export class RegistrationActionBuilder {
         }
     }
 
-    private async inviteForGroup(registrations: PlatformRegistration[], group: Group, waitingListId: string) {
+    private async inviteForGroup(registrations: PlatformRegistration[], group: Group) {
         return await inviteMembersForGroup({
             members: getUniqueMembersFromRegistrations(registrations),
             group,
-            waitingListId,
             context: this.context,
             owner: this.owner
         })
@@ -835,7 +834,7 @@ export class RegistrationActionBuilder {
                     // disable if already invited
                     disableIfSome: (registration: PlatformRegistration) => isMemberInvited(registration.member, group),
                     handler: async (registrations: PlatformRegistration[]) => {
-                        await this.inviteForGroup(registrations, group, waitingList.id)
+                        await this.inviteForGroup(registrations, group)
                     }
                 }),
 
@@ -892,7 +891,7 @@ export class RegistrationActionBuilder {
                 childActions: () => getChildActions({
                     // disable if already invited
                     disableIfSome: (registration: PlatformRegistration, group: Group) => isMemberInvited(registration.member, group),
-                    action: async (registrations, group) => await this.inviteForGroup(registrations, group, waitingList.id)
+                    action: async (registrations, group) => await this.inviteForGroup(registrations, group)
                 })
             }),
             new MenuTableAction({

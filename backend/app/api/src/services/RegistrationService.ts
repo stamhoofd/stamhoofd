@@ -55,7 +55,7 @@ export const RegistrationService = {
         await registration.save();
         RegistrationService.scheduleStockUpdate(registration.id);
 
-        await this.handleInvitations(registration);
+        await this.handleWaitingListRegistrationAndInvitation(registration);
 
         await PlatformMembershipService.updateMembershipsForId(registration.memberId);
 
@@ -83,7 +83,7 @@ export const RegistrationService = {
      * Will not throw if it fails.
      * @param registration 
      */
-    async handleInvitations(registration: Registration): Promise<void> {
+    async handleWaitingListRegistrationAndInvitation(registration: Registration): Promise<void> {
         const group = await Group.getByID(registration.groupId);
 
         if (!group || group.type === GroupType.WaitingList) {
@@ -105,11 +105,6 @@ export const RegistrationService = {
         }
 
         if (invitation) {
-            if (invitation.waitingListId) {
-                // we should remove the member from this waiting list later on
-                waitingListIds.add(invitation.waitingListId);
-            }
-
             // delete the invitation
             try {
                 await invitation.delete();
@@ -119,31 +114,21 @@ export const RegistrationService = {
             }
         }
 
-        // unsubscribe from waiting lists (should only be 1)
-        for (const waitingListId of waitingListIds.values()) {
+        // unsubscribe from waiting list
+        if (group.waitingListId) {
             try {
-                // count all invitations for the waiting list for this member
-                const invitationsForMemberForWaitingList = await RegistrationInvitation.select()
-                    .where('memberId', registration.memberId)
-                    .where('waitingListId', waitingListId)
-                    .count();
-
-                // only unsubscribe if the member has no other invitations from the waiting list
-                if (invitationsForMemberForWaitingList > 0) {
-                    continue;
-                }
-            
                 // get the registration for the waiting list (should only be 1)
                 const waitingListRegistration = await Registration.select()
-                    .where('groupId', waitingListId)
-                    .andWhere('memberId', registration.memberId)
-                    .andWhereNot('registeredAt', null)
+                    .where('groupId', group.waitingListId)
+                    .where('memberId', registration.memberId)
+                    .where('deactivatedAt', null)
+                    .whereNot('registeredAt', null)
                     .first(false);
                 
                 if (waitingListRegistration) {
                     // unsubscribe for waiting list (waiting lists cannot have a price -> balance items should not be updated)
                     await RegistrationService.deactivate(waitingListRegistration);
-                    await GroupService.updateOccupancy(waitingListId);
+                    await GroupService.updateOccupancy(group.waitingListId);
                 }
             } catch (e) {
                 // an error should not stop other logic (impact of an error is low)

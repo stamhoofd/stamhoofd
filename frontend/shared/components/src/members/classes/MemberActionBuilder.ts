@@ -628,7 +628,7 @@ export class MemberActionBuilder {
                     // disable if already invited
                     disableIfSome: (member: PlatformMember) => isMemberInvited(member, group),
                     handler: async (members: PlatformMember[]) => {
-                        await this.inviteForGroup(members, group, waitingList.id)
+                        await this.inviteForGroup(members, group)
                     }
                 }),
 
@@ -685,7 +685,7 @@ export class MemberActionBuilder {
                 childActions: () => getChildActions({
                     // disable if already invited
                     disableIfSome: (member: PlatformMember, group: Group) => isMemberInvited(member, group),
-                    action: async (members, group) => await this.inviteForGroup(members, group, waitingList.id)
+                    action: async (members, group) => await this.inviteForGroup(members, group)
                 })
             }),
             new MenuTableAction({
@@ -1015,11 +1015,10 @@ export class MemberActionBuilder {
         });
     }
 
-    private async inviteForGroup(members: PlatformMember[], group: Group, waitingListId: string) {
+    private async inviteForGroup(members: PlatformMember[], group: Group) {
         return await inviteMembersForGroup({
             members,
             group,
-            waitingListId,
             context: this.context,
             owner: this.owner
         })
@@ -1174,7 +1173,7 @@ function isMemberRegistered(member: PlatformMember, group: Group) {
     return member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null);
 }
 
-export async function inviteMembersForGroup({members, group, waitingListId, context, owner}: {members: PlatformMember[], group: Group, waitingListId: string, context: SessionContext, owner: any}) {
+export async function inviteMembersForGroup({members, group, context, owner}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any}) {
         if (members.length === 0) {
             return;
         }
@@ -1199,7 +1198,6 @@ export async function inviteMembersForGroup({members, group, waitingListId, cont
             const invitation = RegistrationInvitationRequest.create({
                 groupId: group.id,
                 memberId: member.member.id,
-                waitingListId
             })
 
             invitations.addPut(invitation);

@@ -1251,8 +1251,7 @@ export class AuthenticatedStructures {
                     isClosed: group.closed
                 }),
                 organizationId: invitation.organizationId,
-                createdAt: invitation.createdAt,
-                waitingListId: invitation.waitingListId
+                createdAt: invitation.createdAt
             })
 
             let array = results.get(invitation.memberId);
@@ -1304,8 +1303,7 @@ export class AuthenticatedStructures {
                     firstName: member.firstName,
                     lastName: member.lastName
                 }),
-                createdAt: invitation.createdAt,
-                waitingListId: invitation.waitingListId
+                createdAt: invitation.createdAt
             });
         });
     }

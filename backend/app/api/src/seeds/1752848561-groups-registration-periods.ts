@@ -440,7 +440,6 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
                 invitation.memberId = registration.memberId;
                 invitation.organizationId = organization.id;
                 invitation.createdAt = registration.createdAt;
-                invitation.waitingListId = waitingList.id;
 
                 // deprecated -> set to false
                 registration.canRegister = false;
@@ -456,7 +455,14 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
         if (!dryRun) {
             await registration.save();
             if (invitation) {
-                await invitation.save();
+                try {
+                    await invitation.save();
+                } catch (e) {
+                    // do not throw if duplicate
+                    if (e.code !== 'ER_DUP_ENTRY') {
+                        throw e;
+                    }
+                }
             }
         }
     }

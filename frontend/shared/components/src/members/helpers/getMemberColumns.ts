@@ -440,9 +440,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         }),
     );
 
-    if (waitingList && group) {
-        const waitingListId = group.id;
-
+    if (waitingList) {
         allColumns.push(
             new Column<ObjectType, string[]>({
                 name: $t('Toegelaten voor'),
@@ -453,7 +451,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     if (organization) {
                         return v.member.registrationInvitations.filter(r => r.organizationId === organization.id).map(i => i.group.name.toString());
                     }
-                    return v.member.registrationInvitations.filter(i => i.waitingListId === waitingListId).map(i => i.group.name.toString());
+                    return v.member.registrationInvitations.map(i => i.group.name.toString());
                 },
                 format: (v) => {
                     if (v.length === 0) {
