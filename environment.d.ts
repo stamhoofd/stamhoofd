@@ -45,6 +45,12 @@ declare global {
         api: string; // requires wildcard prefix DNS
         rendererApi: string;
 
+        /**
+         * @deprecated
+         * Removed in v2
+         */
+        admin?: string;
+
         // MX + SPF (both for email) + A record for webshops
         webshopCname?: string;
 
