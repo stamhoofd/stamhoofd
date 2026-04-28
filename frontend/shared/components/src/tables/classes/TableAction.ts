@@ -70,7 +70,7 @@ export abstract class TableAction<T extends { id: string }> {
         }
     }
 
-    isDisabled(hasSelection: boolean) {
+    isDisabled(hasSelection: boolean, _selection: TableActionSelection<T>) {
         if (!this.allowAutoSelectAll && !hasSelection && this.needsSelection) {
             return true;
         }
@@ -139,14 +139,48 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
     handler: (item: T[]) => Promise<void> | void;
     fetchLimitSettings?: FetchLimitSettings;
 
-    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[]) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings }) {
+    /**
+     * Disable the action if some items in the selection match this filter.
+     * If an async fetchAll is needed disableIfSome will be ignored.
+     */
+    disableIfSome?: (item: T) => boolean;
+
+    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[]) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings, disableIfSome?: (item: T) => boolean }) {
         super(settings);
         this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
         this.fetchLimitSettings = settings.fetchLimitSettings;
+        this.disableIfSome = settings.disableIfSome;
+    }
+
+    override isDisabled(hasSelection: boolean, selection: TableActionSelection<T>) {
+        if (super.isDisabled(hasSelection, selection)) {
+            return true;
+        }
+
+        if (!this.disableIfSome) {
+            return false;
+        }
+
+        // disable if some items match the disableIfSome filter
+        // if an async fetchAll is needed always return false
+        return this.getSelectionSync(selection).some(this.disableIfSome);
     }
 
     async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions<T>) {
         return await fetchAll(initialRequest, objectFetcher, { ...options, fetchLimitSettings: this.fetchLimitSettings });
+    }
+
+    private getSelectionSync(selection: TableActionSelection<T>) {        
+        if (selection.cachedAllValues) {
+            return selection.cachedAllValues;
+        }
+
+        if (selection.markedRows.size && selection.markedRowsAreSelected === true) {
+            // No async needed
+            return Array.from(selection.markedRows.values());
+        }
+
+        return [];
     }
 
     async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions<T>) {

@@ -20,13 +20,13 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 import Checkbox from '#inputs/Checkbox.vue';
 import ContextMenuItemView from '#overlays/ContextMenuItemView.vue';
 import ContextMenuLine from '#overlays/ContextMenuLine.vue';
 import ContextMenuView from '#overlays/ContextMenuView.vue';
 import { Toast } from '#overlays/Toast.ts';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
 
 import type { TableAction, TableActionSelection } from './classes';
 
@@ -55,7 +55,7 @@ export default class TableActionsContextMenu extends VueComponent {
     selection!: TableActionSelection<any>;
 
     isDisabled(action: TableAction<any>) {
-        return action.isDisabled(this.hasSelection);
+        return action.isDisabled(this.hasSelection, this.selection);
     }
 
     unmounted() {

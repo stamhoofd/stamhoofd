@@ -387,9 +387,9 @@ async function createActions(): Promise<void> {
         }
 
         results.push(...actionBuilder.getInviteMemberForGroupActions(eventGroups));
-
-        actions.value = results;
     }
+
+    actions.value = results;
 }
 
 createActions().catch(console.error);

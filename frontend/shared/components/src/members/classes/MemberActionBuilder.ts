@@ -625,6 +625,8 @@ export class MemberActionBuilder {
                     enabled,
                     needsSelection: true,
                     allowAutoSelectAll: false,
+                    // disable if already invited
+                    disableIfSome: (member: PlatformMember) => isMemberInvited(member, group),
                     handler: async (members: PlatformMember[]) => {
                         await this.inviteForGroup(members, group, waitingList.id)
                     }
@@ -638,6 +640,8 @@ export class MemberActionBuilder {
                     enabled,
                     needsSelection: true,
                     allowAutoSelectAll: false,
+                    // disable if not invited
+                    disableIfSome: (member: PlatformMember) => !isMemberInvited(member, group),
                     handler: async (members: PlatformMember[]) => {
                         await this.deleteInvitations(members, group)
                     }
@@ -645,7 +649,7 @@ export class MemberActionBuilder {
             ]
         }
 
-        const getChildActions = (action: (items: PlatformMember[], group: Group) => void | Promise<void>) => {
+        const getChildActions = ({action, disableIfSome}: {action: (items: PlatformMember[], group: Group) => void | Promise<void>, disableIfSome: (item: PlatformMember, group: Group) => boolean}) => {
             const childActions = [];
 
             if (eventGroups.length > 0) {
@@ -658,6 +662,7 @@ export class MemberActionBuilder {
                             name: g.settings.name.toString(),
                             needsSelection: true,
                             allowAutoSelectAll: false,
+                            disableIfSome: (item) => disableIfSome(item, g),
                             handler: async (items: PlatformMember[]) => {
                                 await action(items, g);
                             },
@@ -666,7 +671,7 @@ export class MemberActionBuilder {
                 }));
             }
 
-            return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action));
+            return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action, disableIfSome));
         }
 
         return [
@@ -677,7 +682,11 @@ export class MemberActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
-                childActions: () => getChildActions(async (members, group) => await this.inviteForGroup(members, group, waitingList.id))
+                childActions: () => getChildActions({
+                    // disable if already invited
+                    disableIfSome: (member: PlatformMember, group: Group) => isMemberInvited(member, group),
+                    action: async (members, group) => await this.inviteForGroup(members, group, waitingList.id)
+                })
             }),
             new MenuTableAction({
                 name: $t(`Toelating intrekken voor`),
@@ -686,7 +695,11 @@ export class MemberActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
-                childActions: () => getChildActions(async (members, group) => await this.deleteInvitations(members, group))
+                childActions: () => getChildActions({
+                    // disable if not invited
+                    disableIfSome: (member: PlatformMember, group: Group) => !isMemberInvited(member, group),
+                    action: async (members, group) => await this.deleteInvitations(members, group)
+                })
             })
         ];
     }
@@ -1022,38 +1035,42 @@ export class MemberActionBuilder {
     }
 }
 
-export function getActionsForCategory<T extends { id: string }>(category: GroupCategoryTree, action: (items: T[], group: Group) => void | Promise<void>): TableAction<T>[] {
-    const r = [
-        ...category.categories.map((c) => {
-            return new MenuTableAction({
-                name: c.settings.name,
-                groupIndex: 2,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: c.groups.length > 0 || c.categories.length > 0,
-                childActions: getActionsForCategory(c, action),
-            });
-        }),
-        ...category.groups.map((g) => {
-            return new InMemoryTableAction({
-                name: g.settings.name.toString(),
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                handler: async (items: T[]) => {
-                    await action(items, g);
-                },
-            });
-        }),
-    ];
+export function getActionsForCategory<T extends { id: string }>(
+    category: GroupCategoryTree,
+    action: (items: T[], group: Group) => void | Promise<void>,
+    disableIfSome?: (item: T, group: Group) => boolean): TableAction<T>[] {
+        const r = [
+            ...category.categories.map((c) => {
+                return new MenuTableAction({
+                    name: c.settings.name,
+                    groupIndex: 2,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    enabled: c.groups.length > 0 || c.categories.length > 0,
+                    childActions: getActionsForCategory(c, action, disableIfSome),
+                });
+            }),
+            ...category.groups.map((g) => {
+                return new InMemoryTableAction({
+                    name: g.settings.name.toString(),
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    disableIfSome: disableIfSome ? (item) => disableIfSome(item, g) : undefined,
+                    handler: async (items: T[]) => {
+                        await action(items, g);
+                    },
+                });
+            }),
+        ];
 
-    if (r.filter(rr => rr.enabled).length === 1) {
-        const rr = r.filter(rr => rr.enabled)[0];
-        if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
-            return rr.childActions;
+        if (r.filter(rr => rr.enabled).length === 1) {
+            const rr = r.filter(rr => rr.enabled)[0];
+            if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
+                return rr.childActions;
+            }
         }
-    }
 
-    return r;
+        return r;
 }
 
 export async function presentEditMember({ member, present, context }: { member: PlatformMember; present: ReturnType<typeof usePresent>; context: SessionContext }) {
@@ -1149,6 +1166,13 @@ export async function presentExportMembersToPdf({ members, platform, organizatio
     });
 }
 
+function isMemberInvited(member: PlatformMember, group: Group) {
+    return member.member.registrationInvitations.some(invitation => invitation.group.id === group.id);
+}
+
+function isMemberRegistered(member: PlatformMember, group: Group) {
+    return member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null);
+}
 
 export async function inviteMembersForGroup({members, group, waitingListId, context, owner}: {members: PlatformMember[], group: Group, waitingListId: string, context: SessionContext, owner: any}) {
         if (members.length === 0) {
@@ -1160,13 +1184,13 @@ export async function inviteMembersForGroup({members, group, waitingListId, cont
 
         const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
         for (const member of members) {
-            if (member.member.registrationInvitations.some(invitation => invitation.group.id === group.id)) {
+            if (isMemberInvited(member, group)) {
                 // already invited
                 alreadyInvitedCount += 1;
                 continue;
             }
 
-            if (member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
+            if (isMemberRegistered(member, group)) {
                 // already registered
                 alreadyRegisteredCount += 1;
                 continue;
