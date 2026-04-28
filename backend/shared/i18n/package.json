@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-i18n",
-    "version": "2.120.0",
+    "version": "2.120.1",
     "type": "module",
     "types": "./dist/index.d.ts",
     "main": "./dist/index.js",

@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/locales",
-    "version": "2.120.0",
+    "version": "2.120.1",
     "license": "UNLICENCED",
     "type": "module",
     "types": "./dist/index.d.ts",
