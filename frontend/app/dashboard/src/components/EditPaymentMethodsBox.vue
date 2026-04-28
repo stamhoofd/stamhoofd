@@ -290,10 +290,8 @@ const sortedPaymentMethods = computed(() => {
     // Force a given ordering
     if ((country.value === Country.Belgium && canEnablePaymentMethod(PaymentMethod.Payconiq)) || getPaymentMethod(PaymentMethod.Payconiq)) {
         // Disable Payconiq if Bancontact is enabled
-        if (!canEnablePaymentMethod(PaymentMethod.Bancontact) || getPaymentMethod(PaymentMethod.Payconiq)) {
-            // Only allowed as legacy fallover
-            r.push(PaymentMethod.Payconiq);
-        }
+        // Only allowed as legacy fallover
+        r.push(PaymentMethod.Payconiq);
     }
 
     r.push(PaymentMethod.CreditCard);
