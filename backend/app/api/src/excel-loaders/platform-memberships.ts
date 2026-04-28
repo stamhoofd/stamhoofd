@@ -141,6 +141,66 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
                 };
             },
         },
+        // balance item
+        {
+            id: 'balanceItem.createdAt',
+            name: $t(`Aanrekeningsdatum`),
+            width: 20,
+            getValue: (membership: PlatformMembership) => ({
+                value: membership.balanceItem?.createdAt ?? null,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
+        },
+        {
+            id: 'balanceItem.priceOpen',
+            name: $t('Openstaand'),
+            width: 10,
+            getValue: (membership: PlatformMembership) => {
+                return {
+                    value: membership.balanceItem?.priceOpen ? ((membership.balanceItem?.priceOpen ?? 0) / 1_0000) : null,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
+        },
+        {
+            id: 'balanceItem.pricePaid',
+            name: $t('Betaald'),
+            width: 10,
+            getValue: (membership: PlatformMembership) => {
+                return {
+                    value: membership.balanceItem?.pricePaid ? ((membership.balanceItem?.pricePaid ?? 0) / 1_0000) : null,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
+        },
+        {
+            id: 'balanceItem.pricePending',
+            name: $t('In vewerking'),
+            width: 10,
+            getValue: (membership: PlatformMembership) => {
+                return {
+                    value: membership.balanceItem?.pricePending ? ((membership.balanceItem?.pricePending ?? 0) / 1_0000) : null,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
+        },
+
         // member
         {
             id: 'member.memberNumber',

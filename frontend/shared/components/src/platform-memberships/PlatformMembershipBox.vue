@@ -1,6 +1,6 @@
 <template>
     <div class="hover-box container">
-        <hr><dl class="details-grid">
+        <dl class="details-grid">
             <template v-for="{id, label, value} in rows" :key="id">
                 <dt>{{ label }}</dt>
                 <dd>

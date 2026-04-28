@@ -64,7 +64,7 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
 const allColumns = useGetPlatformMembershipColumns();
 
-const defaultSortColumn = allColumns.find(c => c.id === 'id') ?? null;
+const defaultSortColumn = allColumns.find(c => c.id === 'createdAt') ?? null;
 const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
 
 const  actionBuilder = usePlatformMembershipActions();

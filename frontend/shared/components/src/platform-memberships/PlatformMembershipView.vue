@@ -16,6 +16,16 @@
                 <div>
                     <PlatformMembershipBox :platform-membership="platformMembership" />
                 </div>
+
+                <hr><h2>{{ $t('%1JH') }}</h2>
+
+                <p v-if="!sortedPayments.length" class="info-box">
+                    {{ $t('Er werden nog geen betalingen aangemaakt voor deze aansluiting') }}
+                </p>
+
+                <STList v-else>
+                    <PaymentRow v-for="payment of sortedPayments" :key="payment.id" :payment="payment.payment" :payments="sortedPayments.map(b => b.payment)" :price="payment.payment.isFailed ? 0 : payment.price" />
+                </STList>
             </main>
         </div>
     </LoadingViewTransition>
@@ -26,6 +36,9 @@ import type { PlatformMembership } from '@stamhoofd/structures';
 import { LoadingViewTransition } from '../containers';
 import { useBackForward } from '../hooks';
 import PlatformMembershipBox from './PlatformMembershipBox.vue';
+import { Sorter } from '@stamhoofd/utility';
+import { computed } from 'vue';
+import PaymentRow from '#/payments/components/PaymentRow.vue';
 
 /**
  * Simple list with data (will not be used frequently). Can be improved in the future if necessary.
@@ -43,4 +56,12 @@ const props = withDefaults(
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('platformMembership', props);
 
 const title = $t('Aansluiting');
+
+const sortedPayments = computed(() => {
+    if (!props.platformMembership.balanceItem) {
+        return [];
+    }
+    return props.platformMembership.balanceItem.payments.slice().sort((a, b) => Sorter.byDateValue(a.payment.paidAt ?? a.payment.createdAt, b.payment.paidAt ?? b.payment.createdAt));
+});
+
 </script>

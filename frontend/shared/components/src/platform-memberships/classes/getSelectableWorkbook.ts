@@ -3,6 +3,7 @@ import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoof
 export function getSelectableColumns() {
     const memberCategory = $t('Lid');
     const organizationCategory = $t('Vereniging');
+    const balanceItemCategory = $t('Aanrekening');
 
     const columns: SelectableColumn[] = [
         new SelectableColumn({
@@ -56,6 +57,35 @@ export function getSelectableColumns() {
             name: $t(`Vervaldatum`),
             enabled: false,
         }),
+
+        new SelectableColumn({
+            id: 'balanceItem.createdAt',
+            name: $t(`Aanrekeningsdatum`),
+            category: balanceItemCategory,
+            enabled: true,
+        }),
+
+        new SelectableColumn({
+            id: 'balanceItem.priceOpen',
+            name: $t(`Openstaand`),
+            category: balanceItemCategory,
+            enabled: true,
+        }),
+
+        new SelectableColumn({
+            id: 'balanceItem.pricePaid',
+            name: $t(`Betaald`),
+            category: balanceItemCategory,
+            enabled: true,
+        }),
+
+        new SelectableColumn({
+            id: 'balanceItem.pricePending',
+            name: $t(`In verwerking`),
+            category: balanceItemCategory,
+            enabled: true,
+        }),
+
         // member
         new SelectableColumn({
             id: 'member.memberNumber',
@@ -84,7 +114,7 @@ export function getSelectableColumns() {
         }),
         new SelectableColumn({
             id: 'organization.uri',
-            name: $t(`Nummer`),
+            name: $t(`Groepsnummer`),
             category: organizationCategory,
             enabled: true
         }),

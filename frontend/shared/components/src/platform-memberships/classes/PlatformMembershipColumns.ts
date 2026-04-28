@@ -38,6 +38,7 @@ export function useGetPlatformMembershipColumns() {
             recommendedWidth: 100,
             getStyle: () => 'code',
             index: 0,
+            enabled: false
         }),
         new Column<ObjectType, string>({
             id: 'member.name',
@@ -57,17 +58,6 @@ export function useGetPlatformMembershipColumns() {
             minimumWidth: 100,
             recommendedWidth: 200,
             enabled: false,
-            allowSorting: false
-        }),
-        new Column<ObjectType, Date | null>({
-            id: 'balanceItem.createdAt',
-            name: $t('Aanrekeningsdatum'),
-            getValue: m => m.balanceItem?.createdAt ?? null,
-            format: formatDate($t('Nog niet aangerekend')),
-            getStyle: styleDate,
-            minimumWidth: 100,
-            recommendedWidth: 200,
-            enabled: true,
             allowSorting: false
         }),
         new Column<ObjectType, string>({
@@ -142,6 +132,17 @@ export function useGetPlatformMembershipColumns() {
             enabled: false,
             allowSorting: true
         }),
+        new Column<ObjectType, Date | null>({
+            id: 'balanceItem.createdAt',
+            name: $t('Aanrekeningsdatum'),
+            getValue: m => m.balanceItem?.createdAt ?? null,
+            format: formatDate($t('Nog niet aangerekend')),
+            getStyle: styleDate,
+            minimumWidth: 100,
+            recommendedWidth: 200,
+            enabled: true,
+            allowSorting: false
+        }),
         new Column<ObjectType, number>({
             id: 'price',
             name: $t(`%1IP`),
@@ -158,6 +159,39 @@ export function useGetPlatformMembershipColumns() {
             recommendedWidth: 80,
             enabled: false,
         }),
+        new Column<ObjectType, number | null>({
+            id: 'balanceItem.priceOpen',
+            name: $t('Openstaand'),
+            getValue: m => m.balanceItem?.priceOpen ?? null,
+            format: (p) => p === null ? $t('Wacht op aanrekening') : Formatter.price(p),
+            getStyle: (p) => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+            minimumWidth: 100,
+            recommendedWidth: 100,
+            enabled: false,
+            allowSorting: false
+        }),
+        new Column<ObjectType, number | null>({
+            id: 'balanceItem.pricePaid',
+            name: $t('Betaald'),
+            getValue: m => m.balanceItem?.pricePaid ?? null,
+            format: (p) => Formatter.price(p ?? 0),
+            getStyle: (p) => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+            minimumWidth: 100,
+            recommendedWidth: 100,
+            enabled: false,
+            allowSorting: false
+        }),
+        new Column<ObjectType, number | null>({
+            id: 'balanceItem.pricePending',
+            name: $t('In verwerking'),
+            getValue: m => m.balanceItem?.pricePending ?? null,
+            format: (p) => Formatter.price(p ?? 0),
+            getStyle: (p) => p === null || p === 0 ? 'gray' : (p < 0 ? 'negative' : ''),
+            minimumWidth: 100,
+            recommendedWidth: 120,
+            enabled: false,
+            allowSorting: false
+        }),
         new Column<ObjectType, Date>({
             id: 'createdAt',
             name: $t('Aanmaakdatum'),
@@ -167,7 +201,7 @@ export function useGetPlatformMembershipColumns() {
             getStyle: styleDate,
             minimumWidth: 80,
             recommendedWidth: 220,
-            enabled: false
+            enabled: true
         }),
         new Column<ObjectType, Date | null>({
             id: 'trialUntil',
