@@ -50,6 +50,12 @@ declare global {
          * Removed in v2
          */
         admin?: string;
+        
+        /**
+         * @deprecated
+         * Removed in v2
+         */
+        adminApi?: string,
 
         // MX + SPF (both for email) + A record for webshops
         webshopCname?: string;

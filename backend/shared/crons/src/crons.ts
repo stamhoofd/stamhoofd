@@ -39,7 +39,7 @@ async function run(name: string, handler: () => Promise<void>) {
     }
 }
 
-async function checkReadOnly() {
+export async function checkReadOnly() {
     // Check if database is in read only mode. If so, skip running cronjobs.
     const [results] = await Database.select("SHOW VARIABLES LIKE 'read_only'");
     if (results.length !== 1) {
@@ -60,7 +60,6 @@ async function checkReadOnly() {
             }
             else {
                 if (value === 'ON') {
-                    console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'));
                     return true;
                 }
             }
@@ -95,6 +94,7 @@ async function crons() {
     }
 
     if (await checkReadOnly()) {
+        console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'));
         return;
     }
 
@@ -120,6 +120,7 @@ async function crons() {
             await sleep(10 * 1000);
 
             if (await checkReadOnly()) {
+                console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are interrupted.').addClass('error'));
                 return;
             }
         }

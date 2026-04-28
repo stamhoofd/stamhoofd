@@ -5,6 +5,7 @@ import { Email } from '@stamhoofd/email';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
+import { checkReadOnly } from '@stamhoofd/crons';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
@@ -24,6 +25,7 @@ import { PlatformMembershipService } from './services/PlatformMembershipService.
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
 import { AutoEncoder } from '@simonbackx/simple-encoding';
+import { StyledText } from '@simonbackx/simple-logging';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -47,11 +49,17 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 const seeds = async (options: {shutdown: () => Promise<void>}) => {
+    if (await checkReadOnly()) {
+        console.error(new StyledText(`[SEEDS] `).addClass('migration', 'tag'), new StyledText('MySQL is in read-only mode: Seeds are disabled.').addClass('error'));
+        return;
+    }
+
     try {
         // Internal
         await AuditLogService.disable(async () => {
             if (!await Migration.runAll(import.meta.dirname + '/seeds')) {
-                console.error('Seeds failed!')
+                console.error(new StyledText(`[SEEDS] `).addClass('migration', 'tag'), new StyledText('Seeds failed!').addClass('error'));
+
                 if (STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development') {
                     await options.shutdown();
                 }
