@@ -11,14 +11,14 @@
             </button>
 
             <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Registrations) }" @click="navigate(Routes.Registrations)">
-                <span class="icon group" />
+                <span class="icon edit" />
                 <span>
                     {{ $t("%1EI") }}
                 </span>
             </button>
             
             <button v-if="showMemberships" type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.PlatformMemberships) }" @click="navigate(Routes.PlatformMemberships)">
-                <span class="icon membership" />
+                <span class="icon membership-filled" />
                 <span>
                     {{ $t("%1Nt") }}
                 </span>
