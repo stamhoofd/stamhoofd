@@ -502,7 +502,8 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                                 moreTab.items.unshift(financesTab);
                             }
 
-                            if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)) {
+                            if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)
+                             || reactiveSession.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages)) {
                                 moreTab.items.unshift(communicationTab);
                             }
                         }
