@@ -212,7 +212,7 @@ export function useGetPlatformMembershipColumns() {
                 if (!value) {
                     return $t('Geen');
                 }
-                const date = formatDate(value, width);
+                const date = formatDate()(value, width);
 
                 if (value > now) {
                     return $t('%g8', {date})
