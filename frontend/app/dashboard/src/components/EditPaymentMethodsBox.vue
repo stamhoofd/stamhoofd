@@ -53,6 +53,9 @@
                             <span class="icon arrow-right-small" />
                         </button>
                     </template>
+                    <template v-else #right>
+                        <button v-if="getPaymentMethod(method)" class="icon button settings" type="button" @click="editPaymentMethodSettings(method)" />
+                    </template>
                 </STListItem>
             </STList>
 
@@ -111,6 +114,7 @@ import { Country } from "@stamhoofd/types/Country";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import PaymentSettingsView from '../views/dashboard/settings/PaymentSettingsView.vue';
+import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
 
 const props = withDefaults(defineProps<{
     type: 'registration' | 'webshop';
@@ -171,6 +175,22 @@ function patchPrivateConfig(patch: AutoEncoderPatchType<PrivatePaymentConfigurat
 }
 function patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
     emit('patch:config', patch);
+}
+
+async function editPaymentMethodSettings(paymentMethod: PaymentMethod) {
+    await present({
+        components: [
+            new ComponentWithProperties(EditPaymentMethodSettingsView, {
+                type: props.type,
+                paymentMethod,
+                configuration: props.config,
+                saveHandler: async (configuration: AutoEncoderPatchType<PaymentConfiguration>) => {
+                    patchConfig(configuration);
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function openPaymentSettings() {
@@ -434,6 +454,11 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
     patchConfig(PaymentConfiguration.patch({
         paymentMethods: arr,
     }));
+
+    if (enabled && method === PaymentMethod.Transfer) {
+        // Open dialog
+        editPaymentMethodSettings(method).catch(console.error);
+    }
 }
 
 function canEnablePaymentMethod(method: PaymentMethod) {
