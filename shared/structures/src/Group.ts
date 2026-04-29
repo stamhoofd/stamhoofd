@@ -163,7 +163,7 @@ export class Group extends AutoEncoder {
 
         return false;
     }
-
+    
     /**
      * Returns all parent and grandparents of this group
      */

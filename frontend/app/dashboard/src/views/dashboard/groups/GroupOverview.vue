@@ -75,7 +75,7 @@
                             {{ $t('Uitnodigingen') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Bekijk de uitnodigingen voor deze groep.') }}
+                            {{ $t('Bekijk de uitnodigingen voor {group}.', {group: group.settings.name.toString()}) }}
                         </p>
                         <template #right>
                             <span class="style-description-small">{{ formatInteger(invitationsCount) }}</span>
