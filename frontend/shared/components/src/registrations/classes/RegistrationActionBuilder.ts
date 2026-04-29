@@ -824,7 +824,7 @@ export class RegistrationActionBuilder {
             const group = allGroups[0];
             const actions = [
                 new InMemoryTableAction({
-                    name: $t('Toelaten om in te schrijven'),
+                    name: $t('Uitnodigen'),
                     icon: 'success',
                     priority: 15,
                     groupIndex: 2,
@@ -839,7 +839,7 @@ export class RegistrationActionBuilder {
                 }),
 
                 new InMemoryTableAction({
-                    name: $t('Toelating intrekken'),
+                    name: $t('Verwijder uitnodiging'),
                     icon: 'canceled',
                     priority: 14,
                     groupIndex: 2,
@@ -884,7 +884,7 @@ export class RegistrationActionBuilder {
 
         const actions = [
             new MenuTableAction({
-                name: $t(`Inschrijven toelaten voor`),
+                name: $t(`Uitnodigen voor`),
                 priority: 2,
                 groupIndex: 2,
                 needsSelection: true,
@@ -897,7 +897,7 @@ export class RegistrationActionBuilder {
                 })
             }),
             new MenuTableAction({
-                name: $t(`Toelating intrekken voor`),
+                name: $t(`Uitnodiging verwijderen voor`),
                 priority: 1,
                 groupIndex: 2,
                 needsSelection: true,

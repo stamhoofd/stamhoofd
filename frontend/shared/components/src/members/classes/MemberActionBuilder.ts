@@ -593,7 +593,7 @@ export class MemberActionBuilder {
 
             const actions = [
                     new InMemoryTableAction({
-                        name: $t('Toelaten om in te schrijven'),
+                        name: $t('Uitnodigen'),
                         icon: 'success',
                         priority: 15,
                         groupIndex: 2,
@@ -608,7 +608,7 @@ export class MemberActionBuilder {
                     }),
 
                     new InMemoryTableAction({
-                        name: $t('Toelating intrekken'),
+                        name: $t('Verwijder uitnodiging'),
                         icon: 'canceled',
                         priority: 14,
                         groupIndex: 2,
@@ -656,7 +656,7 @@ export class MemberActionBuilder {
 
         const actions = [
             new MenuTableAction({
-                name: $t(`Inschrijven toelaten voor`),
+                name: $t(`Uitnodigen voor`),
                 priority: 2,
                 groupIndex: 2,
                 needsSelection: true,
@@ -669,7 +669,7 @@ export class MemberActionBuilder {
                 })
             }),
             new MenuTableAction({
-                name: $t(`Toelating intrekken voor`),
+                name: $t(`Uitnodiging verwijderen voor`),
                 priority: 1,
                 groupIndex: 2,
                 needsSelection: true,
@@ -1195,16 +1195,16 @@ export async function inviteMembersForGroup({members, group, context, owner, wer
 
             if (members.length === 1) {
                 if (alreadyInvitedCount) {
-                    Toast.warning($t('Dit lid is is al toegelaten voor {group}', { group: groupName })).show();
+                    Toast.warning($t('Dit lid is is al uitgenodigd voor {group}', { group: groupName })).show();
 
                 } else {
                     Toast.warning($t('Dit lid is al ingeschreven voor {group}', {group: groupName})).show();
                 }
             } else {
                 if (alreadyInvitedCount === 1) {
-                    Toast.warning($t('1 lid is al toegelaten voor {group}', {group: groupName})).show();
+                    Toast.warning($t('1 lid is al uitgenodigd voor {group}', {group: groupName})).show();
                 } else if (alreadyInvitedCount) {
-                    Toast.warning($t('{count} leden zijn al toegelaten voor {group}', {count: alreadyInvitedCount, group: groupName})).show();
+                    Toast.warning($t('{count} leden zijn al uitgenodigd voor {group}', {count: alreadyInvitedCount, group: groupName})).show();
                 }
 
                 if (alreadyRegisteredCount === 1) {
@@ -1246,7 +1246,7 @@ export async function inviteMembersForGroup({members, group, context, owner, wer
                 }).catch(console.error);
             }
 
-            const successMessage = responseInvitations.length === 1 ? $t('{name} is toegelaten', { name: responseInvitations[0].member.name }) : $t('{count} leden zijn toegelaten', { count: responseInvitations.length });
+            const successMessage = responseInvitations.length === 1 ? $t('{name} is uitgenodigd', { name: responseInvitations[0].member.name }) : $t('{count} leden zijn uitgenodigd', { count: responseInvitations.length });
             new Toast(successMessage, 'success green').show();
         } catch (e) {
             console.error(e);
@@ -1266,7 +1266,7 @@ export async function deleteInvitationsForMembers({members, group, context, owne
 
     if (invitations.getDeletes().length === 0) {
         const groupName = group.settings.name.toString();
-        Toast.warning(members.length === 1 ? $t('Dit lid is nog niet toegelaten voor {group}', { group: groupName }) : $t('Deze leden zijn nog niet toegelaten voor {group}', {group: groupName})).show();
+        Toast.warning(members.length === 1 ? $t('Dit lid is nog niet uitgenodigd voor {group}', { group: groupName }) : $t('Deze leden zijn nog niet uitgenodigd voor {group}', {group: groupName})).show();
         return;
     }
 
