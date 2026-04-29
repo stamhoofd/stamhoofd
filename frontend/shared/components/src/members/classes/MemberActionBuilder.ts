@@ -601,7 +601,7 @@ export class MemberActionBuilder {
                         needsSelection: true,
                         allowAutoSelectAll: false,
                         // disable if already invited
-                        disableIfSome: (member: PlatformMember) => isMemberInvited(member, group),
+                        disableIfAll: (member: PlatformMember) => isMemberInvited(member, group),
                         handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
                             await this.inviteForGroup(members, group, wereItemsFetched)
                         }
@@ -616,7 +616,7 @@ export class MemberActionBuilder {
                         needsSelection: true,
                         allowAutoSelectAll: false,
                         // disable if not invited
-                        disableIfSome: (member: PlatformMember) => !isMemberInvited(member, group),
+                        disableIfAll: (member: PlatformMember) => !isMemberInvited(member, group),
                         handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
                             await this.deleteInvitations(members, group, wereItemsFetched)
                         }
@@ -629,7 +629,7 @@ export class MemberActionBuilder {
             }
         }
 
-        const getChildActions = ({action, disableIfSome}: {action: (items: PlatformMember[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfSome: (item: PlatformMember, group: Group) => boolean}) => {
+        const getChildActions = ({action, disableIfAll}: {action: (items: PlatformMember[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfAll: (item: PlatformMember, group: Group) => boolean}) => {
             const childActions = [];
 
             if (eventGroups.length > 0) {
@@ -642,7 +642,7 @@ export class MemberActionBuilder {
                             name: g.settings.name.toString(),
                             needsSelection: true,
                             allowAutoSelectAll: false,
-                            disableIfSome: (item) => disableIfSome(item, g),
+                            disableIfAll: (item) => disableIfAll(item, g),
                             handler: async (items: PlatformMember[], wereItemsFetched: boolean) => {
                                 await action(items, g, wereItemsFetched);
                             },
@@ -651,7 +651,7 @@ export class MemberActionBuilder {
                 }));
             }
 
-            return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action, disableIfSome));
+            return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action, disableIfAll));
         }
 
         const actions = [
@@ -664,7 +664,7 @@ export class MemberActionBuilder {
                 enabled,
                 childActions: () => getChildActions({
                     // disable if already invited
-                    disableIfSome: (member: PlatformMember, group: Group) => isMemberInvited(member, group),
+                    disableIfAll: (member: PlatformMember, group: Group) => isMemberInvited(member, group),
                     action: async (members, group, wereItemsFetched) => await this.inviteForGroup(members, group, wereItemsFetched)
                 })
             }),
@@ -677,7 +677,7 @@ export class MemberActionBuilder {
                 enabled,
                 childActions: () => getChildActions({
                     // disable if not invited
-                    disableIfSome: (member: PlatformMember, group: Group) => !isMemberInvited(member, group),
+                    disableIfAll: (member: PlatformMember, group: Group) => !isMemberInvited(member, group),
                     action: async (members, group, wereItemsFetched) => await this.deleteInvitations(members, group, wereItemsFetched)
                 })
             })
@@ -1024,7 +1024,7 @@ export class MemberActionBuilder {
 export function getActionsForCategory<T extends { id: string }>(
     category: GroupCategoryTree,
     action: (items: T[], group: Group, wereItemsFetched: boolean) => void | Promise<void>,
-    disableIfSome?: (item: T, group: Group) => boolean): TableAction<T>[] {
+    disableIfAll?: (item: T, group: Group) => boolean): TableAction<T>[] {
         const r = [
             ...category.categories.map((c) => {
                 return new MenuTableAction({
@@ -1033,7 +1033,7 @@ export function getActionsForCategory<T extends { id: string }>(
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     enabled: c.groups.length > 0 || c.categories.length > 0,
-                    childActions: getActionsForCategory(c, action, disableIfSome),
+                    childActions: getActionsForCategory(c, action, disableIfAll),
                 });
             }),
             ...category.groups.map((g) => {
@@ -1041,7 +1041,7 @@ export function getActionsForCategory<T extends { id: string }>(
                     name: g.settings.name.toString(),
                     needsSelection: true,
                     allowAutoSelectAll: false,
-                    disableIfSome: disableIfSome ? (item) => disableIfSome(item, g) : undefined,
+                    disableIfAll: disableIfAll ? (item) => disableIfAll(item, g) : undefined,
                     handler: async (items: T[], wereItemsFetched: boolean) => {
                         await action(items, g, wereItemsFetched);
                     },

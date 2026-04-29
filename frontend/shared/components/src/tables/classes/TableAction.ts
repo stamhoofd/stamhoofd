@@ -140,16 +140,16 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
     fetchLimitSettings?: FetchLimitSettings;
 
     /**
-     * Disable the action if some items in the selection match this filter.
-     * If an async fetchAll is needed disableIfSome will be ignored.
+     * Disable the action if every item in the selection matches this filter.
+     * If an async fetchAll is needed disableIfAll will be ignored.
      */
-    disableIfSome?: (item: T) => boolean;
+    disableIfAll?: (item: T) => boolean;
 
-    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings, disableIfSome?: (item: T) => boolean }) {
+    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings, disableIfAll?: (item: T) => boolean }) {
         super(settings);
         this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
         this.fetchLimitSettings = settings.fetchLimitSettings;
-        this.disableIfSome = settings.disableIfSome;
+        this.disableIfAll = settings.disableIfAll;
     }
 
     override isDisabled(hasSelection: boolean, selection: TableActionSelection<T>) {
@@ -157,13 +157,17 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
             return true;
         }
 
-        if (!this.disableIfSome) {
+        if (!this.disableIfAll) {
             return false;
         }
 
-        // disable if some items match the disableIfSome filter
+        // disable if all items match the disableIfAll filter
         // if an async fetchAll is needed always return false
-        return this.getSelectionSync(selection).some(this.disableIfSome);
+        const items = this.getSelectionSync(selection);
+        if (items.length === 0) {
+            return false;
+        }
+        return items.every(this.disableIfAll);
     }
 
     async fetchAll(initialRequest: LimitedFilteredRequest, objectFetcher: ObjectFetcher<T>, options?: FetchAllOptions<T>) {

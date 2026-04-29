@@ -832,7 +832,7 @@ export class RegistrationActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     // disable if already invited
-                    disableIfSome: (registration: PlatformRegistration) => isMemberInvited(registration.member, group),
+                    disableIfAll: (registration: PlatformRegistration) => isMemberInvited(registration.member, group),
                     handler: async (registrations: PlatformRegistration[], wereItemsFetched: boolean) => {
                         await this.inviteForGroup(registrations, group, wereItemsFetched)
                     }
@@ -847,7 +847,7 @@ export class RegistrationActionBuilder {
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     // disable if not invited
-                    disableIfSome: (registration: PlatformRegistration) => !isMemberInvited(registration.member, group),
+                    disableIfAll: (registration: PlatformRegistration) => !isMemberInvited(registration.member, group),
                     handler: async (registrations: PlatformRegistration[], wereItemsFetched: boolean) => {
                         await this.deleteInvitations(registrations, group, wereItemsFetched)
                     }
@@ -857,7 +857,7 @@ export class RegistrationActionBuilder {
             return { actions, groups: allGroups };
         }
 
-        const getChildActions = ({action, disableIfSome}: {action: (items: PlatformRegistration[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfSome: (registration: PlatformRegistration, group: Group) => boolean}) => {
+        const getChildActions = ({action, disableIfAll}: {action: (items: PlatformRegistration[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfAll: (registration: PlatformRegistration, group: Group) => boolean}) => {
             const childActions = [];
 
             if (eventGroups.length > 0) {
@@ -870,7 +870,7 @@ export class RegistrationActionBuilder {
                             name: g.settings.name.toString(),
                             needsSelection: true,
                             allowAutoSelectAll: false,
-                            disableIfSome: (item) => disableIfSome(item, g),
+                            disableIfAll: (item) => disableIfAll(item, g),
                             handler: async (items: PlatformRegistration[], wereItemsFetched: boolean) => {
                                 await action(items, g, wereItemsFetched);
                             },
@@ -879,7 +879,7 @@ export class RegistrationActionBuilder {
                 }));
             }
 
-            return childActions.concat(getActionsForCategory<PlatformRegistration>(categoryTree, action, disableIfSome));
+            return childActions.concat(getActionsForCategory<PlatformRegistration>(categoryTree, action, disableIfAll));
         }
 
         const actions = [
@@ -892,7 +892,7 @@ export class RegistrationActionBuilder {
                 enabled,
                 childActions: () => getChildActions({
                     // disable if already invited
-                    disableIfSome: (registration: PlatformRegistration, group: Group) => isMemberInvited(registration.member, group),
+                    disableIfAll: (registration: PlatformRegistration, group: Group) => isMemberInvited(registration.member, group),
                     action: async (registrations, group, wereItemsFetched: boolean) => await this.inviteForGroup(registrations, group, wereItemsFetched)
                 })
             }),
@@ -905,7 +905,7 @@ export class RegistrationActionBuilder {
                 enabled,
                 childActions: () => getChildActions({
                     // disable if not invited
-                    disableIfSome: (registration: PlatformRegistration, group: Group) => !isMemberInvited(registration.member, group),
+                    disableIfAll: (registration: PlatformRegistration, group: Group) => !isMemberInvited(registration.member, group),
                     action: async (registrations, group, wereItemsFetched: boolean) => await this.deleteInvitations(registrations, group, wereItemsFetched)
                 })
             })
