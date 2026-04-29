@@ -1246,14 +1246,13 @@ export async function inviteMembersForGroup({members, group, context, owner, wer
                 }).catch(console.error);
             }
 
+            const successMessage = responseInvitations.length === 1 ? $t('{name} is toegelaten', { name: responseInvitations[0].member.name }) : $t('{count} leden zijn toegelaten', { count: responseInvitations.length });
+            new Toast(successMessage, 'success green').show();
         } catch (e) {
             console.error(e);
             Toast.fromError(e).show();
             return;
         }
-
-        const successMessage = members.length === 1 ? $t('{name} is toegelaten', { name: members[0].member.name }) : $t('{count} leden zijn toegelaten', { count: members.length });
-        new Toast(successMessage, 'success green').show();
 }
 
 export async function deleteInvitationsForMembers({members, group, context, owner, wereItemsFetched}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any, wereItemsFetched: boolean}) {
