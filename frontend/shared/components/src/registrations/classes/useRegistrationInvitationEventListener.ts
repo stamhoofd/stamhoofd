@@ -2,7 +2,9 @@ import { onMounted, onUnmounted } from 'vue';
 import { EventBus } from '../../EventBus';
 
 type RegistrationInvitationEventName = 'updated';
-export type RegistrationInvitationEvenOrigin = 'invitations-table';
+
+// makes it possible for the listener to decide to do something depending on the origin
+export type RegistrationInvitationEvenOrigin = 'invitations-table' | 'members-table-sync' | 'members-table-async';
 type RegistrationInvitationEventNameValue = {groupIds: Set<string>, origin?: RegistrationInvitationEvenOrigin}
 
 export const RegistrationInvitationEventBus = new EventBus<RegistrationInvitationEventName, RegistrationInvitationEventNameValue>();

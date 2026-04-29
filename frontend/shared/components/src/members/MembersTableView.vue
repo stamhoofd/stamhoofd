@@ -342,6 +342,11 @@ createActions().catch(console.error);
 
 if (waitingList.value) {
     useRegistrationInvitationEventListener('updated', async (value) => {
+        // not necessary in this case because the invitations are updated directly
+        if (value.origin === 'members-table-sync') {
+            return;
+        }
+
         if (groupsLinkedToWaitingList.value.some(group => value.groupIds.has(group.id))) {
             tableObjectFetcher.reset(true, true);
         }

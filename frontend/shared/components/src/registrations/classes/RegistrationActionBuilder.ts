@@ -12,7 +12,7 @@ import type { RecipientChooseOneOption } from '../../email';
 import { EmailView } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
 import type { PlatformFamilyManager } from '../../members';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, deleteInvitationsForMembers, getActionsForCategory, inviteMembersForGroup, isMemberInvited, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { Toast } from '../../overlays/Toast';
 import type { TableAction, TableActionSelection } from '../../tables';
@@ -786,43 +786,43 @@ export class RegistrationActionBuilder {
         }
     }
 
-    private async inviteForGroup(registrations: PlatformRegistration[], group: Group) {
+    private async inviteForGroup(registrations: PlatformRegistration[], group: Group, wereItemsFetched: boolean) {
         return await inviteMembersForGroup({
             members: getUniqueMembersFromRegistrations(registrations),
             group,
             context: this.context,
-            owner: this.owner
+            owner: this.owner,
+            wereItemsFetched
         })
     }
 
-    private async deleteInvitations(registrations: PlatformRegistration[], group: Group) {
+    private async deleteInvitations(registrations: PlatformRegistration[], group: Group, wereItemsFetched: boolean) {
         await deleteInvitationsForMembers({
             members: getUniqueMembersFromRegistrations(registrations),
             group,
             context: this.context,
-            owner: this.owner
+            owner: this.owner,
+            wereItemsFetched
         })
     }
 
-    getInviteMemberForGroupActions(eventGroups: Group[]): TableAction<PlatformRegistration>[] {
-        const result = this.getCategoryTreeOfGroupsLinkedToWaitingList();
+    getInviteMemberForGroupActionsWithGroups(eventGroups: Group[]): {actions: TableAction<PlatformRegistration>[], groups: Group[]} | null {
+        const categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess()});
 
-        if (!result) {
-            return [];
+        if (!categoryTree) {
+            return null;
         }
-
-        const {categoryTree, waitingList} = result;
 
         const enabled = this.hasWrite;
 
         const allGroups = categoryTree.getAllGroups().concat(eventGroups);
         if (allGroups.length === 0) {
-            return [];
+            return null;
         }
         
         if (allGroups.length === 1) {
             const group = allGroups[0];
-            return [
+            const actions = [
                 new InMemoryTableAction({
                     name: $t('Toelaten om in te schrijven'),
                     icon: 'success',
@@ -833,8 +833,8 @@ export class RegistrationActionBuilder {
                     allowAutoSelectAll: false,
                     // disable if already invited
                     disableIfSome: (registration: PlatformRegistration) => isMemberInvited(registration.member, group),
-                    handler: async (registrations: PlatformRegistration[]) => {
-                        await this.inviteForGroup(registrations, group)
+                    handler: async (registrations: PlatformRegistration[], wereItemsFetched: boolean) => {
+                        await this.inviteForGroup(registrations, group, wereItemsFetched)
                     }
                 }),
 
@@ -848,14 +848,16 @@ export class RegistrationActionBuilder {
                     allowAutoSelectAll: false,
                     // disable if not invited
                     disableIfSome: (registration: PlatformRegistration) => !isMemberInvited(registration.member, group),
-                    handler: async (registrations: PlatformRegistration[]) => {
-                        await this.deleteInvitations(registrations, group)
+                    handler: async (registrations: PlatformRegistration[], wereItemsFetched: boolean) => {
+                        await this.deleteInvitations(registrations, group, wereItemsFetched)
                     }
                 }),
-            ]
+            ];
+
+            return { actions, groups: allGroups };
         }
 
-        const getChildActions = ({action, disableIfSome}: {action: (items: PlatformRegistration[], group: Group) => void | Promise<void>, disableIfSome: (registration: PlatformRegistration, group: Group) => boolean}) => {
+        const getChildActions = ({action, disableIfSome}: {action: (items: PlatformRegistration[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfSome: (registration: PlatformRegistration, group: Group) => boolean}) => {
             const childActions = [];
 
             if (eventGroups.length > 0) {
@@ -869,8 +871,8 @@ export class RegistrationActionBuilder {
                             needsSelection: true,
                             allowAutoSelectAll: false,
                             disableIfSome: (item) => disableIfSome(item, g),
-                            handler: async (items: PlatformRegistration[]) => {
-                                await action(items, g);
+                            handler: async (items: PlatformRegistration[], wereItemsFetched: boolean) => {
+                                await action(items, g, wereItemsFetched);
                             },
                         })
                     }),
@@ -880,7 +882,7 @@ export class RegistrationActionBuilder {
             return childActions.concat(getActionsForCategory<PlatformRegistration>(categoryTree, action, disableIfSome));
         }
 
-        return [
+        const actions = [
             new MenuTableAction({
                 name: $t(`Inschrijven toelaten voor`),
                 priority: 2,
@@ -891,7 +893,7 @@ export class RegistrationActionBuilder {
                 childActions: () => getChildActions({
                     // disable if already invited
                     disableIfSome: (registration: PlatformRegistration, group: Group) => isMemberInvited(registration.member, group),
-                    action: async (registrations, group) => await this.inviteForGroup(registrations, group)
+                    action: async (registrations, group, wereItemsFetched: boolean) => await this.inviteForGroup(registrations, group, wereItemsFetched)
                 })
             }),
             new MenuTableAction({
@@ -904,10 +906,12 @@ export class RegistrationActionBuilder {
                 childActions: () => getChildActions({
                     // disable if not invited
                     disableIfSome: (registration: PlatformRegistration, group: Group) => !isMemberInvited(registration.member, group),
-                    action: async (registrations, group) => await this.deleteInvitations(registrations, group)
+                    action: async (registrations, group, wereItemsFetched: boolean) => await this.deleteInvitations(registrations, group, wereItemsFetched)
                 })
             })
         ];
+
+        return { actions, groups: allGroups };
     }
 }
 

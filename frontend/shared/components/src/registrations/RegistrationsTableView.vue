@@ -39,6 +39,7 @@ import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/fi
 import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
 import { fetchAll } from '../tables/classes/ObjectFetcher';
+import { useRegistrationInvitationEventListener } from './classes';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
 type ObjectType = PlatformRegistration;
@@ -344,6 +345,8 @@ const isLimitedGroup = computed(() => {
     return false;
 });
 
+const groupsLinkedToWaitingList = ref<Group[]>([]);
+
 async function createActions(): Promise<void> {
     const results: TableAction<ObjectType>[] = [
         new InMemoryTableAction({
@@ -386,11 +389,28 @@ async function createActions(): Promise<void> {
             console.error(e);
         }
 
-        results.push(...actionBuilder.getInviteMemberForGroupActions(eventGroups));
+        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups(eventGroups);
+        if (actionsWithGroups) {
+            results.push(...actionsWithGroups.actions);
+            groupsLinkedToWaitingList.value = actionsWithGroups.groups;
+        }
     }
 
     actions.value = results;
 }
 
 createActions().catch(console.error);
+
+if (waitingList.value) {
+    useRegistrationInvitationEventListener('updated', async (value) => {
+        // not necessary in this case because the invitations are updated directly
+        if (value.origin === 'members-table-sync') {
+            return;
+        }
+
+        if (groupsLinkedToWaitingList.value.some(group => value.groupIds.has(group.id))) {
+            tableObjectFetcher.reset(true, true);
+        }
+    })
+}
 </script>

@@ -602,8 +602,8 @@ export class MemberActionBuilder {
                         allowAutoSelectAll: false,
                         // disable if already invited
                         disableIfSome: (member: PlatformMember) => isMemberInvited(member, group),
-                        handler: async (members: PlatformMember[]) => {
-                            await this.inviteForGroup(members, group)
+                        handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
+                            await this.inviteForGroup(members, group, wereItemsFetched)
                         }
                     }),
 
@@ -617,8 +617,8 @@ export class MemberActionBuilder {
                         allowAutoSelectAll: false,
                         // disable if not invited
                         disableIfSome: (member: PlatformMember) => !isMemberInvited(member, group),
-                        handler: async (members: PlatformMember[]) => {
-                            await this.deleteInvitations(members, group)
+                        handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
+                            await this.deleteInvitations(members, group, wereItemsFetched)
                         }
                     }),
             ];
@@ -629,7 +629,7 @@ export class MemberActionBuilder {
             }
         }
 
-        const getChildActions = ({action, disableIfSome}: {action: (items: PlatformMember[], group: Group) => void | Promise<void>, disableIfSome: (item: PlatformMember, group: Group) => boolean}) => {
+        const getChildActions = ({action, disableIfSome}: {action: (items: PlatformMember[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfSome: (item: PlatformMember, group: Group) => boolean}) => {
             const childActions = [];
 
             if (eventGroups.length > 0) {
@@ -643,8 +643,8 @@ export class MemberActionBuilder {
                             needsSelection: true,
                             allowAutoSelectAll: false,
                             disableIfSome: (item) => disableIfSome(item, g),
-                            handler: async (items: PlatformMember[]) => {
-                                await action(items, g);
+                            handler: async (items: PlatformMember[], wereItemsFetched: boolean) => {
+                                await action(items, g, wereItemsFetched);
                             },
                         })
                     }),
@@ -665,7 +665,7 @@ export class MemberActionBuilder {
                 childActions: () => getChildActions({
                     // disable if already invited
                     disableIfSome: (member: PlatformMember, group: Group) => isMemberInvited(member, group),
-                    action: async (members, group) => await this.inviteForGroup(members, group)
+                    action: async (members, group, wereItemsFetched) => await this.inviteForGroup(members, group, wereItemsFetched)
                 })
             }),
             new MenuTableAction({
@@ -678,7 +678,7 @@ export class MemberActionBuilder {
                 childActions: () => getChildActions({
                     // disable if not invited
                     disableIfSome: (member: PlatformMember, group: Group) => !isMemberInvited(member, group),
-                    action: async (members, group) => await this.deleteInvitations(members, group)
+                    action: async (members, group, wereItemsFetched) => await this.deleteInvitations(members, group, wereItemsFetched)
                 })
             })
         ];
@@ -1000,28 +1000,30 @@ export class MemberActionBuilder {
         });
     }
 
-    private async inviteForGroup(members: PlatformMember[], group: Group) {
+    private async inviteForGroup(members: PlatformMember[], group: Group, wereItemsFetched: boolean) {
         return await inviteMembersForGroup({
             members,
             group,
             context: this.context,
-            owner: this.owner
+            owner: this.owner,
+            wereItemsFetched
         })
     }
 
-    private async deleteInvitations(members: PlatformMember[], group: Group) {
+    private async deleteInvitations(members: PlatformMember[], group: Group, wereItemsFetched: boolean) {
         await deleteInvitationsForMembers({
             members,
             group,
             context: this.context,
-            owner: this.owner
+            owner: this.owner,
+            wereItemsFetched
         })
     }
 }
 
 export function getActionsForCategory<T extends { id: string }>(
     category: GroupCategoryTree,
-    action: (items: T[], group: Group) => void | Promise<void>,
+    action: (items: T[], group: Group, wereItemsFetched: boolean) => void | Promise<void>,
     disableIfSome?: (item: T, group: Group) => boolean): TableAction<T>[] {
         const r = [
             ...category.categories.map((c) => {
@@ -1040,8 +1042,8 @@ export function getActionsForCategory<T extends { id: string }>(
                     needsSelection: true,
                     allowAutoSelectAll: false,
                     disableIfSome: disableIfSome ? (item) => disableIfSome(item, g) : undefined,
-                    handler: async (items: T[]) => {
-                        await action(items, g);
+                    handler: async (items: T[], wereItemsFetched: boolean) => {
+                        await action(items, g, wereItemsFetched);
                     },
                 });
             }),
@@ -1158,7 +1160,7 @@ function isMemberRegistered(member: PlatformMember, group: Group) {
     return member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null);
 }
 
-export async function inviteMembersForGroup({members, group, context, owner}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any}) {
+export async function inviteMembersForGroup({members, group, context, owner, wereItemsFetched}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any, wereItemsFetched: boolean}) {
         if (members.length === 0) {
             return;
         }
@@ -1228,7 +1230,7 @@ export async function inviteMembersForGroup({members, group, context, owner}: {m
 
             const responseInvitations: RegistrationInvitation[] = response.data;
 
-            // update invitations
+            // update the invitations of the member
             for (const invitation of responseInvitations) {
                 const member = members.find(m => m.member.id === invitation.member.id);
                 if (member && !member.member.registrationInvitations.find(i => i.id === invitation.id)) {
@@ -1237,8 +1239,13 @@ export async function inviteMembersForGroup({members, group, context, owner}: {m
             }
 
             if (responseInvitations.length > 0) {
-                RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set([group.id])}).catch(console.error);
+                RegistrationInvitationEventBus.sendEvent('updated', {
+                    groupIds: new Set([group.id]),
+                    // the members table should only be refreshed if the items were fetched from the server because the reference of the items will be different then the objects of the rows, therefore setting the invitations will not update the column with invitations
+                    origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync'
+                }).catch(console.error);
             }
+
         } catch (e) {
             console.error(e);
             Toast.fromError(e).show();
@@ -1249,7 +1256,7 @@ export async function inviteMembersForGroup({members, group, context, owner}: {m
         new Toast(successMessage, 'success green').show();
 }
 
-export async function deleteInvitationsForMembers({members, group, context, owner}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any}) {
+export async function deleteInvitationsForMembers({members, group, context, owner, wereItemsFetched}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any, wereItemsFetched: boolean}) {
     const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
     for (const member of members) {
@@ -1282,7 +1289,10 @@ export async function deleteInvitationsForMembers({members, group, context, owne
             }
         }
 
-        RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set([group.id])}).catch(console.error);
+        RegistrationInvitationEventBus.sendEvent('updated', {
+            groupIds: new Set([group.id]),
+            origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync'
+        }).catch(console.error);
     } catch (e) {
         console.error(e);
         Toast.fromError(e).show();
@@ -1293,7 +1303,7 @@ export async function deleteInvitationsForMembers({members, group, context, owne
     new Toast(successMessage, 'success green').show();
 }
 
-function getCategoryTreeOfGroupsLinkedToWaitingList({waitingList, organization, hasFullAccess}: {waitingList: Group, organization: Organization, hasFullAccess: boolean}): null | GroupCategoryTree {
+export function getCategoryTreeOfGroupsLinkedToWaitingList({waitingList, organization, hasFullAccess}: {waitingList: Group, organization: Organization, hasFullAccess: boolean}): null | GroupCategoryTree {
     const isWaitingList = waitingList.type === GroupType.WaitingList
     if (!isWaitingList) {
         return null;
