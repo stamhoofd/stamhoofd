@@ -2,7 +2,8 @@ import { onMounted, onUnmounted } from 'vue';
 import { EventBus } from '../../EventBus';
 
 type RegistrationInvitationEventName = 'updated';
-type RegistrationInvitationEventNameValue = {groupIds: Set<string>}
+export type RegistrationInvitationEvenOrigin = 'invitations-table';
+type RegistrationInvitationEventNameValue = {groupIds: Set<string>, origin?: RegistrationInvitationEvenOrigin}
 
 export const RegistrationInvitationEventBus = new EventBus<RegistrationInvitationEventName, RegistrationInvitationEventNameValue>();
 

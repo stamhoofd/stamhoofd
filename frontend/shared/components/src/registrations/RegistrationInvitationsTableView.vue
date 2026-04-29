@@ -17,6 +17,7 @@ import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import type { Group, RegistrationInvitation, StamhoofdFilter } from '@stamhoofd/structures';
 import { SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { watch } from 'vue';
 import { useRegistrationInvitationsObjectFetcher } from '../fetchers/useRegistrationInvitationsObjectFetcher';
 import { useRegistrationInvitationActionBuilder } from './classes/RegistrationInvitationActionBuilder';
 import { useRegistrationInvitationEventListener } from './classes/useRegistrationInvitationEventListener';
@@ -26,12 +27,14 @@ type ObjectType = RegistrationInvitation;
 const props = withDefaults(defineProps<{
     group: Group;
     estimatedRows?: number | null;
+    updateTotal?: (total: number | null) => void;
 }>(), {
-    estimatedRows: null
+    estimatedRows: null,
+    updateTotal: undefined
 });
 
 const getActionBuilder = useRegistrationInvitationActionBuilder();
-const actions = getActionBuilder({group: props.group}).getActions();
+const actions = getActionBuilder({group: props.group, eventOrigin: 'invitations-table'}).getActions();
 
 const title = $t('Uitnodigingen');
 
@@ -62,6 +65,12 @@ const objectFetcher = useRegistrationInvitationsObjectFetcher({
 });
 
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
+
+if (props.updateTotal) {
+    watch(() => tableObjectFetcher.totalCount, (value) => {
+        props.updateTotal?.(value);
+    })
+}
 
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({

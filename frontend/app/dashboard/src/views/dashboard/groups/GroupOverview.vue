@@ -316,6 +316,11 @@ defineRoutes([{
         return {
             group: props.group,
             estimatedRows: invitationsCount.value,
+            updateTotal: (total: number | null) => {
+                if (total !== null) {
+                    invitationsCount.value = total;
+                }
+            }
         };
     },
 },
@@ -954,7 +959,9 @@ async function fetchInvitationCount() {
 fetchInvitationCount().catch(console.error);
 
 useRegistrationInvitationEventListener('updated', async (value) => {
-    if (value.groupIds.has(props.group.id)) {
+    // update the invitation count if invitations for this groups changed
+    // do not fetch again if the change originated in the invitations table (prevent double fetch) 
+    if (value.origin !== 'invitations-table' && value.groupIds.has(props.group.id)) {
         fetchInvitationCount().catch(console.error);
     }
 });

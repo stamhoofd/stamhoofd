@@ -9,13 +9,14 @@ import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import type { TableAction } from '../../tables';
 import { InMemoryTableAction } from '../../tables';
+import type { RegistrationInvitationEvenOrigin } from './useRegistrationInvitationEventListener';
 import { RegistrationInvitationEventBus } from './useRegistrationInvitationEventListener';
 
 export function useRegistrationInvitationActionBuilder() {
     const context = useContext();
     const owner = useRequestOwner();
 
-    return (options: {group: Group}) => {
+    return (options: {group: Group, eventOrigin: RegistrationInvitationEvenOrigin}) => {
         return new RegistrationInvitationActionBuilder({
             ...options,
             context: context.value,
@@ -28,6 +29,7 @@ export class RegistrationInvitationActionBuilder {
     private readonly group: Group;
     private readonly context: SessionContext;
     private readonly owner: any;
+    private readonly eventOrigin: RegistrationInvitationEvenOrigin;
 
     get hasWrite() {
         return this.context.auth.canAccessGroup(this.group, PermissionLevel.Write)
@@ -37,10 +39,12 @@ export class RegistrationInvitationActionBuilder {
         group: Group;
         context: SessionContext;
         owner: any;
+        eventOrigin: RegistrationInvitationEvenOrigin
     }) {
         this.group = settings.group;
         this.context = settings.context;
         this.owner = settings.owner;
+        this.eventOrigin = settings.eventOrigin;
     }
 
     getActions() {
@@ -92,7 +96,7 @@ export class RegistrationInvitationActionBuilder {
                 owner: this.owner
             });
 
-            RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set(invitations.map(i => i.group.id))}).catch(console.error);
+            RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set(invitations.map(i => i.group.id)), origin: this.eventOrigin}).catch(console.error);
         } catch (e) {
             console.error(e);
             Toast.fromError(e).show();
