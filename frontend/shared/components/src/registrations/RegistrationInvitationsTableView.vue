@@ -1,5 +1,8 @@
 <template>
     <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :title="title" :column-configuration-id="'registration-invitations'" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :estimated-rows="estimatedRows">
+        <p class="style-description-block">
+            {{ $t('Uitnodigingen zijn zichtbaar voor leden in het ledenportaal. Zo kunnen ze zelf inschrijven voor de groep.') }}
+        </p>
         <template #empty>
             {{ $t('Geen uitnodigingen') }}
         </template>
