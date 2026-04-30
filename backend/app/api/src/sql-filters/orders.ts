@@ -260,19 +260,6 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
-    // isPaid: createColumnFilter({
-    //     expression: SQL.if(SQL.column('totalPrice'), 0)
-    //         .then(
-    //             1
-    //         ).else(
-    //             SQL.if(getPricePaidSubQuery(), SQLWhereSign.GreaterEqual, SQL.column('totalPrice'))
-    //             .then(1)
-    //             .else(
-    //                 SQL.if(SQL.isNull(getPricePaidSubQuery()), 1).then(1).else(0)
-    //             )),
-    //     type: SQLValueType.Number,
-    //     nullable: false,
-    // })
 };
 
 function getPricePaidSubQuery(): SQLExpression {

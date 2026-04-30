@@ -205,11 +205,6 @@ export class Order extends AutoEncoder {
         return this.pricePaid >= this.totalToPay;
     }
 
-    // used for inMemoryFilters
-    get isPaid() {
-        return this.totalToPay === 0 || this.pricePaid >= this.totalToPay;
-    }
-
     updatePricePaid() {
         for (const item of this.balanceItems) {
             item.updatePricePaid();

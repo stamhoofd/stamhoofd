@@ -131,7 +131,6 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     createdAt: createInMemoryFilterCompiler('createdAt'),
     number: createInMemoryFilterCompiler('number'),
     status: createInMemoryFilterCompiler('status'),
-    paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
     checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
     checkoutMethodId: createInMemoryFilterCompiler('data.checkoutMethod.id'),
     // todo
@@ -147,11 +146,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     totalPrice: createInMemoryFilterCompiler('data.totalPrice'),
     amount: createInMemoryFilterCompiler('data.amount'),
     timeSlotTime: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
-    // todo
-    openBalance: createInMemoryFilterCompiler('openBalance'),
     location: createInMemoryFilterCompiler('data.locationName'),
-    // todo
-    paidAt: createInMemoryFilterCompiler('paidAt'),
 
     // Other (no sorters)
     items: createInMemoryFilterCompiler('data.cart.items', {
