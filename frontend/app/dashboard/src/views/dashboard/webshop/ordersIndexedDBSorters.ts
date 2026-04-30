@@ -1,6 +1,4 @@
-import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { PrivateOrder, SortDefinitions } from '@stamhoofd/structures';
-import type { IndexedDbIndexValue } from './IndexBox';
 import { IndexBox } from './IndexBox';
 
 export enum OrderIndexedDBIndex {
@@ -24,7 +22,7 @@ export enum OrderIndexedDBIndex {
 /**
  * Don't forget to add the required in memory filters.
  */
-export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
+export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> & Record<'id' | OrderIndexedDBIndex, { getValue: (value: PrivateOrder) => string | number }> = {
     id: {
         getValue: value => value.id,
     },
@@ -32,7 +30,7 @@ export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
         getValue: value => value.createdAt.getTime(),
     },
     [OrderIndexedDBIndex.Number]: {
-        getValue: value => value.number,
+        getValue: value => value.number ?? 0,
     },
     [OrderIndexedDBIndex.Status]: {
         getValue: value => value.status,
@@ -41,13 +39,13 @@ export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
         getValue: value => value.data.paymentMethod,
     },
     [OrderIndexedDBIndex.CheckoutMethod]: {
-        getValue: value => value.data.checkoutMethod?.type,
+        getValue: value => value.data.checkoutMethod?.type ?? '',
     },
     [OrderIndexedDBIndex.TimeSlotDate]: {
-        getValue: value => value.data.timeSlot?.date.getTime(),
+        getValue: value => value.data.timeSlot?.date.getTime() ?? '',
     },
     [OrderIndexedDBIndex.ValidAt]: {
-        getValue: value => value.validAt?.getTime(),
+        getValue: value => value.validAt?.getTime() ?? '',
     },
     [OrderIndexedDBIndex.Name]: {
         getValue: value => value.data.customer.name,
@@ -73,7 +71,7 @@ export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
         getValue: value => value.data.locationName,
     },
     [OrderIndexedDBIndex.TimeSlotTime]: {
-        getValue: value => value.data.timeSlot?.timeIndex,
+        getValue: value => value.data.timeSlot?.timeIndex ?? '',
     },
 };
 
@@ -85,66 +83,15 @@ export function createPrivateOrderIndexBox(data: PrivateOrder) {
     return new IndexBox({ data, getIndexes: getPrivateOrderIndexes });
 };
 
-export class PrivateOrderEncodeableIndexes extends AutoEncoder implements Record<OrderIndexedDBIndex, IndexedDbIndexValue> {
-    @field({ decoder: NumberDecoder })
-    createdAt: number = 0;
+function getPrivateOrderIndexes(order: PrivateOrder): Record<string, string | number> {
+    return Object.fromEntries(Object.values(OrderIndexedDBIndex).map((generatedIndex) => {
+        const getIndex = ordersIndexedDBSorters[generatedIndex].getValue;
+        let index = getIndex(order);
 
-    @field({ decoder: NumberDecoder })
-    number: number = 0;
+        if (typeof index === 'string') {
+            index = index.toLocaleLowerCase();
+        }
 
-    @field({ decoder: StringDecoder })
-    status: string = '';
-
-    @field({ decoder: StringDecoder })
-    paymentMethod: string = '';
-
-    @field({ decoder: StringDecoder })
-    checkoutMethod: string = '';
-
-    @field({ decoder: NumberDecoder })
-    timeSlotDate: number = 0;
-
-    @field({ decoder: NumberDecoder })
-    validAt: number = 0;
-
-    @field({ decoder: StringDecoder })
-    name: string = '';
-
-    @field({ decoder: StringDecoder })
-    email: string = '';
-
-    @field({ decoder: StringDecoder })
-    phone: string = '';
-
-    @field({ decoder: NumberDecoder })
-    totalPrice: number = 0;
-
-    @field({ decoder: NumberDecoder })
-    amount: number = 0;
-
-    @field({ decoder: NumberDecoder })
-    openBalance: number = 0;
-
-    @field({ decoder: StringDecoder })
-    location: string = '';
-
-    @field({ decoder: StringDecoder })
-    timeSlotTime: string = '';
-}
-
-function getPrivateOrderIndexes(order: PrivateOrder): PrivateOrderEncodeableIndexes {
-    return PrivateOrderEncodeableIndexes.create(
-        Object.fromEntries(
-            Object.values(OrderIndexedDBIndex).map((generatedIndex) => {
-                const getIndex = ordersIndexedDBSorters[generatedIndex].getValue;
-                let index = getIndex(order);
-
-                if (typeof index === 'string') {
-                    index = index.toLocaleLowerCase();
-                }
-
-                return [generatedIndex, index];
-            }),
-        ),
-    );
+        return [generatedIndex, index];
+    }));
 };

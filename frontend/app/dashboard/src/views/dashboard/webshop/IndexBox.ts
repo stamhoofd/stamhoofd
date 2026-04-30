@@ -1,9 +1,9 @@
-import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext} from '@simonbackx/simple-encoding';
+import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
 import { encodeObject } from '@simonbackx/simple-encoding';
 
-export type IndexedDbIndexValue = string | number | null | undefined;
+export type IndexedDbIndexValue = string | number;
 export type IndexMap<Key = string> = Map<Key, IndexedDbIndexValue>;
-export type GetIndexes<Data, T extends EncodableObject = EncodableObject> = (data: Data) => T;
+export type GetIndexes<Data> = (data: Data) => Record<string, string | number>;
 
 export class IndexBox<T extends EncodableObject> implements Encodeable {
     readonly data: T;
