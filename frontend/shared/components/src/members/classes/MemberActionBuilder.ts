@@ -574,8 +574,14 @@ export class MemberActionBuilder {
         return allActions;
     }
 
-    getInviteMemberForGroupActionsWithGroups(eventGroups: Group[]): {actions: TableAction<PlatformMember>[], groups: Group[]} | null {
-        const categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess()});
+    getInviteMemberForGroupActionsWithGroups(eventGroups: Group[], isWaitingList: boolean): {actions: TableAction<PlatformMember>[], groups: Group[]} | null {
+        let categoryTree: null | GroupCategoryTree = null;
+
+        if (isWaitingList) {
+            categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess()});
+        } else if (this.organizations.length === 1) {
+            categoryTree = this.organizations[0].period.adminCategoryTree
+        }
 
         if (!categoryTree) {
             return null;
@@ -588,7 +594,7 @@ export class MemberActionBuilder {
             return null;
         }
         
-        if (allGroups.length === 1) {
+        if (isWaitingList && allGroups.length === 1) {
             const group = allGroups[0];
 
             const actions = [
@@ -601,7 +607,7 @@ export class MemberActionBuilder {
                         needsSelection: true,
                         allowAutoSelectAll: false,
                         // disable if already invited
-                        disableIfAll: (member: PlatformMember) => isMemberInvited(member, group),
+                        disableIfAll: (member: PlatformMember) => isMemberInvited(member, group) || isMemberRegistered(member, group),
                         handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
                             await this.inviteForGroup(members, group, wereItemsFetched)
                         }
@@ -616,7 +622,7 @@ export class MemberActionBuilder {
                         needsSelection: true,
                         allowAutoSelectAll: false,
                         // disable if not invited
-                        disableIfAll: (member: PlatformMember) => !isMemberInvited(member, group),
+                        disableIfAll: (member: PlatformMember) => !isMemberInvited(member, group) && !isMemberRegistered(member, group),
                         handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
                             await this.deleteInvitations(members, group, wereItemsFetched)
                         }
@@ -657,17 +663,20 @@ export class MemberActionBuilder {
         const actions = [
             new MenuTableAction({
                 name: $t(`Uitnodigen voor`),
-                priority: 2,
-                groupIndex: 2,
+                priority: isWaitingList ? 2 : 1,
+                groupIndex: isWaitingList ? 2 : 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled,
                 childActions: () => getChildActions({
                     // disable if already invited
-                    disableIfAll: (member: PlatformMember, group: Group) => isMemberInvited(member, group),
+                    disableIfAll: (member: PlatformMember, group: Group) => isMemberInvited(member, group) || isMemberRegistered(member, group),
                     action: async (members, group, wereItemsFetched) => await this.inviteForGroup(members, group, wereItemsFetched)
                 })
-            }),
+            })
+        ];
+
+        if (isWaitingList) {
             new MenuTableAction({
                 name: $t(`Uitnodiging verwijderen voor`),
                 priority: 1,
@@ -677,15 +686,15 @@ export class MemberActionBuilder {
                 enabled,
                 childActions: () => getChildActions({
                     // disable if not invited
-                    disableIfAll: (member: PlatformMember, group: Group) => !isMemberInvited(member, group),
+                    disableIfAll: (member: PlatformMember, group: Group) => !isMemberInvited(member, group) && !isMemberRegistered(member, group),
                     action: async (members, group, wereItemsFetched) => await this.deleteInvitations(members, group, wereItemsFetched)
                 })
             })
-        ];
+        }
 
         return {
             actions,
-            groups: allGroups
+            groups: isWaitingList ? allGroups : []
         }
     }
 

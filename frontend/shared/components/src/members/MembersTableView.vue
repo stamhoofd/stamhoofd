@@ -324,10 +324,15 @@ async function createActions(): Promise<void> {
             console.error(e);
         }
 
-        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups(eventGroups);
+        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups(eventGroups, true);
         if (actionsWithGroups) {
             results.push(...actionsWithGroups.actions);
             groupsLinkedToWaitingList.value = actionsWithGroups.groups;
+        }
+    } else {
+        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups([], false);
+        if (actionsWithGroups) {
+            results.push(...actionsWithGroups.actions);
         }
     }
 
