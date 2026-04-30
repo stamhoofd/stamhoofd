@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
@@ -55,6 +55,11 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.paymentMethod'),
         type: SQLValueType.JSONString,
         nullable: false,
+    }),
+    checkoutMethodId: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.checkoutMethod.id'),
+        type: SQLValueType.JSONString,
+        nullable: true,
     }),
     checkoutMethod: createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.checkoutMethod.type'),
