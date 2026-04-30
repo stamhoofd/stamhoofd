@@ -109,6 +109,14 @@ export const eventNotificationsInMemoryFilterCompilers: InMemoryFilterDefinition
     ...recordAnswersFilterCompilers,
 };
 
+export const paymentFilterCompilers: InMemoryFilterDefinitions = {
+    ...baseInMemoryFilterCompilers,
+    paidAt: createInMemoryFilterCompiler('paidAt'),
+    method: createInMemoryFilterCompiler('method'),
+    price: createInMemoryFilterCompiler('price'),
+    transferDescription: createInMemoryFilterCompiler('transferDescription'),
+};
+
 export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
 
@@ -126,6 +134,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
     checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
     checkoutMethodId: createInMemoryFilterCompiler('data.checkoutMethod.id'),
+    // todo
     discountCodes: createInMemoryFilterCompiler('data.discountCodes', {
         ...baseInMemoryFilterCompilers,
         code: createInMemoryFilterCompiler('code'),
@@ -138,8 +147,10 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     totalPrice: createInMemoryFilterCompiler('data.totalPrice'),
     amount: createInMemoryFilterCompiler('data.amount'),
     timeSlotTime: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
+    // todo
     openBalance: createInMemoryFilterCompiler('openBalance'),
     location: createInMemoryFilterCompiler('data.locationName'),
+    // todo
     paidAt: createInMemoryFilterCompiler('paidAt'),
 
     // Other (no sorters)
@@ -155,7 +166,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
-    recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
+    payments: createInMemoryFilterCompiler('payments', paymentFilterCompilers),
 };
 
 export const privateOrderWithTicketsFilterCompilers: InMemoryFilterDefinitions = {

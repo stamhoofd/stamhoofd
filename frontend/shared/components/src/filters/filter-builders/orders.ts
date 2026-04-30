@@ -1,5 +1,5 @@
 import type { PrivateWebshop, WebshopPreview } from '@stamhoofd/structures';
-import { CheckoutMethodType, CheckoutMethodTypeHelper, FilterWrapperMarker, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, Webshop } from '@stamhoofd/structures';
+import { CheckoutMethodType, CheckoutMethodTypeHelper, FilterWrapperMarker, OrderStatus, OrderStatusHelper, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
@@ -8,6 +8,7 @@ import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getCartFilterBuilder } from './checkout';
+import { PaymentFilterBuilders } from './payments';
 import { getFilterBuildersForRecordCategories } from './record-categories';
 
 export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | WebshopPreview) {
@@ -46,22 +47,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         }));
     }
 
-    builders.push(new MultipleChoiceFilterBuilder({
-        name: $t(`%M7`),
-        options: Object.values(PaymentMethod).map((paymentMethod) => {
-            return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(paymentMethod), paymentMethod);
-        }),
-        wrapper: {
-            paymentMethod: {
-                $in: FilterWrapperMarker,
-            },
-        },
-    }));
-
-    builders.push(new DateFilterBuilder({
-        key: 'paidAt',
-        name: $t('%1Jb'),
-    }));
+    builders.push(getPaymentGroupFilterBuilder());
 
     if (preview.meta.checkoutMethods.length > 1) {
         builders.push(new MultipleChoiceFilterBuilder({
@@ -181,4 +167,25 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
     const groupFilter = new GroupUIFilterBuilder({ builders });
 
     return [groupFilter, ...builders];
+}
+
+
+function getPaymentGroupFilterBuilder() {
+    const paymentFilterBuilders: UIFilterBuilders = [
+        PaymentFilterBuilders.paidAt,
+        PaymentFilterBuilders.method,
+        PaymentFilterBuilders.price,
+        PaymentFilterBuilders.transferDescription,
+    ];
+
+    return new GroupUIFilterBuilder({
+        name: $t('Betaling(en)'),
+        description: $t('Filter op de betaling(en) van de bestelling'),
+        builders: paymentFilterBuilders,
+        wrapper: {
+            payments: {
+                $elemMatch: FilterWrapperMarker,
+            },
+        },
+    });
 }

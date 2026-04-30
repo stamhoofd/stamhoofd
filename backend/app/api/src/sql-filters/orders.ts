@@ -1,5 +1,8 @@
+import { Payment } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import { PaymentStatus } from '@stamhoofd/structures';
+import { paymentFilterCompilers } from './payments.js';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -207,5 +210,49 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                 nullable: true,
             }),
         }),
+    ),
+    payments: createExistsFilter(
+        // should equal payments on structure
+        SQL.select()
+            .from(
+                SQL.table('balance_items'),
+            )
+            .join(
+                SQL.join(
+                    SQL.table('balance_item_payments'),
+                ).where(
+                    SQL.column('balance_items', 'id'),
+                    SQL.column('balance_item_payments', 'balanceItemId'),
+                )
+            )
+            .join(
+                SQL.join(
+                    SQL.table('payments'),
+                ).where(
+                    SQL.column('payments', 'id'),
+                    SQL.column('balance_item_payments', 'paymentId')
+                ),
+            )
+            .where(
+                SQL.column('balance_items', 'orderId'),
+                SQL.column('webshop_orders', 'id'),
+            )
+            // payments on structure filter away failed payments -> also filter out failed payments in backend
+            .whereNot(
+                SQL.column('payments', 'status'),
+                PaymentStatus.Failed
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            paidAt: createColumnFilter({
+                expression: SQL.column(Payment.table, 'paidAt'),
+                type: SQLValueType.Datetime,
+                nullable: false,
+            }),
+            method: paymentFilterCompilers.method,
+            status: paymentFilterCompilers.status,
+            price: paymentFilterCompilers.price,
+            transferDescription: paymentFilterCompilers.transferDescription,
+        },
     ),
 };
