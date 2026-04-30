@@ -8,6 +8,7 @@ import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getCartFilterBuilder } from './checkout';
+import { simpleBooleanFilterFactory } from './helpers';
 import { PaymentFilterBuilders } from './payments';
 import { getFilterBuildersForRecordCategories } from './record-categories';
 
@@ -47,6 +48,16 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         }));
     }
 
+    builders.push(simpleBooleanFilterFactory({
+        name: $t('Betaald'),
+        optionNames: {
+            true: $t('Ja'),
+            false: $t('Nee'),
+        },
+        filterIfTrue: {
+            isPaid: true,
+        }
+    }));
     builders.push(getPaymentGroupFilterBuilder());
 
     if (preview.meta.checkoutMethods.length > 1) {
