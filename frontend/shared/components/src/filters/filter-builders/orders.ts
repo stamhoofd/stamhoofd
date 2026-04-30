@@ -55,9 +55,23 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
             false: $t('Nee'),
         },
         filterIfTrue: {
-            isPaid: true,
+            $or: [
+                {
+                    status: OrderStatus.Canceled
+                },
+                {
+                    status: OrderStatus.Deleted
+                },
+                {
+                    totalPrice: 0
+                },
+                {
+                    doesPricePaidEqualOrExceedTotalPrice: true
+                }
+            ]
         }
     }));
+    
     builders.push(getPaymentGroupFilterBuilder());
 
     if (preview.meta.checkoutMethods.length > 1) {

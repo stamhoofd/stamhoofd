@@ -201,6 +201,11 @@ export class Order extends AutoEncoder {
     }
 
     // used for inMemoryFilters
+    get doesPricePaidEqualOrExceedTotalPrice() {
+        return this.pricePaid >= this.totalToPay;
+    }
+
+    // used for inMemoryFilters
     get isPaid() {
         return this.totalToPay === 0 || this.pricePaid >= this.totalToPay;
     }

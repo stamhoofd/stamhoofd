@@ -1,7 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
 import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery } from './SQLExpression.js';
-import type { ParseWhereArguments} from './SQLWhere.js';
+import type { SQLSelect } from './SQLSelect.js';
+import type { ParseWhereArguments } from './SQLWhere.js';
 import { SQLEmptyWhere } from './SQLWhere.js';
 
 export type SQLScalarValue = string | number | boolean | Date;
@@ -584,6 +585,25 @@ export class SQLIsNull implements SQLExpression {
         return joinSQLQuery([
             this.expression.getSQL(options),
             ' IS NULL',
+        ]);
+    }
+}
+
+export type SQLAggregateColumnType = 'COUNT' | 'SUM' | 'MIN' | 'MAX' | 'AVG';
+
+export class SQLSubQuery implements SQLExpression {
+    select: SQLExpression;
+    notExists = false;
+
+    constructor(select: SQLSelect) {
+        this.select = select;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            `(`,
+            this.select.getSQL(options),
+            `)`,
         ]);
     }
 }

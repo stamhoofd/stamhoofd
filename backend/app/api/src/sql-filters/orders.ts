@@ -1,6 +1,6 @@
 import { Payment } from '@stamhoofd/models';
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import type { SQLExpression, SQLFilterDefinitions } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLSum, SQLValueType, SQLWhereSign } from '@stamhoofd/sql';
 import { PaymentStatus } from '@stamhoofd/structures';
 import { paymentFilterCompilers } from './payments.js';
 
@@ -255,4 +255,28 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             transferDescription: paymentFilterCompilers.transferDescription,
         },
     ),
+    doesPricePaidEqualOrExceedTotalPrice: createColumnFilter({
+        expression: SQL.if(getPricePaidSubQuery(), SQLWhereSign.GreaterEqual, SQL.column('totalPrice')).then(1).else(0),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
+    // isPaid: createColumnFilter({
+    //     expression: SQL.if(SQL.column('totalPrice'), 0)
+    //         .then(
+    //             1
+    //         ).else(
+    //             SQL.if(getPricePaidSubQuery(), SQLWhereSign.GreaterEqual, SQL.column('totalPrice'))
+    //             .then(1)
+    //             .else(
+    //                 SQL.if(SQL.isNull(getPricePaidSubQuery()), 1).then(1).else(0)
+    //             )),
+    //     type: SQLValueType.Number,
+    //     nullable: false,
+    // })
 };
+
+function getPricePaidSubQuery(): SQLExpression {
+    return SQL.subQuery(SQL.select(new SQLSum(SQL.column('balance_items', 'pricePaid')))
+            .from(SQL.table('balance_items'))
+            .where(SQL.column('balance_items', 'orderId'), SQL.column('webshop_orders', 'id')));
+}
