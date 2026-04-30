@@ -1,7 +1,8 @@
 /// <reference types="@vitest/browser/providers/playwright" />
 import { userEvent } from '@vitest/browser/context';
 import { expect, test } from 'vitest';
-import { render, type RenderResult } from 'vitest-browser-vue';
+import { render  } from 'vitest-browser-vue';
+import type {RenderResult} from 'vitest-browser-vue';
 import type { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
 import FloatInputBox from './FloatInputBox.vue';
@@ -312,7 +313,7 @@ describe('FloatInputBox', () => {
                 },
             ];
 
-            for(const {text, expected} of inputValues) {
+            for (const {text, expected} of inputValues) {
                 // clear input
                 await userEvent.clear(inputEl);
 
@@ -608,7 +609,7 @@ type FloatInputBoxProps = {
 
 function lastEmittedModelValue(result: RenderResult<any>): number | null | undefined {
     const emitted = result.emitted<(number | null)[]>('update:modelValue');
-    if(emitted === undefined) {
+    if (emitted === undefined) {
         return undefined;
     }
 
