@@ -1,5 +1,5 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventBus } from '@stamhoofd/components/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
@@ -161,7 +161,7 @@ export class WebshopOrdersRepo {
             transform: async (rawOrder: any) => {
                 let order: PrivateOrder;
                 try {
-                    order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+                    order = decoder.decode(new ObjectData(rawOrder, { version: Version, medium: EncodeMedium.Database }));
                 }
                 catch (e) {
                     // force fetch all again
@@ -271,7 +271,7 @@ export class OrdersStore {
         const rawItem = await this.database.getItemFromStore({ storeName: OrdersStore.storeName, id });
         if (rawItem) {
             const decoder = new IndexBoxDecoder(PrivateOrder as Decoder<PrivateOrder>);
-            return decoder.decode(new ObjectData(rawItem, { version: Version }));
+            return decoder.decode(new ObjectData(rawItem, { version: Version, medium: EncodeMedium.Database }));
         }
         return undefined;
     }
@@ -302,7 +302,7 @@ export class OrdersStore {
                 }
                 else {
                     const indexBox = createPrivateOrderIndexBox(order);
-                    objectStore.put(indexBox.encode({ version: Version }));
+                    objectStore.put(indexBox.encode({ version: Version, medium: EncodeMedium.Database }));
                 }
             }
         });

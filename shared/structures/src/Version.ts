@@ -5,11 +5,15 @@
 //
 // -------------------------------------------------------------
 
-export const Version = 396;
+export const Version = 397;
 
 declare global {
     const NextVersion: { optional: true; version: number };
 }
+
+import { AutoEncoder } from '@simonbackx/simple-encoding';
+AutoEncoder.skipDefaultValuesVersion = 10000; // todo
+
 /**
  * Use this in development when making changes to fields.
  * On release, the version will get bumped and the usages of NextVersion will be replaced by that version.

@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
@@ -147,7 +147,7 @@ export class WebshopManager {
     }
 
     async saveToDatabase(webshop: PrivateWebshop) {
-        await this.settings.set(this.webshopStoreName, webshop.encode({ version: Version }));
+        await this.settings.set(this.webshopStoreName, webshop.encode({ version: Version, medium: EncodeMedium.Database }));
     }
 
     /**
@@ -259,7 +259,7 @@ export class WebshopManager {
                 let order: PrivateOrderWithTickets;
 
                 try {
-                    order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+                    order = decoder.decode(new ObjectData(rawOrder, { version: Version, medium: EncodeMedium.Database }));
                 }
                 catch (e) {
                     // force fetch all again
@@ -287,7 +287,7 @@ export class WebshopManager {
             let order: PrivateOrderWithTickets;
 
             try {
-                order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+                order = decoder.decode(new ObjectData(rawOrder, { version: Version, medium: EncodeMedium.Database }));
             }
             catch (e) {
                 // force fetch all again
@@ -314,7 +314,7 @@ export class WebshopManager {
             return undefined;
         }
 
-        return PrivateWebshop.decode(new ObjectData(raw, { version: Version }));
+        return PrivateWebshop.decode(new ObjectData(raw, { version: Version, medium: EncodeMedium.Database }));
     }
 
     private updatePreview(webshop: PrivateWebshop) {
