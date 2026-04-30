@@ -21,11 +21,11 @@
 <script lang="ts" setup>
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
-import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
+import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
+import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import type { Invoice, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
