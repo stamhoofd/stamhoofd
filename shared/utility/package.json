@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/utility",
-    "version": "2.120.2",
+    "version": "2.120.3",
     "type": "module",
     "types": "./dist/index.d.ts",
     "module": "./dist/index.js",

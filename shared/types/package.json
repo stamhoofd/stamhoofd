@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/types",
-    "version": "2.120.2",
+    "version": "2.120.3",
     "type": "module",
     "exports": {
         "./*": {
