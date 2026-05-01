@@ -160,7 +160,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
-    balance: createInMemoryFilterCompiler('balance'),
+    amountToPay: createInMemoryFilterCompiler('amountToPay'),
     payments: createInMemoryFilterCompiler('payments', paymentFilterCompilers),
 };
 

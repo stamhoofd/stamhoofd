@@ -66,7 +66,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
                     totalPrice: 0
                 },
                 {
-                    balance: {
+                    amountToPay: {
                         $lte: 0
                     }
                 }

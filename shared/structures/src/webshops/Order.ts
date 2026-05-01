@@ -200,8 +200,8 @@ export class Order extends AutoEncoder {
         return this.totalToPay - this.pricePaid;
     }
 
-    // used for inMemoryFilters
-    get balance() {
+    // used only for inMemoryFilters
+    get amountToPay() {
         return this.data.totalPrice - this.pricePaid;
     }
 

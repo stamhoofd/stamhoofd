@@ -263,7 +263,7 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         },
     ),
     // not same as open balance (balance can be negative)
-    balance: createColumnFilter({
+    amountToPay: createColumnFilter({
         expression: SQL.calculation(SQL.column('totalPrice')).subtract(getPricePaidSubQuery()),
         type: SQLValueType.Number,
         nullable: false,
