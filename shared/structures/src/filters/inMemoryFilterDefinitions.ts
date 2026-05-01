@@ -161,7 +161,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
             id: createInMemoryFilterCompiler('id'),
         }),
     }),
-    doesPricePaidEqualOrExceedTotalPrice: createInMemoryFilterCompiler('doesPricePaidEqualOrExceedTotalPrice'),
+    balance: createInMemoryFilterCompiler('balance'),
     payments: createInMemoryFilterCompiler('payments', paymentFilterCompilers),
 };
 

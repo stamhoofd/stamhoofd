@@ -1,6 +1,6 @@
 import { Payment } from '@stamhoofd/models';
 import type { SQLExpression, SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLSum, SQLValueType, SQLWhereSign } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLSum, SQLValueType } from '@stamhoofd/sql';
 import { PaymentStatus } from '@stamhoofd/structures';
 import { paymentFilterCompilers } from './payments.js';
 
@@ -255,8 +255,9 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             transferDescription: paymentFilterCompilers.transferDescription,
         },
     ),
-    doesPricePaidEqualOrExceedTotalPrice: createColumnFilter({
-        expression: SQL.if(getPricePaidSubQuery(), SQLWhereSign.GreaterEqual, SQL.column('totalPrice')).then(1).else(0),
+    // not same as open balance (balance can be negative)
+    balance: createColumnFilter({
+        expression: SQL.calculation(SQL.column('totalPrice')).subtract(getPricePaidSubQuery()),
         type: SQLValueType.Number,
         nullable: false,
     }),
@@ -264,6 +265,6 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
 
 function getPricePaidSubQuery(): SQLExpression {
     return SQL.subQuery(SQL.select(new SQLSum(SQL.column('balance_items', 'pricePaid')))
-            .from(SQL.table('balance_items'))
-            .where(SQL.column('balance_items', 'orderId'), SQL.column('webshop_orders', 'id')));
+        .from(SQL.table('balance_items'))
+        .where(SQL.column('balance_items', 'orderId'), SQL.column('webshop_orders', 'id')));
 }

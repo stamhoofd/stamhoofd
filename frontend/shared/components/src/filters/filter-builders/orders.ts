@@ -66,7 +66,9 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
                     totalPrice: 0
                 },
                 {
-                    doesPricePaidEqualOrExceedTotalPrice: true
+                    balance: {
+                        $lte: 0
+                    }
                 }
             ]
         }

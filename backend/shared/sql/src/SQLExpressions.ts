@@ -112,6 +112,17 @@ export class SQLMinusSign implements SQLExpression {
     }
 }
 
+export type SQLArithmicOperatorType = '+' | '-' | '*' | '/' | '%';
+
+export class SQLArithmicOperator implements SQLExpression {
+    constructor(readonly type: SQLArithmicOperatorType) {
+    }
+
+    getSQL(): SQLQuery {
+        return this.type;
+    }
+}
+
 export class SQLGreatest implements SQLExpression {
     expressions: SQLDynamicExpression[];
 
@@ -133,6 +144,36 @@ export class SQLCalculation implements SQLExpression {
 
     constructor(...expressions: SQLExpression[]) {
         this.expressions = expressions;
+    }
+
+    add(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('+', expression);
+    }
+
+    subtract(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('-', expression);
+    }
+
+    multiply(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('*', expression);
+    }
+
+    divide(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('/', expression);
+    }
+
+    modulo(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('%', expression);
+    }
+
+    /**
+     * Add a new arithmic operation.
+     * @param type 
+     * @param expression 
+     */
+    private pushOperation(type: SQLArithmicOperatorType, expression: SQLExpression): SQLCalculation {
+        this.expressions.push(new SQLArithmicOperator(type), expression);
+        return this;
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
