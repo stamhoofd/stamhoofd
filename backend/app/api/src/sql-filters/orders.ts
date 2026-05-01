@@ -115,7 +115,14 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: true,
     }),
-
+    discountCodes: {
+        ...baseSQLFilterCompilers,
+        code: createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column('data'), '$.value.discountCodes[*].code', true),
+            type: SQLValueType.JSONArray,
+            nullable: true,
+        })
+    },
     items: createExistsFilter(
         /**
          * There is a bug in MySQL 8 that is fixed in 9.3

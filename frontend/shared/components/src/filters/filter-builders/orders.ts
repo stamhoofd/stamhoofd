@@ -143,9 +143,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         key: 'code',
         name: $t('%1MX'),
         wrapper: {
-            discountCodes: {
-                $elemMatch: FilterWrapperMarker,
-            },
+            discountCodes: FilterWrapperMarker
         },
     }));
 
