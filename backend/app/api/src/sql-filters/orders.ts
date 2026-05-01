@@ -118,7 +118,7 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
     discountCodes: {
         ...baseSQLFilterCompilers,
         code: createColumnFilter({
-            expression: SQL.jsonExtract(SQL.column('data'), '$.value.discountCodes[*].code', true),
+            expression: SQL.jsonExtract(SQL.column('data'), '$.value.discountCodes[*].code'),
             type: SQLValueType.JSONArray,
             nullable: true,
         })
