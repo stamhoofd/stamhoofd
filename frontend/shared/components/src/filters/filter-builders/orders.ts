@@ -3,12 +3,12 @@ import { CheckoutMethodType, CheckoutMethodTypeHelper, FilterWrapperMarker, Orde
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
 import { getCartFilterBuilder } from './checkout';
-import { simpleBooleanFilterFactory } from './helpers';
+import { simpleMultipleChoiceFilterFactory } from './helpers';
 import { PaymentFilterBuilders } from './payments';
 import { getFilterBuildersForRecordCategories } from './record-categories';
 
@@ -48,31 +48,53 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         }));
     }
 
-    builders.push(simpleBooleanFilterFactory({
-        name: $t('Betaald'),
-        optionNames: {
-            true: $t('Ja'),
-            false: $t('Nee'),
-        },
-        filterIfTrue: {
-            $or: [
-                {
-                    status: OrderStatus.Canceled
-                },
-                {
-                    status: OrderStatus.Deleted
-                },
-                {
-                    totalPrice: 0
-                },
-                {
+    builders.push(simpleMultipleChoiceFilterFactory({
+        name: $t('Betaalstatus'),
+        filterMode: MultipleChoiceUIFilterMode.Or,
+        options: [
+            {
+                name: $t('Betaald (of niet meer te betalen)'),
+                value: 0,
+                filter: {
+                    $or: [
+                        {
+                            status: {
+                                $in: [OrderStatus.Canceled, OrderStatus.Deleted]
+                            },
+                        },
+                        {
+                            amountToPay: {
+                                $lte: 0
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                name: $t('Nog te betalen'),
+                value: 1,
+                filter: {
+                    status: {
+                        $not: {
+                            $in: [OrderStatus.Canceled, OrderStatus.Deleted]
+                        }
+                    },
                     amountToPay: {
-                        $lte: 0
+                        $gt: 0
                     }
                 }
-            ]
-        }
-    }));
+            },
+            {
+                name: $t('Terug te betalen'),
+                value: 2,
+                filter: {
+                    amountToPay: {
+                        $lt: 0
+                    }
+                }
+            }
+        ]
+    }))
     
     builders.push(getPaymentGroupFilterBuilder());
 
