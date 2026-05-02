@@ -10,7 +10,7 @@ import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email as EmailClass } from '@stamhoofd/email';
 import type { QueueHandlerOptions } from '@stamhoofd/queues';
 import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
+import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCount, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
 import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailTemplate } from './EmailTemplate.js';
@@ -469,27 +469,24 @@ export class Email extends QueryableModel {
 
         switch (type) {
             case 'hard-bounce': {
-                base.set('hardBouncesCount', new SQLCalculation(
-                    SQL.column('hardBouncesCount'),
-                    new SQLPlusSign(),
-                    readDynamicSQLExpression(1),
-                ));
+                base.set('hardBouncesCount',
+                    SQL.calculation(SQL.column('hardBouncesCount'))
+                        .add(readDynamicSQLExpression(1))
+                    );
                 break;
             }
             case 'soft-bounce': {
-                base.set('softBouncesCount', new SQLCalculation(
-                    SQL.column('softBouncesCount'),
-                    new SQLPlusSign(),
-                    readDynamicSQLExpression(1),
-                ));
+                base.set('softBouncesCount',
+                    SQL.calculation(SQL.column('softBouncesCount'))
+                        .add(readDynamicSQLExpression(1))
+                    );
                 break;
             }
             case 'complaint': {
-                base.set('spamComplaintsCount', new SQLCalculation(
-                    SQL.column('spamComplaintsCount'),
-                    new SQLPlusSign(),
-                    readDynamicSQLExpression(1),
-                ));
+                base.set('spamComplaintsCount',
+                    SQL.calculation(SQL.column('spamComplaintsCount'))
+                        .add(readDynamicSQLExpression(1))
+                    );
                 break;
             }
         }

@@ -1,6 +1,6 @@
 import { CachedBalance, Registration } from '@stamhoofd/models';
-import type { SQLNamedExpression} from '@stamhoofd/sql';
-import { SQL, SQLAlias, SQLCalculation, SQLPlusSign, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
+import type { SQLNamedExpression } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
 
 export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     SQL.select('objectId', 'organizationId',
@@ -24,23 +24,16 @@ export const registrationCachedBalanceJoin = SQL.leftJoin(
     SQL.select('objectId', 'organizationId',
         new SQLSelectAs(
             new SQLSum(
-                new SQLCalculation(
-                    SQL.column('amountOpen'),
-                    new SQLPlusSign(),
-                    SQL.column('amountPending'),
-                ),
+                SQL.calculation(SQL.column('amountOpen'))
+                    .add(SQL.column('amountPending'))
             ),
             new SQLAlias('toPay'),
         ),
         new SQLSelectAs(
             new SQLSum(
-                new SQLCalculation(
-                    SQL.column('amountOpen'),
-                    new SQLPlusSign(),
-                    SQL.column('amountPaid'),
-                    new SQLPlusSign(),
-                    SQL.column('amountPending'),
-                ),
+                SQL.calculation(SQL.column('amountOpen'))
+                    .add(SQL.column('amountPaid'))
+                    .add(SQL.column('amountPending'))
             ),
             new SQLAlias('price'),
         ),

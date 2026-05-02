@@ -94,24 +94,6 @@ export class SQLLower implements SQLExpression {
     }
 }
 
-export class SQLPlusSign implements SQLExpression {
-    getSQL(): SQLQuery {
-        return '+';
-    }
-}
-
-export class SQLMultiplicationSign implements SQLExpression {
-    getSQL(): SQLQuery {
-        return '*';
-    }
-}
-
-export class SQLMinusSign implements SQLExpression {
-    getSQL(): SQLQuery {
-        return '-';
-    }
-}
-
 export type SQLArithmicOperatorType = '+' | '-' | '*' | '/' | '%';
 
 export class SQLArithmicOperator implements SQLExpression {
