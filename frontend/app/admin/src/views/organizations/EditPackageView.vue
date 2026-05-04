@@ -127,6 +127,7 @@ import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import PermyriadInput from '@stamhoofd/components/inputs/PermyriadInput.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
+import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
 
 const props = defineProps<{
     pack: STPackage;

@@ -16,6 +16,7 @@ export class STPackageService {
                 SQL.where('removeAt', null)
                     .or('removeAt', '>', new Date()),
             )
+            .orderBy('validAt', 'DESC')
             .fetch();
     }
 
@@ -23,6 +24,7 @@ export class STPackageService {
         return await STPackage.select()
             .where('organizationId', organizationId)
             .andWhere('validAt', '!=', null)
+            .orderBy('validAt', 'DESC')
             .fetch();
     }
 

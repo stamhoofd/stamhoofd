@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, useContext, useErrors } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
@@ -115,8 +115,10 @@ async function createPackage() {
             new ComponentWithProperties(EditPackageView, {
                 pack,
                 isNew: true,
-                saveHandler: () => {
-                    // todo: save
+                saveHandler: async (patch: AutoEncoderPatchType<STPackage>) => {
+                    const status = OrganizationPackagesStatus.patch({});
+                    status.packages.addPut(pack.patch(patch));
+                    await applyPatch(status)
                 }
             })
         ],
@@ -130,13 +132,26 @@ async function editPackage(pack: STPackage) {
             new ComponentWithProperties(EditPackageView, {
                 pack,
                 isNew: false,
-                saveHandler: () => {
-                    // todo: save
+                saveHandler: async (patch: AutoEncoderPatchType<STPackage>) => {
+                    const status = OrganizationPackagesStatus.patch({});
+                    patch.id = pack.id;
+                    status.packages.addPatch(patch)
+                    await applyPatch(status)
                 }
             })
         ],
         modalDisplayStyle: 'popup'
     })
+}
+
+async function applyPatch(patch: AutoEncoderPatchType<OrganizationPackagesStatus>) {
+    const response = await context.value.getAuthenticatedServerForOrganization(props.organization.id).request({
+        method: "PATCH",
+        path: "/organization/packages",
+        body: patch,
+        decoder: OrganizationPackagesStatus as Decoder<OrganizationPackagesStatus>
+    })
+    packageStatus.value = response.data
 }
 
 

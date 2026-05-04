@@ -39,7 +39,9 @@ export class UserFactory extends Factory<Options, User> {
             email,
             organizationId: organization?.id ?? null,
             password,
-        }));
+        }), {
+            allowPlatform: !!this.options.globalPermissions
+        });
         if (!user) {
             throw new Error('Unexpected failure when creating user in factory');
         }
