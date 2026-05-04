@@ -5,6 +5,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel, PermissionsResourceType, PrivateWebshop, ResourcePermissions, Version, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Context } from '../../../../helpers/Context.js';
 
@@ -46,7 +47,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         const webshop = new Webshop();
 
-        webshop.id = request.body.id;
+        webshop.id = uuidv4()
         webshop.meta = request.body.meta;
         webshop.meta.domainActive = false;
         webshop.privateMeta = request.body.privateMeta;
