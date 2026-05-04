@@ -45,10 +45,15 @@ function $notInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFi
 function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const a = normalizeValue(assertFilterCompareValue(val));
-        const b = normalizeValue(assertFilterCompareValue(filter));
-        if (a === null || b === null) {
-            return a !== null && b === null;
+        if (a === null) {
+            return true;
         }
+
+        const b = normalizeValue(assertFilterCompareValue(filter));
+        if (b === null) {
+            return false;
+        }
+
         return a < b;
     };
 }
@@ -56,9 +61,13 @@ function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
 function $greaterThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const a = normalizeValue(assertFilterCompareValue(val));
+        if (a === null) {
+            return false;
+        }
+
         const b = normalizeValue(assertFilterCompareValue(filter));
-        if (a === null || b === null) {
-            return a === null && b !== null;
+        if ( b === null) {
+            return true;
         }
         return a > b;
     };
