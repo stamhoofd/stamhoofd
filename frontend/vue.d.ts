@@ -23,6 +23,7 @@ declare module 'vue' {
         $isMac: boolean;
         $isMobile: boolean;
         $isStamhoofd: boolean;
+        $isPlatform: boolean;
         $t: typeof import('@stamhoofd/frontend-i18n/I18n').I18n.prototype.$t;
         $feature: ReturnType<typeof import('@stamhoofd/components/hooks/useFeatureFlag').useFeatureFlag>;
 

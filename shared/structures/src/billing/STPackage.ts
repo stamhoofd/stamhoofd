@@ -62,6 +62,14 @@ export class STPackageMeta extends AutoEncoder {
         return STPackageTypeHelper.getName(this.type);
     }
 
+    get isTrial() {
+        return this.type.includes('Trial')
+    }
+
+    get isWebshops() {
+        return this.type === STPackageType.Webshops || this.type === STPackageType.SingleWebshop || this.type === STPackageType.TrialWebshops
+    }
+
     /**
      * ID of the package that was renewed (if it was renewed)
      */

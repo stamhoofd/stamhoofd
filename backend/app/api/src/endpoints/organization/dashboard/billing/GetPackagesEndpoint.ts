@@ -32,7 +32,7 @@ export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error();
         }
 
-        const packages = await STPackageService.getActivePackages(organization.id);
+        const packages = Context.auth.hasPlatformFullAccess() ? await STPackageService.getValidPackagesWithExpired(organization.id) : await STPackageService.getActivePackages(organization.id);
 
         return new Response(OrganizationPackagesStatus.create({
             packages: packages.map(p => STPackageStruct.create(p)),

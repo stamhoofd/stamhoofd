@@ -65,7 +65,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="!isPlatform">
+                <STListItem v-if="!$isPlatform">
                     <h3 class="style-definition-label">
                         {{ $t('%6t') }}
                     </h3>
@@ -74,12 +74,12 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="!isPlatform && organization.privateMeta">
+                <STListItem v-if="!$isPlatform && organization.privateMeta">
                     <h3 class="style-definition-label">
                         {{ $t('%1z') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ organization.privateMeta?.acquisitionTypes.join(', ') }}
+                        {{ organization.privateMeta?.acquisitionTypes?.length ? organization.privateMeta.acquisitionTypes.join(', ') : $t('Onbekend') }}
                     </p>
                 </STListItem>
 
@@ -113,6 +113,21 @@
             <p>{{ $t('Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.' ) }}</p>
 
             <STList class="illustration-list">
+                <STListItem v-if="!$isPlatform" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Invoices)">
+                    <template #left>
+                        <img src="~@stamhoofd/assets/images/illustrations/transfer.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Facturatie') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Bekijk facturen, openstaande bedragen en mandaten') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/' + appToUri('dashboard') + '/' + organization.uri + '/instellingen'" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
@@ -183,7 +198,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import MemberCountSpan from '@stamhoofd/components/members/components/MemberCountSpan.vue';
@@ -199,12 +214,30 @@ import { appToUri, Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';
+import OrganizationInvoicesView from './OrganizationInvoicesView.vue';
 
 const props = defineProps<{
     organization: Organization;
     getNext: (current: Organization) => Organization | null;
     getPrevious: (current: Organization) => Organization | null;
 }>();
+const navigate = useNavigate()
+
+enum Routes {
+    Invoices = 'invoices',
+}
+
+defineRoutes([
+    {
+        url: Routes.Invoices,
+        component: OrganizationInvoicesView,
+        paramsToProps() {
+            return {
+                organization: props.organization
+            };
+        },
+    }
+])
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
 

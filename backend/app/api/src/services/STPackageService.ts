@@ -19,6 +19,13 @@ export class STPackageService {
             .fetch();
     }
 
+    static async getValidPackagesWithExpired(organizationId: string) {
+        return await STPackage.select()
+            .where('organizationId', organizationId)
+            .andWhere('validAt', '!=', null)
+            .fetch();
+    }
+
     /**
      * Returns an up to date amount that should be charged for this package.
      * Note that this value could be smaller than the already charged amount.
