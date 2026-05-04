@@ -27,14 +27,12 @@ import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '#tables/ModernTableView.vue';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { AccessRight, GroupType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import { useGroupsObjectFetcher } from '../fetchers/useGroupsObjectsFetcher';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
 import { useRegistrationInvitationEventListener } from '../registrations';
-import { fetchAll } from '../tables';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from './helpers';
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -279,66 +277,37 @@ if (!organization.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!organization.value && props.group.organizationId !== organization.value.id;
 
-const groupsLinkedToWaitingList = ref<Group[]>([]);
+let groupsLinkedToWaitingList: Group[] = [];
 
 async function createActions(): Promise<void> {
     const results: TableAction<ObjectType>[] = [
-    new InMemoryTableAction({
-        name: $t(`%zh`),
-        icon: 'add',
-        priority: 0,
-        groupIndex: 1,
-        needsSelection: false,
-        enabled: canAdd,
-        handler: async () => {
-            await chooseOrganizationMembersForGroup({
-                members: [],
-                group: props.group!,
-            });
-        },
-    }),
-    ...actionBuilder.getActions({
-        selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
-        includeMove: true,
-        includeEdit: !excludeEdit,
-        includeOnlyIfRelevantForWaitingList: true
-    }),
+        new InMemoryTableAction({
+            name: $t(`%zh`),
+            icon: 'add',
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            enabled: canAdd,
+            handler: async () => {
+                await chooseOrganizationMembersForGroup({
+                    members: [],
+                    group: props.group!,
+                });
+            },
+        }),
+        ...await actionBuilder.getActions({
+            selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
+            includeMove: true,
+            includeEdit: !excludeEdit,
+            includeOnlyIfRelevantForWaitingList: true
+        }),
     ];
-    
-    if (waitingList.value && props.group) {
-        const request = new LimitedFilteredRequest({
-            limit: 100,
-            filter: {
-                waitingListId: props.group.id,
-                // only get events
-                type: GroupType.EventRegistration
-            }
-        })
-
-        const groupsObjectFetcher = useGroupsObjectFetcher();
-        
-        let eventGroups: Group[] = [];
-        try {
-            eventGroups = await fetchAll(request, groupsObjectFetcher);
-        } catch (e) {
-            console.error(e);
-        }
-
-        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups(eventGroups, true);
-        if (actionsWithGroups) {
-            results.push(...actionsWithGroups.actions);
-            groupsLinkedToWaitingList.value = actionsWithGroups.groups;
-        }
-    } else {
-        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups([], false);
-        if (actionsWithGroups) {
-            results.push(...actionsWithGroups.actions);
-        }
-    }
 
     if (((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) && props.group?.type !== GroupType.WaitingList) {
         results.push(actionBuilder.getChargeAction());
     }
+
+    groupsLinkedToWaitingList = actionBuilder.allGroupsLinkedToWaitingList;
 
     actions.value = results;
 }
@@ -352,7 +321,7 @@ if (waitingList.value) {
             return;
         }
 
-        if (groupsLinkedToWaitingList.value.some(group => value.groupIds.has(group.id))) {
+        if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
             tableObjectFetcher.reset(true, true);
         }
     })

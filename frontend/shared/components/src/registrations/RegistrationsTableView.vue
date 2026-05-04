@@ -30,15 +30,13 @@ import type { TableAction } from '#tables/classes/TableAction.ts';
 import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
-import { AccessRight, GroupType, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, GroupType, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import { useGroupsObjectFetcher } from '../fetchers/useGroupsObjectsFetcher';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
-import { fetchAll } from '../tables/classes/ObjectFetcher';
 import { useRegistrationInvitationEventListener } from './classes';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
@@ -318,12 +316,6 @@ if (!organizationScope.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!props.organization && props.group.organizationId !== props.organization.id;
 
-const registrationActions = actionBuilder.getActions({
-    selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
-    includeMove: true,
-    includeEdit: !excludeEdit,
-});
-
 const isLimitedGroup = computed(() => {
     if (!props.group) {
         return false;
@@ -345,9 +337,15 @@ const isLimitedGroup = computed(() => {
     return false;
 });
 
-const groupsLinkedToWaitingList = ref<Group[]>([]);
+let groupsLinkedToWaitingList: Group[] = [];
 
 async function createActions(): Promise<void> {
+    const registrationActions = await actionBuilder.getActions({
+        selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
+        includeMove: true,
+        includeEdit: !excludeEdit,
+    });
+
     const results: TableAction<ObjectType>[] = [
         new InMemoryTableAction({
                 name: $t(`%zh`),
@@ -370,31 +368,7 @@ async function createActions(): Promise<void> {
         results.push(actionBuilder.getChargeAction());
     }
 
-    if (waitingList.value && props.group) {
-        const request = new LimitedFilteredRequest({
-            limit: 100,
-            filter: {
-                waitingListId: props.group.id,
-                // only get events
-                type: GroupType.EventRegistration
-            }
-        })
-
-        const groupsObjectFetcher = useGroupsObjectFetcher();
-        
-        let eventGroups: Group[] = [];
-        try {
-            eventGroups = await fetchAll(request, groupsObjectFetcher);
-        } catch (e) {
-            console.error(e);
-        }
-
-        const actionsWithGroups = actionBuilder.getInviteMemberForGroupActionsWithGroups(eventGroups);
-        if (actionsWithGroups) {
-            results.push(...actionsWithGroups.actions);
-            groupsLinkedToWaitingList.value = actionsWithGroups.groups;
-        }
-    }
+    groupsLinkedToWaitingList = actionBuilder.allGroupsLinkedToWaitingList;
 
     actions.value = results;
 }
@@ -408,7 +382,7 @@ if (waitingList.value) {
             return;
         }
 
-        if (groupsLinkedToWaitingList.value.some(group => value.groupIds.has(group.id))) {
+        if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
             tableObjectFetcher.reset(true, true);
         }
     })
