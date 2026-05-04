@@ -25,7 +25,7 @@
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.839.0",
-        "@simonbackx/simple-endpoints": "1.21.0",
+        "@simonbackx/simple-endpoints": "1.21.1",
         "@simonbackx/simple-logging": "^1.0.1",
         "formidable": "3.5.4",
         "luxon": "3.4.4",
