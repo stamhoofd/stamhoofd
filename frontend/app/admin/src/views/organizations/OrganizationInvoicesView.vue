@@ -21,7 +21,7 @@
                         {{ $t('Geen pakketten') }}
                     </p>
                     <STList v-else>
-                        <STListItem v-for="pack of packageStatus.packages" :key="pack.id" :selectable="true">
+                        <STListItem v-for="pack of packageStatus.packages" :key="pack.id" :selectable="true" @click="editPackage(pack)">
                             <template #left>
                                 <IconContainer :icon="pack.meta.isWebshops ? 'basket' : 'group'" :class="{'gray': !pack.status.isActive, 'secundary': pack.status.isActive && pack.meta.isTrial}">
                                     <template #aside>
@@ -49,14 +49,17 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, useContext, useErrors } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useRequestOwner } from '@stamhoofd/networking';
-import type { Organization } from '@stamhoofd/structures';
+import { STPackageBundle, STPackageBundleHelper, STPackageMeta  } from '@stamhoofd/structures';
+import type {Organization, STPackage} from '@stamhoofd/structures';
 import { OrganizationPackagesStatus, STPackageType } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
+import EditPackageView from './EditPackageView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -72,6 +75,7 @@ const errors = useErrors();
 const loading = ref(false);
 const context = useContext();
 const owner = useRequestOwner();
+const present = usePresent()
 
 onMounted(() => {
     reload().catch(console.error)
@@ -102,8 +106,38 @@ async function reload() {
     loading.value = false;
 }
 
-function createPackage() {
-    // todo
+async function createPackage() {
+    const pack = STPackageBundleHelper.getCurrentPackage(STPackageBundle.Webshops, new Date())
+    pack.validAt = new Date()
+    
+    await present({
+        components: [
+            new ComponentWithProperties(EditPackageView, {
+                pack,
+                isNew: true,
+                saveHandler: () => {
+                    // todo: save
+                }
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
 }
+
+async function editPackage(pack: STPackage) {
+    await present({
+        components: [
+            new ComponentWithProperties(EditPackageView, {
+                pack,
+                isNew: false,
+                saveHandler: () => {
+                    // todo: save
+                }
+            })
+        ],
+        modalDisplayStyle: 'popup'
+    })
+}
+
 
 </script>
