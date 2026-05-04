@@ -1,5 +1,5 @@
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
-import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
+import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useContext, useOrganization, usePlatform } from '../hooks';
@@ -57,71 +57,7 @@ export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     return builders;
 };
 
-export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
-    const builders: UIFilterBuilders = [
-        new MultipleChoiceFilterBuilder({
-            name: $t(`%M7`),
-            options: Object.values(PaymentMethod).map((method) => {
-                return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
-            }),
-            wrapper: {
-                method: {
-                    $in: FilterWrapperMarker,
-                },
-            },
-        }),
 
-        new MultipleChoiceFilterBuilder({
-            name: $t(`%1A`),
-            options: Object.values(PaymentStatus).map((method) => {
-                return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
-            }),
-            wrapper: {
-                status: {
-                    $in: FilterWrapperMarker,
-                },
-            },
-        }),
-
-        new MultipleChoiceFilterBuilder({
-            name: $t(`%1LP`),
-            options: Object.values(PaymentType).map((method) => {
-                return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(method)), method);
-            }),
-            wrapper: {
-                type: {
-                    $in: FilterWrapperMarker,
-                },
-            },
-        }),
-
-        new NumberFilterBuilder({
-            name: $t(`%1IP`),
-            type: NumberFilterFormat.Currency,
-            key: 'price',
-        }),
-
-        new DateFilterBuilder({
-            name: $t(`%1Jb`),
-            key: 'paidAt',
-        }),
-
-        new DateFilterBuilder({
-            name: $t(`%1Jc`),
-            key: 'createdAt',
-        }),
-
-        getCustomerUIFilterBuilders()[0],
-    ];
-
-    builders.unshift(
-        new GroupUIFilterBuilder({
-            builders,
-        }),
-    );
-
-    return builders;
-};
 
 export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [

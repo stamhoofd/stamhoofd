@@ -325,4 +325,141 @@ describe('InMemoryFilter', () => {
             });
         });
     });
+
+    describe('$lt', () => {
+        it('Numbers and null', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                age: createInMemoryFilterCompiler('age'),
+            };
+
+            test({
+                filter: { age: {$lt: 5} },
+                filters,
+                objects: [
+                    { age: null }, // null is always smaller than anything
+                    { age: 4 },
+                    { age: -5 }
+                ],
+                doNotMatch: [
+                    { age: 5 },
+                    { age: 10 },
+                ],
+            });
+        });
+
+        it('Strings and null', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                name: createInMemoryFilterCompiler('name'),
+            };
+
+            test({
+                filter: { name: {$lt: 'John Doe'} },
+                filters,
+                objects: [
+                    { name: null }, // null is always smaller than anything
+                    { name: 'Jane Doe' },                    
+                    { name: 'John Dod' },
+                    { name: 'John Do' }
+                ],
+                doNotMatch: [
+                    { name: 'John Dof' },
+                    { name: 'John Doee' },
+                    { name: 'John Doe' },
+                ],
+            });
+        });
+
+        it('Date and null', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                birthDay: createInMemoryFilterCompiler('birthDay'),
+            };
+
+            test({
+                filter: { birthDay: {$lt: new Date(1994,5,24)} },
+                filters,
+                objects: [
+                    { birthDay: null }, // null is always smaller than anything
+                    { birthDay: new Date(1994,5,23) },
+                    { birthDay: new Date(1993,5,24) },
+                ],
+                doNotMatch: [
+                    { birthDay: new Date(1994,5,25) },
+                    { birthDay: new Date(1995,5,24) },
+                    { birthDay: new Date(1994,5,24) },
+                ],
+            });
+        });
+    });
+
+    describe('$gt', () => {
+        it('Numbers and null', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                age: createInMemoryFilterCompiler('age'),
+            };
+
+            test({
+                filter: { age: {$gt: 5} },
+                filters,
+                objects: [
+                    { age: 10 },
+                    { age: 6 }
+                ],
+                doNotMatch: [
+                    { age: null }, // null is always smaller than anything
+                    { age: 5 },
+                    { age: 4 },
+                    { age: -10 },
+                ],
+            });
+        });
+
+        it('Strings and null', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                name: createInMemoryFilterCompiler('name'),
+            };
+
+            test({
+                filter: { name: {$gt: 'John Doe'} },
+                filters,
+                objects: [
+                    { name: 'John Dof' },
+                    { name: 'John Doee' },
+                ],
+                doNotMatch: [
+                    { name: null }, // null is always smaller than anything
+                    { name: 'Jane Doe' },                    
+                    { name: 'John Dod' },
+                    { name: 'John Do' },
+                    { name: 'John Doe' },
+                ],
+            });
+        });
+
+        it('Date and null', async () => {
+            const filters = {
+                ...baseInMemoryFilterCompilers,
+                birthDay: createInMemoryFilterCompiler('birthDay'),
+            };
+
+            test({
+                filter: { birthDay: {$gt: new Date(1994,5,24)} },
+                filters,
+                objects: [
+                    { birthDay: new Date(1994,5,25) },
+                    { birthDay: new Date(1995,5,24) }
+                ],
+                doNotMatch: [
+                    { birthDay: null }, // null is always smaller than anything
+                    { birthDay: new Date(1994,5,23) },
+                    { birthDay: new Date(1993,5,24) },
+                    { birthDay: new Date(1994,5,24) },
+                ],
+            });
+        });
+    });
 });

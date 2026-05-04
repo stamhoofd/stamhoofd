@@ -2,11 +2,11 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete.js';
 import type { SQLExpression } from './SQLExpression.js';
 import { isSQLExpression } from './SQLExpression.js';
-import type { SQLColumnExpressionParams, SQLScalarValue} from './SQLExpressions.js';
-import { SQLAssignment, SQLCoalesce, SQLColumnExpression, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
+import type { SQLColumnExpressionParams, SQLScalarValue } from './SQLExpressions.js';
+import { SQLAssignment, SQLCalculation, SQLCoalesce, SQLColumnExpression, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLSubQuery, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
 import { SQLInsert } from './SQLInsert.js';
 import { SQLJoin, SQLJoinType } from './SQLJoin.js';
-import type { SQLJsonValueType} from './SQLJsonExpressions.js';
+import type { SQLJsonValueType } from './SQLJsonExpressions.js';
 import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonType, SQLJsonUnquote, SQLJsonValue, SQLLpad } from './SQLJsonExpressions.js';
 import { parseTable, SQLSelect } from './SQLSelect.js';
 import { SQLUpdate } from './SQLUpdate.js';
@@ -126,6 +126,14 @@ class StaticSQL {
 
     isNull(column: SQLExpression): SQLIsNull {
         return new SQLIsNull(column);
+    }
+
+    subQuery(select: SQLSelect): SQLSubQuery {
+        return new SQLSubQuery(select);
+    }
+
+    calculation(expression: SQLExpression): SQLCalculation {
+        return new SQLCalculation(expression);
     }
 }
 

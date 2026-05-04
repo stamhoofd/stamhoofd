@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -198,6 +198,11 @@ export class Order extends AutoEncoder {
 
     get openBalance() {
         return this.totalToPay - this.pricePaid;
+    }
+
+    // used only for inMemoryFilters
+    get amountToPay() {
+        return this.data.totalPrice - this.pricePaid;
     }
 
     updatePricePaid() {

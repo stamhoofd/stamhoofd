@@ -8,12 +8,12 @@
 
 <script lang="ts" setup>
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
-import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
-import PaymentView from '@stamhoofd/components/payments/PaymentView.vue';
-import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { usePaymentsObjectFetcher } from '@stamhoofd/components/fetchers/usePaymentsObjectFetcher.ts';
+import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import PaymentView from '@stamhoofd/components/payments/PaymentView.vue';
+import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
+import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import type { PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
 import { PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection } from '@stamhoofd/structures';

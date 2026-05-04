@@ -1,4 +1,5 @@
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import { Payment } from '@stamhoofd/models';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments.js';
 
@@ -13,7 +14,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     method: createColumnFilter({
-        expression: SQL.column('method'),
+        expression: SQL.column(Payment.table, 'method'),
         type: SQLValueType.String,
         nullable: false,
     }),
@@ -23,7 +24,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     status: createColumnFilter({
-        expression: SQL.column('status'),
+        expression: SQL.column(Payment.table, 'status'),
         type: SQLValueType.String,
         nullable: false,
     }),
@@ -53,7 +54,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
     price: createColumnFilter({
-        expression: SQL.column('price'),
+        expression: SQL.column(Payment.table, 'price'),
         type: SQLValueType.Number,
         nullable: false,
     }),
@@ -63,7 +64,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
     transferDescription: createColumnFilter({
-        expression: SQL.column('transferDescription'),
+        expression: SQL.column(Payment.table, 'transferDescription'),
         type: SQLValueType.String,
         nullable: true,
     }),

@@ -1,7 +1,7 @@
 import { registerCron } from '@stamhoofd/crons';
 import { CachedBalance, Email, EmailRecipient, Organization, User } from '@stamhoofd/models';
-import type { IterableSQLSelect} from '@stamhoofd/sql';
-import { readDynamicSQLExpression, SQL, SQLCalculation, SQLPlusSign } from '@stamhoofd/sql';
+import type { IterableSQLSelect } from '@stamhoofd/sql';
+import { readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
 import type { OrganizationEmail, StamhoofdFilter } from '@stamhoofd/structures';
 import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailTemplateType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context.js';
@@ -220,11 +220,8 @@ async function sendTemplate({
                     .set('lastReminderAmountOpen', SQL.column('amountOpen'))
                     .set(
                         'reminderEmailCount',
-                        new SQLCalculation(
-                            SQL.column('reminderEmailCount'),
-                            new SQLPlusSign(),
-                            readDynamicSQLExpression(1),
-                        ),
+                        SQL.calculation(SQL.column('reminderEmailCount'))
+                            .add(readDynamicSQLExpression(1))
                     )
                     .where('id', balanceItemIds)
                     .where('organizationId', organization.id)

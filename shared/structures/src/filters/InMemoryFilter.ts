@@ -45,10 +45,15 @@ function $notInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFi
 function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const a = normalizeValue(assertFilterCompareValue(val));
-        const b = normalizeValue(assertFilterCompareValue(filter));
-        if (a === null || b === null) {
-            return a !== null && b === null;
+        if (a === null) {
+            return true;
         }
+
+        const b = normalizeValue(assertFilterCompareValue(filter));
+        if (b === null) {
+            return false;
+        }
+
         return a < b;
     };
 }
@@ -56,9 +61,13 @@ function $lessThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
 function $greaterThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
         const a = normalizeValue(assertFilterCompareValue(val));
+        if (a === null) {
+            return false;
+        }
+
         const b = normalizeValue(assertFilterCompareValue(filter));
-        if (a === null || b === null) {
-            return a === null && b !== null;
+        if ( b === null) {
+            return true;
         }
         return a > b;
     };
@@ -98,12 +107,30 @@ function invertFilterCompiler(compiler: InMemoryRequiredFilterCompiler): InMemor
 
 function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunner {
     return (val) => {
-        const a = normalizeValue(assertFilterCompareValue(val));
         const needle = normalizeValue(assertFilterCompareValue(filter));
-
-        if (typeof a !== 'string' || typeof needle !== 'string') {
+        if (typeof needle !== 'string') {
             return false;
         }
+
+        if (Array.isArray(val)) {
+            // To match backend logic where these things are required for optimizations
+            // + also match MongoDB behavior
+
+            for (const v of val) {
+                const a = normalizeValue(assertFilterCompareValue(v));
+                if (typeof a === 'string' && StringCompare.contains(a, needle)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        const a = normalizeValue(assertFilterCompareValue(val));
+
+        if (typeof a !== 'string') {
+            return false;
+        }
+        
         return StringCompare.contains(a, needle);
     };
 }
@@ -280,19 +307,6 @@ export function createInMemoryWildcardCompilerSelector(overrideFilterDefinitions
         // Every key will match on this compiler
         const compiler = createInMemoryFilterCompiler(key, overrideFilterDefinitions);
         return compiler(filter, compiler, key);
-    };
-}
-
-export function createInMemoryFilterCompilerFromCompositePath(paths: string[], separator = ' '): InMemoryFilterCompiler {
-    const splittedPaths = paths.map(path => path.split('.'));
-
-    return (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => {
-        const runner = $andInMemoryFilterCompiler(filter, compilers);
-
-        return (object) => {
-            const value = splittedPaths.map(splitted => objectPathValue(object, splitted)).join(separator);
-            return runner(value);
-        };
     };
 }
 

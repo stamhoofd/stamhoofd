@@ -1,7 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
 import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery } from './SQLExpression.js';
-import type { ParseWhereArguments} from './SQLWhere.js';
+import type { SQLSelect } from './SQLSelect.js';
+import type { ParseWhereArguments } from './SQLWhere.js';
 import { SQLEmptyWhere } from './SQLWhere.js';
 
 export type SQLScalarValue = string | number | boolean | Date;
@@ -93,21 +94,14 @@ export class SQLLower implements SQLExpression {
     }
 }
 
-export class SQLPlusSign implements SQLExpression {
-    getSQL(): SQLQuery {
-        return '+';
-    }
-}
+export type SQLArithmicOperatorType = '+' | '-' | '*' | '/' | '%';
 
-export class SQLMultiplicationSign implements SQLExpression {
-    getSQL(): SQLQuery {
-        return '*';
+export class SQLArithmicOperator implements SQLExpression {
+    constructor(readonly type: SQLArithmicOperatorType) {
     }
-}
 
-export class SQLMinusSign implements SQLExpression {
     getSQL(): SQLQuery {
-        return '-';
+        return this.type;
     }
 }
 
@@ -132,6 +126,36 @@ export class SQLCalculation implements SQLExpression {
 
     constructor(...expressions: SQLExpression[]) {
         this.expressions = expressions;
+    }
+
+    add(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('+', expression);
+    }
+
+    subtract(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('-', expression);
+    }
+
+    multiply(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('*', expression);
+    }
+
+    divide(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('/', expression);
+    }
+
+    modulo(expression: SQLExpression): SQLCalculation {
+        return this.pushOperation('%', expression);
+    }
+
+    /**
+     * Add a new arithmic operation.
+     * @param type 
+     * @param expression 
+     */
+    private pushOperation(type: SQLArithmicOperatorType, expression: SQLExpression): SQLCalculation {
+        this.expressions.push(new SQLArithmicOperator(type), expression);
+        return this;
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
@@ -584,6 +608,25 @@ export class SQLIsNull implements SQLExpression {
         return joinSQLQuery([
             this.expression.getSQL(options),
             ' IS NULL',
+        ]);
+    }
+}
+
+export type SQLAggregateColumnType = 'COUNT' | 'SUM' | 'MIN' | 'MAX' | 'AVG';
+
+export class SQLSubQuery implements SQLExpression {
+    select: SQLExpression;
+    notExists = false;
+
+    constructor(select: SQLSelect) {
+        this.select = select;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            `(`,
+            this.select.getSQL(options),
+            `)`,
         ]);
     }
 }
