@@ -48,7 +48,7 @@
             <div class="style-button-bar">
                 <LoadingButton :loading="loading" class="max">
                     <button class="button primary" type="button" data-testid="signup-account-button" @click.prevent="goNext">
-                        <span>{{ $t('%ur') }}</span>
+                        <span>{{ $t('Voltooien') }}</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
