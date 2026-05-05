@@ -1,3 +1,4 @@
+import { decodeBase62, isBase62 } from './compress-uuids.js';
 import { getTranslationsWithPath } from './get-translations-with-path.js';
 import { findUnusedTranslationKeys, replaceOccurrences } from './replace-keys-with-uuid.js';
 import { writeTranslation } from './write-translations.js';
@@ -47,14 +48,30 @@ export function mergeDuplicates() {
             if (otherUuid === uuid) {
                 continue;
             }
-            if (otherUuid < uuid) {
+
+            if (otherUuid > uuid) {
                 // Already checked in the other direction
                 continue;
             }
 
+            if (!isBase62(uuid) || !isBase62(otherUuid)) {
+                // Cannot compare first
+                continue;
+            }
+
             if (isMapEqual(values, otherValues)) {
-                console.log('Found duplicate keys ', uuid, otherUuid);
-                merge.set(otherUuid, uuid);
+                const uuidVal = decodeBase62(uuid);
+                const otherUuidVal = decodeBase62(otherUuid)
+
+                if (uuidVal <= otherUuidVal) {
+                    // uuid should be the goal, replace otheruuid with uuid
+                    console.log('Found duplicate keys ', otherUuid, ' → ', uuid);
+                    merge.set(otherUuid, uuid);
+                } else {
+                    // uuid should be the goal, replace otheruuid with uuid
+                    console.log('Found duplicate keys ', uuid, ' → ', otherUuid);
+                    merge.set(uuid, otherUuid);
+                }
             }
         }
     }
