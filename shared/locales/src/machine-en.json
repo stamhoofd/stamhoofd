@@ -6375,6 +6375,10 @@
     "original": "Betaald (of niet meer te betalen)",
     "translation": "Paid (or nothing left to pay)"
   },
+  "%1Pz": {
+    "original": "Voltooien",
+    "translation": "Complete"
+  },
   "%2": {
     "original": "Aansluiting/verzekering Stamhoofd*",
     "translation": "Affiliation/insurance Stamhoofd*"
@@ -19732,8 +19736,8 @@
     "translation": "Close and do not complete"
   },
   "%ur": {
-    "original": "Voltooien",
-    "translation": "Complete"
+    "original": "Account aanmaken",
+    "translation": "Create account"
   },
   "%us": {
     "original": "Stel een nieuw wachtwoord in voor jouw account.",

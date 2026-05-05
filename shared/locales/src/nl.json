@@ -5385,5 +5385,6 @@
   "%1Pt": "Nieuw pakket",
   "%1Pv": "Filter op de betaling(en) van de bestelling",
   "%1Pw": "Dit pakket werd gedeactiveerd",
-  "%1Py": "Betaald (of niet meer te betalen)"
+  "%1Py": "Betaald (of niet meer te betalen)",
+  "%1Pz": "Voltooien"
 }

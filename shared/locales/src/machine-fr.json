@@ -6419,6 +6419,10 @@
     "original": "Betaald (of niet meer te betalen)",
     "translation": "Payé (ou plus à payer)"
   },
+  "%1Pz": {
+    "original": "Voltooien",
+    "translation": "Terminer"
+  },
   "%1T": {
     "original": "Developers",
     "translation": "Développeurs"
@@ -19980,8 +19984,8 @@
     "translation": "Fermer et ne pas terminer"
   },
   "%ur": {
-    "original": "Voltooien",
-    "translation": "Terminer"
+    "original": "Account aanmaken",
+    "translation": "Créer un compte"
   },
   "%us": {
     "original": "Stel een nieuw wachtwoord in voor jouw account.",
