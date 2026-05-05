@@ -40,7 +40,7 @@
                 <LoadingButton :loading="loading" class="block input-spacing">
                     <button id="submit" class="button primary" type="submit">
                         <span class="icon lock" />
-                        <span>{{ $t('%ur') }}</span>
+                        <span>{{ $t('Account aanmaken') }}</span>
                     </button>
                 </LoadingButton>
             </SignupPoliciesBox>
