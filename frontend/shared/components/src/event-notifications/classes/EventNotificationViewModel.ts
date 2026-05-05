@@ -127,6 +127,7 @@ export class EventNotificationViewModel {
                     const put = response.data[0];
 
                     this.eventNotification.deepSet(put);
+                    this.eventNotification.id = put.id;
                     this.isNew = false;
 
                     if (this.saveHandler) {
