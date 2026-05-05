@@ -439,8 +439,8 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    static decode(...args: Parameters<typeof AutoEncoder.decode>) {
-        const result = super.decode.call(this, ...args) as any as Group;
+    static decodeField(...args: Parameters<typeof AutoEncoder.decode>) {
+        const result = super.decodeField.call(this, ...args) as any as Group;
 
         // Create circular reference for permission checking in the frontend
         if (result.waitingList && result.type === GroupType.EventRegistration) {
