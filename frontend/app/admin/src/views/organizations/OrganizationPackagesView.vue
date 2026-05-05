@@ -18,7 +18,7 @@
                     </h2>
 
                     <p v-if="packageStatus.packages.length === 0" class="info-box">
-                        {{ $t('Geen pakketten') }}
+                        {{ $t('%1Pn') }}
                     </p>
                     <STList v-else>
                         <STListItem v-for="pack of packageStatus.packages" :key="pack.id" :selectable="true" @click="editPackage(pack)">
@@ -68,7 +68,7 @@ const props = withDefaults(
     {
     });
 
-const title = $t('Facturatie');
+const title = $t('%1Mm');
 
 const packageStatus = ref<null | OrganizationPackagesStatus>(null);
 const errors = useErrors();

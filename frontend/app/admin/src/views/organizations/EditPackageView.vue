@@ -141,7 +141,7 @@ const errors = useErrors();
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t(`Nieuw pakket`) : $t(`Pakket bewerken`);
+    return props.isNew ? $t(`%1Pt`) : $t(`%1Pp`);
 });
 
 const type = computed({
@@ -377,7 +377,7 @@ async function doDelete() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`Dit pakket deactiveren?`), $t(`%CJ`), $t(`%1Fc`)))) {
+    if (!(await CenteredMessage.confirm($t(`%1Pm`), $t(`%CJ`), $t(`%1Fc`)))) {
         return;
     }
     if (loading.value) {
@@ -391,7 +391,7 @@ async function doDelete() {
         await props.saveHandler(STPackage.patch({
             removeAt: new Date()
         }));
-        Toast.success($t('Dit pakket werd gedeactiveerd')).show();
+        Toast.success($t('%1Pw')).show();
         await pop({ force: true });
     }
     catch (e) {

@@ -6379,6 +6379,46 @@
     "original": "Aanmaken",
     "translation": "Créer"
   },
+  "%1Pk": {
+    "original": "Bekijk facturen, openstaande bedragen en mandaten",
+    "translation": "Consulter les factures, les montants en attente et les mandats"
+  },
+  "%1Pm": {
+    "original": "Dit pakket deactiveren?",
+    "translation": "Désactiver ce paquet ?"
+  },
+  "%1Pn": {
+    "original": "Geen pakketten",
+    "translation": "Aucun paquet"
+  },
+  "%1Pp": {
+    "original": "Pakket bewerken",
+    "translation": "Modifier le paquet"
+  },
+  "%1Pr": {
+    "original": "Betaling(en)",
+    "translation": "Paiement(s)"
+  },
+  "%1Ps": {
+    "original": "Nog te betalen",
+    "translation": "Reste à payer"
+  },
+  "%1Pt": {
+    "original": "Nieuw pakket",
+    "translation": "Nouveau paquet"
+  },
+  "%1Pv": {
+    "original": "Filter op de betaling(en) van de bestelling",
+    "translation": "Filtrer sur le(s) paiement(s) de la commande"
+  },
+  "%1Pw": {
+    "original": "Dit pakket werd gedeactiveerd",
+    "translation": "Ce paquet a été désactivé"
+  },
+  "%1Py": {
+    "original": "Betaald (of niet meer te betalen)",
+    "translation": "Payé (ou plus à payer)"
+  },
   "%1T": {
     "original": "Developers",
     "translation": "Développeurs"

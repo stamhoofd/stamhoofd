@@ -49,11 +49,11 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
     }
 
     builders.push(simpleMultipleChoiceFilterFactory({
-        name: $t('Betaalstatus'),
+        name: $t('%M6'),
         filterMode: MultipleChoiceUIFilterMode.Or,
         options: [
             {
-                name: $t('Betaald (of niet meer te betalen)'),
+                name: $t('%1Py'),
                 value: 0,
                 filter: {
                     $or: [
@@ -71,7 +71,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
                 }
             },
             {
-                name: $t('Nog te betalen'),
+                name: $t('%1Ps'),
                 value: 1,
                 filter: {
                     status: {
@@ -85,7 +85,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
                 }
             },
             {
-                name: $t('Terug te betalen'),
+                name: $t('%10b'),
                 value: 2,
                 filter: {
                     amountToPay: {
@@ -226,8 +226,8 @@ function getPaymentGroupFilterBuilder() {
     ];
 
     return new GroupUIFilterBuilder({
-        name: $t('Betaling(en)'),
-        description: $t('Filter op de betaling(en) van de bestelling'),
+        name: $t('%1Pr'),
+        description: $t('%1Pv'),
         builders: paymentFilterBuilders,
         wrapper: {
             payments: {

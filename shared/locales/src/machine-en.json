@@ -6335,6 +6335,46 @@
     "original": "Aanmaken",
     "translation": "Create"
   },
+  "%1Pk": {
+    "original": "Bekijk facturen, openstaande bedragen en mandaten",
+    "translation": "View invoices, open amounts, and mandates"
+  },
+  "%1Pm": {
+    "original": "Dit pakket deactiveren?",
+    "translation": "Deactivate this package?"
+  },
+  "%1Pn": {
+    "original": "Geen pakketten",
+    "translation": "No packages"
+  },
+  "%1Pp": {
+    "original": "Pakket bewerken",
+    "translation": "Edit package"
+  },
+  "%1Pr": {
+    "original": "Betaling(en)",
+    "translation": "Payment(s)"
+  },
+  "%1Ps": {
+    "original": "Nog te betalen",
+    "translation": "Still to be paid"
+  },
+  "%1Pt": {
+    "original": "Nieuw pakket",
+    "translation": "New package"
+  },
+  "%1Pv": {
+    "original": "Filter op de betaling(en) van de bestelling",
+    "translation": "Filter by payment(s) for the order"
+  },
+  "%1Pw": {
+    "original": "Dit pakket werd gedeactiveerd",
+    "translation": "This package has been deactivated"
+  },
+  "%1Py": {
+    "original": "Betaald (of niet meer te betalen)",
+    "translation": "Paid (or nothing left to pay)"
+  },
   "%2": {
     "original": "Aansluiting/verzekering Stamhoofd*",
     "translation": "Affiliation/insurance Stamhoofd*"

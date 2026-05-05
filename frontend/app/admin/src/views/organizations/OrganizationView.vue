@@ -79,7 +79,7 @@
                         {{ $t('%1z') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ organization.privateMeta?.acquisitionTypes?.length ? organization.privateMeta.acquisitionTypes.join(', ') : $t('Onbekend') }}
+                        {{ organization.privateMeta?.acquisitionTypes?.length ? organization.privateMeta.acquisitionTypes.join(', ') : $t('%Gr') }}
                     </p>
                 </STListItem>
 
@@ -118,10 +118,10 @@
                         <img src="~@stamhoofd/assets/images/illustrations/transfer.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Facturatie') }}
+                        {{ $t('%1Mm') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Bekijk facturen, openstaande bedragen en mandaten') }}
+                        {{ $t('%1Pk') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

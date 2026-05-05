@@ -75,7 +75,7 @@ export class PaymentFilterBuilders {
 
     static get transferDescription() {
         return new StringFilterBuilder({
-            name: $t('Mededeling (overschrijving)'),
+            name: $t('%ox'),
             key: 'transferDescription',
         })
     }
