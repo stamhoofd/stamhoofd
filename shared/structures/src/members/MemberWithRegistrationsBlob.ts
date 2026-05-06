@@ -1,6 +1,5 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@simonbackx/simple-encoding';
 
-import { Formatter } from '@stamhoofd/utility';
 import { GenericBalance } from '../GenericBalance.js';
 import { Organization } from '../Organization.js';
 import { User } from '../User.js';
@@ -13,6 +12,7 @@ import { Member } from './Member.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { Registration } from './Registration.js';
+import { MemberRegistrationInvitation } from './RegistrationInvitation.js';
 import type { Filterable } from './records/RecordCategory.js';
 
 export class MemberWithRegistrationsBlob extends Member implements Filterable {
@@ -30,6 +30,9 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
     @field({ decoder: new ArrayDecoder(GenericBalance), version: 375 })
     balances: GenericBalance[] = [];
+
+    @field({ decoder: new ArrayDecoder(MemberRegistrationInvitation), ...NextVersion })
+    registrationInvitations: MemberRegistrationInvitation[] = [];
 
     doesMatchFilter(filter: StamhoofdFilter) {
         try {

@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition>
-        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
+        <ModernTableView v-if="!isLoading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
             <p v-if="isLimitedGroup" class="style-description-block">
                 {{ $t('%1HO') }}
             </p>
@@ -15,28 +15,29 @@
 </template>
 
 <script lang="ts" setup>
-import type { Column } from '#tables/classes/Column.ts';
 import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import type { TableAction } from '#tables/classes/TableAction.ts';
-import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import ModernTableView from '#tables/ModernTableView.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { useAuth } from '#hooks/useAuth.ts';
-import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import ModernTableView from '#tables/ModernTableView.vue';
+import type { Column } from '#tables/classes/Column.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, Organization, PlatformRegistration, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, GroupType, mergeFilters, SortItemDirection } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
 import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
+import { useRegistrationInvitationEventListener } from './classes';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
 type ObjectType = PlatformRegistration;
@@ -65,9 +66,12 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const { filterBuilders, loading } = useAdvancedRegistrationWithMemberUIFilterBuilders({
+const { filterBuilders, loading: isLoadingFilters } = useAdvancedRegistrationWithMemberUIFilterBuilders({
     multipleGroups: props.organization === null || props.category !== null,
 });
+
+const actions: Ref<TableAction<ObjectType>[]> = ref([]);
+const isLoading = computed(() => isLoadingFilters.value && actions.value.length === 0);
 
 const title = computed(() => {
     if (props.customTitle) {
@@ -312,12 +316,6 @@ if (!organizationScope.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!props.organization && props.group.organizationId !== props.organization.id;
 
-const registrationActions = actionBuilder.getActions({
-    selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
-    includeMove: true,
-    includeEdit: !excludeEdit,
-});
-
 const isLimitedGroup = computed(() => {
     if (!props.group) {
         return false;
@@ -339,25 +337,54 @@ const isLimitedGroup = computed(() => {
     return false;
 });
 
-const actions: TableAction<ObjectType>[] = [
-    new InMemoryTableAction({
-        name: $t(`%zh`),
-        icon: 'add',
-        priority: 0,
-        groupIndex: 1,
-        needsSelection: false,
-        enabled: canAdd,
-        handler: async () => {
-            await chooseOrganizationMembersForGroup({
-                members: [],
-                group: props.group!,
-            });
-        },
-    }),
-    ...registrationActions,
-];
+let groupsLinkedToWaitingList: Group[] = [];
 
-if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
-    actions.push(actionBuilder.getChargeAction());
+async function createActions(): Promise<void> {
+    const registrationActions = await actionBuilder.getActions({
+        selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
+        includeMove: true,
+        includeEdit: !excludeEdit,
+    });
+
+    const results: TableAction<ObjectType>[] = [
+        new InMemoryTableAction({
+                name: $t(`%zh`),
+                icon: 'add',
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                enabled: canAdd,
+                handler: async () => {
+                    await chooseOrganizationMembersForGroup({
+                        members: [],
+                        group: props.group!,
+                    });
+                },
+            }),
+            ...registrationActions,
+    ];
+
+    if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
+        results.push(actionBuilder.getChargeAction());
+    }
+
+    groupsLinkedToWaitingList = actionBuilder.allGroupsLinkedToWaitingList;
+
+    actions.value = results;
+}
+
+createActions().catch(console.error);
+
+if (waitingList.value) {
+    useRegistrationInvitationEventListener('updated', async (value) => {
+        // not necessary in this case because the invitations are updated directly
+        if (value.origin === 'members-table-sync') {
+            return;
+        }
+
+        if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
+            tableObjectFetcher.reset(true, true);
+        }
+    })
 }
 </script>

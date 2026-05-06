@@ -174,6 +174,7 @@ export * from './members/RegistrationWithTinyMember.js';
 export * from './members/ReviewTime.js';
 export * from './members/RegistrationWithMemberBlob.js';
 export * from './members/RegistrationsBlob.js';
+export * from './members/RegistrationInvitation.js';
 
 // Register checkout
 export * from './members/checkout/BalanceItemCartItem.js';

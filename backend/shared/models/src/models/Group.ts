@@ -1,12 +1,12 @@
-import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
-import type { GroupCategory} from '@stamhoofd/structures';
+import { column, Database } from '@simonbackx/simple-database';
+import type { GroupCategory } from '@stamhoofd/structures';
 import { GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
-import type {OrganizationRegistrationPeriod} from './OrganizationRegistrationPeriod.js';
+import type { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
 import { Registration } from './Registration.js';
 
 if (Registration === undefined) {
@@ -89,6 +89,27 @@ export class Group extends QueryableModel {
      */
     @column({ type: 'json', decoder: new ArrayDecoder(StockReservation) })
     stockReservations: StockReservation[] = [];
+
+    /**
+     * No registrations and waiting list registrations are possible if closed
+     */
+    get closed() {
+        if (this.status !== GroupStatus.Open) {
+            return true;
+        }
+
+        if (this.settings.notYetOpen) {
+            // Start date or pre registration date are in the future
+            return true;
+        }
+
+        const now = new Date();
+        if (this.settings.registrationEndDate && this.settings.registrationEndDate < now) {
+            return true;
+        }
+
+        return false;
+    }
 
     static async getAll(organizationId: string, periodId: string | null, active = true, types: GroupType[] = [GroupType.Membership]): Promise<Group[]> {
         const query = Group.select()

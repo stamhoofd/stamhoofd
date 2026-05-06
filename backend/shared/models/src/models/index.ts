@@ -61,5 +61,6 @@ export * from './UitpasClientCredential.js';
 
 export * from './Invoice.js';
 export * from './InvoicedBalanceItem.js';
+export * from './RegistrationInvitation.js';
 
 import './_relations.js';

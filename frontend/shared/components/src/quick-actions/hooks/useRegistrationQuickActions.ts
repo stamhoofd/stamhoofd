@@ -1,9 +1,10 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Platform, PlatformFamily, PlatformMember, StamhoofdFilter} from '@stamhoofd/structures';
+import type { MemberManager } from '@stamhoofd/networking/MemberManager';
+import { useMemberManager } from '@stamhoofd/networking/MemberManager';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
+import type { Group, MemberRegistrationInvitation, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
@@ -12,7 +13,7 @@ import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
 import { useContext, useUser } from '../../hooks';
-import { useEditMember } from '../../members';
+import { useChooseGroupForMember, useEditMember } from '../../members';
 import { MemberStepManager } from '../../members/classes/MemberStepManager';
 import { getAllMemberSteps } from '../../members/classes/steps';
 import { useNavigationActions } from '../../types/NavigationActions';
@@ -26,6 +27,7 @@ import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstan
 import { EventView } from '../../events';
 import EventIcon from '../../events/components/EventIcon.vue';
 import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
+import RegistrationInvitationIcon from '../RegistrationInvitationIcon.vue';
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
@@ -38,21 +40,10 @@ export function useRegistrationQuickActions(): QuickActions {
     const errors = useErrors();
     const $navigate = useNavigate();
     const show = useShow();
+    const chooseGroupForMember = useChooseGroupForMember();
 
     async function openCart() {
         await GlobalEventBus.sendEvent('selectTabById', 'cart');
-    }
-
-    async function openEvent(event: Event) {
-        const component = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EventView, {
-                event,
-            }),
-        });
-
-        await show({
-            components: [component],
-        });
     }
 
     async function fillInMemberMissingData(member: PlatformMember) {
@@ -196,54 +187,108 @@ export function useRegistrationQuickActions(): QuickActions {
                 });
             }
 
-            let eventCount = 0;
-            for (const event of featuredEvents.value ?? []) {
-                const group = event.group;
-
-                if (group) {
-                    /**
-                     * check if at least 1 member can register for this group, because:
-                     * - the query does cannot check all cases
-                     * - the suggestion should disappear after registering
-                     */
-                    const organization = memberManager.family.getOrganization(group.organizationId);
-                    if (!organization) {
-                        console.error(`Could not find organization with id ${group.organizationId} for group with id ${group.id}`);
-                        continue;
-                    }
-                    const canSomeMemberRegister = memberManager.family.members.some((member) => {
-                        if (member.canRegister(group, organization) || member.canRegisterForWaitingList(group, organization)) {
-                            return true;
+            // todo: sort on createdAt?
+            for (const member of memberManager.family.members) {
+                const invitationData: {invitation: MemberRegistrationInvitation, group: Group, organization: Organization}[] = member.member.registrationInvitations
+                    .filter(i => !i.group.isClosed && i.group.type === GroupType.Membership)
+                    .sort((a, b) => a.group.name.toString().localeCompare(b.group.name.toString()))
+                    .flatMap((invitation) => {
+                        const organization = memberManager.family.getOrganization(invitation.organizationId);
+                        if (!organization) {
+                            return [];
                         }
 
-                        return false;
-                    });
+                        const group = organization.period.groups.find(g => g.id === invitation.group.id);
+                        if (!group) {
+                            return [];
+                        }
 
-                    if (!canSomeMemberRegister) {
-                        continue;
-                    }
-                }
-                else if (!event.webshopId) {
-                    // event should have webshop or group
+                        return [{
+                            invitation,
+                            group,
+                            organization
+                        }];
+                    })
+                    .filter(({group, organization}) => {
+                        return member.canRegister(group, organization);
+                    })
+
+                if (invitationData.length === 0) {
                     continue;
                 }
 
-                const groupText = getGroupDescriptionForEvent(event, memberManager.family.platform);
-                const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
-                eventCount += 1;
+                const groupsText = Formatter.joinLast(invitationData.map(i => i.invitation.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
+
+                const invitationDataForIcon = invitationData.find(({group}) => group.squareImage !== null) ?? invitationData[0];
+
+                if (!invitationDataForIcon) {
+                    continue;
+                }
+
                 arr.push({
-                    leftComponent: EventIcon,
-                    leftProps: { event },
-                    prefix: groupText,
-                    title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
-                    description,
+                    leftComponent: RegistrationInvitationIcon,
+                    leftProps: {
+                        group: invitationDataForIcon.group,
+                        organization: invitationDataForIcon.organization,
+                    },
+                    prefix: $t('Uitnodiging'),
+                    title: $t('Schrijf {firstName} in voor {groups}', {firstName: member.member.firstName, groups: groupsText}),
+                    description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),
                     action: () => {
-                        openEvent(event).catch(console.error);
+                        chooseGroupForMember({member, defaultOrganization: invitationDataForIcon.organization, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}}).catch(console.error);
                     },
                 });
+            }
 
-                if (eventCount >= 3) {
-                    break;
+            if (featuredEvents.value) {
+                const maxSuggestions = 3 - arr.length;
+                let suggestionCount = 0;
+
+                // first get the events where members are invited for
+                const {invited, notInvited} = getEventsWhereInvited({events: featuredEvents.value, memberManager});
+
+                // first create actions for events where members are invited
+                for (const event of invited) {
+                    if (!event.group) {
+                        // should not happen
+                        continue;
+                    }
+
+                    if (!canRegisterForEvent({event, memberManager})) {
+                        continue;
+                    }
+                    
+                    const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
+                    suggestionCount += 1;
+                    arr.push({
+                        leftComponent: RegistrationInvitationIcon,
+                        leftProps: { event, group: event.group },
+                        prefix: $t('Uitnodiging'),
+                        title: $t('%1Mp', { event: event.name }),
+                        description,
+                        action: () => openEvent({event, show}),
+                    });
+                }
+
+                // add extra actions for left over events if limit is not reached
+                for (const event of notInvited) {
+                    if (suggestionCount >= maxSuggestions) {
+                        break;
+                    }
+
+                    if (!canRegisterForEvent({event, memberManager})) {
+                        continue;
+                    }
+
+                    suggestionCount += 1;
+                    arr.push({
+                        leftComponent: EventIcon,
+                        leftProps: { event },
+                        prefix: $t('Aankomende activiteit'),
+                        title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
+                        description: Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate)),
+                        action: () => openEvent({event, show}),
+                    });
                 }
             }
 
@@ -258,29 +303,70 @@ export function useRegistrationQuickActions(): QuickActions {
     };
 }
 
-function getGroupDescriptionForEvent(event: Event, platform: Platform) {
-    const prefixes: string[] = [];
+function getEventsWhereInvited({events, memberManager}: {events: Event[], memberManager: MemberManager}): {notInvited: Event[], invited: Event[]} {
+    const groupInvites = new Set(memberManager.family.members.flatMap(m => m.member.registrationInvitations.map(r => r.group.id)));
 
-    if (event.meta.defaultAgeGroupIds !== null) {
-        for (const ageGroupId of event.meta.defaultAgeGroupIds) {
-            const ageGroup = platform.config.defaultAgeGroups.find(g => g.id === ageGroupId);
-            if (ageGroup) {
-                prefixes.push(ageGroup.name);
+    const invited: Event[] = [];
+    const notInvited: Event[] = [];
+
+    for (const event of events) {
+        if (event.group && groupInvites.has(event.group.id)) {
+            invited.push(event);
+        } else {
+            notInvited.push(event);
+        }
+    }
+
+    return {
+        invited,
+        notInvited
+    }
+}
+
+function openEvent({event, show}: {event: Event, show: ReturnType<typeof useShow>} ) {
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(EventView, {
+            event,
+        }),
+    });
+
+    show({
+        components: [component],
+    }).catch(console.error);
+}
+
+function canRegisterForEvent({event, memberManager}: {event: Event, memberManager: MemberManager}): boolean {
+    const group = event.group;
+
+    if (group) {
+        /**
+         * check if at least 1 member can register for this group, because:
+         * - the query does cannot check all cases
+         * - the suggestion should disappear after registering
+         */
+        const organization = memberManager.family.getOrganization(group.organizationId);
+        if (!organization) {
+            console.error(`Could not find organization with id ${group.organizationId} for group with id ${group.id}`);
+            return false;
+        }
+        const canSomeMemberRegister = memberManager.family.members.some((member) => {
+            if (member.canRegister(group, organization) || member.canRegisterForWaitingList(group, organization)) {
+                return true;
             }
+
+            return false;
+        });
+
+        if (!canSomeMemberRegister) {
+            return false;
         }
     }
-
-    if (event.meta.groups !== null) {
-        for (const group of event.meta.groups) {
-            prefixes.push(group.name);
-        }
+    else if (!event.webshopId) {
+        // event should have webshop or group
+        return false;
     }
 
-    if (prefixes.length === 0) {
-        return null;
-    }
-
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
+    return true;
 }
 
 export async function getFeaturedEventsForFamily({ context, family, owner }: { context: SessionContext; family: PlatformFamily; owner?: object }) {
@@ -289,10 +375,13 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
     }
 
     function createFilter(family: PlatformFamily): StamhoofdFilter | null {
+        // filter on groups that can register for this event
         const groupIds = new Set<string>();
         const defaultGroupIds = new Set<string>();
         const organizationIds = new Set<string>();
         const ages = new Set<number>();
+        // filter on the group that is linked to this event
+        const eventGroupIds = new Set<string>();
         const periodIds = getActivePeriodIds(null, null, family.platform);
         for (const org of family.organizations) {
             const ids = getActivePeriodIds(null, org);
@@ -321,6 +410,16 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                         ages.add(d2);
                     }
                 }
+            }
+
+            // also add the events this member is invited for
+            for (const invitation of member.member.registrationInvitations) {
+                if (invitation.group.isClosed) {
+                    continue;
+                }
+
+                eventGroupIds.add(invitation.group.id);
+                organizationIds.add(invitation.organizationId);
             }
         }
 
@@ -351,6 +450,15 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                     ],
                 })),
             };
+        }
+
+        let eventGroupsFilter: StamhoofdFilter | null = null;
+        if (eventGroupIds.size > 0) {
+            eventGroupsFilter = {
+                groupId: {
+                    $in: [...eventGroupIds],
+                }
+            }
         }
 
         const uniqueOrganizationIds = [...organizationIds];
@@ -396,14 +504,25 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                 },
                 // visible
                 'meta.visible': true,
-                'groupIds': {
-                    $in: [null, ...groupIds.values()],
-                },
-                'defaultAgeGroupIds': {
-                    $in: [null, ...defaultGroupIds.values()],
-                },
             },
-            ...(ageFilter ? [ageFilter] : []),
+            {
+                $or: [
+                    {
+                        $and: [
+                            {
+                                'groupIds': {
+                                    $in: [null, ...groupIds.values()],
+                                },
+                                'defaultAgeGroupIds': {
+                                    $in: [null, ...defaultGroupIds.values()],
+                                }
+                            },
+                            ...(ageFilter ? [ageFilter] : []),
+                        ]
+                    },
+                    ...eventGroupsFilter ? [eventGroupsFilter] : []
+                ]
+            },
             {
             // add this filter last because it is more expensive (exists filter)
                 $or: [

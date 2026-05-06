@@ -1,6 +1,6 @@
 <template>
-    <LoadingViewTransition>
-        <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
+    <LoadingViewTransition :loading="isLoading">
+        <ModernTableView v-if="!isLoading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
             <p v-if="isLimitedGroup" class="style-description-block">
                 {{ $t('%1HO') }}
             </p>
@@ -13,26 +13,26 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentExposed } from '#VueGlobalHelper.ts';
-import type { TableAction} from '#tables/classes/TableAction.ts';
-import { InMemoryTableAction  } from '#tables/classes/TableAction.ts';
-import type {TableActionSelection} from '#tables/classes/TableAction.ts';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
-import ModernTableView from '#tables/ModernTableView.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { useAuth } from '#hooks/useAuth.ts';
-import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useChooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useRequiredRegistrationsFilter } from '#registrations/classes/getRequiredRegistrationsFilter.ts';
+import type { TableAction } from '#tables/classes/TableAction.ts';
+import { InMemoryTableAction } from '#tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
+import ModernTableView from '#tables/ModernTableView.vue';
+import type { ComponentExposed } from '#VueGlobalHelper.ts';
 import type { Group, GroupCategoryTree, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, GroupType } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
+import { useRegistrationInvitationEventListener } from '../registrations';
 import { useDirectMemberActions } from './classes/MemberActionBuilder';
 import { getMemberColumns } from './helpers';
 import MemberSegmentedView from './MemberSegmentedView.vue';
@@ -63,7 +63,9 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
+const { filterBuilders, loading: isLoadingFilters } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
+const actions: Ref<TableAction<ObjectType>[]> = ref([]);
+const isLoading = computed(() => isLoadingFilters.value && actions.value.length === 0);
 
 const title = computed(() => {
     if (props.customTitle) {
@@ -275,29 +277,53 @@ if (!organization.value) {
 // registrations for events of another organization should not be editable
 const excludeEdit = props.group && props.group.type === GroupType.EventRegistration && !!organization.value && props.group.organizationId !== organization.value.id;
 
-const actions: TableAction<ObjectType>[] = [
-    new InMemoryTableAction({
-        name: $t(`%zh`),
-        icon: 'add',
-        priority: 0,
-        groupIndex: 1,
-        needsSelection: false,
-        enabled: canAdd,
-        handler: async () => {
-            await chooseOrganizationMembersForGroup({
-                members: [],
-                group: props.group!,
-            });
-        },
-    }),
-    ...actionBuilder.getActions({
-        selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
-        includeMove: true,
-        includeEdit: !excludeEdit,
-    }),
-];
+let groupsLinkedToWaitingList: Group[] = [];
 
-if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
-    actions.push(actionBuilder.getChargeAction());
+async function createActions(): Promise<void> {
+    const results: TableAction<ObjectType>[] = [
+        new InMemoryTableAction({
+            name: $t(`%zh`),
+            icon: 'add',
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            enabled: canAdd,
+            handler: async () => {
+                await chooseOrganizationMembersForGroup({
+                    members: [],
+                    group: props.group!,
+                });
+            },
+        }),
+        ...await actionBuilder.getActions({
+            selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
+            includeMove: true,
+            includeEdit: !excludeEdit,
+            includeOnlyIfRelevantForWaitingList: true
+        }),
+    ];
+
+    if (((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) && props.group?.type !== GroupType.WaitingList) {
+        results.push(actionBuilder.getChargeAction());
+    }
+
+    groupsLinkedToWaitingList = actionBuilder.allGroupsLinkedToWaitingList;
+
+    actions.value = results;
+}
+
+createActions().catch(console.error);
+
+if (waitingList.value) {
+    useRegistrationInvitationEventListener('updated', async (value) => {
+        // not necessary in this case because the invitations are updated directly
+        if (value.origin === 'members-table-sync') {
+            return;
+        }
+
+        if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
+            tableObjectFetcher.reset(true, true);
+        }
+    })
 }
 </script>

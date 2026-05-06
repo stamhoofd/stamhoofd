@@ -1,8 +1,8 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket} from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
-import type { PaymentGeneral} from '@stamhoofd/structures';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct, BalanceItem as BalanceItemStruct } from '@stamhoofd/structures';
+import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import type { PaymentGeneral } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -458,6 +458,12 @@ export class AuthenticatedStructures {
                 .where('periodId', relevantPeriodIds)
                 .fetch()
             : [];
+        const registrationInvitations = members.length > 0
+            ? await RegistrationInvitation.select()
+                .where('memberId', members.map(m => m.id))
+                .fetch() : [];
+
+        const memberRegistrationInvitations: Map<string, MemberRegistrationInvitation[]> = registrationInvitations.length > 0 ? await this.memberRegistrationInvitations(registrationInvitations) : new Map();
 
         // Load organizations
         const organizationIds = responsibilities.map(r => r.organizationId)
@@ -663,6 +669,7 @@ export class AuthenticatedStructures {
                 return r.getStructure(group);
             });
             blob.platformMemberships = platformMemberships.filter(r => r.memberId == blob.id).map(r => MemberPlatformMembershipStruct.create(r));
+            blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
         }
 
         return MembersBlob.create({
@@ -1219,5 +1226,86 @@ export class AuthenticatedStructures {
 
     static async balanceItemsWithPayments(balanceItems: BalanceItem[]) {
         return await BalanceItem.getStructureWithPayments(balanceItems);
+    }
+
+    static async memberRegistrationInvitations(invitations: RegistrationInvitation[]): Promise<Map<string, MemberRegistrationInvitation[]>> {
+        const results = new Map<string, MemberRegistrationInvitation[]>();
+        const groups = await Group.getByIDs(...invitations.map(i => i.groupId));
+
+        for (const invitation of invitations) {
+            const group = groups.find(g => g.id === invitation.groupId);
+            if (!group) {
+                throw new SimpleError({
+                    code: 'group_not_found',
+                    message: 'Group not found',
+                    human: $t(`Groep niet gevonden`),
+                })
+            }
+
+            const result = MemberRegistrationInvitation.create({
+                id: invitation.id,
+                group: InvitationGroupData.create({
+                    id: invitation.groupId,
+                    name: group.settings.name,
+                    type: group.type,
+                    isClosed: group.closed
+                }),
+                organizationId: invitation.organizationId,
+                createdAt: invitation.createdAt
+            })
+
+            let array = results.get(invitation.memberId);
+            if (!array) {
+                array = [result];
+                results.set(invitation.memberId, array);
+            } else {
+                array.push(result);
+            }
+        }
+
+        return results;
+    }
+
+    static async registrationInvitations(invitations: RegistrationInvitation[]): Promise<RegistrationInvitationStruct[]> {
+        const members = await Member.getByIDs(...invitations.map(i => i.memberId));
+        const groups = await Group.getByIDs(...invitations.map(i => i.groupId));
+
+        return invitations.map((invitation) => {
+            const member = members.find(m => m.id === invitation.memberId);
+            if (!member) {
+                throw new SimpleError({
+                    code: 'member_not_found',
+                    message: 'Member not found',
+                    human: $t(`Lid niet gevonden`),
+                })
+            }
+
+            const group = groups.find(g => g.id === invitation.groupId);
+            if (!group) {
+                throw new SimpleError({
+                    code: 'group_not_found',
+                    message: 'Group not found',
+                    human: $t(`Groep niet gevonden`),
+                })
+            }
+
+            return RegistrationInvitationStruct.create({
+                id: invitation.id,
+                group: InvitationGroupData.create({
+                    id: group.id,
+                    name: group.settings.name,
+                    type: group.type,
+                    isClosed: group.closed
+                }),
+                organizationId: invitation.organizationId,
+                member: InvitationMemberData.create({
+                    id: member.id,
+                    firstName: member.firstName,
+                    lastName: member.lastName,
+                    birthDay: member.details.birthDay,
+                }),
+                createdAt: invitation.createdAt
+            });
+        });
     }
 }

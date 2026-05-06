@@ -22,14 +22,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import SegmentedView from '#containers/SegmentedView.vue';
-import TableActionsContextMenu from '#tables/TableActionsContextMenu.vue';
-import type { TableActionSelection } from '#tables/classes/TableAction.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useBackForward } from '#hooks/useBackForward.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import TableActionsContextMenu from '#tables/TableActionsContextMenu.vue';
+import type { TableActionSelection } from '#tables/classes/TableAction.ts';
+import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import type { Group, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { AccessRight, Gender, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -124,7 +124,7 @@ async function showContextMenu(event: MouseEvent) {
         forceWriteAccess: hasWrite.value,
     });
 
-    const actions = builder.getActions({ includeMove: false, includeEdit: true });
+    const actions = await builder.getActions({ includeMove: false, includeEdit: true });
 
     const el = event.currentTarget! as HTMLElement;
     const bounds = el.getBoundingClientRect();
