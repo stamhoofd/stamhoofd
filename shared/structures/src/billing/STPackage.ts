@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { Country } from '@stamhoofd/types/Country';
 import type { Address } from '../addresses/Address.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import { STPackageBundle, STPackageBundleHelper } from './STPackageBundle.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export enum STPackageType {
     // Members without activities (not available in frontend anymore)
@@ -40,6 +42,27 @@ export class STPackageTypeHelper {
             case STPackageType.TrialWebshops: return $t(`%1Hm`);
         }
     }
+
+    /**
+     * Used for renewal. Should this package renew as what bundle?
+     */
+     static getBundle(type: STPackageType): STPackageBundle {
+        switch (type) {
+            case STPackageType.LegacyMembers: 
+            case STPackageType.Members:
+                return STPackageBundle.Members;
+
+            case STPackageType.Webshops: 
+            case STPackageType.SingleWebshop:
+                return STPackageBundle.Webshops;
+
+            case STPackageType.TrialMembers:
+                return STPackageBundle.TrialMembers;
+
+            case STPackageType.TrialWebshops:
+                return STPackageBundle.TrialWebshops;
+        }
+    }
 }
 
 export enum STPricingType {
@@ -71,7 +94,9 @@ export class STPackageMeta extends AutoEncoder {
     }
 
     /**
-     * ID of the package that was renewed (if it was renewed)
+     * @deprecated
+     * Not really trustworthy as it has not always been set correctly in the past
+     * and won't be set any longer
      */
     @field({ decoder: StringDecoder, optional: true })
     didRenewId?: string;
@@ -81,6 +106,9 @@ export class STPackageMeta extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(STPricingType) })
     pricingType = STPricingType.Fixed;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion, defaultValue: () => false })
+    keepPricesOnRenewal: boolean
 
     /**
      * One time price for the package, per year, or per member depending on pricingType
@@ -169,6 +197,64 @@ export class STPackageMeta extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder })
     canDeactivate = false;
+
+    get humanPricing() {
+        const strs: string[] = [];
+
+        if (this.unitPrice) {
+            if (this.pricingType === STPricingType.PerMember) {
+                strs.push($t(`{price} per lid, per jaar`, {price: Formatter.price(this.unitPrice)}));
+            } else if (this.pricingType === STPricingType.PerYear) {
+                strs.push($t(`{price} per jaar`, {price: Formatter.price(this.unitPrice)}));
+            } else if (this.pricingType === STPricingType.Fixed) {
+                strs.push($t(`{amount} x {price} éénmalig`, {amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice)}));
+            }
+
+            if (this.minimumAmount) {
+                if (this.pricingType !== STPricingType.Fixed) {
+                    strs.push($t(`Minimum aantal van {amount} per jaar`, {amount: Formatter.integer(this.minimumAmount)}));
+                }
+            }
+        }
+
+        let suffix = $t('per stuk / ticket')
+        if (this.type === STPackageType.Members) {
+            suffix = $t('per lid');
+        }
+
+        let minimumSuffix = '';
+        let maximumSuffix = '';
+
+        if (this.serviceFeeMinimum) {
+            minimumSuffix = $t('met een minimum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMinimum)});
+
+            if (this.type === STPackageType.Members) {
+                minimumSuffix = $t('met een minimum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMinimum)});
+            }
+        }
+
+        if (this.serviceFeeMaximum) {
+            maximumSuffix = $t('met een maximum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMaximum)});
+
+            if (this.type === STPackageType.Members) {
+                maximumSuffix = $t('met een maximum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMaximum)});
+            }
+        }
+
+        if (this.serviceFeePercentage && this.serviceFeeFixed) {
+            strs.push(Formatter.percentage(this.serviceFeePercentage) + ` + ` + Formatter.price(this.serviceFeeFixed) + ' ' + suffix + (minimumSuffix ? (', ' + minimumSuffix) : '') + (maximumSuffix ? (', ' + maximumSuffix) : ''));
+        } else if (this.serviceFeeFixed) {
+            strs.push((Formatter.price(this.serviceFeeFixed) + ' ' + suffix + (minimumSuffix ? (', ' + minimumSuffix) : '') + (maximumSuffix ? (', ' + maximumSuffix) : '')));
+        } else if (this.serviceFeePercentage) {
+            strs.push(Formatter.percentage(this.serviceFeePercentage) + (minimumSuffix ? (' ' + minimumSuffix) : '') + (maximumSuffix ? ((minimumSuffix ? ', ' : ' ') + maximumSuffix) : ''));
+        }
+
+        if (strs.length === 0) {
+            strs.push($t(`Gratis`));
+        }
+
+        return strs.join('\n');
+    }
 }
 
 /**
@@ -201,24 +287,61 @@ export class STPackage extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     removeAt: Date | null = null;
 
-    shouldHintRenew() {
-        if (!this.meta.allowRenew || this.validUntil === null) {
-            return false;
+    get endDate() {
+        if (!this.removeAt) {
+            return this.validUntil;
+        }
+        if (!this.validUntil) {
+            return this.removeAt
+        }
+        return new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
+    }
+
+    /**
+     * Package as if it has been renewed
+     */
+    createRenewed(): STPackage {
+        if (!this.meta.allowRenew) {
+            throw new SimpleError({
+                code: 'not_allowed',
+                message: 'Not allowed',
+                human: $t(`%x7`),
+            });
         }
 
-        if (this.meta.startDate > new Date()) {
-            // Not yet activated
-            return false;
+        if (!this.meta.keepPricesOnRenewal) {
+            return STPackageBundleHelper.getCurrentPackage(
+                STPackageTypeHelper.getBundle(this.meta.type), 
+                new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0))
+            );
         }
 
-        // Allow renew 2 months in advance
-        const allowAfter = new Date(this.validUntil);
-        allowAfter.setDate(allowAfter.getDate() - 31 * 2);
+        const pack = this.clone();
+        pack.id = uuidv4();
 
-        if (allowAfter < new Date()) {
-            return true;
+        // Not yet valid / active (ignored until valid)
+        pack.validAt = null;
+
+        pack.meta.startDate = new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0));
+        pack.meta.paidAmount = 0;
+        pack.meta.paidPrice = 0;
+        pack.meta.firstFailedPayment = null;
+        pack.meta.didRenewId = this.id;
+
+        // Duration for renewals is always a year ATM
+        pack.validUntil = new Date(pack.meta.startDate);
+        pack.validUntil.setFullYear(pack.validUntil.getFullYear() + 1);
+
+        // Remove (= not renewable) if not renewed after 3 months
+        pack.removeAt = new Date(pack.validUntil);
+        pack.removeAt.setMonth(pack.removeAt.getMonth() + 3);
+
+        if (this.meta.type === STPackageType.SingleWebshop) {
+            // Deprecated package
+            pack.meta.type = STPackageType.Webshops;
         }
-        return false;
+
+        return pack;
     }
 
     get status() {

@@ -3,13 +3,21 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
+import type { Decoder} from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
 
 type Params = Record<string, never>;
-type Query = undefined;
+class Query extends AutoEncoder {
+    @field({ decoder: BooleanDecoder })
+    includeExpired = false;
+}
+
 type ResponseBody = OrganizationPackagesStatus;
 type Body = undefined;
 
 export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = Query as Decoder<Query>;
+    
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
@@ -23,7 +31,7 @@ export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return [false];
     }
 
-    async handle(_: DecodedRequest<Params, Query, Body>) {
+    async handle({query}: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
@@ -32,7 +40,7 @@ export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error();
         }
 
-        const packages = Context.auth.hasPlatformFullAccess() ? await STPackageService.getValidPackagesWithExpired(organization.id) : await STPackageService.getActivePackages(organization.id);
+        const packages = query.includeExpired ? await STPackageService.getValidPackagesWithExpired(organization.id) : await STPackageService.getActivePackages(organization.id);
 
         return new Response(OrganizationPackagesStatus.create({
             packages: packages.map(p => STPackageStruct.create(p)),

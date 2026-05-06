@@ -4,7 +4,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem} from '@stamhoofd/models';
 import { Organization, Platform, STPackage } from '@stamhoofd/models';
-import { CheckoutResponse, PackageCheckout, Payment as PaymentStruct, STPackageBundleHelper, STPackageStruct } from '@stamhoofd/structures';
+import { STPackageStruct } from '@stamhoofd/structures';
+import { CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, Payment as PaymentStruct, STPackageBundleHelper } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { STPackageService } from '../../../services/STPackageService.js';
@@ -55,7 +56,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        const currentPackages = await STPackageService.getActivePackages(organization.id);
 
         const packages: STPackageStruct[] = [];
         const balanceItems: Map<BalanceItem, number> = new Map();
@@ -63,65 +63,12 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         let totalPrice = 0;
 
         if (STAMHOOFD.userMode === 'organization') {
-            // Only allowed in organization mode
-            for (const bundle of request.body.purchases.packageBundles) {
-            // Renew after currently running packages
-                let date = new Date();
+            const currentPackages = await STPackageService.getActivePackages(organization.id);
+            const packageStatus = OrganizationPackagesStatus.create({
+                packages: currentPackages.map(p => STPackageStruct.create(p)),
+            });
 
-                let skip = false;
-
-                // Do we have a collision? Make sure our package only start after the expiry date of existing packages
-                for (const currentPack of currentPackages) {
-                    if (!STPackageBundleHelper.isCombineable(bundle, STPackageStruct.create(currentPack))) {
-                        if (!STPackageBundleHelper.isStackable(bundle, STPackageStruct.create(currentPack))) {
-                        // WE skip silently
-                            console.error('Tried to activate non combineable, non stackable packages...');
-                            skip = true;
-                            continue;
-                        }
-                        if (currentPack.validUntil !== null) {
-                            const end = currentPack.validUntil;
-                            if (end > date) {
-                                date = end;
-                            }
-                        }
-                    }
-                }
-
-                if (skip) {
-                    continue;
-                }
-                packages.push(STPackageBundleHelper.getCurrentPackage(bundle, date));
-            }
-
-            // Add renewals
-            if (checkout.purchases.renewPackageIds.length > 0) {
-                for (const id of checkout.purchases.renewPackageIds) {
-                    const pack = currentPackages.find(c => c.id === id);
-                    if (!pack) {
-                        throw new SimpleError({
-                            code: 'not_found',
-                            message: 'Package not found',
-                            human: $t('%1L1'),
-                        });
-                    }
-
-                    // Renew
-                    const model = pack.createRenewed();
-
-                    const balanceItem = await STPackageService.chargePackage(model, undefined, checkout.customer ?? undefined);
-                    if (balanceItem) {
-                        totalPrice += balanceItem.priceWithVAT;
-                        balanceItems.set(balanceItem, balanceItem.priceWithVAT);
-                    }
-
-                    if (!request.body.proForma) {
-                        await model.save();
-                        await balanceItem?.save();
-                    }
-                    models.push(model);
-                }
-            }
+            packages.push(...checkout.purchases.getPackages(packageStatus));
         }
 
         // Create the real models for each package

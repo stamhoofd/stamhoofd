@@ -21,25 +21,7 @@
                         {{ $t('%1Pn') }}
                     </p>
                     <STList v-else>
-                        <STListItem v-for="pack of packageStatus.packages" :key="pack.id" :selectable="true" @click="editPackage(pack)">
-                            <template #left>
-                                <IconContainer :icon="pack.meta.isWebshops ? 'basket' : 'group'" :class="{'gray': !pack.status.isActive, 'secundary': pack.status.isActive && pack.meta.isTrial}">
-                                    <template #aside>
-                                        <span v-if="pack.meta.isTrial" v-tooltip="'Momenteel in proefperiode, activeer om in gebruik te nemen'" :class="'icon trial small stroke ' + (pack.status.isActive ? 'secundary' : '')" />
-                                        <span v-else-if="pack.status.isActive" v-tooltip="'Deze functie is actief'" class="icon success small primary" />
-                                    </template>
-                                </IconContainer>
-                            </template>
-                            <h3 class="style-title-list">
-                                {{ pack.meta.name }}
-                            </h3>
-                            <p v-if="pack.meta.startDate" class="style-description-small">
-                                Vanaf {{ formatDateTime(pack.meta.startDate) }}
-                            </p>
-                            <p v-if="pack.validUntil" class="style-description-small">
-                                Geldig tot {{ formatDateTime(pack.validUntil) }}
-                            </p>
-                        </STListItem>
+                        <STPackageRow v-for="pack of packageStatus.packages" :key="pack.id" :pack="pack" :selectable="true" @click="editPackage(pack)" />
                     </STList>
                 </div>
             </main>
@@ -52,12 +34,10 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, useContext, useErrors } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STPackageRow from '@stamhoofd/components/packages/STPackageRow.vue';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { STPackageBundle, STPackageBundleHelper, STPackageMeta  } from '@stamhoofd/structures';
-import type {Organization, STPackage} from '@stamhoofd/structures';
-import { OrganizationPackagesStatus, STPackageType } from '@stamhoofd/structures';
+import type { Organization, STPackage } from '@stamhoofd/structures';
+import { OrganizationPackagesStatus, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 import EditPackageView from './EditPackageView.vue';
 
@@ -93,6 +73,9 @@ async function reload() {
         const response = await context.value.getAuthenticatedServerForOrganization(props.organization.id).request({
             method: 'GET',
             path: '/organization/packages',
+            query: {
+                includeExpired: true
+            },
             owner,
             decoder: OrganizationPackagesStatus as Decoder<OrganizationPackagesStatus>,
         });

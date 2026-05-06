@@ -1,3 +1,4 @@
+import { Formatter } from '../../../utility/dist/Formatter.js';
 import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPackage.js';
 
 /**
@@ -11,7 +12,7 @@ export enum STPackageBundle {
     Members = 'Members',
 
     // One webshop package (max 1 webshop)
-    SingleWebshop = 'SingleWebshop',
+    // SingleWebshop = 'SingleWebshop',
 
     TrialMembers = 'TrialMembers',
     TrialWebshops = 'TrialWebshops',
@@ -50,23 +51,6 @@ export class STPackageBundleHelper {
         return false;
     }
 
-    /**
-     * If you buy a package that is not combineable with an existing one, should it throw an error?
-     */
-    static isStackable(bundle: STPackageBundle, pack: STPackage): boolean {
-        switch (bundle) {
-            case STPackageBundle.TrialMembers: {
-                // Not allowed to start a trial even if pack is expired
-                return false;
-            }
-            case STPackageBundle.TrialWebshops: {
-                // Not allowed to start a trial again if pack is expired
-                return false;
-            }
-        }
-        return true;
-    }
-
     static isAlreadyBought(bundle: STPackageBundle, pack: STPackage): boolean {
         switch (bundle) {
             case STPackageBundle.Members: {
@@ -87,13 +71,6 @@ export class STPackageBundleHelper {
                 }
                 return false;
             }
-            case STPackageBundle.SingleWebshop: {
-                if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
-                    // Already bought
-                    return true;
-                }
-                return false;
-            }
         }
         return false;
     }
@@ -108,13 +85,6 @@ export class STPackageBundleHelper {
                 return false;
             }
             case STPackageBundle.Webshops: {
-                if (pack.meta.type === STPackageType.TrialWebshops) {
-                    // Already bought
-                    return true;
-                }
-                return false;
-            }
-            case STPackageBundle.SingleWebshop: {
                 if (pack.meta.type === STPackageType.TrialWebshops) {
                     // Already bought
                     return true;
@@ -141,13 +111,6 @@ export class STPackageBundleHelper {
                 }
                 return true;
             }
-            case STPackageBundle.SingleWebshop: {
-                if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
-                    // Already bought
-                    return false;
-                }
-                return true;
-            }
             case STPackageBundle.TrialMembers: {
                 if (pack.meta.type === STPackageType.Members || pack.meta.type === STPackageType.TrialMembers) {
                     // Already bought
@@ -167,29 +130,43 @@ export class STPackageBundleHelper {
     }
 
     /**
-     * Create a new package for this type and return the pricing
+     * If you buy a package that is not combineable with an existing one.
+     * Should it start the package after the existing one expires (true) or should it ignore it (false)
+     */
+    static isStackable(bundle: STPackageBundle, pack: STPackage): boolean {
+        switch (bundle) {
+            case STPackageBundle.TrialMembers: {
+                // Not allowed to start a trial even if pack is expired
+                return false;
+            }
+            case STPackageBundle.TrialWebshops: {
+                // Not allowed to start a trial again if pack is expired
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Create a new package for this type that starts on 'date' and return the pricing
      */
     static getCurrentPackage(bundle: STPackageBundle, date: Date): STPackage {
+        const start = Formatter.luxon(date).startOf('day');
         switch (bundle) {
             case STPackageBundle.Members: {
-                // 1 year valid
-                const validUntil = new Date(date);
-                validUntil.setFullYear(validUntil.getFullYear() + 1);
-
-                // Remove (= not renewable) if not renewed after 1 month
-                const removeAt = new Date(validUntil);
-                removeAt.setMonth(removeAt.getMonth() + 1);
+                const validUntil = start.plus({ years: 1 }).endOf('day');
+                const removeAt = validUntil.plus({months: 1}).endOf('day');
 
                 return STPackage.create({
-                    validUntil,
-                    removeAt,
+                    validUntil: validUntil.toJSDate(),
+                    removeAt: removeAt.toJSDate(),
                     meta: STPackageMeta.create({
                         type: STPackageType.Members,
                         unitPrice: 1_0000, // 1 euro
                         minimumAmount: 0,
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
-                        startDate: new Date(date),
+                        startDate: start.toJSDate()
                     }),
                 });
             }
@@ -207,52 +184,44 @@ export class STPackageBundleHelper {
                         serviceFeeFixed: 0,
                         serviceFeePercentage: 2_00,
                         serviceFeeMaximum: 2000, // 20 cent
-                        startDate: new Date(date),
+                        startDate: start.toJSDate(),
                         canDeactivate: true,
                     }),
                 });
             }
             case STPackageBundle.TrialMembers: {
-                // Disable functions after two weeks, manual reenable required
-                const validUntil = new Date(date);
-                validUntil.setDate(validUntil.getDate() + 14);
-
-                // Remove if not valid anymore
-                const removeAt = new Date(validUntil);
+                const validUntil = start.plus({ days: 14 }).endOf('day');
+                const removeAt = validUntil;
 
                 return STPackage.create({
-                    validUntil,
-                    removeAt,
+                    validUntil: validUntil.toJSDate(),
+                    removeAt: removeAt.toJSDate(),
                     meta: STPackageMeta.create({
                         type: STPackageType.TrialMembers,
                         unitPrice: 0,
                         minimumAmount: 1,
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date(date),
+                        startDate: start.toJSDate(),
                         canDeactivate: true,
                     }),
                 });
             }
 
             case STPackageBundle.TrialWebshops: {
-                // Disable functions after two weeks, manual reenable required
-                const validUntil = new Date(date);
-                validUntil.setDate(validUntil.getDate() + 14);
-
-                // Remove if not valid anymore
-                const removeAt = new Date(validUntil);
+                const validUntil = start.plus({ days: 14 }).endOf('day');
+                const removeAt = validUntil;
 
                 return STPackage.create({
-                    validUntil,
-                    removeAt,
+                    validUntil: validUntil.toJSDate(),
+                    removeAt: removeAt.toJSDate(),
                     meta: STPackageMeta.create({
                         type: STPackageType.TrialWebshops,
                         unitPrice: 0,
                         minimumAmount: 1,
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
-                        startDate: new Date(date),
+                        startDate: start.toJSDate(),
                         canDeactivate: true,
                     }),
                 });

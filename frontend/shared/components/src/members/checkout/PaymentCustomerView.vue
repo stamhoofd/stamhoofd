@@ -95,10 +95,6 @@ const companies = computed(() => organization.value?.meta.companies ?? []);
 const selectedCompanyId = ref<string | null>(companies.value.length > 0 ? companies.value[0].id : null);
 const auth = useAuth();
 
-onMounted(() => {
-    // Build default value
-});
-
 function buildCustomer() {
     return PaymentCustomer.create({
         firstName: user.value?.firstName,
