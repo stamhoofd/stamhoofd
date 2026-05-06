@@ -103,6 +103,7 @@ import { ref, watch } from 'vue';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { startCheckout } from './startCheckout';
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
