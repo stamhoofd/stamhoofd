@@ -45,7 +45,7 @@
                 <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`%6q`)">
                     <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`%1Mn`)" />
 
-                    <template v-if="$feature('vat') || !VATIncluded" #right>
+                    <template v-if="organization?.meta.invoicesEnabled || !VATIncluded" #right>
                         <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
                             <span v-if="VATIncluded">{{ $t('%1Hs') }}</span>
                             <span v-else>{{ $t('%1Ht') }}</span>
@@ -59,7 +59,7 @@
                 </STInputBox>
             </div>
 
-            <NumberInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`%M4`)" v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`%20`)" :validator="errors.validator" />
+            <NumberInputBox v-model="amount" error-fields="amount" :error-box="errors.errorBox" :title="$t(`%M4`)" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`%20`)" :validator="errors.validator" />
         </div>
 
         <div class="split-inputs">
@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        <STInputBox v-if="$feature('vat') || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('%1Hu')" class="max">
+        <STInputBox v-if="organization?.meta.invoicesEnabled || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('%1Hu')" class="max">
             <template #right>
                 <button v-if="!VATExcempt" class="button text small" type="button" @click="toggleVATExcempt">
                     <span>Verleggen</span>

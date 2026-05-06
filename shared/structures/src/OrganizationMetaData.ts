@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Colors } from '@stamhoofd/utility';
 
 import { Address } from './addresses/Address.js';
@@ -15,9 +15,9 @@ import type { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.
 import { OrganizationType } from './OrganizationType.js';
 import { PaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';
+import { UitpasClientCredentialsStatus } from './UitpasClientCredentialsStatus.js';
 import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
-import { UitpasClientCredentialsStatus } from './UitpasClientCredentialsStatus.js';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
@@ -367,6 +367,12 @@ export class OrganizationMetaData extends AutoEncoder {
         defaultValue: () => OrganizationRecordsConfiguration.create({}),
     })
     recordsConfiguration: OrganizationRecordsConfiguration;
+
+    /**
+     * When enabled, this organization will create invoices for all payments, unless that fails (missing VAT data)
+     */
+    @field({decoder: BooleanDecoder, ...NextVersion, defaultValue: () => false})
+    invoicesEnabled: boolean;
 
     /**
      * @deprecated Moved to companies

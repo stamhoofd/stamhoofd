@@ -243,7 +243,7 @@
                 </STListItem>
             </STList>
 
-            <template v-if="(isManualMethod || $feature('vat')) && canWrite">
+            <template v-if="(isManualMethod || organization?.meta.invoicesEnabled) && canWrite">
                 <hr><h2>{{ $t('%16X') }}</h2>
 
                 <STList>
@@ -336,7 +336,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="$feature('vat') && !payment.invoiceId" :selectable="true" @click="createInvoice">
+                    <STListItem v-if="organization?.meta.invoicesEnabled && !payment.invoiceId" :selectable="true" @click="createInvoice">
                         <template #left>
                             <IconContainer icon="receipt" class="primary">
                                 <template #aside>
@@ -360,7 +360,7 @@
 
             <template v-if="payment.balanceItemPayments.length">
                 <hr><h2>{{ $t('%YI') }}</h2>
-                <p v-if="$feature('vat')">
+                <p v-if="organization?.meta.invoicesEnabled">
                     {{ $t('%1K4') }}
                 </p>
 
@@ -393,29 +393,29 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import AuditLogsView from '#audit-logs/AuditLogsView.vue';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+import { useAppContext } from '#context/appContext.ts';
 import EmailAddress from '#email/EmailAddress.vue';
-import { GlobalEventBus } from '#EventBus.ts';
-import IconContainer from '#icons/IconContainer.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import { useErrors } from '#errors/useErrors.ts';
+import { GlobalEventBus } from '#EventBus.ts';
+import { useAuth } from '#hooks/useAuth.ts';
+import { useBackForward } from '#hooks/useBackForward.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import IconContainer from '#icons/IconContainer.vue';
 import STGrid from '#layout/STGrid.vue';
 import STGridItem from '#layout/STGridItem.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import { useAppContext } from '#context/appContext.ts';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useBackForward } from '#hooks/useBackForward.ts';
-import { useContext } from '#hooks/useContext.ts';
-import { useErrors } from '#errors/useErrors.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
-import type { BalanceItem} from '@stamhoofd/structures';
+import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { BalanceItem } from '@stamhoofd/structures';
 import { BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';

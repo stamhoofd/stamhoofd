@@ -10,7 +10,7 @@
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { usePaymentsObjectFetcher } from '@stamhoofd/components/fetchers/usePaymentsObjectFetcher.ts';
 import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
-import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import PaymentView from '@stamhoofd/components/payments/PaymentView.vue';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
@@ -40,7 +40,7 @@ const configurationId = computed(() => {
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = getPaymentsUIFilterBuilders();
-const $feature = useFeatureFlag();
+const organization = useOrganization();
 const title = computed(() => {
     if (props.methods?.length === 1) {
         return PaymentMethodHelper.getPluralNameCapitalized(props.methods[0]);
@@ -227,7 +227,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 
     ...(
-        $feature('vat')
+        organization.value?.meta.invoicesEnabled
             ? [
                     new Column<ObjectType, boolean>({
                         id: 'hasInvoice',

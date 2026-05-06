@@ -78,15 +78,14 @@
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox :model-value="getFeatureFlag('vat')" @update:model-value="setFeatureFlag('vat', !!$event)" />
+                        <Checkbox v-model="invoicesEnabled" />
                     </template>
-
                     <h3 class="style-title-list">
-                        {{ $t('%1Hp') }} (wip)
+                        {{ $t('Facturen aanmaken voor alle betalingen') }}
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('%1Hq') }}
+                        {{ $t('Maak facturen aan voor alle betalingen en stel BTW-tarieven in.') }}
                     </p>
                 </STListItem>
 
@@ -148,7 +147,7 @@
 </template>
 
 <script lang="ts">
-import type { AutoEncoder, AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
@@ -225,6 +224,18 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
     set forcePayconiq(forcePayconiq: boolean) {
         this.setFeatureFlag('forcePayconiq', forcePayconiq);
+    }
+
+    get invoicesEnabled() {
+        return this.organization.meta.invoicesEnabled ?? false;
+    }
+
+    set invoicesEnabled(invoicesEnabled: boolean) {
+        this.organizationPatch = this.organizationPatch.patch({
+            meta: OrganizationMetaData.patch({
+                invoicesEnabled
+            }),
+        });
     }
 
     getFeatureFlag(flag: string) {

@@ -89,7 +89,7 @@
                     </STListItem>
                 </STList>
 
-                <div v-if="$feature('vat') && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" class="container">
+                <div v-if="organization?.meta.invoicesEnabled && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" class="container">
                     <hr>
                     <h2>{{ $t('%1JA') }}</h2>
 
@@ -163,23 +163,23 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
-import PayableBalanceCollectionView from '@stamhoofd/components/payments/PayableBalanceCollectionView.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import PayableBalanceCollectionView from '@stamhoofd/components/payments/PayableBalanceCollectionView.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, BalanceItem, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
-import type { ComponentOptions, Ref } from 'vue';
+import type { Ref } from 'vue';
 import { ref } from 'vue';
+import BalanceItemsTableView from '../balance-items/BalanceItemsTableView.vue';
 import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
-import BalanceItemsTableView from '../balance-items/BalanceItemsTableView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
