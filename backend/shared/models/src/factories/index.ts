@@ -24,3 +24,4 @@ export * from './RecordCategoryFactory.js';
 export * from './RecordAnswerFactory.js';
 export * from './DocumentTemplateFactory.js';
 export * from './STPackageFactory.js';
+export * from './RegistrationInvitationFactory.js';
