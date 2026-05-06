@@ -251,11 +251,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
             }
 
-            // Allow admin patches (permissions only atm). No put atm
-            if (request.body.admins) {
-                throw new Error('Temporary removed to keep code cleaner. Please use different endpoints.');
-            }
-
             if (request.body.meta) {
                 if (request.body.meta.companies) {
                     await this.validateCompanies(organization, request.body.meta.companies);

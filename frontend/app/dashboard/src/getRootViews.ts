@@ -99,7 +99,7 @@ export async function sessionFromOrganization(data: ({ organization: Organizatio
     await session.checkSSO();
     if ('organization' in data) {
         // Up to date organization
-        session.setOrganization(data.organization);
+        session.updateOrganization(data.organization);
         session._lastFetchedOrganization = new Date();
     }
     await SessionManager.prepareSessionForUsage(session, false);

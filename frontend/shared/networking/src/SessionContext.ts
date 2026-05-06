@@ -669,7 +669,7 @@ export class SessionContext implements RequestMiddleware {
     /**
      * Set the organization, including the reference
      */
-    setOrganization(organization: Organization) {
+    private setOrganization(organization: Organization) {
         this.organization = organization;
         this.callListeners('organization');
     }
@@ -685,13 +685,7 @@ export class SessionContext implements RequestMiddleware {
             this.callListeners('organization');
         }
         else {
-            const oldAdmins = this.organization.admins;
-
             this.organization.deepSet(organization);
-
-            if (oldAdmins && !this.organization.admins) {
-                this.organization.admins = oldAdmins;
-            }
             this.clearAuthCache();
             this.callListeners('organization');
         }

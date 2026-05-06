@@ -251,12 +251,8 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
     webshops: WebshopPreview[] = [];
 
     /**
-     * Only available for patching. Also available with lazy loading OrganizationAdmins
-     */
-    admins?: User[] | null = null;
-
-    /**
-     * Keep admins accessible and in memory
+     * @deprecated
+     * This way of caching is discouraged and unstable because it gets overriden easily using deepSet
      */
     periods?: RegistrationPeriodList;
 

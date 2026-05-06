@@ -1,81 +1,26 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { GlobalEventBus } from '#EventBus.ts';
 import { useGlobalEventListener } from '#hooks/useGlobalEventListener.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { LoadedPermissions, Permissions, User} from '@stamhoofd/structures';
+import type { LoadedPermissions, Permissions, User } from '@stamhoofd/structures';
 import { ApiUser, MemberAdmin, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, shallowRef } from 'vue';
-import { useReloadAdmins } from './useReloadAdmins';
+import { useLoadAdmins } from './useLoadAdmins';
 
-export function useAdmins(load = true) {
+const permissionContextCache = shallowRef(new WeakMap<User, ContextPermissions>());
+const apiContextCache = shallowRef(new WeakMap<ApiUser, {
+    permissions: LoadedPermissions | null;
+    unloadedPermissions: Permissions | null;
+}>());
+
+export function usePermissionsCache() {
     const organization = useOrganization();
     const platform = usePlatform();
-    const { reload, reloadPromise } = useReloadAdmins();
-    let lastLoaded = new Date();
-
-    const loading = computed(() => {
-        if (organization.value) {
-            return organization.value?.admins === undefined || organization.value?.admins === null;
-        }
-
-        // Platform scope
-        return platform.value.admins === undefined || platform.value.admins === null;
-    });
-
-    if (loading.value && load) {
-        void reload(false);
-    }
-
-    onActivated(async () => {
-        if (load && lastLoaded < new Date(Date.now() - 1000 * 60 * 5)) {
-            lastLoaded = new Date();
-            await reload(true);
-        }
-
-        // Reload admins
-        clearPermissionCache();
-    });
-
-    useGlobalEventListener('members-responsibilities-changed', async () => {
-        if (load) {
-            lastLoaded = new Date();
-            void reload(true);
-        }
-    });
-
-    // Listen for updates that require the permission to get recalculated
     const owner = useRequestOwner();
-
-    GlobalEventBus.addListener(owner, 'organization-updated', async () => {
-        clearPermissionCache();
-    });
-
-    GlobalEventBus.addListener(owner, 'platform-updated', async () => {
-        clearPermissionCache();
-    });
-
-    GlobalEventBus.addListener(owner, 'user-updated', async () => {
-        clearPermissionCache();
-    });
-
-    const admins = computed(() => {
-        if (organization.value) {
-            return organization.value?.admins ?? [];
-        }
-
-        // Platform scope
-        return platform.value.admins ?? [];
-    });
-
-    const permissionContextCache = shallowRef(new WeakMap<User, ContextPermissions>());
-    const apiContextCache = shallowRef(new WeakMap<ApiUser, {
-        permissions: LoadedPermissions | null;
-        unloadedPermissions: Permissions | null;
-    }>());
 
     const getPermissionContext = (user: User | ApiUser) => {
         if (user instanceof ApiUser) {
@@ -111,6 +56,56 @@ export function useAdmins(load = true) {
         return getPermissionContext(user).unloadedPermissions;
     };
 
+    GlobalEventBus.addListener(owner, 'organization-updated', async () => {
+        clearPermissionCache();
+    });
+
+    GlobalEventBus.addListener(owner, 'platform-updated', async () => {
+        clearPermissionCache();
+    });
+
+    GlobalEventBus.addListener(owner, 'user-updated', async () => {
+        clearPermissionCache();
+    });
+
+    const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
+    const hasEmptyAccess = (user: User) => getPermissions(user)?.isEmpty ?? true;
+    const memberHasFullAccess = (member: MemberAdmin) => !!member.users.find(u => hasFullAccess(u));
+    const memberHasNoRoles = (member: MemberAdmin) => member.users.every(u => hasEmptyAccess(u));
+
+    onActivated(async () => {
+        // Reload admins
+        clearPermissionCache();
+    });
+
+    return { getPermissions, getUnloadedPermissions, clearPermissionCache, hasFullAccess, hasEmptyAccess, memberHasFullAccess, memberHasNoRoles };
+}
+
+/**
+ * Will load admins automatically. Use useLoadAdmins if you want to load them manually or need more control over the loading state.
+ */
+export function useAdmins(options?: {forceLoadOnMount?: boolean}) {
+    const organization = useOrganization();
+    const { admins, hasAdmins, loading, load, loadPromise } = useLoadAdmins();
+    let lastLoaded = new Date();
+    const { getPermissions, getUnloadedPermissions, memberHasFullAccess, memberHasNoRoles, clearPermissionCache } = usePermissionsCache();
+
+    if (!hasAdmins.value || options?.forceLoadOnMount) {
+        void load(true);
+    }
+
+    onActivated(async () => {
+        if (lastLoaded < new Date(Date.now() - 1000 * 60 * 5)) {
+            lastLoaded = new Date();
+            await load(true);
+        }
+    });
+
+    useGlobalEventListener('members-responsibilities-changed', async () => {
+        lastLoaded = new Date();
+        void load(true);
+    });
+
     const getPermissionsPatch = (user: User | ApiUser, patch: AutoEncoderPatchType<Permissions> | null): AutoEncoderPatchType<UserPermissions> | UserPermissions => {
         if (organization.value) {
             if (!user.permissions) {
@@ -138,10 +133,6 @@ export function useAdmins(load = true) {
                 Sorter.byStringValue(a.firstName + ' ' + a.lastName, b.firstName + ' ' + b.lastName),
             ));
     });
-    const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
-    const hasEmptyAccess = (user: User) => getPermissions(user)?.isEmpty ?? true;
-    const memberHasFullAccess = (member: MemberAdmin) => !!member.users.find(u => hasFullAccess(u));
-    const memberHasNoRoles = (member: MemberAdmin) => member.users.every(u => hasEmptyAccess(u));
 
     const sortedMembers = computed(() => {
         const members = new Map<string, MemberAdmin>();
@@ -167,31 +158,30 @@ export function useAdmins(load = true) {
     // Sorted members todo
 
     const pushInMemory = (user: UserWithMembers) => {
-        if (organization.value) {
-            return organization.value?.admins?.push(user);
-        }
-
-        // Platform scope
-        return platform.value.admins?.push(user);
+        return admins.value.push(user);
     };
 
     const dropFromMemory = (user: UserWithMembers) => {
-        if (organization.value) {
-            const index = organization.value?.admins?.findIndex(u => u.id == user.id);
-
-            if (index !== undefined && index !== -1) {
-                organization.value?.admins?.splice(index, 1);
-            }
-            return;
-        }
-
-        // Platform scope
-        const index = platform.value.admins?.findIndex(u => u.id == user.id);
+        const index = admins.value.findIndex(u => u.id === user.id);
 
         if (index !== undefined && index !== -1) {
-            platform.value.admins?.splice(index, 1);
+            admins.value.splice(index, 1);
         }
     };
 
-    return { hasEmptyAccess, reload, memberHasFullAccess, memberHasNoRoles, loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getUnloadedPermissions, getPermissionsPatch, pushInMemory, dropFromMemory, clearPermissionCache };
+    return { 
+        memberHasFullAccess, 
+        loading, 
+        admins, 
+        loadPromise, 
+        sortedAdmins, 
+        sortedMembers, 
+        getPermissionsPatch, 
+        pushInMemory, 
+        dropFromMemory,
+        getPermissions,
+        getUnloadedPermissions,
+        memberHasNoRoles,
+        clearPermissionCache
+    };
 }

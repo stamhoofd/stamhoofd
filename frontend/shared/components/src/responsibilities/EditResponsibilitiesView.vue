@@ -59,7 +59,7 @@ import type { Group, PermissionRoleForResponsibility } from '@stamhoofd/structur
 import { MemberResponsibility } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditRoleView from '../admins/EditRoleView.vue';
-import { useReloadAdmins } from '../admins/hooks/useReloadAdmins';
+import { useLoadAdmins } from '../admins/hooks/useLoadAdmins';
 import { usePatchRoles } from '../admins/hooks/useRoles';
 import InheritedResponsibilityRow from './components/InheritedResponsibilityRow.vue';
 import ResponsibilityRow from './components/ResponsibilityRow.vue';
@@ -69,7 +69,7 @@ const pop = usePop();
 const present = usePresent();
 
 const organization = useOrganization();
-const { reload } = useReloadAdmins();
+const { load } = useLoadAdmins();
 
 const { saving, errors, save: rawSave, hasChanges, createInheritedResponsibilityRolePatchArray, responsibilities, inheritedResponsibilitiesWithGroup, patchResponsibilities, patchInheritedResponsibilityRoles } = usePatchRoles();
 
@@ -200,7 +200,7 @@ async function editInheritedResponsibility(responsibility: MemberResponsibility,
 
 async function save() {
     await rawSave(async () => {
-        await reload();
+        await load();
         new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     });

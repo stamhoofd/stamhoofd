@@ -18,7 +18,7 @@ import type { PlatformMember, User } from '@stamhoofd/structures';
 import { MemberWithRegistrationsBlob, PermissionLevel } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-import { useAdmins } from '../../../admins/hooks/useAdmins';
+import { usePermissionsCache } from '../../../admins/hooks/useAdmins';
 import { useAppContext } from '../../../context/appContext';
 import { useAuth } from '../../../hooks';
 import STGrid from '../../../layout/STGrid.vue';
@@ -37,7 +37,7 @@ const app = useAppContext();
 const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, PermissionLevel.Write));
 const deletingUsers = ref(new Set<string>());
 const platformFamilyManager = usePlatformFamilyManager();
-const { hasEmptyAccess } = useAdmins(false);
+const { hasEmptyAccess } = usePermissionsCache();
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {

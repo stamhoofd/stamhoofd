@@ -40,8 +40,7 @@ import { useAdmins } from './hooks/useAdmins';
 import InternalAdminsBox from './InternalAdminsBox.vue';
 import RolesView from './RolesView.vue';
 
-const { loading, reload } = useAdmins();
-reload(true)?.catch(console.error);
+const { loading } = useAdmins({forceLoadOnMount: true});
 
 enum Routes {
     Roles = 'rollen',

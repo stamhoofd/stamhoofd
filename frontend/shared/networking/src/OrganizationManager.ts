@@ -68,12 +68,7 @@ export class OrganizationManager {
         });
 
         // Keep admins
-        const admins = this.$context.organization.admins;
         this.$context.updateOrganization(response.data);
-
-        if (admins && !response.data.admins && patch.admins) {
-            this.$context.organization.admins = patch.admins.applyTo(admins);
-        }
 
         if (patch.period) {
             // Clear cached periods
@@ -81,7 +76,7 @@ export class OrganizationManager {
 
             // There is something fishy going on with the period that doesn't get set using deepSet (updateOrganization) - can't explain why atm
             // this fixes it for now
-            this.$context.organization.period = response.data.period;
+            // this.$context.organization.period = response.data.period;
         }
 
         // Call handlers: also update the stored organization in localstorage
@@ -92,33 +87,6 @@ export class OrganizationManager {
         this.save().catch(console.error);
 
         await GlobalEventBus.sendEvent('organization-updated', this.$context.organization);
-    }
-
-    async loadAdmins(force = false, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
-        if (!force && this.organization.admins) {
-            return this.organization as any;
-        }
-
-        const response = await this.$context.authenticatedServer.request({
-            method: 'GET',
-            path: '/organization/admins',
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>,
-            shouldRetry,
-            owner,
-        });
-        const loaded = response.data;
-
-        if (this.organization.admins) {
-            deepSetArray(this.organization.admins, loaded.users);
-        }
-        else {
-            this.organization.admins = loaded.users;
-        }
-
-        // Save organization in localstorage
-        this.save().catch(console.error);
-
-        return this.organization as any;
     }
 
     async loadPeriods(force = false, shouldRetry?: boolean, owner?: any) {

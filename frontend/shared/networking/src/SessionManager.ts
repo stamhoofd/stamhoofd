@@ -312,7 +312,7 @@ export class SessionManagerStatic {
 
         try {
             const session = await this.getContextForOrganization(organization.id);
-            session.setOrganization(organization);
+            session.updateOrganization(organization);
             await this.prepareSessionForUsage(session, false);
             return session;
         }

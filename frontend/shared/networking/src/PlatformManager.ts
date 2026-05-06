@@ -133,44 +133,12 @@ export class PlatformManager {
             decoder: Platform as Decoder<Platform>,
             shouldRetry,
         });
-
-        // Keep admins
-        const admins = this.$platform.admins;
-
         this.$platform.deepSet(response.data);
-
-        if (admins && !response.data.admins && patch.admins) {
-            this.$platform.admins = patch.admins.applyTo(admins);
-        }
-        else if (admins && !response.data.admins && !patch.admins) {
-            this.$platform.admins = admins;
-        }
 
         // Save platform in localstorage
         this.savePlatform().catch(console.error);
         this.updateStyles();
         await GlobalEventBus.sendEvent('platform-updated', this.$platform);
-    }
-
-    async loadAdmins(force = false, shouldRetry?: boolean, owner?: any): Promise<void> {
-        if (!force && this.$platform.admins) {
-            return;
-        }
-
-        const response = await this.$context.authenticatedServer.request({
-            method: 'GET',
-            path: '/platform/admins',
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>,
-            shouldRetry: shouldRetry ?? false,
-            owner,
-        });
-
-        if (this.$platform.admins) {
-            deepSetArray(this.$platform.admins, response.data.users);
-        }
-        else {
-            this.$platform.admins = response.data.users;
-        }
     }
 
     _pendingLoadPeriods: Promise<RegistrationPeriod[]> | null = null;

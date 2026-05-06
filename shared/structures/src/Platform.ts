@@ -535,12 +535,8 @@ export class Platform extends AutoEncoder {
     membershipOrganizationId: string | null = null;
 
     /**
-     * Keep admins accessible and in memory
-     */
-    admins?: User[] | null;
-
-    /**
-     * Keep admins accessible and in memory
+     * @deprecated
+     * This way of caching is discouraged and unstable because it gets overriden easily using deepSet
      */
     periods?: RegistrationPeriod[];
 

@@ -83,7 +83,7 @@ import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();
 const organization = useOrganization();
-const { sortedAdmins, sortedMembers, reloadPromise, getPermissions, getUnloadedPermissions, reload } = useAdmins();
+const { sortedAdmins, sortedMembers, loadPromise, getPermissions, getUnloadedPermissions } = useAdmins();
 const MAX_VISIBLE_DEFAULT = 5;
 const searchQuery = ref('');
 const showAll = ref(false);
@@ -162,7 +162,7 @@ defineRoutes([
             userId: String,
         },
         paramsToProps: async (params: { userId: string }) => {
-            await reloadPromise();
+            await loadPromise();
             const user = sortedAdmins.value.find(u => u.id === params.userId);
             if (!user) {
                 throw new Error('User not found');

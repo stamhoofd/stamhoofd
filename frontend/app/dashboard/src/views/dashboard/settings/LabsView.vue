@@ -316,7 +316,6 @@ export default class LabsView extends Mixins(NavigationMixin) {
         // Remove private data
         const organization = Organization.create({
             ...this.$organization,
-            admins: [],
             webshops: [],
         });
 

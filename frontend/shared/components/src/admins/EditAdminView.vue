@@ -104,7 +104,7 @@ import { User, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
-import { useAdmins } from './hooks/useAdmins';
+import { useAdmins, usePermissionsCache } from './hooks/useAdmins';
 
 const $errors = useErrors();
 const saving = ref(false);
@@ -120,7 +120,9 @@ const props = defineProps<{
 }>();
 
 const { patch, patched, addPatch, hasChanges } = usePatch(props.user);
-const { pushInMemory, dropFromMemory, getPermissionsPatch, getPermissions, getUnloadedPermissions } = useAdmins();
+const { pushInMemory, dropFromMemory, getPermissionsPatch } = useAdmins();
+const { clearPermissionCache, getPermissions, getUnloadedPermissions } = usePermissionsCache();
+
 const permissions = useUninheritedPermissions({ patchedUser: patched });
 const resources = computed(() => {
     const raw = permissions.unloadedPermissions;
@@ -256,6 +258,8 @@ const doDelete = async () => {
 
         // Copy all data
         props.user.deepSet(response.data);
+
+        await GlobalEventBus.sendEvent('user-updated', props.user);
 
         if (getPermissions(props.user)?.isEmpty ?? true) {
             dropFromMemory(props.user);
