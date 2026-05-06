@@ -5,11 +5,13 @@ import type { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsMana
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import type { Checkoutable } from '@stamhoofd/structures';
 
-export class InvoiceStep implements ViewStep {
+export class PaymentCustomerStep implements ViewStep {
     checkout: Checkoutable;
+    invoicesEnabled: boolean
 
-    constructor(checkout: Checkoutable) {
+    constructor({checkout, invoicesEnabled}: { checkout: Checkoutable; invoicesEnabled: boolean }) {
         this.checkout = checkout;
+        this.invoicesEnabled = invoicesEnabled;
     }
 
     isEnabled(_manager: ViewStepsManager) {
@@ -19,6 +21,7 @@ export class InvoiceStep implements ViewStep {
     getComponent(manager: ViewStepsManager): ComponentWithProperties {
         return new ComponentWithProperties(PaymentCustomerView, {
             checkout: this.checkout,
+            invoicesEnabled: this.invoicesEnabled,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
             },

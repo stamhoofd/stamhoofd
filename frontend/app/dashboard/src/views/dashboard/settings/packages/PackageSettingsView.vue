@@ -89,7 +89,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -98,7 +97,6 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { STPackage, STPackageType } from '@stamhoofd/structures';
 import { PackageCheckout, PackagePurchases, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
@@ -109,13 +107,11 @@ import { startCheckout } from './startCheckout';
 const errors = useErrors();
 const organization = useRequiredOrganization();
 const packages = ref([] as SelectablePackage[]);
-const owner = useRequestOwner();
 const context = useContext();
-const dismiss = useDismiss();
 const loadingModule = ref(null as STPackageType | null);
 const deactivatePackage = useDeactivatePackage();
 
-const { loading: loadingStatus, packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
+const { packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
 
 class SelectablePackage {
     package: STPackage;
@@ -280,7 +276,7 @@ async function checkoutPackage(pack: SelectablePackage) {
         // Activate instead
         checkout.purchases.packageBundles.push(pack.bundle);
     }
-
+    
     await startCheckout({
         checkout,
         context: context.value,

@@ -1,7 +1,12 @@
 <template>
     <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`%uE`)" @save="goNext">
         <h1>{{ $t('%1Ke') }}</h1>
-        <p>{{ $t('%eQ') }}</p>
+        <p v-if="invoicesEnabled">
+            {{ $t('Deze gegevens komen op jouw factuur. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.') }}
+        </p>
+        <p v-else>
+            {{ $t('%eQ') }}
+        </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -54,25 +59,30 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { PaymentCustomer   } from '@stamhoofd/structures';
-import type {RegisterCheckout, Checkoutable} from '@stamhoofd/structures';
-import { computed, onMounted, ref } from 'vue';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useErrors } from '#errors/useErrors.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
-import type { NavigationActions} from '#types/NavigationActions.ts';
-import { useNavigationActions } from '#types/NavigationActions.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { useAuth } from '#hooks/useAuth.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
 import GeneralSettingsView from '#organizations/GeneralSettingsView.vue';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import type { Checkoutable, RegisterCheckout } from '@stamhoofd/structures';
+import { PaymentCustomer } from '@stamhoofd/structures';
+import { computed, onMounted, ref } from 'vue';
 
-const props = defineProps<{
-    checkout: RegisterCheckout | Checkoutable;
-    saveHandler: (navigate: NavigationActions) => Promise<void>;
-}>();
+const props = withDefaults(
+    defineProps<{
+        checkout: RegisterCheckout | Checkoutable;
+        invoicesEnabled?: boolean;
+        saveHandler: (navigate: NavigationActions) => Promise<void>;
+    }>(), {
+        invoicesEnabled: false,
+    }
+);
 
 const errors = useErrors();
 
