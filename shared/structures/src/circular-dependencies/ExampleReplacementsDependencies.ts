@@ -20,6 +20,7 @@ import { Product, ProductPrice } from '../webshops/Product.js';
 import { TransferDescriptionType, TransferSettings } from '../webshops/TransferSettings.js';
 import { WebshopPreview } from '../webshops/Webshop.js';
 import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '../webshops/WebshopMetaData.js';
+import { PaymentCustomer } from '../PaymentCustomer.js';
 
 injectReplacementValues(fillReplacements);
 function fillReplacements(replacements: Replacement[]) {
@@ -137,6 +138,12 @@ function fillReplacements(replacements: Replacement[]) {
         status: PaymentStatus.Pending,
         iban: 'BE1234 1234 1234',
         ibanName: $t(`%ID`),
+        customer: PaymentCustomer.create({
+            firstName: $t('Jan Janssens').split(' ')[0],
+            lastName: $t('Jan Janssens').split(' ').slice(1).join(' '),
+            phone: $t('+32 479 11 11 11'),
+            email: $t('jan.janssens@voorbeeld.be')
+        }),
         transferDescription: '+++111/111/111+++',
         transferSettings: TransferSettings.create({
             type: TransferDescriptionType.Structured,
