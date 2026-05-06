@@ -19,7 +19,7 @@ import type { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import EmailView from '../../email/EmailView.vue';
 import MembersPdfExportView from '../../export/MembersPdfExportView.vue';
 import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
-import { useContext, useOrganization, usePlatform } from '../../hooks';
+import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';
 import ChargeMembersView from '../../members/ChargeMembersView.vue';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
@@ -589,6 +589,10 @@ export class MemberActionBuilder {
     }
 
     private async getInviteMemberForGroupActionsWithGroups(): Promise<TableAction<PlatformMember>[]> {
+        if (!manualFeatureFlag('registration-invites', this.context)) {
+            return [];
+        }
+
         let categoryTree: null | GroupCategoryTree = null;
 
         if (this.isWaitingList) {

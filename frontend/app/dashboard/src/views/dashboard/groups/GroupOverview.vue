@@ -949,6 +949,11 @@ const invitationsFetcher = useRegistrationInvitationsObjectFetcher({
 });
 
 async function fetchInvitationCount() {
+    if (!featureFlag('registration-invites')) {
+        invitationsCount.value = 0;
+        return;
+    }
+    
     try {
         invitationsCount.value = await countAll(invitationsFetcher);
     } catch (e) {
