@@ -69,7 +69,7 @@
 
                     <STListItem v-if="invitationsCount > 0" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Invitations)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/user.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('Uitnodigingen') }}
