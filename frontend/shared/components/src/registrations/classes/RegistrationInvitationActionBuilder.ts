@@ -89,7 +89,7 @@ export class RegistrationInvitationActionBuilder {
         invitations.forEach(i => patchableArray.addDelete(i.id));
     
         try {
-            await this.context.authenticatedServer.request({
+            await this.context.getAuthenticatedServerForOrganization(this.group.organizationId).request({
                 method: 'PATCH',
                 path: '/registration-invitations',
                 body: patchableArray,
