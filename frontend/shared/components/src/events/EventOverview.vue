@@ -1,246 +1,264 @@
 <template>
     <ExternalOrganizationContainer :organization-id="event.organizationId" @update="setOrganization">
         <ExternalOrganizationContainer :organization-id="event.group?.organizationId ?? null" :organization-hint="eventOrganization" @update="setGroupOrganization">
-            <div class="st-view event-overview">
-                <STNavigationBar :title="title" />
+            <LoadingViewTransition>
+                <div v-if="invitationsCount !== null" class="st-view event-overview">
+                    <STNavigationBar :title="title" />
 
-                <main class="center">
-                    <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
+                    <main class="center">
+                        <ImageComponent v-if="event.meta.coverPhoto" :image="event.meta.coverPhoto" :auto-height="true" class="style-cover-photo" />
 
-                    <p class="style-title-prefix">
-                        {{ levelPrefix }}
-                    </p>
-                    <h1 class="style-navigation-title">
-                        {{ title }}
-                    </h1>
+                        <p class="style-title-prefix">
+                            {{ levelPrefix }}
+                        </p>
+                        <h1 class="style-navigation-title">
+                            {{ title }}
+                        </h1>
 
-                    <template v-if="event.meta.description.html">
-                        <div class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
-                    </template>
-
-                    <EventInfoTable :event="event">
-                        <template v-if="event.group && (!organization || auth.canAccessGroup(event.group, undefined, groupOrganization) || event.group.settings.implicitlyAllowViewRegistrations)">
-                            <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
-                                <template #left>
-                                    <span class="icon group" />
-                                </template>
-
-                                <h2 class="style-title-list">
-                                    {{ $t('%LX') }}
-                                </h2>
-                                <p class="style-description">
-                                    {{ $t('%LY') }}
-                                </p>
-                                <template #right>
-                                    <span v-if="event.group.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
-                                    <RegistrationCountSpan v-else :filter="getCountFilter(event.group)" class="style-description-small" />
-                                    <span class="icon arrow-right-small gray" />
-                                </template>
-                            </STListItem>
-
-                            <STListItem v-if="event.group.waitingList && (!organization || auth.canAccessGroup(event.group.waitingList, undefined, groupOrganization) || event.group.waitingList.settings.implicitlyAllowViewRegistrations)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
-                                <template #left>
-                                    <span class="icon clock" />
-                                </template>
-
-                                <h2 class="style-title-list">
-                                    {{ event.group.waitingList.settings.name }}
-                                </h2>
-                                <p class="style-description">
-                                    {{ $t('%au') }}
-                                </p>
-                                <template #right>
-                                    <span v-if="event.group.waitingList.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
-                                    <RegistrationCountSpan v-else :filter="getCountFilter(event.group.waitingList)" class="style-description-small" />
-                                    <span class="icon arrow-right-small gray" />
-                                </template>
-                            </STListItem>
+                        <template v-if="event.meta.description.html">
+                            <div class="description style-wysiwyg gray large" v-html="event.meta.description.html" />
                         </template>
-                    </EventInfoTable>
 
-                    <div v-if="canWriteEvent" class="container">
-                        <hr><h2>
-                            {{ $t('%xU') }}
-                        </h2>
+                        <EventInfoTable :event="event">
+                            <template v-if="event.group && (!organization || auth.canAccessGroup(event.group, undefined, groupOrganization) || event.group.settings.implicitlyAllowViewRegistrations)">
+                                <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
+                                    <template #left>
+                                        <span class="icon group" />
+                                    </template>
 
-                        <STList class="illustration-list">
-                            <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Edit)">
+                                    <h2 class="style-title-list">
+                                        {{ $t('%LX') }}
+                                    </h2>
+                                    <p class="style-description">
+                                        {{ $t('%LY') }}
+                                    </p>
+                                    <template #right>
+                                        <span v-if="event.group.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
+                                        <RegistrationCountSpan v-else :filter="getCountFilter(event.group)" class="style-description-small" />
+                                        <span class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+
+                                <STListItem v-if="event.group.waitingList && (!organization || auth.canAccessGroup(event.group.waitingList, undefined, groupOrganization) || event.group.waitingList.settings.implicitlyAllowViewRegistrations)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
+                                    <template #left>
+                                        <span class="icon clock" />
+                                    </template>
+
+                                    <h2 class="style-title-list">
+                                        {{ event.group.waitingList.settings.name }}
+                                    </h2>
+                                    <p class="style-description">
+                                        {{ $t('%au') }}
+                                    </p>
+                                    <template #right>
+                                        <span v-if="event.group.waitingList.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
+                                        <RegistrationCountSpan v-else :filter="getCountFilter(event.group.waitingList)" class="style-description-small" />
+                                        <span class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+
+                                <STListItem v-if="invitationsCount > 0" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Invitations)">
+                                    <template #left>
+                                        <span class="icon email" />
+                                    </template>
+                                    <h2 class="style-title-list">
+                                        {{ $t('Uitnodigingen') }}
+                                    </h2>
+                                    <p class="style-description">
+                                        {{ $t('Bekijk de uitnodigingen voor {group}.', {group: event.group.settings.name.toString()}) }}
+                                    </p>
+                                    <template #right>
+                                        <span class="style-description-small">{{ formatInteger(invitationsCount) }}</span>
+                                        <span class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+                            </template>
+                        </EventInfoTable>
+
+                        <div v-if="canWriteEvent" class="container">
+                            <hr><h2>
+                                {{ $t('%xU') }}
+                            </h2>
+
+                            <STList class="illustration-list">
+                                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Edit)">
+                                    <template #left>
+                                        <img src="@stamhoofd/assets/images/illustrations/flag.svg">
+                                    </template>
+                                    <h2 class="style-title-list">
+                                        {{ $t('%Lb') }}
+                                    </h2>
+                                    <p class="style-description">
+                                        {{ $t('%av') }}
+                                    </p>
+                                    <template #right>
+                                        <span class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+
+                                <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditGroup)">
+                                    <template #left>
+                                        <img src="@stamhoofd/assets/images/illustrations/list.svg">
+                                    </template>
+                                    <h2 class="style-title-list">
+                                        {{ $t('%aw') }}
+                                    </h2>
+                                    <p class="style-description">
+                                        {{ $t('%ax') }}
+                                    </p>
+                                    <template #right>
+                                        <span class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+
+                                <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
+                                    <template #left>
+                                        <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                                    </template>
+                                    <h2 class="style-title-list">
+                                        {{ $t('%1DD') }}
+                                    </h2>
+                                    <p class="style-description">
+                                        {{ $t('%ay') }}
+                                    </p>
+                                    <template #right>
+                                        <span class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+
+                                <STListItem v-if="event.webshopId" :selectable="canEditWebshopHere" class="left-center right-stack" @click="canEditWebshopHere ? $navigate(Routes.Webshop) : null">
+                                    <template #left>
+                                        <img src="@stamhoofd/assets/images/illustrations/cart.svg">
+                                    </template>
+                                    <h2 v-if="!webshop || webshop.meta.name === event.name" class="style-title-list">
+                                        {{ $t('%1Ag') }}
+                                    </h2>
+                                    <h2 v-else class="style-title-list">
+                                        {{ webshop.meta.name ?? $t('%Gr') }}
+                                    </h2>
+                                    <p v-if="canEditWebshopHere" class="style-description-small">
+                                        {{ $t('%1Ah') }}
+                                    </p>
+                                    <p v-else-if="webshop" class="style-description-small">
+                                        {{ $t('%1CC') }}
+                                    </p>
+                                    <p v-else class="style-description-small">
+                                        {{ $t('%1CD') }}
+                                    </p>
+                                    <template #right>
+                                        <button v-if="canWriteEvent" v-tooltip="$t('%1Ai')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
+                                        <span v-if="canEditWebshopHere" class="icon arrow-right-small gray" />
+                                    </template>
+                                </STListItem>
+
+                                <template v-if="eventOrganization">
+                                    <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
+                                </template>
+                            </STList>
+                        </div>
+
+                        <hr>
+                        <h2>{{ $t('%16X') }}</h2>
+                        <STList>
+                            <STListItem v-if="!event.group && !event.webshopId && canWriteEvent" :selectable="true" class="left-center" @click="createGroup">
                                 <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/flag.svg">
+                                    <IconContainer icon="group" class="success">
+                                        <template #aside>
+                                            <span class="icon success stroke small" />
+                                        </template>
+                                    </IconContainer>
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('%Lb') }}
+                                    {{ $t('%1Aj') }}
                                 </h2>
-                                <p class="style-description">
-                                    {{ $t('%av') }}
+                                <p class="style-description-small">
+                                    {{ $t('%16Z') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
 
-                            <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditGroup)">
+                            <STListItem v-if="!event.group && !event.webshopId && canWriteEvent && $feature('event-webshops')" :selectable="true" class="left-center" @click="linkWebshop">
                                 <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/list.svg">
+                                    <IconContainer icon="basket" class="success">
+                                        <template #aside>
+                                            <span class="icon success stroke small" />
+                                        </template>
+                                    </IconContainer>
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('%aw') }}
+                                    {{ $t('%1Ak') }}
                                 </h2>
-                                <p class="style-description">
-                                    {{ $t('%ax') }}
+                                <p class="style-description-small">
+                                    {{ $t('%1Al') }}
                                 </p>
                                 <template #right>
                                     <span class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
 
-                            <STListItem v-if="event.group" :selectable="true" class="left-center" @click="$navigate(Routes.EditEmails)">
+                            <STListItem v-if="event.group && auth.canRegisterMembersInGroup(event.group, groupOrganization)" :selectable="true" class="left-center" @click="addMembers">
                                 <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
+                                    <IconContainer icon="group">
+                                        <template #aside>
+                                            <span class="icon add small stroke" />
+                                        </template>
+                                    </IconContainer>
                                 </template>
                                 <h2 class="style-title-list">
-                                    {{ $t('%1DD') }}
+                                    {{ $t('%b0') }}
                                 </h2>
-                                <p class="style-description">
-                                    {{ $t('%ay') }}
+                                <p v-if="organization && event.organizationId === organization.id" class="style-description-small">
+                                    {{ $t('%BJ') }}
                                 </p>
-                                <template #right>
-                                    <span class="icon arrow-right-small gray" />
-                                </template>
-                            </STListItem>
-
-                            <STListItem v-if="event.webshopId" :selectable="canEditWebshopHere" class="left-center right-stack" @click="canEditWebshopHere ? $navigate(Routes.Webshop) : null">
-                                <template #left>
-                                    <img src="@stamhoofd/assets/images/illustrations/cart.svg">
-                                </template>
-                                <h2 v-if="!webshop || webshop.meta.name === event.name" class="style-title-list">
-                                    {{ $t('%1Ag') }}
-                                </h2>
-                                <h2 v-else class="style-title-list">
-                                    {{ webshop.meta.name ?? $t('%Gr') }}
-                                </h2>
-                                <p v-if="canEditWebshopHere" class="style-description-small">
-                                    {{ $t('%1Ah') }}
-                                </p>
-                                <p v-else-if="webshop" class="style-description-small">
-                                    {{ $t('%1CC') }}
+                                <p v-else-if="!event.group.settings.isFree" class="style-description-small">
+                                    {{ $t('%BK') }}
                                 </p>
                                 <p v-else class="style-description-small">
-                                    {{ $t('%1CD') }}
+                                    {{ $t('%BL') }}
                                 </p>
                                 <template #right>
-                                    <button v-if="canWriteEvent" v-tooltip="$t('%1Ai')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
-                                    <span v-if="canEditWebshopHere" class="icon arrow-right-small gray" />
+                                    <span class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
 
-                            <template v-if="eventOrganization">
-                                <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
-                            </template>
+                            <STListItem v-if="canWriteEvent && onSaveDuplicate" :selectable="true" class="left-center" @click="duplicateEvent()">
+                                <template #left>
+                                    <IconContainer icon="copy" />
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ $t('%1Ka') }}
+                                </h2>
+                                <p class="style-description">
+                                    {{ $t('%1Kb') }}
+                                </p>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
+                            <STListItem v-if="event.meta.visible" v-copyable="link" :selectable="true" class="left-center">
+                                <template #left>
+                                    <IconContainer icon="link" />
+                                </template>
+                                <h2 class="style-title-list">
+                                    {{ $t('%az') }}
+                                </h2>
+                                <p class="style-description-small">
+                                    {{ $t("%7l") }}
+                                </p>
+                                <div class="split-inputs option">
+                                    <input class="input" :value="link" readonly>
+                                </div>
+                                <template #right>
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
                         </STList>
-                    </div>
-
-                    <hr>
-                    <h2>{{ $t('%16X') }}</h2>
-                    <STList>
-                        <STListItem v-if="!event.group && !event.webshopId && canWriteEvent" :selectable="true" class="left-center" @click="createGroup">
-                            <template #left>
-                                <IconContainer icon="group" class="success">
-                                    <template #aside>
-                                        <span class="icon success stroke small" />
-                                    </template>
-                                </IconContainer>
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%1Aj') }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ $t('%16Z') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-if="!event.group && !event.webshopId && canWriteEvent && $feature('event-webshops')" :selectable="true" class="left-center" @click="linkWebshop">
-                            <template #left>
-                                <IconContainer icon="basket" class="success">
-                                    <template #aside>
-                                        <span class="icon success stroke small" />
-                                    </template>
-                                </IconContainer>
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%1Ak') }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ $t('%1Al') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-if="event.group && auth.canRegisterMembersInGroup(event.group, groupOrganization)" :selectable="true" class="left-center" @click="addMembers">
-                            <template #left>
-                                <IconContainer icon="group">
-                                    <template #aside>
-                                        <span class="icon add small stroke" />
-                                    </template>
-                                </IconContainer>
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%b0') }}
-                            </h2>
-                            <p v-if="organization && event.organizationId === organization.id" class="style-description-small">
-                                {{ $t('%BJ') }}
-                            </p>
-                            <p v-else-if="!event.group.settings.isFree" class="style-description-small">
-                                {{ $t('%BK') }}
-                            </p>
-                            <p v-else class="style-description-small">
-                                {{ $t('%BL') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-if="canWriteEvent && onSaveDuplicate" :selectable="true" class="left-center" @click="duplicateEvent()">
-                            <template #left>
-                                <IconContainer icon="copy" />
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%1Ka') }}
-                            </h2>
-                            <p class="style-description">
-                                {{ $t('%1Kb') }}
-                            </p>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-if="event.meta.visible" v-copyable="link" :selectable="true" class="left-center">
-                            <template #left>
-                                <IconContainer icon="link" />
-                            </template>
-                            <h2 class="style-title-list">
-                                {{ $t('%az') }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ $t("%7l") }}
-                            </p>
-                            <div class="split-inputs option">
-                                <input class="input" :value="link" readonly>
-                            </div>
-                            <template #right>
-                                <span class="icon arrow-right-small gray" />
-                            </template>
-                        </STListItem>
-                    </STList>
-                </main>
-            </div>
+                    </main>
+                </div>
+            </LoadingViewTransition>
         </ExternalOrganizationContainer>
     </ExternalOrganizationContainer>
 </template>
@@ -260,18 +278,20 @@ import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { LoadComponent, PromiseView } from '../containers';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
+import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
 import { EditEmailTemplatesView } from '../email';
 import { useEventsObjectFetcher } from '../fetchers';
+import { useRegistrationInvitationsObjectFetcher } from '../fetchers/useRegistrationInvitationsObjectFetcher';
 import EditGroupView from '../groups/EditGroupView.vue';
-import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
+import { useAuth, useContext, useFeatureFlag, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import IconContainer from '../icons/IconContainer.vue';
 import { MembersTableView, RegistrationCountSpan, useChooseOrganizationMembersForGroup } from '../members';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import { useRequiredRegistrationsFilter } from '../registrations';
+import { RegistrationInvitationsTableView, useRegistrationInvitationEventListener, useRequiredRegistrationsFilter } from '../registrations';
 import RegistrationsTableView from '../registrations/RegistrationsTableView.vue';
-import { useInfiniteObjectFetcher } from '../tables';
+import { countAll, useInfiniteObjectFetcher } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
@@ -292,6 +312,9 @@ const auth = useAuth();
 const createEventGroup = useCreateEventGroup();
 const eventOrganization: Ref<Organization | null> = ref(null);
 const owner = useRequestOwner();
+const featureFlag = useFeatureFlag();
+const invitationsCount = ref<number | null>(props.event.group ? null : 0);
+
 // @ts-ignore Something wrong with Vue converting structures to refs, causes too large types and causes a ts error "Type instantiation is excessively deep and possibly infinite."
 const webshop = computed<WebshopPreview | null>(() => {
     if (!props.event.webshopId) {
@@ -416,6 +439,7 @@ enum Routes {
     EditGroup = 'inschrijvingsinstellingen',
     EditEmails = 'emails',
     Webshop = 'webshop',
+    Invitations = 'Invitations',
 }
 
 const { getRequiredRegistrationsFilter } = useRequiredRegistrationsFilter();
@@ -444,6 +468,26 @@ defineRoutes([{
                 start: props.event.startDate,
                 end: props.event.endDate,
             },
+        };
+    },
+},
+{
+    url: 'uitnodigingen',
+    name: Routes.Invitations,
+    component: RegistrationInvitationsTableView,
+    paramsToProps: () => {
+        if (!props.event.group) {
+            throw new Error('No group found');
+        }
+
+        return {
+            group: props.event.group,
+            estimatedRows: invitationsCount.value,
+            updateTotal: (total: number | null) => {
+                if (total !== null) {
+                    invitationsCount.value = total;
+                }
+            }
         };
     },
 },
@@ -897,6 +941,46 @@ function duplicateEvent() {
         ],
     }).catch(console.error);
 }
+
+const invitationsFetcher = useRegistrationInvitationsObjectFetcher(props.event.group ? {
+    requiredFilter: {
+        groupId: props.event.group.id
+    }} : {});
+
+async function fetchInvitationCount() {
+    if (!featureFlag('registration-invites')) {
+        invitationsCount.value = 0;
+        return;
+    }
+
+    if (!props.event.group) {
+        invitationsCount.value = 0;
+        return;
+    }
+
+
+    
+    try {
+        invitationsCount.value = await countAll(invitationsFetcher);
+    } catch (e) {
+        console.error(e);
+        invitationsCount.value = 0;
+    }
+}
+
+fetchInvitationCount().catch(console.error);
+
+useRegistrationInvitationEventListener('updated', async (value) => {
+    if (!props.event.group) {
+        return;
+    }
+    
+    // update the invitation count if invitations for this groups changed
+    // do not fetch again if the change originated in the invitations table (prevent double fetch) 
+    if (value.origin !== 'invitations-table' && value.groupIds.has(props.event.group.id)) {
+        fetchInvitationCount().catch(console.error);
+    }
+});
 
 useGlobalEventListener('event-deleted', async (event: Event) => {
     if (event.id === props.event.id) {
