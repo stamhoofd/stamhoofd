@@ -30,9 +30,9 @@ const paymentRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
         const q = await GetPaymentsEndpoint.buildQuery(query);
         const base = await q.count();
 
-        if (base < 1000) {
+        if (base < 100) {
             // Do full scan
-            query.limit = 1000;
+            query.limit = 100;
             const result = await fetchPaymentRecipients(query, _subfilter);
             return result.results.length;
         }
@@ -45,10 +45,20 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Payment, paymentRecipientLoa
 
 const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
     fetch: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult) => fetchPaymentOrganizationRecipients(query, subfilter, beforeFetchAllResult),
+
     // For now: only count the number of payments - not the amount of emails
-    count: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => {
+    count: async (query: LimitedFilteredRequest, _subfilter) => {
         const q = await GetPaymentsEndpoint.buildQuery(query);
-        return await q.count();
+        const base = await q.count();
+
+        if (base < 100) {
+            // Do full scan
+            query.limit = 100;
+            const result = await fetchPaymentOrganizationRecipients(query, _subfilter);
+            return result.results.length;
+        }
+
+        return base;
     },
 };
 
@@ -298,6 +308,11 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
                 continue;
             }
             const users = admins.filter(a => a.permissions?.forOrganization(organization)?.hasFullAccess());
+
+            if (users.length === 0) {
+                console.warn('No admins found for organization with id ', organizationId, ' while fetching email recipients for payment with id ', payment.id);
+                continue;
+            }
 
             const replacements = getEmailReplacementsForPayment(payment, replacementOptions);
 
