@@ -3,11 +3,12 @@ import { SQLDelete } from './SQLDelete.js';
 import type { SQLExpression } from './SQLExpression.js';
 import { isSQLExpression } from './SQLExpression.js';
 import type { SQLColumnExpressionParams, SQLScalarValue } from './SQLExpressions.js';
+import { SQLCast } from './SQLExpressions.js';
 import { SQLAssignment, SQLCalculation, SQLCoalesce, SQLColumnExpression, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLSubQuery, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
 import { SQLInsert } from './SQLInsert.js';
 import { SQLJoin, SQLJoinType } from './SQLJoin.js';
 import type { SQLJsonValueType } from './SQLJsonExpressions.js';
-import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonType, SQLJsonUnquote, SQLJsonValue, SQLLpad } from './SQLJsonExpressions.js';
+import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonOverlaps, SQLJsonType, SQLJsonUnquote, SQLJsonValue, SQLLpad } from './SQLJsonExpressions.js';
 import { parseTable, SQLSelect } from './SQLSelect.js';
 import { SQLUpdate } from './SQLUpdate.js';
 import type { ParseWhereArguments, SQLWhere } from './SQLWhere.js';
@@ -30,6 +31,14 @@ class StaticSQL {
         return new SQLJsonExtract(column, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
     }
 
+    scalar(value: SQLScalarValue): SQLScalar {
+        return new SQLScalar(value)
+    }
+
+    jsonOverlaps(jsonDoc1: SQLExpression, jsonDoc2: SQLExpression): SQLJsonOverlaps {
+        return new SQLJsonOverlaps(jsonDoc1, jsonDoc2);
+    }
+
     jsonValue(column: SQLExpression, path: string, type?: SQLJsonValueType, asScalar = false): SQLJsonValue {
         return new SQLJsonValue(column, type, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
     }
@@ -40,6 +49,10 @@ class StaticSQL {
 
     jsonType(column: SQLExpression): SQLJsonType {
         return new SQLJsonType(column);
+    }
+
+    cast(expression: SQLExpression, as = 'CHAR'): SQLCast{
+        return new SQLCast(expression, as);
     }
 
     lpad(column: SQLExpression, length: number, value: string): SQLLpad {

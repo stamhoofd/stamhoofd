@@ -141,20 +141,19 @@ export class User extends QueryableModel {
         return global;
     }
 
-    static async getAdmins(organizationId: string, options?: { verified?: boolean }) {
+    static async getAdmins(organizationId: string | string[], options?: { verified?: boolean }) {
         if (STAMHOOFD.userMode === 'platform') {
             // Custom implementation
             const q = User.select()
                 .where('organizationId', null)
                 .where('permissions', '!=', null)
                 .where(
-                    SQL.jsonExtract(
-                        SQL.jsonExtract(SQL.column('permissions'), '$.value.organizationPermissions'),
-                        '$."' + organizationId + '"',
-                        true,
+                    SQL.jsonOverlaps(
+                        SQL.jsonKeys(SQL.jsonExtract(SQL.column('permissions'), '$.value.organizationPermissions')),
+                        SQL.cast(SQL.scalar(JSON.stringify(Array.isArray(organizationId) ? organizationId : [organizationId])), 'JSON'),
                     ),
-                    '!=',
-                    null,
+                    '=',
+                    1,
                 )
             ;
 

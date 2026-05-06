@@ -14,15 +14,6 @@ type BeforeFetchAllResult = {
     areAllPaymentsTransfers: boolean;
 };
 
-async function fetchPaymentRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter, beforeFetchAllResult?: BeforeFetchAllResult) {
-    const result = await GetPaymentsEndpoint.buildData(query);
-
-    return new PaginatedResponse({
-        results: await getRecipients(result, EmailRecipientFilterType.Payment, subfilter, beforeFetchAllResult),
-        next: result.next,
-    });
-}
-
 const paymentRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
     beforeFetchAll: async (query: LimitedFilteredRequest) => {
         const doesIncludePaymentWithoutOrders = await doesQueryIncludePaymentsWithoutOrder(query);
@@ -51,6 +42,26 @@ const paymentRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
 };
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Payment, paymentRecipientLoader);
+
+const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
+    fetch: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult) => fetchPaymentOrganizationRecipients(query, subfilter, beforeFetchAllResult),
+    // For now: only count the number of payments - not the amount of emails
+    count: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => {
+        const q = await GetPaymentsEndpoint.buildQuery(query);
+        return await q.count();
+    },
+};
+
+Email.recipientLoaders.set(EmailRecipientFilterType.PaymentOrganization, paymentOrganizationRecipientLoader);
+
+async function fetchPaymentRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter, beforeFetchAllResult?: BeforeFetchAllResult) {
+    const result = await GetPaymentsEndpoint.buildData(query);
+
+    return new PaginatedResponse({
+        results: await getRecipients(result, EmailRecipientFilterType.Payment, subfilter, beforeFetchAllResult),
+        next: result.next,
+    });
+}
 
 async function doesQueryIncludePaymentsWithoutOrder(filterRequest: LimitedFilteredRequest) {
     // create count request (without limit and page filter)
@@ -112,17 +123,6 @@ async function fetchPaymentOrganizationRecipients(query: LimitedFilteredRequest,
         next: result.next,
     });
 }
-
-const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
-    fetch: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult) => fetchPaymentOrganizationRecipients(query, subfilter, beforeFetchAllResult),
-    // For now: only count the number of payments - not the amount of emails
-    count: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => {
-        const q = await GetPaymentsEndpoint.buildQuery(query);
-        return await q.count();
-    },
-};
-
-Email.recipientLoaders.set(EmailRecipientFilterType.PaymentOrganization, paymentOrganizationRecipientLoader);
 
 async function getRecipients(result: PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>, type: EmailRecipientFilterType.Payment | EmailRecipientFilterType.PaymentOrganization, subFilter: StamhoofdFilter | null, beforeFetchAllResult: BeforeFetchAllResult | undefined) {
     const recipients: EmailRecipient[] = [];
@@ -273,7 +273,7 @@ async function getMembersForOrganizations(organizationIds: string[], filter: Sta
 }
 
 async function getOrganizationRecipients(ids: { organizationId: string; payment: PaymentGeneral }[], replacementOptions: ReplacementsOptions, subFilter: StamhoofdFilter | null): Promise<EmailRecipient[]> {
-    if (ids.length === 0 || subFilter === null) {
+    if (ids.length === 0) {
         return [];
     }
 
@@ -287,32 +287,60 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
         organizationMap.set(organization.id, organization);
     }
 
-    const membersForOrganizations = await getMembersForOrganizations(allOrganizationIds, subFilter);
-
     const results: EmailRecipient[] = [];
 
-    for (const { organizationId, payment } of ids) {
-        const organization = organizationMap.get(organizationId);
-
-        if (organization) {
-            const members = membersForOrganizations.get(organizationId);
-            if (!members) {
+    if (subFilter === null) {
+        // Use full admins instead
+        const admins = await User.getAdmins(allOrganizationIds, {verified: true});
+        for (const { organizationId, payment } of ids) {
+            const organization = organizationMap.get(organizationId);
+            if (!organization) {
                 continue;
             }
+            const users = admins.filter(a => a.permissions?.forOrganization(organization)?.hasFullAccess());
 
             const replacements = getEmailReplacementsForPayment(payment, replacementOptions);
 
-            for (const member of members) {
-                for (const email of member.details.getNotificationEmails()) {
-                    results.push(EmailRecipient.create({
-                        objectId: payment.id,
-                        name: organization.name,
-                        memberId: member.id,
-                        firstName: member.details.firstName,
-                        lastName: member.details.lastName,
-                        email,
-                        replacements,
-                    }));
+            for (const user of users) {
+                results.push(EmailRecipient.create({
+                    objectId: payment.id,
+                    name: organization.name,
+                    userId: user.id,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    replacements,
+                }));
+            }
+        }
+    } else {
+        const membersForOrganizations = await getMembersForOrganizations(allOrganizationIds, subFilter);
+
+        for (const { organizationId, payment } of ids) {
+            const organization = organizationMap.get(organizationId);
+
+            if (organization) {
+                const members = membersForOrganizations.get(organizationId);
+                if (!members || members.length === 0) {
+                    // Use admins by default
+
+                    continue;
+                }
+
+                const replacements = getEmailReplacementsForPayment(payment, replacementOptions);
+
+                for (const member of members) {
+                    for (const email of member.details.getNotificationEmails()) {
+                        results.push(EmailRecipient.create({
+                            objectId: payment.id,
+                            name: organization.name,
+                            memberId: member.id,
+                            firstName: member.details.firstName,
+                            lastName: member.details.lastName,
+                            email,
+                            replacements,
+                        }));
+                    }
                 }
             }
         }
