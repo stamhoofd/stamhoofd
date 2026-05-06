@@ -819,6 +819,10 @@ export class RegistrationActionBuilder {
     }
 
     private async getInviteMemberForGroupActionsWithGroups(): Promise<TableAction<PlatformRegistration>[]> {
+        if (this.organizations.length === 0) {
+            return [];
+        }
+
         if (!manualFeatureFlag('registration-invites', this.context)) {
             return [];
         }
