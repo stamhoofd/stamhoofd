@@ -10,7 +10,7 @@ import { CommunicationView } from '../../communication';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import type { RecipientChooseOneOption } from '../../email';
 import { EmailView } from '../../email';
-import { useContext, useOrganization, usePlatform } from '../../hooks';
+import { manualFeatureFlag, useContext, useOrganization, usePlatform } from '../../hooks';
 import type { PlatformFamilyManager } from '../../members';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, getEventGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
@@ -819,6 +819,10 @@ export class RegistrationActionBuilder {
     }
 
     private async getInviteMemberForGroupActionsWithGroups(): Promise<TableAction<PlatformRegistration>[]> {
+        if (!manualFeatureFlag('registration-invites', this.context)) {
+            return [];
+        }
+        
         let categoryTree: null | GroupCategoryTree = null;
         
         if (this.isWaitingList) {

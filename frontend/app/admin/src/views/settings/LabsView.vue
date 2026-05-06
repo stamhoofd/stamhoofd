@@ -50,6 +50,10 @@
             <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
                 {{ $t('%18D') }} (beta)
             </Checkbox>
+
+            <Checkbox :model-value="getFeatureFlag('registration-invites')" @update:model-value="setFeatureFlag('registration-invites', !!$event)">
+                {{ $t('Uitnodigen voor een groep') }}
+            </Checkbox>
         </template>
 
         <hr><h2>{{ $t('%HJ') }}</h2>
@@ -77,15 +81,15 @@
 <script lang="ts" setup>
 import type { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import LoginMethodConfigView from '@stamhoofd/components/auth/LoginMethodConfigView.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useIsRootAdmin } from '@stamhoofd/components/hooks/useIsRootAdmin.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';
