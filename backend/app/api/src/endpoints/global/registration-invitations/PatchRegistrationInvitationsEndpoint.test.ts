@@ -8,12 +8,8 @@ import { PermissionLevel, Permissions, PermissionsResourceType, RegistrationInvi
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchRegistrationInvitationsEndpoint } from './PatchRegistrationInvitationsEndpoint.js';
 
-
 describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
     const endpoint = new PatchRegistrationInvitationsEndpoint();
-
-    beforeAll(async () => {
-    });
 
     const patchInvitations = async ({ patch, organization, user }: { patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest>; organization: Organization; user: User | null }) => {
         const request = Request.buildJson('PATCH', '/registration-invitations', organization.getApiHost(), patch);
@@ -23,7 +19,6 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         }
         return await testServer.test<RegistrationInvitationStruct[]>(endpoint, request);
     };
-    
 
     describe('Put invitation', () => {
         test('Happy path', async () => {

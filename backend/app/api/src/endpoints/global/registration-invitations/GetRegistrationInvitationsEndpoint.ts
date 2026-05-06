@@ -55,7 +55,6 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                 if (tags !== 'all') {
                     const platform = await Platform.getShared();
 
-                    // todo: test
                     // Add organization scope filter
                     scopeFilter = {           
                         group: {
@@ -97,7 +96,6 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                     }
                 }
                 else {
-                    // todo: is this correct?
                     const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.EventRegistration]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
