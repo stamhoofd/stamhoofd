@@ -70,7 +70,7 @@ import { useUser } from '#hooks/useUser.ts';
 import GeneralSettingsView from '#organizations/GeneralSettingsView.vue';
 
 const props = defineProps<{
-    checkout: RegisterCheckout | Checkoutable<unknown>;
+    checkout: RegisterCheckout | Checkoutable;
     saveHandler: (navigate: NavigationActions) => Promise<void>;
 }>();
 

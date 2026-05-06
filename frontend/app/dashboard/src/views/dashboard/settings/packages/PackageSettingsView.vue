@@ -90,19 +90,21 @@
 
 <script lang="ts" setup>
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { STPackage, STPackageType } from '@stamhoofd/structures';
 import { PackageCheckout, PackagePurchases, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
-import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
+import { useOrganizationPackages } from './hooks/useOrganizationPackages';
+import { startCheckout } from './startCheckout';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
@@ -263,11 +265,27 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
 
     loadingModule.value = null;
 }
+const navigationActions = useNavigationActions();
+async function checkoutPackage(pack: SelectablePackage) {
+    const checkout = PackageCheckout.create({
+        purchases: PackagePurchases.create({
+            packageBundles: [],
+        }),
+        paymentMethod: PaymentMethod.Unknown,
+    })
 
-async function openPackageDetails(pack: SelectablePackage) {
-    // this.show(new ComponentWithProperties(PackageConfirmView, {
-    //    bundles: [pack.bundle]
-    // }))
+    if (pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew) {
+        checkout.purchases.renewPackageIds.push(pack.package.id);
+    } else {
+        // Activate instead
+        checkout.purchases.packageBundles.push(pack.bundle);
+    }
+
+    await startCheckout({
+        checkout,
+        context: context.value,
+        displayOptions: { action: 'show' }
+    }, navigationActions);
 }
 
 async function checkout(pack: SelectablePackage) {
@@ -277,7 +295,7 @@ async function checkout(pack: SelectablePackage) {
             case STPackageBundle.Members: {
                 if (!organization.value.meta.packages.canStartMembersTrial) {
                     new Toast($t('%1M4'), 'error').show();
-                    await openPackageDetails(pack);
+                    await checkoutPackage(pack);
                     return;
                 }
                 // Activate trial if possible (otherwise go to confirm)
@@ -287,7 +305,7 @@ async function checkout(pack: SelectablePackage) {
             case STPackageBundle.Webshops: {
                 if (!organization.value.meta.packages.canStartWebshopsTrial) {
                     new Toast($t('%1M4'), 'error').show();
-                    await openPackageDetails(pack);
+                    await checkoutPackage(pack);
                     return;
                 }
                 // Activate trial if possible (otherwise go to confirm)
@@ -297,7 +315,7 @@ async function checkout(pack: SelectablePackage) {
         }
         return;
     }
-    await openPackageDetails(pack);
+    await checkoutPackage(pack);
 }
 
 </script>
