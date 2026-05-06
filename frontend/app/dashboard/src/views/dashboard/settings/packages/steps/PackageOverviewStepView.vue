@@ -34,12 +34,6 @@
                 </I18nComponent>
             </Checkbox>
         </STInputBox>
-
-        <STInputBox :error-box="errors.errorBox" error-fields="terms" class="max">
-            <Checkbox v-model="acceptTerms">
-                {{ $t('Ik begrijp dat de gekozen betaalkaart gebruikt zal worden voor eventuele toekomstige maandelijkse afrekeningen') }}
-            </Checkbox>
-        </STInputBox>
     </SaveView>
 </template>
 

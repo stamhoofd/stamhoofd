@@ -11,6 +11,7 @@
         <h3 class="style-title-list">
             {{ pack.meta.name }}
         </h3>
+        <p class="style-description-small" v-text="pack.meta.humanPricing" />
 
         <p v-if="pack.removeAt && pack.removeAt < now" class="style-description-small">
             {{ $t('Stopgezet op {date}', {date: formatDate(pack.removeAt)}) }}
@@ -33,9 +34,6 @@
         <p v-if="$app === 'admin' && pack.meta.allowRenew && pack.meta.keepPricesOnRenewal" class="style-description-small">
             {{ $t('Prijzen blijven behouden bij verlengen') }}
         </p>
-
-
-        <p class="style-description-small" v-text="pack.meta.humanPricing" />
     </STListItem>
 </template>
 

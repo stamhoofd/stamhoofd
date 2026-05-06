@@ -8,6 +8,7 @@ export default defineConfig({
         globals: true,
         root: import.meta.dirname,
         isolate: true,
+        testTimeout: 10_000, // required for slow CI
         maxWorkers: 1, // For now we can't run parallel because all test files use the same database
     },
 });

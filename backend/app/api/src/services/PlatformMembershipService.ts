@@ -175,7 +175,7 @@ export class PlatformMembershipService {
                 }
                 const types = platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
                 if (types.length === 0) {
-                    if (!silent) {
+                    if (!silent && STAMHOOFD.environment !== 'test') {
                         console.warn('No membership types found for memberships');
                     }
                     return;

@@ -297,6 +297,7 @@ async function checkout(pack: SelectablePackage) {
                 }
                 // Activate trial if possible (otherwise go to confirm)
                 // this.setupMemberAdministration();
+                await checkoutTrial(STPackageBundle.TrialMembers, 'wip');
                 break;
             }
             case STPackageBundle.Webshops: {
