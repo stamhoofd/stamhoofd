@@ -4,7 +4,8 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EmailView, { type RecipientChooseOneOption, type RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
+import EmailView from '@stamhoofd/components/email/EmailView.vue';
+import type {RecipientChooseOneOption, RecipientMultipleChoiceOption} from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -307,6 +308,53 @@ export class PaymentActionBuilder {
                 );
             }
 
+            if (this.platform.config.responsibilities.length === 0) {
+                // Add all option
+                const alternative: RecipientChooseOneOption = {
+                    type: 'ChooseOne',
+                    options: [
+                        {
+                            id: 'all',
+                            name: $t(`Alle betalingen van verenigingen`),
+                            value: [
+                                EmailRecipientSubfilter.create({
+                                    type: EmailRecipientFilterType.PaymentOrganization,
+                                    filter: mergeFilters([filter, {
+                                        $or: [
+                                            {
+                                                payingOrganizationId: {
+                                                    $neq: null,
+                                                },
+                                            }, {
+                                                balanceItemPayments: {
+                                                    $elemMatch: {
+                                                        balanceItem: {
+                                                            payingOrganizationId: {
+                                                                $neq: null,
+                                                            },
+                                                        },
+
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    }]),
+                                    search,
+                                }),
+                            ],
+                        },
+                        {
+                            id: 'none',
+                            name: $t(`Geen betalingen van verenigingen`),
+                            value: [],
+                        },
+                    ],
+                };
+                options.push(alternative);
+            } else {
+                options.push(organizationOption);
+            }
+
             const otherPayments: RecipientChooseOneOption = {
                 type: 'ChooseOne',
                 options: [
@@ -348,7 +396,7 @@ export class PaymentActionBuilder {
                 ],
             };
 
-            options.push(organizationOption, otherPayments);
+            options.push(otherPayments);
         }
 
         const displayedComponent = new ComponentWithProperties(NavigationController, {
