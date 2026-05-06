@@ -102,10 +102,41 @@ export class PaymentGeneral extends Payment {
         const replacements: { title: string; value: string }[] = [];
 
         if (customer) {
-            replacements.push({
-                title: $t(`%1Os`),
-                value: customer.dynamicName,
-            });
+            if (customer.company) {
+                replacements.push({
+                    title: customer.company.VATNumber || customer.company.companyNumber ? $t(`Bedrijfsnaam`) : $t('Naam vereniging'),
+                    value: customer.company.name,
+                });
+
+                if (customer.company.address) {
+                    replacements.push({
+                        title: customer.company.VATNumber || customer.company.companyNumber ? $t(`Bedrijfsadres`) : $t('Adres vereniging'),
+                        value: customer.company.address.toString(),
+                    });
+                }
+
+                if (customer.company.VATNumber) {
+                    replacements.push({
+                        title: $t(`BTW-nummer`),
+                        value: customer.company.VATNumber,
+                    });
+                } else if (customer.company.companyNumber) {
+                    replacements.push({
+                        title: $t(`Ondernemingsnummer`),
+                        value: customer.company.companyNumber,
+                    });
+                } else {
+                    replacements.push({
+                        title: $t(`Ondernemingsnummer`),
+                        value: $t('Geen') + ' ('+$t('feitelijke vereniging')+')',
+                    });
+                }
+            } else {
+                replacements.push({
+                    title: $t(`%1Os`),
+                    value: customer.dynamicName,
+                });
+            }
 
             if (customer.phone) {
                 replacements.push({
@@ -113,17 +144,20 @@ export class PaymentGeneral extends Payment {
                     value: customer.phone,
                 });
             }
+
+            if (customer.email) {
+                replacements.push({
+                    title: $t(`E-mailadres`),
+                    value: customer.email,
+                });
+            }
+        } else {
+            // Information missing - default to email recipient data
+            replacements.push({
+                title: $t(`%1Os`),
+                value: '{{firstName}} {{lastName}}', // will get replaced automatically by the email template system
+            });
         }
-
-        replacements.push({
-            title: $t(`%M7`),
-            value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method ?? PaymentMethod.Unknown)),
-        });
-
-        replacements.push({
-            title: $t(`%xL`),
-            value: Formatter.price(this.price),
-        });
 
         for (const replacement of replacements) {
             if (replacement.value.length === 0) {
