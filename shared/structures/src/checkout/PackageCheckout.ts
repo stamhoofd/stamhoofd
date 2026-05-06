@@ -6,6 +6,10 @@ import { Checkoutable } from './Checkoutable.js';
  * Checkout flow between organizations
  */
 export class PackagePurchases extends AutoEncoder {
+    /**
+     * Buy or activate new packges.
+     * If the package already exists, the backend will map it automatically to a renewal.
+     */
     @field({ decoder: new ArrayDecoder(new EnumDecoder(STPackageBundle)) })
     packageBundles: STPackageBundle[] = [];
 
