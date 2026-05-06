@@ -1,5 +1,9 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
+/**
+ * @deprecated
+ * Replaced by PaymentMandate
+ */
 export class OrganizationPaymentMandateDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
     consumerName?: string;
@@ -17,6 +21,10 @@ export class OrganizationPaymentMandateDetails extends AutoEncoder {
     cardLabel: string | null = null;
 }
 
+/**
+ * @deprecated
+ * Replaced by PaymentMandate
+ */
 export class OrganizationPaymentMandate extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string;

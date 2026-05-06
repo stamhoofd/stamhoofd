@@ -6,6 +6,10 @@ import { STPackage } from './STPackage.js';
 import { OrganizationPaymentMandate } from './OrganizationPaymentMandate.js';
 import { STPendingInvoice } from './STPendingInvoice.js';
 
+/**
+ * @deprecated
+ * Replaced by balances
+ */
 export class STBillingStatus extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(STInvoice) })
     invoices: STInvoice[];
