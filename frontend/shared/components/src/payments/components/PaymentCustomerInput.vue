@@ -79,6 +79,7 @@ import type { Validator } from '#errors/Validator.ts';
 import type { PaymentCustomer } from '@stamhoofd/structures';
 import { Company } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+import CompanyInputBox from '#organizations/components/CompanyInputBox.vue';
 
 const props = withDefaults(defineProps<{
     customer: PaymentCustomer;
