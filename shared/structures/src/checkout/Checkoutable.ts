@@ -10,7 +10,7 @@ import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDec
  * This interface, streamlines this to a common interface that we should start using everywhere, so we can
  * make more general helpers in the backend and frontend for handling the payment flow.
  */
-export abstract class Checkoutable<T> extends AutoEncoder {
+export abstract class Checkoutable<T = unknown> extends AutoEncoder {
     /**
      * This part is what you are paying for, new stuff. Can be empty if you are only paying
      * for existing balances.
