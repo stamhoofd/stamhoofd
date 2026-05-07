@@ -4,7 +4,6 @@ import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 const defaultGenerator = getDefaultGenerator<RegistrationInvitation>({
         created: AuditLogType.RegistrationInvitationAdded,
-        updated: AuditLogType.RegistrationInvitationEdited,
         deleted: AuditLogType.RegistrationInvitationDeleted,
 });
 
