@@ -18,6 +18,7 @@ import { StripeAccountLogger } from './StripeAccountLogger.js';
 import { UserLogger } from './UserLogger.js';
 import { WebshopLogger } from './WebshopLogger.js';
 import { modelLogDefinitions } from '../services/AuditLogService.js';
+import { RegistrationInvitationLogger } from './RegistrationInvitationLogger.js';
 
 modelLogDefinitions.set(RegistrationLogger.model, RegistrationLogger);
 modelLogDefinitions.set(GroupLogger.model, GroupLogger);
@@ -38,3 +39,4 @@ modelLogDefinitions.set(EmailLogger.model, EmailLogger);
 modelLogDefinitions.set(EmailTemplateLogger.model, EmailTemplateLogger);
 modelLogDefinitions.set(EmailAddressLogger.model, EmailAddressLogger);
 modelLogDefinitions.set(UserLogger.model, UserLogger);
+modelLogDefinitions.set(RegistrationInvitationLogger.model, RegistrationInvitationLogger);

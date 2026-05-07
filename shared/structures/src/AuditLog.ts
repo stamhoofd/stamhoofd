@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
-import type { RenderContext} from './AuditLogRenderer.js';
+import type { RenderContext } from './AuditLogRenderer.js';
 import { renderTemplate } from './AuditLogRenderer.js';
 import { AuditLogReplacement } from './AuditLogReplacement.js';
 import { NamedObject } from './Event.js';
@@ -118,6 +118,11 @@ export enum AuditLogType {
     EmailTemplateAdded = 'EmailTemplateAdded',
     EmailTemplateEdited = 'EmailTemplateEdited',
     EmailTemplateDeleted = 'EmailTemplateDeleted',
+
+    // Registration invitations
+    RegistrationInvitationAdded = 'RegistrationInvitationAdded',
+    RegistrationInvitationEdited = 'RegistrationInvitationEdited',
+    RegistrationInvitationDeleted = 'RegistrationInvitationDeleted',
 }
 
 export function getAuditLogTypeName(type: AuditLogType): string {
@@ -248,6 +253,13 @@ export function getAuditLogTypeName(type: AuditLogType): string {
 
         case AuditLogType.MemberSecurityCodeUsed:
             return `Gebruik van beveiligingscodes`;
+
+        case AuditLogType.RegistrationInvitationAdded:
+            return `Nieuwe uitnodigingen`;
+        case AuditLogType.RegistrationInvitationEdited:
+            return `Wijzigingen aan uitnodigingen`;
+        case AuditLogType.RegistrationInvitationDeleted:
+            return `Verwijderde uitnodigingen`;
     }
 }
 
@@ -390,6 +402,13 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
 
         case AuditLogType.MemberSecurityCodeUsed:
             return [`key`, `success primary stroke`];
+
+        case AuditLogType.RegistrationInvitationAdded:
+            return [`email`, `add green`];
+        case AuditLogType.RegistrationInvitationEdited:
+            return [`email`, `edit stroke`];
+        case AuditLogType.RegistrationInvitationDeleted:
+            return [`email`, `trash red stroke`];
     }
 }
 
@@ -552,6 +571,13 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
 
         case AuditLogType.MemberSecurityCodeUsed:
             return `De beveiligingscode werd gebruikt om toegang te krijgen tot {{m}}`;
+
+        case AuditLogType.RegistrationInvitationAdded:
+            return `{{m}} werd uitgenodigd voor {{g}}{{if org " (" org ")"}}`;
+        case AuditLogType.RegistrationInvitationEdited:
+            return `{{m}} werd opnieuw uitgenodigd voor {{g}}{{if org " (" org ")"}}`;
+        case AuditLogType.RegistrationInvitationDeleted:
+            return `De uitnodiging van {{m}} voor {{g}}{{if org " (" org ")"}} werd verwijderd`;
     }
 }
 
@@ -583,6 +609,9 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
             return ['m'];
         case AuditLogType.MemberRegistered:
         case AuditLogType.MemberUnregistered:
+        case AuditLogType.RegistrationInvitationAdded:
+        case AuditLogType.RegistrationInvitationEdited:
+        case AuditLogType.RegistrationInvitationDeleted:
             return ['m', 'g'];
         case AuditLogType.OrganizationEdited:
         case AuditLogType.OrganizationAdded:
