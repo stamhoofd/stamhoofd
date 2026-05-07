@@ -139,33 +139,31 @@
 </template>
 
 <script lang="ts" setup>
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useErrors } from '#errors/useErrors.ts';
+import { GlobalEventBus } from '#EventBus.ts';
+import { useContext } from '#hooks/useContext.ts';
+import IconContainer from '#icons/IconContainer.vue';
+import SegmentedControl from '#inputs/SegmentedControl.vue';
+import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
+import { Toast } from '#overlays/Toast.ts';
+import BalancePriceBreakdown from '#payments/BalancePriceBreakdown.vue';
+import PaymentRow from '#payments/components/PaymentRow.vue';
+import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+import EditPaymentView from '#payments/EditPaymentView.vue';
+import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import BalancePriceBreakdown from '#payments/BalancePriceBreakdown.vue';
-import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
-import EditPaymentView from '#payments/EditPaymentView.vue';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import { GlobalEventBus } from '#EventBus.ts';
-import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
-import IconContainer from '#icons/IconContainer.vue';
-import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
-import PaymentRow from '#payments/components/PaymentRow.vue';
-import SegmentedControl from '#inputs/SegmentedControl.vue';
-import { Toast } from '#overlays/Toast.ts';
-import { useContext } from '#hooks/useContext.ts';
-import { useErrors } from '#errors/useErrors.ts';
-import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
-import { useLoadFamily } from '#members/hooks/useLoadFamily.ts';
-import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { BaseOrganization, PlatformMember, ReceivableBalance} from '@stamhoofd/structures';
-import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
+import type { BaseOrganization, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
-import ReceivableBalanceList from './ReceivableBalanceList.vue';
 import EmailAddress from '../email/EmailAddress.vue';
+import ReceivableBalanceList from './ReceivableBalanceList.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -231,7 +229,10 @@ async function reload() {
             }
         }
 
-        props.item.deepSet(response.data);
+        // in case a placeholder was used for the item, deepsetting the placeholder causes the detailedItem to loose its balanceItems and payments because the prop item is a ReceivableBalance and not a DetailedReceivableBalance
+        if (response.data.id === props.item.id) {
+            props.item.deepSet(response.data);
+        }
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
