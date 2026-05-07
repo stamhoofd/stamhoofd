@@ -65,7 +65,7 @@
         <div class="split-inputs">
             <div>
                 <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`%gq`)">
-                    <DateSelection v-model="createdAt" :adjust-initial-time="isNew" :time="{hours: 12}" />
+                    <DateSelection v-model="createdAt" :adjust-initial-time="isNew" :max="now" />
                 </STInputBox>
             </div>
 
@@ -307,6 +307,7 @@ const context = useContext();
 const owner = useRequestOwner();
 const loadFamilyFromId = useLoadFamilyFromId();
 const loadingPayments = ref(false);
+const now = new Date();
 
 // Load mmeber on load
 loadMember().catch(console.error);
