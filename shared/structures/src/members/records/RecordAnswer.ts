@@ -1,10 +1,10 @@
-import type { Data, Decoder} from '@simonbackx/simple-encoding';
+import type { Data, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import type {CellValue} from '@stamhoofd/excel-writer';
+import type { CellValue } from '@stamhoofd/excel-writer';
 import { Address } from '../../addresses/Address.js';
 import { CountryHelper } from '../../addresses/CountryDecoder.js';
 import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';
@@ -216,7 +216,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: "'" + (this.value) + $t(`%qu`),
+                    message: $t(`'{number}' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.`, {number: this.value}),
                     field: 'input',
                 });
             }

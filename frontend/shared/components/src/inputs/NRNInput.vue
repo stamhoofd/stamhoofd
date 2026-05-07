@@ -7,14 +7,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
-import { useErrors } from '../errors/useErrors';
-import type { Validator } from '../errors/Validator';
-import { DataValidator } from '@stamhoofd/utility';
-import { ErrorBox } from '../errors/ErrorBox';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { useValidation } from '../errors/useValidation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
+import { DataValidator } from '@stamhoofd/utility';
+import { computed, ref, watch } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
+import { useErrors } from '../errors/useErrors';
+import { useValidation } from '../errors/useValidation';
+import type { Validator } from '../errors/Validator';
 
 const props = withDefaults(
     defineProps<{
@@ -145,7 +145,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: nrrRaw.value.length === 0 ? $t(`%z4`) : $t(`%z5`),
+                message: nrrRaw.value.length === 0 ? $t(`%z4`) : $t(`Dit is geen geldig rijksregisternummer. Je kan dit nummer vinden op de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.`),
                 field: 'nationalRegisterNumber',
             }));
         }
