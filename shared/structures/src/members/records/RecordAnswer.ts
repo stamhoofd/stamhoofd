@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder,field, IntegerDecoder, NumberDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { isSimpleError, SimpleError } from "@simonbackx/simple-errors";
 import { Formatter, StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../addresses/Address";
 import { CountryHelper } from "../../addresses/CountryDecoder";
 import { Image } from "../../files/Image";
-import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from "./RecordSettings";
+import { RecordChoice, RecordSettings,RecordType, RecordWarning, RecordWarningType } from "./RecordSettings"
 
 
 export class RecordAnswer extends AutoEncoder {
@@ -145,6 +145,11 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
             case RecordType.Image: return RecordImageAnswer;
             case RecordType.Integer: return RecordIntegerAnswer;
         }
+        throw new SimpleError({
+            code: "not_supported",
+            message: "A property type is not supported",
+            human: "Een bepaald kenmerk wordt niet ondersteund. Kijk na of je wel de laatste versie gebruikt en update indien nodig."
+        })
     }
 }
 export const RecordAnswerDecoder = new RecordAnswerDecoderStatic()
@@ -210,7 +215,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: "invalid_field",
-                    message: "'" + (this.value) + "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op je identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
+                    message: "'" + (this.value) + "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
                     field: "input"
                 })
             }
