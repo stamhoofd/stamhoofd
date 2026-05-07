@@ -215,7 +215,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: "invalid_field",
-                    message: "'" + (this.value) + "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
+                    message: "'" + (this.value) + "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op je identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
                     field: "input"
                 })
             }
