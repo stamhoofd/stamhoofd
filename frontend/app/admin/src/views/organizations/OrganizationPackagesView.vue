@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <div v-if="packageStatus" class="st-view">
+        <div v-if="mandates !== null && packageStatus" class="st-view">
             <STNavigationBar :title="title" />
 
             <main>
@@ -11,7 +11,21 @@
                 <div class="container">
                     <hr>
                     <h2 class="style-with-button">
-                        <div>Pakketten</div>
+                        <div>{{ $t('Betaalmethodes') }}</div>
+                    </h2>
+
+                    <p v-if="mandates.length === 0" class="info-box">
+                        {{ $t('Geen mandaten') }}
+                    </p>
+                    <STGrid v-else>
+                        <PaymentMandateRow v-for="mandate of mandates" :key="mandate.id" :mandate="mandate" :selectable="false" :allow-delete="true" />
+                    </STGrid>
+                </div>
+
+                <div class="container">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>{{ $t('Pakketten') }}</div>
                         <div class="hover-show">
                             <button class="button icon gray add" type="button" @click="createPackage()" />
                         </div>
@@ -40,6 +54,9 @@ import type { Organization, STPackage } from '@stamhoofd/structures';
 import { OrganizationPackagesStatus, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 import EditPackageView from './EditPackageView.vue';
+import { useOrganizationPaymentMandates } from '@stamhoofd/components/mandates/useOrganizationPaymentMandates';
+import PaymentMandateRow from '@stamhoofd/components/mandates/PaymentMandateRow.vue';
+import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -56,6 +73,11 @@ const loading = ref(false);
 const context = useContext();
 const owner = useRequestOwner();
 const present = usePresent()
+
+const {mandates} = useOrganizationPaymentMandates({
+    payingOrganizationId: props.organization.id,
+    errors,
+});
 
 onMounted(() => {
     reload().catch(console.error)
