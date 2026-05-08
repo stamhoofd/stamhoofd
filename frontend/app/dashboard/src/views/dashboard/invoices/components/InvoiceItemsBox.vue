@@ -2,7 +2,7 @@
     <STGrid>
         <STGridItem v-for="item of invoice.items" :key="item.id" class="price-grid">
             <template #left>
-                <IconContainer icon="box" />
+                <IconContainer :icon="getBalanceItemTypeIcon(item.type)" />
             </template>
 
             <h3 class="style-title-list">
@@ -48,7 +48,8 @@ import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue
 import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
-import type { Invoice } from '@stamhoofd/structures';
+import { getBalanceItemTypeIcon  } from '@stamhoofd/structures';
+import type {Invoice} from '@stamhoofd/structures';
 import { default as InvoiceVATDetailsBox } from './InvoiceVATDetailsBox.vue';
 
 const props = withDefaults(

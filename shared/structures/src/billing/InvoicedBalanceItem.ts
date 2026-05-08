@@ -1,6 +1,6 @@
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import {  VATExcemptReason } from '../BalanceItem.js';
+import {  BalanceItemType, getBalanceItemTypeIcon, VATExcemptReason } from '../BalanceItem.js';
 import type {BalanceItem} from '../BalanceItem.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { STMath } from '@stamhoofd/utility';
@@ -11,6 +11,9 @@ export class InvoicedBalanceItem extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     balanceItemId = '';
+
+    @field({ decoder: new EnumDecoder(BalanceItemType), ...NextVersion})
+    type = BalanceItemType.Other;
 
     @field({ decoder: StringDecoder })
     name = '';
@@ -107,6 +110,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
             });
         }
         const item = new InvoicedBalanceItem();
+        item.type = balanceItem.type;
         item.balanceItemId = balanceItem.id;
         item.name = balanceItem.itemTitle;
         item.description = balanceItem.itemDescription ?? '';
@@ -117,8 +121,9 @@ export class InvoicedBalanceItem extends AutoEncoder {
 
         // Calculate amount and unit price
         const balanceItemUnitPriceWithVAT = STMath.round(balanceItem.priceWithVAT / balanceItem.quantity);
-        const quantity = STMath.round(item.balanceInvoicedAmount * 1_00_00 / balanceItemUnitPriceWithVAT); // Amount per ten thousand
-        if (quantity === 0) {
+        const quantity = balanceItemUnitPriceWithVAT === 0 ? 1_00_00 : STMath.round(item.balanceInvoicedAmount * 1_00_00 / balanceItemUnitPriceWithVAT); // Amount per ten thousand
+
+        if (quantity === 0 || isNaN(quantity) || quantity === null || quantity === undefined) {
             throw new SimpleError({
                 message: 'Invoiced amount is too low to create an invoiced balance item',
                 human: $t('%1Ik'),
