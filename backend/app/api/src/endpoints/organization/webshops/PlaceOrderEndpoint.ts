@@ -181,7 +181,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 payment.method = request.body.paymentMethod;
                 payment.status = PaymentStatus.Created;
                 payment.price = totalPrice;
-                PaymentService.round(payment);
+                PaymentService.roundPayment(payment);
                 totalPrice = payment.price;
                 payment.paidAt = null;
                 payment.customer = PaymentCustomer.create({

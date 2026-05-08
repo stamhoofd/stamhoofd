@@ -157,7 +157,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         payment.method = struct.data.paymentMethod;
                         payment.status = PaymentStatus.Created;
                         payment.price = totalPrice;
-                        PaymentService.round(payment);
+                        PaymentService.roundPayment(payment);
                         payment.paidAt = null;
 
                         // Determine the payment provider (always null because no online payments here)

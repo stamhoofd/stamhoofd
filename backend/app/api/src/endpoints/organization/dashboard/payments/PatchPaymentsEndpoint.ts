@@ -166,7 +166,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             // Check total price
             const totalPrice = balanceItemPayments.reduce((total, item) => total + item.price, 0);
             payment.price = totalPrice;
-            PaymentService.round(payment);
+            PaymentService.roundPayment(payment);
 
             switch (payment.type) {
                 case PaymentType.Payment: {

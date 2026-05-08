@@ -356,27 +356,38 @@ export class PaymentService {
      * we'll need to round the payment to 1 cent. That can cause issues in the financial statements because
      * the total amount of balances does not match the total amount received/paid.
      *
-     * To fix that, we create an extra balance item with the difference. So the rounding always matches.
-     *
-     * TODO: update this method to generate a virtual invoice and use the price of the invoice instead of the rounded payment price, so we don't get differences in calculation
+     * To fix that, we create an extra roundingAmount with the difference. So the rounding always matches.
      */
-    static round(payment: Payment) {
-        const amount = payment.price;
-        const rounded = Payment.roundPrice(payment.price);
+    static roundPayment(payment: Payment) {
+        // Calculate total price of the balance items
+        // this fixes issus when the method is called multiple times
+        // should be subtracted, not added
+        const balanceItemsTotalPrice = payment.price - payment.roundingAmount;
+
+        const {roundingAmount, price} = this.round(balanceItemsTotalPrice);
+        payment.roundingAmount = roundingAmount;
+        payment.price = price;
+    }
+
+    static round(amount: number) {
+        const rounded = Payment.roundPrice(amount);
         const difference = rounded - amount;
 
         if (difference === 0) {
-            return;
+            return {
+                price: amount,
+                roundingAmount: 0
+            };
         }
 
         if (difference > 100 || difference < -100) {
-            throw new Error('Unexpected rounding difference of ' + difference + ' for payment ' + payment.id);
+            throw new Error('Unexpected rounding difference of ' + difference + ' for price ' + amount.toString());
         }
 
-        payment.roundingAmount = difference;
-
-        // Change payment total price
-        payment.price += difference;
+        return {
+            price: amount + difference,
+            roundingAmount: difference
+        }
     }
 
     static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType }: {
