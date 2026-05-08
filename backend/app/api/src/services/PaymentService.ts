@@ -648,7 +648,6 @@ export class PaymentService {
                             payment: payment.id,
                         },
                         i18n: Context.i18n,
-                        lineItems: balanceItemPayments,
                         organization,
                         customer: {
                             name: user.name ?? names[0]?.name ?? $t(`%Gr`),

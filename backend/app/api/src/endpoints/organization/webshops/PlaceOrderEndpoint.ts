@@ -211,8 +211,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 // Save order to get the id
                 await order.save();
 
-                const balanceItemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = [];
-
                 // Create balance item
                 const balanceItem = new BalanceItem();
                 balanceItem.type = BalanceItemType.Order;
@@ -240,7 +238,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 balanceItemPayment.organizationId = organization.id;
                 balanceItemPayment.price = balanceItem.price;
                 await balanceItemPayment.save();
-                balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem));
 
                 let paymentUrl: string | null = null;
                 let paymentQRCode: string | null = null;
@@ -288,7 +285,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 payment: payment.id,
                             },
                             i18n: request.i18n,
-                            lineItems: balanceItemPayments,
                             organization,
                             customer: {
                                 name: order.data.customer.name,

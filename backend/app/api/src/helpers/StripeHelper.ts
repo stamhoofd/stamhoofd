@@ -207,7 +207,7 @@ export class StripeHelper {
     }
 
     static async createPayment(
-        { payment, stripeAccount, redirectUrl, cancelUrl, customer, statementDescriptor, i18n, metadata, organization, lineItems }: {
+        { payment, stripeAccount, redirectUrl, cancelUrl, customer, statementDescriptor, i18n, metadata, organization }: {
             payment: Payment;
             stripeAccount: StripeAccount | null;
             redirectUrl: string;
@@ -220,7 +220,6 @@ export class StripeHelper {
             i18n: I18n;
             metadata: { [key: string]: string };
             organization: Organization;
-            lineItems: (BalanceItemPayment & { balanceItem: BalanceItem })[];
         },
     ): Promise<{ paymentUrl: string }> {
         if (!stripeAccount) {
