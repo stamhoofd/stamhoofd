@@ -119,6 +119,16 @@ button.st-grid-item {
         grid-column: 5;
     }
 
+    &.right-stack {
+        > .middle-right {
+            align-self: center;
+        }
+
+        > .right {
+            align-self: center;
+        }
+    }
+
     &.price-grid {
         > .middle-right {
             text-align: right;
