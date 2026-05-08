@@ -1,17 +1,17 @@
+import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { PlatformMember, RegisterCheckout} from '@stamhoofd/structures';
+import type { PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
-import { updateContextFromMembersBlob } from '../';
 import { GlobalEventBus } from '../../EventBus';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { PaymentHandler } from '../../views/PaymentHandler';
-import { RegistrationSuccessView } from '../checkout';
+import { updateContextFromMembersBlob } from '../helpers/updateContextFromMembersBlob';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
+import RegistrationSuccessView from './RegistrationSuccessView.vue';
 
 export async function startCheckout({ checkout, context, displayOptions, admin, members }: { checkout: RegisterCheckout; context: SessionContext; displayOptions: DisplayOptions; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     checkout.validate({});
@@ -34,16 +34,8 @@ export async function startSilentRegister({ checkout, context, admin, members }:
     await silentRegister({ checkout, context, admin, members });
 }
 
-/**
- * Register without ui
- * @param param0
- * @param navigate
- * @returns
- */
-async function silentRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }) {
+function getIdCheckout({ checkout, admin }: { checkout: RegisterCheckout; admin?: boolean;}) {
     const organization = checkout.singleOrganization!;
-    const server = context.getAuthenticatedServerForOrganization(organization.id);
-
     const idCheckout = checkout.convert();
 
     if (!admin) {
@@ -65,6 +57,20 @@ async function silentRegister({ checkout, context, admin, members }: { checkout:
         // NOTE: setting protocol doesn't work in all situations (weird!)
         idCheckout.cancelUrl = new URL(idCheckout.cancelUrl.toString().replace(idCheckout.cancelUrl.protocol, 'https:'));
     }
+
+    return idCheckout
+}
+
+/**
+ * Register without ui
+ * @param param0
+ * @param navigate
+ * @returns
+ */
+async function silentRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }) {
+    const organization = checkout.singleOrganization!;
+    const server = context.getAuthenticatedServerForOrganization(organization.id);
+    const idCheckout = getIdCheckout({checkout, admin})
 
     const response = await server.request({
         method: 'POST',
@@ -101,28 +107,7 @@ async function silentRegister({ checkout, context, admin, members }: { checkout:
 async function register({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     const organization = checkout.singleOrganization!;
     const server = context.getAuthenticatedServerForOrganization(organization.id);
-
-    const idCheckout = checkout.convert();
-
-    if (!admin) {
-        idCheckout.redirectUrl = new URL(organization.registerUrl);
-        idCheckout.cancelUrl = new URL(organization.registerUrl);
-    }
-    else {
-        idCheckout.redirectUrl = new URL(window.location.href);
-        idCheckout.cancelUrl = new URL(window.location.href);
-    }
-
-    // Force https protocol (the app can use capacitor:// instead of https, so we need to swap)
-    if (idCheckout.redirectUrl.protocol !== 'https:') {
-        // NOTE: setting protocol doesn't work in all situations (weird!)
-        idCheckout.redirectUrl = new URL(idCheckout.redirectUrl.toString().replace(idCheckout.redirectUrl.protocol, 'https:'));
-    }
-
-    if (idCheckout.cancelUrl.protocol !== 'https:') {
-        // NOTE: setting protocol doesn't work in all situations (weird!)
-        idCheckout.cancelUrl = new URL(idCheckout.cancelUrl.toString().replace(idCheckout.cancelUrl.protocol, 'https:'));
-    }
+    const idCheckout = getIdCheckout({checkout, admin})
 
     const response = await server.request({
         method: 'POST',
