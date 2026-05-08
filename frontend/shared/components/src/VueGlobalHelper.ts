@@ -108,6 +108,12 @@ export class VueGlobalHelper {
             return Formatter.pluralText(num, singular, plural);
         };
 
+        // For some reason Vue does not log the error itself
+        app.config.errorHandler = (err, instance, info) => {
+            console.error('Vue errorHandler caught:', err)   // the real Error object
+            console.error('Component info:', info)
+        }
+
         app.config.warnHandler = function (msg, instance, trace) {
             // Shorter error message because the trace is complete garbage
             console.warn(msg, instance);
