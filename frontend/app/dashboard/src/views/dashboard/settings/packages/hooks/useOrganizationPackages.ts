@@ -1,4 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
+import { useGlobalEventListener, useRequiredOrganization } from '@stamhoofd/components';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -7,15 +8,21 @@ import type { Ref} from 'vue';
 import { onMounted, ref } from 'vue';
 
 let sharedState: null | {
+    organizationId: string
     loading: Ref<boolean>;
     packages: Ref<OrganizationPackagesStatus | null>;
-    pendingLoad: Promise<void> | null;
+    pendingLoad: Promise<OrganizationPackagesStatus | undefined> | null;
 } = null;
 
 export function useOrganizationPackages(options?: {
     errors?: { errorBox: ErrorBox | null };
     onMounted?: boolean;
 }) {
+    const organization = useRequiredOrganization()
+    if (sharedState?.organizationId !== organization.value.id) {
+        sharedState = null;
+    }
+
     const context = useContext();
     const loading = sharedState?.loading ?? ref(false);
     const owner = useRequestOwner();
@@ -23,6 +30,7 @@ export function useOrganizationPackages(options?: {
 
     // Cache
     sharedState = {
+        organizationId: organization.value.id,
         loading,
         packages,
         pendingLoad: sharedState?.pendingLoad ?? null,
@@ -30,6 +38,12 @@ export function useOrganizationPackages(options?: {
 
     async function loadIfMissing() {
         if (packages.value === null) {
+            await reload();
+        }
+    }
+
+    async function reloadIfSet() {
+        if (packages.value !== null) {
             await reload();
         }
     }
@@ -44,10 +58,11 @@ export function useOrganizationPackages(options?: {
         if (sharedState) {
             sharedState.pendingLoad = promise;
         }
-        return promise.then(() => {
+        return promise.then((p) => {
             if (sharedState) {
                 sharedState.pendingLoad = null;
             }
+            return p
         });
     }
 
@@ -68,6 +83,7 @@ export function useOrganizationPackages(options?: {
             });
 
             packages.value = response.data;
+            return response.data;
         }
         catch (e) {
             if (options?.errors) {
@@ -76,9 +92,9 @@ export function useOrganizationPackages(options?: {
             else {
                 throw e;
             }
+        } finally {
+            loading.value = false;
         }
-
-        loading.value = false;
     }
 
     if (options?.onMounted) {
@@ -86,6 +102,10 @@ export function useOrganizationPackages(options?: {
             loadIfMissing().catch(console.error);
         });
     }
+
+    useGlobalEventListener('payment-succeeded', async () => {
+        await reloadIfSet()
+    })
 
     return {
         loading,

@@ -7,7 +7,7 @@ import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
-import { Address, appToUri, DNSRecordStatus, EmailTemplateType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import { Address, appToUri, DNSRecordStatus, EmailTemplateType, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
@@ -17,6 +17,8 @@ import { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod
 import { StripeAccount } from './StripeAccount.js';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
+import { Registration } from './Registration.js';
+import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
@@ -913,10 +915,17 @@ export class Organization extends QueryableModel {
         };
     }
 
-    async getPaymentProviderFor(method: PaymentMethod, config: PrivatePaymentConfiguration): Promise<{
+    async getPaymentProviderFor(method: PaymentMethod, mandate: PaymentMandate | null, config: PrivatePaymentConfiguration): Promise<{
         provider: PaymentProvider | null;
         stripeAccount: StripeAccount | null;
     }> {
+        if (mandate) {
+            return {
+                provider: mandate.provider,
+                stripeAccount: null
+            }
+        }
+        
         let stripeAccount = (config.stripeAccountId ? (await StripeAccount.getByID(config.stripeAccountId)) : null) ?? null;
         if (stripeAccount && stripeAccount.organizationId !== this.id) {
             console.warn('Stripe account ' + stripeAccount.id + ' is not linked to organization ' + this.id);
@@ -984,7 +993,7 @@ export class Organization extends QueryableModel {
             return 0;
         }
 
-        return await this.select()
+        return await Registration.select()
             .join(
                 SQL.join(Group.table)
                     .where(SQL.column('id'), SQL.parentColumn('groupId')),
@@ -993,6 +1002,7 @@ export class Organization extends QueryableModel {
             .where('deactivatedAt', null)
             .where('registeredAt', '!=', null)
             .where(SQL.column(Group.table, 'deletedAt'), null)
+            .where(SQL.column(Group.table, 'type'), '!=', GroupType.WaitingList)
             .count(
                 SQL.distinct(SQL.column('memberId')),
             );

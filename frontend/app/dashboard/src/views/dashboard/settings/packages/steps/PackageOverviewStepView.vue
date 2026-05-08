@@ -1,11 +1,6 @@
 <template>
-    <SaveView :loading="loading" :loading-view="!status" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="companies.length === 0" :title="$t(`%uE`)" @save="goNext">
+    <SaveView :loading="loading" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="!acceptTerms" :title="$t(`%uE`)" @save="goNext">
         <h1>{{ $t('Overzicht') }}</h1>
-
-        <STErrorsDefault :error-box="errors.errorBox" />
-
-        <hr>
-        <h2>{{ $t('Prijsoverzicht') }}</h2>
         <p>
             <I18nComponent :t="$t('Meer info over alle prijzen en een prijscalculator kan je terugvinden op <button>onze website</button>')">
                 <template #button="{content}">
@@ -16,12 +11,12 @@
             </I18nComponent>
         </p>
 
-        <STList>
-            <STPackageRow v-for="pack of packages" :key="pack.id" :pack="pack" />
-        </STList>
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr>
-        <h2>{{ $t('Algemene voorwaarden') }}</h2>
+
+        <STList>
+            <STPackageRow v-for="pack of model.packages" :key="pack.id" :pack="pack" />
+        </STList>
 
         <STInputBox :error-box="errors.errorBox" error-fields="terms" class="max">
             <Checkbox v-model="acceptTerms">
@@ -41,39 +36,26 @@
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STPackageRow from '@stamhoofd/components/packages/STPackageRow.vue';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import type { PackageCheckout } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
-import { useOrganizationPackages } from '../hooks/useOrganizationPackages';
+import { ref } from 'vue';
+import type { PackageCheckoutViewModel } from '../PackageCheckoutViewModel';
 
 const props = withDefaults(
     defineProps<{
-        checkout: PackageCheckout;
+        model: PackageCheckoutViewModel;
         saveHandler: (navigate: NavigationActions) => Promise<void>;
     }>(), {
     }
 );
 
 const errors = useErrors();
-const { packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
-const organization = useOrganization();
 const loading = ref(false);
+
 const navigate = useNavigationActions();
-const companies = computed(() => organization.value?.meta.companies ?? []);
-
 const acceptTerms = ref(false);
-
-const packages = computed(() => {
-    if (!status.value) {
-        return [];
-    }
-
-    return props.checkout.purchases.getPackages(status.value);
-});
 
 async function goNext() {
     if (loading.value) {
@@ -84,6 +66,9 @@ async function goNext() {
     errors.errorBox = null;
 
     try {
+        // Check packages are fine (throws if renew or activation is not possible)
+        props.model.validate();
+
         // todo: validate and modify checkout
         await props.saveHandler(navigate);
     }

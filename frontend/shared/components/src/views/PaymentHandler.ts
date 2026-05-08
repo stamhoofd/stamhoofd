@@ -60,7 +60,7 @@ export class PaymentHandler {
             paymentQRCode: string | null;
             transferSettings: TransferSettings | null;
             navigate: NavigationActions;
-            type: 'order' | 'registration';
+            type: 'order' | 'registration' | 'packages';
         },
         successHandler: (payment: Payment, navigate: NavigationActions) => void | Promise<void>,
         failedHandler: (payment: Payment | null) => void | Promise<void>,
@@ -89,7 +89,7 @@ export class PaymentHandler {
                 },
             }));
         }
-        else if (payment.provider == PaymentProvider.Payconiq && paymentUrl) {
+        else if (payment.provider === PaymentProvider.Payconiq && paymentUrl) {
             if (!paymentQRCode || this.getOS() == 'android' || this.getOS() == 'iOS') {
                 // we need this view for polling
                 const buttonComponent = new ComponentWithProperties(PayconiqButtonView, {
@@ -129,10 +129,11 @@ export class PaymentHandler {
                 return;
             }
         }
-        else {
-            if (paymentUrl) {
-                window.location.href = paymentUrl;
-            }
+        else if (paymentUrl) {
+            window.location.href = paymentUrl;
+        }  else if (payment.method === PaymentMethod.DirectDebit) {
+            // For now we go to DirectDebit
+            successHandler(payment, navigate)?.catch(console.error);
         }
     }
 }

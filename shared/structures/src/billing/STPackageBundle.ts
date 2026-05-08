@@ -43,14 +43,6 @@ export class STPackageBundleHelper {
         return false;
     }
 
-    static requiresMandate(bundle: STPackageBundle): boolean {
-        switch (bundle) {
-            case STPackageBundle.Members: return true;
-            case STPackageBundle.Webshops: return true;
-        }
-        return false;
-    }
-
     static isAlreadyBought(bundle: STPackageBundle, pack: STPackage): boolean {
         switch (bundle) {
             case STPackageBundle.Members: {

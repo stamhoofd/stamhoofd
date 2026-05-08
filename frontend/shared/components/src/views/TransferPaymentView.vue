@@ -217,7 +217,7 @@ import { useNavigationActions } from '../types/NavigationActions';
 const props = withDefaults(defineProps<{
     payment: Payment;
     created?: boolean;
-    type: 'registration' | 'order';
+    type: 'registration' | 'order' | 'packages';
     organization: Organization;
     settings?: TransferSettings | null;
     isPopup?: boolean;
@@ -293,6 +293,15 @@ const preventLeave = (event: BeforeUnloadEvent) => {
         // This message is not visible on most browsers
         return $t(`%12t`);
     }
+
+    if (props.type === 'packages') {
+        // Chrome requires returnValue to be set
+        event.returnValue = $t(`Jouw aankoop is al bevestigd! Je kan niet meer van betaalmethode veranderen.`);
+
+        // This message is not visible on most browsers
+        return $t(`Jouw aankoop is al bevestigd! Je kan niet meer van betaalmethode veranderen.`);
+    }
+
     // Chrome requires returnValue to be set
     event.returnValue = $t(`%12u`);
 
@@ -353,7 +362,10 @@ async function generateQRCode() {
 }
 
 function helpMe() {
-    if (props.type === 'order') {
+    if (props.type === 'packages') {
+        new CenteredMessage($t(`%kI`), $t(`Jouw aankoop is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.`)).addCloseButton().show();
+    }
+    else if (props.type === 'order') {
         new CenteredMessage($t(`%kI`), $t(`%12v`)).addCloseButton().show();
     }
     else {

@@ -1,7 +1,7 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Payment } from '../members/Payment.js';
 import { Invoice } from '../billing/Invoice.js';
+import { PaymentGeneral } from '../members/PaymentGeneral.js';
 
 /**
  * If needed, you can extend this class to add extra fields in custom checkout flows.
@@ -11,8 +11,8 @@ export class CheckoutResponse extends AutoEncoder {
      * Used for polling the payment status or showing transfer instructions.
      * Also used for showing a summary on the success page.
      */
-    @field({ decoder: Payment, nullable: true })
-    payment: Payment | null = null;
+    @field({ decoder: PaymentGeneral, nullable: true })
+    payment: PaymentGeneral | null = null;
 
     /**
      * If an invoice is available and created, it will be set here already.

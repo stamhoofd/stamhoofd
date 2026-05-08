@@ -29,7 +29,7 @@ export { default as SegmentedControl } from './SegmentedControl.vue';
 export { default as SelectionAddressInput } from './SelectionAddressInput.vue';
 export { default as Slider } from './Slider.vue';
 export { default as StepperInput } from './StepperInput.vue';
-export { default as STInputBox } from './STInputBox.vue';
+//export { default as STInputBox } from './STInputBox.vue';
 export { default as TimeInput } from './TimeInput.vue';
 export { default as TimeMinutesInput } from './TimeMinutesInput.vue';
 export { default as UploadButton } from './UploadButton.vue';

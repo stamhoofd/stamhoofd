@@ -2,13 +2,14 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { BalanceItem} from '@stamhoofd/models';
+import { BalanceItem} from '@stamhoofd/models';
 import { Organization, Platform, STPackage } from '@stamhoofd/models';
-import { STPackageStruct } from '@stamhoofd/structures';
+import { BalanceItemPaymentDetailed, BalanceItemStatus, BalanceItemType, PaymentGeneral, PaymentMethod, STPackageStruct } from '@stamhoofd/structures';
 import { CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, Payment as PaymentStruct, STPackageBundleHelper } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { STPackageService } from '../../../services/STPackageService.js';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -60,7 +61,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         const packages: STPackageStruct[] = [];
         const balanceItems: Map<BalanceItem, number> = new Map();
         const models: STPackage[] = [];
-        let totalPrice = 0;
 
         if (STAMHOOFD.userMode === 'organization') {
             const currentPackages = await STPackageService.getActivePackages(organization.id);
@@ -69,6 +69,27 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             });
 
             packages.push(...checkout.purchases.getPackages(packageStatus));
+        }
+
+        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
+        if (!membershipOrganizationId) {
+            throw new SimpleError({
+                code: 'unavailable',
+                message: 'No membership organization id set on the platform',
+                human: $t('De aankoop van pakketten is tijdelijk onbeschikbaar, probeer zo meteen opnieuw en herlaad de pagina.')
+            });
+        }
+
+        if (membershipOrganizationId === organization.id) {
+            throw new SimpleError({
+                code: 'unavailable',
+                message: 'Cannot purchase packages from yourself',
+            });
+        }
+
+        const membershipOrganization = await Organization.getByID(membershipOrganizationId);
+        if (!membershipOrganization) {
+            throw new Error('Unexpected missing membershipOrganization');
         }
 
         // Create the real models for each package
@@ -84,35 +105,92 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             model.validAt = null;
             model.organizationId = organization.id;
 
+            if (request.body.proForma) {
+                // Security addition
+                model.disableSave();
+            }
+
             const balanceItem = await STPackageService.chargePackage(model, undefined, checkout.customer ?? undefined);
             if (balanceItem) {
-                totalPrice += balanceItem.priceWithVAT;
+                balanceItem.VATExcempt = PaymentService.getVATExcempt({
+                    customer: checkout.customer,
+                    sellerOrganization: membershipOrganization
+                });
                 balanceItems.set(balanceItem, balanceItem.priceWithVAT);
             }
 
             if (!request.body.proForma) {
                 await model.save();
                 await balanceItem?.save();
+            } else {
+                // Security addition
+                if (balanceItem && balanceItem.id) {
+                    throw new Error('Unexpected balance item save')
+                }
+                balanceItem?.disableSave()
             }
 
             models.push(model);
+
+            if (model.meta.requiresMandate) {
+                checkout.createMandate = true;
+            }
         }
 
         // todo: Add pending items (balance items in request)
 
-        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
-        if (!membershipOrganizationId) {
-            throw new SimpleError({
-                code: 'unavailable',
-                message: 'No membership organization id set on the platform',
-                human: 'Package purchases are currently unavailable',
+        // If still zero payment
+        const { price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({ 
+            balanceItems, 
+            organization: membershipOrganization
+        })
+        const minimumAmount = 2_00;
+        
+        if (totalPrice < minimumAmount && checkout.createMandate) {
+            const item = new BalanceItem();
+            item.type = BalanceItemType.AdministrationFee;
+            item.description = $t('Verificatie bankkaart of bankrekening')
+            item.payingOrganizationId = organization.id;
+            item.organizationId = membershipOrganizationId;
+            item.VATPercentage = 21;
+            item.VATExcempt = PaymentService.getVATExcempt({
+                customer: checkout.customer,
+                sellerOrganization: membershipOrganization
             });
+            item.VATIncluded = !item.VATExcempt; // Makes sure price with VAT always matches unitPrice
+            item.quantity = 1;
+            item.unitPrice = minimumAmount - (totalPrice - roundingAmount); 
+            item.createdAt = new Date();
+            item.status = BalanceItemStatus.Hidden;
+
+            if (!request.body.proForma) {
+                await item.save();
+            } else {
+                item.disableSave()
+            }
+
+            balanceItems.set(item, item.priceWithVAT);
         }
 
-        const membershipOrganization = await Organization.getByID(membershipOrganizationId);
-        if (!membershipOrganization) {
-            throw new Error('Unexpected missing membershipOrganization');
+        // Disable createMandate if a mandate was chosen
+        if (checkout.createMandate && checkout.mandate) {
+            checkout.createMandate = false;
         }
+
+        if (checkout.proForma) {
+            const result = await PaymentService.createProForma({
+                balanceItems,
+                checkout,
+                user,
+                organization: membershipOrganization,
+                payingOrganization: organization,
+            });
+
+            return new Response(CheckoutResponse.create({
+                payment: result.payment,
+                invoice: result.invoice
+            }));
+        } 
 
         const result = await PaymentService.createPayment({
             balanceItems,
@@ -121,9 +199,11 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             organization: membershipOrganization,
             payingOrganization: organization,
             serviceFeeType: 'system',
+            createMandate: checkout.createMandate,
+            useMandate: checkout.mandate,
+            paymentConfiguration: membershipOrganization.meta.registrationPaymentConfiguration,
+            privatePaymentConfiguration: organization.privateMeta.registrationPaymentConfiguration
         });
-
-        console.log('Created payment', result);
 
         if (!result) {
             // No payment needed
@@ -134,28 +214,14 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             });
         }
 
-        if (!checkout.proForma) {
-            for (const pack of models) {
-                await pack.save();
-            }
-        }
-        else {
-            // Delete payment again
-            if (result) {
-                await result.payment.delete();
-                result.paymentUrl = null;
-                result.paymentQRCode = null;
-            }
-
-            for (const [item] of balanceItems) {
-                await item.delete();
-            }
+        for (const pack of models) {
+            await pack.save();
         }
 
         const { payment, paymentUrl, paymentQRCode } = result;
 
         return new Response(CheckoutResponse.create({
-            payment: payment ? PaymentStruct.create(payment) : null,
+            payment: payment ? await AuthenticatedStructures.paymentGeneral(payment) : null,
             paymentUrl,
             paymentQRCode,
         }));

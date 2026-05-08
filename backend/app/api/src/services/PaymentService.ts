@@ -1,10 +1,10 @@
-import { createMollieClient, PaymentMethod as molliePaymentMethod, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
+import { createMollieClient, PaymentMethod as molliePaymentMethod, PaymentStatus as MolliePaymentStatus, SequenceType } from '@mollie/api-client';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Member, User } from '@stamhoofd/models';
 import { BalanceItemPayment, Group, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Checkoutable, PaymentConfiguration } from '@stamhoofd/structures';
-import { AuditLogSource, BalanceItemType, EmailTemplateType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, VATExcemptReason, Version } from '@stamhoofd/structures';
+import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
@@ -14,6 +14,11 @@ import { StripeHelper } from '../helpers/StripeHelper.js';
 import { AuditLogService } from './AuditLogService.js';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
 import { BalanceItemService } from './BalanceItemService.js';
+import { ViesHelper } from '../helpers/ViesHelper.js';
+import { PaymentMandateStatus, PaymentMandateType  } from '@stamhoofd/structures/PaymentMandate.js';
+import type {PaymentMandate} from '@stamhoofd/structures/PaymentMandate.js';
+import { PaymentMandateService } from './PaymentMandateService.js';
+import { MollieService } from './MollieService.js';
 
 export class PaymentService {
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
@@ -185,7 +190,7 @@ export class PaymentService {
                                         payment.ibanName = details.cardHolder;
                                     }
                                     if (details?.cardNumber) {
-                                        payment.iban = 'xxxx xxxx xxxx ' + details.cardNumber;
+                                        payment.iban = '•••• ' + details.cardNumber;
                                     }
 
                                     if (mollieData.status === MolliePaymentStatus.paid) {
@@ -390,16 +395,11 @@ export class PaymentService {
         }
     }
 
-    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType }: {
+    static calculateTotalPrice({ balanceItems, organization, members}: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
-        user: User;
         members?: Member[];
-        checkout: Pick<Checkoutable<never>, 'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
-        payingOrganization?: Organization | null;
-        serviceFeeType: 'webshop' | 'members' | 'tickets' | 'system';
     }) {
-        // Calculate total price to pay
         let totalPrice = 0;
         const names: {
             firstName: string;
@@ -448,44 +448,55 @@ export class PaymentService {
                 });
             }
         }
+        const { price, roundingAmount } = this.round(totalPrice);
 
-        if (totalPrice < 0) {
-            // todo: try to make it non-negative by reducing some balance items
+        if (price < 0) {
             throw new SimpleError({
                 code: 'negative_price',
                 message: $t(`%vl`),
             });
         }
 
-        if (checkout.totalPrice !== null && totalPrice !== checkout.totalPrice) {
-            // Changed!
+        return { hasNegative, price, roundingAmount, names }
+    }
+
+    static validateTotalPrice({ price, roundingAmount, checkout}: {
+        price: number, // already rounded
+        roundingAmount: number,
+        checkout: Pick<Checkoutable<never>, 'totalPrice'>;
+    }) {
+        // total price without rounding
+        const balanceItemsPrice = price - roundingAmount; 
+
+        // also accept rounding that might have happend in the frontend and that was correct
+        if (checkout.totalPrice !== null && checkout.totalPrice !== balanceItemsPrice && checkout.totalPrice !== price) { 
             throw new SimpleError({
                 code: 'changed_price',
-                message: $t(`%vk`, { total: Formatter.price(totalPrice) }),
+                message: $t(`%vk`, { total: Formatter.price(price) }),
             });
         }
+    }
 
-        const payment = new Payment();
-
-        // Who will receive this money?
-        payment.organizationId = organization.id;
-
-        // Who paid
-        payment.payingUserId = user.id;
-        payment.payingOrganizationId = payingOrganization?.id ?? null;
-
+    static async validateCustomer({ price, hasNegative, user, checkout, payingOrganization}: {
+        price: number,
+        hasNegative: boolean,
+        user: User;
+        checkout: Pick<Checkoutable<never>, 'customer'>;
+        payingOrganization?: Organization | null;
+    }) {
         // Fill in customer default value
-        payment.customer = PaymentCustomer.create({
+        const customer = PaymentCustomer.create({
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
+            phone: checkout.customer?.phone
         });
 
         // Use structured transfer description prefix
         let prefix = '';
 
         if (payingOrganization) {
-            if (totalPrice !== 0 || hasNegative || checkout.customer) {
+            if (price !== 0 || hasNegative || checkout.customer) {
                 if (!checkout.customer) {
                     throw new SimpleError({
                         code: 'missing_fields',
@@ -514,7 +525,14 @@ export class PaymentService {
                     });
                 }
 
-                payment.customer.company = foundCompany;
+                if (!checkout.customer.company.equals(foundCompany)) {
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.'
+                    });
+                }
+
+                customer.company = foundCompany;
 
                 const orgNumber = parseInt(payingOrganization.uri);
 
@@ -525,42 +543,159 @@ export class PaymentService {
             else {
                 // Zero amount payment (without refunds) without specifying a company will just use the default company to link to the payment
                 // It doesn't really matter since the price is zero and we won't invoice it.
-                const company = payingOrganization.meta.companies[0];
+                const company = this.getDefaultCompanyForOrganization(payingOrganization);
                 if (company) {
-                    payment.customer.company = company;
+                    customer.company = company;
                 }
+            }
+        } else {
+            if (checkout.customer && checkout.customer.company) {
+                customer.company = checkout.customer.company.clone()
+                await ViesHelper.checkCompany(checkout.customer.company, customer.company);
             }
         }
 
-        // Validate VAT rates for this customer
-        await this.validateVATRates({ customer: payment.customer, organization, balanceItems });
-
-        payment.status = PaymentStatus.Created;
-        payment.paidAt = null;
-        payment.price = totalPrice;
-        PaymentService.round(payment);
-        totalPrice = payment.price;
-
-        if (totalPrice === 0) {
-            payment.status = PaymentStatus.Succeeded;
-            payment.paidAt = new Date();
+        if (price !== 0 && customer.company?.VATNumber !== checkout.customer?.company?.VATNumber) {
+            // Security check: because previous validation and generation might have used the VATNumber from the checkout
+            throw new SimpleError({
+                code: 'changed_VAT_number',
+                message: 'Unexpected VAT number change'
+            })
         }
 
-        // Validate payment method after customer is defined
-        const paymentConfiguration = organization.meta.registrationPaymentConfiguration;
-        const privatePaymentConfiguration = organization.privateMeta.registrationPaymentConfiguration;
+        return { customer, prefix };
+    }
 
-        payment.method = checkout.paymentMethod ?? PaymentMethod.Unknown;
-        await this.validatePaymentMethod({ payment, balanceItems, paymentConfiguration });
+    static async createProForma({ balanceItems, organization, user, members, checkout, payingOrganization}: {
+        balanceItems: Map<BalanceItem, number>;
+        organization: Organization;
+        user: User;
+        members?: Member[];
+        checkout: Pick<Checkoutable<never>, 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
+        payingOrganization?: Organization | null;
+    }) {
+        // Calculate total price to pay
+        const { price, hasNegative, roundingAmount } = PaymentService.calculateTotalPrice({ balanceItems, organization, members })
+        PaymentService.validateTotalPrice({ price, roundingAmount, checkout })
 
-        // Validate URL's for online payments before saving the payment
-        if ((payment.method !== PaymentMethod.Transfer && payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) && (!checkout.redirectUrl || !checkout.cancelUrl)) {
+        const { customer, } = await PaymentService.validateCustomer({ user, checkout, payingOrganization, price, hasNegative })
+        const { seller } = PaymentService.validateVATRates({ customer, organization, balanceItems });
+        
+        // Create invoice instead from fictive PaymentGeneral
+        const fakePaymentGeneral = PaymentGeneral.create({
+            id: 'pro-forma',
+            price,
+            customer,
+            method: PaymentMethod.Unknown,
+            balanceItemPayments: [...balanceItems.entries()].map(([balanceItem, price]) => {
+                return BalanceItemPaymentDetailed.create({
+                    id: 'pro-forma-' + balanceItem.id,
+                    balanceItem: balanceItem.getStructure(),
+                    price
+                })
+            })
+        })
+
+        const invoice = Invoice.create({
+            seller,
+            customer,
+            payments: [fakePaymentGeneral],
+        });
+        invoice.buildFromPayments();
+
+        return {
+            invoice,
+            payment: fakePaymentGeneral
+        }
+    }
+
+
+    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration}: {
+        balanceItems: Map<BalanceItem, number>;
+        organization: Organization;
+        user: User;
+        members?: Member[];
+        checkout: Pick<Checkoutable<never>, 'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
+        payingOrganization?: Organization | null;
+        serviceFeeType: 'webshop' | 'members' | 'tickets' | 'system';
+        createMandate: boolean,
+        useMandate: PaymentMandate | null,
+        paymentConfiguration: PaymentConfiguration,
+        privatePaymentConfiguration: PrivatePaymentConfiguration
+    }) {
+        if (balanceItems.size === 0) {
+            return null;
+        }
+
+        // Calculate total price to pay
+        const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({ balanceItems, organization, members })
+        PaymentService.validateTotalPrice({ price, roundingAmount, checkout })
+
+        const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization, price, hasNegative })
+        this.validateVATRates({ customer, organization, balanceItems });
+        
+        const {method, type, mandate} = await this.validatePaymentMethod({ 
+            method: checkout.paymentMethod ?? PaymentMethod.Unknown,
+            mandate: useMandate,
+            createMandate,
+            customer,
+            price,
+            hasNegative,
+            balanceItems, 
+            paymentConfiguration,
+            user,
+            payingOrganization: payingOrganization ?? null,
+            sellingOrganization: organization
+        });
+
+        // Check URL's set fro online payments
+        if ((method !== PaymentMethod.Transfer && method !== PaymentMethod.PointOfSale && method !== PaymentMethod.Unknown) && (!checkout.redirectUrl || !checkout.cancelUrl)) {
             throw new SimpleError({
                 code: 'missing_fields',
                 message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
                 human: $t(`%vq`),
             });
         }
+
+        // Determine the payment provider (throws if invalid)
+        const { provider, stripeAccount } = await organization.getPaymentProviderFor(method, mandate, privatePaymentConfiguration);
+
+        if (createMandate) {
+            if (provider !== PaymentProvider.Mollie) {
+                throw new SimpleError({
+                    code: 'cannot_create_mandate_for_provider',
+                    message: 'Saving a payment method is not yet supported for this payment method',
+                    human: $t('Deze betaalmethode wordt nog niet ondersteund voor het opslaan van een betaalmethode, maak een andere keuze.')
+                })
+            }
+        }
+
+        // Done validation
+        const payment = new Payment();
+
+        // Who will receive this money?
+        payment.organizationId = organization.id;
+
+        // Who paid
+        payment.payingUserId = user.id;
+        payment.payingOrganizationId = payingOrganization?.id ?? null;
+        payment.customer = customer;
+
+        payment.status = PaymentStatus.Created;
+        payment.paidAt = null;
+        payment.price = price;
+        payment.roundingAmount = roundingAmount;
+        payment.method = method;
+        payment.type = type;
+
+        if (price === 0) {
+            payment.status = PaymentStatus.Succeeded;
+            payment.paidAt = new Date();
+        }
+
+        payment.provider = provider;
+        payment.stripeAccountId = stripeAccount?.id ?? null;
+        ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
 
         // Add transfer description
         if (payment.method === PaymentMethod.Transfer) {
@@ -588,20 +723,12 @@ export class PaymentService {
             );
         }
 
-        // Determine the payment provider
-        // Throws if invalid
-        const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, privatePaymentConfiguration);
-        payment.provider = provider;
-        payment.stripeAccountId = stripeAccount?.id ?? null;
-        ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
-
         await payment.save();
+
+        // Create online payment and balance item payments
         let paymentUrl: string | null = null;
         let paymentQRCode: string | null = null;
         const description = organization.name + ' ' + payment.id;
-
-        // Create balance item payments
-        const balanceItemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = [];
 
         try {
             for (const [balanceItem, price] of balanceItems) {
@@ -611,10 +738,12 @@ export class PaymentService {
                 balanceItemPayment.paymentId = payment.id;
                 balanceItemPayment.organizationId = organization.id;
                 balanceItemPayment.price = price;
-                await balanceItemPayment.save();
 
-                balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem));
+                await balanceItemPayment.save();
             }
+
+            // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
+            await BalanceItemService.updatePaidAndPending([...balanceItems.keys()]);
 
             // Update balance items
             if (payment.method === PaymentMethod.Transfer) {
@@ -645,8 +774,12 @@ export class PaymentService {
                 const cancelUrl = _cancelUrl.href;
 
                 const webhookUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
-
+                
                 if (payment.provider === PaymentProvider.Stripe) {
+                    if (createMandate || mandate) {
+                        // Already checked, but for security
+                        throw new Error('Unsupported')
+                    }
                     const stripeResult = await StripeHelper.createPayment({
                         payment,
                         stripeAccount,
@@ -668,51 +801,39 @@ export class PaymentService {
                     paymentUrl = stripeResult.paymentUrl;
                 }
                 else if (payment.provider === PaymentProvider.Mollie) {
-                    // Mollie payment
-                    const token = await MollieToken.getTokenFor(organization.id);
-                    if (!token) {
-                        throw new SimpleError({
-                            code: '',
-                            message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
-                        });
-                    }
-                    const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(organization.getHost());
-                    if (!profileId) {
-                        throw new SimpleError({
-                            code: '',
-                            message: $t(`%w4`, { method: PaymentMethodHelper.getName(payment.method) }),
-                        });
-                    }
-                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                    const locale = Context.i18n.locale.replace('-', '_');
-                    const molliePayment = await mollieClient.payments.create({
-                        amount: {
-                            currency: 'EUR',
-                            value: (totalPrice / 100).toFixed(2),
-                        },
-                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                        testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
-                        profileId,
-                        description,
+                    const mollieResult = await MollieService.createPayment({
+                        payment,
                         redirectUrl,
+                        cancelUrl,
                         webhookUrl,
+                        description,
                         metadata: {
-                            paymentId: payment.id,
+                            organization: organization.id,
+                            user: user.id,
+                            payment: payment.id,
                         },
-                        locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
+                        sellingOrganization: organization,
+                        payingOrganization: payingOrganization ?? null,
+                        user,
+                        customer,
+                        mandate,
+                        createMandate
                     });
-                    paymentUrl = molliePayment.getCheckoutUrl();
-
-                    // Save payment
-                    const dbPayment = new MolliePayment();
-                    dbPayment.paymentId = payment.id;
-                    dbPayment.mollieId = molliePayment.id;
-                    await dbPayment.save();
+                    paymentUrl = mollieResult.paymentUrl;
                 }
                 else if (payment.provider === PaymentProvider.Payconiq) {
+                    if (createMandate || mandate) {
+                        // Already checked, but for security
+                        throw new Error('Unsupported')
+                    }
                     ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl));
                 }
                 else if (payment.provider === PaymentProvider.Buckaroo) {
+                    if (createMandate || mandate) {
+                        // Already checked, but for security
+                        throw new Error('Unsupported')
+                    }
+
                     // Increase request timeout because buckaroo is super slow (in development)
                     Context.request.request?.setTimeout(60 * 1000);
                     const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? '', organization.privateMeta?.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
@@ -735,8 +856,8 @@ export class PaymentService {
             throw e;
         }
 
-        // Mark valid if needed
-        if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown) {
+        // Mark valid (not same as paid) if needed
+        if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown || (payment.method === PaymentMethod.DirectDebit && mandate)) {
             let hasBundleDiscount = false;
             for (const [balanceItem] of balanceItems) {
                 // Mark valid
@@ -755,7 +876,6 @@ export class PaymentService {
 
         return {
             payment,
-            balanceItemPayments,
             provider,
             stripeAccount,
             paymentUrl,
@@ -796,43 +916,175 @@ export class PaymentService {
         });
     }
 
-    static async validatePaymentMethod({ payment, balanceItems, paymentConfiguration }: { payment: Payment; balanceItems: Map<BalanceItem, number>; paymentConfiguration: PaymentConfiguration }) {
-        if (payment.price === 0) {
+    static async validatePaymentMethod({ 
+        method,
+        customer,
+        price,
+        hasNegative,
+        balanceItems, 
+        paymentConfiguration,
+        mandate,
+        payingOrganization,
+        sellingOrganization,
+        user,
+        createMandate
+    }: { 
+        method: PaymentMethod,
+        customer: PaymentCustomer,
+        price: number,
+        hasNegative: boolean,
+        balanceItems: Map<BalanceItem, number>; 
+        paymentConfiguration: PaymentConfiguration,
+        mandate: PaymentMandate | null,
+        payingOrganization: Organization | null,
+        sellingOrganization: Organization,
+        user: User | null,
+        createMandate: boolean
+    }) {
+        if (price === 0) {
             if (balanceItems.size === 0) {
-                return;
+                throw new Error('Empty payment')
             }
-            // Create an egalizing payment
-            payment.method = PaymentMethod.Unknown;
 
-            if ([...balanceItems.values()].find(b => b < 0)) {
-                payment.type = PaymentType.Reallocation;
+            if (createMandate) {
+                throw new SimpleError({
+                    code: 'cannot_create_mandate_without_payment',
+                    message: 'Cannot create saved payment method without payment of a small amount',
+                    human: $t(`We kunnen geen betaalmethode opslaan zonder een betaling van een klein bedrag`),
+                });
+            }
+
+            // Create an egalizing payment
+            if (hasNegative) {
+                return {
+                    method: PaymentMethod.Unknown,
+                    type: PaymentType.Reallocation,
+                    mandate: null
+                }
+            }
+
+            return {
+                // Free purchase
+                method: PaymentMethod.Unknown,
+                type: PaymentType.Payment,
+                mandate: null
             }
         }
-        else if (payment.method === PaymentMethod.Unknown) {
+
+        if (mandate) {
+            if (createMandate) {
+                throw new Error('Cannot create mandate when using mandate')
+            }
+
+            // Validate mandate + update payment method based on the mandate
+            if (method !== PaymentMethod.Unknown) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: 'Cannot combine setting mandate with method'
+                });
+            }
+
+            const allMandates = await PaymentMandateService.getMandates({
+                payingOrganization,
+                sellingOrganization,
+                user,
+            });
+
+            const existingMandate = allMandates.find(m => m.id === mandate.id && m.provider === mandate.provider);
+            if (!existingMandate) {
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Mandate not found',
+                    human: $t('Deze betaalmethode kon niet teruggevonden worden. Herlaad de pagina en probeer opnieuw.'),
+                    field: 'mandateId'
+                });
+            }
+
+            if (existingMandate.status !== PaymentMandateStatus.Valid) {
+                throw new SimpleError({
+                    code: 'mandate_not_valid',
+                    message: 'Mandate not valid',
+                    human: $t('Deze opgeslagen betaalmethode is niet (meer) geldig en kan niet gebruikt worden. Maak een andere keuze.'),
+                    field: 'mandateId'
+                });
+            }
+
+            switch (existingMandate.type) {
+                case PaymentMandateType.CreditCard:
+                    return {
+                        mandate: existingMandate,
+                        method: PaymentMethod.CreditCard,
+                        type: PaymentType.Payment
+                    }
+                case PaymentMandateType.DirectDebit:
+                    return {
+                        mandate: existingMandate,
+                        method: PaymentMethod.DirectDebit,
+                        type: PaymentType.Payment
+                    }
+            }
+
+            throw new Error('Unsupported mandate type')
+        }
+        
+        if (method === PaymentMethod.Unknown) {
             throw new SimpleError({
                 code: 'invalid_data',
                 message: $t(`%vy`),
             });
         }
-        else {
-            // Validate payment method
-            const allowedPaymentMethods = paymentConfiguration.getAvailablePaymentMethods({
-                amount: payment.price,
-                customer: payment.customer,
-            });
 
-            if (!allowedPaymentMethods.includes(payment.method)) {
-                throw new SimpleError({
-                    code: 'invalid_payment_method',
-                    message: $t(`%vp`),
-                });
-            }
+        // Validate payment method
+        const allowedPaymentMethods = paymentConfiguration.getAvailablePaymentMethods({
+            amount: price,
+            customer: customer,
+            forMandate: createMandate
+        });
+
+        if (!allowedPaymentMethods.includes(method)) {
+            throw new SimpleError({
+                code: 'invalid_payment_method',
+                message: $t(`%vp`),
+            });
+        }
+
+        return {
+            method,
+            type: PaymentType.Payment,
+            mandate: null
         }
     }
 
-    static async validateVATRates({ customer, organization, balanceItems }: { customer: PaymentCustomer; organization: Organization; balanceItems: Map<BalanceItem, number> }) {
+    static getDefaultCompanyForOrganization(sellerOrganization: Organization) {
+        return sellerOrganization.meta.companies[0];
+    }
+
+    static getVATExcempt({ customer, sellerOrganization }: { customer: PaymentCustomer | null; sellerOrganization: Organization; }) {
         // Validate VAT rates for this customer
-        const seller = organization.meta.companies[0];
+        const seller = this.getDefaultCompanyForOrganization(sellerOrganization)
+        if (seller && seller.VATNumber && seller.address && customer && customer.company) {
+            // B2B validation
+            if (!customer.company.address) {
+                throw new SimpleError({
+                    code: 'missing_field',
+                    message: 'Company address missing',
+                    human: $t('%1LH'),
+                    field: 'customer.company.address',
+                });
+            }
+
+            // Reverse charged vat applicable?
+            if (customer.company.address.country !== seller.address.country && customer.company.VATNumber) {
+                return VATExcemptReason.IntraCommunity;
+            }
+        }
+
+        return null
+    }
+
+    static validateVATRates({ customer, organization, balanceItems }: { customer: PaymentCustomer; organization: Organization; balanceItems: Map<BalanceItem, number> }) {
+        // Validate VAT rates for this customer
+        const seller = this.getDefaultCompanyForOrganization(organization)
         if (seller && seller.VATNumber && seller.address && customer.company) {
             // B2B validation
             if (!customer.company.address) {
@@ -845,7 +1097,7 @@ export class PaymentService {
             }
 
             // Reverse charged vat applicable?
-            if (customer.company.address.country !== seller.address.country) {
+            if (customer.company.address.country !== seller.address.country && customer.company.VATNumber) {
                 // Check VAT Exempt is set on each an every balance item with a non-zero price
                 for (const [item] of balanceItems) {
                     if (item.VATExcempt !== VATExcemptReason.IntraCommunity) {
@@ -912,5 +1164,7 @@ export class PaymentService {
                 }
             }
         }
+
+        return {seller}
     }
 };

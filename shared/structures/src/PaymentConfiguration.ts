@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerD
 import { v4 as uuidv4 } from 'uuid';
 
 import type { PaymentCustomer } from './PaymentCustomer.js';
-import { PaymentMethod } from './PaymentMethod.js';
+import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
 
@@ -145,8 +145,14 @@ export class PaymentConfiguration extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(PaymentMethod), PaymentMethodSettings), version: 340 })
     paymentMethodSettings: Map<PaymentMethod, PaymentMethodSettings> = new Map();
 
-    getAvailablePaymentMethods(data: { amount: number; customer: PaymentCustomer | null }) {
+    getAvailablePaymentMethods(data: { amount: number; customer: PaymentCustomer | null, forMandate?: boolean }) {
         return this.paymentMethods.filter((method) => {
+            if (data.forMandate) {
+                if (!PaymentMethodHelper.canCreateMandate(method)) {
+                    return false;
+                }
+            }
+
             const settings = this.paymentMethodSettings.get(method);
             if (!settings) {
                 // No special settings, always available

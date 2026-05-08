@@ -94,6 +94,13 @@ export class STPackageMeta extends AutoEncoder {
     }
 
     /**
+     * When service fees or per member pricing is set, a mandate is required
+     */
+    get requiresMandate() {
+        return this.serviceFeeFixed !== 0 || this.serviceFeePercentage !== 0 || !!this.serviceFeeMinimum || (!!this.unitPrice && this.pricingType === STPricingType.PerMember)
+    }
+
+    /**
      * @deprecated
      * Not really trustworthy as it has not always been set correctly in the past
      * and won't be set any longer

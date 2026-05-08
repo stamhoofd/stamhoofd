@@ -111,4 +111,8 @@ export class PaymentMethodHelper {
         }
         return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getPluralName(method));
     }
+
+    static canCreateMandate(method: PaymentMethod) {
+        return method === PaymentMethod.Bancontact || method === PaymentMethod.CreditCard || method === PaymentMethod.iDEAL
+    }
 }

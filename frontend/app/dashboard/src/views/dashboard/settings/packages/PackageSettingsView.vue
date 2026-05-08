@@ -64,22 +64,24 @@
                         </p>
 
                         <template #right>
-                            <span v-if="!pack.alreadyBought && (pack.inTrial || !pack.canStartTrial)" class="button text selected">
-                                <span>{{ $t('%1Lx') }}</span>
-                                <span class="icon arrow-right-small" />
-                            </span>
+                            <LoadingButton :loading="pack.loading">
+                                <span v-if="!pack.alreadyBought && (pack.inTrial || !pack.canStartTrial)" class="button text selected">
+                                    <span>{{ $t('%1Lx') }}</span>
+                                    <span class="icon arrow-right-small" />
+                                </span>
 
-                            <span v-if="!pack.alreadyBought && !pack.inTrial && pack.canStartTrial" class="button text selected">
-                                <span>{{ $t('%1Ly') }}</span>
-                                <span class="icon arrow-right-small" />
-                            </span>
+                                <span v-if="!pack.alreadyBought && !pack.inTrial && pack.canStartTrial" class="button text selected">
+                                    <span>{{ $t('%1Ly') }}</span>
+                                    <span class="icon arrow-right-small" />
+                                </span>
 
-                            <span v-if="pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew" class="button text selected">
-                                <span>{{ $t('%1Lz') }}</span>
-                                <span class="icon arrow-right-small" />
-                            </span>
+                                <span v-if="pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew" class="button text selected">
+                                    <span>{{ $t('%1Lz') }}</span>
+                                    <span class="icon arrow-right-small" />
+                                </span>
 
-                            <span v-else-if="pack.alreadyBought" class="button icon arrow-right-small" />
+                                <span v-else-if="pack.alreadyBought" class="button icon arrow-right-small" />
+                            </LoadingButton>
                         </template>
                     </STListItem>
                 </STList>
@@ -89,29 +91,30 @@
 </template>
 
 <script lang="ts" setup>
+import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import type { STPackage, STPackageType } from '@stamhoofd/structures';
 import { PackageCheckout, PackagePurchases, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
+import { useActivatePackages } from './hooks/useActivatePackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
-import { startCheckout } from './startCheckout';
-import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import { useStartPackageCheckout } from './useStartPackageCheckout';
+import Spinner from '@stamhoofd/components/Spinner.vue';
+import { LoadingButton } from '@stamhoofd/components';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
 const packages = ref([] as SelectablePackage[]);
-const context = useContext();
 const loadingModule = ref(null as STPackageType | null);
 const deactivatePackage = useDeactivatePackage();
-
+const startPackageCheckout = useStartPackageCheckout({ errors })
 const { packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
 
 class SelectablePackage {
@@ -126,6 +129,8 @@ class SelectablePackage {
     canStartTrial = true;
 
     selected = false;
+
+    loading = false
 
     constructor(pack: STPackage, bundle: STPackageBundle) {
         this.package = pack;
@@ -233,6 +238,8 @@ async function stopTrial(pack: SelectablePackage) {
     deactivatePackage.deactivate(pack.package, $t('%1M2')).catch(console.error);
 }
 
+const activatePackages = useActivatePackages();
+
 async function checkoutTrial(bundle: STPackageBundle, message: string) {
     if (loadingModule.value) {
         new Toast($t('%1M3'), 'info').show();
@@ -241,18 +248,14 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
     loadingModule.value = bundle as any as STPackageType;
 
     try {
-        await context.value.authenticatedServer.request({
-            method: 'POST',
-            path: '/billing/activate-packages',
-            body: PackageCheckout.create({
+        await activatePackages(
+            PackageCheckout.create({
                 purchases: PackagePurchases.create({
                     packageBundles: [bundle],
                 }),
                 paymentMethod: PaymentMethod.Unknown,
-            }),
-            shouldRetry: false,
-        });
-        await context.value.fetchOrganization(false);
+            })
+        );
         await reload();
         new Toast(message, 'success green').show();
     }
@@ -262,8 +265,11 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
 
     loadingModule.value = null;
 }
-const navigationActions = useNavigationActions();
 async function checkoutPackage(pack: SelectablePackage) {
+    if (!status.value) {
+        return;
+    }
+    
     const checkout = PackageCheckout.create({
         purchases: PackagePurchases.create({
             packageBundles: [],
@@ -278,11 +284,12 @@ async function checkoutPackage(pack: SelectablePackage) {
         checkout.purchases.packageBundles.push(pack.bundle);
     }
     
-    await startCheckout({
+    pack.loading = true;
+    await startPackageCheckout({
         checkout,
-        context: context.value,
         displayOptions: { action: 'show' }
-    }, navigationActions);
+    });
+    pack.loading = false;
 }
 
 async function checkout(pack: SelectablePackage) {
