@@ -193,6 +193,7 @@ export class Settlement extends AutoEncoder {
     amount: number;
 
     /**
+     * @deprecated: moved to transferFee
      * Fee for the payment provider for the individual payment
      * Only set if it is witheld from the settlement/payout
      */
