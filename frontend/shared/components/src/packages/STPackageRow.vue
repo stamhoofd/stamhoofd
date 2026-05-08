@@ -1,5 +1,5 @@
 <template>
-    <STListItem :key="pack.id" :selectable="selectable">
+    <STListItem :selectable="selectable">
         <template #left>
             <IconContainer :icon="pack.meta.isWebshops ? 'basket' : 'group'" :class="{'gray': !pack.status.isActive, 'secundary': pack.status.isActive && pack.meta.isTrial}">
                 <template #aside>
@@ -49,7 +49,7 @@ const props = withDefaults(
         selectable?: boolean;
     }>(),
     {
-        selectable: true,
+        selectable: false,
     },
 );
 const now = useNow()
