@@ -1,8 +1,7 @@
 import { column } from '@simonbackx/simple-database';
-import type { PartialWithoutMethods, PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import { MollieOnboarding, MollieProfile, MollieStatus } from '@stamhoofd/structures';
 import type { IncomingMessage } from 'http';
 import https from 'https';
 
@@ -279,97 +278,13 @@ export class MollieToken extends QueryableModel {
 
             this.knownTokens.set(organization.id, token);
 
-            organization.privateMeta.mollieOnboarding = await token.getOnboardingStatus();
-            await token.setup(organization);
-
-            await organization.save();
             return token;
         }
         throw new SimpleError({ code: '', message: 'Something went wrong in the response' });
     }
 
-    async getOnboardingStatus() {
-        try {
-            const response = await this.authRequest('GET', '/v2/onboarding/me');
-            return MollieOnboarding.create({
-                canReceivePayments: !!response.canReceivePayments,
-                canReceiveSettlements: !!response.canReceiveSettlements,
-                status: response.status === 'needs-data' ? MollieStatus.NeedsData : (response.status === 'in-review' ? MollieStatus.InReview : (MollieStatus.Completed)),
-            });
-        }
-        catch (e) {
-            console.error('Error when requesting Mollie onboarding status:');
-            console.error(e);
-            return null;
-        }
-    }
-
-    async getProfiles(): Promise<MollieProfile[]> {
-        try {
-            const response = await this.authRequest('GET', '/v2/profiles?limit=250');
-            const profiles = response._embedded.profiles as PartialWithoutMethods<MollieProfile>[];
-            return profiles.map(p => MollieProfile.create(p));
-        }
-        catch (e) {
-            console.error('Failed to parse mollie profiles', e);
-            return [];
-        }
-    }
-
-    async getProfileId(website?: string): Promise<string | null> {
-        const response = await this.authRequest('GET', '/v2/profiles?limit=250');
-        const profiles = response._embedded.profiles;
-
-        // Search profile with Stamhoofd as name
-        if (website) {
-            for (const profile of profiles) {
-                if (profile.website.toLowerCase().includes(website)) {
-                    return profile.id;
-                }
-            }
-        }
-
-        // Search profile with Stamhoofd as name
-        for (const profile of profiles) {
-            if (profile.name.toLowerCase().includes('stamhoofd')) {
-                return profile.id;
-            }
-        }
-
-        return response._embedded.profiles[0]?.id ?? null;
-    }
-
     async getOnboardingLink() {
         const response = await this.authRequest('GET', '/v2/onboarding/me');
         return response._links.dashboard.href ?? '';
-    }
-
-    /**
-     * Set initial onboarding values + enable bancontact
-     */
-    async setup(organization: Organization) {
-        // Submit onboarding data
-
-        if (organization.privateMeta.mollieOnboarding && organization.privateMeta.mollieOnboarding.status == MollieStatus.NeedsData) {
-            await this.authRequest('POST', '/v2/onboarding/me', {
-                organization: {
-                    name: organization.name,
-                    address: {
-                        streetAndNumber: organization.address.street + ' ' + organization.address.number,
-                        postalCode: organization.address.postalCode,
-                        city: organization.address.city,
-                        country: organization.address.country,
-                    },
-
-                    vatRegulation: 'shifted',
-                },
-                profile: {
-                    name: organization.name + ' - Stamhoofd',
-                    // url: "https://"+organization.getHost(),
-                    description: $t(`%x1`),
-                    categoryCode: 8398,
-                },
-            });
-        }
     }
 }

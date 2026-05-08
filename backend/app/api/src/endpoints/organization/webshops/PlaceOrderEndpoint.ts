@@ -16,6 +16,7 @@ import { AuditLogService } from '../../../services/AuditLogService.js';
 import { UitpasService } from '../../../services/uitpas/UitpasService.js';
 import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { PaymentService } from '../../../services/PaymentService.js';
+import { MollieService } from '../../../services/MollieService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -298,28 +299,26 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     }
                     else if (payment.provider === PaymentProvider.Mollie) {
                         // Mollie payment
-                        const token = await MollieToken.getTokenFor(webshop.organizationId);
-                        if (!token) {
+                        const mollieService = await MollieService.create({sellingOrganization: organization});
+                        if (!mollieService) {
                             throw new SimpleError({
                                 code: '',
                                 message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
-                        const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(webshop.getHost());
+                        const profileId = await mollieService.getProfileId(webshop.getHost());
                         if (!profileId) {
                             throw new SimpleError({
                                 code: '',
                                 message: $t(`%w4`, { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
-                        const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                        const locale = Context.i18n.locale.replace('-', '_');
-                        const molliePayment = await mollieClient.payments.create({
+                        const molliePayment = await mollieService.client.payments.create({
                             amount: {
                                 currency: 'EUR',
                                 value: (totalPrice / 10000).toFixed(2), // from 4 decimals to 0 decimals
                             },
-                            method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                            method: payment.method === PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method === PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
                             testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
                             profileId,
                             description,
@@ -331,7 +330,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 webshop: webshop.id,
                                 payment: payment.id,
                             },
-                            locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
+                            locale: mollieService.locale
                         });
                         console.log(molliePayment);
                         paymentUrl = molliePayment.getCheckoutUrl();

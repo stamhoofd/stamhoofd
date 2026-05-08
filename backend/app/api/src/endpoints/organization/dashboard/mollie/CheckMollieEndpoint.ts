@@ -6,6 +6,7 @@ import { CheckMollieResponse, PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
+import { MollieService } from '../../../../services/MollieService.js';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -36,9 +37,9 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error();
         }
 
-        const mollie = await MollieToken.getTokenFor(organization.id);
+        const service = await MollieService.create({sellingOrganization: organization })
 
-        if (!mollie) {
+        if (!service) {
             organization.privateMeta.mollieOnboarding = null;
             organization.privateMeta.mollieProfile = null;
             await organization.save();
@@ -52,9 +53,9 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 profiles: [],
             }));
         }
-        const profiles = await mollie.getProfiles();
+        const profiles = await service.getProfiles();
 
-        const status = await mollie.getOnboardingStatus();
+        const status = await service.getOnboardingStatus();
         organization.privateMeta.mollieOnboarding = status;
 
         // Check profile is still valid

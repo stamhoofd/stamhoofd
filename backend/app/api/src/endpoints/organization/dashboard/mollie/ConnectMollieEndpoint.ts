@@ -9,6 +9,7 @@ import { PermissionLevel } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { checkMollieSettlementsFor } from '../../../../helpers/CheckSettlements.js';
 import { Context } from '../../../../helpers/Context.js';
+import { MollieService } from '../../../../services/MollieService.js';
 
 type Params = Record<string, never>;
 
@@ -47,9 +48,13 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         const mollieToken = await MollieToken.create(organization, request.body.code);
+        const service = await MollieService.create({sellingOrganization: organization})
+        if (service) {
+            await service.setupOnboarding()
 
-        // Check settlements after linking (shouldn't block)
-        checkMollieSettlementsFor(mollieToken.accessToken, true).catch(console.error);
+            // Check settlements after linking (shouldn't block)
+            checkMollieSettlementsFor(mollieToken.accessToken, true).catch(console.error);
+        }
 
         return new Response(await AuthenticatedStructures.organization(organization));
     }
