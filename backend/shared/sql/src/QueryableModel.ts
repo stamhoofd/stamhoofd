@@ -132,4 +132,17 @@ export class QueryableModel extends Model {
 
         return (this as any as typeof QueryableModel).select().where(this.primary.name, ids).limit(ids.length).fetch() as any as InstanceType<T>[];
     }
+
+    disableSave() {
+        this.#disableSave = true;
+    }
+
+    #disableSave = false;
+    override save() {
+        if (this.#disableSave) {
+            throw new Error('Saving is not allowed for this payment')
+        }
+
+        return super.save()
+    }
 }
