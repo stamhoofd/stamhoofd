@@ -62,11 +62,18 @@ export class PackagePurchases extends AutoEncoder {
                         skip = true;
                         continue;
                     }
-                    if (currentPack.validUntil !== null) {
-                        const end = currentPack.validUntil;
+                    if (currentPack.endDate !== null) {
+                        const end = currentPack.endDate;
                         if (end > date) {
                             date = end;
                         }
+                    } else {
+                        // Non-expiring
+                        throw new SimpleError({
+                            code: 'already_active',
+                            message: 'Cannot activate this package because of conflicting package',
+                            human: $t('Dit pakket is ondertussen al geactiveerd, je kan het niet nog eens activeren. Herlaad de pagina.')
+                        })
                     }
                 }
             }
