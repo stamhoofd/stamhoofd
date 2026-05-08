@@ -152,9 +152,10 @@ async function checkPayments() {
         .orderBy('createdAt', 'ASC')
         .limit(500)
         .fetch();
-
-    console.log('[DELAYED PAYMENTS] Checking pending payments: ' + payments.length);
-    await doCheckPayments(payments);
+    if (payments.length) {
+        console.log('[DELAYED PAYMENTS] Checking pending payments: ' + payments.length);
+        await doCheckPayments(payments);
+    }
 }
 
 // 2 hours - 3 days
@@ -180,8 +181,10 @@ async function checkOldPayments() {
         .limit(500)
         .fetch();
 
-    console.log('[DELAYED PAYMENTS] Checking old pending payments: ' + payments.length);
-    await doCheckPayments(payments);
+    if (payments.length) {
+        console.log('[DELAYED PAYMENTS] Checking old pending payments: ' + payments.length);
+        await doCheckPayments(payments);
+    }
 }
 
 async function doCheckPayments(payments: Payment[]) {
