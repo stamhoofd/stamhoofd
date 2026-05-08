@@ -147,7 +147,11 @@ $color-error-border-original: #FFCAD3;
 $color-error-background-original: #ffd6dd;
 $color-error-dark-original: #630012;
 
+$color-error-border-shade-original: #FF7A91;
+$color-error-border-shade: var(--color-error-border-shade, $color-error-border-shade-original);
+
 $dark-theme-color-error-border: invertColor($color-error-border-original, -5);
+$dark-theme-color-error-border-shade: invertColor($color-error-border-shade-original, -5);
 $dark-theme-color-error-background: invertColor($color-error-background-original, -5);
 $dark-theme-color-error-dark: invertColor($color-error-dark-original, -5);
 
@@ -394,6 +398,7 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     --color-error-dark: #{$dark-theme-color-error-dark};
     --color-error-background: #{$dark-theme-color-error-background};
     --color-error-border: #{$dark-theme-color-error-border};
+    --color-error-border-shade: #{$dark-theme-color-error-border-shade};
 
     --color-success-dark: #{$dark-theme-color-success-dark};
     --color-success-background: #{$dark-theme-color-success-background};

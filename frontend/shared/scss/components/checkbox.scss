@@ -151,10 +151,20 @@ $checkbox-size: 20px;
         }
     }
 
+    .input-errors & {
+        > input + div {
+            > div:first-child {
+                border: $border-width solid $color-current-background;
+                box-shadow: 0 0 0 2px $color-error-border-shade;
+            }
+        }
+    }
+
     > input:checked + div {
         > div:first-child {
             border: $border-width solid $color-primary;
             background: $color-primary;
+            box-shadow: 0px 1px 2px 0px $color-input-shadow;
 
             svg > path {
                 stroke-dashoffset: 0;
