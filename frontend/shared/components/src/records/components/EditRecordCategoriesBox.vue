@@ -42,6 +42,9 @@ const { addArrayPatch } = useEmitPatchArray<typeof props, 'categories', RecordCa
 
 const draggableCategories = useDraggableArray(() => props.categories, addArrayPatch);
 
+// ids of records that already had been saved in the database
+const savedRecordIds = new Set(props.categories.flatMap(c => c.getAllRecords().map(r => r.id)));
+
 async function editCategory(category: RecordCategory) {
     await present({
         components: [
@@ -51,6 +54,7 @@ async function editCategory(category: RecordCategory) {
                 settings: props.settings,
                 isNew: false,
                 allowChildCategories: props.allowChildCategories,
+                savedRecordIds,
                 saveHandler: async (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                     addArrayPatch(patch);
                 },

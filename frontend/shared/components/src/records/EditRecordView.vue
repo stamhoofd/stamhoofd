@@ -16,9 +16,9 @@
 
             <div>
                 <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
-                    <Dropdown v-model="type">
+                    <Dropdown v-model="type" :disabled="!areMultipleTypesAvailable">
                         <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
-                            <option v-for="_type in group.values" :key="_type.value" :value="_type.value">
+                            <option v-for="_type in group.values" :key="_type.value" :value="_type.value" :disabled="_type.disabled">
                                 {{ _type.name }}
                             </option>
                         </optgroup>
@@ -220,30 +220,30 @@
 </template>
 
 <script lang="ts" setup generic="T extends ObjectWithRecords">
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import Checkbox from '#inputs/Checkbox.vue';
-import Dropdown from '#inputs/Dropdown.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import { useErrors } from '#errors/useErrors.ts';
 import { GroupUIFilterBuilder } from '#filters/GroupUIFilter.ts';
 import PropertyFilterInput from '#filters/PropertyFilterInput.vue';
+import { usePatch } from '#hooks/usePatch.ts';
+import Checkbox from '#inputs/Checkbox.vue';
+import Dropdown from '#inputs/Dropdown.vue';
 import Radio from '#inputs/Radio.vue';
-import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import SaveView from '#navigation/SaveView.vue';
-import { useErrors } from '#errors/useErrors.ts';
-import { usePatch } from '#hooks/usePatch.ts';
-import type { ObjectWithRecords, RecordCategory} from '@stamhoofd/structures';
-import { FileType, PermissionLevel, PropertyFilter, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
+import { FileType, PermissionLevel, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
-import type { RecordEditorSettings} from './RecordEditorSettings';
+import type { RecordEditorSettings } from './RecordEditorSettings';
 import { RecordEditorType } from './RecordEditorSettings';
 import PreviewRecordView from './components/PreviewRecordView.vue';
 import RecordChoiceRow from './components/RecordChoiceRow.vue';
@@ -255,9 +255,12 @@ const props = withDefaults(defineProps<{
     saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
     settings: RecordEditorSettings<T>;
     rootCategories?: RecordCategory[];
+    // ids of records that already had been saved in the database
+    savedRecordIds?: Set<string>;
 }>(), {
     category: null,
     rootCategories: () => ([]),
+    savedRecordIds: () => new Set<string>(),
 });
 
 const errors = useErrors();
@@ -274,7 +277,9 @@ const hasFilters = computed(() => {
 const { patch: patchRecord, patched: patchedRecord, addPatch, hasChanges } = usePatch(props.record);
 const showExternalPermissionLevel = computed(() => editorType.value === RecordEditorType.PlatformMember);
 
-const availableTypes = [
+const enableAllTypes = props.isNew || !props.savedRecordIds.has(props.record.id);
+
+const availableTypes: {name: string, values: {value: RecordType, name: string, disabled: boolean}[]}[] = [
     {
         name: $t(`%110`),
         values: [
@@ -342,7 +347,22 @@ const availableTypes = [
             },
         ],
     },
-];
+].map(category => {
+    return {
+        ...category,
+        values: category.values.map(v => ({ ...v, disabled: isTypeDisabled(v.value) })),
+    }
+});
+
+const areMultipleTypesAvailable = enableAllTypes ? true : availableTypes.some(c => c.values.some(v => !v.disabled && v.value !== props.record.type));
+
+function isTypeDisabled(type: RecordType) {
+    if (enableAllTypes) {
+       return false; 
+    }
+
+    return RecordAnswerDecoder.getClassForType(props.record.type) !== RecordAnswerDecoder.getClassForType(type);
+}
 
 const availableFileTypes = [
     {
