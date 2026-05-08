@@ -192,13 +192,6 @@ export class STPackageService {
         item.createdAt = now;
         item.status = BalanceItemStatus.Hidden;
 
-        if (customer && customer.company && customer.company.address) {
-            // Reverse charged vat applicable?
-            if (customer.company.address.country !== Country.Belgium) {
-                item.VATExcempt = VATExcemptReason.IntraCommunity;
-            }
-        }
-
         return item;
     }
 
