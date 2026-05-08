@@ -1,10 +1,10 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { cloneObject, isPatchableArray, isPatchMap, ObjectData, PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import type { Company, PermissionsResourceType, ResourcePermissions} from '@stamhoofd/structures';
+import type { Company, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { BuckarooSettings, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -12,6 +12,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper.js';
 import { Context } from '../../../../helpers/Context.js';
 import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer.js';
+import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
 import { TagHelper } from '../../../../helpers/TagHelper.js';
 import { ViesHelper } from '../../../../helpers/ViesHelper.js';
@@ -255,6 +256,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (request.body.meta.companies) {
                     await this.validateCompanies(organization, request.body.meta.companies);
                     shouldUpdateSetupSteps = true;
+                }
+                if (request.body.meta.recordsConfiguration?.recordCategories) {
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(organization.meta.recordsConfiguration.recordCategories, request.body.meta.recordsConfiguration.recordCategories);
                 }
                 const savedPackages = organization.meta.packages;
                 organization.meta.patchOrPut(request.body.meta);

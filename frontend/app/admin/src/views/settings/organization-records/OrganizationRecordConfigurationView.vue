@@ -4,6 +4,8 @@
             {{ title }}
         </h1>
 
+        <STErrorsDefault :error-box="errors.errorBox" />
+
         <p>
             {{ $t('%8E') }}
         </p>
@@ -11,7 +13,7 @@
         <p class="style-description-block">
             {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
-
+        
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
     </SaveView>
 </template>

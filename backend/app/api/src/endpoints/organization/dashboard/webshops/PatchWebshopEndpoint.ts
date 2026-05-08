@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
@@ -8,6 +8,7 @@ import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from '@stamho
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';
+import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -56,6 +57,11 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                 if (request.body.meta.customCode !== undefined && !await Context.auth.hasFullAccess(organization.id)) {
                     throw Context.auth.error($t('%15n'));
                 }
+
+                if (request.body.meta.recordCategories) {
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(webshop.meta.recordCategories, request.body.meta.recordCategories);
+                }
+
                 webshop.meta.patchOrPut(request.body.meta);
             }
 

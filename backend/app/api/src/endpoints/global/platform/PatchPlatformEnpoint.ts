@@ -1,9 +1,9 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { isPatchableArray, patchObject } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import type { MemberResponsibility, PlatformConfig, PlatformPremiseType} from '@stamhoofd/structures';
+import type { EventNotificationType, MemberResponsibility, PlatformConfig, PlatformPremiseType } from '@stamhoofd/structures';
 import { Platform as PlatformStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -12,6 +12,7 @@ import { Context } from '../../../helpers/Context.js';
 import { MembershipCharger } from '../../../helpers/MembershipCharger.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { PeriodHelper } from '../../../helpers/PeriodHelper.js';
+import { RecordAnswerHelper } from '../../../helpers/RecordAnswerHelper.js';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater.js';
 import { TagHelper } from '../../../helpers/TagHelper.js';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
@@ -95,6 +96,24 @@ export class PatchPlatformEndpoint extends Endpoint<
 
             if (request.body.config.organizationLevelRecordsConfiguration) {
                 shouldUpdateSetupSteps = true;
+
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                    platform.config.organizationLevelRecordsConfiguration.recordCategories,
+                    request.body.config.organizationLevelRecordsConfiguration.recordCategories);
+            }
+
+            if (request.body.config.recordsConfiguration) {
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                    platform.config.recordsConfiguration.recordCategories,
+                    request.body.config.recordsConfiguration.recordCategories);
+            }
+
+            if (request.body.config.eventNotificationTypes) {
+                RecordAnswerHelper.throwIfPatchOrPutsAreInvalid<'recordCategories', string, EventNotificationType, AutoEncoderPatchType<EventNotificationType>>(
+                    platform.config.eventNotificationTypes,
+                    request.body.config.eventNotificationTypes,
+                    'recordCategories',
+                )
             }
 
             const newConfig = request.body.config;

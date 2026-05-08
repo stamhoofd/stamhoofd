@@ -10,6 +10,7 @@ import { Event, Group, OrganizationRegistrationPeriod, Platform, Registration, R
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
+import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
 
 type Params = Record<string, never>;
@@ -393,6 +394,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         if (struct.settings) {
             struct.settings.period = undefined; // Not allowed to patch manually
+
+            if (struct.settings.recordCategories) {
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(model.settings.recordCategories, struct.settings.recordCategories);
+            }
+
             model.settings.patchOrPut(struct.settings);
         }
 
