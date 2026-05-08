@@ -45,7 +45,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
+        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: true }); // will authentiate set to true because we allow exchanges for inactive organizations
         if (!request.query.exchange) {
             await Context.optionalAuthenticate();
         }
