@@ -5,7 +5,6 @@ import { Sorter } from '@stamhoofd/utility';
 import { BalanceItemRelationType } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { BaseOrganization } from '../Organization.js';
-import { PaymentMethod, PaymentMethodHelper } from '../PaymentMethod.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { Payment, Settlement } from './Payment.js';
 
