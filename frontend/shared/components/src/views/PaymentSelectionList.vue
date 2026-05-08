@@ -31,27 +31,30 @@
 import Radio from '#inputs/Radio.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
-import type { Organization, PaymentConfiguration, PaymentCustomer} from '@stamhoofd/structures';
+import type { PaymentConfiguration, PaymentCustomer } from '@stamhoofd/structures';
 import { PaymentMethod, PaymentMethodHelper, PaymentType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { computed, onMounted } from 'vue';
 import PaymentMethodIcon from '../payments/components/PaymentMethodIcon.vue';
 
 const props = withDefaults(defineProps<{
-    organization: Organization;
+    country: Country;
     paymentConfiguration: PaymentConfiguration;
     context?: null | 'takeout' | 'delivery';
     amount: number;
     customer?: PaymentCustomer | null;
+    forMandate?: boolean
 }>(), {
     context: null,
     customer: null,
+    forMandate: false
 });
 
 const selectedPaymentMethod = defineModel<PaymentMethod | null>();
 const paymentMethods = computed(() => props.paymentConfiguration.getAvailablePaymentMethods({
     amount: props.amount,
     customer: props.customer,
+    forMandate: props.forMandate
 }));
 
 const sortedPaymentMethods = computed(() => {
@@ -59,12 +62,12 @@ const sortedPaymentMethods = computed(() => {
     const r: PaymentMethod[] = [];
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country == Country.Netherlands) {
+    if (methods.includes(PaymentMethod.iDEAL) && props.country == Country.Netherlands) {
         r.push(PaymentMethod.iDEAL);
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.Bancontact) && props.organization.address.country != Country.Netherlands) {
+    if (methods.includes(PaymentMethod.Bancontact) && props.country != Country.Netherlands) {
         r.push(PaymentMethod.Bancontact);
     }
 
@@ -82,12 +85,12 @@ const sortedPaymentMethods = computed(() => {
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.iDEAL) && props.organization.address.country != Country.Netherlands) {
+    if (methods.includes(PaymentMethod.iDEAL) && props.country != Country.Netherlands) {
         r.push(PaymentMethod.iDEAL);
     }
 
     // Force a given ordering
-    if (methods.includes(PaymentMethod.Bancontact) && props.organization.address.country == Country.Netherlands) {
+    if (methods.includes(PaymentMethod.Bancontact) && props.country == Country.Netherlands) {
         r.push(PaymentMethod.Bancontact);
     }
 
@@ -132,8 +135,8 @@ function getDescription(paymentMethod: PaymentMethod): string {
             return $t(`%12l`);
         }
         case PaymentMethod.Transfer: return $t(`%12m`);
-        case PaymentMethod.Bancontact: return props.organization.address.country === Country.Belgium ? $t('%1Ou') : '';
-        case PaymentMethod.iDEAL: return props.organization.address.country === Country.Netherlands ? $t(`%12n`) : '';
+        case PaymentMethod.Bancontact: return props.country === Country.Belgium ? $t('%1Ou') : '';
+        case PaymentMethod.iDEAL: return props.country === Country.Netherlands ? $t(`%12n`) : '';
         case PaymentMethod.Unknown: return '';
         case PaymentMethod.DirectDebit: return $t(`%12o`);
         case PaymentMethod.CreditCard: return '';

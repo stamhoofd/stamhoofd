@@ -150,7 +150,7 @@
             <template v-if="isNew">
                 <hr><h2>{{ $t('%M7') }}</h2>
 
-                <PaymentSelectionList v-model="paymentMethod" :payment-configuration="paymentConfiguration" :organization="organization!" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
+                <PaymentSelectionList v-model="paymentMethod" :payment-configuration="paymentConfiguration" :country="organization!.address.country" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
             </template>
         </template>
     </SaveView>

@@ -6,7 +6,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :customer="checkout.customer" :organization="organization" />
+            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :customer="checkout.customer" :country="organization.address.country" />
 
             <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
         </main>

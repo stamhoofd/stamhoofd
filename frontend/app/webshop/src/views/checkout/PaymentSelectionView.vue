@@ -12,7 +12,7 @@
 
         <template v-if="checkout.totalPrice > 0">
             <STErrorsDefault :error-box="errors.errorBox" />
-            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :organization="organization" :context="paymentContext" />
+            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-configuration="paymentConfiguration" :amount="checkout.totalPrice" :country="organization.address.country" :context="paymentContext" />
         </template>
         <template v-else>
             <p>{{ $t('%Xx') }}</p>
