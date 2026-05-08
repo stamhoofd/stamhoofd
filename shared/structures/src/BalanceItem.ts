@@ -60,11 +60,6 @@ export enum BalanceItemType {
     CancellationFee = 'CancellationFee',
     RegistrationBundleDiscount = 'RegistrationBundleDiscount',
     /**
-     * Small differences that occurred when creating a payment or invoice
-     */
-    Rounding = 'Rounding',
-
-    /**
      * Platform package activation (features)
      */
     STPackage = 'STPackage',
@@ -88,12 +83,11 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.PlatformMembership: return $t(`%1Ny`);
         case BalanceItemType.CancellationFee: return $t(`%17G`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`%16L`);
-        case BalanceItemType.Rounding: return $t('%1I6');
         case BalanceItemType.STPackage: return $t('%1Ms');
     }
 }
 
-export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
+export function getBalanceItemTypeIcon(type: BalanceItemType): string {
     switch (type) {
         case BalanceItemType.Registration: return 'membership-filled';
         case BalanceItemType.AdministrationFee: return 'calculator';
@@ -103,7 +97,6 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.PlatformMembership: return 'membership-filled';
         case BalanceItemType.CancellationFee: return 'canceled';
         case BalanceItemType.RegistrationBundleDiscount: return 'label';
-        case BalanceItemType.Rounding: return 'calculator';
         case BalanceItemType.STPackage: return 'box';
     }
 }
@@ -556,7 +549,6 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%ls`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
-            case BalanceItemType.Rounding: return this.description;
             case BalanceItemType.STPackage: return this.description;
         }
     }
@@ -579,7 +571,6 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`%ls`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%BV`);
-            case BalanceItemType.Rounding: return $t('%1I7');
             case BalanceItemType.STPackage: return $t('%1Mu');
         }
     }
@@ -706,13 +697,14 @@ export class BalanceItem extends AutoEncoder {
                 }
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
-            case BalanceItemType.CancellationFee: return $t(`%17G`);
-            case BalanceItemType.AdministrationFee: return $t(`%xK`);
+            case BalanceItemType.CancellationFee: return $t(`Annuleringskosten`);
+            case BalanceItemType.AdministrationFee: {
+                return this.description || $t(`%xK`);
+            }
             case BalanceItemType.FreeContribution: return $t(`%Ot`);
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%m2`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`%m3`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`%m4`);
-            case BalanceItemType.Rounding: return $t(`%1I6`);
             case BalanceItemType.STPackage: {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
@@ -758,14 +750,6 @@ export class BalanceItem extends AutoEncoder {
                 break;
             }
             case BalanceItemType.CancellationFee: {
-                const list: string[] = [];
-                // List all relations
-                for (const [key, value] of this.relations.entries()) {
-                    list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name.toString());
-                }
-                return list.join('\n');
-            }
-            case BalanceItemType.Rounding: {
                 const list: string[] = [];
                 // List all relations
                 for (const [key, value] of this.relations.entries()) {
