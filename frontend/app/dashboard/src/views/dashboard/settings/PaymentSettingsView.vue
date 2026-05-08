@@ -580,7 +580,7 @@ async function linkMollie() {
     realRedirectUrl.pathname = realRedirectUrl.pathname + '/oauth/mollie';
     await Storage.keyValue.setItem('mollie-saved-redirect-url', realRedirectUrl.pathname);
 
-    const scope = 'payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write settlements.read orders.read orders.write';
+    const scope = 'payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write settlements.read orders.read orders.write customers.read customers.write';
     const url = 'https://www.mollie.com/oauth2/authorize?client_id=' + encodeURIComponent(client_id) + '&state=' + encodeURIComponent(state) + '&scope=' + encodeURIComponent(scope) + '&response_type=code&approval_prompt=force&locale=nl_BE';
 
     window.location.href = url;
