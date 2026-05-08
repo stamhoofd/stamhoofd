@@ -15,32 +15,11 @@
         </p>
 
         <STList v-else>
-            <STListItem v-for="company of companies" :key="company.id" :selectable="companies.length > 1" class="right-stack" element-name="label">
-                <template #left>
-                    <Radio v-if="companies.length > 1" v-model="selectedCompanyId" :value="company.id" />
+            <CompanyRow v-for="company of companies" :key="company.id" :company="company" :selectable="companies.length > 1" element-name="label">
+                <template v-if="companies.length > 1" #left>
+                    <Radio v-model="selectedCompanyId" :value="company.id" />
                 </template>
-                <h3 class="style-title-list">
-                    {{ company.name || 'Naamloos' }}
-                </h3>
-
-                <p v-if="company.VATNumber" class="style-description-small">
-                    {{ company.VATNumber }} {{ $t('%Gn') }}
-                </p>
-                <p v-else-if="company.companyNumber" class="style-description-small">
-                    {{ company.companyNumber }} {{ $t('%eS') }}
-                </p>
-                <p v-else class="style-description-small">
-                    {{ $t('%1CH') }}
-                </p>
-
-                <p v-if="company.address" class="style-description-small">
-                    {{ company.address.shortString() }}
-                </p>
-
-                <p v-if="company.administrationEmail" class="style-description-small">
-                    {{ company.administrationEmail }}
-                </p>
-            </STListItem>
+            </CompanyRow>
         </STList>
 
         <p v-if="auth.hasFullAccess()" class="style-button-bar">
@@ -73,6 +52,8 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import type { Checkoutable, RegisterCheckout } from '@stamhoofd/structures';
 import { PaymentCustomer } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
+import IconContainer from '../../icons/IconContainer.vue';
+import CompanyRow from '../../companies/CompanyRow.vue';
 
 const props = withDefaults(
     defineProps<{

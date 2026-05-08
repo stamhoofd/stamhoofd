@@ -41,35 +41,7 @@
 
         <STList v-else v-model="draggableCompanies" :draggable="true">
             <template #item="{item: company, index}">
-                <STListItem :selectable="true" class="right-stack" @click="editCompany(company)">
-                    <template #left>
-                        <span class="icon email" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ company.name || 'Naamloos' }}
-                    </h3>
-
-                    <p v-if="company.VATNumber" class="style-description-small">
-                        {{ company.VATNumber }} {{ $t('%Gn') }}
-                    </p>
-                    <p v-else-if="company.companyNumber" class="style-description-small">
-                        {{ company.companyNumber }}
-                    </p>
-                    <p v-else class="style-description-small">
-                        {{ $t('%1CH') }}
-                    </p>
-
-                    <p v-if="company.address" class="style-description-small">
-                        {{ company.address.shortString() }}
-                    </p>
-                    <p v-else class="style-description-small">
-                        <span class="style-tag error">{{ $t('%gE') }}</span>
-                    </p>
-
-                    <p v-if="company.administrationEmail" class="style-description-small">
-                        {{ company.administrationEmail }}
-                    </p>
-
+                <CompanyRow :selectable="true" :company="company" @click="editCompany(company)">
                     <template #right>
                         <span v-if="index === 0" class="style-tag">
                             {{ $t('%v6') }}
@@ -77,7 +49,7 @@
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
                     </template>
-                </STListItem>
+                </CompanyRow>
             </template>
         </STList>
 
@@ -116,6 +88,7 @@ import { Company, OrganizationMetaData, OrganizationPrivateMetaData, SetupStepTy
 import { computed, ref, watch } from 'vue';
 import ReviewCheckbox from '../ReviewCheckbox.vue';
 import EditCompanyView from './components/EditCompanyView.vue';
+import CompanyRow from '../companies/CompanyRow.vue';
 
 const props = defineProps<{ isReview?: boolean }>();
 
