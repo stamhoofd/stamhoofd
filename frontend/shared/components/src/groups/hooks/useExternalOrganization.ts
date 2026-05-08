@@ -62,7 +62,7 @@ export function useExternalOrganization(organizationId: Ref<string | null>, orga
 
         try {
             errorBox.value = null;
-            const response = await context.value.getAuthenticatedServerForOrganization(organizationId.value).request({
+            const response = await context.value.getOptionalAuthenticatedServerForOrganization(organizationId.value).request({
                 method: 'GET',
                 path: '/organization',
                 decoder: Organization as Decoder<Organization>,

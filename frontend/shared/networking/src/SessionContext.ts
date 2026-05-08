@@ -574,6 +574,31 @@ export class SessionContext implements RequestMiddleware {
         if (!this.hasToken()) {
             throw new Error('Could not get authenticated server without token');
         }
+        if (!this.user || (this.user.organizationId !== organizationId && this.user.organizationId !== null)) {
+            console.error('Avoid usage of getAuthenticatedServerForOrganization in organization mode');
+
+            if (STAMHOOFD.environment === 'development') {
+                throw new Error('Not supported in organization mode')
+            }
+        }
+        const server = SessionContext.serverForOrganization(organizationId);
+        server.middlewares.push(this);
+        return server;
+    }
+
+    getOptionalAuthenticatedServerForOrganization(organizationId: string | null) {
+        if (!this.hasToken()) {
+            const server = SessionContext.serverForOrganization(organizationId);
+            return server;
+        }
+
+        if (!this.user || (this.user.organizationId !== organizationId && this.user.organizationId !== null)) {
+            // Out of scope
+            // Server will throw authentication error if we send tokens for a different organization
+            const server = SessionContext.serverForOrganization(organizationId);
+            return server;
+        }
+
         const server = SessionContext.serverForOrganization(organizationId);
         server.middlewares.push(this);
         return server;
