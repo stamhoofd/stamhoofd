@@ -60,6 +60,45 @@ test.describe('Onboarding', () => {
             name,
         );
     });
+    
+    test('happy path via direct /aansluiten URL', async ({ page, pages }) => {
+        await pages.dashboard.goto();
+
+        // click signup
+        await pages.dashboard.startSignup();
+
+        const name = 'Vereniging 2';
+
+        const signupPage = new SignupGeneralPage(page);
+        await signupPage.goto({});
+
+        // step 1
+        await (signupPage).completeHappyFlow({
+            name,
+            type: 'Jeugd',
+            city: 'Wetteren',
+            country: 'BE',
+        });
+
+        // step 2
+        await (new SignupAccountPage(page)).completeHappyFlow({
+            firstName: 'voornaam',
+            lastName: 'achternaam',
+            email: 'test@test.be',
+            password: 'testAbc123456',
+        });
+
+        // fill in code
+        await (new ConfirmEmailPage(page)).fillCode('111111');
+
+        // wait for data-testid element to appear (h1 with name of organization)
+        await page.getByTestId('organization-name').waitFor();
+
+        // check if page contains name of organization
+        await expect(page.getByTestId('organization-name')).toContainText(
+            name,
+        );
+    });
 
     test.describe('organization name', () => {
         test('should show error if empty', async ({ page, pages }) => {
