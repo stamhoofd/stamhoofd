@@ -122,35 +122,24 @@
             <hr>
             <h2>{{ $t('%YI') }}</h2>
 
-            <STList>
-                <STListItem v-for="item in sortedItems" :key="item.id">
-                    <h3 class="style-title-list pre-wrap" v-text="item.name" />
-                    <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
-
-                    <template #right>
-                        <span class="style-price-base" :class="{negative: item.unitPrice < 0}">{{ item.unitPrice === 0 ? 'Gratis' : formatPrice(item.unitPrice) }}</span>
-                    </template>
-                </STListItem>
-            </STList>
-
-            <PriceBreakdownBox :price-breakdown="invoice.priceBreakdown" />
+            <InvoiceItemsBox :invoice="invoice" />
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
-import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
-import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import type { Invoice} from '@stamhoofd/structures';
+import type { Invoice } from '@stamhoofd/structures';
 import { InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import InvoiceItemsBox from './components/InvoiceItemsBox.vue';
 
 const props = withDefaults(
     defineProps<{
