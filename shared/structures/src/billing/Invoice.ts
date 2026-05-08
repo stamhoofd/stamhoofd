@@ -396,7 +396,7 @@ export class Invoice extends AutoEncoder {
         if (this.totalWithVAT !== this.totalPaymentsAmount) {
             throw new SimpleError({
                 code: 'price_difference',
-                message: 'The price of the generated invoice did not match the price of the corresponding payments. Possibly caused by rounding that could not be corrected automatically.',
+                message: 'The price of the generated invoice ('+this.totalWithVAT+') did not match the price of the corresponding payments ('+this.totalPaymentsAmount+'). Possibly caused by rounding that could not be corrected automatically.',
                 human: $t('%1Kn'),
             });
         }
