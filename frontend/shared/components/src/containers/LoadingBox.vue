@@ -1,6 +1,6 @@
 <template>
     <div v-if="view" class="st-view loading-view-container">
-        <STNavigationBar />
+        <STNavigationBar v-if="errorBox" />
         <main v-if="errorBox">
             <h1>{{ $t('%1Ad') }}</h1>
             <STErrorsDefault :error-box="errorBox" />
