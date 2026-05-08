@@ -135,6 +135,10 @@ export class ViesHelperStatic {
 
         const formatted = result.value ?? vatNumber;
 
+        if (STAMHOOFD.environment === 'development' && formatted === 'NL301828519B01') {
+            return formatted
+        }
+
         try {
             const cleaned = formatted.substring(2).replace(/(?:\.-\s)+/g, '');
             const response = await this.request('POST', 'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number', {
@@ -150,7 +154,7 @@ export class ViesHelperStatic {
             if (!response.valid) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: 'Het opgegeven BTW-nummer is ongeldig of niet BTW-plichtig: ' + formatted,
+                    message: $t('Het opgegeven BTW-nummer is ongeldig of niet BTW-plichtig: {vat-number}', {'vat-number': formatted}),
                     field: 'VATNumber',
                 });
             }
@@ -164,7 +168,7 @@ export class ViesHelperStatic {
 
             throw new SimpleError({
                 code: 'service_unavailable',
-                message: 'De BTW-nummer validatie service (VIES) is tijdelijk niet beschikbaar. Probeer het later opnieuw.',
+                message: $t('De Europese BTW-nummer validatie service (VIES) is tijdelijk niet beschikbaar. Probeer het later opnieuw.'),
                 field: 'VATNumber',
             });
         }
