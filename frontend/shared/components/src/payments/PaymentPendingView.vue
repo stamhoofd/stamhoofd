@@ -2,16 +2,25 @@
     <div class="st-view">
         <STNavigationBar :title="$t(`%kP`)" />
 
-        <main v-if="payment && payment.status === 'Pending' && payment.method === 'DirectDebit'">
+        <main v-if="payment && payment.status !== PaymentStatus.Succeeded && payment.status !== PaymentStatus.Failed && payment.method === PaymentMethod.DirectDebit">
             <h1>{{ $t('%kK') }}</h1>
             <p>{{ $t("%kO") }}</p>
         </main>
 
-        <main v-else-if="!payment || payment.status !== 'Failed'">
-            <h1>{{ $t('%kL') }}</h1>
+        <main v-else-if="!payment || PaymentStatus.Failed">
+            <p class="style-title-prefix flex">
+                <span>{{ $t('Even geduld...') }}</span>
+                <ProgressRing :radius="7" :stroke="2" :loading="true" />
+            </p>
+
+            <h1>
+                {{ $t('%kL') }}
+            </h1>
             <p>{{ $t('%kM') }}</p>
 
-            <Spinner />
+            <p class="warning-box">
+                {{ $t('Sluit dit scherm niet tot je betaling werd bevestigd. Het kan zijn dat de betaling nog mislukt, zo blijf je op de hoogte.') }}
+            </p>
         </main>
 
         <main v-else>
@@ -32,17 +41,17 @@
 </template>
 
 <script lang="ts" setup>
+import LoadingButton from '#navigation/LoadingButton.vue';
+import STNavigationBar from '#navigation/STNavigationBar.vue';
+import STToolbar from '#navigation/STToolbar.vue';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import { useNavigationActions } from '#types/NavigationActions.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { Server } from '@simonbackx/simple-networking';
 import { useNavigationController, usePopup } from '@simonbackx/vue-app-navigation';
-import LoadingButton from '#navigation/LoadingButton.vue';
-import type { NavigationActions } from '#types/NavigationActions.ts';
-import Spinner from '#Spinner.vue';
-import STNavigationBar from '#navigation/STNavigationBar.vue';
-import STToolbar from '#navigation/STToolbar.vue';
-import { useNavigationActions } from '#types/NavigationActions.ts';
-import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
+import { PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
+import ProgressRing from '../icons/ProgressRing.vue';
 
 const props = withDefaults(defineProps<{
     paymentId: string;

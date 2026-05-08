@@ -278,6 +278,9 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true, version: 390 })
     VATExcempt: VATExcemptReason | null = null;
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    paidAt: Date | null
+
     /**
      * @deprecated use priceWithVAT in combination with isDue
      *
