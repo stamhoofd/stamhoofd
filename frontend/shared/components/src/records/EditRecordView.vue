@@ -296,16 +296,21 @@ const availableTypes: {name: string, values: {value: RecordType, name: string, d
                 name: $t(`%112`),
             },
             {
-                value: RecordType.Address,
-                name: $t(`%Cn`),
-            },
-            {
                 value: RecordType.Email,
                 name: $t(`%1FK`),
             },
             {
                 value: RecordType.Phone,
                 name: $t(`%wD`),
+            },
+        ],
+    },
+    {
+        name: $t(`Andere`),
+        values: [
+            {
+                value: RecordType.Address,
+                name: $t(`%Cn`),
             },
             {
                 value: RecordType.Date,
