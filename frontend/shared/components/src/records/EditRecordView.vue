@@ -23,6 +23,9 @@
                             </option>
                         </optgroup>
                     </Dropdown>
+                    <template v-if="!areMultipleTypesAvailable" #right>
+                        <button type="button" class="button icon info-circle small gray" @click="showTypeToast()" />
+                    </template>
                 </STInputBox>
 
                 <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`%iq`)">
@@ -242,6 +245,7 @@ import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
 import { FileType, PermissionLevel, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
+import { Toast } from '../overlays/Toast';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import type { RecordEditorSettings } from './RecordEditorSettings';
 import { RecordEditorType } from './RecordEditorSettings';
@@ -362,6 +366,14 @@ function isTypeDisabled(type: RecordType) {
     }
 
     return RecordAnswerDecoder.getClassForType(props.record.type) !== RecordAnswerDecoder.getClassForType(type);
+}
+
+function showTypeToast() {
+    if (areMultipleTypesAvailable) {
+        return;
+    }
+    
+    Toast.info($t('Het type is niet meer wijzigbaar nadat een vraag is opgeslagen.')).show();
 }
 
 const availableFileTypes = [
