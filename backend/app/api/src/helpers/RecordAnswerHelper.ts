@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Encodeable, Identifiable, Patchable, PatchableArray } from '@simonbackx/simple-encoding';
 import { isPatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { RecordCategory, RecordSettings } from '@stamhoofd/structures';
+import type { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { RecordAnswerDecoder } from '@stamhoofd/structures';
 
 export class RecordAnswerHelper {
@@ -67,7 +67,7 @@ export class RecordAnswerHelper {
         if (updated.type !== undefined
             && original.type !== updated.type
             // changing between types with the same class should be allowed
-            && RecordAnswerDecoder.getClassForType(original.type) !== RecordAnswerDecoder.getClassForType(updated.type)) {
+            && !this.haveTypesSameClass(original.type, updated.type)) {
             throw new SimpleError({
                 code: 'invalid_record_type',
                 message: `Cannot change record type from ${original.type} to ${updated.type}`,
@@ -82,6 +82,10 @@ export class RecordAnswerHelper {
                 human: $t(`Je kan het bestandstype van de bestaande vraag '{name}' niet wijzigen.`, {name: original.name}),
             })
         }
+    }
+
+    static haveTypesSameClass(a: RecordType, b: RecordType) {
+        return RecordAnswerDecoder.getClassForType(a) === RecordAnswerDecoder.getClassForType(b);
     }
 
     private static getAllRecords(patchOrPut: RecordCategory[] | PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>): (RecordSettings | AutoEncoderPatchType<RecordSettings>)[] {
