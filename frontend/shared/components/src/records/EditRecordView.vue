@@ -29,7 +29,7 @@
                 </STInputBox>
 
                 <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`%iq`)">
-                    <Dropdown v-model="fileType">
+                    <Dropdown v-model="fileType" :disabled="!enableAllTypes">
                         <option v-for="item in availableFileTypes" :key="item.value || 'null'" :value="item.value">
                             {{ item.name }}
                         </option>
