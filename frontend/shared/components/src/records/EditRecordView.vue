@@ -295,11 +295,6 @@ const availableTypes: {name: string, values: {value: RecordType, name: string, d
                 value: RecordType.Textarea,
                 name: $t(`%112`),
             },
-        ],
-    },
-    {
-        name: $t(`Gestructureerde tekst`),
-        values: [
             {
                 value: RecordType.Email,
                 name: $t(`%1FK`),
@@ -311,7 +306,7 @@ const availableTypes: {name: string, values: {value: RecordType, name: string, d
         ],
     },
     {
-        name: $t(`Overige types`),
+        name: $t(`Andere`),
         values: [
             {
                 value: RecordType.Address,
@@ -332,7 +327,7 @@ const availableTypes: {name: string, values: {value: RecordType, name: string, d
         ],
     },
     {
-        name: $t(`Interactie`),
+        name: $t(`%114`),
         values: [
             {
                 value: RecordType.Checkbox,
@@ -349,7 +344,7 @@ const availableTypes: {name: string, values: {value: RecordType, name: string, d
         ],
     },
     {
-        name: $t(`Media`),
+        name: $t(`%HQ`),
         values: [
             {
                 value: RecordType.Image,
