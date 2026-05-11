@@ -1,24 +1,24 @@
-import { createMollieClient, PaymentMethod as molliePaymentMethod, PaymentStatus as MolliePaymentStatus, SequenceType } from '@mollie/api-client';
+import { createMollieClient, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { BalanceItem, Member, User } from '@stamhoofd/models';
 import { BalanceItemPayment, Group, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, VATExcemptReason, Version } from '@stamhoofd/structures';
+import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
+import { PaymentMandateStatus, PaymentMandateType } from '@stamhoofd/structures/PaymentMandate.js';
 import { Formatter } from '@stamhoofd/utility';
 import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
 import { Context } from '../helpers/Context.js';
 import { ServiceFeeHelper } from '../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../helpers/StripeHelper.js';
+import { ViesHelper } from '../helpers/ViesHelper.js';
 import { AuditLogService } from './AuditLogService.js';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
 import { BalanceItemService } from './BalanceItemService.js';
-import { ViesHelper } from '../helpers/ViesHelper.js';
-import { PaymentMandateStatus, PaymentMandateType  } from '@stamhoofd/structures/PaymentMandate.js';
-import type {PaymentMandate} from '@stamhoofd/structures/PaymentMandate.js';
-import { PaymentMandateService } from './PaymentMandateService.js';
 import { MollieService } from './MollieService.js';
+import { PaymentMandateService } from './PaymentMandateService.js';
 
 export class PaymentService {
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
@@ -134,9 +134,13 @@ export class PaymentService {
                     return;
                 }
 
-                const organization = org ?? await Organization.getByID(payment.organizationId);
+                const organization = org && org.id === payment.organizationId ? org : await Organization.getByID(payment.organizationId);
                 if (!organization) {
                     console.error('Organization not found for payment', payment.id);
+                    return;
+                }
+                if (org && org.id !== payment.organizationId && org.id !== payment.payingOrganizationId) {
+                    console.error('Non-matching organization found for payment', payment.id, 'org', org.id);
                     return;
                 }
 
@@ -763,12 +767,12 @@ export class PaymentService {
 
                 const _redirectUrl = new URL(checkout.redirectUrl);
                 _redirectUrl.searchParams.set('paymentId', payment.id);
-                _redirectUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+                _redirectUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
 
                 const _cancelUrl = new URL(checkout.cancelUrl);
                 _cancelUrl.searchParams.set('paymentId', payment.id);
                 _cancelUrl.searchParams.set('cancel', 'true');
-                _cancelUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+                _cancelUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
 
                 const redirectUrl = _redirectUrl.href;
                 const cancelUrl = _cancelUrl.href;

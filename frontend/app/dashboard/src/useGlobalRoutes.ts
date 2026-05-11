@@ -69,11 +69,12 @@ export function useGlobalRoutes() {
 
         if (queryString.get('paymentId')) {
             const paymentId = queryString.get('paymentId');
+            const organizationId = queryString.get('organizationId');
             const cancel = queryString.get('cancel') === 'true';
 
             if (paymentId) {
                 await present(new ComponentWithProperties(PaymentPendingView, {
-                    server: context.value.optionalAuthenticatedServer,
+                    server: organizationId ? context.value.getOptionalAuthenticatedServerForOrganization(organizationId) :context.value.optionalAuthenticatedServer,
                     paymentId,
                     cancel,
                     errorHandler: async function (navigationActions: NavigationActions, error: unknown) {

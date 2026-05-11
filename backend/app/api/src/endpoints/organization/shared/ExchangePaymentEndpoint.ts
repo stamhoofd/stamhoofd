@@ -46,9 +46,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: true }); // will authentiate set to true because we allow exchanges for inactive organizations
-        if (!request.query.exchange) {
-            await Context.optionalAuthenticate();
-        }
+        await Context.optionalAuthenticate();
 
         // Not method on payment because circular references (not supprted in ts)
         const payment = await PaymentService.pollStatus(request.params.id, organization, request.query.cancel);
@@ -63,19 +61,23 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             return new Response(undefined);
         }
 
-        // #region skip check permissions if order and created less than hour ago
+        // Skip check permissions if order and created less than hour ago
         let checkPermissions = true;
         const hourAgo = new Date();
-        hourAgo.setHours(-1);
+        hourAgo.setHours(-2);
 
         if (payment.createdAt > hourAgo) {
-            const orders = await Order.where({ paymentId: payment.id }, { limit: 1 });
-            const isOrder = orders[0] !== undefined;
-            if (isOrder) {
-                checkPermissions = false;
+            if (payment.payingOrganizationId) {
+                // B2B payments always required
+                checkPermissions = true;
+            } else {
+                const orders = await Order.where({ paymentId: payment.id }, { limit: 1 });
+                const isOrder = orders[0] !== undefined;
+                if (isOrder) {
+                    checkPermissions = false;
+                }
             }
         }
-        // #endregion
 
         return new Response(
             await AuthenticatedStructures.paymentGeneral(payment, checkPermissions),
