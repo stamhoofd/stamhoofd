@@ -14,37 +14,32 @@
             </Dropdown>
         </STInputBox>
 
-        <div class="split-inputs">
-            <STInputBox title="Startdatum" error-fields="settings.startDate" :error-box="errors.errorBox">
-                <DateSelection v-model="startDate" />
-            </STInputBox>
-            <TimeInput v-model="startDate" title="Vanaf welk tijdstip" :validator="errors.validator" /> 
-        </div>
+        <STInputBox title="Startdatum" error-fields="settings.startDate" :error-box="errors.errorBox">
+            <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0}" />
+        </STInputBox>
 
         <Checkbox v-model="enableValidUntil">
             Einddatum toevoegen
         </Checkbox>
 
-        <div v-if="validUntil !== null" class="split-inputs">
+        <template v-if="validUntil !== null">
             <STInputBox title="Einddatum" error-fields="settings.validUntil" :error-box="errors.errorBox">
-                <DateSelection v-model="validUntil" />
+                <DateSelection v-model="validUntil" :time="{hours: 23, minutes: 59}" />
             </STInputBox>
-            <TimeInput v-model="validUntil" title="Tot welk tijdstip" :validator="errors.validator" />
-        </div>
+        </template>
 
         <Checkbox v-model="enableRemoveAt">
             Vervaldatum toevoegen
         </Checkbox>
 
-        <div v-if="removeAt !== null" class="split-inputs">
+        <template v-if="removeAt !== null">
             <STInputBox title="Vervaldatum" error-fields="settings.removeAt" :error-box="errors.errorBox">
-                <DateSelection v-model="removeAt" />
+                <DateSelection v-model="removeAt" :time="{hours: 23, minutes: 59}" />
             </STInputBox>
-            <TimeInput v-model="removeAt" title="Tot welk tijdstip" :validator="errors.validator" />
-        </div>
-        <p v-if="removeAt !== null" class="style-description-small">
-            Verlengen is nog mogelijk tot aan de vervaldatum. Het pakket blijft ook zichtbaar tot aan de vervaldatum
-        </p>
+            <p v-if="removeAt !== null" class="style-description-small">
+                Verlengen is nog mogelijk tot aan de vervaldatum. Het pakket blijft ook zichtbaar tot aan de vervaldatum
+            </p>
+        </template>
 
         <Checkbox v-model="allowRenew">
             Verlengbaar
@@ -57,7 +52,7 @@
         <h2>Servicekosten</h2>
 
         <div class="split-inputs">
-            <STInputBox title="Vast bedrag" error-fields="serviceFeeFixed" :error-box="errors.errorBox">
+            <STInputBox title="Vast bedrag per stuk" error-fields="serviceFeeFixed" :error-box="errors.errorBox">
                 <PriceInput v-model="serviceFeeFixed" />
             </STInputBox>
 
