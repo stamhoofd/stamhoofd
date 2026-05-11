@@ -16,20 +16,17 @@
 
             <div>
                 <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
-                    <Dropdown v-model="type" :disabled="!areMultipleTypesAvailable">
+                    <Dropdown v-model="type" v-tooltip="areMultipleTypesAvailable ? undefined : $t(`Het type is niet meer wijzigbaar nadat een vraag is opgeslagen.`)" :disabled="!areMultipleTypesAvailable">
                         <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
                             <option v-for="_type in group.values" :key="_type.value" :value="_type.value" :disabled="_type.disabled">
                                 {{ _type.name }}
                             </option>
                         </optgroup>
                     </Dropdown>
-                    <template v-if="!areMultipleTypesAvailable" #right>
-                        <button type="button" class="button icon info-circle small gray" @click="showTypeToast()" />
-                    </template>
                 </STInputBox>
 
                 <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`%iq`)">
-                    <Dropdown v-model="fileType" :disabled="!enableAllTypes">
+                    <Dropdown v-model="fileType" v-tooltip="enableAllTypes ? undefined : $t(`Het bestandtype is niet meer wijzigbaar nadat een vraag is opgeslagen.`)" :disabled="!enableAllTypes">
                         <option v-for="item in availableFileTypes" :key="item.value || 'null'" :value="item.value">
                             {{ item.name }}
                         </option>
@@ -245,7 +242,6 @@ import type { ObjectWithRecords, RecordCategory } from '@stamhoofd/structures';
 import { FileType, PermissionLevel, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import { Toast } from '../overlays/Toast';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import type { RecordEditorSettings } from './RecordEditorSettings';
 import { RecordEditorType } from './RecordEditorSettings';
@@ -371,14 +367,6 @@ function isTypeDisabled(type: RecordType) {
     }
 
     return RecordAnswerDecoder.getClassForType(props.record.type) !== RecordAnswerDecoder.getClassForType(type);
-}
-
-function showTypeToast() {
-    if (areMultipleTypesAvailable) {
-        return;
-    }
-    
-    Toast.info($t('Het type is niet meer wijzigbaar nadat een vraag is opgeslagen.')).show();
 }
 
 const availableFileTypes = [
