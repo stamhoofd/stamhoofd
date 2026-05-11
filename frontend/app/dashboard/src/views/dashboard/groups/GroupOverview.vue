@@ -190,7 +190,7 @@
                                 {{ $t('%Lj') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('%Lk') }}
+                                {{ $t('Stop inschrijvingen van leden via het ledenportaal (behalve voor uitgenodigde leden). Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.') }}
                             </p>
                             <template #right>
                                 <button type="button" class="button secundary danger hide-smartphone">
