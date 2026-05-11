@@ -8,6 +8,7 @@ import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionCheck
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
+import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
 
 /**
@@ -1557,7 +1558,7 @@ export class AdminPermissionChecker {
                     cloned.details.recordAnswers.delete(key);
                 }
                 else {
-                    if (value) {
+                    if (value && RecordAnswerHelper.haveTypesSameClass(value.settings.type, record.type)) {
                         // Force update
                         value.settings = record;
                     }

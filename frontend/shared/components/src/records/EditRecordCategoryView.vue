@@ -139,14 +139,18 @@ import { RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
 
 // Define
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     categoryId: string;
     rootCategories: RecordCategory[];
     saveHandler: (category: PatchableArrayAutoEncoder<RecordCategory>) => void;
     settings: RecordEditorSettings<ObjectWithRecords>;
     isNew: boolean;
     allowChildCategories: boolean;
-}>();
+    // ids of records that already had been saved in the database
+    savedRecordIds?: Set<string>;
+}>(), {
+    savedRecordIds: () => new Set<string>(),
+});
 
 // Hooks
 const errors = useErrors();
@@ -407,6 +411,7 @@ async function editRecord(record: RecordSettings, parent: RecordCategory = patch
             new ComponentWithProperties(EditRecordView, {
                 record,
                 isNew: false,
+                savedRecordIds: props.savedRecordIds,
                 parentCategory: parent,
                 settings: props.settings,
                 rootCategories: patchedRootCategories.value,
