@@ -62,6 +62,18 @@ export class RegistrationInvitationActionBuilder {
         if (!this.hasWrite) {
             return null;
         }
+
+        return getDeleteInvitationAction({
+            organizationId: this.group.organizationId,
+            context: this.context,
+            owner: this.owner,
+            eventOrigin: this.eventOrigin
+        })
+        
+    }
+}
+
+export function getDeleteInvitationAction({organizationId, context, owner, eventOrigin, afterDelete}: {organizationId: string, context: SessionContext, owner: any, eventOrigin: RegistrationInvitationEvenOrigin | undefined, afterDelete?: () => void}): TableAction<RegistrationInvitation> | null {
         
         return new InMemoryTableAction({
             name: $t('Verwijder'),
@@ -77,26 +89,37 @@ export class RegistrationInvitationActionBuilder {
                 const isConfirm = await CenteredMessage.confirm(message, $t('Verwijder'));
 
                 if (isConfirm) {
-                    // todo
-                    this.deleteInvitations(invitations).catch(console.error);
+                    deleteInvitations({
+                        invitations,
+                        organizationId,
+                        context,
+                        owner,
+                        eventOrigin,
+                        afterDelete
+                    })
+                    .catch(console.error);
                 }
             },
         });
     }
 
-    private async deleteInvitations(invitations: RegistrationInvitation[]) {
+async function deleteInvitations({invitations, organizationId, context, owner, eventOrigin, afterDelete}: {invitations: RegistrationInvitation[], organizationId: string, context: SessionContext, owner: any, eventOrigin: RegistrationInvitationEvenOrigin | undefined, afterDelete?: () => void}) {
         const patchableArray: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
         invitations.forEach(i => patchableArray.addDelete(i.id));
     
         try {
-            await this.context.getAuthenticatedServerForOrganization(this.group.organizationId).request({
+            await context.getAuthenticatedServerForOrganization(organizationId).request({
                 method: 'PATCH',
                 path: '/registration-invitations',
                 body: patchableArray,
-                owner: this.owner
+                owner
             });
 
-            RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set(invitations.map(i => i.group.id)), origin: this.eventOrigin}).catch(console.error);
+            RegistrationInvitationEventBus.sendEvent('updated', {groupIds: new Set(invitations.map(i => i.group.id)), origin: eventOrigin}).catch(console.error);
+
+            if (afterDelete) {
+                afterDelete();
+            }
         } catch (e) {
             console.error(e);
             Toast.fromError(e).show();
@@ -106,4 +129,3 @@ export class RegistrationInvitationActionBuilder {
         const successMessage = invitations.length === 1 ? $t('De uitnodiging is verwijderd') : $t('{count} uitnodigingen zijn verwijderd', { count: invitations.length });
         new Toast(successMessage, 'success green').show();
     }
-}

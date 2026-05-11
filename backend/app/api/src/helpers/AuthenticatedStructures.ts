@@ -1247,7 +1247,8 @@ export class AuthenticatedStructures {
                 group: InvitationGroupData.create({
                     id: invitation.groupId,
                     name: group.settings.name,
-                    type: group.type
+                    type: group.type,
+                    periodId: group.periodId,
                 }),
                 organizationId: invitation.organizationId,
                 createdAt: invitation.createdAt
@@ -1293,7 +1294,8 @@ export class AuthenticatedStructures {
                 group: InvitationGroupData.create({
                     id: group.id,
                     name: group.settings.name,
-                    type: group.type
+                    type: group.type,
+                    periodId: group.periodId
                 }),
                 organizationId: invitation.organizationId,
                 member: InvitationMemberData.create({

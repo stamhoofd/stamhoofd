@@ -27,6 +27,9 @@ export class InvitationGroupData extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(GroupType) })
     type: GroupType;
+
+    @field({ decoder: StringDecoder })
+    periodId: string;
 }
 
 export class InvitationMemberData extends AutoEncoder {

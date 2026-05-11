@@ -25,9 +25,11 @@
 
         <STList v-if="hasWrite && app !== 'registration'">
             <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" @edit="(e: any) => editRegistration(registration, e)" />
+            <ViewMemberInvitationRow v-for="invitation in filteredInvitations" :key="invitation.id" :member="member" :invitation="invitation" @edit="(e: any) => editInvitation(invitation, e)" />
         </STList>
         <STList v-else>
             <ViewMemberRegistrationRow v-for="registration in visibleRegistrations" :key="registration.id" :member="member" :registration="registration" />
+            <ViewMemberInvitationRow v-for="invitation in filteredInvitations" :key="invitation.id" :member="member" :invitation="invitation" />
         </STList>
 
         <footer v-if="hasDeleted && !showDeleted" class="style-button-bar">
@@ -40,24 +42,27 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
+import type { MemberRegistrationInvitation, PlatformMember, Registration, RegistrationPeriod } from '@stamhoofd/structures';
+import { InvitationMemberData, LimitedFilteredRequest, PermissionLevel, RegistrationInvitation } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { GlobalEventBus } from '../../../EventBus';
 import { useMembersObjectFetcher } from '../../../fetchers/useMembersObjectFetcher';
-import { useAuth, useOrganization, usePlatform } from '../../../hooks';
+import { useRegistrationInvitationsObjectFetcher } from '../../../fetchers/useRegistrationInvitationsObjectFetcher';
+import { useAuth, useContext, useOrganization, usePlatform } from '../../../hooks';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { Toast } from '../../../overlays/Toast';
+import { getDeleteInvitationAction } from '../../../registrations/classes/RegistrationInvitationActionBuilder';
 import type { TableActionSelection } from '../../../tables';
 import TableActionsContextMenu from '../../../tables/TableActionsContextMenu.vue';
 import { useChooseGroupForMember } from '../../checkout';
 import { useRegistrationsActionBuilder } from '../../classes/RegistrationsActionBuilder';
+import ViewMemberInvitationRow from './ViewMemberInvitationRow.vue';
 import ViewMemberRegistrationRow from './ViewMemberRegistrationRow.vue';
 
 const props = defineProps<{
@@ -73,6 +78,7 @@ const present = usePresent();
 const organization = useOrganization();
 const organizationManager = useOrganizationManager();
 const platform = usePlatform();
+const context = useContext();
 
 // If the organization of this member already moved to the next period, select it by default
 const defaultPeriod = organization.value?.period?.period ?? props.member.filterOrganizations({ currentPeriod: true })[0]?.period?.period ?? props.member.filterOrganizations({})[0]?.period?.period ?? platform.value.period;
@@ -115,6 +121,18 @@ const visibleRegistrations = computed(() => {
         return filteredRegistrations.value.filter(r => !r.deactivatedAt);
     }
     return filteredRegistrations.value;
+});
+
+const filteredInvitations = computed(() =>{
+    return props.member.member.registrationInvitations.filter(i => {
+        if (i.group.periodId !== period.value.id) {
+            return false;
+        }
+        if (!auth.hasSomePlatformAccess() && organization.value && organization.value.id !== i.organizationId) {
+            return false;
+        }
+        return true;
+    });
 });
 
 const chooseGroupForMember = useChooseGroupForMember();
@@ -171,6 +189,64 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
         yPlacement: 'bottom',
         actions,
         selection,
+    });
+    await present(displayedComponent.setDisplayStyle('overlay'));
+}
+
+async function editInvitation(memberRegistrationInvitation: MemberRegistrationInvitation, event: MouseEvent) {
+    const member = props.member.member;
+
+    // create registration invitation
+    const invitation = RegistrationInvitation.create({
+        ...memberRegistrationInvitation,
+        member: InvitationMemberData.create({
+            id: member.id,
+            firstName: member.firstName,
+            lastName: member.lastName,
+            birthDay: member.details.birthDay,
+        })
+    });
+
+    const el = event.currentTarget! as HTMLElement;
+    const bounds = el.getBoundingClientRect();
+
+    const actions = [
+        getDeleteInvitationAction({
+            organizationId: invitation.organizationId,
+            context: context.value,
+            owner,
+            eventOrigin: undefined,
+            afterDelete: () => {
+                // delete invitation from member
+                const indexOfInvitation = props.member.member.registrationInvitations.findIndex(i => i.id === invitation.id);
+                if (indexOfInvitation !== -1) {
+                    props.member.member.registrationInvitations.splice(indexOfInvitation, 1);
+                }
+            }
+        })
+    ];
+
+    const invitationsObjectFetcher = useRegistrationInvitationsObjectFetcher();
+
+    const selection: TableActionSelection<RegistrationInvitation> = {
+        filter: new LimitedFilteredRequest({
+            filter: {
+                id: invitation.id,
+            },
+            limit: 1,
+        }),
+        fetcher: invitationsObjectFetcher,
+        markedRows: new Map([[invitation.id, invitation]]),
+        markedRowsAreSelected: true,
+    };
+
+    const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+        x: bounds.right,
+        y: bounds.bottom,
+        xPlacement: 'left',
+        yPlacement: 'bottom',
+        actions,
+        selection
     });
     await present(displayedComponent.setDisplayStyle('overlay'));
 }
