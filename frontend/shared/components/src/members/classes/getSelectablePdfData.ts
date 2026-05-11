@@ -1,7 +1,7 @@
 import type { SelectableColumn } from '@stamhoofd/frontend-excel-export';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { Group, Organization, Parent, PlatformMember, RecordSettings} from '@stamhoofd/structures';
-import { AccessRight, FinancialSupportSettings, getGenderName, GroupType, ParentTypeHelper, Platform, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
+import type { Group, Organization, Parent, PlatformMember, RecordSettings } from '@stamhoofd/structures';
+import { AccessRight, getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, Platform, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 
@@ -21,7 +21,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         ...platform.config.recordsConfiguration.recordCategories,
     ];
 
-    const financialSupportSettings = platform.config.financialSupport ?? FinancialSupportSettings.create({});
+    const financialSupportSettings = getFinancialSupportSettingsOrDefault(platform, organization);
     const financialSupportTitle = financialSupportSettings.title;
 
     const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
@@ -461,7 +461,7 @@ export function getAllSelectablePdfDataForSummary({ platform, organization, auth
 
     const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
 
-    const financialSupportSettings = platform.config.financialSupport ?? FinancialSupportSettings.create({});
+    const financialSupportSettings = getFinancialSupportSettingsOrDefault(platform, organization);
     const financialSupportTitle = financialSupportSettings.title;
 
     const returnNullIfNoAccessRight = returnNullIfNoAccessRightFactory(auth);

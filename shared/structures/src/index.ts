@@ -240,6 +240,8 @@ export * from './SponsorConfig.js';
 export * from './filters/ExcelExportRequest.js';
 export * from './filters/SearchFilterFactory.js';
 export * from './helpers/index.js';
+export * from './helpers/FinancialSupportHelper.js';
+export * from './helpers/DataPermissionHelper.js';
 
 // Last
 export * from './AuditLog.js';

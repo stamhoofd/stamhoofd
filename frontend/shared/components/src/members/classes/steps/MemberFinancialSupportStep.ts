@@ -1,7 +1,7 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { FinancialSupportSettings, PermissionLevel } from '@stamhoofd/structures';
-import { markRaw } from 'vue';
 import MemberStepView from '#members/MemberStepView.vue';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { getFinancialSupportSettingsOrDefault, PermissionLevel } from '@stamhoofd/structures';
+import { markRaw } from 'vue';
 import type { NavigationActions } from '../../../types/NavigationActions';
 import EditMemberFinancialSupportBox from '../../components/edit/EditMemberFinancialSupportBox.vue';
 import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
@@ -15,8 +15,8 @@ export class MemberFinancialSupportStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        const settings = manager.member.platform.config.financialSupport ?? FinancialSupportSettings.create({});
-        return settings.title;
+        // todo: test
+        return getFinancialSupportSettingsOrDefault(manager.member.platform, manager.member.organizations[0]).title;
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -54,7 +54,7 @@ export class MemberFinancialSupportStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
-            title: manager.member.platform.config.financialSupport?.title ?? FinancialSupportSettings.defaultTitle,
+            title: this.getName(manager),
             member: manager.member,
             component: markRaw(EditMemberFinancialSupportBox),
             saveText: $t(`%16p`),

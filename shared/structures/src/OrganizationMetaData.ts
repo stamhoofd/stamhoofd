@@ -8,7 +8,7 @@ import { Replacement } from './endpoints/EmailRequest.js';
 import { File } from './files/File.js';
 import { Image } from './files/Image.js';
 import { GroupCategory } from './GroupCategory.js';
-import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
+import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { OrganizationGenderType } from './OrganizationGenderType.js';
 import type { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
@@ -445,6 +445,18 @@ export class OrganizationMetaData extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus), version: 378, defaultValue: () => UitpasClientCredentialsStatus.NotConfigured })
     uitpasClientCredentialsStatus: UitpasClientCredentialsStatus;
+
+    /**
+     * Contains the text and settings for when financial support is enabled - not whether it is enabled
+     */
+    @field({ decoder: FinancialSupportSettings, ...NextVersion, nullable: true })
+    financialSupport: FinancialSupportSettings | null = null;
+
+    /**
+     * Contains the text and settings for when data permissions are enabled - not whether it is enabled
+     */
+    @field({ decoder: DataPermissionsSettings, ...NextVersion, nullable: true})
+    dataPermission: DataPermissionsSettings | null = null;
 
     /**
      * @deprecated

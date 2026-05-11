@@ -1,6 +1,6 @@
-import type { Group, Organization} from '@stamhoofd/structures';
-import { FinancialSupportSettings, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Group, Organization } from '@stamhoofd/structures';
+import { getFinancialSupportSettingsOrDefault, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed, unref } from 'vue';
 import { useAppContext } from '../../context';
 import { useOrganization, usePlatform } from '../../hooks';
@@ -10,7 +10,7 @@ export function useFinancialSupportSettings(options?: { group?: Ref<Group | null
     const organization = useOrganization();
     const app = useAppContext();
 
-    const financialSupportSettings = computed(() => platform.value.config.financialSupport ?? FinancialSupportSettings.create({}));
+    const financialSupportSettings = computed(() => getFinancialSupportSettingsOrDefault(platform.value, organization.value));
     const recordsConfiguration = computed(() => OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: options?.externalOrganization ? unref(options.externalOrganization) : organization.value,

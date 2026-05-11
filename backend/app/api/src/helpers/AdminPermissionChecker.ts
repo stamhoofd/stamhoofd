@@ -8,6 +8,7 @@ import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionCheck
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
+import { getFinancialSupportSettingsAsync } from './FinancialSupportHelper.js';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
 
@@ -1732,7 +1733,13 @@ export class AdminPermissionChecker {
         // Has financial write access?
         if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Write)) {
             if (isUserManager && isSetFinancialSupportTrue) {
-                const financialSupportSettings = this.platform.config.financialSupport;
+                const financialSupportSettings = await getFinancialSupportSettingsAsync(this.platform, async () => {
+                    if (member.organizationId) {
+                        return await this.getOrganization(member.organizationId);
+                    }
+                    return null;
+                });
+                
                 const preventSelfAssignment = financialSupportSettings?.preventSelfAssignment === true;
 
                 if (preventSelfAssignment) {

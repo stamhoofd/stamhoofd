@@ -1,7 +1,7 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
 import type { ContextPermissions } from '@stamhoofd/networking/ContextPermissions';
-import type { Group, Organization, Platform} from '@stamhoofd/structures';
-import { AccessRight, FinancialSupportSettings, RecordCategory } from '@stamhoofd/structures';
+import type { Group, Organization, Platform } from '@stamhoofd/structures';
+import { AccessRight, getFinancialSupportSettingsOrDefault, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableColumns({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectableColumn[] }) {
     const recordCategories = [
@@ -9,7 +9,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         ...platform.config.recordsConfiguration.recordCategories,
     ];
 
-    const financialSupportSettings = platform.config.financialSupport ?? FinancialSupportSettings.create({});
+    const financialSupportSettings = getFinancialSupportSettingsOrDefault(platform, organization);
     const financialSupportTitle = financialSupportSettings.title;
 
     const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
