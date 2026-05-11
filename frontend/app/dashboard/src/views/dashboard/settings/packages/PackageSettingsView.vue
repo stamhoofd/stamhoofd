@@ -48,11 +48,11 @@
                         </h3>
 
                         <p v-if="pack.alreadyBought && pack.package.validUntil" class="style-description-small">
-                            {{ $t('%1Ha', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+                            {{ $t('%1Ha', {dateTime: formatEndDate(pack.package.validUntil)}) }}
                         </p>
 
                         <p v-else-if="pack.inTrial && pack.package.validUntil" class="style-description-small">
-                            {{ $t('%1Lv', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+                            {{ $t('%1Lv', {dateTime: formatEndDate(pack.package.validUntil)}) }}
 
                             <button type="button" class="inline-link error" @click.stop="stopTrial(pack)">
                                 <span>{{ $t('%1Lw') }}</span>
