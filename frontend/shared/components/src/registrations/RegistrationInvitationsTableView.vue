@@ -1,5 +1,5 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :title="title" :column-configuration-id="'registration-invitations'" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :estimated-rows="estimatedRows">
+    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :title="title" :column-configuration-id="'registration-invitations'" :actions="actions" :all-columns="allColumns" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" :estimated-rows="estimatedRows" :Route="Route">
         <p class="style-description-block">
             {{ description }}
         </p>
@@ -19,6 +19,7 @@ import { GroupGenderType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, watch } from 'vue';
 import { useRegistrationInvitationsObjectFetcher } from '../fetchers/useRegistrationInvitationsObjectFetcher';
+import AsyncMemberSegmentedView from '../members/AsyncMemberSegmentedView.vue';
 import { useRegistrationInvitationActionBuilder } from './classes/RegistrationInvitationActionBuilder';
 import { useRegistrationInvitationEventListener } from './classes/useRegistrationInvitationEventListener';
 
@@ -143,4 +144,12 @@ const allColumns: Column<ObjectType, any>[] = [
 
 const defaultSortColumn = allColumns.find(c => c.id === 'createdAt') ?? null;
 const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
+
+const Route = {
+    Component: AsyncMemberSegmentedView,
+    objectKey: 'registration',
+    getProperties: (invitation: RegistrationInvitation) => ({
+        memberId: invitation.member.id
+    }),
+};
 </script>
