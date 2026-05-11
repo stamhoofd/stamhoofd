@@ -70,7 +70,7 @@
             </h2>
         </STListItem>
 
-        <STListItem v-if="event.group" :selectable="!differentOrganization && !event.group.closed" class="right-stack" @click="!differentOrganization && !event.group.closed ? openGroup() : undefined">
+        <STListItem v-if="event.group && !hideGroupStatus" :selectable="!differentOrganization && !event.group.closed" class="right-stack" @click="!differentOrganization && !event.group.closed ? openGroup() : undefined">
             <template #left>
                 <span class="icon edit" />
             </template>
@@ -98,9 +98,9 @@
 
 <script setup lang="ts">
 import { useAppContext } from '#context/appContext.ts';
-import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import type { Event, PlatformFamily } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -109,9 +109,11 @@ const props = withDefaults(
     defineProps<{
         event: Event;
         family?: PlatformFamily | null;
+        hideGroupStatus?: boolean;
     }>(),
     {
         family: null,
+        hideGroupStatus: false
     },
 );
 

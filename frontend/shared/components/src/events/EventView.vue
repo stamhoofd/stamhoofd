@@ -19,9 +19,9 @@
                     {{ $t('%XD') }}
                 </p>
 
-                <EventInfoTable :event="event" :family="memberManager.family" />
+                <EventInfoTable :event="event" :family="memberManager.family" :hide-group-status="hideGroupStatus" />
 
-                <template v-if="!$isMobile && event.group && !event.group.closed">
+                <template v-if="!$isMobile && canRegister">
                     <hr><p class="style-button-bar right-align">
                         <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
                             <span>{{ $t('%XE') }}</span>
@@ -44,7 +44,7 @@
                 </template>
             </main>
 
-            <STToolbar v-if="$isMobile && event.group && !event.group.closed">
+            <STToolbar v-if="$isMobile && canRegister">
                 <template #right>
                     <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
                         <span>{{ $t('%XE') }}</span>
@@ -70,21 +70,21 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
-import EventInfoTable from '#events/components/EventInfoTable.vue';
 import ExternalOrganizationContainer from '#containers/ExternalOrganizationContainer.vue';
-import ImageComponent from '#views/ImageComponent.vue';
-import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
-import { useContext } from '#hooks/useContext.ts';
+import EventInfoTable from '#events/components/EventInfoTable.vue';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useChooseFamilyMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
+import ImageComponent from '#views/ImageComponent.vue';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Event, Organization, WebshopPreview } from '@stamhoofd/structures';
 import { Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
@@ -124,6 +124,50 @@ const webshopOrganization = computed(() => {
     }
 
     return loadedWebshopOrganization.value;
+});
+
+const canRegister = computed(() => {
+    const group = props.event.group;
+
+    if (!group) {
+        return false;
+    }
+
+    if (!group.closed) {
+        return true;
+    }
+
+    // in case the group is closed but some member is invited
+    for (const member of memberManager.family.members) {
+        const canRegister = member.member.registrationInvitations.some(invitation => {
+            if (invitation.group.id !== group.id) {
+                return false;
+            }
+            
+            const org = memberManager.family.getOrganization(invitation.organizationId);
+            if (!org) {
+                return false;
+            }
+
+            // extra check if can register (prevent showing the button if the member cannot register next)
+            return member.canRegister(group, org)
+        });
+
+        if (canRegister) {
+            return true;
+        }
+    }
+
+    return false;
+});
+
+const hideGroupStatus = computed(() => {
+    if (canRegister.value) {
+        // do not show the group status if the group is closed but a member can register (for example if the member is invited)
+        return props.event.group !== null && props.event.group.closed;
+    }
+
+    return false;
 });
 
 function setOrganization(o: Organization) {

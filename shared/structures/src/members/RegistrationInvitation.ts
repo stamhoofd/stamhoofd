@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupType } from '../GroupType.js';
 import { TranslatedString } from '../TranslatedString.js';
@@ -27,9 +27,6 @@ export class InvitationGroupData extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(GroupType) })
     type: GroupType;
-    
-    @field({ decoder: BooleanDecoder })
-    isClosed: boolean;
 }
 
 export class InvitationMemberData extends AutoEncoder {

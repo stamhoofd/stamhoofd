@@ -187,10 +187,9 @@ export function useRegistrationQuickActions(): QuickActions {
                 });
             }
 
-            // todo: sort on createdAt?
             for (const member of memberManager.family.members) {
                 const invitationData: {invitation: MemberRegistrationInvitation, group: Group, organization: Organization}[] = member.member.registrationInvitations
-                    .filter(i => !i.group.isClosed && i.group.type === GroupType.Membership)
+                    .filter(i => i.group.type === GroupType.Membership)
                     .sort((a, b) => a.group.name.toString().localeCompare(b.group.name.toString()))
                     .flatMap((invitation) => {
                         const organization = memberManager.family.getOrganization(invitation.organizationId);
@@ -414,10 +413,10 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
 
             // also add the events this member is invited for
             for (const invitation of member.member.registrationInvitations) {
-                if (invitation.group.isClosed) {
+                if (invitation.group.type !== GroupType.EventRegistration) {
                     continue;
                 }
-
+                
                 eventGroupIds.add(invitation.group.id);
                 organizationIds.add(invitation.organizationId);
             }
@@ -562,10 +561,13 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                             $eq: null,
                         },
                     },
+                    // or invited for the group
+                    ...eventGroupsFilter ? [eventGroupsFilter] : [],
                     {
-                        group: {
-                            status: GroupStatus.Open,
-                            $and: [
+                        group: [
+                                {
+                                    status: GroupStatus.Open,
+                                },
                                 {
                                     $or: [
                                         { registrationStartDate: null },
@@ -580,7 +582,6 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                                     ],
                                 },
                             ],
-                        },
                     },
                 ],
             },
