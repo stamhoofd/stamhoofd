@@ -294,6 +294,9 @@ export class STPackage extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     removeAt: Date | null = null;
 
+    /**
+     * Helper to handle edge cases where validUntil is null but removeAt is set
+     */
     get endDate() {
         if (!this.removeAt) {
             return this.validUntil;
@@ -302,6 +305,10 @@ export class STPackage extends AutoEncoder {
             return this.removeAt
         }
         return new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
+    }
+
+    get isActive() {
+        return !!this.validAt && (!this.endDate || this.endDate > new Date())
     }
 
     /**

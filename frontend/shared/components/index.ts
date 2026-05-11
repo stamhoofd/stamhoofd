@@ -34,7 +34,6 @@ export * from './src/communication';
 // Navigation
 export { default as BackButton } from './src/navigation/BackButton.vue';
 export { default as LegalFooter } from './src/navigation/LegalFooter.vue';
-export { default as LoadingButton } from './src/navigation/LoadingButton.vue';
 export { default as SaveView } from './src/navigation/SaveView.vue';
 export { default as STButtonToolbar } from './src/navigation/STButtonToolbar.vue';
 export { default as STFloatingFooter } from './src/navigation/STFloatingFooter.vue';
@@ -44,7 +43,6 @@ export { default as STToolbar } from './src/navigation/STToolbar.vue';
 export { default as LoadingInputBox } from './src/navigation/LoadingInputBox.vue';
 
 // Overlays
-export { CenteredMessage, CenteredMessageButton } from './src/overlays/CenteredMessage';
 export { default as CenteredMessageView } from './src/overlays/CenteredMessageView.vue';
 export { default as ContextMenuItemView } from './src/overlays/ContextMenuItemView.vue';
 export { default as ContextMenuLine } from './src/overlays/ContextMenuLine.vue';

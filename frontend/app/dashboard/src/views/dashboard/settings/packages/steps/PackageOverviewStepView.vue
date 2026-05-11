@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="!acceptTerms" :title="$t(`%uE`)" @save="goNext">
+    <SaveView :loading="loading" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="!acceptTerms" :title="$t(`Overzicht`)" @save="goNext">
         <h1>{{ $t('Overzicht') }}</h1>
         <p>
             <I18nComponent :t="$t('Meer info over alle prijzen en een prijscalculator kan je terugvinden op <button>onze website</button>')">

@@ -7,6 +7,8 @@ type CenteredMessageCheckbox = {
     text: string;
 };
 
+type ConfirmOptions = {title: string, confirmText: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string, availabilityDelay?: number}
+
 export class CenteredMessageButton {
     text: string;
     href?: string;
@@ -125,27 +127,40 @@ export class CenteredMessage {
      * @param requireCheckbox if a text is provided a checkbox has to be checked first before the message can be confirmed
      * @returns
      */
-    static confirm(text: string, confirmText: string, description = '', cancelText?: string, destructive = true, requireCheckbox: string | undefined = undefined): Promise<boolean> {
+    static confirm(options: ConfirmOptions): Promise<boolean>
+    /** @deprecated, use options variant */ static confirm(text: string, confirmText: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string): Promise<boolean>
+    static confirm(options: string | ConfirmOptions, confirmText?: string, description?: string, cancelText?: string, destructive?: boolean, requireCheckbox?: string /*confirmText?: string, description, cancelText?: string, destructive = true, requireCheckbox: string | undefined = undefined*/): Promise<boolean> {
+        if (typeof options === 'string') {
+            return this.confirm({
+                title: options,
+                confirmText: confirmText ?? '',
+                description,
+                cancelText,
+                destructive,
+                requireCheckbox,
+                availabilityDelay: destructive && confirmText !== $t('%4X') ? 1_000 : undefined
+            })
+        }
         return this.show({
-            title: text,
-            description,
+            title: options.title,
+            description: options.description,
             buttons: [
                 {
-                    text: confirmText,
-                    type: destructive ? 'destructive' : 'primary',
+                    text: options.confirmText,
+                    type: (options.destructive ?? true) ? 'destructive' : 'primary',
                     value: true,
-                    availabilityDelay: destructive && confirmText !== $t('%4X') ? 1_000 : undefined,
-                    requireAcceptCheckbox: requireCheckbox !== undefined,
+                    availabilityDelay: options.availabilityDelay,
+                    requireAcceptCheckbox: options.requireCheckbox !== undefined,
                 },
                 {
-                    text: cancelText ?? $t(`%9b`),
+                    text: options.cancelText ?? $t(`%9b`),
                     type: 'secundary',
                     value: false,
                 },
             ],
-            checkbox: requireCheckbox
+            checkbox: options.requireCheckbox
                 ? {
-                        text: requireCheckbox,
+                        text: options.requireCheckbox,
                     }
                 : undefined,
         });

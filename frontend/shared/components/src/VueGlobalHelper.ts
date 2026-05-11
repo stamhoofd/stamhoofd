@@ -8,7 +8,7 @@ import type {App, ComponentPublicInstance} from 'vue';
 
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext, ViewportHelper } from '..';
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext, ViewportHelper } from '..';
 import PromiseView from './containers/PromiseView.vue';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
@@ -19,6 +19,7 @@ import TInput from './inputs/TInput.vue';
 import TTextarea from './inputs/TTextarea.vue';
 import STListItem from './layout/STListItem.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
+import LoadingButton from './navigation/LoadingButton.vue';
 
 export type ComponentExposed<T> =
 	T extends new (...args: any[]) => infer E ? E :

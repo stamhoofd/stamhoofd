@@ -25,8 +25,8 @@
                         <template #left>
                             <IconContainer :icon="pack.bundle === STPackageBundle.Webshops ? 'basket' : 'group'" :class="{gray: !pack.alreadyBought && !pack.inTrial, 'secundary': !pack.alreadyBought && pack.inTrial}">
                                 <template #aside>
-                                    <span v-if="pack.alreadyBought" v-tooltip="'Deze functie is actief'" class="icon success small primary" />
-                                    <span v-else-if="pack.inTrial" v-tooltip="'Momenteel in proefperiode, activeer om in gebruik te nemen'" class="icon trial small stroke secundary" />
+                                    <span v-if="pack.alreadyBought" v-tooltip="$t('Deze functie is actief')" class="icon success small primary" />
+                                    <span v-else-if="pack.inTrial" v-tooltip="$t('Momenteel in proefperiode, activeer om in gebruik te nemen')" class="icon trial small stroke secundary" />
                                 </template>
                             </IconContainer>
                         </template>
@@ -75,7 +75,7 @@
                                     <span class="icon arrow-right-small" />
                                 </span>
 
-                                <span v-if="pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew" class="button text selected">
+                                <span v-if="pack.alreadyBought && pack.expiresSoon" class="button text selected">
                                     <span>{{ $t('%1Lz') }}</span>
                                     <span class="icon arrow-right-small" />
                                 </span>
@@ -91,9 +91,9 @@
 </template>
 
 <script lang="ts" setup>
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
@@ -105,9 +105,8 @@ import { ref, watch } from 'vue';
 import { useActivatePackages } from './hooks/useActivatePackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
+import PackagesDetailsView from './PackagesDetailsView.vue';
 import { useStartPackageCheckout } from './useStartPackageCheckout';
-import Spinner from '@stamhoofd/components/Spinner.vue';
-import { LoadingButton } from '@stamhoofd/components';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
@@ -115,21 +114,16 @@ const packages = ref([] as SelectablePackage[]);
 const loadingModule = ref(null as STPackageType | null);
 const deactivatePackage = useDeactivatePackage();
 const startPackageCheckout = useStartPackageCheckout({ errors })
+const show = useShow()
 const { packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
 
 class SelectablePackage {
     package: STPackage;
-
-    // In case of a renewal, bundle can be empty
     bundle: STPackageBundle;
-
     alreadyBought = false;
     expiresSoon = false;
     inTrial = false;
     canStartTrial = true;
-
-    selected = false;
-
     loading = false
 
     constructor(pack: STPackage, bundle: STPackageBundle) {
@@ -171,17 +165,15 @@ function getUpdatedPackages() {
         let trialPackage: null | STPackage = null;
 
         for (const p of status.value.packages) {
-            if (p.validUntil !== null) {
-                if (p.validUntil < new Date()) {
-                    // Allow to buy this package because it is expired
-                    continue;
-                }
+            if (!p.isActive) {
+                continue;
             }
 
             if (STPackageBundleHelper.isAlreadyBought(bundle, p)) {
                 isBought = true;
 
-                if (!boughtPackage || p.validUntil === null || (p.validUntil !== null && boughtPackage.validUntil !== null && p.validUntil > boughtPackage.validUntil)) {
+                if (!boughtPackage || p.endDate === null || (p.endDate !== null && boughtPackage.endDate !== null && p.endDate > boughtPackage.endDate)) {
+                    // Take the package that is valid for the longest possible period
                     boughtPackage = p;
                 }
             }
@@ -205,7 +197,7 @@ function getUpdatedPackages() {
             const pack = boughtPackage ?? trialPackage ?? STPackageBundleHelper.getCurrentPackage(bundle, new Date());
             const pp = new SelectablePackage(pack, bundle);
             pp.alreadyBought = isBought;
-            pp.inTrial = isTrial;
+            pp.inTrial = !isBought && isTrial;
             pp.expiresSoon = expiresSoon;
             if (bundle === STPackageBundle.Members && !organization.value.meta.packages.canStartMembersTrial) {
                 pp.canStartTrial = false;
@@ -267,6 +259,23 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
 }
 async function checkoutPackage(pack: SelectablePackage) {
     if (!status.value) {
+        return;
+    }
+
+    if (pack.alreadyBought && !pack.expiresSoon) {
+        // not allowed: open package details instead. We support multiple because we could already have renewed.
+        // this shows both conditions
+        const filteredPackages = status.value.packages.filter(p => p.isActive && (STPackageBundleHelper.isAlreadyBought(pack.bundle, p)))
+
+        if (filteredPackages.length) {
+            await show({
+                components: [
+                    new ComponentWithProperties(PackagesDetailsView, {
+                        packages: filteredPackages
+                    })
+                ]
+            })
+        }
         return;
     }
     

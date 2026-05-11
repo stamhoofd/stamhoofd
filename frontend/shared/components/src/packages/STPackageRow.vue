@@ -13,15 +13,19 @@
         </h3>
         <p class="style-description-small" v-text="pack.meta.humanPricing" />
 
-        <p v-if="pack.removeAt && pack.removeAt < now" class="style-description-small">
-            {{ $t('Stopgezet op {date}', {date: formatDate(pack.removeAt)}) }}
+        <p v-if="pack.endDate && pack.endDate <= now" class="style-description-small">
+            {{ $t('Stopgezet op {date}', {date: formatDate(pack.endDate)}) }}
+        </p>
+
+        <p v-if="pack.meta.startDate > now" class="style-description-small">
+            {{ $t('Vanaf {date}', {date: formatStartDate(pack.meta.startDate)}) }}
         </p>
 
         <p v-if="!pack.validAt && pack.endDate" class="style-description-small">
             {{ $t('Geldig tot {date}', {date: formatEndDate(pack.endDate)}) }}
         </p>
         <p v-if="pack.validAt && pack.endDate" class="style-description-small">
-            {{ formatDateRange(pack.meta.startDate, pack.endDate) }}
+            {{ capitalizeFirstLetter(formatDateRange(pack.meta.startDate, pack.endDate)) }}
         </p>
         <p v-if="pack.validAt && !pack.endDate" class="style-description-small">
             {{ $t('Zonder einddatum') }}
@@ -34,6 +38,10 @@
         <p v-if="$app === 'admin' && pack.meta.allowRenew && pack.meta.keepPricesOnRenewal" class="style-description-small">
             {{ $t('Prijzen blijven behouden bij verlengen') }}
         </p>
+
+        <template #right>
+            <slot name="right" />
+        </template>
     </STListItem>
 </template>
 

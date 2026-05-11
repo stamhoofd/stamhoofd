@@ -5,6 +5,7 @@ import { useOrganizationPackages } from './useOrganizationPackages';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { updateNow } from '@stamhoofd/components/hooks/useNow';
 
 /**
  * Not sure if still required
@@ -75,6 +76,9 @@ export function useDeactivatePackage() {
             });
             await context.value.fetchOrganization(false);
             await reload();
+            pack.removeAt = new Date()
+            pack.meta.canDeactivate = false;
+            updateNow()
             Toast.success(message).show();
         }
         catch (e) {
