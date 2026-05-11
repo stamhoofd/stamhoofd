@@ -19,6 +19,7 @@
     ],
     "dependencies": {
         "@stamhoofd/assets": "*",
+        "@stamhoofd/utility": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/document-helper": "*",
         "@stamhoofd/frontend-excel-export": "*",

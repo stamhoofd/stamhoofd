@@ -21,6 +21,7 @@
         "@stamhoofd/ticket-builder": "*",
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
-        "@stamhoofd/structures": "*"
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/utility": "*"
     }
 }

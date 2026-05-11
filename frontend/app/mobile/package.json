@@ -38,7 +38,8 @@
     "@stamhoofd/ticket-builder": "*",
     "@stamhoofd/networking": "*",
     "@stamhoofd/scss": "*",
-    "@stamhoofd/structures": "*"
+    "@stamhoofd/structures": "*",
+    "@stamhoofd/utility": "*"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",
