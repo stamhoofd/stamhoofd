@@ -3,7 +3,7 @@
         <ImageComponent v-if="eventImage" :image="eventImage" class="event-image" />
         <GroupIcon v-else :group="group" :organization="organization" />
         <template #aside>
-            <span class="icon email stroke small" />
+            <span class="icon email-filled stroke small" />
         </template>
     </IconContainer>
 </template>
