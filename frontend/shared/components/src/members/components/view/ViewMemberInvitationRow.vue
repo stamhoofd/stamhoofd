@@ -62,7 +62,6 @@ const invitationOrganization = computed(() => {
 const group = computed(() => {
     const organization = invitationOrganization.value;
     if (!organization) {
-        // todo
         return null;
     }
 
