@@ -43,6 +43,11 @@ export class DataValidator {
             return true;
         }
 
+        if (domain === 'mailo.com') {
+            // Exception for typo on gmail.com
+            return true;
+        }
+
         if (foundInvalid) {
             return false;
         }
