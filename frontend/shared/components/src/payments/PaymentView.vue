@@ -5,7 +5,7 @@
                 <button v-if="hasPrevious || hasNext" v-tooltip="$t('%hA')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="$t('%hB')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
                 <button v-if="canWrite" v-tooltip="$t('%1Ki')" type="button" class="button icon edit" @click="editPayment" />
-                <button v-if="auth.hasFullAccess()" v-tooltip="$t('%1KS')" type="button" class="button icon history" @click="viewAudit" />
+                <button v-if="auth.hasFullAccess() && payment.organizationId === organization?.id" v-tooltip="$t('%1KS')" type="button" class="button icon history" @click="viewAudit" />
             </template>
         </STNavigationBar>
 
