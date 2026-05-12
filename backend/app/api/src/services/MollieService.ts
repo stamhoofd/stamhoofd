@@ -9,7 +9,6 @@ import { PaymentMandate, PaymentMandateDetails, PaymentMandateStatus, PaymentMan
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import { Context } from '../helpers/Context.js';
-import { PaymentService } from './PaymentService.js';
 
 export class MollieService {
     client: ReturnType<typeof createMollieClient>;
@@ -418,7 +417,13 @@ export class MollieService {
         await dbPayment.save();
 
         if (molliePayment.status === molliePaymentStatus.paid) {
-            await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded);
+            payment.status = PaymentStatus.Succeeded
+        } else if (molliePayment.status === molliePaymentStatus.failed) {
+            payment.status = PaymentStatus.Failed
+        } else if (molliePayment.status === molliePaymentStatus.expired) {
+            payment.status = PaymentStatus.Failed
+        } else if (molliePayment.status === molliePaymentStatus.canceled) {
+            payment.status = PaymentStatus.Failed
         }
         
         return {

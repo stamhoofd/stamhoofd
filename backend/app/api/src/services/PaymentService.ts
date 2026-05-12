@@ -860,8 +860,15 @@ export class PaymentService {
             throw e;
         }
 
-        // Mark valid (not same as paid) if needed
-        if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown || (payment.method === PaymentMethod.DirectDebit && mandate)) {
+        // TypeScript thinks status cannot change to Failed, but it can.
+        if (payment.status === PaymentStatus.Succeeded || (payment.status as PaymentStatus) === PaymentStatus.Failed) { 
+            // force update
+            const updateTo = payment.status
+            payment.status = PaymentStatus.Created
+            await PaymentService.handlePaymentStatusUpdate(payment, organization, updateTo);
+        }
+        else if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown || (payment.method === PaymentMethod.DirectDebit && mandate)) {
+            // Mark valid (not same as paid) if needed
             let hasBundleDiscount = false;
             for (const [balanceItem] of balanceItems) {
                 // Mark valid
