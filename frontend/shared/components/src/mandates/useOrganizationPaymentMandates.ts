@@ -3,26 +3,26 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ErrorBox } from '@stamhoofd/components';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { OrganizationMandatesRequest } from '@stamhoofd/structures/checkout/OrganizationMandatesRequest.js';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
-import { ref, shallowRef } from 'vue';
+import { reactive, ref, shallowRef } from 'vue';
 
 /**
  * Get available mandates for your organization (current context), to pay at a different organization (B2B)
  */
 export function useOrganizationPaymentMandates({
     payingOrganizationId = null,
-    sellerOrganizationId = null, 
+    sellerOrganizationId, 
     errors
 }: {
     payingOrganizationId?: string | null
-    sellerOrganizationId?: string | null
+    sellerOrganizationId: string
     errors: { errorBox: ErrorBox | null };
 }) {
     const context = useContext();
     const owner = useRequestOwner()
     const loading = ref(true);
     const mandates = shallowRef<PaymentMandate[] | null>(null)
+    const deletingMandates = reactive(new Set<string>());
 
     // Load on create
     load().catch(console.error)
@@ -31,10 +31,7 @@ export function useOrganizationPaymentMandates({
         try {
             const response = await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
                 method: 'GET',
-                path: '/billing/mandates',
-                query: OrganizationMandatesRequest.create({
-                    sellingOrganizationId: sellerOrganizationId
-                }),
+                path: '/billing/'+encodeURIComponent(sellerOrganizationId)+'/mandates',
                 shouldRetry: true,
                 owner,
                 decoder: new ArrayDecoder(PaymentMandate as Decoder<PaymentMandate>) 
@@ -48,8 +45,34 @@ export function useOrganizationPaymentMandates({
         loading.value = false;
     }
 
+    async function deleteMandate(mandateId: string) {
+        if (deletingMandates.has(mandateId)) {
+            return;
+        }
+        deletingMandates.add(mandateId)
+
+        try {
+            await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
+                method: 'DELETE',
+                path: '/billing/'+encodeURIComponent(sellerOrganizationId)+'/mandates/' + encodeURIComponent(mandateId),
+                shouldRetry: false,
+                owner,
+            });
+
+            if (mandates.value) {
+                mandates.value = mandates.value.filter(m => m.id !== mandateId)
+            }
+        } catch (e) {
+            errors.errorBox = new ErrorBox(e)
+        } finally {
+            deletingMandates.delete(mandateId)
+        }
+    }
+
     return {
         loading,
+        deleteMandate,
+        deletingMandates,
         mandates
     };
 }

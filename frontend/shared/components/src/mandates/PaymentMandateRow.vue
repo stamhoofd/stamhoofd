@@ -25,10 +25,8 @@
             </p>
         </template>
 
-        <template v-if="allowDelete" #right>
-            <LoadingButton :loading="deleting">
-                <button v-tooltip="$t('Ontkoppel deze bankrekening')" type="button" class="button icon trash" @click.stop="doDelete" />
-            </LoadingButton>
+        <template #right>
+            <slot name="right" />
         </template>
     </STGridItem>
 </template>
@@ -36,26 +34,11 @@
 
 <script lang="ts" setup>
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
-import { ref } from 'vue';
-import type LoadingButton from '../navigation/LoadingButton.vue';
-import PaymentMandateIcon from './PaymentMandateIcon.vue';
 import STGridItem from '../layout/STGridItem.vue';
-import { Formatter } from '@stamhoofd/utility';
+import PaymentMandateIcon from './PaymentMandateIcon.vue';
 
-withDefaults(
-    defineProps<{
-        mandate: PaymentMandate;
-        allowDelete?: boolean
-    }>(),
-    {
-        allowDelete: false
-    }
-);
-
-const deleting = ref(false)
-
-async function doDelete() {
-    // todo
-}
+defineProps<{
+    mandate: PaymentMandate;
+}>();
 
 </script>

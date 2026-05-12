@@ -76,6 +76,18 @@ export class PaymentMandate extends AutoEncoder {
     @field({decoder: DateDecoder})
     createdAt: Date
 
+    get identifier() {
+        if (this.details.iban) {
+            return Formatter.iban(this.details.iban)
+        }
+
+        if (this.details.cardNumber) {
+            return this.details.cardNumber + '/' + this.formattedExpiryDate;
+        }
+
+        return null;
+    }
+
     get name() {
         if (this.details.iban) {
             return Formatter.iban(this.details.iban)

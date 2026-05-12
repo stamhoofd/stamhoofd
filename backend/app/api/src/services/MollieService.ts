@@ -193,6 +193,25 @@ export class MollieService {
         return mandates;
     }
 
+    async deleteMandate({ mandateId, payingOrganization, user }: { 
+        mandateId: string,
+        payingOrganization: Organization | null, 
+        user: User | null,
+    }) {
+        const customerId = await this.getCustomerId({payingOrganization, user});
+        if (!customerId) {
+            return
+        }
+
+        await this.client.customerMandates.revoke(
+            mandateId,
+            {
+                customerId,
+                testmode: this.testMode
+            }
+        )
+    }
+
     private static mollieManateToStamhoofd({ mandate, payingOrganization, user }: { 
         mandate: Mandate,
         payingOrganization: Organization | null, 
@@ -216,7 +235,6 @@ export class MollieService {
             }
         }
         const details = mandate.details;
-        console.log(details)
         return PaymentMandate.create({
             id: mandate.id,
             status: MollieService.mollieMandateStatusToStamhoofd(mandate),

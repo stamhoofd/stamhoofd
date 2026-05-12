@@ -4,24 +4,23 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { PackageCheckout } from '@stamhoofd/structures';
-import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { Context } from '../../../helpers/Context.js';
 import { PaymentMandateService } from '../../../services/PaymentMandateService.js';
 
-type Params = { sellingOrganizationId: string };
+type Params = { id: string, sellingOrganizationId: string };
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = PaymentMandate[];
+type ResponseBody = undefined
 
-export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = PackageCheckout as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method !== 'GET') {
+        if (request.method !== 'DELETE') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates', {sellingOrganizationId: String});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates/@id', {sellingOrganizationId: String, id: String});
 
         if (params) {
             return [true, params as Params];
@@ -33,7 +32,7 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
         const payingOrganization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
 
-        const id = request.params.sellingOrganizationId;
+       const id = request.params.sellingOrganizationId;
         if (!id) {
             throw new SimpleError({
                 code: 'unavailable',
@@ -53,12 +52,15 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
             })
         }
 
-        const mandates = await PaymentMandateService.getMandates({
+        await PaymentMandateService.deleteMandate({
+            mandateId: request.params.id,
             sellingOrganization,
             user,
             payingOrganization
         })
 
-       return new Response(PaymentMandateService.groupByMandate(mandates).mandates);
+        const r = new Response(undefined);
+        r.status = 201;
+        return r;
     }
 }

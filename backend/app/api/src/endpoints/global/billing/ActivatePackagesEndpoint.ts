@@ -1,15 +1,13 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem} from '@stamhoofd/models';
-import { Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemPaymentDetailed, BalanceItemStatus, BalanceItemType, PaymentGeneral, PaymentMethod, STPackageStruct } from '@stamhoofd/structures';
-import { CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, Payment as PaymentStruct, STPackageBundleHelper } from '@stamhoofd/structures';
+import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
+import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, STPackageStruct } from '@stamhoofd/structures';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { STPackageService } from '../../../services/STPackageService.js';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
