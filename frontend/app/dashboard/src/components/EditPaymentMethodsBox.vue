@@ -60,7 +60,8 @@
             </STList>
 
             <template v-if="showAdministrationFee">
-                <hr><h2>{{ $t('%xK') }}</h2>
+                <hr>
+                <h2>{{ $t('%xK') }}</h2>
                 <p>{{ $t('%1') }}</p>
 
                 <div class="split-inputs">
@@ -82,6 +83,16 @@
                     }) }}
                 </p>
             </template>
+
+            <template v-if="$isStamhoofd && (enableMandates || sortedPaymentMethods.find(p => PaymentMethodHelper.canCreateMandate(p)))">
+                <hr>
+                <h2>{{ $t('Bankkaarten opslaan') }}</h2>
+                <p>{{ $t('Sta toe om de gegevens van bankkaarten (Bancontact, iDEAL en kredietkaart) op te slaan voor later gebruik. Deze kunnen dan gebruikt worden door beheerders om betalingen te innen via SEPA domiciliëring of creditcard - of geselecteerd worden bij het afrekenen. Voorlopig enkel ondersteund voor B2B betalingen via Mollie.') }}</p>
+
+                <STList>
+                    <CheckboxListItem v-model="enableMandates" :label="$t('Toelaten om bankkaartene op te slaan en te hergebruiken')" :description="$t('Betalingen via SEPA domiciliëring kunnen tot 3 werkdagen in beslag nemen en voor lange tijd teruggevorderd worden. Pas zeker je algemene voorwaarden aan.')" />
+                </STList>
+            </template>
         </div>
     </LoadingBoxTransition>
 </template>
@@ -101,6 +112,7 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useCountry } from '@stamhoofd/components/hooks/useCountry.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
+import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import PermyriadInputBox from '@stamhoofd/components/inputs/PermyriadInputBox.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
@@ -115,6 +127,7 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import PaymentSettingsView from '../views/dashboard/settings/PaymentSettingsView.vue';
 import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 
 const props = withDefaults(defineProps<{
     type: 'registration' | 'webshop';
@@ -135,7 +148,10 @@ const stripeAccounts = ref<StripeAccount[]>([]);
 const context = useContext();
 const owner = useRequestOwner();
 const organization = useRequiredOrganization();
-const emit = defineEmits(['patch:privateConfig', 'patch:config']);
+const emit = defineEmits<{
+  'patch:privateConfig': [value: AutoEncoderPatchType<PrivatePaymentConfiguration>]
+  'patch:config': [value: AutoEncoderPatchType<PaymentConfiguration>] 
+}>();
 
 const country = useCountry();
 const errors = useErrors({ validator: props.validator });
@@ -511,6 +527,36 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
 
     return $t('%3s', { paymentMethod: PaymentMethodHelper.getName(paymentMethod) });
 }
+
+const enableMandates = computed({
+    get: () => {
+        return props.config.enableMandates
+    },
+    set: (enableMandates) => {
+        if (enableMandates === props.config.enableMandates) {
+            return;
+        }
+        if (!enableMandates) {
+            CenteredMessage.confirm({
+                title: $t('Ben je zeker dat je opgeslagen betaalgegevens wilt uitschakelen?'),
+                description: $t('Dit maakt reeds opgeslagen betaalmethodes of automatische aanrekeningen onbruikbaar in het systeem.'),
+                requireCheckbox: $t('Ja, ik begrijp de gevolgen'),
+                confirmText: $t('Uitschakelen'),
+                destructive: true
+            }).then((confirmed) => {
+                if (confirmed) {
+                    patchConfig(PaymentConfiguration.patch({
+                      enableMandates
+                    }))
+                }
+            }).catch(console.error)
+            return;
+        }
+        patchConfig(PaymentConfiguration.patch({
+            enableMandates
+        }));
+    },
+});
 
 // Administration cost
 const fixed = computed({

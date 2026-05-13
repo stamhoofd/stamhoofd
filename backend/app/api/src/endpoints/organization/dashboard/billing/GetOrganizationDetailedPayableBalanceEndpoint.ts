@@ -1,31 +1,24 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import type { DetailedPayableBalanceCollection} from '@stamhoofd/structures';
-import { PaymentStatus } from '@stamhoofd/structures';
+import { DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';
 
-import { BalanceItem, Payment } from '@stamhoofd/models';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { BalanceItem, Organization, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { GetUserDetailedPayableBalanceEndpoint } from '../../../global/registration/GetUserDetailedPayableBalanceEndpoint.js';
 
-type Params = Record<string, never>;
+type Params = { sellingOrganizationId: string };
 type Query = undefined;
-type ResponseBody = DetailedPayableBalanceCollection;
+type ResponseBody = DetailedPayableBalance;
 type Body = undefined;
 
-export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationDetailedPayableBalancendpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
-
-        const params = request.getVersion() >= 339
-            ? Endpoint.parseParameters(request.url, '/organization/payable-balance/detailed', {})
-            : (
-                    request.getVersion() <= 334
-                        ? Endpoint.parseParameters(request.url, '/organization/billing/status', {})
-                        : Endpoint.parseParameters(request.url, '/organization/billing/status/detailed', {})
-                );
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/payable-balance', {sellingOrganizationId: String});
 
         if (params) {
             return [true, params as Params];
@@ -33,7 +26,7 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
         return [false];
     }
 
-    async handle(_: DecodedRequest<Params, Query, Body>) {
+    async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
@@ -42,15 +35,45 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
             throw Context.auth.error();
         }
 
-        const balanceItemModels = await BalanceItem.balanceItemsForOrganization(organization.id);
+        const id = request.params.sellingOrganizationId;
+        if (!id) {
+            throw new SimpleError({
+                code: 'unavailable',
+                message: 'This is temporarily unavailable',
+                human: $t('Dit is tijdelijk onbeschikbaar, probeer later opnieuw')
+            })
+        }
+        
+        const sellingOrganization = await Organization.getByID(id);
+        if (!sellingOrganization || !sellingOrganization.active) {
+            throw new SimpleError({
+                statusCode: 404,
+                code: 'not_found',
+                message: 'Selling organization not found',
+                human: $t('Deze organisatie bestaat niet (meer)'),
+                field: 'sellingOrganization'
+            })
+        }
+
+        const balanceItemModels = await BalanceItem.balanceItemsForOrganization(organization.id, request.params.sellingOrganizationId);
 
         const paymentModels = await Payment.select()
             .where('payingOrganizationId', organization.id)
+            .where('organizationId', request.params.sellingOrganizationId)
             .andWhere(
                 SQL.whereNot('status', PaymentStatus.Failed),
             )
             .fetch();
 
-        return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, paymentModels));
+        const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
+        const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
+
+        const balance = DetailedPayableBalance.create({
+            organization: await AuthenticatedStructures.organization(sellingOrganization),
+            balanceItems,
+            payments,
+        });
+
+        return new Response(balance);
     }
 }

@@ -100,13 +100,16 @@
 
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Checkbox, Toast, useRequiredOrganization } from '@stamhoofd/components';
+import { Checkbox, Toast } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
+import STGrid from '@stamhoofd/components/layout/STGrid.vue';
+import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
 import PaymentMandateRadioRow from '@stamhoofd/components/mandates/PaymentMandateRadioRow.vue';
 import { useOrganizationPaymentMandates } from '@stamhoofd/components/mandates/useOrganizationPaymentMandates';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
@@ -122,8 +125,6 @@ import { computed, ref, shallowRef, watch } from 'vue';
 import InvoiceItemsBox from '../../../invoices/components/InvoiceItemsBox.vue';
 import { useActivatePackages } from '../hooks/useActivatePackages';
 import type { PackageCheckoutViewModel } from '../PackageCheckoutViewModel';
-import STGrid from '@stamhoofd/components/layout/STGrid.vue';
-import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
 
 const props = defineProps<{
     model: PackageCheckoutViewModel;
@@ -146,7 +147,7 @@ const activatePackages = useActivatePackages();
 const proFormaData = shallowRef<null | CheckoutResponse>(null);
 const loadingProForma = ref(false);
 const {mandates} = useOrganizationPaymentMandates({
-    sellerOrganizationId: props.model.sellerOrganization.id,
+    sellingOrganizationId: props.model.sellingOrganization.id,
     errors,
 });
 

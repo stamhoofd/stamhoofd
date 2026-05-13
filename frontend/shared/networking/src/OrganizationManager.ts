@@ -48,6 +48,10 @@ export class OrganizationManager {
         await this.$context.fetchOrganization(false);
     }
 
+    /**
+     * @deprecated
+     * Use hooks
+     */
     async patch(patch: AutoEncoderPatchType<Organization>, options: { shouldRetry?: boolean; owner?: any } = {}) {
         if (!this.$context.organization) {
             throw new SimpleError({

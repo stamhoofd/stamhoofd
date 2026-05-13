@@ -2,8 +2,8 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { Context } from '../../../helpers/Context.js';
-import { STPackageService } from '../../../services/STPackageService.js';
+import { Context } from '../../../../helpers/Context.js';
+import { STPackageService } from '../../../../services/STPackageService.js';
 type Params = { id: string };
 type Query = undefined;
 type ResponseBody = undefined;

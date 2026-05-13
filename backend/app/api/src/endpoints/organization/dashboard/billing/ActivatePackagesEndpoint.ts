@@ -4,10 +4,10 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, STPackageStruct } from '@stamhoofd/structures';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
-import { Context } from '../../../helpers/Context.js';
-import { PaymentService } from '../../../services/PaymentService.js';
-import { STPackageService } from '../../../services/STPackageService.js';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { PaymentService } from '../../../../services/PaymentService.js';
+import { STPackageService } from '../../../../services/STPackageService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -112,7 +112,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             if (balanceItem) {
                 balanceItem.VATExcempt = PaymentService.getVATExcempt({
                     customer: checkout.customer,
-                    sellerOrganization: membershipOrganization
+                    sellingOrganization: membershipOrganization
                 });
                 balanceItems.set(balanceItem, balanceItem.priceWithVAT);
             }
@@ -153,7 +153,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             item.VATPercentage = 21;
             item.VATExcempt = PaymentService.getVATExcempt({
                 customer: checkout.customer,
-                sellerOrganization: membershipOrganization
+                sellingOrganization: membershipOrganization
             });
             item.VATIncluded = !item.VATExcempt; // Makes sure price with VAT always matches unitPrice
             item.quantity = 1;

@@ -62,12 +62,12 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
             decoder: Organization as Decoder<Organization>,
             owner,
         });
-        const sellerOrganization = response.data;
+        const sellingOrganization = response.data;
 
         const model = new PackageCheckoutViewModel({
             checkout,
             packageStatus: status,
-            sellerOrganization
+            sellingOrganization
         })
 
 
@@ -100,7 +100,7 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
             await handleCheckoutResponse({
                 navigate,
                 response,
-                sellerOrganization,
+                sellingOrganization,
                 context: context.value
             })
         }, displayOptions);
@@ -117,9 +117,9 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
     }
 }
 
-async function handleCheckoutResponse({response, sellerOrganization, context, navigate}: {
+async function handleCheckoutResponse({response, sellingOrganization, context, navigate}: {
     response: CheckoutResponse,
-    sellerOrganization: Organization,
+    sellingOrganization: Organization,
     context: SessionContext,
     navigate: NavigationActions
 }) {
@@ -127,17 +127,17 @@ async function handleCheckoutResponse({response, sellerOrganization, context, na
 
     console.log('handleCheckoutResponse', payment)
 
-    const server = context.getOptionalAuthenticatedServerForOrganization(sellerOrganization.id);
+    const server = context.getOptionalAuthenticatedServerForOrganization(sellingOrganization.id);
     
     if (payment && payment.status !== PaymentStatus.Succeeded) {
         await PaymentHandler.handlePayment({
             server,
-            organization: sellerOrganization,
+            organization: sellingOrganization,
             payment,
             paymentUrl: response.paymentUrl,
             paymentQRCode: response.paymentQRCode,
             navigate,
-            transferSettings: sellerOrganization.meta.registrationPaymentConfiguration.transferSettings,
+            transferSettings: sellingOrganization.meta.registrationPaymentConfiguration.transferSettings,
             type: 'registration',
         }, async (payment, navigate: NavigationActions) => {
             await navigate.show({

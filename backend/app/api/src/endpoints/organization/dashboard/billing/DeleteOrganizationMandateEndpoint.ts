@@ -4,8 +4,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { PackageCheckout } from '@stamhoofd/structures';
-import { Context } from '../../../helpers/Context.js';
-import { PaymentMandateService } from '../../../services/PaymentMandateService.js';
+import { Context } from '../../../../helpers/Context.js';
+import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
 
 type Params = { id: string, sellingOrganizationId: string };
 type Query = undefined;

@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
-import { useAuth } from '@stamhoofd/components';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
 import PlatformMembershipsTableView from '@stamhoofd/components/platform-memberships/PlatformMembershipsTableView.vue';

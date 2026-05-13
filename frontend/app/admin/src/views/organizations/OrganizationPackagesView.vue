@@ -13,11 +13,11 @@
                 <div class="container">
                     <hr>
                     <h2 class="style-with-button">
-                        <div>{{ $t('Betaalmethodes') }}</div>
+                        <div>{{ $t('Betaalkaarten') }}</div>
                     </h2>
 
                     <p v-if="mandates.length === 0" class="info-box">
-                        {{ $t('Geen mandaten') }}
+                        {{ $t('Geen betaalkaarten') }}
                     </p>
                     <STGrid v-else>
                         <PaymentMandateRow v-for="mandate of mandates" :key="mandate.id" :mandate="mandate" :selectable="false">
@@ -54,19 +54,22 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, useContext, useErrors, usePlatform } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
+import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import STGrid from '@stamhoofd/components/layout/STGrid.vue';
+import PaymentMandateRow from '@stamhoofd/components/mandates/PaymentMandateRow.vue';
+import { useOrganizationPaymentMandates } from '@stamhoofd/components/mandates/useOrganizationPaymentMandates';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import STPackageRow from '@stamhoofd/components/packages/STPackageRow.vue';
 import { useRequestOwner } from '@stamhoofd/networking';
 import type { Organization, STPackage } from '@stamhoofd/structures';
 import { OrganizationPackagesStatus, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 import EditPackageView from './EditPackageView.vue';
-import { useOrganizationPaymentMandates } from '@stamhoofd/components/mandates/useOrganizationPaymentMandates';
-import PaymentMandateRow from '@stamhoofd/components/mandates/PaymentMandateRow.vue';
-import STGrid from '@stamhoofd/components/layout/STGrid.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
-import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -87,7 +90,7 @@ const platform = usePlatform();
 
 const {mandates, deleteMandate: doDeleteMandate, deletingMandates} = useOrganizationPaymentMandates({
     payingOrganizationId: props.organization.id,
-    sellerOrganizationId: platform.value.membershipOrganizationId!,
+    sellingOrganizationId: platform.value.membershipOrganizationId!,
     errors,
 });
 

@@ -343,6 +343,22 @@
                         </template>
                     </STListItem>
 
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.PaymentSettings)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Facturen en betaalinstellingen') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Beheer hoe je betaalt voor Stamhoofd, download jouw facturen en bekijk jouw tegoed') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Referrals)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
@@ -405,7 +421,7 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { OrganizationRegistrationPeriod} from '@stamhoofd/structures';
-import { EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
+import { DetailedPayableBalance, EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
 import type { ComponentOptions, Ref} from 'vue';
 import { computed, ref } from 'vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
@@ -422,6 +438,7 @@ import FreeContributionSettingsView from './modules/members/FreeContributionSett
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
+import PayableBalanceView from '@stamhoofd/components/payments/PayableBalanceView.vue';
 
 type ttt = FreeContributionSettingsView;
 
@@ -441,6 +458,7 @@ enum Routes {
     RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
     SingleSignOn = 'sso',
     Packages = 'pakketten',
+    PaymentSettings = 'betalingen',
     Referrals = 'referrals',
     Labs = 'experimenten',
     Premises = 'lokalen',
@@ -610,6 +628,19 @@ defineRoutes([
                     present: 'popup' as const,
                     component: PackageSettingsView,
                 },
+                {
+                    url: Routes.PaymentSettings,
+                    present: 'popup' as const,
+                    component: PayableBalanceView,
+                    async paramsToProps() {
+                        const item = await loadPayableBalance();
+
+                        return {
+                            item,
+                        };
+                    },
+
+                },
             ]
         : []),
 ]);
@@ -635,6 +666,20 @@ const isShowPremises = computed(() => {
     const premises = $organizationManager.value.organization.privateMeta?.premises;
     return premises && premises.length > 0;
 });
+
+// Fetch balance
+async function loadPayableBalance() {
+    const response = await context.value.authenticatedServer.request({
+        method: 'GET',
+        path: `/billing/${platform.value.membershipOrganizationId}/payable-balance`,
+        decoder: DetailedPayableBalance as Decoder<DetailedPayableBalance>,
+        shouldRetry: false,
+        owner,
+        timeout: 10_000,
+    });
+
+    return response.data;
+}
 
 async function loadStripeAccounts(recheckStripeAccount: string | null) {
     try {

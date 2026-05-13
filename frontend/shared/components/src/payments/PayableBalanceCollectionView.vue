@@ -5,10 +5,19 @@
         <main>
             <h1>{{ $t('%1JH') }}</h1>
 
-            <PayableBalanceTable v-for="item in collection.organizations" :key="item.organization.id" :item="item" :show-name="!singleOrganization" />
+            <div v-for="item in collection.organizations.filter(o => o.filteredBalanceItems.length > 0)" :key="item.organization.id" class="container">
+                <hr>
+                <h2>
+                    {{ singleOrganization ? $t('%1Ni') : $t('%vX', {organization: item.organization.name}) }}
+                </h2>
+
+                <PayableBalanceTable :item="item" />
+            </div>
+
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('%1PL') }}</h2>
+                <hr>
+                <h2>{{ $t('%1PL') }}</h2>
                 <p>{{ $t('%h6') }}</p>
 
                 <STList>

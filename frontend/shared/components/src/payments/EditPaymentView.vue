@@ -150,30 +150,31 @@
 </template>
 
 <script lang="ts" setup>
+import { ErrorBox } from '#errors/ErrorBox';
+import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import { useErrors } from '#errors/useErrors';
+import { useOrganization } from '#hooks/useOrganization';
+import { usePatch } from '#hooks/usePatch';
+import IconContainer from '#icons/IconContainer.vue';
+import DateSelection from '#inputs/DateSelection.vue';
+import Dropdown from '#inputs/Dropdown.vue';
+import IBANInput from '#inputs/IBANInput.vue';
+import STInputBox from '#inputs/STInputBox.vue';
+import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
+import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
+import STList from '#layout/STList.vue';
+import STListItem from '#layout/STListItem.vue';
+import SearchOrganizationView from '#members/SearchOrganizationView.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage';
+import { Toast } from '#overlays/Toast';
+import type { NavigationActions } from '#types/NavigationActions';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { BalanceItem, Organization, PaymentGeneral} from '@stamhoofd/structures';
+import type { BalanceItem, Organization, PaymentGeneral } from '@stamhoofd/structures';
 import { BalanceItemRelationType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
-
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
-import { ErrorBox } from '../errors/ErrorBox';
-import STErrorsDefault from '../errors/STErrorsDefault.vue';
-import { useErrors } from '../errors/useErrors';
-import { useOrganization, usePatch } from '../hooks';
-import IconContainer from '../icons/IconContainer.vue';
-import DateSelection from '../inputs/DateSelection.vue';
-import Dropdown from '../inputs/Dropdown.vue';
-import IBANInput from '../inputs/IBANInput.vue';
-import STInputBox from '../inputs/STInputBox.vue';
-import { CategorizedBox, CategorizedView } from '../layout';
-import STList from '../layout/STList.vue';
-import STListItem from '../layout/STListItem.vue';
-import SearchOrganizationView from '../members/SearchOrganizationView.vue';
-import { CenteredMessage } from '../overlays/CenteredMessage';
-import { Toast } from '../overlays/Toast';
-import type { NavigationActions } from '../types/NavigationActions';
 import PaymentCustomerSelectionBox from './components/PaymentCustomerSelectionBox.vue';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 

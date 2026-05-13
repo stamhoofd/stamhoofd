@@ -112,11 +112,14 @@
                 </div>
 
                 <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
-                    <hr><h2>{{ $t('%NH', {organization: item.organization.name}) }}</h2>
-                    <p>{{ $t('%NI', {organization: item.organization.name}) }}</p>
+                    <hr>
+                    <h2>{{ $t('%NH', {organization: item.organization.name}) }}</h2>
+                    <p v-if="$isPlatform">
+                        {{ $t('%NI', {organization: item.organization.name}) }}
+                    </p>
 
                     <STList class="illustration-list">
-                        <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalance, {params: {uri: item.organization.uri}})">
+                        <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.PayableBalanceItems, {params: {uri: item.organization.uri}})">
                             <template #left>
                                 <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                             </template>
@@ -144,10 +147,25 @@
                                 <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('%NL') }}
+                                {{ item.organization.meta.invoicesEnabled ? $t('Facturen en betaalinstellingen') : $t('%NL') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('%NM', {organization: item.organization.name}) }}
+                                {{ item.organization.meta.invoicesEnabled ? $t('Download jouw facturen en bekijk jouw tegoed') : $t('%NM', {organization: item.organization.name}) }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-if="!$isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/stock.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('%1HV') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('%1HW') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -169,10 +187,11 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import PayableBalanceCollectionView from '@stamhoofd/components/payments/PayableBalanceCollectionView.vue';
+import PayableBalanceItemsView from '@stamhoofd/components/payments/PayableBalanceItemsView.vue';
+import PayableBalanceView from '@stamhoofd/components/payments/PayableBalanceView.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { AccessRight, BalanceItem, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { AccessRight, BalanceItem, DetailedPayableBalance, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { ref } from 'vue';
 import BalanceItemsTableView from '../balance-items/BalanceItemsTableView.vue';
@@ -180,6 +199,7 @@ import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
+import PackageSettingsView from './packages/PackageSettingsView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
@@ -187,9 +207,13 @@ enum Routes {
     Payments = 'Payments',
     BalanceItems = 'BalanceItems',
     Invoices = 'Invoices',
+    PayableBalanceItems = 'PayableBalanceItems',
     PayableBalance = 'PayableBalance',
     ReceivableBalance = 'ReceivableBalance',
+    Packages = 'pakketten',
 }
+
+const isPlatform = STAMHOOFD.userMode === 'platform';
 
 defineRoutes([
     {
@@ -251,13 +275,13 @@ defineRoutes([
         component: ConfigurePaymentExportView,
     },
     {
-        name: Routes.PayableBalance,
-        url: 'openstaand/@uri',
+        name: Routes.PayableBalanceItems,
+        url: 'openstaand/@uri/items',
         present: 'popup',
         params: {
             uri: String,
         },
-        component: PayableBalanceCollectionView,
+        component: PayableBalanceItemsView,
         async paramsToProps(params: { uri: string }) {
             await balancePromise;
             const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
@@ -267,29 +291,78 @@ defineRoutes([
             }
 
             return {
-                collection: DetailedPayableBalanceCollection.create({ organizations: [item] }),
+                item,
                 reload: async () => {
                     await updateBalance();
-                    const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
-                    if (!item) {
-                        return DetailedPayableBalanceCollection.create({ organizations: [] });
+                    const newItem = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+                    if (!newItem) {
+                        return DetailedPayableBalance.create({ organization: item.organization });
                     }
-                    return DetailedPayableBalanceCollection.create({ organizations: [item] });
+                    return newItem;
                 },
             };
         },
         propsToParams(props) {
-            if (!('collection' in props) || !(props.collection instanceof DetailedPayableBalanceCollection)) {
-                throw new Error('Missing collection');
+            if (!('item' in props) || !(props.item instanceof DetailedPayableBalance)) {
+                throw new Error('Missing item');
             }
 
             return {
                 params: {
-                    uri: props.collection.organizations[0].organization.uri,
+                    uri: props.item.organization.uri,
                 },
             };
         },
     },
+    {
+        name: Routes.PayableBalance,
+        url: 'openstaand/@uri',
+        present: 'popup',
+        params: {
+            uri: String,
+        },
+        component: PayableBalanceView,
+        async paramsToProps(params: { uri: string }) {
+            await balancePromise;
+            const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+
+            if (!item) {
+                throw new Error('Organization not found');
+            }
+
+            return {
+                item,
+                reload: async () => {
+                    await updateBalance();
+                    const newItem = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+                    if (!newItem) {
+                        return DetailedPayableBalance.create({ organization: item.organization });
+                    }
+                    return newItem;
+                },
+            };
+        },
+        propsToParams(props) {
+            if (!('item' in props) || !(props.item instanceof DetailedPayableBalance)) {
+                throw new Error('Missing item');
+            }
+
+            return {
+                params: {
+                    uri: props.item.organization.uri,
+                },
+            };
+        },
+    },
+    ...(!isPlatform
+        ? [
+                {
+                    url: Routes.Packages,
+                    present: 'popup' as const,
+                    component: PackageSettingsView,
+                },
+            ]
+        : []),
 ]);
 
 const auth = useAuth();

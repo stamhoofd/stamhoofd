@@ -2,12 +2,12 @@
     <STListItem class="right-stack left-center">
         <template #left>
             <slot name="left">
-                <CompanyIcon :company="company" />
+                <CompanyIcon :company="company" :is-default="isDefault" />
             </slot>
         </template>
 
         <h3 class="style-title-list">
-            {{ company.name || 'Naamloos' }}
+            {{ company.name || 'Naamloos' }}<span v-if="isDefault" v-tooltip="$t('Standaard facturatiegegevens')" class="icon tiny success primary" />
         </h3>
 
         <p v-if="company.VATNumber" class="style-description-small">

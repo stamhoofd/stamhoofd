@@ -99,9 +99,9 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import type { Validator } from '@stamhoofd/components';
-import { useErrors } from '@stamhoofd/components';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import type { Validator } from '@stamhoofd/components/errors/Validator';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';

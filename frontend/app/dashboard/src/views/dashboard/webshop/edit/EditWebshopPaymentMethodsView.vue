@@ -42,7 +42,7 @@ function patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
     );
 }
 
-function patchPrivateConfig(patch: PrivatePaymentConfiguration) {
+function patchPrivateConfig(patch: AutoEncoderPatchType<PrivatePaymentConfiguration>) {
     addPatch(
         PrivateWebshop.patch({
             privateMeta: WebshopPrivateMetaData.patch({

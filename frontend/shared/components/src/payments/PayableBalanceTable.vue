@@ -1,38 +1,30 @@
 <template>
-    <div v-if="filteredItems.length !== 0 || !showName" class="container">
-        <hr><h2>
-            {{ !showName ? $t('%1Ni') : $t('%vX', {organization: item.organization.name}) }}
-        </h2>
-
-        <p v-if="filteredItems.length === 0" class="info-box">
-            {{ $t('%h9') }}
+    <p v-if="filteredItems.length === 0" class="info-box">
+        {{ $t('%h9') }}
+    </p>
+    <template v-else>
+        <GroupedBalanceList :item="item" />
+        <BalancePriceBreakdown :item="item" />
+        <p class="style-button-bar right-align">
+            <button class="button primary" type="button" @click="checkout">
+                <span>{{ $t('%eX') }}</span>
+                <span class="icon arrow-right" />
+            </button>
         </p>
-        <template v-else>
-            <GroupedBalanceList :item="item" />
-
-            <BalancePriceBreakdown :item="item" />
-
-            <p class="style-button-bar right-align">
-                <button class="button primary" type="button" @click="checkout">
-                    <span>{{ $t('%eX') }}</span>
-                    <span class="icon arrow-right" />
-                </button>
-            </p>
-        </template>
-    </div>
+    </template>
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
-import { GlobalEventBus } from '#EventBus.ts';
-import type { NavigationActions } from '#types/NavigationActions.ts';
-import SelectBalanceItemsView from '#payments/SelectBalanceItemsView.vue';
-import { Toast } from '#overlays/Toast.ts';
 import { useAppContext } from '#context/appContext.ts';
-import { useOrganizationCart } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { GlobalEventBus } from '#EventBus.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
+import { useOrganizationCart } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { Toast } from '#overlays/Toast.ts';
+import SelectBalanceItemsView from '#payments/SelectBalanceItemsView.vue';
+import type { NavigationActions } from '#types/NavigationActions.ts';
+import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
-import type { BalanceItem, BalanceItemPaymentDetailed, DetailedPayableBalance} from '@stamhoofd/structures';
+import type { BalanceItem, BalanceItemPaymentDetailed, DetailedPayableBalance } from '@stamhoofd/structures';
 import { BalanceItemCartItem, RegisterCheckout } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalancePriceBreakdown from './BalancePriceBreakdown.vue';
@@ -40,7 +32,6 @@ import GroupedBalanceList from './GroupedBalanceList.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance;
-    showName: boolean;
 }>();
 
 const items = computed(() => props.item.filteredBalanceItems);

@@ -1,7 +1,8 @@
+import { ErrorBox } from '#errors/ErrorBox';
+import { useContext } from '#hooks/useContext.ts';
+import { Toast } from '#overlays/Toast';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { ErrorBox } from '@stamhoofd/components';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { reactive, ref, shallowRef } from 'vue';
@@ -11,11 +12,11 @@ import { reactive, ref, shallowRef } from 'vue';
  */
 export function useOrganizationPaymentMandates({
     payingOrganizationId = null,
-    sellerOrganizationId, 
+    sellingOrganizationId, 
     errors
 }: {
     payingOrganizationId?: string | null
-    sellerOrganizationId: string
+    sellingOrganizationId: string
     errors: { errorBox: ErrorBox | null };
 }) {
     const context = useContext();
@@ -31,7 +32,7 @@ export function useOrganizationPaymentMandates({
         try {
             const response = await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
                 method: 'GET',
-                path: '/billing/'+encodeURIComponent(sellerOrganizationId)+'/mandates',
+                path: '/billing/'+encodeURIComponent(sellingOrganizationId)+'/mandates',
                 shouldRetry: true,
                 owner,
                 decoder: new ArrayDecoder(PaymentMandate as Decoder<PaymentMandate>) 
@@ -54,7 +55,7 @@ export function useOrganizationPaymentMandates({
         try {
             await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
                 method: 'DELETE',
-                path: '/billing/'+encodeURIComponent(sellerOrganizationId)+'/mandates/' + encodeURIComponent(mandateId),
+                path: '/billing/'+encodeURIComponent(sellingOrganizationId)+'/mandates/' + encodeURIComponent(mandateId),
                 shouldRetry: false,
                 owner,
             });
@@ -63,7 +64,7 @@ export function useOrganizationPaymentMandates({
                 mandates.value = mandates.value.filter(m => m.id !== mandateId)
             }
         } catch (e) {
-            errors.errorBox = new ErrorBox(e)
+            Toast.fromError(e).show()
         } finally {
             deletingMandates.delete(mandateId)
         }

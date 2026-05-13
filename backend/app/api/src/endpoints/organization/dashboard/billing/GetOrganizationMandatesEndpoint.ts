@@ -5,8 +5,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { PackageCheckout } from '@stamhoofd/structures';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
-import { Context } from '../../../helpers/Context.js';
-import { PaymentMandateService } from '../../../services/PaymentMandateService.js';
+import { Context } from '../../../../helpers/Context.js';
+import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
 
 type Params = { sellingOrganizationId: string };
 type Query = undefined;

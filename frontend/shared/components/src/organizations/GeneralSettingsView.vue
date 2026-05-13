@@ -41,11 +41,8 @@
 
         <STList v-else v-model="draggableCompanies" :draggable="true">
             <template #item="{item: company, index}">
-                <CompanyRow :selectable="true" :company="company" @click="editCompany(company)">
+                <CompanyRow :selectable="true" :company="company" :is-default="index === 0 && draggableCompanies.length > 1" @click="editCompany(company)">
                     <template #right>
-                        <span v-if="index === 0" class="style-tag">
-                            {{ $t('%v6') }}
-                        </span>
                         <span class="button icon drag gray" @click.stop @contextmenu.stop />
                         <span class="icon arrow-right-small gray" />
                     </template>

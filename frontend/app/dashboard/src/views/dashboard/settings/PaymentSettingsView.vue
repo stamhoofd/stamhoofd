@@ -23,7 +23,8 @@
         </p>
 
         <div v-for="account in stripeAccounts" :key="account.id" class="container">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%e') }} <span class="title-suffix">{{ account.accountId }}</span></div>
                 <div>
                     <button type="button" class="button icon edit gray" @click="editStripeAccount(account)" />
@@ -329,13 +330,17 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { useDismiss, useUrl } from '@simonbackx/vue-app-navigation';
-import { useContext, useErrors, useFeatureFlag, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { useContext } from '@stamhoofd/components/hooks/useContext';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
@@ -345,11 +350,12 @@ import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager } from '@stamhoofd/networking';
 import { AppManager } from '@stamhoofd/networking/AppManager';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import type { MollieProfile} from '@stamhoofd/structures';
+import type { MollieProfile } from '@stamhoofd/structures';
 import { BuckarooSettings, CheckMollieResponse, Organization, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount } from '@stamhoofd/structures';
 import { Country } from "@stamhoofd/types/Country";
 import { Formatter } from '@stamhoofd/utility';

@@ -6,17 +6,17 @@ import type { Organization, OrganizationPackagesStatus, PackageCheckout, STPacka
 export class PackageCheckoutViewModel {
     checkout: PackageCheckout
     packageStatus: OrganizationPackagesStatus
-    sellerOrganization: Organization
+    sellingOrganization: Organization
     packages: STPackage[]
 
     constructor(data: {
         checkout: PackageCheckout
         packageStatus: OrganizationPackagesStatus
-        sellerOrganization: Organization
+        sellingOrganization: Organization
     }) {
         this.checkout = data.checkout
         this.packageStatus = data.packageStatus
-        this.sellerOrganization = data.sellerOrganization
+        this.sellingOrganization = data.sellingOrganization
     }
 
     validate() {
@@ -36,6 +36,6 @@ export class PackageCheckoutViewModel {
     }
 
     get paymentConfiguration() {
-        return this.sellerOrganization.meta.registrationPaymentConfiguration
+        return this.sellingOrganization.meta.registrationPaymentConfiguration
     }
 }

@@ -110,8 +110,6 @@
 
             <hr><h2>{{ $t('%6u') }}</h2>
 
-            <p>{{ $t('Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.' ) }}</p>
-
             <STList class="illustration-list">
                 <STListItem v-if="!$isPlatform" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Invoices)">
                     <template #left>

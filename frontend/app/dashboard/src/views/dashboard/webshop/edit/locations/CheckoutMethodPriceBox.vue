@@ -16,8 +16,8 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import type { Validator } from '@stamhoofd/components';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
+import type { Validator } from '@stamhoofd/components/errors/Validator';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import { CheckoutMethodPrice } from '@stamhoofd/structures';

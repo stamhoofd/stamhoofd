@@ -5,7 +5,7 @@
         </template>
 
         <p v-if="mandate.isDefault" class="style-title-prefix-list">
-            {{ $t('Huidige standaard betaalmethode') }}
+            {{ $t('Huidige standaard bankkaart') }}
         </p>
 
         <h3 class="style-title-list">

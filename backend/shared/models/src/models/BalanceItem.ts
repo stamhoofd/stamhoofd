@@ -664,10 +664,15 @@ export class BalanceItem extends QueryableModel {
         return balanceItems;
     }
 
-    static async balanceItemsForOrganization(organizationId: string): Promise<BalanceItem[]> {
-        return await BalanceItem.select()
-            .where('payingOrganizationId', organizationId)
-            .whereNot('status', BalanceItemStatus.Hidden)
-            .fetch();
+    static async balanceItemsForOrganization(payingOrganizationId: string, organizationId?: string): Promise<BalanceItem[]> {
+        const base = BalanceItem.select()
+            .where('payingOrganizationId', payingOrganizationId)
+            .whereNot('status', BalanceItemStatus.Hidden);
+
+        if (organizationId) {
+            base.where('organizationId', organizationId)
+        }
+
+        return await base.fetch();
     }
 }

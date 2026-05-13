@@ -1066,13 +1066,13 @@ export class PaymentService {
         }
     }
 
-    static getDefaultCompanyForOrganization(sellerOrganization: Organization) {
-        return sellerOrganization.meta.companies[0];
+    static getDefaultCompanyForOrganization(sellingOrganization: Organization) {
+        return sellingOrganization.meta.companies[0];
     }
 
-    static getVATExcempt({ customer, sellerOrganization }: { customer: PaymentCustomer | null; sellerOrganization: Organization; }) {
+    static getVATExcempt({ customer, sellingOrganization }: { customer: PaymentCustomer | null; sellingOrganization: Organization; }) {
         // Validate VAT rates for this customer
-        const seller = this.getDefaultCompanyForOrganization(sellerOrganization)
+        const seller = this.getDefaultCompanyForOrganization(sellingOrganization)
         if (seller && seller.VATNumber && seller.address && customer && customer.company) {
             // B2B validation
             if (!customer.company.address) {

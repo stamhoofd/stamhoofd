@@ -379,6 +379,7 @@
 
 .style-tag {
     font-size: 11px;
+    letter-spacing: -5%;
     text-transform: uppercase;
     font-weight: $font-weight-semibold;
     color: $color-primary;
@@ -388,10 +389,15 @@
     }
 
     background: $color-primary-background;
-    padding: 7px 8px;
+    padding: 6px 7px;
     border-radius: $border-radius;
     line-height: 1;
-    display: inline-block;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+
     vertical-align: middle;
     overflow: hidden;
     white-space: nowrap;
@@ -403,6 +409,7 @@
     &.large {
         font-size: 13px;
         padding: 7px 9px;
+        letter-spacing: normal;
     }
 
     &.warn {
@@ -447,7 +454,7 @@
 
     &.inline {
         // need to evaluate the usage of this class
-        display: inline-block;
+        display: inline-flex;
     }
 
     &.inline-first {
@@ -491,6 +498,33 @@
     @extend .style-price-base;
     font-weight: $font-weight-semibold;
     color: $color-primary;
+}
+
+.style-price-big {
+    font-size: 20px;
+    line-height: 1.4;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+}
+
+button.style-price-big {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    user-select: none;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.8;
+    }
+
+    &:active {
+        opacity: 0.4;
+    }
 }
 
 .style-value-old {
@@ -725,13 +759,6 @@
     @media (max-width: 600px) {
         font-size: 12px;
     }
-}
-
-.style-price-big {
-    font-size: 20px;
-    line-height: 1.4;
-    font-weight: $font-weight-semibold;
-    color: $color-primary;
 }
 
 .style-statistic {
