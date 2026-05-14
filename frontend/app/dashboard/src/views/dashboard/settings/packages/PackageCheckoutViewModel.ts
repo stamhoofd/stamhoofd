@@ -7,16 +7,19 @@ export class PackageCheckoutViewModel {
     checkout: PackageCheckout
     packageStatus: OrganizationPackagesStatus
     sellingOrganization: Organization
+    payingOrganization: Organization
     packages: STPackage[]
 
     constructor(data: {
         checkout: PackageCheckout
         packageStatus: OrganizationPackagesStatus
-        sellingOrganization: Organization
+        sellingOrganization: Organization,
+        payingOrganization: Organization
     }) {
         this.checkout = data.checkout
         this.packageStatus = data.packageStatus
         this.sellingOrganization = data.sellingOrganization
+        this.payingOrganization = data.payingOrganization
     }
 
     validate() {

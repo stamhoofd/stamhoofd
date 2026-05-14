@@ -1,4 +1,5 @@
-import type { Organization, User } from '@stamhoofd/models';
+import type { User } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
 import { Platform } from '@stamhoofd/models';
 import { PaymentMandateStatus  } from '@stamhoofd/structures/PaymentMandate.js';
 import type {PaymentMandate} from '@stamhoofd/structures/PaymentMandate.js';
@@ -105,6 +106,53 @@ export class PaymentMandateService {
                     }
                 }
             }
+        }
+    }
+
+    static async setDefaultMandate({ mandateId, sellingOrganization, payingUserId, payingOrganizationId }: {
+        mandateId: string, 
+
+        sellingOrganization: Organization,
+
+        /**
+         * Mandates for B2B payments
+         */
+        payingOrganizationId: Organization | string | null, 
+
+        /**
+         * Not yet supported, but in the future you'll be able to save mandates for a certain user.
+         * Only for B2C payments
+         */
+        payingUserId: string | null,
+    }) {
+        try {
+            if (!payingOrganizationId) {
+                // Not supported yet
+                return;
+            }
+
+            if (sellingOrganization.id !== (await Platform.getShared()).membershipOrganizationId) {
+                // Not yet supported
+                return [];
+            }
+        
+            // Set as default
+            if (payingOrganizationId) {
+                const payingOrganization = typeof payingOrganizationId === 'string' ? await Organization.getByID(payingOrganizationId) : payingOrganizationId;
+                if (payingOrganization) {
+                    console.log('Saving ' + mandateId + ' as default mandate for organization ' + payingOrganization.id + ' ' + payingOrganization.name)
+                    payingOrganization.serverMeta.mollieMandateId = mandateId
+                    await payingOrganization.save()
+                }
+            }
+        } catch (e) {
+            console.error('Failed to save default mandate for mandate ' + mandateId + ' in organization ' + (typeof payingOrganizationId === 'string' ? payingOrganizationId : payingOrganizationId?.id), {cause: e})
+
+            throw new SimpleError({
+                code: 'failed',
+                message: 'Failed to update default mandate',
+                human: $t('Het is niet gelukt om de standaard bankkaart aan te passen. Herlaad de pagina en probeer opnieuw.')
+            })
         }
     }
 

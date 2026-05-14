@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <div v-if="mandates !== null && packageStatus" class="st-view">
+        <div v-if="packageStatus" class="st-view">
             <STNavigationBar :title="title" />
 
             <main>
@@ -13,21 +13,9 @@
                 <div class="container">
                     <hr>
                     <h2 class="style-with-button">
-                        <div>{{ $t('Betaalkaarten') }}</div>
+                        <div>{{ $t('Bankkaarten') }}</div>
                     </h2>
-
-                    <p v-if="mandates.length === 0" class="info-box">
-                        {{ $t('Geen betaalkaarten') }}
-                    </p>
-                    <STGrid v-else>
-                        <PaymentMandateRow v-for="mandate of mandates" :key="mandate.id" :mandate="mandate" :selectable="false">
-                            <template #right>
-                                <LoadingButton :loading="deletingMandates.has(mandate.id)">
-                                    <button v-tooltip="$t('Ontkoppel deze kaart')" type="button" class="button icon trash" @click.stop="deleteMandate(mandate.id)" />
-                                </LoadingButton>
-                            </template>
-                        </PaymentMandateRow>
-                    </STGrid>
+                    <PaymentMandatesBox :paying-organization-id="organization.id" :selling-organization-id="platform.membershipOrganizationId!" />
                 </div>
 
                 <div class="container">
@@ -60,8 +48,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
-import STGrid from '@stamhoofd/components/layout/STGrid.vue';
-import PaymentMandateRow from '@stamhoofd/components/mandates/PaymentMandateRow.vue';
+import PaymentMandatesBox from '@stamhoofd/components/mandates/PaymentMandatesBox.vue';
 import { useOrganizationPaymentMandates } from '@stamhoofd/components/mandates/useOrganizationPaymentMandates';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import STPackageRow from '@stamhoofd/components/packages/STPackageRow.vue';
@@ -87,13 +74,6 @@ const context = useContext();
 const owner = useRequestOwner();
 const present = usePresent()
 const platform = usePlatform();
-
-const {mandates, deleteMandate: doDeleteMandate, deletingMandates} = useOrganizationPaymentMandates({
-    payingOrganizationId: props.organization.id,
-    sellingOrganizationId: platform.value.membershipOrganizationId!,
-    errors,
-});
-
 onMounted(() => {
     reload().catch(console.error)
 });
@@ -124,19 +104,6 @@ async function reload() {
     }
 
     loading.value = false;
-}
-
-async function deleteMandate(mandateId: string) {
-    if (!await CenteredMessage.confirm({
-        title: $t('Ben je zeker dat je dit mandaat wilt verwijderen?'),
-        description: $t('Dit kan ervoor zorgen dat we geen openstaande bedragen kunnen innen van deze vereniging'),
-        requireCheckbox: $t('Ja, verwijder dit mandaat'),
-        confirmText: $t('Verwijderen'),
-        destructive: true
-    })) {
-        return;
-    }
-    await doDeleteMandate(mandateId)
 }
 
 async function createPackage() {

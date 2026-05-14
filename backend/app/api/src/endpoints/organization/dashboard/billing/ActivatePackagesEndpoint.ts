@@ -139,14 +139,14 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 if (!checkout.createMandate) {
                     throw new SimpleError({
                         code: '',
-                        message: $t('Je moet de betaalkaart opslaan om dit pakket te activeren. Dit pakket vereist namelijk periodieke betalingen.')
+                        message: $t('Je moet de bankkaart opslaan om dit pakket te activeren. Dit pakket vereist namelijk periodieke betalingen.')
                     })
                 }
 
                 if (!checkout.createMandate.saveAsDefault) {
                     throw new SimpleError({
                         code: '',
-                        message: $t('Het is noodzakelijk om deze betaalkaart als standaard betaalkaart in te stellen. Dit pakket vereist namelijk periodieke betalingen.')
+                        message: $t('Het is noodzakelijk om deze bankkaart als standaard bankkaart in te stellen. Dit pakket vereist namelijk periodieke betalingen.')
                     })
                 }
             }

@@ -54,6 +54,12 @@ export class Payment extends QueryableModel {
     payingUserId: string | null = null;
 
     /**
+     * External ID of the mandate used for this payment
+     */
+    @column({ type: 'string', nullable: true })
+    mandateId: string | null = null;
+
+    /**
      * @deprecated
      */
     get userId() {

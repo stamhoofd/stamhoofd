@@ -24,7 +24,9 @@
             <template v-if="item.organization.meta.registrationPaymentConfiguration.enableMandates">
                 <hr>
                 <h2>{{ $t('Standaard bankkaart') }}</h2>
-                <p>{{ $t('Koppel een bankkaart of creditcard waarmee automatische betalingen kunnen gebeuren. Deze rekening wordt gebruikt voor automatische incasso\'s.') }}</p>
+                <p v-if="!$isPlatform">
+                    {{ $t('Kies een bankkaart of creditcard waarmee de periodieke betalingen gebeuren.') }}
+                </p>
 
                 <PayableBalanceMandatesBox :item="item" />
             </template>

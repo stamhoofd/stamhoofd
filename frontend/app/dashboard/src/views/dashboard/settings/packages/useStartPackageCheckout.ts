@@ -19,11 +19,12 @@ import { useActivatePackages } from './hooks/useActivatePackages';
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import PaymentSuccessView from '@stamhoofd/components/payments/PaymentSuccessView.vue'
-import { Toast } from '@stamhoofd/components';
+import { Toast, useRequiredOrganization } from '@stamhoofd/components';
 
 export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox | null }}) {
     const context = useContext();
     const platform = usePlatform();
+    const payingOrganization = useRequiredOrganization()
     const { packages: packageStatus, reload } = useOrganizationPackages({ errors, onMounted: true });
     const owner = useRequestOwner()
     const navigationActions = useNavigationActions();
@@ -67,7 +68,8 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
         const model = new PackageCheckoutViewModel({
             checkout,
             packageStatus: status,
-            sellingOrganization
+            sellingOrganization,
+            payingOrganization: payingOrganization.value
         })
 
 
@@ -91,7 +93,7 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
 
         const steps = [
             new PackageOverviewStep({ model }),
-            new PaymentCustomerStep({ checkout, invoicesEnabled: true }),
+            new PaymentCustomerStep({ model }),
             new PaymentSelectionWithMandatesStep({ model }),
         ];
 

@@ -2,7 +2,7 @@ import type { Mandate , Payment as MolliePaymentType} from '@mollie/api-client';
 import { ApiMode, createMollieClient, MandateMethod, MandateStatus, PaymentMethod as molliePaymentMethod, PaymentStatus as molliePaymentStatus, OnboardingStatus, ProfileStatus, SequenceType } from '@mollie/api-client';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Payment, User } from '@stamhoofd/models';
-import { Organization } from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { MolliePayment, MollieToken, Platform } from '@stamhoofd/models';
 import type { PaymentCustomer } from '@stamhoofd/structures';
 import { MollieOnboarding, MollieProfile, MollieProfileMode, MollieProfileStatus, MollieStatus, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
@@ -434,10 +434,11 @@ export class MollieService {
         dbPayment.mollieId = molliePayment.id;
         await dbPayment.save();
 
-        payment.status = await mollieService.getStatusFor(molliePayment, payment, false)
+        const {status} = await mollieService.getStatusFor(molliePayment, payment, false)
+        payment.status = status;
         
         return {
-            paymentUrl: paymentUrl
+            paymentUrl: paymentUrl,
         }
     }
 
@@ -457,6 +458,8 @@ export class MollieService {
                 if ('cardNumber' in details) {
                     payment.iban = '•••• ' + details.cardNumber;
                 }
+
+                payment.mandateId = mollieData.mandateId ?? null
                 await payment.save();
             }
         }
@@ -465,35 +468,25 @@ export class MollieService {
         }
     }
 
-    async getStatusFor(mollieData: MolliePaymentType, payment: Payment, cancel = false): Promise<PaymentStatus> {
+    async getStatusFor(mollieData: MolliePaymentType, payment: Payment, cancel = false): Promise<{status: PaymentStatus}> {
         await MollieService.saveChargeInfo(mollieData, payment)
 
-        if (mollieData.mandateId && mollieData.status === molliePaymentStatus.paid) {
-            if (payment.createMandate && payment.createMandate.saveAsDefault) {
-                try {
-                    // Set as default
-                    if (payment.payingOrganizationId) {
-                        const payingOrganization = await Organization.getByID(payment.payingOrganizationId)
-                        if (payingOrganization) {
-                            console.log('Saving ' + mollieData.mandateId + ' as default mandate for organization ' + payingOrganization.id + ' ' + payingOrganization.name)
-                            payingOrganization.serverMeta.mollieMandateId = mollieData.mandateId
-                            await payingOrganization.save()
-                        }
-                    }
-                } catch (e) {
-                    console.error('Failed to save default mandate for Mollie Payment ' + payment.id, {cause: e})
-                }
-            }
-        }
-
         if (mollieData.status === molliePaymentStatus.paid) {
-            return PaymentStatus.Succeeded
+            return {
+                status: PaymentStatus.Succeeded, 
+            }
         } else if (mollieData.status === molliePaymentStatus.failed) {
-            return PaymentStatus.Failed
+            return {
+                status: PaymentStatus.Failed, 
+            }
         } else if (mollieData.status === molliePaymentStatus.expired) {
-            return PaymentStatus.Failed
+            return {
+                status: PaymentStatus.Failed, 
+            }
         } else if (mollieData.status === molliePaymentStatus.canceled) {
-            return PaymentStatus.Failed
+            return {
+                status: PaymentStatus.Failed, 
+            }
         }
 
         // Pending payments should be cancellable
@@ -517,10 +510,14 @@ export class MollieService {
 
         if (mollieData.status === molliePaymentStatus.open ) {
             // Nothink happend yet
-            return PaymentStatus.Created
+            return {
+                status: PaymentStatus.Created, 
+            }
         }
 
-        return PaymentStatus.Pending
+        return {
+            status: PaymentStatus.Pending, 
+        }
     }
 
     async getStatus(payment: Payment, cancel = false) {

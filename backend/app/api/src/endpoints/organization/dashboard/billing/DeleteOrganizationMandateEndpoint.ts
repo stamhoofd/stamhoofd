@@ -1,9 +1,7 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
-import { PackageCheckout } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
 
@@ -13,8 +11,6 @@ type Body = undefined;
 type ResponseBody = undefined
 
 export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = PackageCheckout as Decoder<Query>;
-
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'DELETE') {
             return [false];

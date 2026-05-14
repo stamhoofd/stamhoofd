@@ -1,17 +1,19 @@
 <template>
     <component
         :is="dynamicElementName"
+        v-bind="$attrs"
+        ref="root"
         class="st-grid-item"
         :class="[{
             selectable,
+            rightClickable,
             hoverable,
             disabled,
             button: dynamicElementName === 'button'
         }, $attrs.class]"
         :type="dynamicElementName === 'button' ? 'button' : undefined"
-        v-bind="$attrs"
         @click="$emit('click', $event)"
-        @contextmenu="$emit('contextmenu', $event)"
+        @contextmenu="onContext"
     >
         <div v-if="$slots.left" class="left">
             <slot name="left" />
@@ -31,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, getCurrentInstance, useTemplateRef } from 'vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -54,6 +56,25 @@ const props = withDefaults(
 const emit = defineEmits(['click', 'contextmenu']);
 const dynamicElementName = computed(() => (props.elementName === 'article' && props.selectable && !props.disabled) ? 'button' : props.elementName);
 const hoverable = computed(() => dynamicElementName.value === 'button' || dynamicElementName.value === 'label');
+const root = useTemplateRef<HTMLElement>('root');
+
+const rightClickable = computed(
+  () => !!getCurrentInstance()?.vnode.props?.onContextmenu
+);
+
+function onContext(event: MouseEvent) {
+    if (root.value) {
+        const target = root.value;
+        target.classList.add('right-click');
+
+        window.setTimeout(() => {
+            target.classList.remove('right-click');
+        }, 250);
+    }
+
+    emit('contextmenu', event)
+}
+
 </script>
 
 <style lang="scss">
@@ -170,7 +191,7 @@ button.st-grid-item {
         }
     }
 
-    &.selectable:not(.is-dragging) {
+    &.selectable:not(.is-dragging), &.rightClickable {
         touch-action: manipulation;
         user-select: none;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -225,17 +246,17 @@ button.st-grid-item {
                 }
             }
         }
+    }
 
-        &:active, &.hoverable:active {
+    &.selectable:not(.is-dragging):active, &.hoverable:active, &.rightClickable.right-click {
+        &:before {
+            opacity: 1;
+            transition: none;
+        }
+
+        &:has(button:active), &:has(select:active), &:has(label:active), &:has(textarea:active), &:has(input:not([type=radio]):not([type=checkbox]):active), &:has(.input:active) {
             &:before {
-                opacity: 1;
-                transition: none;
-            }
-
-            &:has(button:active), &:has(select:active), &:has(label:active), &:has(textarea:active), &:has(input:not([type=radio]):not([type=checkbox]):active), &:has(.input:active) {
-                &:before {
-                    opacity: 0;
-                }
+                opacity: 0;
             }
         }
     }

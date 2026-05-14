@@ -108,7 +108,7 @@
                     </h3>
 
                     <p class="style-definition-text">
-                        {{ payment.iban }}
+                        {{ Formatter.iban(payment.iban) }}
                     </p>
                     <p v-if="payment.ibanName" class="style-description-small">
                         {{ $t('%hK', {name: payment.ibanName}) }}
@@ -421,7 +421,7 @@ import { BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, Pa
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Sorter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 import PriceBreakdownBox from '../views/PriceBreakdownBox.vue';

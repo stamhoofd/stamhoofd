@@ -49,6 +49,15 @@ export class PaymentService {
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
                 });
+
+                // It is possible the mandate succeeds immediately, in which case we might
+                // need to save it as the default payment method
+                if (payment.status === PaymentStatus.Succeeded) {
+                    await this.saveMandateIfNeeded({
+                        payment,
+                        sellingOrganization: organization,
+                    })
+                }
                 return;
             }
 
@@ -116,6 +125,25 @@ export class PaymentService {
         });
     }
 
+    static async saveMandateIfNeeded({payment, sellingOrganization}: {payment: Payment, sellingOrganization: Organization}) {
+        // Save as default
+        if (payment.createMandate && payment.createMandate.saveAsDefault) {
+            if (payment.mandateId && payment.status === PaymentStatus.Succeeded) {
+                try {
+                    await PaymentMandateService.setDefaultMandate({
+                        mandateId: payment.mandateId,
+                        payingOrganizationId: payment.payingOrganizationId,
+                        sellingOrganization,
+                        payingUserId: payment.payingUserId
+                    })
+                } catch (e) {
+                    // Ignore as setting the payment status is more important
+                    console.error(e);
+                }
+            }
+        }
+    }
+
     /**
      * ID of payment is needed because of race conditions (need to fetch payment in a race condition save queue)
      */
@@ -173,12 +201,13 @@ export class PaymentService {
                                 sellingOrganization: organization
                             }); 
                             if (mollieClient) {
-                                let status = await mollieClient.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment));
+                                let {status} = await mollieClient.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment));
 
                                 if (this.isManualExpired(status, payment)) {
                                     console.error('Manually marking Mollie payment as expired', payment.id);
                                     status = PaymentStatus.Failed;
                                 }
+
                                 await this.handlePaymentStatusUpdate(payment, organization, status);
                             } else {
                                 console.error('Missing Mollie Credentials for payment', payment.id);
@@ -196,7 +225,7 @@ export class PaymentService {
                             }
                         }
                     }
-                    else if (payment.provider == PaymentProvider.Buckaroo) {
+                    else if (payment.provider === PaymentProvider.Buckaroo) {
                         const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? '', organization.privateMeta.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
                         try {
                             let status = await helper.getStatus(payment);

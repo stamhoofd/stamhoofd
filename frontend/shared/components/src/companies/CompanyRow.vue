@@ -18,7 +18,8 @@
             {{ company.companyNumber }}
         </p>
         <p v-else class="style-description-small">
-            {{ $t('%1CH') }}
+            <span>{{ $t('Geen ondernemingsnummer (feitelijke vereniging)') }}</span>
+            <span v-if="isDefault" v-tooltip="$t('Er zal geen ondernemingsnummer op facturen vermeld worden. Controleer goed of je geen ondernemingsnummer hebt en of je via die weg facturen wilt ontvangen.')" class="icon text-size warning" />
         </p>
 
         <p v-if="company.address" class="style-description-small">

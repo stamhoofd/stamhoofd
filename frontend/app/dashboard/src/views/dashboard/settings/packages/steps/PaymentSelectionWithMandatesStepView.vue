@@ -11,6 +11,7 @@
                     <h2>
                         {{ $t('Betaling') }}
                     </h2>
+
                     <STInputBox v-if="mandates?.length" error-fields="mandateId" :error-box="errors.errorBox" class="max">
                         <STGrid>
                             <PaymentMandateRadioRow v-for="mandate of mandates" :key="mandate.id" v-model="mandateId" :mandate="mandate">
