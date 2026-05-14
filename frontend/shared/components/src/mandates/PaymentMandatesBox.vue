@@ -75,10 +75,6 @@ async function deleteMandate(mandateId: string) {
         return;
     }
     const mandate = mandates.value?.find(m => m.id === mandateId);
-    if (mandate?.isDefault) {
-        Toast.error('Voeg eerst een andere standaard betaalkaart toe').show();
-        return;
-    }
 
     if (!await CenteredMessage.confirm({
         title: $t('Ben je zeker dat je deze bankkaart wilt verwijderen?'),

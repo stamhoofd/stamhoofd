@@ -90,11 +90,9 @@
                     </p>
                 </div>
 
-                <div class="container categorized-box">
+                <div v-if="proFormaData?.invoice && proFormaData.invoice.totalWithVAT !== 0" class="container categorized-box">
                     <h2>{{ $t('Nu te betalen') }}</h2>
-                    <STInputBox v-if="proFormaData?.invoice" class="max">
-                        <InvoiceItemsBox :invoice="proFormaData?.invoice" />
-                    </STInputBox>
+                    <InvoiceItemsBox :invoice="proFormaData.invoice" />
                 </div>
             </main>
             <STToolbar>
@@ -103,8 +101,13 @@
                     <span v-else class="style-placeholder-skeleton" />
                 </template>
                 <template #right>
-                    <LoadingButton :loading="loading">
-                        <button class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
+                    <LoadingButton :loading="!proFormaData || loading">
+                        <button v-if="proFormaData?.payment?.price === 0" class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
+                            <span class="icon play small" />
+                            <span>{{ $t('Activeren') }}</span>
+                        </button>
+
+                        <button v-else class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
                             <span class="icon card small" />
                             <span>{{ $t('%eX') }}</span>
                         </button>
@@ -142,6 +145,9 @@ import { computed, ref, shallowRef, watch } from 'vue';
 import InvoiceItemsBox from '../../../invoices/components/InvoiceItemsBox.vue';
 import { useActivatePackages } from '../hooks/useActivatePackages';
 import type { PackageCheckoutViewModel } from '../PackageCheckoutViewModel';
+import { Formatter, sleep } from '@stamhoofd/utility';
+import { Request } from '@simonbackx/simple-networking';
+import { useRequestOwner } from '@stamhoofd/networking';
 
 const props = defineProps<{
     model: PackageCheckoutViewModel;
@@ -173,6 +179,13 @@ watch(mandates, (n, old) => {
         // Select default mandate
         mandateId.value = n[0].id
     }
+
+    if (n && mandateId.value) {
+        if (!n.find(pp => pp.id === mandateId.value)) {
+            // Mandate became invalid: reset
+            mandateId.value = n[0]?.id ?? null
+        }
+    }
 })   
 
 const mandateId = computed({
@@ -192,6 +205,8 @@ const mandateId = computed({
                     saveAsDefault: true
                 })
             }
+        } else {
+            console.error('Mandate not found', mandateId)
         }
     },
 })
@@ -218,13 +233,18 @@ const saveMandateAsDefault = computed({
 
 // Update pro forma
 // todo: cancel previous after changes
-const realCreateMandate = computed(() => props.model.requiresMandate || (!!props.model.checkout.createMandate && !props.model.checkout.mandate))
+const realCreateMandate = computed(() => mandates.value === null ? null : ((!!props.model.checkout.createMandate || props.model.requiresMandate) && !props.model.checkout.mandate))
+const loadProFormaBag = useRequestOwner()
 watch(realCreateMandate, (n, old) => {
     if (n === old) {
         return;
     }
+    console.log('update pro forma')
+
+    Request.cancelAll(loadProFormaBag)
     loadProForma().catch(console.error);
-}, {immediate: true, })
+}, {immediate: false})
+
 
 async function loadProForma() {
     if (loading.value) {
@@ -236,10 +256,30 @@ async function loadProForma() {
         const response = await activatePackages(
             props.model.checkout.patch({
                 proForma: true
-            })
+            }), {
+                shouldRetry: true,
+                owner: loadProFormaBag
+            }
         )
+        const old = proFormaData.value
         proFormaData.value = response
+
+        if (old) {
+            if (old.payment?.price !== undefined && response.payment?.price !== undefined) {
+                const from = old.payment.price;
+                const to =  response.payment.price
+
+                if (from === 0 && to > from && to < 1_00_00) {
+                    Toast.info($t('Er wordt een kleine kost aangerekend van {price} voor de verificatie van je bankkaart', {price: Formatter.price(to)})).show()
+                }
+
+            }
+        }
     } catch (e) {
+        if (Request.isAbortError(e)) {
+            loading.value = false
+            return;
+        }
         Toast.fromError(e).show()
         errors.errorBox = new ErrorBox(e)
     }

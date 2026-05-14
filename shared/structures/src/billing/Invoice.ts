@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 import type { BalanceItem} from '../BalanceItem.js';
-import { getVATExcemptInvoiceNote, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
+import { BalanceItemType, getVATExcemptInvoiceNote, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import type { PriceBreakdown, PriceBreakdownAction } from '../PriceBreakdown.js';
@@ -434,8 +434,14 @@ export class Invoice extends AutoEncoder {
 
         for (const item of balanceItemsMap.values()) {
             const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, item.amount);
+            
+            // Remove zero invoicedItems if they were for a package (activation of a free package should not be invoiced)
+            if (invoiced.totalWithoutVAT === 0 && item.balanceItem.type === BalanceItemType.STPackage) {
+                continue;
+            }
             invoicedItems.push(invoiced);
         }
+        
 
         invoicedItems.sort((a, b) => {
             return Sorter.stack(

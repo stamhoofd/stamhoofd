@@ -3,14 +3,12 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, PaymentStatus, STPackageStruct } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, STPackageStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
-import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
-import { PaymentMandateStatus } from '@stamhoofd/structures/PaymentMandate.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -133,21 +131,27 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             models.push(model);
 
-            if (!checkout.proForma && model.meta.requiresMandate) {
-                // setting checkout.mandate is not enough - we also need to set it as default.
+            if (model.meta.requiresMandate) {
+                if (checkout.proForma) {
+                    if (!checkout.createMandate) {
+                        checkout.createMandate = CreateMandateSettings.create({saveAsDefault: true})
+                    }
+                } else {
+                    // setting checkout.mandate is not enough - we also need to set it as default.
 
-                if (!checkout.createMandate) {
-                    throw new SimpleError({
-                        code: '',
-                        message: $t('Je moet de bankkaart opslaan om dit pakket te activeren. Dit pakket vereist namelijk periodieke betalingen.')
-                    })
-                }
+                    if (!checkout.createMandate) {
+                        throw new SimpleError({
+                            code: '',
+                            message: $t('Je moet de bankkaart opslaan om dit pakket te activeren. Dit pakket vereist namelijk periodieke betalingen.')
+                        })
+                    }
 
-                if (!checkout.createMandate.saveAsDefault) {
-                    throw new SimpleError({
-                        code: '',
-                        message: $t('Het is noodzakelijk om deze bankkaart als standaard bankkaart in te stellen. Dit pakket vereist namelijk periodieke betalingen.')
-                    })
+                    if (!checkout.createMandate.saveAsDefault) {
+                        throw new SimpleError({
+                            code: '',
+                            message: $t('Het is noodzakelijk om deze bankkaart als standaard bankkaart in te stellen. Dit pakket vereist namelijk periodieke betalingen.')
+                        })
+                    }
                 }
             }
         }
@@ -161,7 +165,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         })
         const minimumAmount = 2_00;
         
-        if (totalPrice < minimumAmount && checkout.createMandate) {
+        if (totalPrice < minimumAmount && checkout.createMandate && !checkout.mandate) {
             const item = new BalanceItem();
             item.type = BalanceItemType.AdministrationFee;
             item.description = $t('Verificatie bankkaart of bankrekening')

@@ -8,14 +8,14 @@ export function useActivatePackages() {
     const context = useContext();
     const owner = useRequestOwner()
 
-    async function activatePackages(checkout: PackageCheckout) {
+    async function activatePackages(checkout: PackageCheckout, options?: {shouldRetry?: boolean, owner?: any}) {
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/billing/activate-packages',
             body: checkout,
-            shouldRetry: false,
+            shouldRetry: options?.shouldRetry ?? false,
             timeout: 60_000,
-            owner,
+            owner: options?.owner ?? owner,
             decoder: CheckoutResponse as Decoder<CheckoutResponse>
         });
 
