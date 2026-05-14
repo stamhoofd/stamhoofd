@@ -7,6 +7,8 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 type ObjectType = PlatformMember;
 
 export function getMemberColumns({ organization, dateRange, group, groups, filterPeriodId, periodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
+    const isPlatform = STAMHOOFD.userMode === 'platform';
+
     const allColumns: Column<ObjectType, any>[] = [
         new Column<ObjectType, string>({
             id: 'memberNumber',
@@ -20,7 +22,6 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             allowSorting: true,
             enabled: false,
         }),
-
         new Column<ObjectType, string>({
             id: 'name',
             name: $t(`%1Os`),
@@ -46,7 +47,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             minimumWidth: 50,
             recommendedWidth: 120,
         }),
-        new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
+        isPlatform ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'membership',
             name: $t(`%1Ny`),
             enabled: !waitingList,
@@ -92,8 +93,8 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             minimumWidth: 120,
             recommendedWidth: 140,
             allowSorting: false,
-        }),
-        dateRange !== null
+        }) : null,
+        isPlatform && dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
                 id: 'continuousMembership',
                 name: 'Doorlopende aansluiting',

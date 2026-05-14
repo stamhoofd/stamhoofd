@@ -11,6 +11,7 @@ import type { UIFilterBuilder } from '../UIFilter';
 export function useAdvancedRegistrationsUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
+    const isPlatform = STAMHOOFD.userMode === 'platform';
 
     const manager = usePlatformManager();
     const owner = useRequestOwner();
@@ -99,21 +100,23 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                 }),
             );
 
-            all.push(
-                new MultipleChoiceFilterBuilder({
-                    name: $t('%wI'),
-                    options: platform.config.defaultAgeGroups.map((group) => {
-                        return new MultipleChoiceUIFilterOption(group.name, group.id);
-                    }),
-                    wrapper: {
-                        group: {
-                            defaultAgeGroupId: {
-                                $in: FilterWrapperMarker,
+            if (isPlatform && platform.config.defaultAgeGroups.length > 0) {
+                all.push(
+                    new MultipleChoiceFilterBuilder({
+                        name: $t('%wI'),
+                        options: platform.config.defaultAgeGroups.map((group) => {
+                            return new MultipleChoiceUIFilterOption(group.name, group.id);
+                        }),
+                        wrapper: {
+                            group: {
+                                defaultAgeGroupId: {
+                                    $in: FilterWrapperMarker,
+                                },
                             },
                         },
-                    },
-                }),
-            );
+                    }),
+                );
+            }
 
             all.push(
                 new StringFilterBuilder({

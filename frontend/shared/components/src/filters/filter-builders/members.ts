@@ -11,7 +11,7 @@ import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
-import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
+import type { BaseUIFilterBuilder, UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from './helpers';
 import { getFilterBuildersForRecordCategories } from './record-categories';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
@@ -46,6 +46,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
 export function createMemberWithRegistrationsBlobFilterBuilders({ organization, $user, $platform, financialSupportSettings, auth, registrationFilters, membershipFilters }: { organization: Ref<Organization | null, Organization | null>; $platform: ReturnType<typeof usePlatform>; $user: ReturnType<typeof useUser>; financialSupportSettings: ReturnType<typeof useFinancialSupportSettings>; auth: ReturnType<typeof useAuth>; registrationFilters: ComputedRef<UIFilterBuilder<UIFilter>[]>; membershipFilters: ComputedRef<UIFilterBuilder<UIFilter>[]> }) {
     const platform = $platform.value;
     const user = $user.value;
+    const isPlatform = STAMHOOFD.userMode === 'platform';
 
     const filterResponsibilities = (responsibilities: MemberResponsibility[]) => {
         return responsibilities.filter((r) => {
@@ -122,68 +123,257 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         }
     }
 
-    all.push(
-        new MultipleChoiceFilterBuilder({
-            name: $t('%7E'),
-            options: [
-                new MultipleChoiceUIFilterOption($t('%1H0'), 'Active'),
-                new MultipleChoiceUIFilterOption($t('%1IH'), 'Trial'),
-                new MultipleChoiceUIFilterOption($t('%7F'), 'Expiring'),
-                new MultipleChoiceUIFilterOption($t('%7G'), 'Inactive'),
-            ],
-            wrapFilter: (f: StamhoofdFilter) => {
-                const choices = Array.isArray(f) ? f : [f];
+    if (isPlatform) {
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t('%7E'),
+                options: [
+                    new MultipleChoiceUIFilterOption($t('%1H0'), 'Active'),
+                    new MultipleChoiceUIFilterOption($t('%1IH'), 'Trial'),
+                    new MultipleChoiceUIFilterOption($t('%7F'), 'Expiring'),
+                    new MultipleChoiceUIFilterOption($t('%7G'), 'Inactive'),
+                ],
+                wrapFilter: (f: StamhoofdFilter) => {
+                    const choices = Array.isArray(f) ? f : [f];
 
-                if (choices.length === 4 || choices.length === 0) {
-                    return null;
-                }
+                    if (choices.length === 4 || choices.length === 0) {
+                        return null;
+                    }
 
-                const activeOrExpiringFilter: StamhoofdFilter = {
-                    platformMemberships: {
-                        $elemMatch: {
-                            startDate: {
-                                $lte: { $: '$now' },
-                            },
-                            endDate: {
-                                $gt: { $: '$now' },
+                    const activeOrExpiringFilter: StamhoofdFilter = {
+                        platformMemberships: {
+                            $elemMatch: {
+                                startDate: {
+                                    $lte: { $: '$now' },
+                                },
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
                             },
                         },
-                    },
-                };
+                    };
 
-                const activeOrExpiringFilterButNoTrial: StamhoofdFilter = {
-                    platformMemberships: {
-                        $elemMatch: {
-                            startDate: {
-                                $lte: { $: '$now' },
-                            },
-                            endDate: {
-                                $gt: { $: '$now' },
-                            },
-                            $or: [
-                                {
-                                    trialUntil: null,
+                    const activeOrExpiringFilterButNoTrial: StamhoofdFilter = {
+                        platformMemberships: {
+                            $elemMatch: {
+                                startDate: {
+                                    $lte: { $: '$now' },
                                 },
-                                {
-                                    trialUntil: {
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
+                                $or: [
+                                    {
+                                        trialUntil: null,
+                                    },
+                                    {
+                                        trialUntil: {
+                                            $lte: { $: '$now' },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    };
+
+                    if (choices.length === 3 && ['Active', 'Expiring', 'Trial'].every(x => choices.includes(x))) {
+                        return activeOrExpiringFilter;
+                    }
+
+                    if (choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
+                        return activeOrExpiringFilterButNoTrial;
+                    }
+
+                    if (choices.length === 2 && ['Active', 'Trial'].every(x => choices.includes(x))) {
+                        return {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    endDate: {
+                                        $gt: { $: '$now' },
+                                    },
+                                    startDate: {
                                         $lte: { $: '$now' },
                                     },
+                                    $or: [
+                                        {
+                                            expireDate: null,
+                                        },
+                                        {
+                                            expireDate: {
+                                                $gt: { $: '$now' },
+                                            },
+                                        },
+                                    ],
                                 },
-                            ],
-                        },
-                    },
-                };
+                            },
+                        };
+                    }
 
-                if (choices.length === 3 && ['Active', 'Expiring', 'Trial'].every(x => choices.includes(x))) {
-                    return activeOrExpiringFilter;
-                }
+                    const getFilter = (choice: StamhoofdFilter<StamhoofdCompareValue>): StamhoofdFilter => {
+                        switch (choice) {
+                            case 'Active': {
+                                return {
+                                    platformMemberships: {
+                                        $elemMatch: {
+                                            $and: [
+                                                {
+                                                    endDate: {
+                                                        $gt: { $: '$now' },
+                                                    },
+                                                    startDate: {
+                                                        $lte: { $: '$now' },
+                                                    },
+                                                    $or: [
+                                                        {
+                                                            expireDate: null,
+                                                        },
+                                                        {
+                                                            expireDate: {
+                                                                $gt: { $: '$now' },
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                {
+                                                    $or: [
+                                                        {
+                                                            trialUntil: null,
+                                                        },
+                                                        {
+                                                            trialUntil: {
+                                                                $lte: { $: '$now' },
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                };
+                            }
+                            case 'Trial': {
+                                return {
+                                    platformMemberships: {
+                                        $elemMatch: {
+                                            endDate: {
+                                                $gt: { $: '$now' },
+                                            },
+                                            startDate: {
+                                                $lte: { $: '$now' },
+                                            },
+                                            $or: [
+                                                {
+                                                    expireDate: null,
+                                                },
+                                                {
+                                                    expireDate: {
+                                                        $gt: { $: '$now' },
+                                                    },
+                                                },
+                                            ],
+                                            trialUntil: {
+                                                $gt: { $: '$now' },
+                                            },
+                                        },
+                                    },
+                                };
+                            }
+                            case 'Inactive': {
+                                return {
+                                    $not: activeOrExpiringFilter,
+                                };
+                            }
+                            case 'Expiring': {
+                                return {
+                                    $not: getFilter('Active'),
+                                    platformMemberships: {
+                                        $elemMatch: {
+                                            endDate: {
+                                                $gte: { $: '$now' },
+                                            },
+                                            expireDate: {
+                                                $lt: { $: '$now' },
+                                            },
+                                        },
+                                    },
+                                };
+                            }
+                            default: {
+                                return null;
+                            }
+                        }
+                    };
 
-                if (choices.length === 2 && ['Active', 'Expiring'].every(x => choices.includes(x))) {
-                    return activeOrExpiringFilterButNoTrial;
-                }
+                    const filters = choices.map(getFilter);
 
-                if (choices.length === 2 && ['Active', 'Trial'].every(x => choices.includes(x))) {
+                    if (filters.length === 1) {
+                        return filters[0];
+                    }
+
                     return {
+                        $or: filters,
+                    };
+                },
+                unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
+                    const activeAndExpiring = unwrapFilter(f, {
+                        platformMemberships: {
+                            $elemMatch: {
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
+                            },
+                        },
+                    });
+
+                    if (activeAndExpiring.match) {
+                        return ['Active', 'Trial', 'Expiring'];
+                    }
+
+                    const activeOrExpiring = unwrapFilter(f, {
+                        platformMemberships: {
+                            $elemMatch: {
+                                startDate: {
+                                    $lte: { $: '$now' },
+                                },
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
+                            },
+                        },
+                    });
+
+                    if (activeOrExpiring.match) {
+                        return ['Active', 'Expiring', 'Trial'];
+                    }
+
+                    const activeOrExpiringButNoTrial = unwrapFilter(f, {
+                        platformMemberships: {
+                            $elemMatch: {
+                                startDate: {
+                                    $lte: { $: '$now' },
+                                },
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
+                                $or: [
+                                    {
+                                        trialUntil: null,
+                                    },
+                                    {
+                                        trialUntil: {
+                                            $lte: { $: '$now' },
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    });
+
+                    if (activeOrExpiringButNoTrial.match) {
+                        return ['Active', 'Expiring'];
+                    }
+
+                    const activeOrTrial = unwrapFilter(f, {
                         platformMemberships: {
                             $elemMatch: {
                                 endDate: {
@@ -204,181 +394,34 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                                 ],
                             },
                         },
-                    };
-                }
+                    });
 
-                const getFilter = (choice: StamhoofdFilter<StamhoofdCompareValue>): StamhoofdFilter => {
-                    switch (choice) {
-                        case 'Active': {
-                            return {
-                                platformMemberships: {
-                                    $elemMatch: {
-                                        $and: [
-                                            {
-                                                endDate: {
-                                                    $gt: { $: '$now' },
-                                                },
-                                                startDate: {
-                                                    $lte: { $: '$now' },
-                                                },
-                                                $or: [
-                                                    {
-                                                        expireDate: null,
-                                                    },
-                                                    {
-                                                        expireDate: {
-                                                            $gt: { $: '$now' },
-                                                        },
-                                                    },
-                                                ],
-                                            },
-                                            {
-                                                $or: [
-                                                    {
-                                                        trialUntil: null,
-                                                    },
-                                                    {
-                                                        trialUntil: {
-                                                            $lte: { $: '$now' },
-                                                        },
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                },
-                            };
-                        }
-                        case 'Trial': {
-                            return {
-                                platformMemberships: {
-                                    $elemMatch: {
-                                        endDate: {
-                                            $gt: { $: '$now' },
-                                        },
-                                        startDate: {
-                                            $lte: { $: '$now' },
-                                        },
-                                        $or: [
-                                            {
-                                                expireDate: null,
-                                            },
-                                            {
-                                                expireDate: {
-                                                    $gt: { $: '$now' },
-                                                },
-                                            },
-                                        ],
-                                        trialUntil: {
-                                            $gt: { $: '$now' },
-                                        },
-                                    },
-                                },
-                            };
-                        }
-                        case 'Inactive': {
-                            return {
-                                $not: activeOrExpiringFilter,
-                            };
-                        }
-                        case 'Expiring': {
-                            return {
-                                $not: getFilter('Active'),
-                                platformMemberships: {
-                                    $elemMatch: {
-                                        endDate: {
-                                            $gte: { $: '$now' },
-                                        },
-                                        expireDate: {
-                                            $lt: { $: '$now' },
-                                        },
-                                    },
-                                },
-                            };
-                        }
-                        default: {
-                            return null;
-                        }
+                    if (activeOrTrial.match) {
+                        return ['Active', 'Trial'];
                     }
-                };
 
-                const filters = choices.map(getFilter);
+                    return null;
+                },
+            }),
+        );
 
-                if (filters.length === 1) {
-                    return filters[0];
-                }
-
-                return {
-                    $or: filters,
-                };
-            },
-            unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
-                const activeAndExpiring = unwrapFilter(f, {
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t('%7H'),
+                options: platform.config.membershipTypes.map((type) => {
+                    return new MultipleChoiceUIFilterOption(type.name, type.id);
+                }),
+                wrapper: {
                     platformMemberships: {
                         $elemMatch: {
-                            endDate: {
-                                $gt: { $: '$now' },
+                            membershipTypeId: {
+                                $in: FilterWrapperMarker,
                             },
-                        },
-                    },
-                });
-
-                if (activeAndExpiring.match) {
-                    return ['Active', 'Trial', 'Expiring'];
-                }
-
-                const activeOrExpiring = unwrapFilter(f, {
-                    platformMemberships: {
-                        $elemMatch: {
                             startDate: {
                                 $lte: { $: '$now' },
                             },
                             endDate: {
                                 $gt: { $: '$now' },
-                            },
-                        },
-                    },
-                });
-
-                if (activeOrExpiring.match) {
-                    return ['Active', 'Expiring', 'Trial'];
-                }
-
-                const activeOrExpiringButNoTrial = unwrapFilter(f, {
-                    platformMemberships: {
-                        $elemMatch: {
-                            startDate: {
-                                $lte: { $: '$now' },
-                            },
-                            endDate: {
-                                $gt: { $: '$now' },
-                            },
-                            $or: [
-                                {
-                                    trialUntil: null,
-                                },
-                                {
-                                    trialUntil: {
-                                        $lte: { $: '$now' },
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                });
-
-                if (activeOrExpiringButNoTrial.match) {
-                    return ['Active', 'Expiring'];
-                }
-
-                const activeOrTrial = unwrapFilter(f, {
-                    platformMemberships: {
-                        $elemMatch: {
-                            endDate: {
-                                $gt: { $: '$now' },
-                            },
-                            startDate: {
-                                $lte: { $: '$now' },
                             },
                             $or: [
                                 {
@@ -392,50 +435,10 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                             ],
                         },
                     },
-                });
-
-                if (activeOrTrial.match) {
-                    return ['Active', 'Trial'];
-                }
-
-                return null;
-            },
-        }),
-    );
-
-    all.push(
-        new MultipleChoiceFilterBuilder({
-            name: $t('%7H'),
-            options: platform.config.membershipTypes.map((type) => {
-                return new MultipleChoiceUIFilterOption(type.name, type.id);
-            }),
-            wrapper: {
-                platformMemberships: {
-                    $elemMatch: {
-                        membershipTypeId: {
-                            $in: FilterWrapperMarker,
-                        },
-                        startDate: {
-                            $lte: { $: '$now' },
-                        },
-                        endDate: {
-                            $gt: { $: '$now' },
-                        },
-                        $or: [
-                            {
-                                expireDate: null,
-                            },
-                            {
-                                expireDate: {
-                                    $gt: { $: '$now' },
-                                },
-                            },
-                        ],
-                    },
                 },
-            },
-        }),
-    );
+            }),
+        );
+    }
 
     all.push(
         new StringFilterBuilder({
@@ -627,18 +630,20 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
             }),
         );
 
-        all.push(
-            new GroupUIFilterBuilder({
-                name: $t('%BV'),
-                description: $t('%BW'),
-                builders: membershipFilters.value,
-                wrapper: {
-                    platformMemberships: {
-                        $elemMatch: FilterWrapperMarker,
+        if (membershipFilters.value.length) {
+            all.push(
+                new GroupUIFilterBuilder({
+                    name: $t('%BV'),
+                    description: $t('%BW'),
+                    builders: membershipFilters.value,
+                    wrapper: {
+                        platformMemberships: {
+                            $elemMatch: FilterWrapperMarker,
+                        },
                     },
-                },
-            }),
-        );
+                }),
+            );
+        }
     }
 
     if (user?.permissions?.platform !== null) {
@@ -858,7 +863,15 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
     return all;
 }
 
-export function useAdvancedPlatformMembershipUIFilterBuilders() {
+export function useAdvancedPlatformMembershipUIFilterBuilders(): {loading: Ref<boolean>, filterBuilders: ComputedRef<UIFilterBuilder<UIFilter<BaseUIFilterBuilder>>[]>} {
+    const isPlatform = STAMHOOFD.userMode === 'platform';
+    if (!isPlatform) {
+        return {
+            loading: ref(false),
+            filterBuilders: computed(() => []),
+        }
+    }
+
     const $platform = usePlatform();
     const $user = useUser();
 

@@ -7,6 +7,8 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 type ObjectType = PlatformRegistration;
 
 export function getRegistrationColumns({ organization, dateRange, group, groups, filterPeriodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
+    const isPlatform = STAMHOOFD.userMode === 'platform';
+
     const allColumns: (Column<ObjectType, any> | null)[] = [
         new Column<ObjectType, string>({
             id: 'member.memberNumber',
@@ -48,8 +50,8 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             recommendedWidth: 120,
             enabled: false,
         }),
-        // todo
-        new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
+
+         isPlatform ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'member.membership',
             name: $t(`%1Ny`),
             getValue: (registration) => {
@@ -95,8 +97,8 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             recommendedWidth: 140,
             allowSorting: false,
             enabled: true,
-        }),
-        dateRange !== null
+        }) : null,
+        isPlatform && dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
                 id: 'member.continuousMembership',
                 name: $t('%1IM'),
