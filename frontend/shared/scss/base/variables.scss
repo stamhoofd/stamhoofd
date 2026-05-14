@@ -55,7 +55,7 @@ $border-radius-modals: 16px;
 $color-primary-original: #0053ff;
 $color-primary-lighter-original: #F7FAFF;
 $color-primary-light-original: #dfe9ff;
-$color-primary-background-original: #E5EEFF;
+$color-primary-background-original: #ECF0F9;
 $color-primary-dark-original: #001F61;
 $color-primary-gray-light-original: #9DB7EC;
 
@@ -144,7 +144,7 @@ $dark-theme-color-primary-contrast: var(--dark-theme-color-primary-contrast, $co
 
 $color-error-original: #f0153d;
 $color-error-border-original: #FFCAD3;
-$color-error-background-original: #ffd6dd;
+$color-error-background-original: #FBDAE0;
 $color-error-dark-original: #630012;
 
 $color-error-border-shade-original: #FF7A91;
@@ -165,8 +165,8 @@ $color-error-border-focus: $color-error;
 // -------- Success (green) ----------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-success-original: #11BB6B;
-$color-success-background-original: #DCF1DE;
+$color-success-original: #15C16B;
+$color-success-background-original: #E0F5E4;
 $color-success-dark-original: #006108;
 $color-success-border-original: #AEDBB2;
 
@@ -185,7 +185,7 @@ $color-success-border-focus: $color-success;
 // -----------------------------------------------------------------------------
 
 $color-warning-original: #FFAA00;
-$color-warning-background-original: #fff6d6;
+$color-warning-background-original: #FBF4DA;
 $color-warning-dark-original: #634e00;
 $color-warning-border-original: #DBD1AE;
 
@@ -231,7 +231,7 @@ $dark-theme-color-gray-5: invertColor($color-gray-5-original, -8); //hsl(color.h
 // -----------------------------------------------------------------------------
 
 $color-secundary-original: #8B17FF;
-$color-secundary-background-original: #EBD6FF;
+$color-secundary-background-original: #EBDAFB;
 $color-secundary-dark-original: #300061;
 $color-secundary-border-original: #C5AEDB;
 
@@ -250,7 +250,7 @@ $color-secundary-border-focus: $color-secundary;
 // -----------------------------------------------------------------------------
 
 $color-tertiary-original: #FF17B2;
-$color-tertiary-background-original: #FFD6F1;
+$color-tertiary-background-original: #FBDAF0;
 $color-tertiary-dark-original: #610041;
 $color-tertiary-border-original: #DBAECC;
 
@@ -288,7 +288,7 @@ $color-payconiq-border-focus: $color-payconiq;
 // -----------------------------------------------------------------------------
 
 $color-discount-original: #ff4747;
-$color-discount-background-original: #ffd6d6;
+$color-discount-background-original: #FBDADA;
 $color-discount-dark-original: #692020;
 $color-discount-border-original: #dbaeae;
 
