@@ -486,7 +486,7 @@ const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] 
     },
     {
         value: OrganizationType.Culture,
-        title: $t(`%mR`),
+        title: $t(`Cultuur`),
         imgSrc: stageIllustration,
     }, {
         value: OrganizationType.Youth,

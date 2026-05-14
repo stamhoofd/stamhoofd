@@ -145,7 +145,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Culture,
-                name: $t(`%mR`),
+                name: $t(`Cultuur`),
             },
             // {
             //     value: OrganizationType.LGBTQ,
@@ -219,7 +219,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.Stage:
             case OrganizationType.Events:
             case OrganizationType.Dance:
-                return $t(`%mR`);
+                return $t(`Cultuur`);
 
             case OrganizationType.School:
                 return $t('%1OC');
