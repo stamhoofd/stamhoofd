@@ -128,7 +128,7 @@ export class ViesHelperStatic {
         if (!result.isValid) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Ongeldig BTW-nummer: ' + vatNumber,
+                message: $t('Ongeldig BTW-nummer: {number}', {'number': vatNumber}),
                 field: 'VATNumber',
             });
         }
