@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
 <style lang="scss">
 @use '@stamhoofd/scss/base/variables' as *;
 
-.categorized-boxes .categorized-box {
+.categorized-box {
 
     background: $color-background;
     --color-current-background: #{$color-background};
@@ -143,6 +143,10 @@ onBeforeUnmount(() => {
 
     > .style-title-prefix {
         margin-bottom: 12px;
+    }
+
+    > .st-grid:last-child , > .st-list:last-child, > .st-input-box:last-child{
+        padding-bottom: 0;
     }
 
 }

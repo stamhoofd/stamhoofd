@@ -43,7 +43,12 @@ export default class LoadingButton extends VueComponent {
 
 .loading-button {
     position: relative;
-    display: inline-block;
+    display: block;
+
+    &:first-child:last-child {
+        // Fixes whitespace taking up space
+        display: block;
+    }
 
     &.block {
         display: block;

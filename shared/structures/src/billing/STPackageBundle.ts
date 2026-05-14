@@ -158,7 +158,8 @@ export class STPackageBundleHelper {
                         minimumAmount: 0,
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
-                        startDate: start.toJSDate()
+                        startDate: start.toJSDate(),
+                        canDeactivate: STAMHOOFD.environment === 'development' // Cannot deactivate in production because they already paid for it.
                     }),
                 });
             }

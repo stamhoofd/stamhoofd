@@ -78,7 +78,7 @@ export class PaymentMandateService {
                 throw new SimpleError({
                     code: 'not_allowed',
                     message: 'You cannot delete the last mandate',
-                    human: $t('Je kan de laatste betaalkaart niet verwijderen. Voeg eerst een andere betaalkaart toe waarmee je het wilt vervangen en verwijder daarna deze betaalkaart.')
+                    human: $t('Je kan de laatste bankkaart niet verwijderen. Voeg eerst een andere bankkaart toe waarmee je het wilt vervangen en verwijder daarna deze bankkaart.')
                 })
             }
         }

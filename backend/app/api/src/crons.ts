@@ -123,19 +123,22 @@ async function checkWebshopDNS() {
 
 // 11 min - 2 hours
 async function checkPayments() {
+    let timeout = 60 * 1000 * 11;
+    const methods = [
+        PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard,
+    ];
+
     if (STAMHOOFD.environment === 'development') {
-        // return;
+        // For Mollie, webhooks won't work, so we poll in the backend
+        timeout = 0;
     }
 
-    const timeout = 60 * 1000 * 11;
     const timeout2 = 60 * 1000 * 60 * 2;
 
     // TODO: only select the ID + organizationId
     const payments = await Payment.select()
         .where(
-            SQL.where('method', [
-                PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard,
-            ])
+            SQL.where('method', methods)
                 .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
                 .and('createdAt', '<', new Date(new Date().getTime() - timeout))
                 .and('createdAt', '>', new Date(new Date().getTime() - timeout2)),
@@ -183,6 +186,36 @@ async function checkOldPayments() {
 
     if (payments.length) {
         console.log('[DELAYED PAYMENTS] Checking old pending payments: ' + payments.length);
+        await doCheckPayments(payments);
+    }
+}
+
+// 5 days - 10 days
+async function checkOldDirectDebitPayments() {
+    let timeout = 60 * 1000 * 60 * 24 * 5;
+    const timeout2 = 60 * 1000 * 60 * 24 * 10;
+
+    if (STAMHOOFD.environment === 'development') {
+        // For Mollie, webhooks won't work, so we poll in the backend
+        timeout = 0;
+    }
+
+    // TODO: only select the ID + organizationId
+    const payments = await Payment.select()
+        .where(
+            SQL.where('method', [
+                PaymentMethod.DirectDebit,
+            ])
+                .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
+                .and('createdAt', '<', new Date(new Date().getTime() - timeout))
+                .and('createdAt', '>', new Date(new Date().getTime() - timeout2)),
+        )
+        .orderBy('createdAt', 'ASC')
+        .limit(500)
+        .fetch();
+
+    if (payments.length) {
+        console.log('[DELAYED PAYMENTS] Checking old direct debit pending payments: ' + payments.length);
         await doCheckPayments(payments);
     }
 }
@@ -385,6 +418,7 @@ registerCron('checkDNS', checkDNS);
 registerCron('checkWebshopDNS', checkWebshopDNS);
 registerCron('checkPayments', checkPayments);
 registerCron('checkOldPayments', checkOldPayments);
+registerCron('checkOldDirectDebitPayments', checkOldDirectDebitPayments);
 registerCron('checkDrips', checkDrips);
 
 // Register other crons

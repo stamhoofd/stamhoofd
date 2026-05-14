@@ -3,11 +3,14 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, STPackageStruct } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, PaymentStatus, STPackageStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
+import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
+import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
+import { PaymentMandateStatus } from '@stamhoofd/structures/PaymentMandate.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -130,8 +133,22 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             models.push(model);
 
-            if (model.meta.requiresMandate) {
-                checkout.createMandate = true;
+            if (!checkout.proForma && model.meta.requiresMandate) {
+                // setting checkout.mandate is not enough - we also need to set it as default.
+
+                if (!checkout.createMandate) {
+                    throw new SimpleError({
+                        code: '',
+                        message: $t('Je moet de betaalkaart opslaan om dit pakket te activeren. Dit pakket vereist namelijk periodieke betalingen.')
+                    })
+                }
+
+                if (!checkout.createMandate.saveAsDefault) {
+                    throw new SimpleError({
+                        code: '',
+                        message: $t('Het is noodzakelijk om deze betaalkaart als standaard betaalkaart in te stellen. Dit pakket vereist namelijk periodieke betalingen.')
+                    })
+                }
             }
         }
 
@@ -168,11 +185,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             balanceItems.set(item, item.priceWithVAT);
-        }
-
-        // Disable createMandate if a mandate was chosen
-        if (checkout.createMandate && checkout.mandate) {
-            checkout.createMandate = false;
         }
 
         if (checkout.proForma) {
@@ -224,4 +236,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             paymentQRCode,
         }));
     }
+
+    setPayment
 }

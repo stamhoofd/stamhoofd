@@ -1,10 +1,11 @@
 import { column } from '@simonbackx/simple-database';
-import type { PaymentMethod, PaymentStatus} from '@stamhoofd/structures';
+import type { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentProvider, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
+import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import type { BalanceItem } from './BalanceItem.js';
 import type { BalanceItemPayment } from './BalanceItemPayment.js';
 import { Organization } from './Organization.js';
@@ -74,6 +75,9 @@ export class Payment extends QueryableModel {
 
     @column({ type: 'string', nullable: true })
     stripeAccountId: string | null = null;
+
+    @column({ type: 'json', decoder: CreateMandateSettings, nullable: true })
+    createMandate: CreateMandateSettings | null = null;
 
     /**
      * Total price

@@ -7,7 +7,8 @@
         </template>
 
         <h3 class="style-title-list">
-            {{ company.name || 'Naamloos' }}<span v-if="isDefault" v-tooltip="$t('Standaard facturatiegegevens')" class="icon tiny success primary" />
+            {{ company.name || 'Naamloos' }}
+            <span v-if="isDefault" class="style-tag success">{{ $t('Standaard') }}</span>
         </h3>
 
         <p v-if="company.VATNumber" class="style-description-small">
@@ -32,7 +33,9 @@
         </p>
 
         <template #right>
-            <slot name="right" />
+            <slot name="right">
+                <CompanyIcon v-if="$slots.left" :company="company" :is-default="isDefault" />
+            </slot>
         </template>
     </STListItem>
 </template>

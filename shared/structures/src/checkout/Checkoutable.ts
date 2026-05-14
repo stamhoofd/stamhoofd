@@ -2,6 +2,7 @@ import { PaymentMethod } from '../PaymentMethod.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { PaymentMandate } from '../PaymentMandate.js';
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder, URLDecoder } from '@simonbackx/simple-encoding';
+import { CreateMandateSettings } from './CreateMandateSettings.js';
 
 /**
  * We have multiple checkout flows in Stamhoofd. They all share a similar way of selecting a payment method,
@@ -49,8 +50,8 @@ export abstract class Checkoutable<T = unknown> extends AutoEncoder {
      *
      * Note: it might be required for subscription based purchases to set this to true if not paying with an existing mandate.
      */
-    @field({ decoder: BooleanDecoder })
-    createMandate = false;
+    @field({ decoder: CreateMandateSettings, nullable: true })
+    createMandate: CreateMandateSettings | null;
 
     /**
      * The link we'll redirect the user back too after the payment page (either succeeded or failed!)

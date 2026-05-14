@@ -102,6 +102,10 @@ button.st-grid-item {
         grid-row: 1;
         grid-column: 3;
         padding-right: 15px;
+
+        > .option {
+            margin-top: 7px
+        }
     }
 
     > .middle-right {

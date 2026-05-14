@@ -3,14 +3,12 @@
         <template #left>
             <PaymentMandateIcon :mandate="mandate" />
         </template>
-
-        <p v-if="mandate.isDefault" class="style-title-prefix-list">
-            {{ $t('Huidige standaard bankkaart') }}
-        </p>
-
+        
         <h3 class="style-title-list">
-            {{ mandate.name }}
+            <span>{{ mandate.name }}</span>
+            <span v-if="mandate.isDefault" class="style-tag success">{{ $t('Standaard') }}</span>
         </h3>
+
         <p v-if="mandate.description" class="style-description-small">
             {{ mandate.description }}
         </p>

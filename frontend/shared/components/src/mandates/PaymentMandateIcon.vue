@@ -1,5 +1,5 @@
 <template>
-    <IconContainer :class="mandate.status === PaymentMandateStatus.Invalid ? 'error' : (mandate.isDefault ? '' : 'gray')">
+    <IconContainer :class="mandate.status === PaymentMandateStatus.Invalid ? 'error' : (mandate.isDefault && mandate.status === PaymentMandateStatus.Valid ? 'gray' : 'gray')">
         <figure>
             <template v-if="mandate.type === PaymentMandateType.CreditCard">
                 <img v-if="mandate.details.brand === 'Mastercard'" src="@stamhoofd/assets/images/partners/icons/mastercard.svg">
@@ -12,7 +12,6 @@
         <template #aside>
             <span v-if="mandate.status === PaymentMandateStatus.Invalid" v-tooltip="$t('Ongeldig')" class="icon error red small" />
             <span v-else-if="mandate.status === PaymentMandateStatus.Pending" v-tooltip="$t('In afwachting van verificatie')" class="icon clock small gray" />
-            <span v-else-if="mandate.isDefault" v-tooltip="$t('Standaard betaalkaart')" class="icon success small primary" />
         </template>
     </IconContainer>
 </template>

@@ -240,6 +240,10 @@ button.st-list-item {
                 padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
                 flex-grow: 1;
                 min-width: 0; // flexbox disable becoming bigger than parent
+
+                > .option {
+                    margin-top: 7px
+                }
             }
 
             > .right {

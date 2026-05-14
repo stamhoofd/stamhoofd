@@ -165,10 +165,10 @@ $color-error-border-focus: $color-error;
 // -------- Success (green) ----------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-success-original: #11BB6B;
-$color-success-background-original: #D6FFEC;
-$color-success-dark-original: #006131;
-$color-success-border-original: #AEDBC6;
+$color-success-original: #11BB1F;
+$color-success-background-original: #DCF1DE;
+$color-success-dark-original: #006108;
+$color-success-border-original: #AEDBB2;
 
 $dark-theme-color-success-background: invertColor($color-success-background-original, -5);
 $dark-theme-color-success-dark: invertColor($color-success-dark-original, -5);

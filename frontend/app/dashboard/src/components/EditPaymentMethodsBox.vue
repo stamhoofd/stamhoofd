@@ -90,7 +90,7 @@
                 <p>{{ $t('Sta toe om de gegevens van bankkaarten (Bancontact, iDEAL en kredietkaart) op te slaan voor later gebruik. Deze kunnen dan gebruikt worden door beheerders om betalingen te innen via SEPA domiciliëring of creditcard - of geselecteerd worden bij het afrekenen. Voorlopig enkel ondersteund voor B2B betalingen via Mollie.') }}</p>
 
                 <STList>
-                    <CheckboxListItem v-model="enableMandates" :label="$t('Toelaten om bankkaartene op te slaan en te hergebruiken')" :description="$t('Betalingen via SEPA domiciliëring kunnen tot 3 werkdagen in beslag nemen en voor lange tijd teruggevorderd worden. Pas zeker je algemene voorwaarden aan.')" />
+                    <CheckboxListItem v-model="enableMandates" :label="$t('Toelaten om bankkaarten op te slaan en te hergebruiken')" :description="$t('Betalingen via SEPA domiciliëring kunnen tot 3 werkdagen in beslag nemen en voor lange tijd teruggevorderd worden. Pas zeker je algemene voorwaarden aan.')" />
                 </STList>
             </template>
         </div>

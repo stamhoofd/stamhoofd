@@ -38,25 +38,7 @@
                     <h1>
                         {{ title }}
                     </h1>
-                    <div class="inline-seeker-box">
-                        <STList>
-                            <STListItem v-for="(category, index) of categories" :key="index" :selectable="true" class="" @click="scrollToCategory(category)">
-                                <template #left>
-                                    <span :class="'icon ' + category.icon.value" />
-                                </template>
-                                <h2 class="style-title-list">
-                                    {{ category.title.value }}
-                                </h2>
-
-                                <RenderSummary :category="category" />
-
-                                <template #right>
-                                    <span v-if="category.hasError?.value" class="icon error red" />
-                                    <span class="icon arrow-down-small gray" />
-                                </template>
-                            </STListItem>
-                        </STList>
-                    </div>
+                    <ScrollableSegmentedControl v-model="visibleCategory" :items="[null, ...categories]" :labels="['Overzicht', ...categories.map(c => c.title.value)]" :icons="[null, ...categories.map(c => c.icon.value)]" />
                 </header>
                 <div>
                     <slot />
@@ -102,7 +84,7 @@ const isEnabled = computed(() => {
 const deviceWidth = useDeviceWidth();
 
 const columnsEnabled = computed(() => {
-    return deviceWidth.value >= 800;
+    return false;//deviceWidth.value >= 800;
 });
 
 const canDelete = computed(() => {

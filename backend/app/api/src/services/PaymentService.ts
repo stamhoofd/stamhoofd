@@ -19,6 +19,7 @@ import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
 import { BalanceItemService } from './BalanceItemService.js';
 import { MollieService } from './MollieService.js';
 import { PaymentMandateService } from './PaymentMandateService.js';
+import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 
 export class PaymentService {
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
@@ -167,84 +168,30 @@ export class PaymentService {
                         }
                     }
                     else if (payment.provider === PaymentProvider.Mollie) {
-                        // check status via mollie
-                        const molliePayments = await MolliePayment.where({ paymentId: payment.id }, { limit: 1 });
-                        if (molliePayments.length === 1) {
-                            const molliePayment = molliePayments[0];
-                            // check status
-                            const token = await MollieToken.getTokenFor(organization.id);
+                        try {
+                            const mollieClient = await MollieService.create({
+                                sellingOrganization: organization
+                            }); 
+                            if (mollieClient) {
+                                let status = await mollieClient.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment));
 
-                            if (token) {
-                                try {
-                                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                                    let mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
-                                        testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
-                                    });
-
-                                    console.log(mollieData); // log to log files to check issues
-
-                                    const details = mollieData.details as any;
-                                    if (details?.consumerName) {
-                                        payment.ibanName = details.consumerName;
-                                    }
-                                    if (details?.consumerAccount) {
-                                        payment.iban = details.consumerAccount;
-                                    }
-                                    if (details?.cardHolder) {
-                                        payment.ibanName = details.cardHolder;
-                                    }
-                                    if (details?.cardNumber) {
-                                        payment.iban = '•••• ' + details.cardNumber;
-                                    }
-
-                                    if (mollieData.status === MolliePaymentStatus.paid) {
-                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
-                                    }
-                                    else if (mollieData.status === MolliePaymentStatus.failed || mollieData.status === MolliePaymentStatus.expired || mollieData.status === MolliePaymentStatus.canceled) {
-                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                                    }
-                                    else if ((cancel || this.shouldTryToCancel(payment.status, payment)) && mollieData.isCancelable) {
-                                        console.log('Cancelling Mollie payment on request', payment.id);
-                                        mollieData = await mollieClient.payments.cancel(molliePayment.mollieId);
-
-                                        if (mollieData.status === MolliePaymentStatus.paid) {
-                                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
-                                        }
-                                        else if (mollieData.status === MolliePaymentStatus.failed || mollieData.status === MolliePaymentStatus.expired || mollieData.status === MolliePaymentStatus.canceled) {
-                                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                                        }
-                                        else if (this.isManualExpired(payment.status, payment)) {
-                                            // Mollie still returning pending after 1 day: mark as failed
-                                            console.error('Manually marking Mollie payment as expired', payment.id);
-                                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                                        }
-                                    }
-                                    else if (this.isManualExpired(payment.status, payment)) {
-                                        // Mollie still returning pending after 1 day: mark as failed
-                                        console.error('Manually marking Mollie payment as expired', payment.id);
-                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                                    }
+                                if (this.isManualExpired(status, payment)) {
+                                    console.error('Manually marking Mollie payment as expired', payment.id);
+                                    status = PaymentStatus.Failed;
                                 }
-                                catch (e) {
-                                    console.error('Payment check failed Mollie', payment.id, e);
-                                    if (this.isManualExpired(payment.status, payment)) {
-                                        console.error('Manually marking Mollie payment as expired', payment.id);
-                                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                                    }
-                                }
-                            }
-                            else {
-                                console.warn('Mollie payment is missing for organization ' + organization.id + ' while checking payment status...');
-
+                                await this.handlePaymentStatusUpdate(payment, organization, status);
+                            } else {
+                                console.error('Missing Mollie Credentials for payment', payment.id);
                                 if (this.isManualExpired(payment.status, payment)) {
-                                    console.error('Manually marking payment without mollie token as expired', payment.id);
+                                    console.error('Manually marking Mollie payment as expired', payment.id);
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                                 }
                             }
-                        }
-                        else {
+
+                        } catch (e) {
+                            console.error('Payment check failed Mollie', payment.id, e);
                             if (this.isManualExpired(payment.status, payment)) {
-                                console.error('Manually marking payment without mollie payments as expired', payment.id);
+                                console.error('Manually marking Mollie payment as expired', payment.id);
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                             }
                         }
@@ -338,6 +285,18 @@ export class PaymentService {
                 return true;
             }
         }
+
+        if (STAMHOOFD.environment === 'development') {
+            // In development, we expire all direct debits and other paymetns after 1 hour, because they need manual changes
+            // otherwise they will remain stuck in the dev environment, poluting the UI
+            if ((status === PaymentStatus.Pending || status === PaymentStatus.Created)) {
+                // If payment is not succeeded after one day, mark as failed
+                if (payment.createdAt < new Date(new Date().getTime() - 60 * 1000 * 60)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -622,7 +581,7 @@ export class PaymentService {
         checkout: Pick<Checkoutable<never>, 'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
         payingOrganization?: Organization | null;
         serviceFeeType: 'webshop' | 'members' | 'tickets' | 'system';
-        createMandate: boolean,
+        createMandate: CreateMandateSettings | null,
         useMandate: PaymentMandate | null,
         paymentConfiguration: PaymentConfiguration,
         privatePaymentConfiguration: PrivatePaymentConfiguration
@@ -641,7 +600,7 @@ export class PaymentService {
         const {method, type, mandate} = await this.validatePaymentMethod({ 
             method: checkout.paymentMethod ?? PaymentMethod.Unknown,
             mandate: useMandate,
-            createMandate,
+            createMandate: !!createMandate,
             customer,
             price,
             hasNegative,
@@ -664,7 +623,7 @@ export class PaymentService {
         // Determine the payment provider (throws if invalid)
         const { provider, stripeAccount } = await organization.getPaymentProviderFor(method, mandate, privatePaymentConfiguration);
 
-        if (createMandate) {
+        if (createMandate && !mandate) {
             if (provider !== PaymentProvider.Mollie) {
                 throw new SimpleError({
                     code: 'cannot_create_mandate_for_provider',
@@ -691,6 +650,7 @@ export class PaymentService {
         payment.roundingAmount = roundingAmount;
         payment.method = method;
         payment.type = type;
+        payment.createMandate = createMandate
 
         if (price === 0) {
             payment.status = PaymentStatus.Succeeded;
@@ -821,7 +781,6 @@ export class PaymentService {
                         user,
                         customer,
                         mandate,
-                        createMandate
                     });
                     paymentUrl = mollieResult.paymentUrl;
                 }
@@ -983,10 +942,6 @@ export class PaymentService {
         }
 
         if (mandate) {
-            if (createMandate) {
-                throw new Error('Cannot create mandate when using mandate')
-            }
-
             // Validate mandate + update payment method based on the mandate
             if (method !== PaymentMethod.Unknown) {
                 throw new SimpleError({

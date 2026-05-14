@@ -379,9 +379,9 @@
 
 .style-tag {
     font-size: 11px;
-    letter-spacing: -5%;
-    text-transform: uppercase;
-    font-weight: $font-weight-semibold;
+    //letter-spacing: -5%;
+    //text-transform: uppercase;
+    font-weight: $font-weight-bold;
     color: $color-primary;
 
     @media (prefers-color-scheme: dark) {
@@ -389,11 +389,11 @@
     }
 
     background: $color-primary-background;
-    padding: 6px 7px;
+    padding: 6px 8px;
     border-radius: $border-radius;
     line-height: 1;
 
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
     align-items: center;
     gap: 4px;
@@ -450,11 +450,6 @@
     &.payconiq {
         color: $color-payconiq-dark;
         background: $color-payconiq-background;
-    }
-
-    &.inline {
-        // need to evaluate the usage of this class
-        display: inline-flex;
     }
 
     &.inline-first {
@@ -667,14 +662,36 @@ button.style-price-big {
     font-variation-settings: 'opsz' 19;
 }
 
-.style-description, .style-description-large, .style-description-small, .style-title-list, .style-title-prefix, .style-definition-label {
+.style-tag {
     /**
         Small optimizations for modern browsers only
     */
     &.flex, &:has(> .icon), &:has(> svg) {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
+    }
+
+    > .icon {
+        // Reduce padding effect
+        margin-top: -1px;
+        margin-bottom: -1px;
+
+        &:first-child {
+            margin-left: -1px;
+        }
+    }
+}
+
+
+.style-description, .style-description-large, .style-description-small, .style-title-list, .style-title-prefix, .style-definition-label {
+    /**
+        Small optimizations for modern browsers only
+    */
+    &.flex, &:has(> .icon), &:has(> svg), &:has(> .style-tag) {
+        display: flex;
+        align-items: center;
+        gap: 7px;
     }
 }
 
@@ -682,10 +699,10 @@ button.style-price-big {
     /**
         Small optimizations for modern browsers only
     */
-    &.flex, &:has(> .icon), &:has(> svg) {
+    &.flex, &:has(> .icon), &:has(> svg), &:has(> .style-tag) {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 7px;
     }
 }
 
@@ -1125,6 +1142,15 @@ button.style-price-big {
         
         > h2 {
             @extend .style-title-2;
+            padding-bottom: 15px;
+
+             @media (max-width: 600px) {
+                padding-bottom: 7px;
+            }
+        }
+
+        > h2.smaller {
+            @extend .style-title-3;
             padding-bottom: 15px;
 
              @media (max-width: 600px) {

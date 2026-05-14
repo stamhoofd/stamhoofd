@@ -1,7 +1,8 @@
-import type { Mandate } from '@mollie/api-client';
+import type { Mandate , Payment as MolliePaymentType} from '@mollie/api-client';
 import { ApiMode, createMollieClient, MandateMethod, MandateStatus, PaymentMethod as molliePaymentMethod, PaymentStatus as molliePaymentStatus, OnboardingStatus, ProfileStatus, SequenceType } from '@mollie/api-client';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { Organization, Payment, User } from '@stamhoofd/models';
+import type { Payment, User } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
 import { MolliePayment, MollieToken, Platform } from '@stamhoofd/models';
 import type { PaymentCustomer } from '@stamhoofd/structures';
 import { MollieOnboarding, MollieProfile, MollieProfileMode, MollieProfileStatus, MollieStatus, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
@@ -368,7 +369,7 @@ export class MollieService {
     }
 
     static async createPayment(
-        { sellingOrganization, payment, mandate, redirectUrl, webhookUrl, cancelUrl, description, metadata, payingOrganization, user, customer, createMandate}: {
+        { sellingOrganization, payment, mandate, redirectUrl, webhookUrl, cancelUrl, description, metadata, payingOrganization, user, customer}: {
             payment: Payment;
             mandate: PaymentMandate | null;
             redirectUrl: string;
@@ -380,7 +381,6 @@ export class MollieService {
             payingOrganization: Organization | null,
             user: User | null,
             customer: PaymentCustomer,
-            createMandate: boolean
         },
     ): Promise<{ paymentUrl: string | null }> {
         const mollieService = await MollieService.create({sellingOrganization});
@@ -409,7 +409,7 @@ export class MollieService {
             method,
             testmode: mollieService.testMode,
             mandateId: mandate?.id,
-            sequenceType: mandate ? SequenceType.recurring : (createMandate ? SequenceType.first : SequenceType.oneoff),
+            sequenceType: mandate ? SequenceType.recurring : (payment.createMandate ? SequenceType.first : SequenceType.oneoff),
             customerId,
             profileId,
             description,
@@ -420,7 +420,7 @@ export class MollieService {
                 paymentId: payment.id,
                 ...metadata
             },
-            locale: mollieService.locale
+            locale: mollieService.locale,
         };
         console.log('Creating payment', data)
         const molliePayment = await mollieService.client.payments.create(data);
@@ -434,18 +434,105 @@ export class MollieService {
         dbPayment.mollieId = molliePayment.id;
         await dbPayment.save();
 
-        if (molliePayment.status === molliePaymentStatus.paid) {
-            payment.status = PaymentStatus.Succeeded
-        } else if (molliePayment.status === molliePaymentStatus.failed) {
-            payment.status = PaymentStatus.Failed
-        } else if (molliePayment.status === molliePaymentStatus.expired) {
-            payment.status = PaymentStatus.Failed
-        } else if (molliePayment.status === molliePaymentStatus.canceled) {
-            payment.status = PaymentStatus.Failed
-        }
+        payment.status = await mollieService.getStatusFor(molliePayment, payment, false)
         
         return {
             paymentUrl: paymentUrl
         }
+    }
+
+    static async saveChargeInfo(mollieData: MolliePaymentType, payment: Payment) {
+        try {
+            const details = mollieData.details;
+            if (details) {
+                if ('consumerName' in details) {
+                    payment.ibanName = details.consumerName;
+                }
+                if ('consumerAccount' in details) {
+                    payment.iban = details.consumerAccount;
+                }
+                if ('cardHolder' in details) {
+                    payment.ibanName = details.cardHolder;
+                }
+                if ('cardNumber' in details) {
+                    payment.iban = '•••• ' + details.cardNumber;
+                }
+                await payment.save();
+            }
+        }
+        catch (e) {
+            console.error('Failed processing charge', e);
+        }
+    }
+
+    async getStatusFor(mollieData: MolliePaymentType, payment: Payment, cancel = false): Promise<PaymentStatus> {
+        await MollieService.saveChargeInfo(mollieData, payment)
+
+        if (mollieData.mandateId && mollieData.status === molliePaymentStatus.paid) {
+            if (payment.createMandate && payment.createMandate.saveAsDefault) {
+                try {
+                    // Set as default
+                    if (payment.payingOrganizationId) {
+                        const payingOrganization = await Organization.getByID(payment.payingOrganizationId)
+                        if (payingOrganization) {
+                            console.log('Saving ' + mollieData.mandateId + ' as default mandate for organization ' + payingOrganization.id + ' ' + payingOrganization.name)
+                            payingOrganization.serverMeta.mollieMandateId = mollieData.mandateId
+                            await payingOrganization.save()
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to save default mandate for Mollie Payment ' + payment.id, {cause: e})
+                }
+            }
+        }
+
+        if (mollieData.status === molliePaymentStatus.paid) {
+            return PaymentStatus.Succeeded
+        } else if (mollieData.status === molliePaymentStatus.failed) {
+            return PaymentStatus.Failed
+        } else if (mollieData.status === molliePaymentStatus.expired) {
+            return PaymentStatus.Failed
+        } else if (mollieData.status === molliePaymentStatus.canceled) {
+            return PaymentStatus.Failed
+        }
+
+        // Pending payments should be cancellable
+        if (cancel && mollieData.isCancelable) {
+            console.log('Cancelling Mollie Payment ' + payment.id);
+
+            // Try to cancel
+            try {
+                const newData = await this.client.payments.cancel(mollieData.id, {
+                    testmode: this.testMode
+                });
+                console.log('Cancelled Mollie Payment ' + payment.id);
+                return await this.getStatusFor(newData, payment, false)
+            } catch (e) {
+                console.error('Failed to cancel Mollie Payment ' + payment.id, {cause: e})
+            }
+
+        } else if (cancel) {
+            console.log('Cannot cancel Mollie Payment ' + payment.id);  
+        }
+
+        if (mollieData.status === molliePaymentStatus.open ) {
+            // Nothink happend yet
+            return PaymentStatus.Created
+        }
+
+        return PaymentStatus.Pending
+    }
+
+    async getStatus(payment: Payment, cancel = false) {
+        const molliePayment = await MolliePayment.select().where('paymentId', payment.id).first(false);
+        if (!molliePayment) {
+            throw new Error('Mollie Payment not found for payment ' + payment.id)
+        }
+
+        const mollieData = await this.client.payments.get(molliePayment.mollieId, {
+            testmode: this.testMode
+        });
+
+        return this.getStatusFor(mollieData, payment, cancel)
     }
 }

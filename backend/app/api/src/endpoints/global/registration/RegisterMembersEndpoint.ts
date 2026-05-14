@@ -841,7 +841,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     members,
                     serviceFeeType: 'members',
                     payingOrganization,
-                    createMandate: false,
+                    createMandate: null,
                     useMandate: null,
                     paymentConfiguration: organization.meta.registrationPaymentConfiguration,
                     privatePaymentConfiguration: organization.privateMeta.registrationPaymentConfiguration
