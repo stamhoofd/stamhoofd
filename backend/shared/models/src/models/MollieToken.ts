@@ -14,6 +14,10 @@ function sleep(ms: number) {
 export class MollieToken extends QueryableModel {
     static table = 'mollie_tokens';
 
+    get id() {
+        return this.organizationId
+    }
+
     @column({ primary: true, type: 'string' })
     organizationId!: string;
 

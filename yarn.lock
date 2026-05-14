@@ -1898,12 +1898,12 @@
     zod "^3.25.0 || ^4.0.0"
     zod-to-json-schema "^3.24.1"
 
-"@mollie/api-client@4.3.3":
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/@mollie/api-client/-/api-client-4.3.3.tgz#41110b2c5d7cc6cba5f8dd81df7695d91ab41fca"
-  integrity sha512-vA8EM3nO8pcTX2AAG93FQElZ9uVpKJ7DBCEalvyStZEnGYGD3fIVPs6Pmr0lIB2tkjrqjEdbhfwwaK4MtBxs+w==
+"@mollie/api-client@4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@mollie/api-client/-/api-client-4.5.0.tgz#21b30d49871cf6ecaaa520f04468fed86a38b09e"
+  integrity sha512-Aj3Erv3EqY74fFK8gYegjzXZxPNq4T7cbsoPueRx5aF6o0kL8kR9eeaLZPaFkv2zHA4XQW6ky8yG7CMyu4oqnw==
   dependencies:
-    "@types/node-fetch" "^2.6.12"
+    "@types/node-fetch" "^2.6.13"
     node-fetch "^2.7.0"
     ruply "^1.0.1"
 
@@ -3872,7 +3872,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node-fetch@^2.6.12", "@types/node-fetch@^2.6.4":
+"@types/node-fetch@^2.6.13", "@types/node-fetch@^2.6.4":
   version "2.6.13"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.13.tgz#e0c9b7b5edbdb1b50ce32c127e85e880872d56ee"
   integrity sha512-QGpRVpzSaUs30JBSGPjOg4Uveu384erbHBoT1zeONvyCfwQxIkUshLAOqN/k9EjGviPRmWTTe6aH2qySWKTVSw==

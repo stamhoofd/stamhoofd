@@ -530,6 +530,8 @@ export class MollieService {
             testmode: this.testMode
         });
 
+        console.log(mollieData)
+
         return this.getStatusFor(mollieData, payment, cancel)
     }
 }

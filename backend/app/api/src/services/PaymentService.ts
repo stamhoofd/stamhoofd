@@ -1,6 +1,7 @@
 import { createMollieClient, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { BalanceItem, Member, User } from '@stamhoofd/models';
+import type { Member, User } from '@stamhoofd/models';
+import { BalanceItem } from '@stamhoofd/models';
 import { BalanceItemPayment, Group, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
@@ -296,7 +297,7 @@ export class PaymentService {
                 else {
                     // Do a manual update if needed
                     if (payment.status === PaymentStatus.Succeeded) {
-                        if (payment.provider === PaymentProvider.Stripe) {
+                        if ( (payment.provider === PaymentProvider.Mollie && STAMHOOFD.environment === 'development')) {
                             // Update the status
                             await StripeHelper.getStatus(payment, false, testMode);
                         }
@@ -601,6 +602,53 @@ export class PaymentService {
         }
     }
 
+    static async registerChargeback(payment: Payment, amount: number) {
+        if (amount !== payment.price) {
+            // Creates issues to know what balance item was paid and what was not.
+            throw new Error('Cannot register chargeback with different amount than the payment for payment ' + payment.id)
+        }
+        const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch()
+        const items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)))
+
+         // Done validation
+        const chargeback = new Payment();
+
+        // Who will receive this money?
+        chargeback.organizationId = payment.organizationId!;
+
+        // Who paid
+        chargeback.payingUserId = payment.payingUserId
+        chargeback.payingOrganizationId = payment.payingOrganizationId
+        chargeback.customer = payment.customer;
+
+        chargeback.status = PaymentStatus.Succeeded;
+        chargeback.paidAt = new Date();
+        chargeback.price = -payment.price;
+        chargeback.roundingAmount = -payment.roundingAmount;
+        chargeback.method = payment.method;
+        chargeback.type = PaymentType.Chargeback;
+
+        chargeback.provider = payment.provider;
+        chargeback.stripeAccountId = payment.stripeAccountId
+
+        await chargeback.save();
+
+
+        for (const original of balanceItemPayments) {
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment();
+            balanceItemPayment.balanceItemId = original.balanceItemId
+            balanceItemPayment.paymentId = chargeback.id;
+            balanceItemPayment.organizationId = chargeback.organizationId;
+            balanceItemPayment.price = -original.price;
+            await balanceItemPayment.save();
+        }
+
+        // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
+        await BalanceItemService.updatePaidAndPending(items);
+
+        return chargeback;
+    }
 
     static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration}: {
         balanceItems: Map<BalanceItem, number>;

@@ -60,6 +60,13 @@ export class Payment extends QueryableModel {
     mandateId: string | null = null;
 
     /**
+     * Link to related payment that was reversed.
+     * Used for refunds and chargebacks
+     */
+    @column({ type: 'string', nullable: true })
+    reversingPaymentId: string | null = null;
+
+    /**
      * @deprecated
      */
     get userId() {

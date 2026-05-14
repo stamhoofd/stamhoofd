@@ -317,7 +317,9 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return 0;
     }
 
-    all(options: IterableSQLSelectOptions = {}): T extends { id: string } ? IterableSQLSelect<T> : never {
+    all<PrimaryKey extends 'id' = 'id'>(options?: IterableSQLSelectOptions): T extends {id: string} ? IterableSQLSelect<T> : never 
+    all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions, primaryKey: PrimaryKey): T extends Record<PrimaryKey, string> ? IterableSQLSelect<T> : never 
+    all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions = {}, preferredPrimaryKey?: PrimaryKey) {
         if (this._orderBy) {
             throw new Error('Cannot use async iterator with custom order by. Results should be ordered by ID');
         }
@@ -331,7 +333,8 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         }
 
         const limit = this._limit;
-        this.orderBy('id');
+        const primaryKey = preferredPrimaryKey ?? 'id'
+        this.orderBy(primaryKey);
 
         let next: this | null = this.clone();
         const base = this;
@@ -394,16 +397,16 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                 if (stack.length >= limit) {
                     next = base.clone();
                     const lastResult = stack[stack.length - 1]!;
-                    if (!('id' in lastResult)) {
-                        throw new Error('Cannot use async iterator without ID column');
+                    if (!(primaryKey in lastResult)) {
+                        throw new Error('Cannot use async iterator without '+primaryKey+' column');
                     }
 
-                    const lastId = lastResult.id;
+                    const lastId = lastResult[primaryKey as keyof T];
                     if (typeof lastId !== 'string') {
-                        throw new Error('Cannot use async iterator without string ID column');
+                        throw new Error('Cannot use async iterator without string '+primaryKey+' column');
                     }
 
-                    next.andWhere('id', '>', lastId);
+                    next.andWhere(primaryKey, '>', lastId);
                 }
 
                 return {
