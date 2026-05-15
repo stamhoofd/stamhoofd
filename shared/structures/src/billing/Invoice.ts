@@ -304,10 +304,15 @@ export class Invoice extends AutoEncoder {
         ];
     }
 
-    updatePayableRoundingAmount() {
+    private updatePayableRoundingAmount() {
+        if (this.number) {
+            // Not allowed: invoice is official
+            return;
+        }
+
         // Calculate difference between the invoice price and the payments price
         const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
-        if (Math.abs(difference) < 5_00) { // Correct maximum 5 cents
+        if (this.payments.length > 0 && Math.abs(difference) < 5_00) { // Correct maximum 5 cents
             this.payableRoundingAmount = difference;
         }
         else {
@@ -319,7 +324,17 @@ export class Invoice extends AutoEncoder {
         return !!this.items.find(i => !!i.addedToUnitPriceToCorrectVAT);
     }
 
-    correctRoundingByUpdatingPrices() {
+    private correctRoundingByUpdatingPrices() {
+        if (this.payments.length === 0) {
+            // Would cause issues
+            return;
+        }
+
+        if (this.number) {
+            // Not allowed: invoice is official
+            return;
+        }
+
         const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
         if (difference === 0) {
             // No need to do any magic
@@ -389,6 +404,13 @@ export class Invoice extends AutoEncoder {
     }
 
     updatePrices() {
+        if (this.number) {
+            throw new SimpleError({
+                code: 'invoice_has_number',
+                message: 'An invoice is immutable after it has been generated',
+            });
+        }
+
         this.correctRoundingByUpdatingPrices();
         this.calculateVAT();
         this.updatePayableRoundingAmount();
