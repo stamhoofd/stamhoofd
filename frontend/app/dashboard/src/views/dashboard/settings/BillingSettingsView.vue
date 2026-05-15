@@ -7,7 +7,7 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Openstaand bedrag">
+                    <STInputBox :title="$t('Openstaand bedrag')">
                         <button class="style-price-big" type="button" @click="$navigate(Routes.Items)">
                             <span>
                                 {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
@@ -125,15 +125,15 @@ import type { DetailedPayableBalance } from '@stamhoofd/structures';
 import { BalanceItem } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import CompanyRow from '../companies/CompanyRow.vue';
-import { useRequiredOrganization } from '../hooks';
-import IconContainer from '../icons/IconContainer.vue';
-import STListItem from '../layout/STListItem.vue';
-import { GeneralSettingsView } from '../organizations';
-import PayableBalanceItemsView from './PayableBalanceItemsView.vue';
-import PayableBalancePaymentsView from './PayableBalancePaymentsView.vue';
-import PayableBalanceMandatesBox from './components/PayableBalanceMandatesBox.vue';
-import PaymentRow from './components/PaymentRow.vue';
+import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+import PayableBalanceItemsView from '@stamhoofd/components/payments/PayableBalanceItemsView.vue';
+import PayableBalancePaymentsView from '@stamhoofd/components/payments/PayableBalancePaymentsView.vue';
+import PayableBalanceMandatesBox from '@stamhoofd/components/payments/components/PayableBalanceMandatesBox.vue';
+import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance;

@@ -396,23 +396,23 @@
 
 <script lang="ts" setup>
 import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
+import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
 import BundleDiscountSettingsView from '@stamhoofd/components/bundle-discounts/BundleDiscountSettingsView.vue';
 import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
-import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
 import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
-import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
-import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
-import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.ts';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
+import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
 
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -420,11 +420,12 @@ import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navig
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { OrganizationRegistrationPeriod} from '@stamhoofd/structures';
+import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { DetailedPayableBalance, EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
-import type { ComponentOptions, Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
+import BillingSettingsView from './BillingSettingsView.vue';
 import LabsView from './LabsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -438,7 +439,6 @@ import FreeContributionSettingsView from './modules/members/FreeContributionSett
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
-import PayableBalanceView from '@stamhoofd/components/payments/PayableBalanceView.vue';
 
 type ttt = FreeContributionSettingsView;
 
@@ -631,7 +631,7 @@ defineRoutes([
                 {
                     url: Routes.PaymentSettings,
                     present: 'popup' as const,
-                    component: PayableBalanceView,
+                    component: BillingSettingsView,
                     async paramsToProps() {
                         const item = await loadPayableBalance();
 

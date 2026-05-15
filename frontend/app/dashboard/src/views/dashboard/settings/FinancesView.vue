@@ -188,7 +188,6 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import PayableBalanceItemsView from '@stamhoofd/components/payments/PayableBalanceItemsView.vue';
-import PayableBalanceView from '@stamhoofd/components/payments/PayableBalanceView.vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AccessRight, BalanceItem, DetailedPayableBalance, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
@@ -199,6 +198,7 @@ import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
+import BillingSettingsView from './BillingSettingsView.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 
 enum Routes {
@@ -321,7 +321,7 @@ defineRoutes([
         params: {
             uri: String,
         },
-        component: PayableBalanceView,
+        component: BillingSettingsView,
         async paramsToProps(params: { uri: string }) {
             await balancePromise;
             const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
