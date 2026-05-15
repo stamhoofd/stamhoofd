@@ -78,9 +78,9 @@
                     </div>
                 </div>
 
-                <div class="container categorized-box">
+                <div v-if="model.requiresMandate && model.packages.length" class="container categorized-box">
                     <h2>{{ $t('Periodiek te betalen') }}</h2>
-                    <STInputBox v-if="model.requiresMandate && model.packages.length" class="max">
+                    <STInputBox class="max">
                         <STList>
                             <STPackageRow v-for="pack of model.packages.filter(p => p.meta.requiresMandate)" :key="pack.id" :pack="pack" />
                         </STList>
@@ -169,7 +169,7 @@ const paymentConfiguration = computed(() => props.model.paymentConfiguration);
 const activatePackages = useActivatePackages();
 const proFormaData = shallowRef<null | CheckoutResponse>(null);
 const loadingProForma = ref(false);
-const {mandates} = useOrganizationPaymentMandates({
+const {mandates} = props.model.forceNewMandate ? {mandates: ref([])} : useOrganizationPaymentMandates({
     sellingOrganizationId: props.model.sellingOrganization.id,
     errors,
 });
@@ -243,7 +243,7 @@ watch(realCreateMandate, (n, old) => {
 
     Request.cancelAll(loadProFormaBag)
     loadProForma().catch(console.error);
-}, {immediate: false})
+}, {immediate: true})
 
 
 async function loadProForma() {

@@ -23,7 +23,10 @@
 
             <template v-if="item.organization.meta.registrationPaymentConfiguration.enableMandates">
                 <hr>
-                <h2>{{ $t('Standaard bankkaart') }}</h2>
+                <h2 class="style-with-button">
+                    <span>{{ $t('Standaard bankkaart') }}</span>
+                    <button v-tooltip="$t('Nieuwe bankkaart koppelen')" type="button" class="button icon add" @click="addCard" />
+                </h2>
                 <p v-if="!$isPlatform">
                     {{ $t('Kies een bankkaart of creditcard waarmee de periodieke betalingen gebeuren.') }}
                 </p>
@@ -122,7 +125,7 @@
 <script setup lang="ts">
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
-import { BalanceItem } from '@stamhoofd/structures';
+import { BalanceItem, PackageCheckout } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
@@ -134,12 +137,17 @@ import PayableBalanceItemsView from '@stamhoofd/components/payments/PayableBalan
 import PayableBalancePaymentsView from '@stamhoofd/components/payments/PayableBalancePaymentsView.vue';
 import PayableBalanceMandatesBox from '@stamhoofd/components/payments/components/PayableBalanceMandatesBox.vue';
 import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
+import { useStartPackageCheckout } from './packages/useStartPackageCheckout';
+import { useErrors } from '@stamhoofd/components';
+import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 
 const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
 
 const organization = useRequiredOrganization()
+const errors = useErrors()
+const startPackageCheckout = useStartPackageCheckout({ errors })
 
 const title = props.item.organization.meta.invoicesEnabled ? $t('Facturen en betaalinstellingen') : $t('Betalingen en betaalinstellingen')
 
@@ -198,6 +206,21 @@ const pendingPayments = computed(() => {
 const succeededPayments = computed(() => {
     return props.item.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
 });
+
+async function addCard() {
+    await startPackageCheckout({
+        forceNewMandate: true,
+        checkout: PackageCheckout.create({
+            createMandate: CreateMandateSettings.create({
+                saveAsDefault: true
+            })
+        }),
+        displayOptions: {
+            action: 'present',
+            modalDisplayStyle: 'popup'
+        }
+    })
+}
 
 
 </script>

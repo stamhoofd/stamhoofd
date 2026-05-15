@@ -33,9 +33,10 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
     /**
      * Can throw, so please catch errors.
      */
-    async function doStartPackageCheckout({ checkout, displayOptions }: { 
+    async function doStartPackageCheckout({ checkout, displayOptions, forceNewMandate }: { 
         checkout: PackageCheckout; 
-        displayOptions: DisplayOptions 
+        displayOptions: DisplayOptions ;
+        forceNewMandate?: boolean
     }) {
         if (!platform.value.membershipOrganizationId) {
             throw new SimpleError({
@@ -69,7 +70,8 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
             checkout,
             packageStatus: status,
             sellingOrganization,
-            payingOrganization: payingOrganization.value
+            payingOrganization: payingOrganization.value,
+            forceNewMandate
         })
 
 

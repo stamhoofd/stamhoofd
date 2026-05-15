@@ -10,16 +10,20 @@ export class PackageCheckoutViewModel {
     payingOrganization: Organization
     packages: STPackage[]
 
+    forceNewMandate = false
+
     constructor(data: {
         checkout: PackageCheckout
         packageStatus: OrganizationPackagesStatus
         sellingOrganization: Organization,
-        payingOrganization: Organization
+        payingOrganization: Organization,
+        forceNewMandate?: boolean
     }) {
         this.checkout = data.checkout
         this.packageStatus = data.packageStatus
         this.sellingOrganization = data.sellingOrganization
         this.payingOrganization = data.payingOrganization
+        this.forceNewMandate = data.forceNewMandate ?? false
     }
 
     validate() {
@@ -35,7 +39,11 @@ export class PackageCheckoutViewModel {
     }
 
     get requiresMandate() {
-        return this.packages.some(p => p.meta.requiresMandate)
+        return this.forceNewMandate || this.packages.some(p => p.meta.requiresMandate)
+    }
+
+    get allowExistingMandates() {
+        return !this.forceNewMandate
     }
 
     get paymentConfiguration() {

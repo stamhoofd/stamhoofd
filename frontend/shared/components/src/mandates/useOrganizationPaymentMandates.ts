@@ -5,7 +5,8 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
-import { reactive, ref, shallowRef, triggerRef } from 'vue';
+import { reactive, ref } from 'vue';
+import { useGlobalEventListener } from '../hooks/useGlobalEventListener';
 
 /**
  * Get available mandates for your organization (current context), to pay at a different organization (B2B)
@@ -24,6 +25,11 @@ export function useOrganizationPaymentMandates({
     const loading = ref(true);
     const mandates = ref<PaymentMandate[] | null>(null)
     const updatingMandates = reactive(new Set<string>());
+
+    // Reload after payment succeeded (mandates might have changed)
+    useGlobalEventListener('payment-succeeded', async () => {
+        load().catch(console.error)
+    })
 
     // Load on create
     load().catch(console.error)
