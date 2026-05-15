@@ -191,11 +191,14 @@ button.st-grid-item {
         }
     }
 
-    &.selectable:not(.is-dragging), &.rightClickable {
+     &.selectable:not(.is-dragging) {
         touch-action: manipulation;
         user-select: none;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         cursor: pointer;
+     }
+
+    &.selectable:not(.is-dragging), &.rightClickable {
         overflow: visible;
         position: relative;
 
