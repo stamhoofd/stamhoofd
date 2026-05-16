@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import type { PlatformMember } from '@stamhoofd/structures';
-import { BooleanStatus } from '@stamhoofd/structures';
+import { BooleanStatus, getDataPermissionSettings } from '@stamhoofd/structures';
 
 import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -49,7 +49,7 @@ import type { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
 import { useValidation } from '../../../errors/useValidation';
 import { useDataPermissionSettings } from '../../../groups';
-import { usePlatform } from '../../../hooks';
+import { useOrganization, usePlatform } from '../../../hooks';
 import Title from './Title.vue';
 
 defineOptions({
@@ -64,11 +64,12 @@ const props = defineProps<{
 }>();
 
 const platform = usePlatform();
+const organization = useOrganization();
 const errors = useErrors({ validator: props.validator });
 const app = useAppContext();
 const isAdmin = app === 'dashboard' || app === 'admin';
 
-const checkboxWarning = computed(() => platform.value.config.dataPermission?.checkboxWarning ?? null);
+const checkboxWarning = computed(() => getDataPermissionSettings(platform.value, organization.value)?.checkboxWarning ?? null);
 
 useValidation(props.validator, async () => {
     if (props.willMarkReviewed) {

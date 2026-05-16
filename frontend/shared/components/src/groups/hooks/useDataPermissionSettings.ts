@@ -1,6 +1,6 @@
-import type { Group} from '@stamhoofd/structures';
-import { DataPermissionsSettings, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Group } from '@stamhoofd/structures';
+import { getDataPermissionSettingsOrDefault, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed, unref } from 'vue';
 import { useOrganization, usePlatform } from '../../hooks';
 
@@ -8,7 +8,7 @@ export function useDataPermissionSettings(options?: {group?: Ref<Group|null>|Gro
     const platform = usePlatform()
     const organization = useOrganization()
 
-    const dataPermissionSettings = computed(() => platform.value.config.dataPermission ?? DataPermissionsSettings.create({}) )
+    const dataPermissionSettings = computed(() => getDataPermissionSettingsOrDefault(platform.value, organization.value))
     const recordsConfiguration = computed(() => OrganizationRecordsConfiguration.build({
         platform: platform.value,
         organization: organization.value,

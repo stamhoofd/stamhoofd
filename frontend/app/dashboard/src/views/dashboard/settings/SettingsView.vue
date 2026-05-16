@@ -222,6 +222,36 @@
                         </template>
                     </STListItem>
 
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.FinancialSupport)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Steun kwetsbare gezinnen') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%vY') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('%5j') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationFreeContributions)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
@@ -417,11 +447,12 @@ import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfi
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { DetailedPayableBalance, EmailTemplate, EmailTemplateType, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
+import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
@@ -466,6 +497,8 @@ enum Routes {
     MembersImport = 'leden-importeren',
     Uitpas = 'uitpas',
     OrganizationRegistrationPeriods = 'werkjaren',
+    FinancialSupport = 'financiele-ondersteuning',
+    DataPermissions = 'toestemming-gegevensverzameling',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -639,7 +672,46 @@ defineRoutes([
                             item,
                         };
                     },
-
+                },
+                {
+                    name: Routes.FinancialSupport,
+                    url: 'financiele-ondersteuning',
+                    component: FinancialSupportSettingsView,
+                    paramsToProps() {
+                        return {
+                            financialSupport: getFinancialSupportSettingsOrDefault(platform.value, organization.value),
+                            saveHandler: async (patch: AutoEncoderPatchType<FinancialSupportSettings>) => {
+                                const isNew = !organization.value?.meta.financialSupport;
+                                await $organizationManager.value.patch(Organization.patch({
+                                    meta: OrganizationMetaData.patch({
+                                        financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
+                                    })
+                                }));
+                                Toast.success($t(`%HU`)).show();
+                            },
+                        };
+                    },
+                    present: 'popup' as const,
+                },
+                {
+                    name: Routes.DataPermissions,
+                    url: 'toestemming-gegevensverzameling',
+                    component: DataPermissionSettingsView,
+                    paramsToProps() {
+                        return {
+                            dataPermission: getDataPermissionSettingsOrDefault(platform.value, organization.value),
+                            saveHandler: async (patch: AutoEncoderPatchType<DataPermissionsSettings>) => {
+                                const isNew = !organization.value?.meta.dataPermission;
+                                await $organizationManager.value.patch(Organization.patch({
+                                    meta: OrganizationMetaData.patch({
+                                        dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
+                                    }),
+                                }));
+                                Toast.success($t(`%HU`)).show();
+                            },
+                        };
+                    },
+                    present: 'popup' as const,
                 },
             ]
         : []),

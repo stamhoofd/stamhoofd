@@ -15,7 +15,6 @@ import { PermissionRoleDetailed } from './PermissionRole.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
-import type { User } from './User.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
@@ -361,7 +360,7 @@ export class PlatformConfig extends AutoEncoder {
     featureFlags: string[] = [];
 
     /**
-     * Cotnains the text and settings for when financial support is enabled - not whether it is enabled
+     * Contains the text and settings for when financial support is enabled - not whether it is enabled
      */
     @field({ decoder: FinancialSupportSettings, nullable: true, version: 320 })
     financialSupport: FinancialSupportSettings | null = null;

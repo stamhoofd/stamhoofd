@@ -1,7 +1,7 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { DataPermissionsSettings, PermissionLevel } from '@stamhoofd/structures';
-import { markRaw } from 'vue';
 import MemberStepView from '#members/MemberStepView.vue';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { getDataPermissionSettingsOrDefault, PermissionLevel } from '@stamhoofd/structures';
+import { markRaw } from 'vue';
 import type { NavigationActions } from '../../../types/NavigationActions';
 import EditMemberDataPermissionsBox from '../../components/edit/EditMemberDataPermissionsBox.vue';
 import type { EditMemberStep, MemberStepManager } from '../MemberStepManager';
@@ -17,8 +17,7 @@ export class MemberDataPermissionStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        const settings = manager.member.platform.config.dataPermission ?? DataPermissionsSettings.create({});
-        return settings.title;
+        return getDataPermissionSettingsOrDefault(manager.member.platform, manager.member.organizations[0]).title;
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -51,7 +50,7 @@ export class MemberDataPermissionStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return new ComponentWithProperties(MemberStepView, {
-            title: manager.member.platform.config.dataPermission?.title ?? DataPermissionsSettings.defaultTitle,
+            title: this.getName(manager),
             member: manager.member,
             component: markRaw(EditMemberDataPermissionsBox),
             saveText: $t(`%16p`),

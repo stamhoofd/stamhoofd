@@ -257,9 +257,18 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     await this.validateCompanies(organization, request.body.meta.companies);
                     shouldUpdateSetupSteps = true;
                 }
+
                 if (request.body.meta.recordsConfiguration?.recordCategories) {
                     RecordAnswerHelper.throwIfPatchOrPutIsInvalid(organization.meta.recordsConfiguration.recordCategories, request.body.meta.recordsConfiguration.recordCategories);
                 }
+
+                if (request.body.meta.financialSupport) {
+                    if (STAMHOOFD.userMode === 'platform') {
+                        // can only set financial support settings on platform if userMode platform
+                        request.body.meta.financialSupport = null;
+                    }
+                }
+
                 const savedPackages = organization.meta.packages;
                 organization.meta.patchOrPut(request.body.meta);
                 organization.meta.packages = savedPackages;
