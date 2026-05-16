@@ -69,9 +69,19 @@ export class PaymentMandateService {
             // Not allowed or does not exist
             throw new SimpleError({
                 code: 'not_allowed',
-                message: 'You cannot delete the last mandate',
+                message: 'Mandate not found',
                 human: $t('Deze betaalmethode bestaat niet (meer)')
             })
+        }
+
+        if (match.isDefault) {
+            if (!Context.optionalAuth?.hasPlatformFullAccess()) {
+                throw new SimpleError({
+                    code: 'not_allowed',
+                    message: 'You cannot delete the default mandate',
+                    human: $t('Je kan de standaard bankkaart niet verwijderen. Stel eerst een andere standaard bankkaart in waarmee je het wilt betalen en verwijder daarna deze bankkaart.')
+                })
+            }
         }
 
         if (grouped.size <= 1) {
