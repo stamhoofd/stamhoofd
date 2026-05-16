@@ -11,6 +11,10 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export class MollieError extends Error {
+    body: PlainObject
+}
+
 export class MollieToken extends QueryableModel {
     static table = 'mollie_tokens';
 
@@ -187,7 +191,9 @@ export class MollieToken extends QueryableModel {
 
                             if (response.statusCode < 200 || response.statusCode >= 300) {
                                 console.error(body);
-                                reject(new Error(response.statusCode + ' ' + response.statusMessage));
+                                const e = new MollieError(response.statusCode + ' ' + response.statusMessage);
+                                e.body = json;
+                                reject(e);
                                 return;
                             }
 
@@ -226,23 +232,38 @@ export class MollieToken extends QueryableModel {
     * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
     */
     async refresh(): Promise<void> {
-        const data = await MollieToken.request('POST', '/oauth2/tokens', {
-            grant_type: 'refresh_token',
-            refresh_token: this.refreshToken,
-        }, 'urlencoded');
+        try {
+            const data = await MollieToken.request('POST', '/oauth2/tokens', {
+                grant_type: 'refresh_token',
+                refresh_token: this.refreshToken,
+            }, 'urlencoded');
 
-        if (data && data.access_token && data.refresh_token) {
-            // Delete token if exisitng
-            this.refreshToken = data.refresh_token;
-            this.accessToken = data.access_token;
-            this.expiresOn = new Date(new Date().getTime() + 3600 * 1000 - 60 * 1000);
-            await this.save();
+            if (data && data.access_token && data.refresh_token) {
+                // Delete token if exisitng
+                this.refreshToken = data.refresh_token;
+                this.accessToken = data.access_token;
+                this.expiresOn = new Date(new Date().getTime() + 3600 * 1000 - 60 * 1000);
+                await this.save();
 
-            // Update shared tokens if this object was fetched directly
-            MollieToken.knownTokens.set(this.organizationId, this);
-            return;
+                // Update shared tokens if this object was fetched directly
+                MollieToken.knownTokens.set(this.organizationId, this);
+                return;
+            }
+            throw new SimpleError({ code: '', message: 'Something went wrong in the response' });
+        } catch (e) {
+            if (e instanceof MollieError) {
+                if (e.body && typeof e.body === 'object' && 'error' in e.body && e.body.error === 'invalid_grant') {
+                    // Refresh token not valid.
+                    console.error('Deleting Mollie Token because invalid refresh token')
+                    await this.delete()
+
+                    // Still throw
+                    throw e;
+                }
+            }
+            throw e;
         }
-        throw new SimpleError({ code: '', message: 'Something went wrong in the response' });
+        
     }
 
     /**
