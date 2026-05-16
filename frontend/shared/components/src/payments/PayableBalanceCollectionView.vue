@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
-import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.js';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { DetailedPayableBalance, DetailedPayableBalanceCollection } from '@stamhoofd/structures';
