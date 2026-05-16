@@ -364,29 +364,7 @@
                     {{ $t('%1K4') }}
                 </p>
 
-                <STGrid>
-                    <STGridItem v-for="item in sortedItems" :key="item.id" :selectable="canWrite" class="price-grid" @click="editBalanceItem(item.balanceItem)">
-                        <template #left>
-                            <BalanceItemIcon :item="item.balanceItem" :is-payable="false" />
-                        </template>
-
-                        <BalanceItemTitleBox :item="item.balanceItem" :is-payable="false" :price="item.price" :payment-status="payment.status" />
-
-                        <p v-if="item.quantity !== 1" class="style-description-small">
-                            {{ $t('%1J3', {price: formatPrice(item.unitPrice)}) }}
-                        </p>
-
-                        <template #middleRight>
-                            <span class="style-price-base" :class="{negative: item.quantity < 0}">{{ formatFloat(item.quantity) }}</span>
-                        </template>
-
-                        <template #right>
-                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('%1Mn') : formatPrice(item.price) }}</span>
-                        </template>
-                    </STGridItem>
-                </STGrid>
-
-                <PriceBreakdownBox :price-breakdown="[{name: $t('%2U'), price: payment.price}]" />
+                <PaymentItemsBox :payment="payment" :can-write="canWrite" />
             </template>
         </main>
     </div>
@@ -405,18 +383,14 @@ import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import IconContainer from '#icons/IconContainer.vue';
-import STGrid from '#layout/STGrid.vue';
-import STGridItem from '#layout/STGridItem.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
-import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import type { BalanceItem } from '@stamhoofd/structures';
-import { BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
+import { Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
@@ -424,10 +398,8 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
-import PriceBreakdownBox from '../views/PriceBreakdownBox.vue';
-import BalanceItemIcon from './BalanceItemIcon.vue';
-import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 import EditPaymentView from './EditPaymentView.vue';
+import PaymentItemsBox from './PaymentItemsBox.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -578,43 +550,6 @@ async function viewAudit() {
         components: [
             new ComponentWithProperties(AuditLogsView, {
                 objectIds: [props.payment.id],
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    });
-}
-
-async function editBalanceItem(balanceItem: BalanceItem) {
-    if (!canWrite.value) {
-        return;
-    }
-    const component = new ComponentWithProperties(EditBalanceItemView, {
-        balanceItem,
-        isNew: false,
-        saveHandler: async (patch: AutoEncoderPatchType<BalanceItem>) => {
-            const arr: PatchableArrayAutoEncoder<BalanceItem> = new PatchableArray();
-            patch.id = balanceItem.id;
-            arr.addPatch(patch);
-            const result = await context.value.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/organization/balance',
-                body: arr,
-                decoder: new ArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>),
-                shouldRetry: false,
-            });
-
-            if (result.data && result.data.length === 1 && result.data[0].id === balanceItem.id) {
-                balanceItem.deepSet(result.data[0]);
-            }
-            else {
-                GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
-            }
-        },
-    });
-    await present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: component,
             }),
         ],
         modalDisplayStyle: 'popup',

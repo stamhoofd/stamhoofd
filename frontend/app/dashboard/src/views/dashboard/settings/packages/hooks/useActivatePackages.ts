@@ -1,29 +1,13 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { CheckoutResponse  } from '@stamhoofd/structures';
-import type {PackageCheckout} from '@stamhoofd/structures';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import type { OrganizationCheckout } from '@stamhoofd/structures';
+import { useCheckoutOrganizationCheckout } from './useCheckoutOrganizationCheckout.js';
 
 export function useActivatePackages() {
-    const context = useContext();
-    const owner = useRequestOwner()
+    const doCheckout = useCheckoutOrganizationCheckout();
+    const platform = usePlatform()
 
-    async function activatePackages(checkout: PackageCheckout, options?: {shouldRetry?: boolean, owner?: any}) {
-        const response = await context.value.authenticatedServer.request({
-            method: 'POST',
-            path: '/billing/activate-packages',
-            body: checkout,
-            shouldRetry: options?.shouldRetry ?? false,
-            timeout: 60_000,
-            owner: options?.owner ?? owner,
-            decoder: CheckoutResponse as Decoder<CheckoutResponse>
-        });
-
-        if (!checkout.proForma) {
-            await context.value.fetchOrganization(false);
-        }
-
-        return response.data;
+    async function activatePackages(checkout: OrganizationCheckout, options?: {shouldRetry?: boolean, owner?: any}) {
+        return await doCheckout(platform.value.membershipOrganizationId!, checkout, options)
     }
 
     return activatePackages;

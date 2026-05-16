@@ -11,7 +11,7 @@
                     {{ singleOrganization ? $t('%1Ni') : $t('%vX', {organization: item.organization.name}) }}
                 </h2>
 
-                <PayableBalanceTable :item="item" />
+                <PayableBalanceTable :item="item" @checkout="$emit('checkout', item)" />
             </div>
 
 
@@ -39,13 +39,13 @@
 </template>
 
 <script setup lang="ts">
+import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.js';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
+import type { DetailedPayableBalance, DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { GlobalEventBus } from '../EventBus';
-import { useVisibilityChange } from '../hooks/useVisibilityChange.js';
-import { Toast } from '../overlays/Toast';
 import PayableBalanceTable from './PayableBalanceTable.vue';
 import PaymentRow from './components/PaymentRow.vue';
 
@@ -63,6 +63,9 @@ const props = withDefaults(
     },
 );
 
+defineEmits<{
+    checkout: [value: DetailedPayableBalance]
+}>()
 const owner = useRequestOwner();
 const pendingPayments = computed(() => {
     return props.collection.organizations.flatMap(i => i.payments).filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
@@ -79,8 +82,7 @@ async function updateBalance() {
     }
 
     try {
-        const updated = await props.reload!();
-        props.collection.deepSet(updated);
+        await props.reload();
     }
     catch (e) {
         Toast.fromError(e).show();

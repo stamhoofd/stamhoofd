@@ -3,6 +3,7 @@ import { PaymentCustomer } from '../PaymentCustomer.js';
 import { PaymentMandate } from '../PaymentMandate.js';
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder, URLDecoder } from '@simonbackx/simple-encoding';
 import { CreateMandateSettings } from './CreateMandateSettings.js';
+import type { BalanceItem } from '../BalanceItem.js';
 
 /**
  * We have multiple checkout flows in Stamhoofd. They all share a similar way of selecting a payment method,
@@ -83,4 +84,12 @@ export abstract class Checkoutable<T = unknown> extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder, nullable: true })
     totalPrice: number | null = null;
+
+    removeBalanceItemByBalance(item: BalanceItem) {
+        this.balances.delete(item.id)
+    }
+
+    addBalanceItem(item: BalanceItem, amount: number) {
+        this.balances.set(item.id, amount)
+    }
 }

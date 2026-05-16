@@ -1,5 +1,5 @@
 import { createMollieClient, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { Member, User } from '@stamhoofd/models';
 import { BalanceItem } from '@stamhoofd/models';
 import { BalanceItemPayment, Group, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate } from '@stamhoofd/models';
@@ -589,12 +589,23 @@ export class PaymentService {
             })
         })
 
-        const invoice = Invoice.create({
-            seller,
-            customer,
-            payments: [fakePaymentGeneral],
-        });
-        invoice.buildFromPayments();
+        let invoice: Invoice | null = null;
+
+        try {
+             invoice = Invoice.create({
+                seller,
+                customer,
+                payments: [fakePaymentGeneral],
+            });
+            invoice.buildFromPayments();
+        } catch (e) {
+            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('balance_item_without_vat_percentage')) {
+                // ok
+                // Missing VAT that prevents invoice from being created
+            } else {
+                throw e;
+            }
+        }
 
         return {
             invoice,
@@ -1019,6 +1030,14 @@ export class PaymentService {
         }
 
         if (mandate) {
+            if (!paymentConfiguration.enableMandates) {
+                 throw new SimpleError({
+                    code: 'mandates_disabled',
+                    message: 'Cannot pay with mandate',
+                    human: $t('Betalen via opgeslagen bankkaart niet (meer) mogelijk')
+                });
+            }
+            
             // Validate mandate + update payment method based on the mandate
             if (method !== PaymentMethod.Unknown) {
                 throw new SimpleError({
@@ -1068,6 +1087,16 @@ export class PaymentService {
             }
 
             throw new Error('Unsupported mandate type')
+        }
+
+        if (createMandate) {
+            if (!paymentConfiguration.enableMandates) {
+                 throw new SimpleError({
+                    code: 'mandates_disabled',
+                    message: 'Cannot pay with mandate',
+                    human: $t('Bankkaart opslaan niet mogelijk')
+                });
+            }
         }
         
         if (method === PaymentMethod.Unknown) {

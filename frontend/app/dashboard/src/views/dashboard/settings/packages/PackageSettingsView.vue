@@ -100,20 +100,21 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import type { STPackage, STPackageType } from '@stamhoofd/structures';
-import { PackageCheckout, PackagePurchases, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
+import { OrganizationCheckout, PackagePurchases, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
 import { useActivatePackages } from './hooks/useActivatePackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
+import { PayBalanceMode } from './OrganizationCheckoutViewModel';
 import PackagesDetailsView from './PackagesDetailsView.vue';
-import { useStartPackageCheckout } from './useStartPackageCheckout';
+import { useStartOrganizationCheckout } from './useStartOrganizationCheckout';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
 const packages = ref([] as SelectablePackage[]);
 const loadingModule = ref(null as STPackageType | null);
 const deactivatePackage = useDeactivatePackage();
-const startPackageCheckout = useStartPackageCheckout({ errors })
+const startOrganizationCheckout = useStartOrganizationCheckout()
 const show = useShow()
 const { packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
 
@@ -241,7 +242,7 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
 
     try {
         await activatePackages(
-            PackageCheckout.create({
+            OrganizationCheckout.create({
                 purchases: PackagePurchases.create({
                     packageBundles: [bundle],
                 }),
@@ -279,7 +280,7 @@ async function checkoutPackage(pack: SelectablePackage) {
         return;
     }
     
-    const checkout = PackageCheckout.create({
+    const checkout = OrganizationCheckout.create({
         purchases: PackagePurchases.create({
             packageBundles: [],
         }),
@@ -294,9 +295,10 @@ async function checkoutPackage(pack: SelectablePackage) {
     }
     
     pack.loading = true;
-    await startPackageCheckout({
+    await startOrganizationCheckout({
+        payBalanceMode: PayBalanceMode.Required,
         checkout,
-        displayOptions: { action: 'show' }
+        displayOptions: { action: 'show' },
     });
     pack.loading = false;
 }

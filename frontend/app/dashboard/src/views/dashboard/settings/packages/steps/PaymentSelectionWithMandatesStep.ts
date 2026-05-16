@@ -2,13 +2,13 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { ViewStep } from '@stamhoofd/components/steps/ViewStep';
 import type { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import type { PackageCheckoutViewModel } from '../PackageCheckoutViewModel';
+import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import PaymentSelectionWithMandatesStepView from './PaymentSelectionWithMandatesStepView.vue';
 
 export class PaymentSelectionWithMandatesStep implements ViewStep {
-    model: PackageCheckoutViewModel;
+    model: OrganizationCheckoutViewModel;
 
-    constructor({model}: { model: PackageCheckoutViewModel;}) {
+    constructor({model}: { model: OrganizationCheckoutViewModel;}) {
         this.model = model;
     }
 

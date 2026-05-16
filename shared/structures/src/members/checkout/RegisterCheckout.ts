@@ -9,7 +9,7 @@ import { PaymentCustomer } from '../../PaymentCustomer.js';
 import { PaymentMethod } from '../../PaymentMethod.js';
 import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import type {PlatformMember} from '../PlatformMember.js';
-import type { BalanceItemCartItem } from './BalanceItemCartItem.js';
+import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
 import type { RegisterItem } from './RegisterItem.js';
 import type {RegistrationWithPlatformMember} from './RegistrationWithPlatformMember.js';
@@ -247,32 +247,31 @@ export class RegisterCheckout {
         }
     }
 
-    addBalanceItem(item: BalanceItemCartItem, options?: { calculate?: boolean }) {
-        this.cart.addBalanceItem(item);
+    addBalanceItem(balanceItem: BalanceItem, amount: number) {
+        const item = BalanceItemCartItem.create({
+            item: balanceItem,
+            price: amount,
+        });
 
-        if (options?.calculate !== false) {
-            this.updatePrices();
-        }
+        this.cart.addBalanceItem(item);
+        this.updatePrices();
     }
 
-    removeBalanceItem(item: BalanceItemCartItem, options?: { calculate?: boolean }) {
+    removeBalanceItem(item: BalanceItemCartItem) {
         this.cart.removeBalanceItem(item);
-
-        if (options?.calculate !== false) {
-            this.updatePrices();
-        }
+        this.updatePrices();
 
         if (this.cart.isEmpty) {
             this.defaultOrganization = null;
         }
     }
 
-    removeBalanceItemByBalance(item: BalanceItem, options?: { calculate?: boolean }) {
+    removeBalanceItemByBalance(item: BalanceItem) {
         const _item = this.cart.balanceItems.find(i => i.item.id === item.id);
         if (!_item) {
             return;
         }
-        this.removeBalanceItem(_item, options);
+        this.removeBalanceItem(_item);
     }
 
     updatePrices() {

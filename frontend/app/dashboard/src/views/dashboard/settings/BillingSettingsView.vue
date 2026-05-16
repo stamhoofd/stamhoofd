@@ -8,7 +8,7 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox :title="$t('Openstaand bedrag')">
-                        <button class="style-price-big" type="button" @click="$navigate(Routes.Items)">
+                        <button class="style-price-big" type="button" @click="item.balanceItems.filter(b => b.isDue).length > 0 ? payBalance : undefined">
                             <span>
                                 {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
                             </span>
@@ -123,31 +123,54 @@
 </template>
 
 <script setup lang="ts">
+import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import type { DetailedPayableBalance } from '@stamhoofd/structures';
-import { BalanceItem, PackageCheckout } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { Toast, useGlobalEventListener, useVisibilityChange } from '@stamhoofd/components';
 import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
-import PayableBalanceItemsView from '@stamhoofd/components/payments/PayableBalanceItemsView.vue';
 import PayableBalancePaymentsView from '@stamhoofd/components/payments/PayableBalancePaymentsView.vue';
 import PayableBalanceMandatesBox from '@stamhoofd/components/payments/components/PayableBalanceMandatesBox.vue';
 import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
-import { useStartPackageCheckout } from './packages/useStartPackageCheckout';
-import { useErrors } from '@stamhoofd/components';
+import type { DetailedPayableBalance } from '@stamhoofd/structures';
+import { BalanceItem, OrganizationCheckout } from '@stamhoofd/structures';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
+import { Sorter } from '@stamhoofd/utility';
+import { computed } from 'vue';
+import { useLoadPayableBalance } from './hooks/useLoadPayableBalance';
+import { PayBalanceMode } from './packages/OrganizationCheckoutViewModel';
+import { useStartOrganizationCheckout } from './packages/useStartOrganizationCheckout';
+import PayableBalanceItemsView from './PayableBalanceItemsView.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
 
 const organization = useRequiredOrganization()
-const errors = useErrors()
-const startPackageCheckout = useStartPackageCheckout({ errors })
+const startOrganizationCheckout = useStartOrganizationCheckout()
+const loadPayableBalance = useLoadPayableBalance();
+
+useGlobalEventListener('payment-succeeded', async () => {
+    reload().catch(console.error)
+});
+
+useVisibilityChange(() => {
+    reload().catch(console.error)
+})
+
+async function reload() {
+    try {
+        const payable = await loadPayableBalance(props.item.organization.id)
+        props.item.deepSet(payable)
+    } catch (e) {
+        if (Request.isAbortError(e)) {
+            return;
+        }
+        Toast.fromError(e).show()
+    }
+}
 
 const title = props.item.organization.meta.invoicesEnabled ? $t('Facturen en betaalinstellingen') : $t('Betalingen en betaalinstellingen')
 
@@ -208,13 +231,30 @@ const succeededPayments = computed(() => {
 });
 
 async function addCard() {
-    await startPackageCheckout({
+    await startOrganizationCheckout({
+        payBalanceMode: PayBalanceMode.Optional,
         forceNewMandate: true,
-        checkout: PackageCheckout.create({
+        sellingOrganization: props.item.organization,
+        payableBalance: props.item,
+        checkout: OrganizationCheckout.create({
             createMandate: CreateMandateSettings.create({
                 saveAsDefault: true
             })
         }),
+        displayOptions: {
+            action: 'present',
+            modalDisplayStyle: 'popup'
+        }
+    })
+}
+
+
+async function payBalance() {
+    await startOrganizationCheckout({
+        payBalanceMode: PayBalanceMode.Recommended,
+        sellingOrganization: props.item.organization,
+        payableBalance: props.item,
+        checkout: OrganizationCheckout.create({}),
         displayOptions: {
             action: 'present',
             modalDisplayStyle: 'popup'

@@ -100,7 +100,7 @@ export class PackagePurchases extends AutoEncoder {
     }
 }
 
-export class PackageCheckout extends Checkoutable<PackagePurchases> {
+export class OrganizationCheckout extends Checkoutable<PackagePurchases> {
     @field({ decoder: PackagePurchases })
     purchases: PackagePurchases;
 }

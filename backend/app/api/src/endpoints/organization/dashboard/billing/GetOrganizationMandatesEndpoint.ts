@@ -3,7 +3,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
-import { PackageCheckout } from '@stamhoofd/structures';
+import { OrganizationCheckout } from '@stamhoofd/structures';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { Context } from '../../../../helpers/Context.js';
 import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
@@ -14,7 +14,7 @@ type Body = undefined;
 type ResponseBody = PaymentMandate[];
 
 export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = PackageCheckout as Decoder<Query>;
+    queryDecoder = OrganizationCheckout as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {

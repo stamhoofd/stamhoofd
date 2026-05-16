@@ -1,22 +1,50 @@
-import type { Organization, OrganizationPackagesStatus, PackageCheckout, STPackage } from '@stamhoofd/structures';
+import type { Organization, OrganizationPackagesStatus, OrganizationCheckout, STPackage, DetailedPayableBalance } from '@stamhoofd/structures';
+
+export enum PayBalanceMode {
+    /**
+     * Required to pay the full outstanding balance
+     */
+    Required = 'Required',
+
+    /**
+     * User can choose what to pay.
+     * By default everything is selected
+     */
+    Recommended = 'Recommended',
+
+    /**
+     * User can choose what to pay.
+     * By default nothing is selected
+     */
+    Optional = 'Optional',
+
+    /**
+     * Not possible to pay from the balance
+     */
+    None = 'None'
+}
 
 /**
  * Only add data here that is absolutely required or that can help with making the views and steps more generic
  */
-export class PackageCheckoutViewModel {
-    checkout: PackageCheckout
+export class OrganizationCheckoutViewModel {
+    checkout: OrganizationCheckout
     packageStatus: OrganizationPackagesStatus
     sellingOrganization: Organization
     payingOrganization: Organization
     packages: STPackage[]
+    payableBalance: DetailedPayableBalance
+    payBalanceMode = PayBalanceMode.Recommended
 
     forceNewMandate = false
 
     constructor(data: {
-        checkout: PackageCheckout
+        checkout: OrganizationCheckout
         packageStatus: OrganizationPackagesStatus
         sellingOrganization: Organization,
         payingOrganization: Organization,
+        payableBalance: DetailedPayableBalance,
+        payBalanceMode: PayBalanceMode,
         forceNewMandate?: boolean
     }) {
         this.checkout = data.checkout
@@ -24,6 +52,8 @@ export class PackageCheckoutViewModel {
         this.sellingOrganization = data.sellingOrganization
         this.payingOrganization = data.payingOrganization
         this.forceNewMandate = data.forceNewMandate ?? false
+        this.payableBalance = data.payableBalance
+        this.payBalanceMode = data.payBalanceMode
     }
 
     validate() {

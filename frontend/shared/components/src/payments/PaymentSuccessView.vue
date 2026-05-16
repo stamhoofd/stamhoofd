@@ -51,6 +51,7 @@ const {title, description} = (() => {
     let d = '';
 
     let packages = false;
+    let others = 0;
     const registrationNames: Set<string> = new Set()
     const registrationNamesPerGroup: Map<string, string[]> = new Map();
     
@@ -98,20 +99,16 @@ const {title, description} = (() => {
 
         if (i.type === BalanceItemType.PlatformMembership) {
             addMembership(i.relations.get(BalanceItemRelationType.MembershipType)?.name.toString(), i.relations.get(BalanceItemRelationType.Member)?.name.toString())
-        }
-
-        if (i.paidAt && i.paidAt.getTime() < Date.now() - 20_000) {
+        } else if (i.paidAt && i.paidAt.getTime() < Date.now() - 20_000) {
             // This was paid later - meaning we just paid for something that was already active
             // for packages and regisrations the message should be changed by this
-            continue;
-        }
-
-        if (i.type === BalanceItemType.STPackage) {
+            others++;
+        } else if (i.type === BalanceItemType.STPackage) {
             packages = true;
-        }
-
-        if (i.type === BalanceItemType.Registration) {
+        } else if (i.type === BalanceItemType.Registration) {
             addRegistration(i.relations.get(BalanceItemRelationType.Group)?.name.toString(), i.relations.get(BalanceItemRelationType.Member)?.name.toString())
+        } else {
+            others++;
         }
     }
 
@@ -160,7 +157,7 @@ const {title, description} = (() => {
             if (membershipNames.size > 4) {
                 t = $t('Hoera! De aansluiting “{name}” voor {count} leden werd betaald', {
                     'count': membershipNames.size,
-                    group: [...membershipNamesPerGroup.keys()].join()
+                    name: [...membershipNamesPerGroup.keys()].join()
                 })
             } else if (membershipNames.size > 1) {
                 t = $t('Hoera! De aansluiting “{name}” voor {simon-and-sarah} werd betaald', {
@@ -187,6 +184,14 @@ const {title, description} = (() => {
                     'simon': [...membershipNames.values()].join(),
                 })
             }
+        }
+    }
+
+    if (others && !d) {
+        if (others> 1) {
+            d = $t('Ook {count} andere items werden betaald', {count: Formatter.integer(others)})
+        } else {
+            d = $t('Ook één ander item werd betaald', {count: Formatter.integer(others)})
         }
     }
     

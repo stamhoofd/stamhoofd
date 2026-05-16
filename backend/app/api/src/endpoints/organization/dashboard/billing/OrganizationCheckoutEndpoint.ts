@@ -3,27 +3,31 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, PackageCheckout, STPackageStruct } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, OrganizationCheckout, STPackageStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
+import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 
-type Params = Record<string, never>;
+type Params = { sellingOrganizationId: string };
 type Query = undefined;
-type Body = PackageCheckout;
+type Body = OrganizationCheckout;
 type ResponseBody = CheckoutResponse;
 
-export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = PackageCheckout as Decoder<Body>;
+/**
+ * B2B billing (outstanding amount) and activating packages
+ */
+export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    bodyDecoder = OrganizationCheckout as Decoder<Body>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/activate-packages', {});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/checkout', {sellingOrganizationId: String});
 
         if (params) {
             return [true, params as Params];
@@ -56,39 +60,46 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
+        const id = request.params.sellingOrganizationId;
+        if (!id) {
+            throw new SimpleError({
+                code: 'unavailable',
+                message: 'This is temporarily unavailable',
+                human: $t('Dit is tijdelijk onbeschikbaar, probeer later opnieuw')
+            })
+        }
+        
+        const sellingOrganization = await Organization.getByID(id);
+        if (!sellingOrganization || !sellingOrganization.active) {
+            throw new SimpleError({
+                statusCode: 404,
+                code: 'not_found',
+                message: 'Selling organization not found',
+                human: $t('Deze organisatie bestaat niet (meer)'),
+                field: 'sellingOrganization'
+            })
+        }
+
+        if (sellingOrganization.id === organization.id) {
+            throw new SimpleError({
+                code: 'unavailable',
+                message: 'Cannot purchase from yourself',
+            });
+        }
 
         const packages: STPackageStruct[] = [];
         const balanceItems: Map<BalanceItem, number> = new Map();
         const models: STPackage[] = [];
 
-        if (STAMHOOFD.userMode === 'organization') {
+        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
+
+        if (STAMHOOFD.userMode === 'organization' && sellingOrganization.id === membershipOrganizationId) {
             const currentPackages = await STPackageService.getActivePackages(organization.id);
             const packageStatus = OrganizationPackagesStatus.create({
                 packages: currentPackages.map(p => STPackageStruct.create(p)),
             });
 
             packages.push(...checkout.purchases.getPackages(packageStatus));
-        }
-
-        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
-        if (!membershipOrganizationId) {
-            throw new SimpleError({
-                code: 'unavailable',
-                message: 'No membership organization id set on the platform',
-                human: $t('De aankoop van pakketten is tijdelijk onbeschikbaar, probeer zo meteen opnieuw en herlaad de pagina.')
-            });
-        }
-
-        if (membershipOrganizationId === organization.id) {
-            throw new SimpleError({
-                code: 'unavailable',
-                message: 'Cannot purchase packages from yourself',
-            });
-        }
-
-        const membershipOrganization = await Organization.getByID(membershipOrganizationId);
-        if (!membershipOrganization) {
-            throw new Error('Unexpected missing membershipOrganization');
         }
 
         // Create the real models for each package
@@ -113,7 +124,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             if (balanceItem) {
                 balanceItem.VATExcempt = PaymentService.getVATExcempt({
                     customer: checkout.customer,
-                    sellingOrganization: membershipOrganization
+                    sellingOrganization
                 });
                 balanceItems.set(balanceItem, balanceItem.priceWithVAT);
             }
@@ -156,12 +167,64 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        // todo: Add pending items (balance items in request)
+        // Add pending items (balance items in request)
+        // Update balances before we start
+        await BalanceItemService.flushCaches(organization.id);
+
+        // Validate balance items (can only happen serverside)
+        const balanceItemIds = [...request.body.balances.keys()]
+        let balanceItemsModels: BalanceItem[] = [];
+        if (balanceItemIds.length > 0) {
+            balanceItemsModels = await BalanceItem.select().where('id', balanceItemIds).andWhere('organizationId', sellingOrganization.id).limit(balanceItemIds.length).fetch();
+
+            if (balanceItemsModels.length !== balanceItemIds.length) {
+                throw new SimpleError({
+                    code: 'balance_changed',
+                    message: $t(`%vg`),
+                });
+            }
+
+            for (const [id, amount] of request.body.balances) {
+                if (amount === 0) {
+                    continue;
+                }
+
+                const item = balanceItemsModels.find(b => b.id === id);
+                if (!item) {
+                    throw new SimpleError({
+                        code: 'balance_changed',
+                        message: $t(`%vg`),
+                    });
+                }
+
+                if (item.priceOpen === 0) {
+                    throw new SimpleError({
+                        code: 'balance_changed',
+                        message: $t(`%vg`),
+                    });
+                }
+
+                if (item.priceOpen > 0 && amount < 0 || amount > item.priceOpen) {
+                    throw new SimpleError({
+                        code: 'balance_changed',
+                        message: $t(`%vg`),
+                    });
+                }
+
+                if (item.priceOpen < 0 && amount > 0 || amount < item.priceOpen) {
+                    throw new SimpleError({
+                        code: 'balance_changed',
+                        message: $t(`%vg`),
+                    });
+                }
+                balanceItems.set(item, amount)
+            }
+        }
 
         // If still zero payment
         const { price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({ 
             balanceItems, 
-            organization: membershipOrganization
+            organization: sellingOrganization
         })
         const minimumAmount = 2_00;
         
@@ -170,11 +233,11 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             item.type = BalanceItemType.AdministrationFee;
             item.description = $t('Verificatie bankkaart of bankrekening')
             item.payingOrganizationId = organization.id;
-            item.organizationId = membershipOrganizationId;
+            item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;
             item.VATExcempt = PaymentService.getVATExcempt({
                 customer: checkout.customer,
-                sellingOrganization: membershipOrganization
+                sellingOrganization
             });
             item.VATIncluded = !item.VATExcempt; // Makes sure price with VAT always matches unitPrice
             item.quantity = 1;
@@ -196,7 +259,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 balanceItems,
                 checkout,
                 user,
-                organization: membershipOrganization,
+                organization: sellingOrganization,
                 payingOrganization: organization,
             });
 
@@ -210,12 +273,12 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             balanceItems,
             checkout,
             user,
-            organization: membershipOrganization,
+            organization: sellingOrganization,
             payingOrganization: organization,
             serviceFeeType: 'system',
             createMandate: checkout.createMandate,
             useMandate: checkout.mandate,
-            paymentConfiguration: membershipOrganization.meta.registrationPaymentConfiguration,
+            paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
             privatePaymentConfiguration: organization.privateMeta.registrationPaymentConfiguration
         });
 

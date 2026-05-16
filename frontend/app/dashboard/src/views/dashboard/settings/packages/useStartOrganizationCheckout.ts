@@ -1,44 +1,68 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { Toast, useRequiredOrganization } from '@stamhoofd/components';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import PaymentSuccessView from '@stamhoofd/components/payments/PaymentSuccessView.vue';
 import { ViewStepsManager } from '@stamhoofd/components/steps/ViewStepsManager';
-import { useNavigationActions   } from '@stamhoofd/components/types/NavigationActions';
-import type {DisplayOptions, NavigationActions} from '@stamhoofd/components/types/NavigationActions';
-import type { SessionContext} from '@stamhoofd/networking';
+import type { DisplayOptions, NavigationActions } from '@stamhoofd/components/types/NavigationActions';
+import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
+import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler';
+import type { SessionContext } from '@stamhoofd/networking';
 import { useRequestOwner } from '@stamhoofd/networking';
-import type { CheckoutResponse, OrganizationPackagesStatus, PackageCheckout } from '@stamhoofd/structures';
+import type { CheckoutResponse, DetailedPayableBalance, OrganizationCheckout, OrganizationPackagesStatus } from '@stamhoofd/structures';
 import { Organization, PaymentStatus } from '@stamhoofd/structures';
+import { useLoadPayableBalance } from '../hooks/useLoadPayableBalance';
+import { useCheckoutOrganizationCheckout } from './hooks/useCheckoutOrganizationCheckout';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
-import { PackageCheckoutViewModel } from './PackageCheckoutViewModel';
+import type { PayBalanceMode } from './OrganizationCheckoutViewModel';
+import { OrganizationCheckoutViewModel } from './OrganizationCheckoutViewModel';
+import { BalanceSelectionStep } from './steps/BalanceSelectionStep';
 import { PackageOverviewStep } from './steps/PackageOverviewStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionWithMandatesStep } from './steps/PaymentSelectionWithMandatesStep';
-import { useActivatePackages } from './hooks/useActivatePackages';
-import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler';
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import PaymentSuccessView from '@stamhoofd/components/payments/PaymentSuccessView.vue'
-import { Toast, useRequiredOrganization } from '@stamhoofd/components';
 
-export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox | null }}) {
+export function useStartOrganizationCheckout() {
     const context = useContext();
     const platform = usePlatform();
     const payingOrganization = useRequiredOrganization()
-    const { packages: packageStatus, reload } = useOrganizationPackages({ errors, onMounted: true });
+    const { packages: packageStatus, reload } = useOrganizationPackages({ onMounted: false });
     const owner = useRequestOwner()
     const navigationActions = useNavigationActions();
-    const activatePackages = useActivatePackages()
+    const checkoutOrganizationCheckout = useCheckoutOrganizationCheckout()
+    const loadPayableBalance = useLoadPayableBalance();
+
 
     /**
      * Can throw, so please catch errors.
      */
-    async function doStartPackageCheckout({ checkout, displayOptions, forceNewMandate }: { 
-        checkout: PackageCheckout; 
-        displayOptions: DisplayOptions ;
-        forceNewMandate?: boolean
-    }) {
-        if (!platform.value.membershipOrganizationId) {
+    async function doStartOrganizationCheckout({ checkout, displayOptions, forceNewMandate, sellingOrganizationId, sellingOrganization, payableBalance, payBalanceMode }: { 
+        checkout: OrganizationCheckout; 
+        sellingOrganizationId?: string;
+        sellingOrganization?: Organization;
+        displayOptions: DisplayOptions;
+        forceNewMandate?: boolean,
+        payBalanceMode: PayBalanceMode
+
+        /**
+         * Optional, otherwise will get loaded async
+         */
+        payableBalance?: DetailedPayableBalance
+    } & ({sellingOrganizationId?: string} | {sellingOrganization: Organization})) {
+        if (!sellingOrganization && !sellingOrganizationId) {
+            sellingOrganizationId = platform.value.membershipOrganizationId ?? undefined
+        }
+
+        if (sellingOrganization) {
+            if (sellingOrganizationId) {
+                throw new Error('Invalid usage')
+            }
+            sellingOrganizationId = sellingOrganization.id
+        }
+
+        if (!sellingOrganizationId) {
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'Temporarily unavailable due to missing membershipOrganizationId',
@@ -57,23 +81,31 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
             status = packageStatus.value
         }
         
-        const server = context.value.getOptionalAuthenticatedServerForOrganization(platform.value.membershipOrganizationId);
-        const response = await server.request({
-            method: 'GET',
-            path: '/organization',
-            decoder: Organization as Decoder<Organization>,
-            owner,
-        });
-        const sellingOrganization = response.data;
+        if (!sellingOrganization) {
+            const server = context.value.getOptionalAuthenticatedServerForOrganization(sellingOrganizationId);
+            const response = await server.request({
+                method: 'GET',
+                path: '/organization',
+                decoder: Organization as Decoder<Organization>,
+                owner,
+            });
+            sellingOrganization = response.data;
+        }
 
-        const model = new PackageCheckoutViewModel({
+        if (!payableBalance) {
+            // todo: only load payable balance if we know this will be required
+            payableBalance = await loadPayableBalance(sellingOrganization.id)
+        }
+
+        const model = new OrganizationCheckoutViewModel({
             checkout,
             packageStatus: status,
             sellingOrganization,
             payingOrganization: payingOrganization.value,
-            forceNewMandate
+            forceNewMandate,
+            payableBalance,
+            payBalanceMode
         })
-
 
         // Set urls
         model.checkout.redirectUrl = new URL(window.location.href);
@@ -93,14 +125,25 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
         // Validate model before starting
         model.validate()
 
-        const steps = [
+        let steps = [
             new PackageOverviewStep({ model }),
             new PaymentCustomerStep({ model }),
+            new BalanceSelectionStep({ model }),
             new PaymentSelectionWithMandatesStep({ model }),
         ];
 
+        if (model.checkout.purchases.empty) {
+            // Moves balance selection to the front
+            steps = [
+                new BalanceSelectionStep({ model }),
+                new PackageOverviewStep({ model }),
+                new PaymentCustomerStep({ model }),
+                new PaymentSelectionWithMandatesStep({ model }),
+            ];
+        }
+
         const stepManager = new ViewStepsManager(steps, async (navigate: NavigationActions) => {
-            const response = await activatePackages(model.checkout);
+            const response = await checkoutOrganizationCheckout(model.sellingOrganization.id, model.checkout);
             await handleCheckoutResponse({
                 navigate,
                 response,
@@ -112,9 +155,9 @@ export function useStartPackageCheckout({errors}: {errors: { errorBox: ErrorBox 
         await stepManager.saveHandler(null, navigationActions);
     }
 
-    return async function startPackageCheckout(...options: Parameters<typeof doStartPackageCheckout>) {
+    return async function startOrganizationCheckout(...options: Parameters<typeof doStartOrganizationCheckout>) {
         try {
-            await doStartPackageCheckout(...options)
+            await doStartOrganizationCheckout(...options)
         } catch (e) {
             Toast.fromError(e).show()
         }

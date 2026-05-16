@@ -10,8 +10,6 @@ export { default as PaymentRow } from './components/PaymentRow.vue';
 export { default as EditBalanceItemView } from './EditBalanceItemView.vue';
 export { default as EditPaymentView } from './EditPaymentView.vue';
 export { default as GroupedBalanceList } from './GroupedBalanceList.vue';
-export { default as PayableBalanceCollectionView } from './PayableBalanceCollectionView.vue';
-export { default as PayableBalanceTable } from './PayableBalanceTable.vue';
 export { default as PaymentView } from './PaymentView.vue';
 export { default as ReceivableBalanceBox } from './ReceivableBalanceBox.vue';
 export { default as ReceivableBalanceList } from './ReceivableBalanceList.vue';

@@ -12,69 +12,76 @@
                         {{ $t('Betaling') }}
                     </h2>
 
-                    <STInputBox v-if="mandates?.length" error-fields="mandateId" :error-box="errors.errorBox" class="max">
-                        <STGrid>
-                            <PaymentMandateRadioRow v-for="mandate of mandates" :key="mandate.id" v-model="mandateId" :mandate="mandate">
-                                <p v-if="mandateId === mandate.id && !mandate.isDefault && saveMandateAsDefault" class="style-description-small">
-                                    <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('Zal worden ingesteld als standaard bankkaart') }}</span></span>
-                                </p>
-                            </PaymentMandateRadioRow>
+                    <template v-if="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
+                        <STInputBox error-fields="mandateId" :error-box="errors.errorBox" class="max">
+                            <STGrid>
+                                <PaymentMandateRadioRow v-for="mandate of mandates" :key="mandate.id" v-model="mandateId" :mandate="mandate">
+                                    <p v-if="mandateId === mandate.id && !mandate.isDefault && saveMandateAsDefault" class="style-description-small">
+                                        <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('Zal worden ingesteld als standaard bankkaart') }}</span></span>
+                                    </p>
+                                </PaymentMandateRadioRow>
 
-                            <STGridItem :selectable="true" element-name="label" class="right-stack left-center">
-                                <template #left>
-                                    <Radio v-model="mandateId" name="choose-payment-mandate" :value="null" />
-                                </template>
+                                <STGridItem :selectable="true" element-name="label" class="right-stack left-center">
+                                    <template #left>
+                                        <Radio v-model="mandateId" name="choose-payment-mandate" :value="null" />
+                                    </template>
 
-                                <h3 class="style-title-list">
-                                    {{ $t('Nieuwe kaart') }}
-                                </h3>
-                                <p class="style-description-small">
-                                    {{ $t('Betaal met een andere kaart') }}
-                                </p>
+                                    <h3 class="style-title-list">
+                                        {{ $t('Nieuwe kaart') }}
+                                    </h3>
+                                    <p class="style-description-small">
+                                        {{ $t('Betaal met een andere kaart') }}
+                                    </p>
 
-                                <p v-if="model.requiresMandate && mandateId === null && saveMandateAsDefault" class="style-description-small">
-                                    <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('Zal worden ingesteld als standaard bankkaart') }}</span></span>
-                                </p>
+                                    <p v-if="model.requiresMandate && mandateId === null && saveMandateAsDefault" class="style-description-small">
+                                        <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('Zal worden ingesteld als standaard bankkaart') }}</span></span>
+                                    </p>
 
-                                <div v-else-if="!model.requiresMandate && mandateId === null" class="option">
-                                    <Checkbox v-model="createMandate">
-                                        {{ $t('Bankkaart opslaan') }}
-                                    </Checkbox>
-                                    <Checkbox v-if="createMandate && (!saveMandateAsDefault || mandates.length > 0)" v-model="saveMandateAsDefault">
-                                        <h3 class="style-title-list">
-                                            {{ $t('Instellen als standaard bankkaart') }}
-                                        </h3>
-                                        <p v-if="model.requiresMandate" class="style-description-small">
-                                            {{ $t('Deze kaart zal ook worden gebruikt voor periodieke aanrekeningen') }}
-                                        </p>
-                                    </Checkbox>
-                                </div>
-                            </STGridItem>
-                        </STGrid>
-                    </STInputBox>
+                                    <div v-else-if="!model.requiresMandate && mandateId === null" class="option">
+                                        <Checkbox v-model="createMandate">
+                                            {{ $t('Bankkaart opslaan') }}
+                                        </Checkbox>
+                                        <Checkbox v-if="createMandate && (!saveMandateAsDefault || mandates.length > 0)" v-model="saveMandateAsDefault">
+                                            <h3 class="style-title-list">
+                                                {{ $t('Instellen als standaard bankkaart') }}
+                                            </h3>
+                                            <p v-if="model.requiresMandate" class="style-description-small">
+                                                {{ $t('Deze kaart zal ook worden gebruikt voor periodieke aanrekeningen') }}
+                                            </p>
+                                        </Checkbox>
+                                    </div>
+                                </STGridItem>
+                            </STGrid>
+                        </STInputBox>
+                    </template>
 
-                    <STInputBox v-if="model.requiresMandate && mandateId === null" error-fields="createMandate" :error-box="errors.errorBox" class="max" :title="$t('Toestemming')">
-                        <STList>
-                            <STListItem :selectable="true" element-name="label" class="right-stack left-center">
-                                <template #left>
-                                    <Checkbox v-model="createMandate" />
-                                </template>
+                    <template v-if="model.requiresMandate && mandateId === null">
+                        <hr v-if="(mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates)">
+                        <STInputBox error-fields="createMandate" :error-box="errors.errorBox" class="max" :title="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? $t('Toestemming') : ''">
+                            <STList>
+                                <STListItem :selectable="true" element-name="label" class="right-stack left-center">
+                                    <template #left>
+                                        <Checkbox v-model="createMandate" />
+                                    </template>
 
-                                <h3 class="style-title-list">
-                                    {{ $t('Deze kaart opslaan en voor periodieke aanrekeningen gebruiken') }}
-                                </h3>
+                                    <h3 class="style-title-list">
+                                        {{ $t('Deze kaart opslaan en voor periodieke aanrekeningen gebruiken') }}
+                                    </h3>
 
-                                <p class="style-description-small">
-                                    {{ $t('We raden af om een persoonlijke kaart te gebruiken.') }}
-                                </p>
-                            </STListItem>
-                        </STList>
-                    </STInputBox>
+                                    <p class="style-description-small">
+                                        {{ $t('We raden af om een persoonlijke kaart te gebruiken.') }}
+                                    </p>
+                                </STListItem>
+                            </STList>
+                        </STInputBox>
+                    </template>
 
                     <div v-if="!mandateId" class="container">
-                        <STInputBox error-fields="method" :error-box="errors.errorBox" class="max" :title="$t('Betaalmethode')">
-                            <PaymentSelectionList v-model="selectedPaymentMethod" :for-mandate="model.requiresMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
+                        <hr v-if="(model.requiresMandate && mandateId === null)">
+                        <STInputBox v-if="model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates && (model.requiresMandate || mandates?.length) " error-fields="method" :error-box="errors.errorBox" class="max" :title="$t('Betaalmethode')">
+                            <PaymentSelectionList v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                         </STInputBox>
+                        <PaymentSelectionList v-else v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                     </div>
                 </div>
 
@@ -94,6 +101,11 @@
                     <h2>{{ $t('Nu te betalen') }}</h2>
                     <InvoiceItemsBox :invoice="proFormaData.invoice" />
                 </div>
+
+                <div v-else-if="proFormaData?.payment && proFormaData.payment.price !== 0" class="container categorized-box">
+                    <h2>{{ $t('Nu te betalen') }}</h2>
+                    <PaymentItemsBox :payment="proFormaData.payment" />
+                </div>
             </main>
             <STToolbar>
                 <template v-if="loadingProForma || proFormaData?.payment" #left>
@@ -101,7 +113,7 @@
                     <span v-else class="style-placeholder-skeleton" />
                 </template>
                 <template #right>
-                    <LoadingButton :loading="!proFormaData || loading">
+                    <LoadingButton :loading="loadingProForma || loading">
                         <button v-if="proFormaData?.payment?.price === 0" class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
                             <span class="icon play small" />
                             <span>{{ $t('Activeren') }}</span>
@@ -144,13 +156,14 @@ import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMand
 import { computed, ref, shallowRef, watch } from 'vue';
 import InvoiceItemsBox from '../../../invoices/components/InvoiceItemsBox.vue';
 import { useActivatePackages } from '../hooks/useActivatePackages';
-import type { PackageCheckoutViewModel } from '../PackageCheckoutViewModel';
+import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import { Request } from '@simonbackx/simple-networking';
 import { useRequestOwner } from '@stamhoofd/networking';
+import PaymentItemsBox from '@stamhoofd/components/payments/PaymentItemsBox.vue';
 
 const props = defineProps<{
-    model: PackageCheckoutViewModel;
+    model: OrganizationCheckoutViewModel;
     saveHandler: (navigate: NavigationActions) => Promise<void>;
 }>();
 
@@ -169,7 +182,7 @@ const paymentConfiguration = computed(() => props.model.paymentConfiguration);
 const activatePackages = useActivatePackages();
 const proFormaData = shallowRef<null | CheckoutResponse>(null);
 const loadingProForma = ref(false);
-const {mandates} = props.model.forceNewMandate ? {mandates: ref([])} : useOrganizationPaymentMandates({
+const {mandates} = props.model.forceNewMandate || !props.model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? {mandates: ref([])} : useOrganizationPaymentMandates({
     sellingOrganizationId: props.model.sellingOrganization.id,
     errors,
 });

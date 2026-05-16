@@ -41,11 +41,11 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { ref } from 'vue';
-import type { PackageCheckoutViewModel } from '../PackageCheckoutViewModel';
+import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 
 const props = withDefaults(
     defineProps<{
-        model: PackageCheckoutViewModel;
+        model: OrganizationCheckoutViewModel;
         saveHandler: (navigate: NavigationActions) => Promise<void>;
     }>(), {
     }
