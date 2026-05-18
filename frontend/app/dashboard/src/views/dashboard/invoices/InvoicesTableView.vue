@@ -22,7 +22,7 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
-import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
+import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
@@ -49,7 +49,7 @@ const configurationId = computed(() => {
 
 const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
-const filterBuilders = getPaymentsUIFilterBuilders();
+const filterBuilders = usePaymentsUIFilterBuilders();
 const title = computed(() => {
     return $t('%1JA');
 });

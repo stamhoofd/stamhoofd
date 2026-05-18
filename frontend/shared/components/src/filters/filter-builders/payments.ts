@@ -7,6 +7,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../Mu
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilders } from '../UIFilter';
+import { useOrganization } from '../../hooks';
 
 export class PaymentFilterBuilders {
     static get method() {
@@ -33,6 +34,18 @@ export class PaymentFilterBuilders {
                 status: {
                     $in: FilterWrapperMarker,
                 },
+            },
+        })
+    }
+
+    static get invoiced() {
+        return new MultipleChoiceFilterBuilder({
+            name: $t(`Gefactureerd`),
+            options: [
+                new MultipleChoiceUIFilterOption($t('Nog niet gefactureerd'), null),
+            ],
+            wrapper: {
+                invoiceId: FilterWrapperMarker
             },
         })
     }
@@ -81,7 +94,9 @@ export class PaymentFilterBuilders {
     }
 }
 
-export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
+export function usePaymentsUIFilterBuilders() {
+    const organization = useOrganization()
+    
     const builders: UIFilterBuilders = [
         PaymentFilterBuilders.method,
         PaymentFilterBuilders.status,
@@ -92,6 +107,10 @@ export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
         PaymentFilterBuilders.transferDescription,
         getCustomerUIFilterBuilders()[0],
     ];
+
+    if (organization.value && organization.value.meta.invoicesEnabled) {
+        builders.push(PaymentFilterBuilders.invoiced)
+    }
 
     builders.unshift(
         new GroupUIFilterBuilder({

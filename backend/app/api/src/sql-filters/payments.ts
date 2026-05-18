@@ -38,6 +38,11 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    invoiceId: createColumnFilter({
+        expression: SQL.column('invoiceId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,

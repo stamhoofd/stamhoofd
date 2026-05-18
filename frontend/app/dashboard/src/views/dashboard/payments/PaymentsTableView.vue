@@ -9,7 +9,7 @@
 <script lang="ts" setup>
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { usePaymentsObjectFetcher } from '@stamhoofd/components/fetchers/usePaymentsObjectFetcher.ts';
-import { getPaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
+import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import PaymentView from '@stamhoofd/components/payments/PaymentView.vue';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
@@ -39,7 +39,7 @@ const configurationId = computed(() => {
 });
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
-const filterBuilders = getPaymentsUIFilterBuilders();
+const filterBuilders = usePaymentsUIFilterBuilders();
 const organization = useOrganization();
 const title = computed(() => {
     if (props.methods?.length === 1) {
