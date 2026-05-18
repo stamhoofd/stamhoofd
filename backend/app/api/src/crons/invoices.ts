@@ -4,7 +4,7 @@ import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import type { IterableSQLSelect } from '@stamhoofd/sql';
 import { EmailTemplateType, InvoiceStruct, Replacement } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
 
@@ -55,9 +55,9 @@ async function createInvoicesFor(organization: Organization) {
         return;
     }
 
-    // Belgian rules: allowed to invoice up to the 15th day of the next month.
+    // Belgian rules: allowed to invoice up to the 15th day of the next month. We extend it with one month to fix mistakes.
     const today = Formatter.luxon();
-    const startDate = today.day <= 15 ? today.minus({month: 1}).startOf('month') : today.startOf('month');
+    const startDate = today.day <= 15 ? today.minus({month: 2}).startOf('month') : today.minus({month: 1}).startOf('month');
 
     // Don't invoice below 1 euro - unless we reached the timeout date for invoices (end of month + 15 days - 3 days margin)
     const invoiceLimit = 1_0000
@@ -87,7 +87,7 @@ async function createInvoicesFor(organization: Organization) {
             payingOrganizationId: payment.payingOrganizationId ?? null,
             vatNumber: payment.customer?.company?.VATNumber,
             companyNumber: payment.customer?.company?.companyNumber,
-            name: payment.customer?.company?.VATNumber ?? payment.customer?.company?.companyNumber ?? payment.customer?.dynamicName
+            // Name and adress is ignored, because subject to changes
         };
         const id = JSON.stringify(blob);
         const existing = groups.get(id);
@@ -105,6 +105,8 @@ async function createInvoicesFor(organization: Organization) {
     let skipped = 0;
 
     for (const [_, payments] of groups) {
+        // Group from last to newest (so we use the last customer details if the address changed during the month)
+        payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
         const customer = payments[0].customer!.dynamicName;
         try {
             const generalStructs = await AuthenticatedStructures.paymentsGeneral(payments, false);

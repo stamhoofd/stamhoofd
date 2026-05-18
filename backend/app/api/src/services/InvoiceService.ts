@@ -1,81 +1,13 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Invoice, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
-import { InvoicedBalanceItem as InvoicedBalanceItemStruct, Invoice as InvoiceStruct } from '@stamhoofd/structures';
+import { BalanceItem, Invoice, InvoicedBalanceItem, Payment } from '@stamhoofd/models';
+import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
+import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
+import type { OrganizationInvoiceSettings } from '@stamhoofd/structures/OrganizationInvoiceSettings.js';
 import { Formatter } from '@stamhoofd/utility';
 import { ViesHelper } from '../helpers/ViesHelper.js';
-import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
-import type { OrganizationInvoiceSettings } from '@stamhoofd/structures/OrganizationInvoiceSettings.js';
 import { BalanceItemService } from './BalanceItemService.js';
 
 export class InvoiceService {
-    static async invoicePayment(payment: Payment) {
-        if (!payment.customer) {
-            throw new SimpleError({
-                code: 'missing_customer',
-                message: 'Missing customer',
-                field: 'customer',
-                human: $t('%1Iw'),
-            });
-        }
-
-        if (payment.price % 100 !== 0) {
-            throw new SimpleError({
-                code: 'invalid_price_decimals',
-                message: 'Cannot invoice a payment with a price having more than two decimals',
-            });
-        }
-
-        const organization = payment.organizationId ? await Organization.getByID(payment.organizationId) : null;
-        if (!organization) {
-            throw new SimpleError({
-                code: 'missing_organization',
-                message: 'Cannot invoice a payment without corresponding organization',
-                statusCode: 500,
-            });
-        }
-
-        // Find default company
-        const seller = organization.meta.companies[0];
-
-        if (!seller) {
-            throw new SimpleError({
-                code: 'missing_company',
-                message: 'Missing invoice settings (companies)',
-                human: $t('%1Ix', {
-                    'organization-name': organization.name,
-                }),
-            });
-        }
-
-        const items: InvoicedBalanceItemStruct[] = [];
-        const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch();
-        const balanceItems = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(d => d.balanceItemId)));
-
-        for (const balanceItemPayment of balanceItemPayments) {
-            const balanceItem = balanceItems.find(b => b.id === balanceItemPayment.balanceItemId);
-            if (!balanceItem) {
-                throw new SimpleError({
-                    code: 'missing_balance_item',
-                    message: 'Balance item missing for balanceItemPayment ' + balanceItemPayment.id,
-                    statusCode: 500,
-                });
-            }
-
-            const item = InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), balanceItemPayment.price);
-            items.push(item);
-        }
-
-        const struct = InvoiceStruct.create({
-            organizationId: organization.id,
-            seller,
-            customer: payment.customer,
-            payingOrganizationId: payment.payingOrganizationId,
-            items,
-        });
-
-        return await this.createFrom(organization, struct, { payments: [payment], balanceItems });
-    }
-
     static async createFrom(organization: { id: string, privateMeta: {invoiceSettings: OrganizationInvoiceSettings} }, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
         if (struct.number) {
             throw new SimpleError({
@@ -106,6 +38,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'invalid_invoiced_amount',
                 message: 'Unexpected 0 totalBalanceInvoicedAmount',
+                statusCode: 400
             });
         }
 
@@ -114,6 +47,14 @@ export class InvoiceService {
                 code: 'invalid_price_decimals',
                 message: 'Unexpected invoice total price with more than two decimals',
                 statusCode: 500,
+            });
+        }
+
+        if (struct.totalWithVAT % 100 === 0) {
+            throw new SimpleError({
+                code: 'invalid_invoiced_amount',
+                message: 'Cannot invoice zero',
+                statusCode: 400,
             });
         }
 

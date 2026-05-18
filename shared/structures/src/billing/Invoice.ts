@@ -455,6 +455,10 @@ export class Invoice extends AutoEncoder {
         const invoicedItems: InvoicedBalanceItem[] = [];
 
         for (const item of balanceItemsMap.values()) {
+            if (item.amount === 0) {
+                // Remove zero invoicedItems
+                continue;
+            }
             const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, item.amount);
             
             // Remove zero invoicedItems if they were for a package (activation of a free package should not be invoiced)
