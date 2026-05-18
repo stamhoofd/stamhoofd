@@ -158,7 +158,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
 const Route = {
     Component: InvoiceView,
-    objectKey: 'invoices',
+    objectKey: 'invoice',
 };
 
 const actions: TableAction<ObjectType>[] = [
