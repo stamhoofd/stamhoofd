@@ -123,6 +123,17 @@
             <h2>{{ $t('%YI') }}</h2>
 
             <InvoiceItemsBox :invoice="invoice" />
+
+            <hr>
+            <h2>{{ $t('%1JH') }}</h2>
+
+            <p v-if="invoice.payments.length === 0" class="info-box">
+                {{ $t('Deze factuur werd nog niet betaald') }}
+            </p>
+
+            <STList v-else>
+                <PaymentRow v-for="payment of invoice.payments" :key="payment.id" :payment="payment" :payments="invoice.payments" :price="payment.isFailed ? 0 : payment.price" />
+            </STList>
         </main>
     </div>
 </template>
@@ -140,6 +151,7 @@ import { InvoiceTypeHelper } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import InvoiceItemsBox from './components/InvoiceItemsBox.vue';
+import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
 
 const props = withDefaults(
     defineProps<{
