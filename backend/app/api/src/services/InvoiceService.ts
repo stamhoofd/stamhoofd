@@ -50,7 +50,7 @@ export class InvoiceService {
             });
         }
 
-        if (struct.totalWithVAT % 100 === 0) {
+        if (struct.totalWithVAT === 0) {
             throw new SimpleError({
                 code: 'invalid_invoiced_amount',
                 message: 'Cannot invoice zero',
