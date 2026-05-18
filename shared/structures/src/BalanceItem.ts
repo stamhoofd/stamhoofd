@@ -403,6 +403,9 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 335 })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     pricePending = 0;
+    
+    @field({ decoder: IntegerDecoder, ...NextVersion, defaultValue: () => 0 })
+    priceInvoiced: number
 
     /**
      * How much has been invoiced

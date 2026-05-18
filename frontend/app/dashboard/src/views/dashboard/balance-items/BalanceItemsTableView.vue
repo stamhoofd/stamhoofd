@@ -7,27 +7,27 @@
 </template>
 
 <script lang="ts" setup>
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import EditBalanceItemView from '@stamhoofd/components/payments/EditBalanceItemView.vue';
-import { getBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
+import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanceItemsObjectFetcher.ts';
+import { getBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import EditBalanceItemView from '@stamhoofd/components/payments/EditBalanceItemView.vue';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanceItemsObjectFetcher.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import type { BalanceItem, BalanceItemType, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelationType, BalanceItemStatus, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
+import { BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
-import { BalanceItemWithPayments } from '@stamhoofd/structures';
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder, Decoder } from '@simonbackx/simple-encoding';
-import { PatchableArray, ArrayDecoder } from '@simonbackx/simple-encoding';
 
 const props = withDefaults(
     defineProps<{
@@ -45,6 +45,7 @@ const configurationId = computed(() => {
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = getBalanceItemsUIFilterBuilders();
+const organization = useOrganization();
 const title = computed(() => {
     return $t('%1LA');
 });
@@ -185,6 +186,20 @@ const allColumns: Column<ObjectType, any>[] = [
         enabled: false,
         allowSorting: false,
     }),
+
+    ...(organization.value && organization.value.meta.invoicesEnabled ? [
+        new Column<ObjectType, number>({
+            id: 'priceInvoiced',
+            name: $t('Gefactureerd bedrag'),
+            getValue: object => object.priceInvoiced,
+            format: (val, width) => Formatter.price(val),
+            getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
+            minimumWidth: 50,
+            recommendedWidth: 150,
+            enabled: true,
+            allowSorting: false,
+        }),
+    ] : []),
 
     ...[...Object.values(BalanceItemRelationType)].map((type) => {
         return new Column<ObjectType, string>({
