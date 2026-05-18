@@ -198,7 +198,14 @@ const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
 const present = usePresent();
-const customerSuggestions = computed(() => patchedPayment.value.payingOrganization ? [...props.customers, ...patchedPayment.value.payingOrganization.defaultCompanies.map(company => PaymentCustomer.create({ company }))] : props.customers);
+const customerSuggestions = computed(() => {
+    const array = patchedPayment.value.payingOrganization ? [...props.customers, ...patchedPayment.value.payingOrganization.defaultCompanies.map(company => PaymentCustomer.create({ company }))] : props.customers;
+
+    // Remove duplicates.
+    return array.filter((value, index, self) => {
+        return self.findIndex(v => v.equals(value)) === index;
+    });
+});
 
 async function choosePayingOrganization() {
     await present({
