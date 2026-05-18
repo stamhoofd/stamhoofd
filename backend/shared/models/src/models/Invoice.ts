@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { Company, File, Invoice as InvoiceStruct, PaymentCustomer, VATSubtotal } from '@stamhoofd/structures';
+import { Company, File, PaymentCustomer, VATSubtotal } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -109,14 +109,6 @@ export class Invoice extends QueryableModel {
     @column({
         type: 'datetime',
         nullable: true,
-        beforeSave(old?: any) {
-            if (old !== undefined || !this.number) {
-                return old;
-            }
-            const date = new Date();
-            date.setMilliseconds(0);
-            return date;
-        },
     })
     invoicedAt: Date | null = null;
 

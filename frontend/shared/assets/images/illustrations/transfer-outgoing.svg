@@ -1,0 +1,55 @@
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_18802_689)">
+<path d="M9 6C9 5.44772 9.44772 5 10 5H40C40.5523 5 41 5.44772 41 6V20H9V6Z" fill="#DCDCDC"/>
+<mask id="mask0_18802_689" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="20" width="35" height="9">
+<path d="M9 20H41L43 29H8L9 20Z" fill="#F5F5F5"/>
+</mask>
+<g mask="url(#mask0_18802_689)">
+<path d="M9 20H41L43 29H8L9 20Z" fill="#E9E9E9"/>
+<path d="M30.2704 23.7831C30.3721 23.3255 30.7779 23 31.2466 23H37C37.5523 23 38 23.4477 38 24C38 24.5523 37.5523 25 37 25H31.2466C30.6069 25 30.1316 24.4076 30.2704 23.7831Z" fill="#C5C5C5"/>
+<path d="M30.1265 26.8871C30.1839 26.3817 30.6115 26 31.1201 26H34C34.5523 26 35 26.4477 35 27C35 27.5523 34.5523 28 34 28H31.1201C30.5231 28 30.0591 27.4803 30.1265 26.8871Z" fill="#C5C5C5"/>
+</g>
+<mask id="mask1_18802_689" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="29" width="35" height="17">
+<path d="M8.00001 29H43V45C43 45.5523 42.5523 46 42 46H9C8.44771 46 8 45.5523 8 45L8.00001 29Z" fill="#FCCBC6"/>
+</mask>
+<g mask="url(#mask1_18802_689)">
+<path d="M8 33H43L43 44C43 45.1046 42.1046 46 41 46H10C8.89543 46 8 45.1046 8 44V33Z" fill="#FFCAD3"/>
+<path d="M8 29H43V33H8V29Z" fill="#DCDCDC"/>
+<path d="M8 32H43V34H8V32Z" fill="#FF1741"/>
+<rect x="14" y="36" width="1" height="2" fill="white"/>
+<rect x="10" y="36" width="6" height="2" rx="1" fill="#840018"/>
+<rect x="10" y="39" width="4" height="2" rx="1" fill="#840018"/>
+<rect x="10" y="42" width="7" height="2" rx="1" fill="#840018"/>
+</g>
+<path d="M15 12C15 11.4477 15.4477 11 16 11H29C29.5523 11 30 11.4477 30 12C30 12.5523 29.5523 13 29 13H16C15.4477 13 15 12.5523 15 12Z" fill="#868686"/>
+<path d="M15 15C15 14.4477 15.4477 14 16 14H23C23.5523 14 24 14.4477 24 15C24 15.5523 23.5523 16 23 16H16C15.4477 16 15 15.5523 15 15Z" fill="#868686"/>
+<rect x="26" y="35" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="22" y="35" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="30" y="35" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="30" y="38" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="30" y="41" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="34" y="35" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="34" y="38" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="34" y="41" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="26" y="38" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="22" y="38" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="26" y="41" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="22" y="41" width="3" height="2" rx="0.25" fill="white"/>
+<rect x="29" y="36.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="25" y="36.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="33" y="36.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="33" y="39.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="33" y="42.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="29" y="39.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="25" y="39.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="29" y="42.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<rect x="25" y="42.5" width="1" height="1" rx="0.25" fill="#840018"/>
+<path d="M49 39C49 44.5228 44.5228 49 39 49C33.4771 49 29 44.5228 29 39C29 33.4772 33.4771 29 39 29C44.5228 29 49 33.4772 49 39Z" fill="#0053FF"/>
+<path d="M39.2929 34.2931C39.6835 33.9026 40.3165 33.9026 40.707 34.2931L44.707 38.2931C45.0974 38.6837 45.0975 39.3167 44.707 39.7072L40.707 43.7072C40.3165 44.0976 39.6834 44.0976 39.2929 43.7072C38.9024 43.3167 38.9025 42.6837 39.2929 42.2931L41.5859 40.0002L34 40.0002C33.4478 40.0002 33.0001 39.5524 33 39.0002C33 38.4479 33.4477 38.0002 34 38.0002L41.5859 38.0002L39.2929 35.7072C38.9024 35.3167 38.9025 34.6837 39.2929 34.2931Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_18802_689">
+<rect width="50" height="50" fill="white"/>
+</clipPath>
+</defs>
+</svg>

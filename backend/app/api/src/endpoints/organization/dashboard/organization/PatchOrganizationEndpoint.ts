@@ -159,6 +159,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey;
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
                 organization.privateMeta.balanceNotificationSettings = patchObject(organization.privateMeta.balanceNotificationSettings, request.body.privateMeta.balanceNotificationSettings);
+                organization.privateMeta.invoiceSettings = patchObject(organization.privateMeta.invoiceSettings, request.body.privateMeta.invoiceSettings);
                 organization.privateMeta.recordAnswers = request.body.privateMeta.recordAnswers.applyTo(organization.privateMeta.recordAnswers);
 
                 if (request.body.privateMeta.responsibilities || request.body.privateMeta.roles) {

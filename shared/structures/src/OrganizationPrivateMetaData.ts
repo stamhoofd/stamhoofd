@@ -15,6 +15,7 @@ import { PaymentProvider } from './PaymentProvider.js';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import type { StripeMetaData } from './StripeAccount.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
+import { OrganizationInvoiceSettings } from './OrganizationInvoiceSettings.js';
 
 export class CreditItem extends AutoEncoder {
     /**
@@ -187,6 +188,9 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 8 })
     mailDomainActive = false;
+    
+    @field({decoder: OrganizationInvoiceSettings, ...NextVersion})
+    invoiceSettings: OrganizationInvoiceSettings;
 
     /**
      * E-mail addresses that an organization can send from (or reply-to)

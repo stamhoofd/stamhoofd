@@ -1,7 +1,8 @@
 import { Model } from '@simonbackx/simple-database';
-import type { Organization, Payment} from '@stamhoofd/models';
+import type { Organization, Payment } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, Document, MemberUser, Order, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue.js';
 import { ThrottledQueue } from '../helpers/ThrottledQueue.js';
 import { AuditLogService } from './AuditLogService.js';
@@ -108,8 +109,17 @@ export const BalanceItemService = {
      */
     async updatePaidAndPending(items: BalanceItem[]) {
         console.log('updatePaidAndPending for', items.length, 'items');
-        await BalanceItem.updatePricePaid(items.map(i => i.id));
+        await BalanceItem.updatePricePaid(Formatter.uniqueArray(items.map(i => i.id)));
         await this.scheduleUpdates(items);
+    },
+
+    /**
+     * Call this when a payment or payment balance items have changed.
+     * It will also call updateOutstanding automatically, so no need to call that separately again
+     */
+    async updateInvoiced(items: (BalanceItem | string)[]) {
+        console.log('updateInvoiced for', items.length, 'items');
+        await BalanceItem.updateInvoiced(Formatter.uniqueArray(items.map(i => typeof i === 'string' ? i : i.id)));
     },
 
     /**

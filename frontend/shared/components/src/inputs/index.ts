@@ -9,7 +9,7 @@ export { default as CodeInput } from './CodeInput.vue';
 export { default as ColorInput } from './ColorInput.vue';
 export { default as CompanyNumberInput } from './CompanyNumberInput.vue';
 export { default as DateSelection } from './DateSelection.vue';
-export { default as Dropdown } from './Dropdown.vue';
+//export { default as Dropdown } from './Dropdown.vue';
 export { default as EmailInput } from './EmailInput.vue';
 export { default as FileInput } from './FileInput.vue';
 export { default as IBANInput } from './IBANInput.vue';

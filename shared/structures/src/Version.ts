@@ -8,7 +8,7 @@
 export const Version = 397;
 
 declare global {
-    const NextVersion: { optional: true; version: number };
+    const NextVersion: { /*optional: true;*/ version: number };
 }
 
 import { AutoEncoder } from '@simonbackx/simple-encoding';
@@ -20,9 +20,9 @@ AutoEncoder.skipDefaultValuesVersion = 10000; // todo
  * Note: during developent all the saved fields with NextVersion will get cleared on the next release.
  */
 (globalThis as any).NextVersion = {
-    optional: true,
+    //optional: true,
     version: Version,
-    defaultValue() {
+    /*defaultValue() {
         return this.upgrade ?? undefined;
-    },
+    },*/
 };

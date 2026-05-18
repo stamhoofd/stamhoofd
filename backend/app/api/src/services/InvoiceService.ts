@@ -3,6 +3,9 @@ import { BalanceItem, BalanceItemPayment, Invoice, InvoicedBalanceItem, Organiza
 import { InvoicedBalanceItem as InvoicedBalanceItemStruct, Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ViesHelper } from '../helpers/ViesHelper.js';
+import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
+import type { OrganizationInvoiceSettings } from '@stamhoofd/structures/OrganizationInvoiceSettings.js';
+import { BalanceItemService } from './BalanceItemService.js';
 
 export class InvoiceService {
     static async invoicePayment(payment: Payment) {
@@ -73,7 +76,7 @@ export class InvoiceService {
         return await this.createFrom(organization, struct, { payments: [payment], balanceItems });
     }
 
-    static async createFrom(organization: { id: string }, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
+    static async createFrom(organization: { id: string, privateMeta: {invoiceSettings: OrganizationInvoiceSettings} }, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
         if (struct.number) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -168,7 +171,17 @@ export class InvoiceService {
             }
         }
 
-        const balanceItems = options?.balanceItems ?? await BalanceItem.getByIDs(...Formatter.uniqueArray(struct.items.map(i => i.balanceItemId)));
+        const balanceItemIds = Formatter.uniqueArray(struct.items.map(i => i.balanceItemId));
+
+        // Make sure priceInvoiced is up to date for these balances
+        const affected = await BalanceItem.updateInvoiced(balanceItemIds);
+
+        if (affected && options?.balanceItems) {
+            // Force update
+            options!.balanceItems = undefined;
+        }
+        
+        const balanceItems = options?.balanceItems ?? await BalanceItem.getByIDs(...balanceItemIds);
         await model.save();
 
         try {
@@ -184,6 +197,94 @@ export class InvoiceService {
                 }
 
                 // Todo: check we are not invoicing more than maximum invoiceable for these items
+                const maximumInvoiceable = balanceItem.priceTotal; // € - 10
+                const alreadyInvoiced = balanceItem.priceInvoiced; // € 5
+                const left = maximumInvoiceable - alreadyInvoiced; // € -15
+                const goingToInvoice = item.balanceInvoicedAmount;
+
+                if (item.quantity === 0) {
+                    // should not be saved!
+                     throw new SimpleError({
+                        statusCode: 400,
+                        code: 'zero_quantity',
+                        message: 'Cannot invoice a quantity of zero',
+                        human: $t('Kan geen factuur opmaken voor een item met een aantal van 0 stuks')
+                    });
+                }
+
+                if (left < 0) {
+                    if (goingToInvoice > 0) {
+                        // Item should be credited, yet we are trying to invoice it
+                        throw new SimpleError({
+                            code: 'error',
+                            message: 'Cannot invoice',
+                            human: $t('Het is niet mogelijk om {a-euro} te factureren voor “{name}”. Je kan nog maximaal {left-euro} crediteren (niet factureren).', {
+                                'a-euro': Formatter.price(goingToInvoice),
+                                'name': balanceItem.getStructure().itemTitle,
+                                'left-euro': Formatter.price(-left),
+                            })
+                        })
+                    }
+
+                    if (goingToInvoice < left) {
+                        // too much
+                        throw new SimpleError({
+                            code: 'error',
+                            message: 'Cannot invoice',
+                            human: $t('Het is niet mogelijk om {a-euro} te crediteren voor “{name}”. Je kan nog maximaal {left-euro} crediteren.', {
+                                'a-euro': Formatter.price(-goingToInvoice),
+                                'name': balanceItem.getStructure().itemTitle,
+                                'left-euro': Formatter.price(-left),
+                            })
+                        })
+                    }
+                }
+
+                if (left === 0) {
+                    if (goingToInvoice < 0) {
+                        throw new SimpleError({
+                            code: 'error',
+                            message: 'Cannot invoice',
+                            human: $t('Het is niet mogelijk om {a-euro} te crediteren voor “{name}”. Dit item werd al volledig gefactureerd.', {
+                                'a-euro': Formatter.price(-goingToInvoice),
+                                'name': balanceItem.getStructure().itemTitle,
+                            })
+                        })
+                    } else if (goingToInvoice > 0) {
+                        throw new SimpleError({
+                            code: 'error',
+                            message: 'Cannot invoice',
+                            human: $t('Het is niet mogelijk om {a-euro} te factureren voor “{name}”. Dit item werd al volledig gefactureerd.', {
+                                'a-euro': Formatter.price(-goingToInvoice),
+                                'name': balanceItem.getStructure().itemTitle,
+                            })
+                        })
+                    }
+                }
+
+                if (left > 0) {
+                    if (goingToInvoice < 0) {
+                        throw new SimpleError({
+                            code: 'error',
+                            message: 'Cannot invoice',
+                            human: $t('Het is niet mogelijk om {a-euro} te crediteren voor “{name}”. Je kan nog maximaal {left-euro} factureren (niet crediteren).', {
+                                'a-euro': Formatter.price(-goingToInvoice),
+                                'name': balanceItem.getStructure().itemTitle,
+                                'left-euro': Formatter.price(left),
+                            })
+                        })
+                    } else if (goingToInvoice > left) {
+                        throw new SimpleError({
+                            code: 'error',
+                            message: 'Cannot invoice',
+                            human: $t('Het is niet mogelijk om {a-euro} te factureren voor “{name}”. Je kan nog maximaal {left-euro} factureren', {
+                                'a-euro': Formatter.price(-goingToInvoice),
+                                'name': balanceItem.getStructure().itemTitle,
+                                'left-euro': Formatter.price(left),
+                            })
+                        })
+                    }
+                }
 
                 const invoiced = new InvoicedBalanceItem();
                 invoiced.invoiceId = model.id;
@@ -212,6 +313,12 @@ export class InvoiceService {
                 payment.invoiceId = model.id;
                 await payment.save();
             }
+
+            // Finalize invoice by generating a number
+            await InvoiceCounter.assignNextNumber(model, organization.privateMeta.invoiceSettings);
+
+            // Update invoiced cache
+            await BalanceItemService.updateInvoiced(struct.items.map(i => i.balanceItemId))
         }
         catch (e) {
             try {

@@ -3,7 +3,7 @@ import { SQLDelete } from './SQLDelete.js';
 import type { SQLExpression } from './SQLExpression.js';
 import { isSQLExpression } from './SQLExpression.js';
 import type { SQLColumnExpressionParams, SQLScalarValue } from './SQLExpressions.js';
-import { SQLCast } from './SQLExpressions.js';
+import { SQLCast, SQLMax, SQLMin } from './SQLExpressions.js';
 import { SQLAssignment, SQLCalculation, SQLCoalesce, SQLColumnExpression, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLSubQuery, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
 import { SQLInsert } from './SQLInsert.js';
 import { SQLJoin, SQLJoinType } from './SQLJoin.js';
@@ -147,6 +147,14 @@ class StaticSQL {
 
     calculation(expression: SQLExpression): SQLCalculation {
         return new SQLCalculation(expression);
+    }
+
+    min(expression: SQLExpression): SQLMin {
+        return new SQLMin(expression);
+    }
+
+    max(expression: SQLExpression): SQLMax {
+        return new SQLMax(expression);
     }
 }
 

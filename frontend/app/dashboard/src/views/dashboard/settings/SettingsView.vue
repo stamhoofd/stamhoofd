@@ -137,6 +137,21 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem v-if="organization?.meta.invoicesEnabled" :selectable="true" class="left-center" @click="$navigate(Routes.Invoices)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/transfer-outgoing.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Uitgaande facturen') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Beheer de nummering van je uitgaande facturen.') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <template v-if="membersPackage">
@@ -457,6 +472,7 @@ import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 import BillingSettingsView from './BillingSettingsView.vue';
+import InvoiceSettingsView from './InvoiceSettingsView.vue';
 import LabsView from './LabsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -499,6 +515,7 @@ enum Routes {
     OrganizationRegistrationPeriods = 'werkjaren',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
+    Invoices = 'uitgaande-facturen'
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -529,6 +546,11 @@ defineRoutes([
     {
         url: Routes.PaymentAccounts,
         component: PaymentSettingsView,
+        present: 'popup',
+    },
+    {
+        url: Routes.Invoices,
+        component: InvoiceSettingsView,
         present: 'popup',
     },
     {

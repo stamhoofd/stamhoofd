@@ -9,6 +9,15 @@
         "./src/models/_relations.ts",
         "./dist/models/_relations.js"
     ],
+    "exports": {
+        ".": "./dist/index.js",
+        "./*.ts": "./dist/*.js",
+        "./*.js": "./dist/*.js"
+    },
+    "imports": {
+        "#*": "./src/*.ts",
+        "#*.ts": "./src/*.ts"
+    },
     "files": [
         "dist",
         "src"

@@ -187,6 +187,12 @@ export class BalanceItem extends QueryableModel {
     priceOpen = 0;
 
     /**
+     * Cached value, for optimizations
+     */
+    @column({ type: 'integer' })
+    priceInvoiced = 0;
+
+    /**
      * todo: deprecate ('pending' and 'paid') + 'hidden' status and replace with 'due' + 'hidden'
      * -> maybe add 'due' (due if dueAt is null or <= now), 'hidden' (never due), 'future' (= not due until dueAt - but not possible to pay earlier)
      */
@@ -542,6 +548,49 @@ export class BalanceItem extends QueryableModel {
         ${secondWhere}`;
 
         await Database.update(query, params);
+    }
+
+        /**
+     * Update the outstanding balance of multiple members in one go (or all members)
+     */
+    static async updateInvoiced(balanceItemIds: string[] | 'all') {
+        if (balanceItemIds !== 'all' && balanceItemIds.length === 0) {
+            return 0;
+        }
+
+        const params: any[] = [];
+        let firstWhere = '';
+        let secondWhere = '';
+
+        if (balanceItemIds !== 'all') {
+            firstWhere = ` AND balanceItemId IN (?)`;
+            params.push(balanceItemIds);
+            params.push(balanceItemIds);
+
+            secondWhere = `WHERE balance_items.id IN (?)`;
+            params.push(balanceItemIds);
+        }
+
+        // Note: this query only works in MySQL because of the SET assignment behaviour allowing to reference newly set values
+        const query = `
+        UPDATE
+            balance_items
+        LEFT JOIN (
+            SELECT
+                balanceItemId,
+                sum(invoiced_balance_items.balanceInvoicedAmount) AS invoiced
+            FROM
+                invoiced_balance_items
+                LEFT JOIN invoices ON invoices.id = invoiced_balance_items.invoiceId
+            WHERE
+                invoices.number is not null${firstWhere}
+            GROUP BY
+                balanceItemId
+            ) invoiced ON invoiced.balanceItemId = balance_items.id
+        SET balance_items.priceInvoiced = coalesce(invoiced.invoiced, 0)
+        ${secondWhere}`;
+
+        return (await Database.update(query, params))[0].affectedRows;
     }
 
     static async loadPayments(items: (BalanceItem | { id: string })[]) {

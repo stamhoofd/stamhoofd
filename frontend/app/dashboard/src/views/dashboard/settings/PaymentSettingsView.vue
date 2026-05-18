@@ -541,7 +541,7 @@ async function save() {
     try {
         await organizationManager.value.patch(organizationPatch.value);
         resetPatch();
-        new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
+        Toast.success($t('De wijzigingen zijn opgeslagen')).show();
         dismiss({ force: true }).catch(console.error);
     }
     catch (e) {
@@ -555,7 +555,10 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm({
+        title: $t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), 
+        confirmText: $t('Niet opslaan')
+    });
 }
 
 let didReadMollie = false;

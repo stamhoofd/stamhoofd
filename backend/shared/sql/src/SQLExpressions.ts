@@ -195,6 +195,22 @@ export class SQLMin implements SQLExpression {
     }
 }
 
+export class SQLMax implements SQLExpression {
+    expression: SQLExpression;
+
+    constructor(expression: SQLExpression) {
+        this.expression = expression;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'MAX(',
+            this.expression.getSQL(options),
+            ')',
+        ]);
+    }
+}
+
 export class SQLSelectAs implements SQLExpression {
     expression: SQLExpression;
     as: SQLAlias;
