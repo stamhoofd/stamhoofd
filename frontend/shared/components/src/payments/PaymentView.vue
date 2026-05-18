@@ -310,7 +310,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment && payment.type !== PaymentType.Reallocation)" :selectable="true" @click="markFailed">
+                    <STListItem v-if="!payment.invoiceId && (payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment && payment.type !== PaymentType.Reallocation))" :selectable="true" @click="markFailed">
                         <template #left>
                             <IconContainer icon="bank" class="error">
                                 <template #aside>
@@ -395,7 +395,7 @@ import { Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMeth
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 import EditPaymentView from './EditPaymentView.vue';
@@ -426,15 +426,6 @@ const markingPaid = ref(false);
 const platform = usePlatform();
 const present = usePresent();
 const organization = useOrganization();
-
-const sortedItems = computed(() => {
-    return props.payment.balanceItemPayments.slice().sort((a, b) => {
-        return Sorter.stack(
-            Sorter.byNumberValue(a.price, b.price),
-            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description),
-        );
-    });
-});
 
 async function reload() {
     try {

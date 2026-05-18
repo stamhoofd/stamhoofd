@@ -28,6 +28,14 @@ export class PaymentService {
             return;
         }
 
+        if (status === PaymentStatus.Failed && payment.invoiceId) {
+            throw new SimpleError({
+                code: 'cannot_fail',
+                message: 'A payment that has been invoiced cannot be marked as failed. Instead create a separate chargeback payment with a negative amount.',
+                human: $t('Een betaling kan niet worden geannuleerd als het al werd gefactureerd. Maak in de plaats daarvan een chargeback aan, die kan je apart crediteren.')
+            })
+        }
+
         await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
             if (status === PaymentStatus.Succeeded) {
                 payment.status = PaymentStatus.Succeeded;
