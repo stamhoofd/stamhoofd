@@ -279,7 +279,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             createMandate: checkout.createMandate,
             useMandate: checkout.mandate,
             paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
-            privatePaymentConfiguration: organization.privateMeta.registrationPaymentConfiguration
+            privatePaymentConfiguration: sellingOrganization.privateMeta.registrationPaymentConfiguration
         });
 
         if (!result) {
