@@ -240,6 +240,10 @@ export class Organization extends QueryableModel {
         return this.uri + '.' + defaultDomain;
     }
 
+    getDashboardHost(i18n?: { language: Language; locale: string }): string {
+        return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('dashboard') + '/' + this.uri;
+    }
+
     get registerUrl() {
         return 'https://' + this.getRegistrationHost();
     }

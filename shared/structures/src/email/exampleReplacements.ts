@@ -300,5 +300,10 @@ function getReplacements() {
             value: $t(`%1K`),
         }),
 
+        errors: Replacement.create({
+            token: 'errors',
+            html: '<p>'+ Formatter.escapeHtml($t(`Foutmelding 1`)) + '</p><p>' + Formatter.escapeHtml($t(`Foutmelding 2`)) + '</p>',
+        }),
+
     };
 }

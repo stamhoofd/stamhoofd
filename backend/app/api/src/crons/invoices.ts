@@ -1,0 +1,163 @@
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { registerCron } from '@stamhoofd/crons';
+import type { Invoice } from '@stamhoofd/models';
+import { Organization, Payment, sendEmailTemplate } from '@stamhoofd/models';
+import type { IterableSQLSelect } from '@stamhoofd/sql';
+import { EmailTemplateType, InvoiceStruct, Replacement } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
+import { InvoiceService } from '../services/InvoiceService.js';
+
+registerCron('invoices', invoices);
+
+let lastFullRun = new Date(0);
+let savedIterator: IterableSQLSelect<Organization> | null = null;
+
+const bootAt = new Date();
+
+async function invoices() {
+    // Do not run within 30 minutes after boot to avoid creating multiple email models for emails that failed to send
+    if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 30 && STAMHOOFD.environment !== 'development') {
+        return;
+    }
+
+    if (lastFullRun.getTime() > new Date().getTime() - 1000 * 60 * 60 * 12) {
+        return;
+    }
+
+    if ((new Date().getHours() > 10 || new Date().getHours() < 3) && STAMHOOFD.environment !== 'development') {
+        return;
+    }
+
+    // Get the next x organization to send e-mails for
+    if (savedIterator === null) {
+        savedIterator = Organization.select().limit(10).all();
+    }
+
+    for await (const organization of savedIterator.maxQueries(5)) {
+        if (!organization.meta.invoicesEnabled) {
+            continue;
+        }
+
+        // Create all invoices for this organization
+        await createInvoicesFor(organization)
+    }
+
+    if (savedIterator.isDone) {
+        savedIterator = null;
+        lastFullRun = new Date();
+    }
+}
+
+async function createInvoicesFor(organization: Organization) {
+    const seller = organization.meta.companies[0];
+    if (!seller) {
+        return;
+    }
+
+    // Belgian rules: allowed to invoice up to the 15th day of the next month.
+    const today = Formatter.luxon();
+    const startDate = today.day <= 15 ? today.minus({month: 1}).startOf('month') : today.startOf('month');
+
+    // Don't invoice below 1 euro - unless we reached the timeout date for invoices (end of month + 15 days - 3 days margin)
+    const invoiceLimit = 1_0000
+    function getPaymentTimeoutDate(p: Payment) {
+        return Formatter.luxon(p.paidAt ?? p.createdAt).plus({month: 1}).set({day: 15 - 3}).startOf('day').toJSDate()
+    }
+
+    console.log('Fetching all payments between ' + Formatter.dateTime(startDate.toJSDate()) + ' and now for ' + organization.name);
+
+    const payments = await Payment.select()
+        .where('organizationId', organization.id)
+        .where('paidAt', '>=', startDate.toJSDate())
+        .where('invoiceId', null)
+        .where('customer', '!=', null)
+        .where('payingOrganizationId', '!=', null)
+        .limit(1_000)
+        .orderBy('payingOrganizationId')
+        .fetch();
+
+    console.log('Invoicing ' + payments.length + ' payments');
+
+    // Group by VATNumber, company number or company name
+    const groups = new Map<string, Payment[]>();
+    for (const payment of payments) {
+        const blob = {
+            // Grouping by payingOrganizationId avoid privacy issues and data leaks
+            payingOrganizationId: payment.payingOrganizationId ?? null,
+            vatNumber: payment.customer?.company?.VATNumber,
+            companyNumber: payment.customer?.company?.companyNumber,
+            name: payment.customer?.company?.VATNumber ?? payment.customer?.company?.companyNumber ?? payment.customer?.dynamicName
+        };
+        const id = JSON.stringify(blob);
+        const existing = groups.get(id);
+        if (existing) {
+            existing.push(payment)
+        } else {
+            groups.set(id, [payment])
+        }
+    }
+
+    console.log('Invoicing ' + groups.size + ' customers');
+
+    const errors: string[] = []
+    const invoices: Invoice[] = []
+    let skipped = 0;
+
+    for (const [_, payments] of groups) {
+        const customer = payments[0].customer!.dynamicName;
+        try {
+            const generalStructs = await AuthenticatedStructures.paymentsGeneral(payments, false);
+
+            const invoice = InvoiceStruct.create({
+                seller,
+                customer: payments[0].customer!,
+                payments: generalStructs,
+            });
+            invoice.buildFromPayments();
+
+            if (invoice.totalWithVAT < invoiceLimit) {
+                const first = new Date(Math.min(...payments.map(p => getPaymentTimeoutDate(p).getTime())));
+                if (first > new Date()) {
+                    console.log('Delaying invoicing ' + customer + ' at ' + organization.id + ' until ' + Formatter.dateIso(first))
+                    skipped += 1;
+                    continue;
+                } else {
+                    console.log('Invoiced low priced invoice, because of date ' + Formatter.dateIso(first) + ' being in the past')
+                }
+            }
+
+            const model = await InvoiceService.createFrom(organization, invoice);
+            invoices.push(model)
+        } catch (e) {
+            console.error(payments.map(p => p.id), e);
+
+            const prefix = customer + ' ('+payments.map(p => '<a href="'+Formatter.escapeHtml('https://'+organization.getDashboardHost() + '/boekhouding/betalingen/' + p.id)+'">'+ Formatter.escapeHtml($t('betaling') + ' ' + p.id.substring(0, 8))+'</a>').join(', ') + '): ';
+
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                errors.push(prefix + Formatter.escapeHtml(e.getHuman()))
+            } else {
+                errors.push(prefix + Formatter.escapeHtml($t('Onbekende fout')))
+            }
+        }
+    }
+
+    console.log('Created ' + invoices.length + ' invoices with ' + errors.length + ' errors and skipped ' + skipped);
+
+    if (errors.length) {
+        await sendEmailTemplate(organization, {
+            template: {
+                type: EmailTemplateType.InvoiceGenerationErrors
+            },
+            recipients: await organization.getAdminRecipients(),
+            type: 'transactional',
+            fromStamhoofd: true,
+            defaultReplacements: [
+                Replacement.create({
+                    token: 'errors',
+                    html: '<ul><li>'+errors.join('</li><li>')+'</li></ul>' + (skipped > 0 ? '<p>'+Formatter.escapeHtml(skipped === 1 ? $t('Daarnaast werd een te factureren bedrag uitgesteld omwille van een laag bedrag (minder dan één euro).') : $t('Daarnaast werden {count} te factureren bedragen uitgesteld omwille van een laag bedrag (minder dan één euro).', {count: skipped}))+'</p>' : '')
+                })
+            ]
+        })
+    }
+}

@@ -476,3 +476,5 @@ export class Invoice extends AutoEncoder {
         this.updatePrices();
     }
 }
+
+export const InvoiceStruct = Invoice;

@@ -333,6 +333,11 @@ export class EditorSmartVariable extends AutoEncoder {
             name: $t('%Ah'),
         }));
 
+        variables.push(EditorSmartVariable.create({
+            id: 'errors',
+            name: $t('Foutmeldingen'),
+        }));
+
         // Fill examples using the example replacements
         this.fillExamples(variables, Object.values(ExampleReplacements.all));
 

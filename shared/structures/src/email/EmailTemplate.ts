@@ -125,6 +125,11 @@ export enum EmailTemplateType {
     EventNotificationAccepted = 'EventNotificationAccepted',
     EventNotificationRejected = 'EventNotificationRejected',
     EventNotificationPartiallyAccepted = 'EventNotificationPartiallyAccepted',
+
+    /**
+     * Invoices
+     */
+    InvoiceGenerationErrors = 'InvoiceGenerationErrors'
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -287,6 +292,8 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationAccepted: return $t('%Ak');
             case EmailTemplateType.EventNotificationRejected: return $t('%Al');
             case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cl');
+
+            case EmailTemplateType.InvoiceGenerationErrors: return $t('Fout bij automatische facturatie');
         }
     }
 
@@ -377,6 +384,9 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationRejected:
             case EmailTemplateType.EventNotificationPartiallyAccepted:
                 return $t('%CV');
+
+            case EmailTemplateType.InvoiceGenerationErrors:
+                return $t('Facturatie');
         }
     }
 
@@ -509,6 +519,7 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t('Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.');
             case EmailTemplateType.OrganizationBalanceReminder: return $t('Automatische e-mail die \'s ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.');
+
         }
 
         return '';
@@ -530,6 +541,15 @@ export class EmailTemplate extends AutoEncoder {
                 ExampleReplacements.all.eventName,
                 ExampleReplacements.all.dateRange,
                 ...(type === EmailTemplateType.EventNotificationRejected || type === EmailTemplateType.EventNotificationPartiallyAccepted ? [ExampleReplacements.all.feedbackText] : []),
+            ];
+        }
+
+        if ([
+            EmailTemplateType.InvoiceGenerationErrors,
+        ].includes(type)) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.errors,
             ];
         }
 
