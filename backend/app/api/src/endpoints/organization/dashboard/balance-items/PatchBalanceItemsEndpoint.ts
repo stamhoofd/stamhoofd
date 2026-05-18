@@ -188,9 +188,24 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
                 model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;
+
+                const VATPercentageBefore = model.VATPercentage;
+                const includedBefore = model.VATIncluded;
+                const excemptBefore = model.VATExcempt
+
                 model.VATIncluded = patch.VATIncluded === undefined ? model.VATIncluded : patch.VATIncluded;
                 model.VATPercentage = patch.VATPercentage === undefined ? model.VATPercentage : patch.VATPercentage;
                 model.VATExcempt = patch.VATExcempt === undefined ? model.VATExcempt : patch.VATExcempt;
+
+                if (model.priceInvoiced !== 0) {
+                    if (model.VATPercentage !== VATPercentageBefore || model.VATIncluded !== includedBefore || model.VATExcempt !== excemptBefore) {
+                        throw new SimpleError({
+                            code: 'invoiced',
+                            message: 'You cannot change VAT settings of balance items when the balance item has been invoiced',
+                            human: $t('Je kan de BTW-instellingen niet meer wijzigen na facturatie. Zet het aantal op 0 en maak een nieuw item aan indien nodig.')
+                        })
+                    }
+                }
 
                 if ((patch.dueAt !== undefined || patch.unitPrice !== undefined) && model.dueAt && model.price < 0) {
                     throw new SimpleError({
