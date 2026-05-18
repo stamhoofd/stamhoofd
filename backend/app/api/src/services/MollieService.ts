@@ -376,7 +376,7 @@ export class MollieService {
             cancelUrl: string;
             webhookUrl: string;
             description: string;
-            metadata: { [key: string]: string };
+            metadata: { [key: string]: string | undefined };
             sellingOrganization: Organization,
             payingOrganization: Organization | null,
             user: User | null,

@@ -7,7 +7,7 @@ import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
-import { Address, appToUri, DNSRecordStatus, EmailTemplateType, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import { Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
@@ -1010,5 +1010,19 @@ export class Organization extends QueryableModel {
             .count(
                 SQL.distinct(SQL.column('memberId')),
             );
+    }
+
+    /**
+     * Assures at least one company at all times
+     */
+    get defaultCompanies() {
+        return this.meta.companies.length
+            ? this.meta.companies
+            : [
+                    Company.create({
+                        name: this.name,
+                        address: this.address,
+                    }),
+                ];
     }
 }

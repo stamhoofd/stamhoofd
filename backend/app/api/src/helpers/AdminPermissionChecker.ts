@@ -1119,7 +1119,7 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async hasFullAccess(organizationId: string, level = PermissionLevel.Full): Promise<boolean> {
+    async hasFullAccess(organizationId: string | Organization, level = PermissionLevel.Full): Promise<boolean> {
         const organizationPermissions = await this.getOrganizationPermissions(organizationId);
 
         if (!organizationPermissions) {

@@ -3,7 +3,7 @@ import { registerCron } from '@stamhoofd/crons';
 import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import type { IterableSQLSelect } from '@stamhoofd/sql';
-import { EmailTemplateType, InvoiceStruct, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, InvoiceStruct, PaymentStatus, Replacement } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
@@ -69,6 +69,7 @@ async function createInvoicesFor(organization: Organization) {
 
     const payments = await Payment.select()
         .where('organizationId', organization.id)
+        .where('status', PaymentStatus.Succeeded)
         .where('paidAt', '>=', startDate.toJSDate())
         .where('invoiceId', null)
         .where('customer', '!=', null)

@@ -218,7 +218,7 @@ export class StripeHelper {
             };
             statementDescriptor: string;
             i18n: I18n;
-            metadata: { [key: string]: string };
+            metadata: { [key: string]: string | undefined};
             organization: Organization;
         },
     ): Promise<{ paymentUrl: string }> {

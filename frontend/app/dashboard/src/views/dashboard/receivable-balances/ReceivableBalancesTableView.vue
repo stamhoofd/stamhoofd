@@ -11,7 +11,8 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
-import EmailView, { type RecipientChooseOneOption, type RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
+import EmailView from '@stamhoofd/components/email/EmailView.vue';
+import type {RecipientChooseOneOption, RecipientMultipleChoiceOption} from '@stamhoofd/components/email/EmailView.vue';
 import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
@@ -25,11 +26,13 @@ import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/Tabl
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalanceType } from '@stamhoofd/structures';
+import { CountFilteredRequest, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref} from 'vue';
 import { computed, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
+import { useChargeReceivableBalances } from '@stamhoofd/components/payments/hooks/useChargeReceivableBalances';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 
 type ObjectType = ReceivableBalance;
 
@@ -152,6 +155,7 @@ const allColumns: Column<ObjectType, any>[] = [
 ];
 
 const { getSelectableWorkbook } = useSelectableWorkbook();
+const charge = useChargeReceivableBalances()
 
 const actions: TableAction<ObjectType>[] = [
     new AsyncTableAction({
@@ -175,6 +179,33 @@ const actions: TableAction<ObjectType>[] = [
                 ],
                 modalDisplayStyle: 'popup',
             });
+        },
+    }),
+
+    new AsyncTableAction({
+        name: $t('Aanrekenen via opgeslagen betaalkaart'),
+        icon: 'receive',
+        priority: 11,
+        groupIndex: 3,
+        needsSelection: true,
+        allowAutoSelectAll: true,
+        enabled: !!organization.value && organization.value.meta.registrationPaymentConfiguration.enableMandates,
+        destructive: true,
+        handler: async (selection) => {
+            if (!await CenteredMessage.confirm({
+                title: $t('Ben je zeker dat je dit wilt aanrekenen?'),
+                description: $t('Je rekent de openstaande bedragen rechstreeks en meteen af via de creditcard of bankkaart van deze personen.'),
+                requireCheckbox: $t('Geld inhouden van bankkaart'),
+                confirmText: $t('Ja, nu aanrekenen')
+            })) {
+                return;
+            }
+            await charge(new CountFilteredRequest({
+                filter: selection.filter.filter,
+                search: selection.filter.search
+            }))
+
+            tableObjectFetcher.reset(true, true);
         },
     }),
 ];

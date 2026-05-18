@@ -481,15 +481,15 @@ export class PaymentService {
     static async validateCustomer({ price, hasNegative, user, checkout, payingOrganization}: {
         price: number,
         hasNegative: boolean,
-        user: User;
+        user: User | null;
         checkout: Pick<Checkoutable<never>, 'customer'>;
         payingOrganization?: Organization | null;
     }) {
         // Fill in customer default value
         const customer = PaymentCustomer.create({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            email: user?.email,
             phone: checkout.customer?.phone
         });
 
@@ -672,7 +672,7 @@ export class PaymentService {
     static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration}: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
-        user: User;
+        user: User | null;
         members?: Member[];
         checkout: Pick<Checkoutable<never>, 'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
         payingOrganization?: Organization | null;
@@ -680,7 +680,7 @@ export class PaymentService {
         createMandate: CreateMandateSettings | null,
         useMandate: PaymentMandate | null,
         paymentConfiguration: PaymentConfiguration,
-        privatePaymentConfiguration: PrivatePaymentConfiguration
+        privatePaymentConfiguration: PrivatePaymentConfiguration,
     }) {
         if (balanceItems.size === 0) {
             return null;
@@ -708,7 +708,7 @@ export class PaymentService {
         });
 
         // Check URL's set fro online payments
-        if ((method !== PaymentMethod.Transfer && method !== PaymentMethod.PointOfSale && method !== PaymentMethod.Unknown) && (!checkout.redirectUrl || !checkout.cancelUrl)) {
+        if ((method !== PaymentMethod.Transfer && method !== PaymentMethod.PointOfSale && method !== PaymentMethod.Unknown) && (!checkout.redirectUrl || !checkout.cancelUrl) && !mandate) {
             throw new SimpleError({
                 code: 'missing_fields',
                 message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
@@ -736,7 +736,7 @@ export class PaymentService {
         payment.organizationId = organization.id;
 
         // Who paid
-        payment.payingUserId = user.id;
+        payment.payingUserId = !payingOrganization ? (user?.id ?? null) : null;
         payment.payingOrganizationId = payingOrganization?.id ?? null;
         payment.customer = customer;
 
@@ -777,7 +777,7 @@ export class PaymentService {
                 {
                     name: groupedNames,
                     naam: groupedNames,
-                    email: user.email,
+                    email: customer.email ?? user?.email ?? '',
                     prefix,
                 },
             );
@@ -809,7 +809,7 @@ export class PaymentService {
             if (payment.method === PaymentMethod.Transfer) {
                 // Send a small reminder email
                 try {
-                    await this.sendTransferEmail(user, organization, payment);
+                    await this.sendTransferEmail(customer, user?.id ?? null, organization, payment);
                 }
                 catch (e) {
                     console.error('Failed to send transfer email');
@@ -817,15 +817,15 @@ export class PaymentService {
                 }
             }
             else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
-                if (!checkout.redirectUrl || !checkout.cancelUrl) {
+                if ((!checkout.redirectUrl || !checkout.cancelUrl) && !mandate) {
                     throw new Error('Should have been caught earlier');
                 }
 
-                const _redirectUrl = new URL(checkout.redirectUrl);
+                const _redirectUrl = new URL(checkout.redirectUrl ?? ('https://' + STAMHOOFD.domains.dashboard));
                 _redirectUrl.searchParams.set('paymentId', payment.id);
                 _redirectUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
 
-                const _cancelUrl = new URL(checkout.cancelUrl);
+                const _cancelUrl = new URL(checkout.cancelUrl?? ('https://' + STAMHOOFD.domains.dashboard));
                 _cancelUrl.searchParams.set('paymentId', payment.id);
                 _cancelUrl.searchParams.set('cancel', 'true');
                 _cancelUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
@@ -840,6 +840,13 @@ export class PaymentService {
                         // Already checked, but for security
                         throw new Error('Unsupported')
                     }
+                    if (!customer.email) {
+                        throw new SimpleError({
+                            code: 'missing_email',
+                            message: 'Email address is required for online payments via Stripe',
+                            human: $t('Een e-mailadres is noodzakelijk voor online betalingen')
+                        })
+                    }
                     const stripeResult = await StripeHelper.createPayment({
                         payment,
                         stripeAccount,
@@ -848,14 +855,14 @@ export class PaymentService {
                         statementDescriptor: organization.name,
                         metadata: {
                             organization: organization.id,
-                            user: user.id,
+                            user: user?.id,
                             payment: payment.id,
                         },
                         i18n: Context.i18n,
                         organization,
                         customer: {
-                            name: user.name ?? names[0]?.name ?? $t(`%Gr`),
-                            email: user.email,
+                            name: customer.name ?? names[0]?.name ?? $t(`%Gr`),
+                            email: customer.email,
                         },
                     });
                     paymentUrl = stripeResult.paymentUrl;
@@ -869,7 +876,7 @@ export class PaymentService {
                         description,
                         metadata: {
                             organization: organization.id,
-                            user: user.id,
+                            user: user?.id,
                             payment: payment.id,
                         },
                         sellingOrganization: organization,
@@ -949,7 +956,12 @@ export class PaymentService {
         };
     }
 
-    static async sendTransferEmail(user: User, organization: Organization, payment: Payment) {
+    static async sendTransferEmail(customer: PaymentCustomer, userId: string | null, organization: Organization, payment: Payment) {
+        const email = customer.dynamicEmail;
+        if (!email) {
+            console.warn('Skipped sending transfer email because of missing email address', payment.id)
+            return;
+        }
         const paymentGeneral = await payment.getGeneralStructure();
         const groupIds = paymentGeneral.groupIds;
 
@@ -957,10 +969,10 @@ export class PaymentService {
 
         const recipients = [
             Recipient.create({
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                userId: user.id,
+                firstName: customer.firstName,
+                lastName: customer.lastName,
+                email: email,
+                userId,
                 replacements,
             }),
         ];
