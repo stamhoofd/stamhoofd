@@ -203,7 +203,7 @@
                 </STListItem>
             </STList>
 
-            <template v-if="feature('sso')">
+            <template v-if="$feature('sso')">
                 <hr><h2>{{ $t('%HQ') }}</h2>
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
@@ -214,7 +214,7 @@
                             {{ $t('%2b') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('%HS') }}
+                            {{ $t('Configureer Single-Sign-On voor webshop authenticatie. Dit werkt momenteel nog niet voor ledenlogin.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -302,19 +302,20 @@ import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.t
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, StripeAccount } from '@stamhoofd/structures';
+import type { LoginMethodConfig } from '@stamhoofd/structures';
+import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, LoginMethod, LoginProviderType, Organization, OrganizationMetaData, StripeAccount } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
+import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 enum Routes {
@@ -344,6 +345,7 @@ const isPlatform = STAMHOOFD.userMode === 'platform';
 const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const organization = useRequiredOrganization();
+const patchOrganization = usePatchOrganization();
 const uitpasFeature = useFeatureFlag()('uitpas');
 
 defineRoutes([
@@ -400,7 +402,25 @@ defineRoutes([
     {
         url: Routes.SingleSignOn,
         present: 'popup',
-        component: async () => (await import('@stamhoofd/components/auth/SSOSettingsView.vue')).default,
+        component: async () => (await import('@stamhoofd/components/auth/LoginMethodSettingsView.vue')).default,
+        defaultProperties() {
+            return {
+                loginMethod: LoginMethod.SSO,
+                title: $t('%2b'),
+                configs: organization.value.meta.loginMethods,
+                provider: LoginProviderType.SSO,
+                showDisplaySettings: false,
+                description: $t('Configureer Single-Sign-On voor webshop authenticatie. Dit werkt momenteel nog niet voor ledenlogin.'),
+                saveHandler: async (loginMethods: ConvertArrayToPatchableArray<Map<LoginMethod, LoginMethodConfig>>) => {
+                    await patchOrganization(Organization.patch({
+                        meta: OrganizationMetaData.patch({
+                            loginMethods,
+                        }),
+                    }));
+                    Toast.success($t(`%HU`)).show();
+                },
+            };
+        },
     },
     {
         url: Routes.Labs,
@@ -500,7 +520,6 @@ const stripeAccounts = ref([]) as Ref<StripeAccount[]>;
 const loadingStripeAccounts = ref(false);
 const context = useContext();
 const owner = useRequestOwner();
-const feature = useFeatureFlag();
 const stripeWarnings = computed(() => {
     return stripeAccounts.value.flatMap(a => a.warning ? [a.warning] : []);
 });

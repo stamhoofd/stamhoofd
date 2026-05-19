@@ -4,56 +4,80 @@
 
         <main class="center">
             <h1>
-                {{ $t('%xU') }}
+                {{ $t("%xU") }}
             </h1>
 
             <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.CorporateIdentity)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.CorporateIdentity)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/palette.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/palette.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%5d') }}
+                        {{ $t("%5d") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%5e') }}
+                        {{ $t("%5e") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Admins)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.Admins)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/admin.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/admin.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%3K') }}
+                        {{ $t("%3K") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%3J') }}
+                        {{ $t("%3J") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.RegistrationPeriods)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.RegistrationPeriods)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/calendar.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%3i') }}
+                        {{ $t("%3i") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%3e') }}
+                        {{ $t("%3e") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem v-for="item in usedSettingItems" :key="item.route" :selectable="true" class="left-center" @click="$navigate(item.route)">
+                <STListItem
+                    v-for="item in usedSettingItems"
+                    :key="item.route"
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(item.route)"
+                >
                     <template #left>
                         <img :src="item.image">
                     </template>
@@ -69,63 +93,91 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('%HL') }}</h2>
+            <hr>
+            <h2>{{ $t("%HL") }}</h2>
 
             <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Records)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.Records)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/health-data.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%Or') }}
+                        {{ $t("%Or") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%3b') }}
+                        {{ $t("%3b") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.FinancialSupport)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.FinancialSupport)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/discount.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/discount.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
+                        {{
+                            platform.config.financialSupport?.title ||
+                                FinancialSupportSettings.defaultTitle
+                        }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%5i') }}
+                        {{ $t("%5i") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.DataPermissions)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/agreement.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%vY') }}
+                        {{ $t("%vY") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%5j') }}
+                        {{ $t("%5j") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Terms)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.Terms)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/privacy-policy.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%5k') }}
+                        {{ $t("%5k") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%5l') }}
+                        {{ $t("%5l") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -133,33 +185,46 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('%HM') }}</h2>
+            <hr>
+            <h2>{{ $t("%HM") }}</h2>
 
             <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.EmailSettings)"
+                >
                     <template #left>
-                        <img src="~@stamhoofd/assets/images/illustrations/email.svg">
+                        <img
+                            src="~@stamhoofd/assets/images/illustrations/email.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%1EJ') }}
+                        {{ $t("%1EJ") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%HN') }}
+                        {{ $t("%HN") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.EmailTemplates)"
+                >
                     <template #left>
-                        <img src="~@stamhoofd/assets/images/illustrations/email-template.svg">
+                        <img
+                            src="~@stamhoofd/assets/images/illustrations/email-template.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%1DD') }}
+                        {{ $t("%1DD") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%HO') }}
+                        {{ $t("%HO") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -168,10 +233,17 @@
             </STList>
 
             <template v-if="unusedSettingItems.length > 0">
-                <hr><h2>{{ $t('%HP') }}</h2>
+                <hr>
+                <h2>{{ $t("%HP") }}</h2>
 
                 <STList class="illustration-list">
-                    <STListItem v-for="item in unusedSettingItems" :key="item.route" :selectable="true" class="left-center" @click="$navigate(item.route)">
+                    <STListItem
+                        v-for="item in unusedSettingItems"
+                        :key="item.route"
+                        :selectable="true"
+                        class="left-center"
+                        @click="$navigate(item.route)"
+                    >
                         <template #left>
                             <img :src="item.image">
                         </template>
@@ -188,48 +260,25 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('%HQ') }}</h2>
+            <hr>
+            <h2>{{ $t("%HQ") }}</h2>
 
             <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Labs)">
+                <STListItem
+                    :selectable="true"
+                    class="left-center"
+                    @click="$navigate(Routes.Labs)"
+                >
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/experiment.svg">
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/experiment.svg"
+                        >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%HD') }}
+                        {{ $t("%HD") }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%HR') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.loginMethods.has(LoginMethod.SSO)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.SSO} })">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/lock.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%2b') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%HS') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.loginMethods.has(LoginMethod.Google)" :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn, { properties: {provider: LoginProviderType.Google} })">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/partners/google/google-50.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%12') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%HT') }}
+                        {{ $t("%HR") }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -256,9 +305,19 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
 
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import type { OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
-import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, Platform, PlatformConfig } from '@stamhoofd/structures';
+import type {
+    OrganizationLevelRecordsConfiguration,
+    OrganizationRecordsConfiguration,
+} from '@stamhoofd/structures';
+import {
+    DataPermissionsSettings,
+    FinancialSupportSettings,
+    LoginProviderType,
+    Platform,
+    PlatformConfig,
+} from '@stamhoofd/structures';
 import { computed } from 'vue';
+
 
 // todo translations
 enum Routes {
@@ -278,8 +337,8 @@ enum Routes {
     DataPermissions = 'toestemming-gegevensverzameling',
     Terms = 'voorwaarden',
     Labs = 'experimenten',
-    SingleSignOn = 'sso',
     OrganizationRecordConfiguration = 'organisatie-gegevens',
+    SingleSignOn = 'SingleSignOn',
 }
 
 const platform = usePlatform();
@@ -333,11 +392,17 @@ const settingItems = computed(() => [
         title: $t('%89'),
         description: $t('%8A'),
         visible: true,
-        used: platform.value.config.organizationLevelRecordsConfiguration.recordCategories.length > 0,
+        used:
+            platform.value.config.organizationLevelRecordsConfiguration
+                .recordCategories.length > 0,
     },
 ]);
-const usedSettingItems = computed(() => settingItems.value.filter(item => item.visible && item.used));
-const unusedSettingItems = computed(() => settingItems.value.filter(item => item.visible && !item.used));
+const usedSettingItems = computed(() =>
+    settingItems.value.filter(item => item.visible && item.used),
+);
+const unusedSettingItems = computed(() =>
+    settingItems.value.filter(item => item.visible && !item.used),
+);
 
 defineRoutes([
     {
@@ -350,13 +415,18 @@ defineRoutes([
         component: async () => (await import('@stamhoofd/components/records/RecordsConfigurationView.vue')).default,
         defaultProperties() {
             return {
-                recordsConfiguration: platform.value.config.recordsConfiguration,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                    await platformManager.value.patch(Platform.patch({
-                        config: PlatformConfig.patch({
-                            recordsConfiguration: patch,
+                recordsConfiguration:
+                    platform.value.config.recordsConfiguration,
+                saveHandler: async (
+                    patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>,
+                ) => {
+                    await platformManager.value.patch(
+                        Platform.patch({
+                            config: PlatformConfig.patch({
+                                recordsConfiguration: patch,
+                            }),
                         }),
-                    }));
+                    );
                     Toast.success($t(`%HU`)).show();
                 },
             };
@@ -368,14 +438,24 @@ defineRoutes([
         component: async () => (await import('@stamhoofd/components/records/FinancialSupportSettingsView.vue')).default,
         defaultProperties() {
             return {
-                financialSupport: platform.value.config.financialSupport ?? FinancialSupportSettings.create({}),
-                saveHandler: async (patch: AutoEncoderPatchType<FinancialSupportSettings>) => {
+                financialSupport:
+                    platform.value.config.financialSupport
+                    ?? FinancialSupportSettings.create({}),
+                saveHandler: async (
+                    patch: AutoEncoderPatchType<FinancialSupportSettings>,
+                ) => {
                     const isNew = !platform.value.config.financialSupport;
-                    await platformManager.value.patch(Platform.patch({
-                        config: PlatformConfig.patch({
-                            financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
+                    await platformManager.value.patch(
+                        Platform.patch({
+                            config: PlatformConfig.patch({
+                                financialSupport: isNew
+                                    ? FinancialSupportSettings.create({}).patch(
+                                            patch,
+                                        )
+                                    : patch,
+                            }),
                         }),
-                    }));
+                    );
                     Toast.success($t(`%HU`)).show();
                 },
             };
@@ -388,14 +468,24 @@ defineRoutes([
         component: async () => (await import('@stamhoofd/components/records/DataPermissionSettingsView.vue')).default,
         defaultProperties() {
             return {
-                dataPermission: platform.value.config.dataPermission ?? DataPermissionsSettings.create({}),
-                saveHandler: async (patch: AutoEncoderPatchType<DataPermissionsSettings>) => {
+                dataPermission:
+                    platform.value.config.dataPermission
+                    ?? DataPermissionsSettings.create({}),
+                saveHandler: async (
+                    patch: AutoEncoderPatchType<DataPermissionsSettings>,
+                ) => {
                     const isNew = !platform.value.config.dataPermission;
-                    await platformManager.value.patch(Platform.patch({
-                        config: PlatformConfig.patch({
-                            dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
+                    await platformManager.value.patch(
+                        Platform.patch({
+                            config: PlatformConfig.patch({
+                                dataPermission: isNew
+                                    ? DataPermissionsSettings.create({}).patch(
+                                            patch,
+                                        )
+                                    : patch,
+                            }),
                         }),
-                    }));
+                    );
                     Toast.success($t(`%HU`)).show();
                 },
             };
@@ -468,13 +558,18 @@ defineRoutes([
         component: async () => (await import('./organization-records/OrganizationRecordConfigurationView.vue')).default,
         defaultProperties() {
             return {
-                recordsConfiguration: platform.value.config.organizationLevelRecordsConfiguration,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationLevelRecordsConfiguration>) => {
-                    await platformManager.value.patch(Platform.patch({
-                        config: PlatformConfig.patch({
-                            organizationLevelRecordsConfiguration: patch,
+                recordsConfiguration:
+                    platform.value.config.organizationLevelRecordsConfiguration,
+                saveHandler: async (
+                    patch: AutoEncoderPatchType<OrganizationLevelRecordsConfiguration>,
+                ) => {
+                    await platformManager.value.patch(
+                        Platform.patch({
+                            config: PlatformConfig.patch({
+                                organizationLevelRecordsConfiguration: patch,
+                            }),
                         }),
-                    }));
+                    );
 
                     Toast.success($t(`%HU`)).show();
                 },
