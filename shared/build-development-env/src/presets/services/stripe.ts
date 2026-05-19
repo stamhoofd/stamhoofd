@@ -6,6 +6,10 @@ import type { Service } from '../../Service.js';
 const execPromise = util.promisify(exec);
 
 export async function inject(config: BackendEnvironment, service: Service) {
+    if (process.env.STAMHOOFD_SKIP_DEV_SERVICES === '1') {
+        return {};
+    }
+
     if (!('backend' in service) || !service.backend) {
         return {};
     }

@@ -55,6 +55,7 @@ You can read the documentation of the most important building blocks of Stamhoof
 - Afterwards install yarn 2: `npm install --global yarn` - this will globally install yarn. Every time node is updated you'll need to reinstall yarn (which isn't a huge issue as it will keep the installation directory clean).
 - Set the yarn version used to the one used by the project by running `yarn policies set-version 1.22.19`. We currently use version version 1.22.19 of yarn because of a bug in workspaces after that version (https://github.com/yarnpkg/yarn/issues/7807).
 - Run `yarn install`
+- Install [`just`](https://just.systems/man/en/packages.html) and run `just` in the project root for local development help and common commands.
 
 #### Dependencies
 

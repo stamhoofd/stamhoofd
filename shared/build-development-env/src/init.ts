@@ -5,6 +5,12 @@ import chalk from 'chalk';
 
 async function init() {
     console.log(chalk.magenta('[INIT]') + ' Initializing development environment...');
+
+    if (process.env.STAMHOOFD_SKIP_DEV_SERVICES === '1') {
+        console.log(chalk.magenta('[INIT]') + ' Skipping development services because STAMHOOFD_SKIP_DEV_SERVICES=1');
+        return;
+    }
+
     const services: ConcurrentlyCommandInput[] = [];
 
     // Loop all presets with a init method and call that method.
