@@ -38,7 +38,7 @@ const props = defineProps<{
     template: DocumentTemplatePrivate;
 }>();
 
-const title = 'Documenten';
+const title = $t('Documenten')
 const configurationId = 'documents';
 
 const objectFetcher = useDocumentsObjectFetcher({
@@ -55,7 +55,7 @@ const allColumns: Column<Document, any>[] = [
     new Column<Document, string>({
         id: 'id',
         enabled: false,
-        name: 'Volgnummer',
+        name: $t('Volgnummer'),
         getValue: v => v.id,
         compare: (a, b) => Sorter.byStringValue(a, b),
         minimumWidth: 100,
@@ -65,10 +65,10 @@ const allColumns: Column<Document, any>[] = [
 
     new Column<Document, number | null>({
         id: 'number',
-        name: 'Nummer',
+        name: $t('Nummer'),
         getValue: v => v.number,
         compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
-        format: n => n ? n.toString() : 'Niet toegekend',
+        format: n => n ? n.toString() : $t('Niet toegekend'),
         getStyle: (status) => {
             if (status === null) {
                 return 'gray';
@@ -83,7 +83,7 @@ const allColumns: Column<Document, any>[] = [
 
     new Column<Document, string>({
         id: 'description',
-        name: 'Beschrijving',
+        name: $t('Beschrijving'),
         getValue: v => v.data.description,
         compare: (a, b) => Sorter.byStringValue(a, b),
         minimumWidth: 100,
@@ -93,7 +93,7 @@ const allColumns: Column<Document, any>[] = [
 
     new Column<Document, DocumentStatus>({
         id: 'status',
-        name: 'Status',
+        name: $t('Status'),
         getValue: document => document.status,
         format: status => DocumentStatusHelper.getName(status),
         compare: (a, b) => Sorter.byEnumValue(a, b, DocumentStatus),
@@ -105,19 +105,19 @@ const allColumns: Column<Document, any>[] = [
     }),
 
     new Column<Document, RecordWarning[]>({
-        name: 'Waarschuwingen',
+        name: $t('Waarschuwingen'),
         allowSorting: false,
         getValue: (document) => {
             return [...document.data.fieldAnswers.values()].flatMap(answer => answer.getWarnings());
         },
         format: (warnings) => {
             if (warnings.length === 1) {
-                return 'Waarschuwing';
+                return $t('Waarschuwing')
             }
             if (warnings.length > 1) {
-                return `${warnings.length} waarschuwingen`;
+                return $t('{count} waarschuwingen', {count: warnings.length})
             }
-            return 'Geen';
+            return $t('Geen');
         },
         compare: (a, b) => -Sorter.byNumberValue(a.length, b.length),
         getStyle: (warnings) => {
