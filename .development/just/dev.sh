@@ -4,71 +4,71 @@ dev_write_caddyfile() {
     common_prepare_dev_dirs
     cat > "$GENERATED_DIR/Caddyfile" <<EOF
 (dev_tls) {
-    tls /etc/caddy/certs/stamhoofd-dev.crt /etc/caddy/certs/stamhoofd-dev.key
+    tls ${CADDY_DEV_CERT_CRT} ${CADDY_DEV_CERT_KEY}
 }
 
 dashboard.${STAMHOOFD_DOMAIN}, *.dashboard.${STAMHOOFD_DOMAIN} {
     import dev_tls
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:8080
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${DASHBOARD_PORT}
 }
 
 api.${STAMHOOFD_DOMAIN}, *.api.${STAMHOOFD_DOMAIN} {
     import dev_tls
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:9091
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${API_PORT}
     header Cache-Control no-store
 }
 
 renderer.${STAMHOOFD_DOMAIN}, *.renderer.${STAMHOOFD_DOMAIN} {
     import dev_tls
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:9093
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${RENDERER_PORT}
 }
 
 *.registration.${STAMHOOFD_DOMAIN} {
     import dev_tls
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:8081
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${REGISTRATION_PORT}
 }
 
 shop.${STAMHOOFD_DOMAIN}, *.shop.${STAMHOOFD_DOMAIN} {
     import dev_tls
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:8082
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${SHOP_PORT}
 }
 
 sso.${STAMHOOFD_DOMAIN} {
     import dev_tls
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:5556
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${SSO_PORT}
 }
 
 :80 {
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:8082
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${SHOP_PORT}
 }
 
 :443 {
     import dev_tls
-    bind 127.0.0.1
-    reverse_proxy 127.0.0.1:8082
+    bind ${LOCAL_HOST}
+    reverse_proxy ${LOCAL_HOST}:${SHOP_PORT}
 }
 EOF
 }
 
 dev_write_corefile() {
     common_prepare_dev_dirs
-    cat > "$GENERATED_DIR/Corefile" <<'EOF'
-stamhoofd {
+    cat > "$GENERATED_DIR/Corefile" <<EOF
+${STAMHOOFD_DOMAIN} {
     log
 
     template IN A {
-        answer "{{ .Name }} 300 IN A 127.0.0.1"
+        answer "{{ .Name }} 300 IN A ${LOCAL_HOST}"
     }
 
     template IN AAAA {
-        answer "{{ .Name }} 300 IN AAAA ::1"
+        answer "{{ .Name }} 300 IN AAAA ${LOCAL_IPV6_HOST}"
     }
 }
 
@@ -83,17 +83,10 @@ EOF
 }
 
 dev_start_mysql() {
-    echo "Starting MySQL on 127.0.0.1:3306..."
-    docker rm -f "$MYSQL_CONTAINER" >/dev/null 2>&1 || true
-    docker volume create "$MYSQL_VOLUME" >/dev/null
-    docker run -d \
-        --name "$MYSQL_CONTAINER" \
-        -e MYSQL_ROOT_PASSWORD=root \
-        -p 127.0.0.1:3306:3306 \
-        -v "$MYSQL_VOLUME:/var/lib/mysql" \
-        mysql:8.4 \
-        --mysql-native-password=ON \
-        --sort-buffer-size=2M >/dev/null
+    echo "Starting MySQL on ${LOCAL_HOST}:${MYSQL_PORT}..."
+    common_docker_rm "$MYSQL_CONTAINER"
+    common_docker_volume_create "$MYSQL_VOLUME"
+    common_start_mysql_container "$MYSQL_CONTAINER" "${LOCAL_HOST}:${MYSQL_PORT}:${MYSQL_CONTAINER_PORT}" "$MYSQL_VOLUME:/var/lib/mysql"
     dev_wait_for_mysql
 }
 
@@ -102,51 +95,51 @@ dev_wait_for_mysql() {
 }
 
 dev_start_maildev() {
-    echo "Starting MailDev on 127.0.0.1:1080..."
-    docker rm -f "$MAILDEV_CONTAINER" >/dev/null 2>&1 || true
-    docker run -d \
+    echo "Starting MailDev on ${MAILDEV_URL}..."
+    common_docker_rm "$MAILDEV_CONTAINER"
+    common_command_quiet run docker run -d \
         --name "$MAILDEV_CONTAINER" \
-        -p 127.0.0.1:1025:1025 \
-        -p 127.0.0.1:1080:1080 \
-        maildev/maildev:2.2.1 \
-        maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password >/dev/null
+        -p "${LOCAL_HOST}:${MAILDEV_SMTP_PORT}:${MAILDEV_CONTAINER_SMTP_PORT}" \
+        -p "${LOCAL_HOST}:${MAILDEV_HTTP_PORT}:${MAILDEV_CONTAINER_HTTP_PORT}" \
+        "$MAILDEV_IMAGE" \
+        maildev --ip 0.0.0.0 --incoming-user username --incoming-pass password
 }
 
 dev_start_coredns() {
-    echo "Starting CoreDNS on 127.0.0.1:53..."
+    echo "Starting CoreDNS on ${LOCAL_HOST}:${DNS_PORT}..."
     dev_write_corefile
-    docker rm -f "$COREDNS_CONTAINER" >/dev/null 2>&1 || true
-    docker run -d \
+    common_docker_rm "$COREDNS_CONTAINER"
+    common_command_quiet run docker run -d \
         --name "$COREDNS_CONTAINER" \
-        -p 127.0.0.1:53:53/udp \
-        -p 127.0.0.1:53:53/tcp \
+        -p "${LOCAL_HOST}:${DNS_PORT}:53/udp" \
+        -p "${LOCAL_HOST}:${DNS_PORT}:53/tcp" \
         -v "$GENERATED_DIR/Corefile:/Corefile:ro" \
-        coredns/coredns:1.11.3 \
-        -conf /Corefile >/dev/null
+        "$COREDNS_IMAGE" \
+        -conf /Corefile
 }
 
 dev_start_caddy() {
-    echo "Starting Caddy on 127.0.0.1:80 and 127.0.0.1:443..."
+    echo "Starting Caddy on ${LOCAL_HOST}:80 and ${LOCAL_HOST}:443..."
     setup_require_dev_certificates
     dev_write_caddyfile
-    docker rm -f "$CADDY_CONTAINER" >/dev/null 2>&1 || true
-    docker volume create "$CADDY_DATA_VOLUME" >/dev/null
-    docker volume create "$CADDY_CONFIG_VOLUME" >/dev/null
-    docker run -d \
+    common_docker_rm "$CADDY_CONTAINER"
+    common_docker_volume_create "$CADDY_DATA_VOLUME"
+    common_docker_volume_create "$CADDY_CONFIG_VOLUME"
+    common_command_quiet run docker run -d \
         --name "$CADDY_CONTAINER" \
         --network host \
         -v "$GENERATED_DIR/Caddyfile:/etc/caddy/Caddyfile:ro" \
-        -v "$CERT_DIR:/etc/caddy/certs:ro" \
+        -v "$CERT_DIR:$CADDY_CERT_DIR:ro" \
         -v "$CADDY_DATA_VOLUME:/data" \
         -v "$CADDY_CONFIG_VOLUME:/config" \
-        caddy:2.8 >/dev/null
+        "$CADDY_IMAGE"
 }
 
 dev_reload_caddy() {
     echo "Reloading Caddy configuration..."
     setup_require_dev_certificates
     dev_write_caddyfile
-    docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile >/dev/null
+    common_command_quiet run docker exec "$CADDY_CONTAINER" caddy reload --config /etc/caddy/Caddyfile
 }
 
 dev_start_network_services() {
@@ -172,7 +165,7 @@ dev_ensure_network_services() {
 }
 
 dev_stop_network_services() {
-    docker rm -f "$CADDY_CONTAINER" "$COREDNS_CONTAINER" >/dev/null 2>&1 || true
+    common_docker_rm "$CADDY_CONTAINER" "$COREDNS_CONTAINER"
     echo "Network services stopped."
 }
 
@@ -184,7 +177,7 @@ dev_start_backend_services() {
 }
 
 dev_stop_backend_services() {
-    docker rm -f "$MAILDEV_CONTAINER" "$MYSQL_CONTAINER" >/dev/null 2>&1 || true
+    common_docker_rm "$MAILDEV_CONTAINER" "$MYSQL_CONTAINER"
     echo "Backend services stopped."
 }
 
@@ -210,27 +203,31 @@ dev_tail_network_logs() {
     wait "$coredns_logs_pid" "$caddy_logs_pid"
 }
 
+dev_run_concurrently() {
+    local lerna_command="$1"
+
+    common_command run npx --no-install concurrently -r \
+        'yarn -s dev:init' \
+        'yarn -s build:shared:watch' \
+        "wait-on shared/locales/dist/index.d.ts && $lerna_command"
+}
+
 dev_run() {
     local target="$1"
     local env_name="$2"
     export STAMHOOFD_ENV="$env_name"
     export STAMHOOFD_SKIP_DEV_SERVICES=1
+    export npm_config_script_shell="${npm_config_script_shell:-/bin/bash}"
     cd "$ROOT_DIR"
     case "$target" in
         all)
-            yarn -s dev
+            dev_run_concurrently 'lerna run dev --ignore @stamhoofd/calculator --stream --parallel'
             ;;
         backend)
-            npx concurrently -r \
-                'yarn -s dev:init' \
-                'yarn -s build:shared:watch' \
-                'wait-on shared/locales/dist/index.d.ts && lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --stream --parallel'
+            dev_run_concurrently 'lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --stream --parallel'
             ;;
         frontend)
-            npx concurrently -r \
-                'yarn -s dev:init' \
-                'yarn -s build:shared:watch' \
-                'wait-on shared/locales/dist/index.d.ts && lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/webshop --stream --parallel'
+            dev_run_concurrently 'lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/webshop --stream --parallel'
             ;;
         *)
             echo "Unknown dev target: $target" >&2

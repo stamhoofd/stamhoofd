@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 sso_issuer() {
-    printf 'https://sso.%s/dex/realms/%s' "$STAMHOOFD_DOMAIN" "$KEYCLOAK_REALM"
+    printf '%s/realms/%s' "$SSO_BASE_URL" "$KEYCLOAK_REALM"
 }
 
 sso_validate_redirect_uri() {
     local redirect_uri="$1"
     if [ -z "$redirect_uri" ]; then
         echo "Missing redirect URI. Copy it from the SSO settings view and run:" >&2
-        echo "  just sso start https://<organization-id>.api.${STAMHOOFD_DOMAIN}/openid/callback" >&2
+        echo "  just sso start ${SSO_EXAMPLE_REDIRECT_URI}" >&2
         return 1
     fi
 
@@ -136,13 +136,43 @@ Test user:
 
 Commands:
 
-  just sso start "${redirect_uri:-https://<organization-id>.api.${STAMHOOFD_DOMAIN}/openid/callback}"
-  just sso start --background "${redirect_uri:-https://<organization-id>.api.${STAMHOOFD_DOMAIN}/openid/callback}"
+  just sso start "${redirect_uri:-${SSO_EXAMPLE_REDIRECT_URI}}"
+  just sso start --background "${redirect_uri:-${SSO_EXAMPLE_REDIRECT_URI}}"
   just sso logs
   just sso stop
 
-Note: use the Issuer value in the app. The Keycloak admin console is available at https://sso.${STAMHOOFD_DOMAIN}/dex/admin with ${KEYCLOAK_ADMIN_USER}/${KEYCLOAK_ADMIN_PASSWORD}.
+Note: use the Issuer value in the app. The Keycloak admin console is available at ${SSO_ADMIN_URL} with ${KEYCLOAK_ADMIN_USER}/${KEYCLOAK_ADMIN_PASSWORD}.
 EOF
+}
+
+sso_run_keycloak() {
+    local mode="$1"
+    local docker_args=(
+        --name "$KEYCLOAK_CONTAINER"
+        -p "${LOCAL_HOST}:${SSO_PORT}:${KEYCLOAK_CONTAINER_PORT}"
+        -e "KC_BOOTSTRAP_ADMIN_USERNAME=$KEYCLOAK_ADMIN_USER"
+        -e "KC_BOOTSTRAP_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD"
+        -e KC_HTTP_RELATIVE_PATH=/dex
+        -v "$KEYCLOAK_IMPORT_DIR:/opt/keycloak/data/import:ro"
+        "$KEYCLOAK_IMAGE"
+        start-dev
+        --import-realm
+        --hostname="$SSO_BASE_URL"
+        --proxy-headers=xforwarded
+    )
+
+    case "$mode" in
+        background)
+            common_command_quiet run docker run -d "${docker_args[@]}"
+            ;;
+        foreground)
+            common_command run docker run --rm "${docker_args[@]}"
+            ;;
+        *)
+            echo "Unknown Keycloak mode: $mode" >&2
+            return 1
+            ;;
+    esac
 }
 
 sso_start() {
@@ -154,19 +184,11 @@ sso_start() {
 
     dev_ensure_network_services
 
-    echo "Starting Keycloak on 127.0.0.1:5556..."
-    docker rm -f "$KEYCLOAK_CONTAINER" >/dev/null 2>&1 || true
+    echo "Starting Keycloak on ${LOCAL_HOST}:${SSO_PORT}..."
+    common_docker_rm "$KEYCLOAK_CONTAINER"
 
     if [ "$background" = "true" ]; then
-        docker run -d \
-            --name "$KEYCLOAK_CONTAINER" \
-            -p 127.0.0.1:5556:8080 \
-            -e KC_BOOTSTRAP_ADMIN_USERNAME="$KEYCLOAK_ADMIN_USER" \
-            -e KC_BOOTSTRAP_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
-            -e KC_HTTP_RELATIVE_PATH=/dex \
-            -v "$KEYCLOAK_IMPORT_DIR:/opt/keycloak/data/import:ro" \
-            "$KEYCLOAK_IMAGE" \
-            start-dev --import-realm --hostname="https://sso.${STAMHOOFD_DOMAIN}/dex" --proxy-headers=xforwarded >/dev/null
+        sso_run_keycloak background
 
         echo "Local SSO server started in the background."
         echo
@@ -185,24 +207,16 @@ sso_start() {
         fi
         cleanup_done=1
         trap - EXIT INT TERM
-        docker rm -f "$KEYCLOAK_CONTAINER" >/dev/null 2>&1 || true
+        common_docker_rm "$KEYCLOAK_CONTAINER"
         echo "Local SSO server stopped."
     }
     trap cleanup EXIT INT TERM
 
-    docker run --rm \
-        --name "$KEYCLOAK_CONTAINER" \
-        -p 127.0.0.1:5556:8080 \
-        -e KC_BOOTSTRAP_ADMIN_USERNAME="$KEYCLOAK_ADMIN_USER" \
-        -e KC_BOOTSTRAP_ADMIN_PASSWORD="$KEYCLOAK_ADMIN_PASSWORD" \
-        -e KC_HTTP_RELATIVE_PATH=/dex \
-        -v "$KEYCLOAK_IMPORT_DIR:/opt/keycloak/data/import:ro" \
-        "$KEYCLOAK_IMAGE" \
-        start-dev --import-realm --hostname="https://sso.${STAMHOOFD_DOMAIN}/dex" --proxy-headers=xforwarded
+    sso_run_keycloak foreground
 }
 
 sso_stop() {
-    docker rm -f "$KEYCLOAK_CONTAINER" >/dev/null 2>&1 || true
+    common_docker_rm "$KEYCLOAK_CONTAINER"
     echo "Local SSO server stopped."
 }
 

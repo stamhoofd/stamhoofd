@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 db_shell() {
-    exec docker exec -it "$MYSQL_CONTAINER" mysql -uroot -proot
+    exec docker exec -it "$MYSQL_CONTAINER" mysql -uroot -p"$MYSQL_ROOT_PASSWORD"
 }
 
 db_clean() {
@@ -10,7 +10,7 @@ db_clean() {
         echo "Database reset skipped."
         return 0
     fi
-    docker rm -f "$MYSQL_CONTAINER" >/dev/null 2>&1 || true
-    docker volume rm "$MYSQL_VOLUME"
+    common_docker_rm "$MYSQL_CONTAINER"
+    common_command run docker volume rm "$MYSQL_VOLUME"
     echo "Database volume removed. Run: just dev backend --env stamhoofd"
 }

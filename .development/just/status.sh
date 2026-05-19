@@ -9,11 +9,11 @@ status() {
     echo "Domain:      .$STAMHOOFD_DOMAIN"
     echo
     echo "URLs:"
-    echo "  Dashboard: https://dashboard.${STAMHOOFD_DOMAIN}"
-    echo "  API:       https://api.${STAMHOOFD_DOMAIN}"
-    echo "  Renderer:  https://renderer.${STAMHOOFD_DOMAIN}"
+    echo "  Dashboard: ${DASHBOARD_URL}"
+    echo "  API:       ${API_URL}"
+    echo "  Renderer:  ${RENDERER_URL}"
     echo "  SSO:       $(sso_issuer)"
-    echo "  MailDev:   http://127.0.0.1:1080"
+    echo "  MailDev:   ${MAILDEV_URL}"
     echo
     echo "Containers:"
     status_show_dev_services || true

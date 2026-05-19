@@ -2,28 +2,22 @@
 
 test_prepare_database() {
     local container_name="${1:-$MYSQL_CONTAINER}"
-    docker exec "$container_name" mysql -h127.0.0.1 -uroot -proot -e 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'
+    docker exec "$container_name" mysql -h"$MYSQL_CLIENT_HOST" -uroot -p"$MYSQL_ROOT_PASSWORD" -e 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'
 }
 
 test_start_services() {
     common_require_command docker
     echo "Starting isolated test MySQL..."
-    docker rm -f "$TEST_MYSQL_CONTAINER" >/dev/null 2>&1 || true
-    docker run -d \
-        --name "$TEST_MYSQL_CONTAINER" \
-        -e MYSQL_ROOT_PASSWORD=root \
-        -p 127.0.0.1::3306 \
-        mysql:8.4 \
-        --mysql-native-password=ON \
-        --sort-buffer-size=2M >/dev/null
+    common_docker_rm "$TEST_MYSQL_CONTAINER"
+    common_start_mysql_container "$TEST_MYSQL_CONTAINER" "${LOCAL_HOST}::${MYSQL_CONTAINER_PORT}"
     export DB_PORT="$(docker port "$TEST_MYSQL_CONTAINER" 3306/tcp | sed 's/.*://')"
-    echo "Test MySQL is mapped to 127.0.0.1:${DB_PORT}."
+    echo "Test MySQL is mapped to ${LOCAL_HOST}:${DB_PORT}."
     common_wait_for_mysql_container "$TEST_MYSQL_CONTAINER"
     test_prepare_database "$TEST_MYSQL_CONTAINER"
 }
 
 test_stop_services() {
-    docker rm -f "$TEST_MYSQL_CONTAINER" >/dev/null 2>&1 || true
+    common_docker_rm "$TEST_MYSQL_CONTAINER"
     echo "Test infrastructure stopped."
 }
 
