@@ -1,8 +1,7 @@
 import type { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { Response } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { Organization } from '@stamhoofd/models';
-import { Platform, Token, User, Webshop } from '@stamhoofd/models';
+import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
 import type { LoginMethod, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 import { LoginProviderType, OpenIDClientConfiguration, Token as TokenStruct } from '@stamhoofd/structures';
 import crypto from 'crypto';
@@ -32,6 +31,7 @@ type SSOSessionContext = {
     redirectUri: string;
     spaState: string;
     providerType: LoginProviderType;
+    organizationId?: string | null;
 
     /**
      * Link this method to this existing user and don't create a new token
@@ -132,12 +132,14 @@ export class SSOService {
         return redirectUri;
     }
 
-    static async fromContext(provider: LoginProviderType) {
+    static async fromContext(provider: LoginProviderType, options: { validate?: boolean } = {}) {
         const organization = Context.organization;
         const platform = await Platform.getForEditing();
 
         const service = new SSOService({ provider, platform, organization });
-        service.validateConfiguration();
+        if (options.validate ?? false) {
+            service.validateConfiguration();
+        }
 
         return service;
     }
@@ -171,15 +173,11 @@ export class SSOService {
     }
 
     get loginConfiguration() {
-        if (this.organization) {
-            throw new SimpleError({
-                code: 'invalid_client',
-                message: 'Login configuration not yet supported for organization users',
-                statusCode: 400,
-            });
-        }
+        const loginMethods = this.organization
+            ? this.organization.meta.loginMethods
+            : this.platform.config.loginMethods;
 
-        const loginConfiguration = this.platform.config.loginMethods.get(this.provider as unknown as LoginMethod);
+        const loginConfiguration = loginMethods.get(this.provider as unknown as LoginMethod);
         if (!loginConfiguration) {
             throw new SimpleError({
                 code: 'invalid_client',
@@ -192,9 +190,9 @@ export class SSOService {
     }
 
     validateConfiguration() {
-        // Validate configuration exists
-        const _ = this.configuration;
-        const __ = this.loginConfiguration;
+        // Trigger getters to validate both server and login method configuration.
+        void this.configuration;
+        void this.loginConfiguration;
     }
 
     validateEmail(email: string) {
@@ -215,19 +213,19 @@ export class SSOService {
         if (this.provider === LoginProviderType.SSO) {
             if (this.organization) {
                 this.organization.serverMeta.ssoConfiguration = configuration;
-                await this.getClient();
+                await this.validateClientConfiguration();
                 await this.organization.save();
                 return;
             } else {
                 this.platform.serverConfig.ssoConfiguration = configuration;
-                await this.getClient();
+                await this.validateClientConfiguration();
                 await this.platform.save();
                 return;
             }
         } else if (this.provider === LoginProviderType.Google) {
             if (!this.organization) {
                 this.platform.serverConfig.googleConfiguration = configuration;
-                await this.getClient();
+                await this.validateClientConfiguration();
                 await this.platform.save();
                 return;
             }
@@ -238,6 +236,20 @@ export class SSOService {
             message: 'SSO not supported here',
             statusCode: 400,
         });
+    }
+
+    async validateClientConfiguration() {
+        try {
+            await this.getClient();
+        } catch (e) {
+            const message = e instanceof Error ? e.message : String(e);
+            throw new SimpleError({
+                code: 'invalid_sso_configuration',
+                message: 'Failed to validate SSO configuration: ' + message,
+                human: $t('De SSO-instellingen konden niet gecontroleerd worden: {message}', { message }),
+                statusCode: 400,
+            });
+        }
     }
 
     async getClient() {
@@ -421,6 +433,7 @@ export class SSOService {
             redirectUri,
             spaState, // this is the state frontend <-> backend (not backend <-> SSO provider)
             providerType: this.provider,
+            organizationId: this.organization?.id ?? null,
             userId: user?.id ?? null,
         };
 
@@ -483,7 +496,14 @@ export class SSOServiceWithSession {
             throw new Error('Missing session');
         }
 
-        const service = await SSOService.fromContext(session.providerType);
+        const platform = await Platform.getForEditing();
+        const organization = session.organizationId ? await Organization.getByID(session.organizationId) : null;
+        if (session.organizationId && !organization) {
+            throw new Error('Missing organization');
+        }
+
+        const service = new SSOService({ provider: session.providerType, platform, organization });
+        service.validateConfiguration();
 
         return new SSOServiceWithSession(session, service, request);
     }

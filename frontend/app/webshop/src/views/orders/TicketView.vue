@@ -43,7 +43,7 @@ async function downloadTickets() {
     loading.value = true;
 
     try {
-        const response = await webshopManager.server.request({
+        const response = await webshopManager.optionalAuthenticatedServer.request({
             method: 'GET',
             path: '/webshop/' + webshopManager.webshop.id + '/tickets',
             query: {

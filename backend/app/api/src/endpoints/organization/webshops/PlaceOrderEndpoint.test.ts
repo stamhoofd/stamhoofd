@@ -3,13 +3,14 @@ import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, StripeAccount, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
-import { Address, Cart, CartItem, CartItemOption, Customer, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import { Address, Cart, CartItem, CartItemOption, Customer, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
+import { STExpect } from '@stamhoofd/test-utils';
 import sinon from 'sinon';
 
 import { StripeMocker } from '../../../../tests/helpers/StripeMocker.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
-import { PatchWebshopOrdersEndpoint } from '../dashboard/webshops/PatchWebshopOrdersEndpoint.js';
+import { GetOrderEndpoint } from './GetOrderEndpoint.js';
 import { PlaceOrderEndpoint } from './PlaceOrderEndpoint.js';
 
 const address = Address.create({
@@ -30,7 +31,7 @@ const customer = Customer.create({
 describe('Endpoint.PlaceOrderEndpoint', () => {
     // Test endpoint
     const endpoint = new PlaceOrderEndpoint();
-    const patchWebshopOrdersEndpoint = new PatchWebshopOrdersEndpoint();
+    const getOrderEndpoint = new GetOrderEndpoint();
 
     let organization: Organization;
     let webshop: Webshop;
@@ -48,8 +49,6 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
     let productPrice1: ProductPrice;
     let productPrice2: ProductPrice;
     let freeProductPrice: ProductPrice;
-    let personProductPrice: ProductPrice;
-    let seatProductPrice: ProductPrice;
     let seatingPlan: SeatingPlan;
 
     let multipleChoiceOptionMenu: OptionMenu;
@@ -60,42 +59,6 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
     let radioOption2: Option;
     let stripeMocker: StripeMocker;
     let stripeAccount: StripeAccount;
-    let token: Token;
-
-    async function refreshAll() {
-        webshop = (await Webshop.getByID(webshop.id))!;
-        product = webshop.products.find(p => p.id == product.id)!;
-        seatProduct = webshop.products.find(p => p.id == seatProduct.id)!;
-        personProduct = webshop.products.find(p => p.id == personProduct.id)!;
-        takeoutMethod = webshop.meta.checkoutMethods.find(m => m.id == takeoutMethod.id)! as WebshopTakeoutMethod;
-        deliveryMethod = webshop.meta.checkoutMethods.find(m => m.id == deliveryMethod.id)! as WebshopDeliveryMethod;
-        onSiteMethod = webshop.meta.checkoutMethods.find(m => m.id == onSiteMethod.id)! as WebshopOnSiteMethod;
-        slot1 = takeoutMethod.timeSlots.timeSlots.find(s => s.id == slot1.id)!;
-        slot2 = takeoutMethod.timeSlots.timeSlots.find(s => s.id == slot2.id)!;
-        slot3 = deliveryMethod.timeSlots.timeSlots.find(s => s.id == slot3.id)!;
-        slot4 = onSiteMethod.timeSlots.timeSlots.find(s => s.id == slot4.id)!;
-        productPrice1 = product.prices.find(p => p.id == productPrice1.id)!;
-        productPrice2 = product.prices.find(p => p.id == productPrice2.id)!;
-        freeProductPrice = product.prices.find(p => p.id == freeProductPrice.id)!;
-        multipleChoiceOptionMenu = product.optionMenus.find(m => m.id == multipleChoiceOptionMenu.id)!;
-        chooseOneOptionMenu = product.optionMenus.find(m => m.id == chooseOneOptionMenu.id)!;
-        checkboxOption1 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption1.id)!;
-        checkboxOption2 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption2.id)!;
-        radioOption1 = chooseOneOptionMenu.options.find(o => o.id == radioOption1.id)!;
-        radioOption2 = chooseOneOptionMenu.options.find(o => o.id == radioOption2.id)!;
-        personProductPrice = personProduct.prices.find(p => p.id == personProductPrice.id)!;
-        seatProductPrice = seatProduct.prices.find(p => p.id == seatProductPrice.id)!;
-        seatingPlan = webshop.meta.seatingPlans.find(s => s.id === seatingPlan.id)!;
-    }
-
-    /** Allows to change the stock */
-    async function saveChanges() {
-        // Set products
-        webshop = (await Webshop.getByID(webshop.id))!;
-        webshop.products = [product, seatProduct, personProduct];
-        await webshop.save();
-        await refreshAll();
-    }
 
     beforeAll(async () => {
         stripeMocker = new StripeMocker();
@@ -190,7 +153,6 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             type: ProductType.Person,
             stock: 100,
         });
-        personProductPrice = personProduct.prices[0];
 
         seatingPlan = SeatingPlan.create({
             name: 'Testzaal',
@@ -242,7 +204,6 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             type: ProductType.Ticket,
             seatingPlanId: seatingPlan.id,
         });
-        seatProductPrice = seatProduct.prices[0];
 
         // Takeout
         takeoutMethod = WebshopTakeoutMethod.create({
@@ -328,6 +289,31 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
     });
 
     describe('User authentication', () => {
+        test('Required-auth webshop rejects anonymous orders', async () => {
+            webshop.meta.authType = WebshopAuthType.Required;
+            await webshop.save();
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Unknown,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: freeProductPrice,
+                            amount: 1,
+                        }),
+                    ],
+                }),
+                customer,
+            });
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+
+            await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('not_authenticated'));
+        });
+
         test('Placing an order with a signed in user overrides the order customer', async () => {
             const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
             const token = await Token.createToken(user);
@@ -368,6 +354,49 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             expect(order.data.customer.email).toEqual(user.email);
             expect(order.data.customer.firstName).toEqual(user.firstName);
             expect(order.data.customer.lastName).toEqual(user.lastName);
+        });
+
+        test('Required-auth webshop order can only be read by owner', async () => {
+            webshop.meta.authType = WebshopAuthType.Required;
+            await webshop.save();
+
+            const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
+            const token = await Token.createToken(user);
+            const otherUser = await new UserFactory({ organization }).create();
+            const otherToken = await Token.createToken(otherUser);
+
+            const orderData = OrderData.create({
+                paymentMethod: PaymentMethod.Unknown,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({
+                    items: [
+                        CartItem.create({
+                            product,
+                            productPrice: freeProductPrice,
+                            amount: 1,
+                        }),
+                    ],
+                }),
+                customer,
+            });
+
+            const placeRequest = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            placeRequest.headers.authorization = 'Bearer ' + token.accessToken;
+            const placeResponse = await testServer.test(endpoint, placeRequest);
+            const order = placeResponse.body.order;
+
+            const anonymousRequest = Request.buildJson('GET', `/webshop/${webshop.id}/order/${order.id}`, organization.getApiHost());
+            await expect(testServer.test(getOrderEndpoint, anonymousRequest)).rejects.toThrow(STExpect.errorWithCode('not_authenticated'));
+
+            const otherUserRequest = Request.buildJson('GET', `/webshop/${webshop.id}/order/${order.id}`, organization.getApiHost());
+            otherUserRequest.headers.authorization = 'Bearer ' + otherToken.accessToken;
+            await expect(testServer.test(getOrderEndpoint, otherUserRequest)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+
+            const ownerRequest = Request.buildJson('GET', `/webshop/${webshop.id}/order/${order.id}`, organization.getApiHost());
+            ownerRequest.headers.authorization = 'Bearer ' + token.accessToken;
+            const ownerResponse = await testServer.test(getOrderEndpoint, ownerRequest);
+            expect(ownerResponse.body.id).toEqual(order.id);
         });
 
         /**

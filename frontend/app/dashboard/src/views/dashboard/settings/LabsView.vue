@@ -109,6 +109,9 @@
                     <h3 class="style-title-list">
                         {{ $t('%1O') }}
                     </h3>
+                    <p class="style-description-small">
+                        {{ $t('Single-Sign-On werkt momenteel enkel samen met webshop authenticatie.') }}
+                    </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
@@ -118,6 +121,10 @@
                     <h3 class="style-title-list">
                         {{ $t('%10') }}
                     </h3>
+
+                    <p class="style-description-small">
+                        {{ $t('Inloggen kan verplicht worden via een nieuwe webshop instelling onder "Algemene instellingen".') }}
+                    </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">

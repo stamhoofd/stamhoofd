@@ -38,7 +38,7 @@ export class CheckoutManager {
         }
         try {
             // Validate code
-            const response = await this.$webshopManager.server.request({
+            const response = await this.$webshopManager.optionalAuthenticatedServer.request({
                 method: 'POST',
                 path: '/webshop/'+this.$webshopManager.webshop.id + '/discount-codes',
                 body: this.checkout.discountCodes.map(c => c.code),
@@ -59,7 +59,7 @@ export class CheckoutManager {
 
         try {
             // Validate code
-            const response = await this.$webshopManager.server.request({
+            const response = await this.$webshopManager.optionalAuthenticatedServer.request({
                 method: 'POST',
                 path: '/webshop/'+this.$webshopManager.webshop.id + '/discount-codes',
                 body: [...this.checkout.discountCodes.map(c => c.code), code],

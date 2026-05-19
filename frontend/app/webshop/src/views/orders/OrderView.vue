@@ -474,7 +474,7 @@ async function checkTickets() {
     loadingTickets.value = true;
 
     try {
-        const response = await webshopManager.server.request({
+        const response = await webshopManager.optionalAuthenticatedServer.request({
             method: 'GET',
             path: '/webshop/' + webshopManager.webshop.id + '/tickets',
             query: {
@@ -507,7 +507,7 @@ onMounted(() => {
     }
     // Load order
     if (props.orderId) {
-        webshopManager.server
+        webshopManager.optionalAuthenticatedServer
             .request({
                 method: 'GET',
                 path: '/webshop/' + webshopManager.webshop.id + '/order/' + props.orderId,
@@ -527,7 +527,7 @@ onMounted(() => {
         if (!props.paymentId) {
             throw new Error('Missing payment id or order id');
         }
-        webshopManager.server
+        webshopManager.optionalAuthenticatedServer
             .request({
                 method: 'GET',
                 path: '/webshop/' + webshopManager.webshop.id + '/payment/' + props.paymentId + '/order',

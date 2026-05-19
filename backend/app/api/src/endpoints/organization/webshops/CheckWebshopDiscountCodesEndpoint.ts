@@ -6,6 +6,7 @@ import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import type { DiscountCode } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
+import { WebshopAuthHelper } from './WebshopAuthHelper.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -38,6 +39,8 @@ export class CheckWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
                 human: $t(`%FX`),
             });
         }
+
+        await WebshopAuthHelper.optionalAuthenticateForWebshop(webshop);
 
         if (request.body.length > 10) {
             // Auto limit

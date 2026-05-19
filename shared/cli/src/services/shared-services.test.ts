@@ -7,6 +7,7 @@ import { CorednsService } from './definitions/coredns-service.js';
 import { MaildevService } from './definitions/maildev-service.js';
 import { MysqlService } from './definitions/mysql-service.js';
 import { RustfsService } from './definitions/rustfs-service.js';
+import { SsoService } from './definitions/sso-service.js';
 import { ContainerRuntime } from './docker.js';
 import { tailSharedLogs } from './shared-services.js';
 
@@ -71,6 +72,22 @@ describe('shared service Docker args', () => {
         expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('127.0.0.1:1053:53/tcp');
         expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('/tmp/Corefile:/Corefile:ro');
         expect(CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'linux'))).toContain('/tmp/caddy.json:/etc/caddy/caddy.json:ro');
+    });
+
+    it('builds SSO args with relabeled import mount', () => {
+        const context = {
+            rootDir: '/tmp/stamhoofd',
+            env: 'stamhoofd',
+            instance: {
+                name: 'stamhoofd',
+                prefix: 'stamhoofd',
+                portOffset: 0,
+                primary: true,
+            },
+        } as any;
+        const args = new SsoService().getDockerArgs(context, { redirectUri: 'https://example.com/openid/callback' }, { importDir: '/tmp/keycloak' });
+
+        expect(args).toContain('/tmp/keycloak:/opt/keycloak/data/import:ro,Z');
     });
 
     it('builds macOS Docker bridge args for Caddy', () => {
