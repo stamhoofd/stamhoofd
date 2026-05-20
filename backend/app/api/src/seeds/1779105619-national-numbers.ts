@@ -1,8 +1,11 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Member, Organization } from '@stamhoofd/models';
 import type { Address, RecordAnswer, RecordCategory, RecordSettings } from '@stamhoofd/structures';
-import { Parent, ParentType, RecordAddressAnswer, RecordTextAnswer } from '@stamhoofd/structures';
+import { Parent, ParentType, PropertyFilter, RecordAddressAnswer, RecordTextAnswer } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
+
+// 1779105619-national-numbers
+// 0000000005-national-numbers.ts
 
 enum RrnTypes {
     Parent1,
@@ -47,7 +50,6 @@ async function migrateNationalNumbers(dryRun = false, doLog = false) {
     if (doLog) {
         console.log('Migrated national numbers for organizations with id: ' + Array.from(organizationsWithNumbers).map(x => `"${x}"`).join(', '));
     }
-    
 
     if (dryRun) {
         throw new Error('Did not finish migration because of dryRun');
@@ -78,17 +80,69 @@ function loopAllRecords(organization: Organization, callback: (record: RecordSet
 async function migrateNumbersOfOrganization(organization: Organization, dryRun: boolean, doLog: boolean): Promise<boolean> {
     const rrnRecords: {type: RrnTypes, record: RecordSettings}[] = [];
 
+    const distinctCategories = new Set<RecordCategory>();
+
     loopAllRecords(organization, (record, category) => {
         const isRrn = isRrnRecord(record);
         if (isRrn) {
             rrnRecords.push({type: getType(record, doLog), record});
             category.records = category.records.filter(r => r.id !== record.id);
+            distinctCategories.add(category);
         }
     });
 
     if (rrnRecords.length === 0) {
         // no rrn records
         return false;
+    }
+
+    // null means always required, always enabled
+    let newPropertyFilter: PropertyFilter | null | undefined = undefined;
+
+    // get property filter for nation register number
+    for (const category of distinctCategories) {
+        if (newPropertyFilter === null) {
+            break;
+        }
+
+        if (category.filter === null) {
+            newPropertyFilter = null;
+            break;
+        }
+
+        if (newPropertyFilter) {
+            newPropertyFilter = newPropertyFilter.merge(category.filter);
+        } else {
+            newPropertyFilter = category.filter;
+        }
+    }
+
+    if (newPropertyFilter === undefined) {
+        throw new Error('newPropertyFilter is undefined, should never happen');
+    }
+
+    if (newPropertyFilter === null) {
+        // set default filter if no specific settings
+        newPropertyFilter = new PropertyFilter(null, null)
+    }
+
+     // set always required if some rrn record is required
+    if (rrnRecords.some(x => x.record.required)) {
+        // empty filter => always required
+        newPropertyFilter.requiredWhen = {};
+    }
+
+    // set the property filter for the national register number
+    if (organization.meta.recordsConfiguration.nationalRegisterNumber) {
+        // this case normally does not happen, just in case
+        organization.meta.recordsConfiguration.nationalRegisterNumber = organization.meta.recordsConfiguration.nationalRegisterNumber.merge(newPropertyFilter);
+    } else {
+        organization.meta.recordsConfiguration.nationalRegisterNumber = newPropertyFilter;
+    }
+
+    if (doLog) {
+        console.log(`newPropertyFilter for org ${organization.id}: ${JSON.stringify(newPropertyFilter)}`);
+        console.log('original filters: ', JSON.stringify([...distinctCategories.values()].map(x => x.filter)));
     }
 
     for await (const member of Member.select().where('organizationId', organization.id).all()) {
