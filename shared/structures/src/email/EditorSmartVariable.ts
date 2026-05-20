@@ -182,6 +182,11 @@ export class EditorSmartVariable extends AutoEncoder {
         }));
 
         variables.push(EditorSmartVariable.create({
+            id: 'invoiceNumber',
+            name: $t(`Factuurnummer`),
+        }));
+
+        variables.push(EditorSmartVariable.create({
             id: 'orderPrice',
             name: $t(`%ot`),
         }));
@@ -223,6 +228,11 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'priceToPay',
+            name: $t(`%hF`),
+        }));
+
+         variables.push(EditorSmartVariable.create({
+            id: 'totalPrice',
             name: $t(`%hF`),
         }));
 

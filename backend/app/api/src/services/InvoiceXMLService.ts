@@ -65,10 +65,10 @@ export class InvoiceXMlService {
         const multiplyAmounts = invoice.totalWithVAT < 0 ? -1 : 1;
 
         let customerEmail: string | null =  company.administrationEmail ?? invoice.customer.email ?? null;
-        if (!customerEmail && invoice.organizationId) {
-            const organization = await Organization.getByID(invoice.organizationId)
-            if (organization) {
-                customerEmail = (await organization.getInvoicingToEmail()) ?? null
+        if (!customerEmail && invoice.payingOrganizationId) {
+            const payingOrganization = await Organization.getByID(invoice.payingOrganizationId)
+            if (payingOrganization) {
+                customerEmail = (await payingOrganization.getInvoicingToEmail()) ?? null
             }
         }
 

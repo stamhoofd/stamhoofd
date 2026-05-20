@@ -44,6 +44,12 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
         const invoices: Invoice[] = [];
 
         for (const { put } of request.body.getPuts()) {
+            if (put.payingOrganizationId) {
+                if (!await Context.auth.hasFullAccess(put.payingOrganizationId)) {
+                    Context.auth.error($t('Geen toegang om facturen te schrijven aan deze organisatie'))
+                }
+            }
+
             const model = await InvoiceService.createFrom(organization, put);
             invoices.push(model);
         }

@@ -129,7 +129,11 @@ export enum EmailTemplateType {
     /**
      * Invoices
      */
-    InvoiceGenerationErrors = 'InvoiceGenerationErrors'
+    InvoiceGenerationErrors = 'InvoiceGenerationErrors',
+    InvoicePaid = 'InvoicePaid',
+    CreditNotePaid = 'CreditNotePaid',
+    InvoiceUnpaid = 'InvoiceUnpaid',
+    CreditNoteUnpaid = 'CreditNoteUnpaid'
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -294,6 +298,11 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cl');
 
             case EmailTemplateType.InvoiceGenerationErrors: return $t('%1Sm');
+            case EmailTemplateType.InvoicePaid: return $t('Factuur (na betaling)');
+            case EmailTemplateType.CreditNotePaid: return $t('Creditnota (na betaling)');
+
+            case EmailTemplateType.InvoiceUnpaid: return $t('Factuur te betalen');
+            case EmailTemplateType.CreditNoteUnpaid: return $t('Creditnota te betalen');
         }
     }
 
@@ -386,6 +395,10 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%CV');
 
             case EmailTemplateType.InvoiceGenerationErrors:
+            case EmailTemplateType.InvoicePaid:
+            case EmailTemplateType.CreditNotePaid:
+            case EmailTemplateType.InvoiceUnpaid:
+            case EmailTemplateType.CreditNoteUnpaid:
                 return $t('%1Mm');
         }
     }
@@ -541,6 +554,19 @@ export class EmailTemplate extends AutoEncoder {
                 ExampleReplacements.all.eventName,
                 ExampleReplacements.all.dateRange,
                 ...(type === EmailTemplateType.EventNotificationRejected || type === EmailTemplateType.EventNotificationPartiallyAccepted ? [ExampleReplacements.all.feedbackText] : []),
+            ];
+        }
+
+        if ([
+            EmailTemplateType.InvoicePaid,
+            EmailTemplateType.CreditNotePaid,
+            EmailTemplateType.InvoiceUnpaid,
+            EmailTemplateType.CreditNoteUnpaid,
+        ].includes(type)) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.invoiceNumber,
+                ExampleReplacements.all.totalPrice,
             ];
         }
 

@@ -219,6 +219,14 @@ function getReplacements() {
             token: 'priceToPay',
             value: '€ 40,50',
         }),
+        totalPrice: Replacement.create({
+            token: 'totalPrice',
+            value: '€ 40,50',
+        }),
+        invoiceNumber: Replacement.create({
+            token: 'invoiceNumber',
+            value: '000152',
+        }),
         transferDescription: Replacement.create({
             token: 'transferDescription',
             value: '+++111/111/111+++',

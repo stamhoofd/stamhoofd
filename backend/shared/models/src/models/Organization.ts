@@ -960,7 +960,11 @@ export class Organization extends QueryableModel {
         if (filtered.length > 0) {
             return filtered.map(f => f.email)[0]
         }
-
+        const filtered2 = admins.filter(a => a.verified && a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)))
+        
+        if (filtered2.length > 0) {
+            return filtered2.map(f => f.email)[0]
+        }
         return undefined
     }
     

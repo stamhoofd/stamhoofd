@@ -1,14 +1,16 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, Invoice, InvoicedBalanceItem, Payment } from '@stamhoofd/models';
+import { Organization } from '@stamhoofd/models';
+import { BalanceItem, Invoice, InvoicedBalanceItem, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
-import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
+import { EmailTemplateType, PaymentStatus, Recipient, Replacement  } from '@stamhoofd/structures';
+import type {Invoice as InvoiceStruct} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ViesHelper } from '../helpers/ViesHelper.js';
 import { BalanceItemService } from './BalanceItemService.js';
 import { InvoicePdfService } from './InvoicePdfService.js';
 import { InvoiceXMlService } from './InvoiceXMLService.js';
+import { Context } from '../helpers/Context.js';
 
 export class InvoiceService {
     static async createFrom(organization: Organization, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
@@ -78,7 +80,8 @@ export class InvoiceService {
         model.stripeAccountId = struct.stripeAccountId;
         model.reference = struct.reference;
 
-        model.negativeInvoiceId = struct.negativeInvoiceId;
+        // todo: permission checks
+        //model.negativeInvoiceId = struct.negativeInvoiceId;
 
         if (Math.abs(model.payableRoundingAmount) > 10_00) {
             throw new SimpleError({
@@ -268,7 +271,9 @@ export class InvoiceService {
             await InvoicePdfService.generatePdf(model)
             await InvoiceXMlService.generateXml(model)
 
-            await this.forwardInvoice(model, organization)
+            if (!await this.forwardInvoice(model, organization)) {
+                await this.sendCustomerEmail(model, organization)
+            }
         }
         catch (e) {
             try {
@@ -363,5 +368,104 @@ export class InvoiceService {
 
         invoice.didSendPeppol = true;
         await invoice.save();
+        return true;
+    }
+
+    static async sendCustomerEmail(invoice: Invoice, organization: Organization) {
+        let email = (invoice.customer.email || invoice.customer.company?.administrationEmail) ?? undefined
+        let bcc = invoice.customer.company?.administrationEmail        
+        
+        if (!email && invoice.payingOrganizationId) {
+            const payingOrganization = await Organization.getByID(invoice.payingOrganizationId)
+            if (payingOrganization) {
+                email = (await payingOrganization.getInvoicingToEmail()) ?? undefined
+            }
+        }
+
+        if (bcc === email) {
+            bcc = undefined;
+        }
+
+        if (!email) {
+            console.log('Skipped sending invoice email: no email address found for ' + invoice.id)
+            return;
+        }
+
+        const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
+        const isPaid = payments.every(p => p.status === PaymentStatus.Succeeded)
+
+        const pdf = await invoice.pdf?.withSignedUrl()
+        const xml = await invoice.xml?.withSignedUrl()
+
+        const recipients = [
+            Recipient.create({
+                email,
+                replacements: [
+                    Replacement.create({
+                        token: 'invoiceNumber',
+                        value: invoice.number ?? '',
+                    }),
+                    Replacement.create({
+                        token: 'totalPrice',
+                        value: Formatter.price(Math.abs(invoice.totalWithVAT)),
+                    }),
+                ],
+            }),
+        ];
+
+        if (bcc) {
+            recipients.push(Recipient.create({
+                email: bcc,
+                replacements: [
+                    Replacement.create({
+                        token: 'invoiceNumber',
+                        value: invoice.number ?? '',
+                    }),
+                    Replacement.create({
+                        token: 'totalPrice',
+                        value: Formatter.price(Math.abs(invoice.totalWithVAT)),
+                    }),
+                ],
+            }))
+        }
+
+        await sendEmailTemplate(organization, {
+            recipients: [
+                Recipient.create({
+                    email,
+                    replacements: [
+                        Replacement.create({
+                            token: 'invoiceNumber',
+                            value: invoice.number ?? '',
+                        }),
+                        Replacement.create({
+                            token: 'totalPrice',
+                            value: Formatter.price(Math.abs(invoice.totalWithVAT)),
+                        }),
+                    ],
+                }),
+            ],
+            template: {
+                type: isPaid ? (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoicePaid : EmailTemplateType.CreditNotePaid)
+                : (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoiceUnpaid : EmailTemplateType.CreditNoteUnpaid),
+            },
+            type: 'transactional',
+            attachments: [
+                ...(pdf ? [
+                    {
+                        filename: invoice.generateCustomerFilename('pdf'),
+                        href: pdf.getPublicPath(),
+                        contentType: 'application/pdf'
+                    }
+                ] : []),
+                ...(xml ? [
+                    {
+                        filename: invoice.generateCustomerFilename('xml'),
+                        href: xml.getPublicPath(),
+                        contentType: 'application/xml'
+                    }
+                ] : [])
+            ]
+        });
     }
 }

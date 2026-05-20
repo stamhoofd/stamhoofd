@@ -487,6 +487,17 @@ export class Invoice extends AutoEncoder {
                 }
                 data.amount += item.price;
             }
+
+            if (payment.payingOrganizationId) {
+                if (this.payingOrganizationId && payment.payingOrganizationId !== this.payingOrganizationId) {
+                    throw new SimpleError({
+                        code: 'multiple_organizations',
+                        message: 'Cannot create one invoice for multiple organizations',
+                        human: $t('Kan geen factuur aanmaken voor betalingen van verschillende organisaties tegelijk')
+                    })
+                }
+                this.payingOrganizationId = payment.payingOrganizationId
+            }
         }
 
         const invoicedItems: InvoicedBalanceItem[] = [];
