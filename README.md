@@ -63,7 +63,7 @@ Using MacOS or Linux is recommended. Setup using WSL can be very difficult given
 - Install MySQL8 and create a new local database
   ```
   brew install mysql@8.4
-  rew link mysql@8.4 --force
+  brew link mysql@8.4 --force
   ```
 
   > [!NOTE]  
