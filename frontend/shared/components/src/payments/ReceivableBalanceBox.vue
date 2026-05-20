@@ -324,16 +324,7 @@ async function createBalanceItem() {
     const component = new ComponentWithProperties(EditBalanceItemView, {
         balanceItem,
         isNew: true,
-        saveHandler: async (patch: AutoEncoderPatchType<BalanceItemWithPayments>) => {
-            const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
-            arr.addPut(balanceItem.patch(patch));
-            await context.value.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/organization/balance',
-                body: arr,
-                decoder: new ArrayDecoder(BalanceItemWithPayments),
-                shouldRetry: false,
-            });
+        saveHandler: async () => {
             await reload();
             // Also reload member outstanding amount of the whole family
             await reloadFamily();

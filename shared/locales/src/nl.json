@@ -5472,7 +5472,7 @@
   "%1Rq": "Inclusief facturen van feitelijke verenigingen?",
   "%1Rr": "Dit lid is al ingeschreven voor {group}",
   "%1Rs": "Hoera! De aansluiting “{name}” voor {count} leden werd betaald",
-  "%1Rt": "Je kan de BTW-instellingen niet meer wijzigen na facturatie. Zet het aantal op 0 en maak een nieuw item aan indien nodig.",
+  "%1Rt": "Je kan de BTW-instellingen niet meer wijzigen na facturatie. Annuleer de aanrekening en maak een nieuwe aan met het juiste bedrag.",
   "%1Ru": "Vaste prefix",
   "%1Rv": "Beheer de nummering van je uitgaande facturen.",
   "%1Rw": "De factuurnummers worden vast voorafgegaan door deze tekst. Vooral handig om meerdere factuurreeksen uit elkaar te houden.",

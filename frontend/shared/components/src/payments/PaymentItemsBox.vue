@@ -67,26 +67,7 @@ async function editBalanceItem(balanceItem: BalanceItem) {
     }
     const component = new ComponentWithProperties(EditBalanceItemView, {
         balanceItem,
-        isNew: false,
-        saveHandler: async (patch: AutoEncoderPatchType<BalanceItem>) => {
-            const arr: PatchableArrayAutoEncoder<BalanceItem> = new PatchableArray();
-            patch.id = balanceItem.id;
-            arr.addPatch(patch);
-            const result = await context.value.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/organization/balance',
-                body: arr,
-                decoder: new ArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>),
-                shouldRetry: false,
-            });
-
-            if (result.data && result.data.length === 1 && result.data[0].id === balanceItem.id) {
-                balanceItem.deepSet(result.data[0]);
-            }
-            else {
-                GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
-            }
-        },
+        isNew: false
     });
     await present({
         components: [

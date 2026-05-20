@@ -7,14 +7,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useBalanceItemsFetcher } from '@stamhoofd/components/fetchers/useBalanceItemsObjectFetcher.ts';
 import { getBalanceItemsUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import EditBalanceItemView from '@stamhoofd/components/payments/EditBalanceItemView.vue';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
@@ -23,7 +19,7 @@ import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableActi
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import type { BalanceItem, BalanceItemType, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
+import { BalanceItemRelationType, BalanceItemStatus, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
@@ -254,32 +250,13 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-const context = useContext();
-
 const Route = {
     Component: EditBalanceItemView,
     objectKey: 'balanceItem',
     getProperties: (balanceItem: BalanceItem) => {
         return {
             isNew: false,
-            saveHandler: async (patch: AutoEncoderPatchType<BalanceItemWithPayments>) => {
-                const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
-                patch.id = balanceItem.id;
-                arr.addPatch(patch);
-                const result = await context.value.authenticatedServer.request({
-                    method: 'PATCH',
-                    path: '/organization/balance',
-                    body: arr,
-                    decoder: new ArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>),
-                    shouldRetry: false,
-                });
-                if (result.data && result.data.length === 1 && result.data[0].id === balanceItem.id) {
-                    balanceItem.deepSet(result.data[0]);
-                }
-                else {
-                    GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
-                }
-            },
+            balanceItem
         };
     },
 };

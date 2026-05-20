@@ -272,25 +272,29 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { Toast } from '#overlays/Toast.ts';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { BalanceItem, BalanceItemRelation } from '@stamhoofd/structures';
-import { BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
+import type { BalanceItemRelation } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
+import { GlobalEventBus } from '../EventBus';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import PaymentRow from './components/PaymentRow.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     balanceItem: BalanceItemWithPayments | BalanceItem;
     isNew: boolean;
-    saveHandler: ((patch: AutoEncoderPatchType<BalanceItem>) => Promise<void>);
-}>();
+    saveHandler?: (() => Promise<void>) | null;
+}>(), {
+    saveHandler: null
+});
 
 const balanceItemWithPayments = ref<null | BalanceItemWithPayments>(null);
 const balanceItem = computed(() => {
@@ -463,13 +467,52 @@ async function save() {
                 human: $t('%1I0'),
             });
         }
-        await props.saveHandler(patch.value);
+
+        const arr: PatchableArrayAutoEncoder<BalanceItem> = new PatchableArray();
+
+        if (props.isNew) {
+            arr.addPut(patchedBalanceItem.value);
+        } else {
+            patch.value.id = patchedBalanceItem.value.id;
+            arr.addPatch(patch.value);    
+        }
+
+        await doPatch(arr)
+        await props.saveHandler?.();
         await pop({ force: true });
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
+}
+
+async function doSinglePatch(patch: AutoEncoderPatchType<BalanceItem>) {
+    const arr: PatchableArrayAutoEncoder<BalanceItem> = new PatchableArray();
+    patch.id = patchedBalanceItem.value.id;
+    arr.addPatch(patch);    
+
+    await doPatch(arr)
+}
+
+async function doPatch(arr: PatchableArrayAutoEncoder<BalanceItem>) {
+    const result = await context.value.authenticatedServer.request({
+        method: 'PATCH',
+        path: '/organization/balance',
+        body: arr,
+        decoder: new ArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>),
+        shouldRetry: false,
+    });
+    if (result.data && result.data.length === 1) {
+        if (result.data[0].id === props.balanceItem.id) {
+            props.balanceItem.deepSet(result.data[0]);
+            if (balanceItemWithPayments.value) {
+                balanceItemWithPayments.value.deepSet(result.data[0]);
+            }
+        } else {
+            GlobalEventBus.sendEvent('balanceItemPatch', result.data[0]).catch(console.error);
+        }
+    }
 }
 
 async function reload() {
@@ -513,7 +556,7 @@ async function markDue() {
 
     try {
         loading.value = true;
-        await props.saveHandler(BalanceItemWithPayments.patch({
+        await doSinglePatch(BalanceItem.patch({
             status: BalanceItemStatus.Due,
         }));
 
@@ -540,7 +583,7 @@ async function doCancel() {
 
     try {
         loading.value = true;
-        await props.saveHandler(BalanceItemWithPayments.patch({
+        await doSinglePatch(BalanceItem.patch({
             status: BalanceItemStatus.Canceled,
         }));
         Toast.success($t('%1Js')).show();
@@ -566,7 +609,7 @@ async function doDelete() {
 
     try {
         loading.value = true;
-        await props.saveHandler(BalanceItemWithPayments.patch({
+        await doSinglePatch(BalanceItem.patch({
             status: BalanceItemStatus.Hidden,
             price: 0,
         }));
