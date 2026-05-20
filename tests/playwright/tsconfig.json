@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "customConditions": ["@stamhoofd/source", "import", "require"],
         "outDir": "dist",
         "rootDir": ".",
         "types": ["node", "playwright/test"]
@@ -10,10 +9,5 @@
         "./src",
         "./stamhoofd.d.ts",
         "./playwright.config.ts"
-    ],
-    "references": [
-        { "path": "../../backend/app/api/tsconfig.build.json" },
-        { "path": "../../backend/app/api/tsconfig.test.json" },
-        { "path": "../../shared/types/tsconfig.build.json" }
     ]
 }

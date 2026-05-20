@@ -6,7 +6,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
     globalSetup: './src/setup/global-setup.js',
     globalTeardown: './src/setup/global-teardown.js',
-    testDir: './src/tests',
+    testDir:'./src/tests',
     /* Exclude tests tagged @extra unless explicitly requested via PLAYWRIGHT_INCLUDE_EXTRA env var */
     grepInvert: process.env.PLAYWRIGHT_INCLUDE_EXTRA ? undefined : /@extra/,
     /* Run tests in files in parallel */
@@ -18,6 +18,12 @@ export default defineConfig({
     workers: process.env.CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: 'line',
+
+    build: {
+        // Disable buggy transpilation we don't need
+        // this tries to transpile sources, 
+        external: [import.meta.resolve('../../../').replace('file://', '/') + '/backend/**', import.meta.resolve('../../../').replace('file://', '/') + '/shared/**'],
+    },
     
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {

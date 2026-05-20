@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.36.12",
+        "@stamhoofd/backend": "*",
         "pino": "^10.1.1"
     },
     "devDependencies": {

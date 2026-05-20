@@ -543,7 +543,7 @@ jobs:
     - name: Build shared packages
       run: yarn build:shared
     - name: Build API
-      run: cd backend/app/api && yarn build
+      run: cd backend/app/api && yarn build:playwright:pre
     - name: Run Playwright tests
       run: cd tests/playwright && yarn -s test
     - name: Upload Playwright artifacts
