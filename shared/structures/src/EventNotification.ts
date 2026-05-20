@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, NamedObject } from './Event.js';
 import { EventNotificationStatus } from './EventNotificationStatus.js';
@@ -6,8 +6,8 @@ import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { eventNotificationsInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
-import type { RecordAnswer} from './members/records/RecordAnswer.js';
-import { RecordAnswerDecoder } from './members/records/RecordAnswer.js';
+import type { RecordAnswer } from './members/records/RecordAnswer.js';
+import { RecordAnswerMapDecoder } from './members/records/RecordAnswer.js';
 import type { RecordSettings } from './members/records/RecordSettings.js';
 import { BaseOrganization } from './Organization.js';
 
@@ -39,10 +39,10 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
     @field({ decoder: StringDecoder, nullable: true })
     feedbackText: string | null = null;
 
-    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
+    @field({ decoder: RecordAnswerMapDecoder })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
-    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), version: 368 })
+    @field({ decoder: RecordAnswerMapDecoder, version: 368 })
     acceptedRecordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**

@@ -1,5 +1,5 @@
-import type { Data, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder, EncodeContext } from '@simonbackx/simple-encoding';
+import { addPropertyField, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, NullableDecoder, PatchMapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -179,6 +179,72 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
     }
 }
 export const RecordAnswerDecoder = new RecordAnswerDecoderStatic();
+
+class PatchRecordAnswerMapDecoderStatic extends PatchMapDecoder<string, RecordAnswer | null> {
+    constructor() {
+        super(StringDecoder, new NullableDecoder(RecordAnswerDecoder))
+    }
+
+    override decode(container: Data) {
+        const response = super.decode(container)
+
+        for (const [key, value] of response) {
+            if (value === null) {
+                continue;
+            }
+            if (value.isPatch()) {
+                // Not allowed
+                const field = addPropertyField(container.currentField, key);
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: `Patching record answers is not allowed. You should put each answer.`,
+                    field: field,
+                });
+            }
+
+            if (value.settings.id !== key) {
+                const field = addPropertyField(container.currentField, key + '.settings.id');
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: `Expected record settings id to match map key`,
+                    field: field,
+                });
+            }
+        }
+
+        return response
+    }
+}
+const PatchRecordAnswerMapDecoder = new PatchRecordAnswerMapDecoderStatic();
+
+class RecordAnswerMapDecoderStatic extends MapDecoder<string, RecordAnswer> {
+    constructor() {
+        super(StringDecoder, RecordAnswerDecoder)
+    }
+
+    override patchType() {
+        return PatchRecordAnswerMapDecoder;
+    }
+
+    override decodeField(value: unknown, context: EncodeContext, currentField?: string): Map<string, RecordAnswer> {
+        const response = super.decodeField(value, context, currentField);
+
+        for (const [key, value] of response) {
+            if (value.settings.id !== key) {
+                const field = addPropertyField(currentField, key + '.settings.id');
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: `Expected record settings id to match map key`,
+                    field: field,
+                });
+            }
+        }
+
+        return response;
+    }
+}
+export const RecordAnswerMapDecoder = new RecordAnswerMapDecoderStatic()
+
 
 export class RecordTextAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder, nullable: true })

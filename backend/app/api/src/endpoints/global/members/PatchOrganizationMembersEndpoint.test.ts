@@ -820,6 +820,143 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             });
         });
 
+        test('It is not possible to set a different settings id for a given record', async () => {
+            const commentsRecord = RecordSettings.create({
+                name: TranslatedString.create('Opmerkingen'),
+                externalPermissionLevel: PermissionLevel.Read, // this should be ignored since we are an admin
+            });
+
+            const recordCategory = RecordCategory.create({
+                name: TranslatedString.create('Medische fiche'),
+                records: [
+                    commentsRecord,
+                ],
+            });
+            const organization = await new OrganizationFactory({
+                meta: OrganizationMetaData.create({
+                    recordsConfiguration: OrganizationRecordsConfiguration.create({
+                        recordCategories: [recordCategory],
+                    }),
+                }),
+            }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
+
+            // Register this member
+            await new RegistrationFactory({
+                member,
+                organization,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const recordAnswers = new PatchMap() as PatchAnswers;
+
+            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
+                settings: RecordSettings.create({
+                    id: 'malicious',
+                    name: TranslatedString.create('Opmerkingen'),
+                }),
+                value: 'Some comments',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    recordAnswers,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'invalid_field',
+                    field: 'changes.0.patch.details.recordAnswers.' + commentsRecord.id+'.settings.id',
+                    message: 'Expected record settings id to match map key',
+                })
+            );
+        });
+
+        test('Cannot change settings via a patch', async () => {
+            // We block this because this coould cause mismatches between the record answer value and record answer settings type
+
+            const commentsRecord = RecordSettings.create({
+                name: TranslatedString.create('Opmerkingen'),
+                externalPermissionLevel: PermissionLevel.Read, // this should be ignored since we are an admin
+            });
+
+            const recordCategory = RecordCategory.create({
+                name: TranslatedString.create('Medische fiche'),
+                records: [
+                    commentsRecord,
+                ],
+            });
+            const organization = await new OrganizationFactory({
+                meta: OrganizationMetaData.create({
+                    recordsConfiguration: OrganizationRecordsConfiguration.create({
+                        recordCategories: [recordCategory],
+                    }),
+                }),
+            }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
+
+            // Register this member
+            await new RegistrationFactory({
+                member,
+                organization,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const recordAnswers = new PatchMap() as PatchAnswers;
+
+            recordAnswers.set(commentsRecord.id, RecordTextAnswer.patch({
+                value: 'Some comments',
+            }));
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    recordAnswers,
+                }),
+            });
+            arr.addPatch(patch);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'missing_field',
+                    field: 'changes.0.patch.details.recordAnswers.changes.' + commentsRecord.id,
+                })
+            );
+        });
+
         test('An admin with read only record category permission cannot set the records in that category', async () => {
             const commentsRecord = RecordSettings.create({
                 name: TranslatedString.create('Opmerkingen'),

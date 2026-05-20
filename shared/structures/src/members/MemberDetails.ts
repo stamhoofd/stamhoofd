@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
 import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
@@ -13,7 +13,7 @@ import { Gender } from './Gender.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import { Parent } from './Parent.js';
 import type { RecordAnswer } from './records/RecordAnswer.js';
-import { RecordAnswerDecoder } from './records/RecordAnswer.js';
+import { RecordAnswerDecoder, RecordAnswerMapDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
 
@@ -158,7 +158,7 @@ export class MemberDetails extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder), version: 120 })
     @field({
-        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder),
+        decoder: RecordAnswerMapDecoder,
         version: 252,
         upgrade: (old: RecordAnswer[]) => {
             const map = new Map<string, RecordAnswer>();

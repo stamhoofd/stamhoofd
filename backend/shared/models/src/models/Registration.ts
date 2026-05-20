@@ -1,7 +1,7 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
 import type { RecordAnswer } from '@stamhoofd/structures';
-import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerMapDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
@@ -39,7 +39,7 @@ export class Registration extends QueryableModel {
     @column({ type: 'json', decoder: new ArrayDecoder(RegisterItemOption) })
     options: RegisterItemOption[] = [];
 
-    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
+    @column({ type: 'json', decoder: RecordAnswerMapDecoder })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**

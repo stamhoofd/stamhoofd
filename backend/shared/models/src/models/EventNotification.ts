@@ -1,8 +1,7 @@
 import { column, ManyToManyRelation } from '@simonbackx/simple-database';
-import { MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import type { RecordAnswer} from '@stamhoofd/structures';
-import { EventNotificationStatus, RecordAnswerDecoder } from '@stamhoofd/structures';
+import type { RecordAnswer } from '@stamhoofd/structures';
+import { EventNotificationStatus, RecordAnswerMapDecoder } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Event } from './Event.js';
 
@@ -39,13 +38,13 @@ export class EventNotification extends QueryableModel {
     @column({ type: 'string' })
     organizationId: string;
 
-    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
+    @column({ type: 'json', decoder: RecordAnswerMapDecoder })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**
      * Contains the answers of an event notification that were accepted
      */
-    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder) })
+    @column({ type: 'json', decoder: RecordAnswerMapDecoder })
     acceptedRecordAnswers: Map<string, RecordAnswer> = new Map();
 
     @column({ type: 'string', nullable: true })

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,7 +18,7 @@ import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import type { PlatformMember } from '../PlatformMember.js';
 import type { RecordAnswer } from '../records/RecordAnswer.js';
-import { RecordAnswerDecoder } from '../records/RecordAnswer.js';
+import { RecordAnswerMapDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
 import type { RecordSettings } from '../records/RecordSettings.js';
 import type { Registration } from '../Registration.js';
@@ -56,7 +56,7 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RegisterItemOption) })
     options: RegisterItemOption[] = [];
 
-    @field({ decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder), version: 338 })
+    @field({ decoder: RecordAnswerMapDecoder, version: 338 })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
     @field({ decoder: new ArrayDecoder(StringDecoder) })

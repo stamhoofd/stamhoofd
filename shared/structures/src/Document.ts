@@ -6,8 +6,8 @@ import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFil
 import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
-import type { RecordAnswer} from './members/records/RecordAnswer.js';
-import { RecordAnswerDecoder } from './members/records/RecordAnswer.js';
+import type { RecordAnswer } from './members/records/RecordAnswer.js';
+import { RecordAnswerDecoder, RecordAnswerMapDecoder } from './members/records/RecordAnswer.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
 import type { RecordSettings } from './members/records/RecordSettings.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
@@ -57,7 +57,7 @@ export class DocumentSettings extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
     @field({
-        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder),
+        decoder: RecordAnswerMapDecoder,
         version: 252,
         upgrade: (old: RecordAnswer[]) => {
             const map = new Map<string, RecordAnswer>();
@@ -149,7 +149,7 @@ export class DocumentTemplateGroup extends AutoEncoder implements ObjectWithReco
      */
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
     @field({
-        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder),
+        decoder: RecordAnswerMapDecoder,
         version: 252,
         upgrade: (old: RecordAnswer[]) => {
             const map = new Map<string, RecordAnswer>();
@@ -280,7 +280,7 @@ export class DocumentData extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
     @field({
-        decoder: new MapDecoder(StringDecoder, RecordAnswerDecoder),
+        decoder: RecordAnswerMapDecoder,
         version: 252,
         upgrade: (old: RecordAnswer[]) => {
             const map = new Map<string, RecordAnswer>();
