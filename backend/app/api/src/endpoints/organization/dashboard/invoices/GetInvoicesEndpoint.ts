@@ -1,19 +1,18 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Invoice } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, InvoiceStruct, StamhoofdFilter} from '@stamhoofd/structures';
+import type { CountFilteredRequest, InvoiceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { invoiceFilterCompilers } from '../../../../sql-filters/invoices.js';
-import { invoiceSorters } from '../../../../sql-sorters/invoices.js';
-import { InvoiceService } from '../../../../services/InvoiceService.js';
 import { InvoicePdfService } from '../../../../services/InvoicePdfService.js';
 import { InvoiceXMlService } from '../../../../services/InvoiceXMLService.js';
+import { invoiceFilterCompilers } from '../../../../sql-filters/invoices.js';
+import { invoiceSorters } from '../../../../sql-sorters/invoices.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
