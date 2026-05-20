@@ -179,10 +179,6 @@
     "original": "Deze aanrekening verwijderen?",
     "translation": "Supprimer cette facture ?"
   },
-  "%10g": {
-    "original": "Kies welke zaken je nu wil betalen",
-    "translation": "Choisissez ce que vous voulez payer maintenant"
-  },
   "%10h": {
     "original": "Openstaande rekening toegevoegd aan winkelmandje. Reken je winkelmandje af of voeg eventueel nog andere zaken toe.",
     "translation": "Compte en suspens ajouté au panier. Réglez votre panier ou ajoutez éventuellement d'autres articles."
@@ -4459,14 +4455,6 @@
     "original": "Verkoop tickets, inschrijvingen, merchandising en meer via één of meerdere webshops.",
     "translation": "Vendez des billets, des inscriptions, des articles de merchandising et plus encore via une ou plusieurs boutiques en ligne."
   },
-  "%1Hp": {
-    "original": "Btw- en facturatiemodule",
-    "translation": "Module TVA et facturation"
-  },
-  "%1Hq": {
-    "original": "Hou het btw-tarief van openstaande bedragen bij zodat het opstellen van facturen vereenvoudigd wordt.",
-    "translation": "Gardez une trace du taux de TVA des montants en attente afin de faciliter la création des factures."
-  },
   "%1Hr": {
     "original": "Betalingen worden niet naar een echte betaalpagina gestuurd. Let wel op dat de betalingen dan nog steeds op betaald kunnen gezet worden maar in werkelijkheid niet betaald zijn op jullie bankrekening.",
     "translation": "Les paiements ne sont pas envoyés vers une vraie page de paiement. Attention : ces paiements peuvent tout de même être marqués comme payés, mais ils ne seront en réalité pas sur votre compte bancaire."
@@ -4530,10 +4518,6 @@
   "%1I6": {
     "original": "Afrondingscorrectie",
     "translation": "Correction d'arrondi"
-  },
-  "%1I7": {
-    "original": "afrondingen",
-    "translation": "arrondis"
   },
   "%1I8": {
     "original": "Prijs excl. btw",
@@ -4683,10 +4667,6 @@
     "original": "Je kan maximaal één fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.",
     "translation": "Vous pouvez créer au maximum une attestation fiscale par année civile. Une attestation fiscale existe déjà pour cette année."
   },
-  "%1Ij": {
-    "original": "Het is niet mogelijk om een factuur aan te maken omdat een BTW-tarief ontbreekt",
-    "translation": "Il n'est pas possible de créer une facture car un taux de TVA manque"
-  },
   "%1Ik": {
     "original": "Het is niet mogelijk om een factuur aan te maken omdat het gefactureerde bedrag te laag is",
     "translation": "Il n'est pas possible de créer une facture car le montant à facturer est trop bas"
@@ -4734,14 +4714,6 @@
   "%1Iv": {
     "original": "De einddatum van jouw kansentarief is ongeldig. Neem contact op met ons om het probleem te verhelpen.",
     "translation": "La date de fin de ton tarif préférentiel est invalide. Contacte-nous pour résoudre ce problème."
-  },
-  "%1Iw": {
-    "original": "Er kan geen factuur aangemaakt worden omdat de klantgegevens ontbreken voor deze betaling",
-    "translation": "Impossible de créer une facture car les informations client sont manquantes pour ce paiement."
-  },
-  "%1Ix": {
-    "original": "Het is niet mogelijk om facturen uit te schrijven omdat er nog geen facturatiegegevens zijn ingesteld voor {organization-name}",
-    "translation": "Impossible d'émettre des factures car les informations de facturation pour {organization-name} ne sont pas encore configurées."
   },
   "%1Iy": {
     "original": "Het UiTPAS-nummer dat je invulde konden we niet terugvinden. Kijk je het nummer even na?",
@@ -6423,9 +6395,921 @@
     "original": "Voltooien",
     "translation": "Terminer"
   },
+  "%1Q0": {
+    "original": "Ja, ik ben helemaal zeker",
+    "translation": "Oui, j'en suis tout à fait sûr"
+  },
+  "%1Q1": {
+    "original": "Deze betaalmethode bestaat niet (meer)",
+    "translation": "Ce mode de paiement n'existe plus"
+  },
+  "%1Q3": {
+    "original": "Btw verlegd",
+    "translation": "TVA inversée"
+  },
+  "%1Q4": {
+    "original": "Verificatie bankkaart of bankrekening",
+    "translation": "Vérification de carte ou compte bancaire"
+  },
+  "%1Q6": {
+    "original": "Ben je zeker dat je dit wilt aanrekenen?",
+    "translation": "Es-tu certain de vouloir facturer ceci ?"
+  },
+  "%1Q7": {
+    "original": "Je kan de laatste bankkaart niet verwijderen. Voeg eerst een andere bankkaart toe waarmee je het wilt vervangen en verwijder daarna deze bankkaart.",
+    "translation": "Tu ne peux pas supprimer la dernière carte bancaire. Ajoute d'abord une autre carte bancaire pour la remplacer, puis supprime celle-ci."
+  },
+  "%1Q8": {
+    "original": "Dit maakt reeds opgeslagen betaalmethodes of automatische aanrekeningen onbruikbaar in het systeem.",
+    "translation": "Cela rendra les modes de paiement enregistrés ou les prélèvements automatiques inutilisables dans le système."
+  },
+  "%1Q9": {
+    "original": "jan.janssens@voorbeeld.be",
+    "translation": "jean.dupont@exemple.be"
+  },
+  "%1QA": {
+    "original": "Deze opgeslagen betaalmethode is niet (meer) geldig en kan niet gebruikt worden. Maak een andere keuze.",
+    "translation": "Ce mode de paiement sauvegardé n'est plus valide et ne peut pas être utilisé. Fais un autre choix."
+  },
+  "%1QB": {
+    "original": "Betalingen en betaalinstellingen",
+    "translation": "Paiements et paramètres de paiement"
+  },
+  "%1QC": {
+    "original": "Toestemming",
+    "translation": "Autorisation"
+  },
+  "%1QD": {
+    "original": "Stop inschrijvingen van leden via het ledenportaal (behalve voor uitgenodigde leden). Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.",
+    "translation": "Arrête les inscriptions de membres via le portail des membres (sauf pour les membres invités). Après la clôture des inscriptions, tu peux aussi éventuellement archiver le groupe."
+  },
+  "%1QE": {
+    "original": "Het is niet mogelijk om {a-euro} te factureren voor “{name}”. Dit item werd al volledig gefactureerd.",
+    "translation": "Il n'est pas possible de facturer {a-euro} pour “{name}”. Cet article a déjà été entièrement facturé."
+  },
+  "%1QF": {
+    "original": "Standaard bankkaart",
+    "translation": "Carte bancaire par défaut"
+  },
+  "%1QG": {
+    "original": "Door leden op de wachtlijst uit te nodigen kunnen ze zelf inschrijven voor {group}.",
+    "translation": "En invitant les membres de la liste d'attente, ils peuvent s'inscrire eux-mêmes pour {group}."
+  },
+  "%1QH": {
+    "original": "Bekijk de uitnodigingen voor {group}.",
+    "translation": "Consulte les invitations pour {group}."
+  },
+  "%1QL": {
+    "original": "Geen betalingen van verenigingen",
+    "translation": "Pas de paiements d'associations"
+  },
+  "%1QM": {
+    "original": "Achtergrond",
+    "translation": "Arrière-plan"
+  },
+  "%1QN": {
+    "original": "Je rekent de openstaande bedragen rechstreeks en meteen af via de creditcard of bankkaart van deze personen.",
+    "translation": "Tu règles immédiatement les montants ouverts via la carte bancaire ou la carte de crédit de ces personnes."
+  },
+  "%1QO": {
+    "original": "Dit rekenen we mee af",
+    "translation": "Nous réglerons ce montant avec"
+  },
+  "%1QP": {
+    "original": "Nog niet uitgenodigd",
+    "translation": "Pas encore invité"
+  },
+  "%1QR": {
+    "original": "Het bestandtype is niet meer wijzigbaar nadat een vraag is opgeslagen.",
+    "translation": "Le type de fichier ne peut plus être modifié après qu'une question a été enregistrée."
+  },
+  "%1QS": {
+    "original": "1 lid is al uitgenodigd voor {group}",
+    "translation": "1 membre a déjà été invité pour {group}"
+  },
+  "%1QT": {
+    "original": "Geldig tot {date}",
+    "translation": "Valide jusqu'au {date}"
+  },
+  "%1QU": {
+    "original": "Uitnodigen voor",
+    "translation": "Inviter pour"
+  },
+  "%1QV": {
+    "original": "Uitgenodigd op",
+    "translation": "Invité le"
+  },
+  "%1QW": {
+    "original": "Download jouw facturen en bekijk jouw tegoed",
+    "translation": "Télécharge tes factures et consulte ton solde"
+  },
+  "%1QX": {
+    "original": "Aantal nullen",
+    "translation": "Nombre de zéros"
+  },
+  "%1QY": {
+    "original": "feitelijke vereniging",
+    "translation": "association de fait"
+  },
+  "%1QZ": {
+    "original": "Standaard bankkaart gewijzigd",
+    "translation": "Carte bancaire par défaut modifiée"
+  },
+  "%1Qa": {
+    "original": "Dit pakket is ondertussen al geactiveerd, je kan het niet nog eens activeren. Herlaad de pagina.",
+    "translation": "Ce package a déjà été activé, tu ne peux pas l'activer à nouveau. Recharge la page."
+  },
+  "%1Qc": {
+    "original": "Deze kaart zal ook worden gebruikt voor periodieke aanrekeningen",
+    "translation": "Cette carte sera également utilisée pour les paiements périodiques"
+  },
+  "%1Qe": {
+    "original": "Jouw aankoop is al bevestigd! Je kan niet meer van betaalmethode veranderen.",
+    "translation": "Ton achat a déjà été confirmé ! Tu ne peux plus changer de mode de paiement."
+  },
+  "%1Qf": {
+    "original": "Wat wil je nu betalen?",
+    "translation": "Que souhaites-tu payer maintenant ?"
+  },
+  "%1Qg": {
+    "original": "Nieuwe bankkaart koppelen",
+    "translation": "Lier une nouvelle carte bancaire"
+  },
+  "%1Qh": {
+    "original": "Dit lid is nog niet uitgenodigd voor {group}",
+    "translation": "Ce membre n’a pas encore été invité pour {group}"
+  },
+  "%1Qi": {
+    "original": "Aanrekenen via opgeslagen betaalkaart",
+    "translation": "Facturer via carte enregistrée"
+  },
+  "%1Qj": {
+    "original": "Pakketten",
+    "translation": "Forfaits"
+  },
+  "%1Qk": {
+    "original": "+32 479 11 11 11",
+    "translation": "+32 479 11 11 11"
+  },
+  "%1Ql": {
+    "original": "Een overzicht van alle betalingen die je hebt gedaan",
+    "translation": "Un aperçu de tous les paiements que tu as effectués"
+  },
+  "%1Qm": {
+    "original": "Hoera! {simon-and-sarah} werden ingeschreven voor {group}",
+    "translation": "Youpi ! {simon-and-sarah} ont été inscrits pour {group}"
+  },
+  "%1Qn": {
+    "original": "Je kan het type van de bestaande vraag '{name}' niet wijzigen.",
+    "translation": "Tu ne peux pas changer le type de la question existante '{name}'."
+  },
+  "%1Qo": {
+    "original": "Je kan er nu mee aan de slag.",
+    "translation": "Tu peux commencer à l'utiliser dès maintenant."
+  },
+  "%1Qp": {
+    "original": "Het is noodzakelijk om deze bankkaart als standaard bankkaart in te stellen. Dit pakket vereist namelijk periodieke betalingen.",
+    "translation": "Il est nécessaire de définir cette carte bancaire comme carte par défaut. Ce forfait demande des paiements périodiques."
+  },
+  "%1Qq": {
+    "original": "Uitnodigen",
+    "translation": "Inviter"
+  },
+  "%1Qr": {
+    "original": "Dit lid is is al uitgenodigd voor {group}",
+    "translation": "Ce membre a déjà été invité pour {group}"
+  },
+  "%1Qt": {
+    "original": "Geen PDF gevonden",
+    "translation": "Aucun PDF trouvé"
+  },
+  "%1Qu": {
+    "original": "Je kan de standaard bankkaart niet verwijderen. Stel eerst een andere standaard bankkaart in waarmee je het wilt betalen en verwijder daarna deze bankkaart.",
+    "translation": "Tu ne peux pas supprimer la carte bancaire par défaut. Configure d'abord une autre carte comme carte par défaut, puis supprime celle-ci."
+  },
+  "%1Qv": {
+    "original": "Je hebt geen toegansrechten om dit lid uit te nodigen.",
+    "translation": "Tu n'as pas les droits d'accès pour inviter ce membre."
+  },
+  "%1Qw": {
+    "original": "Kosten worden op het einde van de maand afgerekend of wekelijks als het openstaand bedrag hoger dan 50 euro wordt.",
+    "translation": "Les frais sont réglés en fin de mois ou chaque semaine si le montant dû dépasse 50 euros."
+  },
+  "%1Qx": {
+    "original": "Periodiek te betalen",
+    "translation": "À payer périodiquement"
+  },
+  "%1Qy": {
+    "original": "Met feitelijke verenigingen",
+    "translation": "Avec des associations de fait"
+  },
+  "%1Qz": {
+    "original": "Kies een bankkaart of creditcard waarmee de periodieke betalingen gebeuren.",
+    "translation": "Choisis la carte bancaire ou la carte de crédit avec laquelle les paiements périodiques seront effectués."
+  },
+  "%1R0": {
+    "original": "Factuurnummers jaarlijks resetten",
+    "translation": "Réinitialiser les numéros de facture annuellement"
+  },
+  "%1R1": {
+    "original": "Bankkaart opslaan niet mogelijk",
+    "translation": "Il n’est pas possible d’enregistrer la carte bancaire"
+  },
+  "%1R2": {
+    "original": "Onbekende betaalmethode",
+    "translation": "Mode de paiement inconnu"
+  },
+  "%1R3": {
+    "original": "Wijzig facturatiegegevens",
+    "translation": "Modifier les informations de facturation"
+  },
+  "%1R5": {
+    "original": "Deze organisatie bestaat niet (meer)",
+    "translation": "Cette organisation n'existe plus"
+  },
+  "%1R6": {
+    "original": "Uitgenodigd voor {name}",
+    "translation": "Invité pour {name}"
+  },
+  "%1R7": {
+    "original": "Het is niet mogelijk om {a-euro} te crediteren voor “{name}”. Dit item werd al volledig gefactureerd.",
+    "translation": "Il n'est pas possible de créditer {a-euro} pour “{name}”. Cet article a déjà été entièrement facturé."
+  },
+  "%1R8": {
+    "original": "Deze bankkaart bestaat nier (meer). Herlaad de pagina indien nodig.",
+    "translation": "Cette carte bancaire n'existe plus. Recharge la page si nécessaire."
+  },
+  "%1R9": {
+    "original": "Uitnodigen voor een groep",
+    "translation": "Inviter pour un groupe"
+  },
+  "%1RA": {
+    "original": "Het is niet mogelijk om {a-euro} te crediteren voor “{name}”. Je kan nog maximaal {left-euro} factureren (niet crediteren).",
+    "translation": "Il n'est pas possible de créditer {a-euro} pour “{name}”. Tu peux encore facturer au maximum {left-euro} (pas créditer)."
+  },
+  "%1RB": {
+    "original": "Het is niet mogelijk om {a-euro} te factureren voor “{name}”. Je kan nog maximaal {left-euro} crediteren (niet factureren).",
+    "translation": "Il n'est pas possible de facturer {a-euro} pour “{name}”. Tu peux encore créditer au maximum {left-euro} (pas facturer)."
+  },
+  "%1RC": {
+    "original": "Toelating voor {name} is ingetrokken",
+    "translation": "L'autorisation pour {name} a été retirée"
+  },
+  "%1RD": {
+    "original": "Betalingen via SEPA domiciliëring kunnen tot 3 werkdagen in beslag nemen en voor lange tijd teruggevorderd worden. Pas zeker je algemene voorwaarden aan.",
+    "translation": "Les paiements par domiciliation SEPA peuvent prendre jusqu'à 3 jours ouvrables et être remboursés longtemps après. Pensez à adapter vos conditions générales."
+  },
+  "%1RF": {
+    "original": "'{number}' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
+    "translation": "'{number}' n'est pas un numéro de registre national valide. Ce numéro se trouve sur la carte d'identité, sous la forme AA.MM.JJ-XXX.XX. Vérifiez l'absence de fautes de frappe."
+  },
+  "%1RH": {
+    "original": "Deze gegevens komen op jouw factuur. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.",
+    "translation": "Ces informations figurent sur votre facture. Veillez à ce qu'elles soient correctes car vous ne pourrez plus les modifier par la suite."
+  },
+  "%1RI": {
+    "original": "Een betaling kan niet worden geannuleerd als het al werd gefactureerd. Maak in de plaats daarvan een chargeback aan, die kan je apart crediteren.",
+    "translation": "Un paiement déjà facturé ne peut pas être annulé. À la place, créez un remboursement, qui pourra être crédité séparément."
+  },
+  "%1RJ": {
+    "original": "{price} per jaar",
+    "translation": "{price} par an"
+  },
+  "%1RK": {
+    "original": "Uitnodiging verwijderen voor",
+    "translation": "Supprimer l'invitation pour"
+  },
+  "%1RL": {
+    "original": "Hoera! {count} leden werden ingeschreven voor {group}",
+    "translation": "Hourra ! {count} membres ont été inscrits pour {group}"
+  },
+  "%1RM": {
+    "original": "met een minimum van {price} per stuk of ticket",
+    "translation": "avec un minimum de {price} par article ou billet"
+  },
+  "%1RO": {
+    "original": "Geen uitnodigingen",
+    "translation": "Aucune invitation"
+  },
+  "%1RP": {
+    "original": "De leden werden al uitgenodigd.",
+    "translation": "Les membres ont déjà été invités."
+  },
+  "%1RQ": {
+    "original": "{count} waarschuwingen",
+    "translation": "{count} avertissements"
+  },
+  "%1RR": {
+    "original": "Hoera! {simon-and-sarah} werden ingeschreven",
+    "translation": "Hourra ! {simon-and-sarah} ont été inscrits"
+  },
+  "%1RS": {
+    "original": "Het lid is al uitgenodigd voor deze groep.",
+    "translation": "Ce membre a déjà été invité dans ce groupe."
+  },
+  "%1RT": {
+    "original": "Prijzen blijven behouden bij verlengen",
+    "translation": "Les tarifs sont maintenus lors d'un renouvellement"
+  },
+  "%1RU": {
+    "original": "Even geduld...",
+    "translation": "Un instant ..."
+  },
+  "%1RW": {
+    "original": "Wijzig standaard facturatiegegevens",
+    "translation": "Modifier les informations de facturation par défaut"
+  },
+  "%1RX": {
+    "original": "{amount} x {price} éénmalig",
+    "translation": "{amount} x {price} en une seule fois"
+  },
+  "%1RZ": {
+    "original": "Kan geen factuur opmaken voor een item met een aantal van 0 stuks",
+    "translation": "Impossible de créer une facture pour un article avec une quantité de 0"
+  },
+  "%1Rb": {
+    "original": "Verwijder uitnodiging",
+    "translation": "Supprimer l'invitation"
+  },
+  "%1Rc": {
+    "original": "Gelukt! De pakketten zijn geactiveerd",
+    "translation": "Succès ! Les forfaits sont activés"
+  },
+  "%1Rd": {
+    "original": "Deze gegevens komen op jouw facturen. Kijk het even na.",
+    "translation": "Ces informations apparaissent sur vos factures. Merci de les vérifier."
+  },
+  "%1Re": {
+    "original": "Maak facturen aan voor alle betalingen en stel BTW-tarieven in.",
+    "translation": "Créez des factures pour tous les paiements et définissez les taux de TVA."
+  },
+  "%1Rf": {
+    "original": "Datum waarop nummering wordt gereset",
+    "translation": "Date de réinitialisation de la numérotation"
+  },
+  "%1Rg": {
+    "original": "Uitgaande facutren",
+    "translation": "Factures sortantes"
+  },
+  "%1Rh": {
+    "original": "Je moet de bankkaart opslaan om dit pakket te activeren. Dit pakket vereist namelijk periodieke betalingen.",
+    "translation": "Vous devez enregistrer la carte bancaire pour activer ce forfait. Ce forfait nécessite en effet des paiements récurrents."
+  },
+  "%1Ri": {
+    "original": "Afrekenen is tijdelijk onbeschikbaar, herlaad te pagina of probeer later opnieuw!",
+    "translation": "Le paiement est temporairement indisponible, rechargez la page ou réessayez plus tard !"
+  },
+  "%1Rk": {
+    "original": "Het pakket werd verwijderd",
+    "translation": "Le forfait a été supprimé"
+  },
+  "%1Rl": {
+    "original": "Foutmelding 2",
+    "translation": "Message d’erreur 2"
+  },
+  "%1Rm": {
+    "original": "Facturen en transacties",
+    "translation": "Factures et transactions"
+  },
+  "%1Rp": {
+    "original": "Deze factuur heeft geen PDF",
+    "translation": "Cette facture n'a pas de PDF"
+  },
+  "%1Rq": {
+    "original": "Inclusief facturen van feitelijke verenigingen?",
+    "translation": "Inclure les factures des associations de fait ?"
+  },
+  "%1Rr": {
+    "original": "Dit lid is al ingeschreven voor {group}",
+    "translation": "Ce membre est déjà inscrit pour {group}"
+  },
+  "%1Rs": {
+    "original": "Hoera! De aansluiting “{name}” voor {count} leden werd betaald",
+    "translation": "Hourra ! L'affiliation “{name}” pour {count} membres a été payée"
+  },
+  "%1Rt": {
+    "original": "Je kan de BTW-instellingen niet meer wijzigen na facturatie. Zet het aantal op 0 en maak een nieuw item aan indien nodig.",
+    "translation": "Vous ne pouvez plus modifier les paramètres de TVA après la facturation. Mettez la quantité à 0 et créez un nouvel article si nécessaire."
+  },
+  "%1Ru": {
+    "original": "Vaste prefix",
+    "translation": "Préfixe fixe"
+  },
+  "%1Rv": {
+    "original": "Beheer de nummering van je uitgaande facturen.",
+    "translation": "Gérez la numérotation de vos factures sortantes."
+  },
+  "%1Rw": {
+    "original": "De factuurnummers worden vast voorafgegaan door deze tekst. Vooral handig om meerdere factuurreeksen uit elkaar te houden.",
+    "translation": "Les numéros de factures commencent toujours par ce texte. Pratique pour différencier plusieurs séries de factures."
+  },
+  "%1Rx": {
+    "original": "Er wordt een kleine kost aangerekend van {price} voor de verificatie van je bankkaart",
+    "translation": "Un petit montant de {price} est débité pour la vérification de votre carte bancaire"
+  },
+  "%1Ry": {
+    "original": "Sta toe om de gegevens van bankkaarten (Bancontact, iDEAL en kredietkaart) op te slaan voor later gebruik. Deze kunnen dan gebruikt worden door beheerders om betalingen te innen via SEPA domiciliëring of creditcard - of geselecteerd worden bij het afrekenen. Voorlopig enkel ondersteund voor B2B betalingen via Mollie.",
+    "translation": "Autorisez l'enregistrement des informations des cartes bancaires (Bancontact, iDEAL et carte de crédit) pour une utilisation ultérieure. Les administrateurs pourront ainsi les utiliser pour encaisser par domiciliation SEPA ou carte de crédit — ou les sélectionner lors du paiement. À ce jour uniquement pour les paiements B2B via Mollie."
+  },
+  "%1Rz": {
+    "original": "Dit is tijdelijk onbeschikbaar, probeer later opnieuw",
+    "translation": "Ceci est temporairement indisponible, veuillez réessayer plus tard"
+  },
+  "%1S0": {
+    "original": "Toelaten om bankkaarten op te slaan en te hergebruiken",
+    "translation": "Autoriser l'enregistrement et la réutilisation des cartes bancaires"
+  },
+  "%1S1": {
+    "original": "Deze kaart opslaan en voor periodieke aanrekeningen gebruiken",
+    "translation": "Enregistrer cette carte et l'utiliser pour les paiements récurrents"
+  },
+  "%1S2": {
+    "original": "Dit lid is al ingeschreven voor deze groep",
+    "translation": "Ce membre est déjà inscrit dans ce groupe"
+  },
+  "%1S3": {
+    "original": "Uitnodiging",
+    "translation": "Invitation"
+  },
+  "%1S4": {
+    "original": "Het is niet gelukt om de standaard bankkaart aan te passen. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Impossible de modifier la carte bancaire par défaut. Rechargez la page et réessayez."
+  },
+  "%1S5": {
+    "original": "nullen",
+    "translation": "zéros"
+  },
+  "%1S6": {
+    "original": "Deze items stonden nog open en zullen mee aangerekend worden. Alle prijzen zijn inclusief BTW.",
+    "translation": "Ces articles étaient encore ouverts et seront ajoutés à la facturation. Tous les prix incluent la TVA."
+  },
+  "%1S7": {
+    "original": "Facturen en betaalinstellingen",
+    "translation": "Factures et paramètres de paiement"
+  },
+  "%1S8": {
+    "original": "Facturen aanmaken voor alle betalingen",
+    "translation": "Créer des factures pour tous les paiements"
+  },
+  "%1S9": {
+    "original": "Ongeldig",
+    "translation": "Non valide"
+  },
+  "%1SA": {
+    "original": "nul",
+    "translation": "zéro"
+  },
+  "%1SB": {
+    "original": "Betaal met een andere kaart",
+    "translation": "Payer avec une autre carte"
+  },
+  "%1SE": {
+    "original": "{count} leden zijn al uitgenodigd voor {group}",
+    "translation": "{count} membres ont déjà été invités dans {group}"
+  },
+  "%1SF": {
+    "original": "Ook één ander item werd betaald",
+    "translation": "Un autre article a également été payé"
+  },
+  "%1SG": {
+    "original": "1 lid is al ingeschreven voor {group}",
+    "translation": "1 membre est déjà inscrit pour {group}"
+  },
+  "%1SI": {
+    "original": "Bankkaarten opslaan",
+    "translation": "Sauvegarder les cartes bancaires"
+  },
+  "%1SJ": {
+    "original": "Een e-mailadres is noodzakelijk voor online betalingen",
+    "translation": "Une adresse e-mail est requise pour les paiements en ligne"
+  },
+  "%1SK": {
+    "original": "Betalen via opgeslagen bankkaart niet (meer) mogelijk",
+    "translation": "Le paiement via une carte bancaire enregistrée n'est plus possible"
+  },
+  "%1SL": {
+    "original": "Aankomende activiteit",
+    "translation": "Activité à venir"
+  },
+  "%1SM": {
+    "original": "Groep niet gevonden",
+    "translation": "Groupe non trouvé"
+  },
+  "%1SO": {
+    "original": "Kan niet verlengd worden",
+    "translation": "Impossible de prolonger"
+  },
+  "%1SP": {
+    "original": "Je kan het bestandstype van de bestaande vraag '{name}' niet wijzigen.",
+    "translation": "Vous ne pouvez pas modifier le type de fichier de la question existante '{name}'."
+  },
+  "%1SQ": {
+    "original": "In afwachting van verificatie",
+    "translation": "En attente de vérification"
+  },
+  "%1SS": {
+    "original": "Ik ga akkoord met de <button>algemene voorwaarden</button>",
+    "translation": "J’accepte les <button>conditions générales</button>"
+  },
+  "%1ST": {
+    "original": "Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.",
+    "translation": "Vous n’avez pas les droits nécessaires pour inviter quelqu’un dans ce groupe."
+  },
+  "%1SV": {
+    "original": "Niet toegekend",
+    "translation": "Non attribué"
+  },
+  "%1SW": {
+    "original": "Verplicht aan te vinken: voor deze pakketten is het verplicht om een bankkaart te koppelen waarop de periodieke kosten verrekend kunnen worden (meestal één keer per maand tenzij je niets gebruikt).",
+    "translation": "Obligatoire à cocher : pour ces formules, il est nécessaire de lier une carte bancaire sur laquelle les frais récurrents seront prélevés (généralement une fois par mois sauf si vous n'utilisez rien)."
+  },
+  "%1SX": {
+    "original": "Achtergrond vanaf 2e pagina",
+    "translation": "Fond d’écran à partir de la 2e page"
+  },
+  "%1SY": {
+    "original": "Hoera! De aansluiting “{name}” voor {simon} werd betaald",
+    "translation": "Hourra ! L’affiliation “{name}” pour {simon} a été payée"
+  },
+  "%1SZ": {
+    "original": "Exporteer ook de PDF's voor feitelijke verenigingen? Alle facturen worden altijd in de Excel opgenomen.",
+    "translation": "Exporter également les PDF pour les associations de fait ? Toutes les factures sont toujours incluses dans l’Excel."
+  },
+  "%1Sa": {
+    "original": "Deactiveren",
+    "translation": "Désactiver"
+  },
+  "%1Sb": {
+    "original": "Details van jouw pakketten",
+    "translation": "Détails de vos formules"
+  },
+  "%1Sc": {
+    "original": "Ja, ik begrijp de gevolgen",
+    "translation": "Oui, je comprends les conséquences"
+  },
+  "%1Sd": {
+    "original": "Bv.",
+    "translation": "Ex."
+  },
+  "%1Sf": {
+    "original": "De Europese BTW-nummer validatie service (VIES) is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
+    "translation": "Le service européen de validation des numéros de TVA (VIES) est temporairement indisponible. Veuillez réessayer plus tard."
+  },
+  "%1Sh": {
+    "original": "Adres vereniging",
+    "translation": "Adresse de l'association"
+  },
+  "%1Si": {
+    "original": "Ben je zeker dat je opgeslagen betaalgegevens wilt uitschakelen?",
+    "translation": "Êtes-vous sûr de vouloir désactiver les informations de paiement enregistrées ?"
+  },
+  "%1Sj": {
+    "original": "Bekijk en download een kopie van alle facturen die je hebt ontvangen",
+    "translation": "Consultez et téléchargez une copie de toutes les factures que vous avez reçues"
+  },
+  "%1Sk": {
+    "original": "Wat wil je betalen?",
+    "translation": "Que souhaitez-vous payer ?"
+  },
+  "%1Sm": {
+    "original": "Fout bij automatische facturatie",
+    "translation": "Erreur lors de la facturation automatique"
+  },
+  "%1Sn": {
+    "original": "Deze items stonden nog op ‘te betalen’. Bespaar jezelf wat werk door deze mee af te rekenen. Alle prijzen zijn inclusief BTW.",
+    "translation": "Ces articles étaient encore en attente de paiement. Gagnez du temps en les ajoutant à ce règlement. Tous les prix s’entendent TVA comprise."
+  },
+  "%1Sp": {
+    "original": "Daarnaast werden {count} te factureren bedragen uitgesteld omwille van een laag bedrag (minder dan één euro).",
+    "translation": "De plus, {count} montants à facturer ont été reportés en raison d'un montant faible (moins d’un euro)."
+  },
+  "%1Sq": {
+    "original": "Dit vult de nummering langs links aan met nullen zodat de nummers altijd dezelfde lengte hebben.",
+    "translation": "Cela complète la numérotation à gauche avec des zéros afin que les numéros aient toujours la même longueur."
+  },
+  "%1Sr": {
+    "original": "Meer info over alle prijzen en een prijscalculator kan je terugvinden op <button>onze website</button>",
+    "translation": "Vous trouverez plus d’informations sur tous les prix ainsi qu’un calculateur de tarifs sur <button>notre site web</button>"
+  },
+  "%1Ss": {
+    "original": "We kunnen geen betaalmethode opslaan zonder een betaling van een klein bedrag",
+    "translation": "Nous ne pouvons pas enregistrer un moyen de paiement sans un petit paiement préalable"
+  },
+  "%1St": {
+    "original": "Sluit dit scherm niet tot je betaling werd bevestigd. Het kan zijn dat de betaling nog mislukt, zo blijf je op de hoogte.",
+    "translation": "Ne fermez pas cet écran avant que le paiement ait été confirmé. Il se peut que le paiement échoue, restez donc attentif."
+  },
+  "%1Su": {
+    "original": "Foutmelding 1",
+    "translation": "Message d’erreur 1"
+  },
+  "%1Sv": {
+    "original": "Je kan dit pakket nog niet zoveel op voorhand verlengen",
+    "translation": "Vous ne pouvez pas encore renouveler cette formule si longtemps à l’avance"
+  },
+  "%1Sw": {
+    "original": "De bankkaart werd verwijderd",
+    "translation": "La carte bancaire a été supprimée"
+  },
+  "%1Sx": {
+    "original": "Optioneel. bv. 'STA'",
+    "translation": "Optionnel. ex. 'STA'"
+  },
+  "%1Sy": {
+    "original": "Hoera! {count} leden werden ingeschreven",
+    "translation": "Hourra ! {count} membres ont été inscrits"
+  },
+  "%1Sz": {
+    "original": "Er zal geen ondernemingsnummer op facturen vermeld worden. Controleer goed of je geen ondernemingsnummer hebt en of je via die weg facturen wilt ontvangen.",
+    "translation": "Aucun numéro d’entreprise ne sera mentionné sur les factures. Vérifiez bien que vous n’avez pas de numéro d’entreprise et que vous souhaitez recevoir des factures de cette façon."
+  },
   "%1T": {
     "original": "Developers",
     "translation": "Développeurs"
+  },
+  "%1T2": {
+    "original": "{price} per lid, per jaar",
+    "translation": "{price} par membre, par an"
+  },
+  "%1T4": {
+    "original": "Je kan {firstName} nu inschrijven voor {groups}.",
+    "translation": "Vous pouvez maintenant inscrire {firstName} dans {groups}."
+  },
+  "%1T7": {
+    "original": "Ja, verwijder “{cardNumber}”",
+    "translation": "Oui, supprimer « {cardNumber} »"
+  },
+  "%1T8": {
+    "original": "Bankkaart opslaan",
+    "translation": "Enregistrer la carte bancaire"
+  },
+  "%1T9": {
+    "original": "Dit is geen geldig rijksregisternummer. Je kan dit nummer vinden op de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
+    "translation": "Ce numéro national n’est pas valide. Vous le trouverez sur la carte d’identité, au format JJ.MM.AA-XXX.XX. Vérifiez qu’il n’y a pas de fautes de frappe."
+  },
+  "%1TA": {
+    "original": "Het is niet mogelijk om een factuur aan te maken omdat een BTW-tarief ontbreekt bij ‘{item}’",
+    "translation": "Il n’est pas possible de créer une facture car il manque un taux de TVA pour « {item} »"
+  },
+  "%1TB": {
+    "original": "Deze gegevens worden gebruikt voor alle toekomstige facturen.",
+    "translation": "Ces informations seront utilisées pour toutes les factures futures."
+  },
+  "%1TC": {
+    "original": "Stopgezet op {date}",
+    "translation": "Clôturé le {date}"
+  },
+  "%1TD": {
+    "original": "Nieuwe kaart",
+    "translation": "Nouvelle carte"
+  },
+  "%1TE": {
+    "original": "Geen bankkaarten",
+    "translation": "Aucune carte bancaire"
+  },
+  "%1TG": {
+    "original": "Het opgegeven BTW-nummer is ongeldig of niet BTW-plichtig: {vat-number}",
+    "translation": "Le numéro de TVA fourni est invalide ou ne comporte pas l’obligation de TVA : {vat-number}"
+  },
+  "%1TH": {
+    "original": "Alle betalingen van verenigingen",
+    "translation": "Tous les paiements des associations"
+  },
+  "%1TI": {
+    "original": "Uitnodigingen zijn zichtbaar voor leden in het ledenportaal.",
+    "translation": "Les invitations sont visibles pour les membres dans le portail des membres."
+  },
+  "%1TJ": {
+    "original": "Momenteel in proefperiode, activeer om in gebruik te nemen",
+    "translation": "En période d’essai, activez pour commencer à l’utiliser"
+  },
+  "%1TK": {
+    "original": "Je hebt nog geen facturatiegegevens ingesteld. Voeg deze eerst toe via de algemene instellingen.",
+    "translation": "Vous n’avez pas encore renseigné vos informations de facturation. Ajoutez-les d’abord via les paramètres généraux."
+  },
+  "%1TL": {
+    "original": "Hoera! De aansluiting “{name}” voor {simon-and-sarah} werd betaald",
+    "translation": "Hourra ! L’affiliation “{name}” pour {simon-and-sarah} a été payée"
+  },
+  "%1TN": {
+    "original": "Zonder einddatum",
+    "translation": "Sans date de fin"
+  },
+  "%1TO": {
+    "original": "Deze functie is actief",
+    "translation": "Cette fonction est active"
+  },
+  "%1TP": {
+    "original": "Alle prijzen zijn inclusief BTW.",
+    "translation": "Tous les prix s’entendent TVA comprise."
+  },
+  "%1TQ": {
+    "original": "Deze betaalmethode kon niet teruggevonden worden. Herlaad de pagina en probeer opnieuw.",
+    "translation": "Impossible de trouver ce moyen de paiement. Rechargez la page et réessayez."
+  },
+  "%1TR": {
+    "original": "Hoera! {simon} werd ingeschreven voor {group}",
+    "translation": "Hourra ! {simon} a été inscrit dans {group}"
+  },
+  "%1TS": {
+    "original": "Het is niet mogelijk om {a-euro} te factureren voor “{name}”. Je kan nog maximaal {left-euro} factureren",
+    "translation": "Il n’est pas possible de facturer {a-euro} pour “{name}”. Il reste un maximum de {left-euro} à facturer"
+  },
+  "%1TT": {
+    "original": "Geen ondernemingsnummer (feitelijke vereniging)",
+    "translation": "Pas de numéro d’entreprise (association de fait)"
+  },
+  "%1TU": {
+    "original": "Dit bedrag zal bij jouw volgende afrekening aangerekend worden.",
+    "translation": "Ce montant sera facturé lors de votre prochaine facture."
+  },
+  "%1TV": {
+    "original": "Uitschakelen",
+    "translation": "Désactiver"
+  },
+  "%1TW": {
+    "original": "Deze factuur werd nog niet betaald",
+    "translation": "Cette facture n’a pas encore été payée"
+  },
+  "%1TY": {
+    "original": "Uitnodigingen",
+    "translation": "Invitations"
+  },
+  "%1TZ": {
+    "original": "Ja, nu aanrekenen",
+    "translation": "Oui, facturer maintenant"
+  },
+  "%1Ta": {
+    "original": "Minimum aantal van {amount} per jaar",
+    "translation": "Nombre minimum de {amount} par an"
+  },
+  "%1Tc": {
+    "original": "Instellen als standaard bankkaart",
+    "translation": "Définir cette carte comme carte par défaut"
+  },
+  "%1Te": {
+    "original": "Steun kwetsbare gezinnen",
+    "translation": "Soutenir les familles vulnérables"
+  },
+  "%1Tf": {
+    "original": "Betaling gelukt!",
+    "translation": "Paiement réussi !"
+  },
+  "%1Th": {
+    "original": "{package-name} deactiveren?",
+    "translation": "Désactiver {package-name} ?"
+  },
+  "%1Ti": {
+    "original": "Geld inhouden van bankkaart",
+    "translation": "Retenir l'argent de la carte bancaire"
+  },
+  "%1Tl": {
+    "original": "met een maximum van {price} per stuk of ticket",
+    "translation": "avec un maximum de {price} par pièce ou billet"
+  },
+  "%1Tm": {
+    "original": "Het is niet mogelijk om {a-euro} te crediteren voor “{name}”. Je kan nog maximaal {left-euro} crediteren.",
+    "translation": "Il n'est pas possible de créditer {a-euro} pour “{name}”. Vous pouvez encore créditer au maximum {left-euro}."
+  },
+  "%1To": {
+    "original": "Ongeldig BTW-nummer: {number}",
+    "translation": "Numéro de TVA invalide : {number}"
+  },
+  "%1Tp": {
+    "original": "Uitgaande facturen",
+    "translation": "Factures sortantes"
+  },
+  "%1Tr": {
+    "original": "{name} is uitgenodigd",
+    "translation": "{name} a été invité"
+  },
+  "%1Ts": {
+    "original": "per lid",
+    "translation": "par membre"
+  },
+  "%1Tt": {
+    "original": "We raden af om een persoonlijke kaart te gebruiken.",
+    "translation": "Nous déconseillons d'utiliser une carte personnelle."
+  },
+  "%1Tu": {
+    "original": "De uitnodiging is verwijderd",
+    "translation": "L'invitation a été supprimée"
+  },
+  "%1Tv": {
+    "original": "Weet je zeker dat je de uitnodiging van {name} wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer l'invitation de {name} ?"
+  },
+  "%1Tw": {
+    "original": "Restricties van een groep zijn niet van toepassing op uitgenodigde leden.",
+    "translation": "Les restrictions d'un groupe ne s'appliquent pas aux membres invités."
+  },
+  "%1Ty": {
+    "original": "Het type is niet meer wijzigbaar nadat een vraag is opgeslagen.",
+    "translation": "Le type ne peut plus être modifié après avoir sauvegardé une question."
+  },
+  "%1Tz": {
+    "original": "Ook {count} andere items werden betaald",
+    "translation": "En plus, {count} autres articles ont été payés"
+  },
+  "%1U0": {
+    "original": "Deze betaalmethode wordt nog niet ondersteund voor het opslaan van een betaalmethode, maak een andere keuze.",
+    "translation": "Ce mode de paiement ne permet pas encore d'enregistrer une méthode de paiement, veuillez choisir une autre option."
+  },
+  "%1U1": {
+    "original": "Toon minder",
+    "translation": "Afficher moins"
+  },
+  "%1U2": {
+    "original": "Foutmeldingen",
+    "translation": "Messages d'erreur"
+  },
+  "%1U3": {
+    "original": "per stuk / ticket",
+    "translation": "par pièce / billet"
+  },
+  "%1U4": {
+    "original": "Daarnaast werd een te factureren bedrag uitgesteld omwille van een laag bedrag (minder dan één euro).",
+    "translation": "De plus, un montant à facturer a été reporté en raison d'un faible montant (moins d'un euro)."
+  },
+  "%1U5": {
+    "original": "Zonder feitelijke verenigingen",
+    "translation": "Sans associations de fait"
+  },
+  "%1U6": {
+    "original": "Cultuur",
+    "translation": "Culture"
+  },
+  "%1U7": {
+    "original": "Het lid kon niet worden geopend.",
+    "translation": "Le membre n'a pas pu être ouvert."
+  },
+  "%1U8": {
+    "original": "{count} uitnodigingen zijn verwijderd",
+    "translation": "{count} invitations ont été supprimées"
+  },
+  "%1U9": {
+    "original": "Toon {extra} meer",
+    "translation": "Afficher {extra} de plus"
+  },
+  "%1UA": {
+    "original": "Ben je zeker dat je deze bankkaart wilt verwijderen?",
+    "translation": "Êtes-vous sûr de vouloir supprimer cette carte bancaire ?"
+  },
+  "%1UB": {
+    "original": "Bankkaarten",
+    "translation": "Cartes bancaires"
+  },
+  "%1UD": {
+    "original": "Uitgenodigd voor",
+    "translation": "Invité pour"
+  },
+  "%1UF": {
+    "original": "Hoera! {simon} werd ingeschreven",
+    "translation": "Hourra ! {simon} a été inscrit"
+  },
+  "%1UG": {
+    "original": "Beheer hoe je betaalt voor Stamhoofd, download jouw facturen en bekijk jouw tegoed",
+    "translation": "Gérez comment vous payez pour Stamhoofd, téléchargez vos factures et consultez votre crédit"
+  },
+  "%1UH": {
+    "original": "Jouw aankoop is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.",
+    "translation": "Votre achat a déjà été enregistré, ne réessayez donc pas ! Si le scan ne fonctionne pas, vous pouvez toujours effectuer le virement manuellement avec les informations fournies. Le scan du QR code n'est pas nécessaire et ne fonctionne pas dans toutes les applications bancaires. Ce n'est pas un paiement en ligne, le QR code permet seulement de remplir les informations rapidement et sans erreurs dans votre app."
+  },
+  "%1UJ": {
+    "original": "Zal worden ingesteld als standaard bankkaart",
+    "translation": "Sera définie comme carte bancaire par défaut"
+  },
+  "%1UK": {
+    "original": "Jaarnummer voor factuurnummer toevoegen",
+    "translation": "Ajouter l'année au numéro de facture"
+  },
+  "%1UL": {
+    "original": "Waarschuwingen",
+    "translation": "Avertissements"
+  },
+  "%1UM": {
+    "original": "{count} leden zijn al ingeschreven voor {group}",
+    "translation": "{count} membres sont déjà inscrits pour {group}"
+  },
+  "%1UN": {
+    "original": "Je hebt geen toegansrechten om deze uitnodiging te verwijderen.",
+    "translation": "Vous n'avez pas les droits pour supprimer cette invitation."
+  },
+  "%1UO": {
+    "original": "Uitgenodigd op {date}",
+    "translation": "Invité le {date}"
+  },
+  "%1UP": {
+    "original": "Schrijf {firstName} in voor {groups}",
+    "translation": "Inscrire {firstName} à {groups}"
+  },
+  "%1UQ": {
+    "original": "Betaal je dit meteen ook?",
+    "translation": "Souhaitez-vous payer ceci tout de suite ?"
+  },
+  "%1US": {
+    "original": "Gefactureerd bedrag",
+    "translation": "Montant facturé"
   },
   "%1Y": {
     "original": "1 week",
@@ -10787,14 +11671,6 @@
     "original": "Er ging iets mis: te veel doorverwijzingen.",
     "translation": "Une erreur s'est produite : trop de redirections."
   },
-  "%Jc": {
-    "original": "Betaling voltooid",
-    "translation": "Paiement effectué"
-  },
-  "%Jd": {
-    "original": "De betaling werd voltooid.",
-    "translation": "Le paiement a été effectué."
-  },
   "%Je": {
     "original": "Betaling mislukt",
     "translation": "Paiement refusé"
@@ -11310,10 +12186,6 @@
   "%Lj": {
     "original": "Inschrijvingen sluiten",
     "translation": "Fermer les inscriptions"
-  },
-  "%Lk": {
-    "original": "Stop inschrijvingen van leden via het ledenportaal. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.",
-    "translation": "Arrêter les inscriptions des membres via le portail des membres. Après la fermeture des inscriptions, vous pouvez éventuellement archiver le groupe."
   },
   "%Ll": {
     "original": "Groep definitief verwijderen",
@@ -17879,10 +18751,6 @@
     "original": "Beeldende kunst (schilderen, beeldhouwen, fotografie...)",
     "translation": "Arts plastiques (peinture, sculpture, photographie, ...)"
   },
-  "%mR": {
-    "original": "Andere culturele vereniging",
-    "translation": "Autre association culturelle"
-  },
   "%mS": {
     "original": "Politiek",
     "translation": "Politique"
@@ -18994,10 +19862,6 @@
   "%qt": {
     "original": "Dit veld is verplicht",
     "translation": "Ce champ est obligatoire"
-  },
-  "%qu": {
-    "original": "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
-    "translation": " n'est pas un numéro de registre national valide. Vous pouvez trouver ce numéro au verso de votre carte d'identité, sous la forme JJ.MM.DD-XXX.XX. Vérifiez les erreurs de frappe."
   },
   "%qv": {
     "original": "Dit is verplicht",
@@ -21022,10 +21886,6 @@
   "%z4": {
     "original": "Vul een rijksregisternummer in",
     "translation": "Saisissez un numéro national"
-  },
-  "%z5": {
-    "original": "Dit is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
-    "translation": "Ce n'est pas un numéro national valide. Vous pouvez trouver ce numéro au verso de la carte d'identité, sous la forme JJ.MM.DD-XXX.XX. Vérifiez les fautes de frappe."
   },
   "%z6": {
     "original": "Dit rijksregisternummer komt niet overeen met de ingevulde geboortedatum.",

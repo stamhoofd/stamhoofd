@@ -295,6 +295,46 @@
     "original": "Nummer groep",
     "translation": "Numéro du groupe"
   },
+  "%1QD": {
+    "original": "Stop inschrijvingen van leden via ‘Mijn account’ (behalve voor uitgenodigde leden). Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.",
+    "translation": "Arrête les inscriptions de membres via 'Mon compte' (sauf pour les membres invités). Après la clôture des inscriptions, tu peux aussi éventuellement archiver le groupe."
+  },
+  "%1QL": {
+    "original": "Geen betalingen van groepen",
+    "translation": "Aucun paiement provenant des groupes"
+  },
+  "%1Qy": {
+    "original": "Met feitelijke groepen",
+    "translation": "Avec des groupes réels"
+  },
+  "%1Rq": {
+    "original": "Inclusief facturen van feitelijke groepen?",
+    "translation": "Inclure les factures des groupes réels ?"
+  },
+  "%1SZ": {
+    "original": "Exporteer ook de PDF's voor feitelijke groepen? Alle facturen worden altijd in de Excel opgenomen.",
+    "translation": "Exporter également les PDF des groupes réels ? Toutes les factures sont toujours disponibles dans le fichier Excel."
+  },
+  "%1Sh": {
+    "original": "Adres groep",
+    "translation": "Adresse du groupe"
+  },
+  "%1TH": {
+    "original": "Alle betalingen van groepen",
+    "translation": "Tous les paiements provenant des groupes"
+  },
+  "%1TI": {
+    "original": "Uitnodigingen zijn zichtbaar voor leden in ‘Mijn account’.",
+    "translation": "Les invitations sont visibles pour les membres dans 'Mon compte'."
+  },
+  "%1U5": {
+    "original": "Zonder feitelijke groepen",
+    "translation": "Sans groupes réels"
+  },
+  "%1UG": {
+    "original": "Beheer hoe je betaalt voor Ravot, download jouw facturen en bekijk jouw tegoed",
+    "translation": "Gérez comment vous payez pour Ravot, téléchargez vos factures et consultez votre crédit."
+  },
   "%2": {
     "original": "Aansluiting/verzekering KSA Nationaal*",
     "translation": "Affiliation/assurance KSA National*"
@@ -1211,10 +1251,6 @@
     "original": "Open inschrijvingen van leden via ‘Mijn account’.",
     "translation": "Ouvrir les inscriptions des membres via « Mon compte »."
   },
-  "%Lk": {
-    "original": "Stop inschrijvingen van leden via ‘Mijn account’. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.",
-    "translation": "Arrêter les inscriptions des membres via « Mon compte ». Après la fermeture des inscriptions, vous pouvez également archiver le groupe."
-  },
   "%NP": {
     "original": "Maak een kopie van de instellingen van jouw groep.",
     "translation": "Faire une copie des paramètres de votre groupe."
@@ -1390,10 +1426,6 @@
   "%mP": {
     "original": "Beroepsgroep",
     "translation": "Groupe professionnel"
-  },
-  "%mR": {
-    "original": "Andere culturele groep",
-    "translation": "Autre groupe culturel"
   },
   "%nZ": {
     "original": "adres van je groep",

@@ -339,6 +339,38 @@
     "original": "Nummer eenheid",
     "translation": "Unit number"
   },
+  "%1QL": {
+    "original": "Geen betalingen van eenheden",
+    "translation": "No payments from units"
+  },
+  "%1Qy": {
+    "original": "Met feitelijke eenheden",
+    "translation": "With de facto units"
+  },
+  "%1Rq": {
+    "original": "Inclusief facturen van feitelijke eenheden?",
+    "translation": "Include invoices from informal units?"
+  },
+  "%1SZ": {
+    "original": "Exporteer ook de PDF's voor feitelijke eenheden? Alle facturen worden altijd in de Excel opgenomen.",
+    "translation": "Export the PDFs for de facto units too? All invoices are always included in the Excel."
+  },
+  "%1Sh": {
+    "original": "Adres eenheid",
+    "translation": "Unit address"
+  },
+  "%1TH": {
+    "original": "Alle betalingen van eenheden",
+    "translation": "All unit payments"
+  },
+  "%1U5": {
+    "original": "Zonder feitelijke eenheden",
+    "translation": "Without actual units"
+  },
+  "%1UG": {
+    "original": "Beheer hoe je betaalt voor Jamboree, download jouw facturen en bekijk jouw tegoed",
+    "translation": "Manage your Jamboree payments, download your invoices, and view your credit"
+  },
   "%2": {
     "original": "Aansluiting/verzekering Jamboree*",
     "translation": "Jamboree affiliation/insurance*"
@@ -1394,10 +1426,6 @@
   "%mP": {
     "original": "Beroepseenheid",
     "translation": "Professional unit"
-  },
-  "%mR": {
-    "original": "Andere culturele eenheid",
-    "translation": "Other cultural unit"
   },
   "%nZ": {
     "original": "adres van je eenheid",

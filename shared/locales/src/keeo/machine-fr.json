@@ -347,6 +347,38 @@
     "original": "Nummer eenheid",
     "translation": "Numéro de l’unité"
   },
+  "%1QL": {
+    "original": "Geen betalingen van eenheden",
+    "translation": "Pas de paiements des unités"
+  },
+  "%1Qy": {
+    "original": "Met feitelijke eenheden",
+    "translation": "Avec des unités de fait"
+  },
+  "%1Rq": {
+    "original": "Inclusief facturen van feitelijke eenheden?",
+    "translation": "Inclure les factures des unités de fait ?"
+  },
+  "%1SZ": {
+    "original": "Exporteer ook de PDF's voor feitelijke eenheden? Alle facturen worden altijd in de Excel opgenomen.",
+    "translation": "Exporter également les PDF pour les unités de fait ? Toutes les factures sont toujours incluses dans l’Excel."
+  },
+  "%1Sh": {
+    "original": "Adres eenheid",
+    "translation": "Adresse de l'unité"
+  },
+  "%1TH": {
+    "original": "Alle betalingen van eenheden",
+    "translation": "Tous les paiements des unités"
+  },
+  "%1U5": {
+    "original": "Zonder feitelijke eenheden",
+    "translation": "Sans unités de fait"
+  },
+  "%1UG": {
+    "original": "Beheer hoe je betaalt voor Keeo, download jouw facturen en bekijk jouw tegoed",
+    "translation": "Gérez comment vous payez pour Keeo, téléchargez vos factures et consultez votre crédit"
+  },
   "%2": {
     "original": "Aansluiting/verzekering Keeo*",
     "translation": "Connexion/assurance Keeo*"
@@ -1406,10 +1438,6 @@
   "%mP": {
     "original": "Beroepseenheid",
     "translation": "Unité professionnelle"
-  },
-  "%mR": {
-    "original": "Andere culturele eenheid",
-    "translation": "Autre unité culturelle"
   },
   "%nZ": {
     "original": "adres van je eenheid",
