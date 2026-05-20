@@ -34,7 +34,7 @@ import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsi
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
-export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
+export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[] }) {
     return useMemberActions()(options);
 }
 
@@ -46,13 +46,14 @@ export function useMemberActions() {
     const organization = useOrganization();
     const platform = usePlatform();
 
-    return (options?: { groups?: Group[]; organizations?: Organization[]; forceWriteAccess?: boolean | null }) => {
+    return (options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; forceWriteAccess?: boolean | null }) => {
         return new MemberActionBuilder({
             present,
             platform: platform.value,
             context: context.value,
             groups: options?.groups ?? [],
             organizations: organization.value ? [organization.value] : (options?.organizations ?? []),
+            categories: options?.categories ?? [],
             platformFamilyManager,
             owner,
             forceWriteAccess: options?.forceWriteAccess
@@ -71,6 +72,7 @@ export class MemberActionBuilder {
      * Determines what to move or register the members to
      */
     organizations: Organization[];
+    categories: GroupCategoryTree[];
 
     present: ReturnType<typeof usePresent>;
     context: SessionContext;
@@ -95,6 +97,7 @@ export class MemberActionBuilder {
         organizations: Organization[];
         platformFamilyManager: PlatformFamilyManager;
         owner: any;
+        categories: GroupCategoryTree[];
         forceWriteAccess?: boolean | null;
     }) {
         this.present = settings.present;
@@ -102,6 +105,7 @@ export class MemberActionBuilder {
         this.platform = settings.platform;
         this.groups = settings.groups;
         this.organizations = settings.organizations;
+        this.categories = settings.categories;
         this.platformFamilyManager = settings.platformFamilyManager;
         this.owner = settings.owner;
         this.forceWriteAccess = settings.forceWriteAccess ?? null;

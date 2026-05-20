@@ -244,6 +244,7 @@ const Route = {
 
 const actionBuilder = useDirectMemberActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
+    categories: props.category ? [props.category] : [],
 });
 
 const isLimitedGroup = computed(() => {

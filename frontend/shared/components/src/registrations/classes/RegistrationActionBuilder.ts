@@ -20,8 +20,10 @@ import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '../../ta
 import ChargeRegistrationsView from '../ChargeRegistrationsView.vue';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
-export function useDirectRegistrationActions(options?: { groups?: Group[];
+export function useDirectRegistrationActions(options?: {
+    groups?: Group[];
     organizations?: Organization[];
+    categories?: GroupCategoryTree[];
 }) {
     return useRegistrationActions()(options);
 }
@@ -36,6 +38,7 @@ export function useRegistrationActions() {
 
     return (options?: { groups?: Group[];
         organizations?: Organization[];
+        categories?: GroupCategoryTree[];
         forceWriteAccess?: boolean | null; }) => {
         return new RegistrationActionBuilder({
             present,
@@ -46,6 +49,7 @@ export function useRegistrationActions() {
             platformFamilyManager,
             forceWriteAccess: options?.forceWriteAccess,
             owner,
+            categories: options?.categories ?? [],
         });
     };
 }
@@ -62,6 +66,7 @@ export class RegistrationActionBuilder {
     private readonly isWaitingList: boolean;
     private eventGroupsLinkedToWaitingList: Group[] | null = null;
     private _allGroupsLinkedToWaitingList: Group[] | null = null;
+    private categories: GroupCategoryTree[];
 
     get allGroupsLinkedToWaitingList() {
         return this._allGroupsLinkedToWaitingList?.slice() ?? [];
@@ -90,6 +95,7 @@ export class RegistrationActionBuilder {
         platformFamilyManager: PlatformFamilyManager;
         forceWriteAccess?: boolean | null;
         owner: any;
+        categories: GroupCategoryTree[];
     }) {
         this.present = settings.present;
         this.context = settings.context;
@@ -100,6 +106,7 @@ export class RegistrationActionBuilder {
         this.forceWriteAccess = settings.forceWriteAccess ?? null;
         this.platform = settings.platform;
         this.isWaitingList = this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
+        this.categories = settings.categories;
     }
 
     async getActions(options: { includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {

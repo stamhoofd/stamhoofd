@@ -304,6 +304,7 @@ const Route = {
 
 const actionBuilder = useDirectRegistrationActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
+    categories: props.category ? [props.category] : [],
 });
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
