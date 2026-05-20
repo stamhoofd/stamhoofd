@@ -34,6 +34,13 @@ export class Formatter {
         }
     }
 
+    /**
+     * Removes dots and special characters from a VAT number
+     */
+    static slugVATNumber(vatNumber: string) {
+        return vatNumber.replace(/[^a-z0-9]+/gi, '');
+    }
+
     static slug(name: StringLike): string {
         return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
     }

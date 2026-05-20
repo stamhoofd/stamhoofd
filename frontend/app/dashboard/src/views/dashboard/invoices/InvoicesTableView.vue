@@ -36,6 +36,7 @@ import InvoiceView from './InvoiceView.vue';
 import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage';
 import { Toast } from '@stamhoofd/components';
 import { InvoicesExcelExport } from './InvoicesExcelExport';
+import { AppManager } from '@stamhoofd/networking/AppManager';
 
 const props = withDefaults(
     defineProps<{
@@ -213,7 +214,7 @@ function showInvoice(invoice: Invoice) {
         return
     }
     if (invoice.xml) {
-        window.open(invoice.xml.getPublicPath(), "_blank")
+        AppManager.shared.downloadFile(new URL(invoice.xml.getPublicPath()), invoice.number + '.xml').catch(console.error);
     } else {
         window.open(invoice.pdf.getPublicPath(), "_blank")
     }

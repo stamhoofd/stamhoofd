@@ -12,6 +12,8 @@ import { Context } from '../../../../helpers/Context.js';
 import { invoiceFilterCompilers } from '../../../../sql-filters/invoices.js';
 import { invoiceSorters } from '../../../../sql-sorters/invoices.js';
 import { InvoiceService } from '../../../../services/InvoiceService.js';
+import { InvoicePdfService } from '../../../../services/InvoicePdfService.js';
+import { InvoiceXMlService } from '../../../../services/InvoiceXMLService.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -188,8 +190,12 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         for (const invoice of invoices) {
+            if (invoice.number && !invoice.pdf && STAMHOOFD.environment === 'development') {
+                await InvoicePdfService.generatePdf(invoice)
+            }
+
             if (invoice.number && STAMHOOFD.environment === 'development') {
-                await InvoiceService.generatePdf(invoice)
+                await InvoiceXMlService.generateXml(invoice)
             }
         }
 

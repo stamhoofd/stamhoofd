@@ -406,10 +406,17 @@ async function toggleVATExcempt(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: getVATExcemptReasonName(VATExcemptReason.IntraCommunity),
-                selected: VATExcempt.value === VATExcemptReason.IntraCommunity,
+                name: getVATExcemptReasonName(VATExcemptReason.IntraCommunityServices),
+                selected: VATExcempt.value === VATExcemptReason.IntraCommunityServices,
                 action: () => {
-                    VATExcempt.value = VATExcemptReason.IntraCommunity;
+                    VATExcempt.value = VATExcemptReason.IntraCommunityServices;
+                },
+            }),
+            new ContextMenuItem({
+                name: getVATExcemptReasonName(VATExcemptReason.IntraCommunityGoods),
+                selected: VATExcempt.value === VATExcemptReason.IntraCommunityGoods,
+                action: () => {
+                    VATExcempt.value = VATExcemptReason.IntraCommunityGoods;
                 },
             }),
         ],

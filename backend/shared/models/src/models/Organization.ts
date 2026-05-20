@@ -7,8 +7,8 @@ import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
-import { Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { AccessRight, Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData.js';
@@ -19,6 +19,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { Registration } from './Registration.js';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
+import { Token } from './Token.js';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
@@ -906,6 +907,63 @@ export class Organization extends QueryableModel {
             });
         });
     }
+
+    /**
+     * These email addresess are private
+     */
+    async getInvoicingToEmails() {
+        // Circular reference fix
+        const admins  = await this.getAdmins();
+        const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)))
+
+        if (filtered.length > 0) {
+            return filtered.flatMap(f => f.getEmailTo() ).map((recipient) => {
+                if (!recipient.name) {
+                    return recipient.email
+                }
+                const cleanedName = Formatter.emailSenderName(recipient.name)
+                if (cleanedName.length < 2) {
+                    return recipient.email
+                }
+                return '"'+cleanedName+'" <'+recipient.email+'>'
+            }).join(', ')
+        }
+
+        return undefined
+    }
+
+    /**
+     * Returns one email for invoices. since in ubl we can only add one address.
+     * We choose the oldest user that was active in the last 3 months (otherwise the oldest user if noone was active)
+     */
+     async getInvoicingToEmail(): Promise<string | undefined> {
+        // Circular reference fix
+        const admins = await this.getAdmins()
+
+        const tokens = await Token.select().where('userId', admins.map(a => a.id)).fetch();
+
+        // Sort by admins that were active in the last 3 months, then creation date
+        const cutoffDate = new Date(Date.now() - 1000*60*60*24*31*3)
+        admins.sort((a, b) => {
+            const aTokens = tokens.filter(t => t.userId === a.id);
+            const bTokens = tokens.filter(t => t.userId === b.id);
+            const aActive = !!aTokens.find(t => t.updatedAt > cutoffDate)
+            const bActive = !!bTokens.find(t => t.updatedAt > cutoffDate)
+            return Sorter.stack(
+                Sorter.byBooleanValue(aActive, bActive),
+                Sorter.byDateValue(b.createdAt, a.createdAt)
+            )
+        })
+
+        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)))
+
+        if (filtered.length > 0) {
+            return filtered.map(f => f.email)[0]
+        }
+
+        return undefined
+    }
+    
 
     /**
      * Return default e-mail address if no email addresses are set.

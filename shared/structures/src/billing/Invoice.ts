@@ -1,15 +1,15 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import type { BalanceItem} from '../BalanceItem.js';
-import { BalanceItemType, getVATExcemptInvoiceNote, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
+import type { BalanceItem } from '../BalanceItem.js';
+import { BalanceItemType, getVATExcemptInvoiceNote, VATExcemptReason } from '../BalanceItem.js';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import type { PriceBreakdown, PriceBreakdownAction } from '../PriceBreakdown.js';
 import { File } from '../files/File.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
-import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
-import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
+import { getPeppolCategoryCode, InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 export class VATSubtotal extends AutoEncoder {
     /**
@@ -29,6 +29,10 @@ export class VATSubtotal extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     VAT: number = 0;
+
+    get peppolCategoryCode() {
+        return getPeppolCategoryCode(this)
+    }
 }
 
 export enum InvoiceType {
@@ -215,7 +219,7 @@ export class Invoice extends AutoEncoder {
 
         if (intra) {
             for (const item of this.items) {
-                if (item.VATExcempt !== VATExcemptReason.IntraCommunity) {
+                if (item.VATExcempt !== VATExcemptReason.IntraCommunityServices && item.VATExcempt !== VATExcemptReason.IntraCommunityGoods) {
                     throw new SimpleError({
                         code: 'missing_vat_excemption',
                         message: 'Missing IntraCommunity VAT excemption',
@@ -226,7 +230,7 @@ export class Invoice extends AutoEncoder {
         }
         else {
             for (const item of this.items) {
-                if (item.VATExcempt === VATExcemptReason.IntraCommunity) {
+                if (item.VATExcempt === VATExcemptReason.IntraCommunityServices || item.VATExcempt === VATExcemptReason.IntraCommunityGoods) {
                     throw new SimpleError({
                         code: 'erroneous_vat_excemption',
                         message: 'IntraCommunity VAT excemption should not apply to this item',

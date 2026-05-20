@@ -1,6 +1,16 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Country } from '@stamhoofd/types/Country';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from './addresses/Address.js';
+
+export class PeppolEndointId extends AutoEncoder {
+    @field({decoder: StringDecoder })
+    schemeID: string
+
+    @field({decoder: StringDecoder })
+    id: string
+}
 
 export class Company extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })
@@ -23,6 +33,39 @@ export class Company extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, optional: true })
     administrationEmail: string | null = null;
+
+    @field({decoder: PeppolEndointId, nullable: true, ...NextVersion})
+    customPeppolEndpointId: PeppolEndointId | null;
+
+    get peppolEndpointId(): PeppolEndointId | null {
+        if (this.customPeppolEndpointId) {
+            return this.customPeppolEndpointId
+        }
+
+        return this.peppolCompanyId;
+    }
+
+    get peppolCompanyId(): PeppolEndointId | null {
+        if (this.address?.country !== Country.Belgium) {
+            // Unsupported
+            return null;
+        }
+
+        const companyNumberOrVAT = this.VATNumber ?? this.companyNumber;
+
+        if (!companyNumberOrVAT) {
+            return null
+        }
+
+        const companyNumber = (this.VATNumber ? this.VATNumber.substring(2) : companyNumberOrVAT).replace(/\D+/g, '');
+
+        const id = Formatter.slugVATNumber(companyNumber);
+
+        return PeppolEndointId.create({
+            schemeID: '0208', // Belgium
+            id
+        })
+    }
 
     getDiffValue() {
         return this.name;

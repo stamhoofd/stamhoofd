@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export class Invoice extends QueryableModel {
     static table = 'invoices';
@@ -152,5 +153,13 @@ export class Invoice extends QueryableModel {
         // Load all the related models from the database so we can build the structures
         const invoicedBalanceItems = await InvoicedBalanceItem.select().where('invoiceId', invoices.map(i => i.id)).fetch();
         return { invoicedBalanceItems };
+    }
+
+    generateCustomerFilename(ext: 'pdf' | 'xml') {
+        if (!this.number || !this.invoicedAt) {
+            return this.id + '.' + ext;
+        }
+        const date = this.invoicedAt
+        return Formatter.dateIso(date) + ' - ' + (this.totalWithVAT < 0 ? $t('Creditnota') : $t('Factuur')) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
     }
 }

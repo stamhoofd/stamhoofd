@@ -184,7 +184,7 @@ describe('InvoicedBalanceItem', () => {
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
-            balanceItem.VATExcempt = VATExcemptReason.IntraCommunity;
+            balanceItem.VATExcempt = VATExcemptReason.IntraCommunityServices;
 
             expect(balanceItem.priceWithVAT).toBe(20_00);
             expect(balanceItem.priceWithoutVAT).toBe(20_00);
@@ -197,7 +197,7 @@ describe('InvoicedBalanceItem', () => {
             expect(invoicedItem.unitPrice).toBe(20_00);
             expect(invoicedItem.VATPercentage).toBe(21);
             expect(invoicedItem.VATIncluded).toBe(false);
-            expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunity);
+            expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunityServices);
             expect(invoicedItem.totalWithoutVAT).toBe(20_00);
         });
 
@@ -208,7 +208,7 @@ describe('InvoicedBalanceItem', () => {
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = true;
-            balanceItem.VATExcempt = VATExcemptReason.IntraCommunity;
+            balanceItem.VATExcempt = VATExcemptReason.IntraCommunityServices;
 
             expect(balanceItem.priceWithVAT).toBe(20_00);
             expect(balanceItem.priceWithoutVAT).toBe(20_00);
@@ -221,7 +221,7 @@ describe('InvoicedBalanceItem', () => {
             expect(invoicedItem.unitPrice).toBe(20_00);
             expect(invoicedItem.VATPercentage).toBe(21);
             expect(invoicedItem.VATIncluded).toBe(true);
-            expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunity);
+            expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunityServices);
             expect(invoicedItem.totalWithoutVAT).toBe(20_00);
         });
 
@@ -232,7 +232,7 @@ describe('InvoicedBalanceItem', () => {
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
-            balanceItem.VATExcempt = VATExcemptReason.IntraCommunity;
+            balanceItem.VATExcempt = VATExcemptReason.IntraCommunityServices;
 
             expect(balanceItem.priceWithVAT).toBe(30_00);
             expect(balanceItem.priceWithoutVAT).toBe(30_00);
@@ -244,7 +244,7 @@ describe('InvoicedBalanceItem', () => {
             expect(invoicedItem.unitPrice).toBe(30_00); // = 0,30 euro
             expect(invoicedItem.VATPercentage).toBe(21);
             expect(invoicedItem.VATIncluded).toBe(false);
-            expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunity);
+            expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunityServices);
             expect(invoicedItem.totalWithoutVAT).toBe(10_00); // rounded
         });
     });

@@ -1151,7 +1151,7 @@ export class PaymentService {
         return sellingOrganization.meta.companies[0];
     }
 
-    static getVATExcempt({ customer, sellingOrganization }: { customer: PaymentCustomer | null; sellingOrganization: Organization; }) {
+    static getVATExcempt({ customer, sellingOrganization, type }: { customer: PaymentCustomer | null; sellingOrganization: Organization; type: 'services'|'goods' }) {
         // Validate VAT rates for this customer
         const seller = this.getDefaultCompanyForOrganization(sellingOrganization)
         if (seller && seller.VATNumber && seller.address && customer && customer.company) {
@@ -1167,7 +1167,10 @@ export class PaymentService {
 
             // Reverse charged vat applicable?
             if (customer.company.address.country !== seller.address.country && customer.company.VATNumber) {
-                return VATExcemptReason.IntraCommunity;
+                if (type === 'services') {
+                    return VATExcemptReason.IntraCommunityServices;
+                }
+                return VATExcemptReason.IntraCommunityGoods;
             }
         }
 
@@ -1192,7 +1195,7 @@ export class PaymentService {
             if (customer.company.address.country !== seller.address.country && customer.company.VATNumber) {
                 // Check VAT Exempt is set on each an every balance item with a non-zero price
                 for (const [item] of balanceItems) {
-                    if (item.VATExcempt !== VATExcemptReason.IntraCommunity) {
+                    if (item.VATExcempt !== VATExcemptReason.IntraCommunityServices && item.VATExcempt !== VATExcemptReason.IntraCommunityGoods) {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Intra community VAT reverse charge not supported for this purchase',
@@ -1214,7 +1217,7 @@ export class PaymentService {
             else {
                 // Fine to just not have setup VAT rates yet if the price is guaranteed to include VAT
                 for (const [item] of balanceItems) {
-                    if (item.VATExcempt === VATExcemptReason.IntraCommunity) {
+                    if (item.VATExcempt === VATExcemptReason.IntraCommunityGoods || item.VATExcempt === VATExcemptReason.IntraCommunityServices) {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Unexpected reverse charge applied',
@@ -1237,7 +1240,7 @@ export class PaymentService {
 
             // You cannot buy balance items with VAT if you didn't set up a VAT number.
             for (const [item] of balanceItems) {
-                if (item.VATExcempt === VATExcemptReason.IntraCommunity) {
+                if (item.VATExcempt === VATExcemptReason.IntraCommunityGoods || item.VATExcempt === VATExcemptReason.IntraCommunityServices) {
                     throw new SimpleError({
                         code: 'VAT_error',
                         message: 'Unexpected reverse charge applied',

@@ -33,20 +33,47 @@ export enum BalanceItemStatus {
 
 export enum VATExcemptReason {
     /**
+     * IC Goederen
      * Btw verlegd: Art. 39 bis – intracommunautaire levering
      */
-    IntraCommunity = 'IntraCommunity',
+    IntraCommunityGoods = 'IntraCommunityGoods',
+
+    /**
+     * IC Diensten
+     * Btw verlegd: Art 21 § 2 van het Belgische btw-wetboek
+     */
+    IntraCommunityServices = 'IntraCommunityServices'
 }
 
 export function getVATExcemptReasonName(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunity: return $t('%1I5');
+        case VATExcemptReason.IntraCommunityGoods: return $t('Intracommunautaire (EU) verleggingsregeling: export van goederen binnen de EU');
+        case VATExcemptReason.IntraCommunityServices: return $t('Intracommunautaire (EU) verleggingsregeling: export van diensten binnen de EU');
     }
 }
 
 export function getVATExcemptInvoiceNote(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunity: return $t('%1Km');
+        case VATExcemptReason.IntraCommunityGoods: return $t('%1Km');
+        case VATExcemptReason.IntraCommunityServices: return $t('Btw verlegd: Art 21 § 2 van het Belgische btw-wetboek');
+    }
+}
+
+export function getVATExcemptPeppolTaxCategoryCode(reason: VATExcemptReason): string {
+    // ref https://docs.peppol.eu/poacc/billing/3.0/codelist/vatex/
+    // We follow https://docs.billit.be/docs/ventilation-codes as this isn't super well documented or clear
+    switch (reason) {
+        case VATExcemptReason.IntraCommunityGoods: return 'K'
+        case VATExcemptReason.IntraCommunityServices: return 'K'
+    }
+}
+
+
+export function getVATExcemptPeppolExemptionReasonCode(reason: VATExcemptReason): string {
+    // ref https://docs.peppol.eu/poacc/billing/3.0/codelist/vatex/
+    switch (reason) {
+        case VATExcemptReason.IntraCommunityGoods: return 'VATEX-EU-IC'
+        case VATExcemptReason.IntraCommunityServices: return 'VATEX-EU-IC'
     }
 }
 

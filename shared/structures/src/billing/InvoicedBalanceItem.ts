@@ -1,9 +1,20 @@
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { v4 as uuidv4 } from 'uuid';
-import {  BalanceItemType, getBalanceItemTypeIcon, VATExcemptReason } from '../BalanceItem.js';
-import type {BalanceItem} from '../BalanceItem.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { STMath } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
+import type { BalanceItem } from '../BalanceItem.js';
+import { BalanceItemType, getVATExcemptPeppolTaxCategoryCode, VATExcemptReason } from '../BalanceItem.js';
+
+export function getPeppolCategoryCode(data: {VATPercentage: number, VATExcempt: VATExcemptReason | null}) {
+    if (data.VATExcempt) {
+        return getVATExcemptPeppolTaxCategoryCode(data.VATExcempt)
+    }
+    if (data.VATPercentage === 0) {
+        // Note: if it is exempt from tax, VATExcempt should be set instead to give a better code
+        return 'Z'
+    }
+    return 'S'
+}
 
 export class InvoicedBalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -70,6 +81,10 @@ export class InvoicedBalanceItem extends AutoEncoder {
      */
     @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true })
     VATExcempt: VATExcemptReason | null = null;
+
+    get peppolCategoryCode() {
+        return getPeppolCategoryCode(this)
+    }
 
     /**
      * This should be rounded to 2 decimals to match PEPPOL requirements

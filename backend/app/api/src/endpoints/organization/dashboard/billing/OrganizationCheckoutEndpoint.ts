@@ -124,7 +124,8 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             if (balanceItem) {
                 balanceItem.VATExcempt = PaymentService.getVATExcempt({
                     customer: checkout.customer,
-                    sellingOrganization
+                    sellingOrganization,
+                    type: 'services'
                 });
                 balanceItems.set(balanceItem, balanceItem.priceWithVAT);
             }
@@ -237,7 +238,8 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             item.VATPercentage = 21;
             item.VATExcempt = PaymentService.getVATExcempt({
                 customer: checkout.customer,
-                sellingOrganization
+                sellingOrganization,
+                type: 'services'
             });
             item.VATIncluded = !item.VATExcempt; // Makes sure price with VAT always matches unitPrice
             item.quantity = 1;

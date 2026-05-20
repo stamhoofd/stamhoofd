@@ -189,7 +189,7 @@ describe('Invoice', () => {
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
-            balanceItem.VATExcempt = VATExcemptReason.IntraCommunity;
+            balanceItem.VATExcempt = VATExcemptReason.IntraCommunityServices;
 
             const item = InvoicedBalanceItem.createFor(balanceItem, 20_00);
             invoice.addItem(item);
@@ -203,7 +203,7 @@ describe('Invoice', () => {
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 6;
             balanceItem.VATIncluded = false;
-            balanceItem.VATExcempt = VATExcemptReason.IntraCommunity;
+            balanceItem.VATExcempt = VATExcemptReason.IntraCommunityServices;
 
             const item = InvoicedBalanceItem.createFor(balanceItem, 5_23_00);
             invoice.addItem(item);
@@ -217,7 +217,7 @@ describe('Invoice', () => {
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
-            balanceItem.VATExcempt = VATExcemptReason.IntraCommunity;
+            balanceItem.VATExcempt = VATExcemptReason.IntraCommunityServices;
 
             const item = InvoicedBalanceItem.createFor(balanceItem, 5_23_00);
             invoice.addItem(item);
