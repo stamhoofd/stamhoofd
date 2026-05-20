@@ -1,5 +1,5 @@
 import type { Data, Decoder, EncodeContext } from '@simonbackx/simple-encoding';
-import { addPropertyField, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, NullableDecoder, PatchMapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { addPropertyField, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EncodeMedium, field, IntegerDecoder, MapDecoder, NullableDecoder, PatchMapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -232,11 +232,17 @@ class RecordAnswerMapDecoderStatic extends MapDecoder<string, RecordAnswer> {
         for (const [key, value] of response) {
             if (value.settings.id !== key) {
                 const field = addPropertyField(currentField, key + '.settings.id');
-                throw new SimpleError({
-                    code: 'invalid_field',
-                    message: `Expected record settings id to match map key`,
-                    field: field,
-                });
+                if (context.medium === EncodeMedium.Database) {
+                    // When deconding from database, ignore silently as we would otherwise cause issues.
+                    console.error('Found invalid RecordAnswerMap when decoding ' + field)
+                    value.settings.id = key;
+                } else {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: `Expected record settings id to match map key`,
+                        field: field,
+                    });
+                }
             }
         }
 
