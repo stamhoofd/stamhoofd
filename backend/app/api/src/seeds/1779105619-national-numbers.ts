@@ -4,10 +4,6 @@ import type { Address, RecordAnswer, RecordCategory, RecordSettings } from '@sta
 import { Parent, ParentType, RecordAddressAnswer, RecordTextAnswer } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
-// 1779105619-national-numbers.ts
-
-// 0000000005-national-numbers.ts
-
 enum RrnTypes {
     Parent1,
     Parent2,
@@ -30,70 +26,30 @@ export default new Migration(async () => {
         return;
     }
 
-    // await TestMethods.logDistinctRecordNames();
-    await migrateNationalNumbers(true, true);
-    throw new Error('test')
+    await migrateNationalNumbers(false, true);
 });
 
-class TestMethods {
-    static async logDistinctRecordNames() {
-        const distinctNames = new Set<string>();
-
-        for await (const organization of Organization.select().all()) {
-            for (const category of organization.meta.recordsConfiguration.recordCategories) {
-                for (const record of category.getAllRecords()) {
-                    const name = record.name.toString().toLowerCase();
-                    distinctNames.add(name);
-                }
-            }
-        }
-
-        console.error(`[${Array.from(distinctNames).sort().map(x => `"${x}"`).join(', ')}]`);
-    }
-
-    static async logValuesForRecorWhereNameIncludes(value: string) {
-        for await (const organization of Organization.select().all()) {
-            for (const category of organization.meta.recordsConfiguration.recordCategories) {
-                for (const record of category.getAllRecords()) {
-                    const name = record.name.toString().toLowerCase();
-
-                    if (name.includes(value)) {
-                        console.error(`Values for record with name "${value}" for organization "${organization.name}":`);
-                        const results = new Set<string>();
-
-                        for await (const member of Member.select().where('organizationId', organization.id).all()) {
-                            const recordAnswer = member.details.recordAnswers.get(record.id);
-                            if (recordAnswer) {
-                                const value = recordAnswer.stringValue;
-                                results.add(value);
-                            }
-                        }
-
-                        console.error('results: [' + Array.from(results).map(x => `"${x}"`).join(', '), ']');
-                    }
-                }
-            }
-        }
-    }
-}
-
 async function migrateNationalNumbers(dryRun = false, doLog = false) {
-    // const organizationsWithNumbers = new Set<string>();
+    const organizationsWithNumbers = new Set<string>();
 
     for await (const organization of Organization.select().all()) {
         const hasNumbers = await migrateNumbersOfOrganization(organization, dryRun, doLog);
         if (hasNumbers) {
-            // organizationsWithNumbers.add(organization.id);
+            organizationsWithNumbers.add(organization.id);
 
-            if(!dryRun) {
+            if (!dryRun) {
                 // save
                 await organization.save();
             }
         }
     }
 
+    if (doLog) {
+        console.log('Migrated national numbers for organizations with id: ' + Array.from(organizationsWithNumbers).map(x => `"${x}"`).join(', '));
+    }
+    
+
     if (dryRun) {
-        // console.error('organization ids: ' + Array.from(organizationsWithNumbers).map(x => `"${x}"`).join(', '));
         throw new Error('Did not finish migration because of dryRun');
     }
 }
@@ -105,11 +61,11 @@ function isRrnRecord(record: RecordSettings): boolean {
 
 function loopAllRecords(organization: Organization, callback: (record: RecordSettings, category: RecordCategory) => void) {
     function recursiveLoopAllRecords(category: RecordCategory, callback: (record: RecordSettings, category: RecordCategory) => void) {
-        for(const record of category.records) {
+        for (const record of category.records) {
             callback(record, category);
         }
 
-        for(const childCategory of category.childCategories) {
+        for (const childCategory of category.childCategories) {
             recursiveLoopAllRecords(childCategory, callback);
         }
     }
@@ -396,7 +352,7 @@ function createParentFromDebtor(member: Member, record: RecordSettings): null | 
     let firstNameRecord = getStringValueFromRecord(debtorRecords.find(r => r.settings.name.toString().toLowerCase().includes('voornaam')))?.trim();
     let lastNameRecord = getStringValueFromRecord(debtorRecords.find(r => r.settings.name.toString().toLowerCase().includes('achternaam')))?.trim();
 
-    if(firstNameRecord && lastNameRecord) {
+    if (firstNameRecord && lastNameRecord) {
         // sometimes the first and last names are repeated
         if (firstNameRecord.toLowerCase() === lastNameRecord.toLowerCase()) {
 
@@ -572,13 +528,13 @@ function getAndRemoveRrn(recordId: string, member: Member, doLog: boolean): stri
     }
 
     if (!DataValidator.verifyBelgianNationalNumber(text)) {
-        if(text.length < 6 || /[a-zA-Z]/.test(text)) {
+        if (text.length < 6 || /[a-z]/i.test(text)) {
             return null;
         }
 
         const invalid = ['11111', '123456', '....', '//', '12121'];
 
-        if(invalid.some(x => text.includes(x))) {
+        if (invalid.some(x => text.includes(x))) {
             return null;
         }
 
