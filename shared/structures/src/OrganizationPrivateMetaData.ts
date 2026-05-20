@@ -189,7 +189,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 8 })
     mailDomainActive = false;
     
-    @field({decoder: OrganizationInvoiceSettings, ...NextVersion})
+    @field({decoder: OrganizationInvoiceSettings, version: 398})
     invoiceSettings: OrganizationInvoiceSettings;
 
     /**

@@ -114,7 +114,7 @@ export class STPackageMeta extends AutoEncoder {
     @field({ decoder: new EnumDecoder(STPricingType) })
     pricingType = STPricingType.Fixed;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion, defaultValue: () => false })
+    @field({ decoder: BooleanDecoder, version: 398, defaultValue: () => false })
     keepPricesOnRenewal: boolean
 
     /**

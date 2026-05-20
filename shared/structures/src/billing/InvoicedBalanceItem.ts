@@ -12,7 +12,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
     balanceItemId = '';
 
-    @field({ decoder: new EnumDecoder(BalanceItemType), ...NextVersion})
+    @field({ decoder: new EnumDecoder(BalanceItemType), version: 398})
     type = BalanceItemType.Other;
 
     @field({ decoder: StringDecoder })

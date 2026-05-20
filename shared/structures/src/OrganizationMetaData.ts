@@ -371,7 +371,7 @@ export class OrganizationMetaData extends AutoEncoder {
     /**
      * When enabled, this organization will create invoices for all payments, unless that fails (missing VAT data)
      */
-    @field({decoder: BooleanDecoder, ...NextVersion, defaultValue: () => false})
+    @field({decoder: BooleanDecoder, version: 398, defaultValue: () => false})
     invoicesEnabled: boolean;
 
     /**
@@ -449,13 +449,13 @@ export class OrganizationMetaData extends AutoEncoder {
     /**
      * Contains the text and settings for when financial support is enabled - not whether it is enabled
      */
-    @field({ decoder: FinancialSupportSettings, ...NextVersion, nullable: true })
+    @field({ decoder: FinancialSupportSettings, version: 398, nullable: true })
     financialSupport: FinancialSupportSettings | null = null;
 
     /**
      * Contains the text and settings for when data permissions are enabled - not whether it is enabled
      */
-    @field({ decoder: DataPermissionsSettings, ...NextVersion, nullable: true})
+    @field({ decoder: DataPermissionsSettings, version: 398, nullable: true})
     dataPermission: DataPermissionsSettings | null = null;
 
     /**

@@ -31,7 +31,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(GenericBalance), version: 375 })
     balances: GenericBalance[] = [];
 
-    @field({ decoder: new ArrayDecoder(MemberRegistrationInvitation), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(MemberRegistrationInvitation), version: 398 })
     registrationInvitations: MemberRegistrationInvitation[] = [];
 
     doesMatchFilter(filter: StamhoofdFilter) {

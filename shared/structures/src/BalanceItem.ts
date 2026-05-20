@@ -271,7 +271,7 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true, version: 390 })
     VATExcempt: VATExcemptReason | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 398 })
     paidAt: Date | null
 
     /**
@@ -404,7 +404,7 @@ export class BalanceItem extends AutoEncoder {
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     pricePending = 0;
     
-    @field({ decoder: IntegerDecoder, ...NextVersion, defaultValue: () => 0 })
+    @field({ decoder: IntegerDecoder, version: 398, defaultValue: () => 0 })
     priceInvoiced: number
 
     /**
