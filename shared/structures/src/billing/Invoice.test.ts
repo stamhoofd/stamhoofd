@@ -1,8 +1,122 @@
 import { BalanceItem, VATExcemptReason } from '../BalanceItem.js';
+import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
+import { PaymentGeneral } from '../members/PaymentGeneral.js';
+import { PaymentMethod } from '../PaymentMethod.js';
 import { Invoice } from './Invoice.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 describe('Invoice', () => {
+    test('Rounding lots of items', () => {
+        const payment = PaymentGeneral.create({
+            method: PaymentMethod.Transfer
+        })
+
+        {
+            const balanceItem = new BalanceItem();
+            balanceItem.id = '1'
+            balanceItem.description = 'Test Item 1';
+            balanceItem.unitPrice = 1_00_00;
+            balanceItem.quantity = 815;
+            balanceItem.VATPercentage = 21;
+            balanceItem.VATIncluded = true;
+
+            const item = InvoicedBalanceItem.createFor(balanceItem, 815_00_00);
+            expect(item.unitPrice).toEqual(82_64)
+            expect(item.quantity).toEqual(815_00_00); 
+            expect(item.totalWithoutVAT).toEqual(673_52_00); // rounded unit price * quantity
+
+            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
+                balanceItem,
+                price: 815_00_00
+            }))
+        }
+
+        {
+            const balanceItem = new BalanceItem();
+            balanceItem.id = '2'
+            balanceItem.description = 'Test Item 2';
+            balanceItem.unitPrice = 1_00_00;
+            balanceItem.quantity = 2;
+            balanceItem.VATPercentage = 21;
+            balanceItem.VATIncluded = true;
+
+            const item = InvoicedBalanceItem.createFor(balanceItem, 2_00_00);
+            expect(item.unitPrice).toEqual(82_64)
+            expect(item.totalWithoutVAT).toEqual(1_65_00); // rounded
+
+            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
+                balanceItem,
+                price: 2_00_00
+            }))
+        }
+
+        {
+            const balanceItem = new BalanceItem();
+            balanceItem.id = '3'
+            balanceItem.description = 'Test Item 3';
+            balanceItem.unitPrice = 1_00_00;
+            balanceItem.quantity = 2;
+            balanceItem.VATPercentage = 21;
+            balanceItem.VATIncluded = true;
+
+            const item = InvoicedBalanceItem.createFor(balanceItem, 2_00_00);
+            expect(item.unitPrice).toEqual(82_64)
+            expect(item.totalWithoutVAT).toEqual(1_65_00); // rounded
+
+            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
+                balanceItem,
+                price: 2_00_00
+            }))
+        }
+        payment.price = payment.balanceItemPayments.reduce((a, b) => a + b.price, 0)
+        expect(payment.price).toEqual(819_00_00)
+
+        const invoice = Invoice.create({
+            payments: [payment]
+        })
+        invoice.buildFromPayments()
+        expect(invoice.items.length).toEqual(3)
+    });
+
+    test('Rounding by adding extra item to the list because unable to correct', () => {
+        const payment = PaymentGeneral.create({
+            method: PaymentMethod.Transfer
+        })
+
+        {
+            const balanceItem = new BalanceItem();
+            balanceItem.id = '1'
+            balanceItem.description = 'Test Item 1';
+            balanceItem.unitPrice = 1_00_00;
+            balanceItem.quantity = 815;
+            balanceItem.VATPercentage = 21;
+            balanceItem.VATIncluded = true;
+
+            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
+                balanceItem,
+                price: 815_00_00
+            }))
+        }
+
+        payment.price = payment.balanceItemPayments.reduce((a, b) => a + b.price, 0)
+        expect(payment.price).toEqual(815_00_00)
+
+        const invoice = Invoice.create({
+            payments: [payment]
+        })
+        invoice.buildFromPayments()
+        expect(invoice.totalWithoutVAT).toEqual(673_55_00)
+
+        expect(invoice.items.length).toEqual(2)
+        expect(invoice.items[1]).toMatchObject({
+            quantity: 1_00_00,
+            unitPrice: 3_00 
+        })
+
+        expect(invoice.items[0].totalWithoutVAT).toEqual(Math.round(82_64 * 815 / 100) * 100) // because we need to round per item to 4 decimals
+        expect(invoice.items[1].totalWithoutVAT).toEqual(3_00) // because we need to round per item to 4 decimals
+    });
+
     test('Multiple items with 21% VAT', () => {
         const invoice = Invoice.create({});
 

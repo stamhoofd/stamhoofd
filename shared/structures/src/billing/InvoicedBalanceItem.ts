@@ -155,20 +155,18 @@ export class InvoicedBalanceItem extends AutoEncoder {
     }
 
     roundUnitPriceWithoutDifferenceInTotal() {
-
         // Round unit price cleaner
-        const recalculated = STMath.round(this.totalWithoutVAT * 10_000 / this.quantity);
-        if (recalculated !== this.unitPrice) {
+        const recalculated = STMath.round(this.totalWithoutVAT * 10_000 / this.quantity / 20) * 20;// 15_00_00
+        if (recalculated !== this.unitPrice && (recalculated % 100 === 0 || recalculated % 100 === 5)) {
+            // Only allow clean rounding like 15,455 or 15,45.
             if (STMath.round(recalculated * this.quantity / 1_00_00_00) * 100 === this.totalWithoutVAT) {
                 if (this.addedToUnitPriceToCorrectVAT !== 0) {
                     const originalUnitPrice = this.unitPrice - this.addedToUnitPriceToCorrectVAT
                     this.addedToUnitPriceToCorrectVAT = recalculated - originalUnitPrice
                 }
                 this.unitPrice = recalculated;
-                //this.addedToUnitPriceToCorrectVAT = 
             }
         }
-
     }
 
     /**

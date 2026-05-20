@@ -20,7 +20,7 @@ describe('InvoicedBalanceItem', () => {
 
             expect(invoicedItem.balanceInvoicedAmount).toBe(5_00_00);
             expect(invoicedItem.quantity).toBe(1_00_00);
-            expect(invoicedItem.unitPrice).toBe(4_13_22); // should not be rounded to 1 cent
+            expect(invoicedItem.unitPrice).toBe(4_13_00); // should only be rounded if no difference in output
             expect(invoicedItem.VATPercentage).toBe(21);
             expect(invoicedItem.VATIncluded).toBe(true);
             expect(invoicedItem.VATExcempt).toBeNull();
@@ -45,7 +45,7 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(5_00_00);
                 expect(invoicedItem.quantity).toBe(1_00_00);
-                expect(invoicedItem.unitPrice).toBe(4_13_22); // not rounded
+                expect(invoicedItem.unitPrice).toBe(4_13_00); 
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
@@ -58,7 +58,7 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(10_00_00);
                 expect(invoicedItem.quantity).toBe(2_00_00);
-                expect(invoicedItem.unitPrice).toBe(4_13_22); // not rounded
+                expect(invoicedItem.unitPrice).toBe(4_13_00); 
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
@@ -84,7 +84,7 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(2_50_00);
                 expect(invoicedItem.quantity).toBe(50_00); // 50% of an item
-                expect(invoicedItem.unitPrice).toBe(4_13_22); // not rounded
+                expect(invoicedItem.unitPrice).toBe(4_14_00); // changed after reverse rounding
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
@@ -97,7 +97,7 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(1_66_66);
                 expect(invoicedItem.quantity).toBe(33_33); // 33.33% of an item
-                expect(invoicedItem.unitPrice).toBe(4_13_25); // difference caused by rounding of quantity
+                expect(invoicedItem.unitPrice).toBe(4_14_00); 
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();

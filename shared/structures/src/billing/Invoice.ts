@@ -400,7 +400,7 @@ export class Invoice extends AutoEncoder {
                 const afterCurrent = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
                 const afterCurrentToAddToTaxablePrice = STMath.round((precise - afterCurrent) / 100) * 100;
 
-                if (Math.abs(afterCurrentToAddToTaxablePrice) > Math.abs(currentToAddToTaxablePrice)) {
+                if (Math.abs(afterCurrentToAddToTaxablePrice) > Math.abs(currentToAddToTaxablePrice) || afterCurrentToAddToTaxablePrice === 0 || Math.sign(afterCurrentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice)) {
                     // Revert
                     next.unitPrice -= addition;
                     next.addedToUnitPriceToCorrectVAT -= addition;
@@ -412,6 +412,27 @@ export class Invoice extends AutoEncoder {
                 // todo
                 next = getNext();
             }
+
+            {const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
+            const precise = items.reduce((a, b) => a + b.preciseTotalWithoutVAT, 0);
+
+            const toAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
+
+            if (Math.abs(toAddToTaxablePrice) > 1_00) {
+                console.warn('Could not correct invoice. Adding manual item with the same VAT tax so we still apply VAT on the price to pay, which is more correct than adding after VAT')
+                const add = InvoicedBalanceItem.create({
+                    balanceItemId: items[0].balanceItemId,
+                    balanceInvoicedAmount: 0,
+                    quantity: 1_00_00,
+                    unitPrice: toAddToTaxablePrice,
+                    VATPercentage: items[0].VATPercentage,
+                    VATIncluded: false,
+                    VATExcempt: items[0].VATExcempt,
+                    name: items[0].name,
+                    description: $t('Dit werd afgesplits in een aparte lijn omdat het gewenste bedrag door afronding (tot op 1 cent per lijn op bedragen exclusief BTW) anders niet kan worden bekomen. Deze lijn telt niet als een extra stuk.')
+                });
+                this.addItem(add)
+            }}
         }
     }
 
@@ -430,7 +451,7 @@ export class Invoice extends AutoEncoder {
         if (this.totalWithVAT !== this.totalPaymentsAmount) {
             throw new SimpleError({
                 code: 'price_difference',
-                message: 'The price of the generated invoice ('+this.totalWithVAT+') did not match the price of the corresponding payments ('+this.totalPaymentsAmount+'). Possibly caused by rounding that could not be corrected automatically.',
+                message: 'The price of the generated invoice ('+Formatter.price(this.totalWithVAT)+') ('+Formatter.price(this.totalWithoutVAT)+') did not match the price of the corresponding payments ('+Formatter.price(this.totalPaymentsAmount)+'). Possibly caused by rounding that could not be corrected automatically.',
                 human: $t('%1Kn'),
             });
         }
