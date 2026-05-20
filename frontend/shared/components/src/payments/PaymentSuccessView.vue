@@ -47,7 +47,7 @@ onMounted(() => {
 });
 
 const {title, description} = (() => {
-    let t = $t(`Betaling gelukt!`) ;
+    let t = $t(`%1Tf`) ;
     let d = '';
 
     let packages = false;
@@ -113,39 +113,39 @@ const {title, description} = (() => {
     }
 
     if (packages) {
-        t = $t('Gelukt! De pakketten zijn geactiveerd')
-        d = $t('Je kan er nu mee aan de slag.')
+        t = $t('%1Rc')
+        d = $t('%1Qo')
     }
 
     if (registrationNames.size) {
         if (registrationNamesPerGroup.size === 1) {
             if (registrationNames.size > 4) {
-                t = $t('Hoera! {count} leden werden ingeschreven voor {group}', {
+                t = $t('%1RL', {
                     'count': registrationNames.size,
                     group: [...registrationNamesPerGroup.keys()].join()
                 })
             } else if (registrationNames.size > 1) {
-                t = $t('Hoera! {simon-and-sarah} werden ingeschreven voor {group}', {
-                    'simon-and-sarah': Formatter.joinLast([...registrationNames.values()], ', ', ' ' + $t('en') + ' '),
+                t = $t('%1Qm', {
+                    'simon-and-sarah': Formatter.joinLast([...registrationNames.values()], ', ', ' ' + $t('%M1') + ' '),
                     group: [...registrationNamesPerGroup.keys()].join()
                 })
             } else {
-                t = $t('Hoera! {simon} werd ingeschreven voor {group}', {
+                t = $t('%1TR', {
                     'simon': [...registrationNames.values()].join(),
                     group: [...registrationNamesPerGroup.keys()].join()
                 })
             }
         } else {
             if (registrationNames.size > 4) {
-                t = $t('Hoera! {count} leden werden ingeschreven', {
+                t = $t('%1Sy', {
                     'count': registrationNames.size,
                 })
             } else if (registrationNames.size > 1) {
-                t = $t('Hoera! {simon-and-sarah} werden ingeschreven', {
-                    'simon-and-sarah': Formatter.joinLast([...registrationNames.values()], ', ', ' ' + $t('en') + ' '),
+                t = $t('%1RR', {
+                    'simon-and-sarah': Formatter.joinLast([...registrationNames.values()], ', ', ' ' + $t('%M1') + ' '),
                 })
             } else {
-                t = $t('Hoera! {simon} werd ingeschreven', {
+                t = $t('%1UF', {
                     'simon': [...registrationNames.values()].join(),
                 })
             }
@@ -155,32 +155,32 @@ const {title, description} = (() => {
     if (membershipNames.size) {
         if (membershipNamesPerGroup.size === 1) {
             if (membershipNames.size > 4) {
-                t = $t('Hoera! De aansluiting “{name}” voor {count} leden werd betaald', {
+                t = $t('%1Rs', {
                     'count': membershipNames.size,
                     name: [...membershipNamesPerGroup.keys()].join()
                 })
             } else if (membershipNames.size > 1) {
-                t = $t('Hoera! De aansluiting “{name}” voor {simon-and-sarah} werd betaald', {
-                    'simon-and-sarah': Formatter.joinLast([...membershipNames.values()], ', ', ' ' + $t('en') + ' '),
+                t = $t('%1TL', {
+                    'simon-and-sarah': Formatter.joinLast([...membershipNames.values()], ', ', ' ' + $t('%M1') + ' '),
                     name: [...membershipNamesPerGroup.keys()].join()
                 })
             } else {
-                t = $t('Hoera! De aansluiting “{name}” voor {simon} werd betaald', {
+                t = $t('%1SY', {
                     'simon': [...membershipNames.values()].join(),
                     name: [...membershipNamesPerGroup.keys()].join()
                 })
             }
         } else {
             if (membershipNames.size > 4) {
-                t = $t('Hoera! {count} leden werden ingeschreven', {
+                t = $t('%1Sy', {
                     'count': membershipNames.size,
                 })
             } else if (membershipNames.size > 1) {
-                t = $t('Hoera! {simon-and-sarah} werden ingeschreven', {
-                    'simon-and-sarah': Formatter.joinLast([...membershipNames.values()], ', ', ' ' + $t('en') + ' '),
+                t = $t('%1RR', {
+                    'simon-and-sarah': Formatter.joinLast([...membershipNames.values()], ', ', ' ' + $t('%M1') + ' '),
                 })
             } else {
-                t = $t('Hoera! {simon} werd ingeschreven', {
+                t = $t('%1UF', {
                     'simon': [...membershipNames.values()].join(),
                 })
             }
@@ -189,9 +189,9 @@ const {title, description} = (() => {
 
     if (others && !d) {
         if (others> 1) {
-            d = $t('Ook {count} andere items werden betaald', {count: Formatter.integer(others)})
+            d = $t('%1Tz', {count: Formatter.integer(others)})
         } else {
-            d = $t('Ook één ander item werd betaald', {count: Formatter.integer(others)})
+            d = $t('%1SF', {count: Formatter.integer(others)})
         }
     }
     

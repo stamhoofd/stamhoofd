@@ -70,7 +70,7 @@ export class PaymentMandateService {
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Mandate not found',
-                human: $t('Deze betaalmethode bestaat niet (meer)')
+                human: $t('%1Q1')
             })
         }
 
@@ -79,7 +79,7 @@ export class PaymentMandateService {
                 throw new SimpleError({
                     code: 'not_allowed',
                     message: 'You cannot delete the default mandate',
-                    human: $t('Je kan de standaard bankkaart niet verwijderen. Stel eerst een andere standaard bankkaart in waarmee je het wilt betalen en verwijder daarna deze bankkaart.')
+                    human: $t('%1Qu')
                 })
             }
         }
@@ -89,7 +89,7 @@ export class PaymentMandateService {
                 throw new SimpleError({
                     code: 'not_allowed',
                     message: 'You cannot delete the last mandate',
-                    human: $t('Je kan de laatste bankkaart niet verwijderen. Voeg eerst een andere bankkaart toe waarmee je het wilt vervangen en verwijder daarna deze bankkaart.')
+                    human: $t('%1Q7')
                 })
             }
         }
@@ -161,7 +161,7 @@ export class PaymentMandateService {
             throw new SimpleError({
                 code: 'failed',
                 message: 'Failed to update default mandate',
-                human: $t('Het is niet gelukt om de standaard bankkaart aan te passen. Herlaad de pagina en probeer opnieuw.')
+                human: $t('%1S4')
             })
         }
     }

@@ -52,7 +52,7 @@
             </Checkbox>
 
             <Checkbox :model-value="getFeatureFlag('registration-invites')" @update:model-value="setFeatureFlag('registration-invites', !!$event)">
-                {{ $t('Uitnodigen voor een groep') }}
+                {{ $t('%1R9') }}
             </Checkbox>
         </template>
 

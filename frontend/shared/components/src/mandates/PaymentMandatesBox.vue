@@ -2,7 +2,7 @@
     <LoadingBoxTransition :error-box="errors.errorBox">
         <div v-if="mandates !== null">
             <p v-if="mandates.length === 0" class="info-box">
-                {{ $t('Geen bankkaarten') }}
+                {{ $t('%1TE') }}
             </p>
             <STGrid v-else>
                 <PaymentMandateRow v-for="mandate of mandates" :key="mandate.id" :mandate="mandate" :selectable="false" @contextmenu="showContextMenu($event, mandate.id)">
@@ -50,7 +50,7 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`Instellen als standaard bankkaart`),
+                name: $t(`%1Tc`),
                 icon: 'success',
                 disabled: isDefault,
                 action: async () => {
@@ -59,7 +59,7 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
             }),
 
             new ContextMenuItem({
-                name: $t(`Verwijderen`),
+                name: $t(`%CJ`),
                 icon: 'trash',
                 action: async () => {
                     await deleteMandate(mandateId)
@@ -77,9 +77,9 @@ async function deleteMandate(mandateId: string) {
     const mandate = mandates.value?.find(m => m.id === mandateId);
 
     if (!await CenteredMessage.confirm({
-        title: $t('Ben je zeker dat je deze bankkaart wilt verwijderen?'),
-        requireCheckbox: $t('Ja, verwijder “{cardNumber}”', {cardNumber: mandate?.name ?? $t('de bankkaart')}),
-        confirmText: $t('Verwijderen'),
+        title: $t('%1UA'),
+        requireCheckbox: $t('%1T7', {cardNumber: mandate?.name ?? $t('de bankkaart')}),
+        confirmText: $t('%CJ'),
         destructive: true
     })) {
         return;

@@ -135,12 +135,12 @@ async function createInvoicesFor(organization: Organization) {
         } catch (e) {
             console.error(payments.map(p => p.id), e);
 
-            const prefix = customer + ' ('+payments.map(p => '<a href="'+Formatter.escapeHtml('https://'+organization.getDashboardHost() + '/boekhouding/betalingen/' + p.id)+'">'+ Formatter.escapeHtml($t('betaling') + ' ' + p.id.substring(0, 8))+'</a>').join(', ') + '): ';
+            const prefix = customer + ' ('+payments.map(p => '<a href="'+Formatter.escapeHtml('https://'+organization.getDashboardHost() + '/boekhouding/betalingen/' + p.id)+'">'+ Formatter.escapeHtml($t('%14a') + ' ' + p.id.substring(0, 8))+'</a>').join(', ') + '): ';
 
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 errors.push(prefix + Formatter.escapeHtml(e.getHuman()))
             } else {
-                errors.push(prefix + Formatter.escapeHtml($t('Onbekende fout')))
+                errors.push(prefix + Formatter.escapeHtml($t('%1ED')))
             }
         }
     }
@@ -158,7 +158,7 @@ async function createInvoicesFor(organization: Organization) {
             defaultReplacements: [
                 Replacement.create({
                     token: 'errors',
-                    html: '<ul><li>'+errors.join('</li><li>')+'</li></ul>' + (skipped > 0 ? '<p>'+Formatter.escapeHtml(skipped === 1 ? $t('Daarnaast werd een te factureren bedrag uitgesteld omwille van een laag bedrag (minder dan één euro).') : $t('Daarnaast werden {count} te factureren bedragen uitgesteld omwille van een laag bedrag (minder dan één euro).', {count: skipped}))+'</p>' : '')
+                    html: '<ul><li>'+errors.join('</li><li>')+'</li></ul>' + (skipped > 0 ? '<p>'+Formatter.escapeHtml(skipped === 1 ? $t('%1U4') : $t('%1Sp', {count: skipped}))+'</p>' : '')
                 })
             ]
         })

@@ -700,7 +700,7 @@ export class BalanceItem extends AutoEncoder {
                 }
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
-            case BalanceItemType.CancellationFee: return $t(`Annuleringskosten`);
+            case BalanceItemType.CancellationFee: return $t(`%17G`);
             case BalanceItemType.AdministrationFee: {
                 return this.description || $t(`%xK`);
             }

@@ -7,7 +7,7 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="$t('Openstaand bedrag')">
+                    <STInputBox :title="$t('%76')">
                         <button class="style-price-big" type="button" @click="item.balanceItems.filter(b => b.isDue).length > 0 ? payBalance : undefined">
                             <span>
                                 {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
@@ -16,7 +16,7 @@
                         </button>
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ $t('Dit bedrag zal bij jouw volgende afrekening aangerekend worden.') }}
+                        {{ $t('%1TU') }}
                     </p>
                 </div>
             </div>
@@ -24,11 +24,11 @@
             <template v-if="item.organization.meta.registrationPaymentConfiguration.enableMandates">
                 <hr>
                 <h2 class="style-with-button">
-                    <span>{{ $t('Standaard bankkaart') }}</span>
-                    <button v-tooltip="$t('Nieuwe bankkaart koppelen')" type="button" class="button icon add" @click="addCard" />
+                    <span>{{ $t('%1QF') }}</span>
+                    <button v-tooltip="$t('%1Qg')" type="button" class="button icon add" @click="addCard" />
                 </h2>
                 <p v-if="!$isPlatform">
-                    {{ $t('Kies een bankkaart of creditcard waarmee de periodieke betalingen gebeuren.') }}
+                    {{ $t('%1Qz') }}
                 </p>
 
                 <PayableBalanceMandatesBox :item="item" />
@@ -37,14 +37,14 @@
         
             <template v-if="item.organization.meta.invoicesEnabled">
                 <hr>
-                <h2>{{ $t('Facturatiegegevens') }}</h2>
-                <p>{{ $t('Deze gegevens worden gebruikt voor alle toekomstige facturen.') }}</p>
+                <h2>{{ $t('%1Ke') }}</h2>
+                <p>{{ $t('%1TB') }}</p>
 
                 <button v-if="organization.meta.companies.length === 0" class="info-box selectable" type="button" @click="$navigate(Routes.Settings)">
-                    <span>{{ $t('Je hebt nog geen facturatiegegevens ingesteld. Voeg deze eerst toe via de algemene instellingen.') }}</span>
+                    <span>{{ $t('%1TK') }}</span>
 
                     <span class="button text">
-                        {{ $t('Instellen') }}
+                        {{ $t('%9H') }}
                     </span>
                 </button>
 
@@ -68,7 +68,7 @@
 
             <template v-if="item.organization.meta.invoicesEnabled">
                 <hr>
-                <h2>{{ $t('Facturen en transacties') }}</h2>
+                <h2>{{ $t('%1Rm') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" element-name="button" @click="$navigate(Routes.Invoices)">
@@ -77,10 +77,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Facturen') }}
+                            {{ $t('%1JA') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Bekijk en download een kopie van alle facturen die je hebt ontvangen') }}
+                            {{ $t('%1Sj') }}
                         </p>
 
                         <template #right>
@@ -94,10 +94,10 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Betalingen') }}
+                            {{ $t('%1JH') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Een overzicht van alle betalingen die je hebt gedaan') }}
+                            {{ $t('%1Ql') }}
                         </p>
 
                         <template #right>
@@ -172,7 +172,7 @@ async function reload() {
     }
 }
 
-const title = props.item.organization.meta.invoicesEnabled ? $t('Facturen en betaalinstellingen') : $t('Betalingen en betaalinstellingen')
+const title = props.item.organization.meta.invoicesEnabled ? $t('%1S7') : $t('%1QB')
 
 enum Routes {
     Payments = 'betalingen',

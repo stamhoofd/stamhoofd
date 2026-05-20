@@ -65,7 +65,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('Dit is tijdelijk onbeschikbaar, probeer later opnieuw')
+                human: $t('%1Rz')
             })
         }
         
@@ -75,7 +75,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                 statusCode: 404,
                 code: 'not_found',
                 message: 'Selling organization not found',
-                human: $t('Deze organisatie bestaat niet (meer)'),
+                human: $t('%1R5'),
                 field: 'sellingOrganization'
             })
         }
@@ -153,14 +153,14 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                     if (!checkout.createMandate) {
                         throw new SimpleError({
                             code: '',
-                            message: $t('Je moet de bankkaart opslaan om dit pakket te activeren. Dit pakket vereist namelijk periodieke betalingen.')
+                            message: $t('%1Rh')
                         })
                     }
 
                     if (!checkout.createMandate.saveAsDefault) {
                         throw new SimpleError({
                             code: '',
-                            message: $t('Het is noodzakelijk om deze bankkaart als standaard bankkaart in te stellen. Dit pakket vereist namelijk periodieke betalingen.')
+                            message: $t('%1Qp')
                         })
                     }
                 }
@@ -231,7 +231,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         if (totalPrice < minimumAmount && checkout.createMandate && !checkout.mandate) {
             const item = new BalanceItem();
             item.type = BalanceItemType.AdministrationFee;
-            item.description = $t('Verificatie bankkaart of bankrekening')
+            item.description = $t('%1Q4')
             item.payingOrganizationId = organization.id;
             item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;

@@ -1,11 +1,11 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t('Details van jouw pakketten')" />
+        <STNavigationBar :title="$t('%1Sb')" />
 
         <main>
-            <h1>{{ $t('Details van jouw pakketten') }}</h1>
+            <h1>{{ $t('%1Sb') }}</h1>
             <p>
-                <I18nComponent :t="$t('Meer info over alle prijzen en een prijscalculator kan je terugvinden op <button>onze website</button>')">
+                <I18nComponent :t="$t('%1Sr')">
                     <template #button="{content}">
                         <a :href="'https://'+ LocalizedDomains.marketing +'/prijzen'" class="inline-link" target="_blank">
                             {{ content }}
@@ -45,17 +45,17 @@ const {isDeactivatingPackage, deactivate} = useDeactivatePackage();
 
 async function deactivatePackage(pack: STPackage) {
     if (!await CenteredMessage.confirm({
-        title: $t('{package-name} deactiveren?', {'package-name': pack.meta.name}),
-        description: $t('Je kan dit niet ongedaan maken.'),
-        confirmText: $t('Deactiveren'),
+        title: $t('%1Th', {'package-name': pack.meta.name}),
+        description: $t('%1Fc'),
+        confirmText: $t('%1Sa'),
         destructive: true,
-        requireCheckbox: $t('Ja, ik ben helemaal zeker'),
+        requireCheckbox: $t('%1Q0'),
         availabilityDelay: 1_000,
     })) {
         return;
     }
 
-    await deactivate(pack, $t('Het pakket werd verwijderd'))
+    await deactivate(pack, $t('%1Rk'))
 }
 
 </script>

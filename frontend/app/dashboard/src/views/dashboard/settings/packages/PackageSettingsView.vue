@@ -25,8 +25,8 @@
                         <template #left>
                             <IconContainer :icon="pack.bundle === STPackageBundle.Webshops ? 'basket' : 'group'" :class="{gray: !pack.alreadyBought && !pack.inTrial, 'secundary': !pack.alreadyBought && pack.inTrial}">
                                 <template #aside>
-                                    <span v-if="pack.alreadyBought" v-tooltip="$t('Deze functie is actief')" class="icon success small primary" />
-                                    <span v-else-if="pack.inTrial" v-tooltip="$t('Momenteel in proefperiode, activeer om in gebruik te nemen')" class="icon trial small stroke secundary" />
+                                    <span v-if="pack.alreadyBought" v-tooltip="$t('%1TO')" class="icon success small primary" />
+                                    <span v-else-if="pack.inTrial" v-tooltip="$t('%1TJ')" class="icon trial small stroke secundary" />
                                 </template>
                             </IconContainer>
                         </template>

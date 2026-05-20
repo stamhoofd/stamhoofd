@@ -62,7 +62,7 @@ async function checkout(item: DetailedPayableBalance) {
                 new ComponentWithProperties(
                     SelectBalanceItemsView,
                     {
-                        title: $t(`Wat wil je nu betalen?`),
+                        title: $t(`%1Qf`),
                         items,
                         isPayable: true,
                         canCustomizeItemValue: (item: BalanceItem) => {

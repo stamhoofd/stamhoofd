@@ -6,7 +6,7 @@
         
         <h3 class="style-title-list">
             <span>{{ mandate.name }}</span>
-            <span v-if="mandate.isDefault" class="style-tag success">{{ $t('Standaard') }}</span>
+            <span v-if="mandate.isDefault" class="style-tag success">{{ $t('%v6') }}</span>
         </h3>
 
         <p v-if="mandate.description" class="style-description-small">

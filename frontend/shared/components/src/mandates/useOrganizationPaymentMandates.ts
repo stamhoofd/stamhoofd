@@ -70,7 +70,7 @@ export function useOrganizationPaymentMandates({
                 mandates.value = mandates.value.filter(m => m.id !== mandateId)
             }
 
-            Toast.success($t('De bankkaart werd verwijderd')).show()
+            Toast.success($t('%1Sw')).show()
         } catch (e) {
             Toast.fromError(e).show()
         } finally {
@@ -106,7 +106,7 @@ export function useOrganizationPaymentMandates({
                 mandates.value = response.data;
             }
 
-            Toast.success($t('Standaard bankkaart gewijzigd')).show()
+            Toast.success($t('%1QZ')).show()
         } catch (e) {
             Toast.fromError(e).show()
         } finally {

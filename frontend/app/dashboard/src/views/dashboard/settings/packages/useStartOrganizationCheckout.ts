@@ -66,7 +66,7 @@ export function useStartOrganizationCheckout() {
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'Temporarily unavailable due to missing membershipOrganizationId',
-                human: $t('Afrekenen is tijdelijk onbeschikbaar, herlaad te pagina of probeer later opnieuw!')
+                human: $t('%1Ri')
             })
         }
 

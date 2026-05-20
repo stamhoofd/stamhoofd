@@ -103,31 +103,31 @@ export class PaymentGeneral extends Payment {
         if (customer) {
             if (customer.company) {
                 replacements.push({
-                    title: customer.company.VATNumber || customer.company.companyNumber ? $t(`Bedrijfsnaam`) : $t('Naam vereniging'),
+                    title: customer.company.VATNumber || customer.company.companyNumber ? $t(`%1JI`) : $t('%1PW'),
                     value: customer.company.name,
                 });
 
                 if (customer.company.address) {
                     replacements.push({
-                        title: customer.company.VATNumber || customer.company.companyNumber ? $t(`Bedrijfsadres`) : $t('Adres vereniging'),
+                        title: customer.company.VATNumber || customer.company.companyNumber ? $t(`%MW`) : $t('%1Sh'),
                         value: customer.company.address.toString(),
                     });
                 }
 
                 if (customer.company.VATNumber) {
                     replacements.push({
-                        title: $t(`BTW-nummer`),
+                        title: $t(`%1CK`),
                         value: customer.company.VATNumber,
                     });
                 } else if (customer.company.companyNumber) {
                     replacements.push({
-                        title: $t(`Ondernemingsnummer`),
+                        title: $t(`%wa`),
                         value: customer.company.companyNumber,
                     });
                 } else {
                     replacements.push({
-                        title: $t(`Ondernemingsnummer`),
-                        value: $t('Geen') + ' ('+$t('feitelijke vereniging')+')',
+                        title: $t(`%wa`),
+                        value: $t('%1FW') + ' ('+$t('%1QY')+')',
                     });
                 }
             } else {
@@ -146,7 +146,7 @@ export class PaymentGeneral extends Payment {
 
             if (customer.email) {
                 replacements.push({
-                    title: $t(`E-mailadres`),
+                    title: $t(`%1FK`),
                     value: customer.email,
                 });
             }

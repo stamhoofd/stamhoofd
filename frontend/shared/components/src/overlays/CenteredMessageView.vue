@@ -294,6 +294,10 @@ function onKey(event: KeyboardEvent) {
             flex-direction: column;
             gap: 10px;
             padding-top: 20px;
+
+            > * {
+                max-width: none;
+            }
         }
     }
 

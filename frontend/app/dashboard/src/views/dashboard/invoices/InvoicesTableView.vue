@@ -25,13 +25,17 @@ import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvo
 import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { InMemoryTableAction  } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type {TableAction} from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import type { Invoice, StamhoofdFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import type { Invoice, InvoiceStruct, StamhoofdFilter, STInvoicePrivate } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import InvoiceView from './InvoiceView.vue';
+import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage';
+import { Toast } from '@stamhoofd/components';
+import { InvoicesExcelExport } from './InvoicesExcelExport';
 
 const props = withDefaults(
     defineProps<{
@@ -162,6 +166,22 @@ const Route = {
 };
 
 const actions: TableAction<ObjectType>[] = [
+    new InMemoryTableAction({
+        name: $t(`%1B7`),
+        icon: 'download',
+        priority: 5,
+        groupIndex: 2,
+        needsSelection: true,
+        allowAutoSelectAll: true,
+        handler: async (invoices: ObjectType[]) => {
+            if (invoices.length === 1) {
+                showInvoice(invoices[0])
+            } else {
+                await downloadInvoices(invoices)
+            }
+        },
+    }),
+
     /* new AsyncTableAction({
         name: $t('%V8'),
         icon: 'download',
@@ -186,5 +206,127 @@ const actions: TableAction<ObjectType>[] = [
         },
     }), */
 ];
+
+function showInvoice(invoice: Invoice) {
+    if (invoice.pdf === null) {
+        new CenteredMessage($t("%1Qt"), $t("%1Rp"), "error").addCloseButton().show()
+        return
+    }
+    if (invoice.xml) {
+        window.open(invoice.xml.getPublicPath(), "_blank")
+    } else {
+        window.open(invoice.pdf.getPublicPath(), "_blank")
+    }
+}
+
+
+    const downloading = ref(false);
+async function downloadInvoices(invoices: Invoice[], onlyVAT?: boolean) {
+    if (downloading.value) {
+        return;
+    }
+
+    if (onlyVAT === undefined) {
+        const v = await CenteredMessage.show({
+            title: $t('%1Rq'),
+            description: $t(`%1SZ`),
+            buttons: [
+                {
+                    text: $t('%1U5'),
+                    type: 'primary',
+                    value: true,
+                },
+                {
+                    text: $t('%1Qy'),
+                    type: 'secundary',
+                    value: false
+                },
+                {
+                    text: $t('%1Lh'),
+                    type: 'secundary',
+                    value: null
+                }
+            ]
+        });
+        if (v === null) {
+            return;
+        }
+        onlyVAT = v;
+    }
+    downloading.value = true
+
+    try {
+
+        const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
+        const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
+        const zip = new JSZip();
+
+        const groups = new Map<string, InvoiceStruct[]>()
+
+        // Group per month
+        for (const invoice of invoices) {
+            const date = invoice.invoicedAt //meta.date ?? invoice.paidAt ?? invoice.createdAt
+
+            if (!date) {
+                throw new Error("Missing invoicedAt date")
+            }
+
+            const year = date.getFullYear()
+            const monthString = year+"-"+((date.getMonth() + 1)+"").padStart(2, "0")+" "+Formatter.capitalizeFirstLetter(Formatter.month(date.getMonth() + 1))
+
+            const group = groups.get(monthString) ?? []
+            group.push(invoice)
+            groups.set(monthString, group)
+        }
+
+        for (const [month, group] of groups) {
+            // Create an Excel file
+            const folder = zip.folder(month)
+            if (!folder) {
+                throw new Error("Failed to create folder")
+            }
+
+            // Sort group based on number here
+            group.sort((a,b) => Sorter.byStringValue(b.number ?? '0', a.number ?? '0'))
+
+            const excel = await InvoicesExcelExport.export(group)
+            folder.file("0000-overzicht-"+month+".xlsx", excel)
+
+            for (const invoice of group) {
+                if (!invoice.pdf) {
+                    throw new Error("PDF ontbreekt voor factuur "+(invoice.number ?? invoice.id));
+                }
+
+                if (onlyVAT) {
+                    if (!invoice.customer.company?.VATNumber) {
+                        continue
+                    }
+                }
+                const data = await fetch(invoice.pdf!.getPublicPath())
+                const blob = await data.blob()
+                folder.file(
+                    (invoice.number+"").padStart(4, "0")+" - "+Formatter.dateIso(invoice.invoicedAt!)+" - "+Formatter.fileSlug(invoice.customer.dynamicName)+".pdf", 
+                    blob
+                );
+
+                if (invoice.xml) {
+                    const data = await fetch(invoice.xml!.getPublicPath())
+                    const blob = await data.blob()
+                    folder.file(
+                        (invoice.number+"").padStart(4, "0")+" - "+Formatter.dateIso(invoice.invoicedAt!)+" - "+Formatter.fileSlug(invoice.customer.dynamicName)+".xml", 
+                        blob
+                    );
+                }
+            }
+        }
+        
+        const blob = await zip.generateAsync({type:"blob"})
+        saveAs(blob, "Facturen.zip");
+    } catch (e) {
+        Toast.fromError(e).show()
+    }
+    downloading.value = false;
+}
+
 
 </script>

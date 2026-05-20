@@ -42,7 +42,7 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('Dit is tijdelijk onbeschikbaar, probeer later opnieuw')
+                human: $t('%1Rz')
             })
         }
         
@@ -52,7 +52,7 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
                 statusCode: 404,
                 code: 'not_found',
                 message: 'Selling organization not found',
-                human: $t('Deze organisatie bestaat niet (meer)'),
+                human: $t('%1R5'),
                 field: 'sellingOrganization'
             })
         }
@@ -69,7 +69,7 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'This payment mandate is not found',
-                    human: $t('Deze bankkaart bestaat nier (meer). Herlaad de pagina indien nodig.')
+                    human: $t('%1R8')
                 })
             }
 

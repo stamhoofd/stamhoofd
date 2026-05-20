@@ -10,9 +10,9 @@
         </figure>
 
         <template #aside>
-            <span v-if="mandate.isDefault && mandate.status === PaymentMandateStatus.Valid" v-tooltip="$t('Standaard bankkaart')" class="icon small success green" />
-            <span v-if="mandate.status === PaymentMandateStatus.Invalid" v-tooltip="$t('Ongeldig')" class="icon error red small" />
-            <span v-else-if="mandate.status === PaymentMandateStatus.Pending" v-tooltip="$t('In afwachting van verificatie')" class="icon clock small gray" />
+            <span v-if="mandate.isDefault && mandate.status === PaymentMandateStatus.Valid" v-tooltip="$t('%1QF')" class="icon small success green" />
+            <span v-if="mandate.status === PaymentMandateStatus.Invalid" v-tooltip="$t('%1S9')" class="icon error red small" />
+            <span v-else-if="mandate.status === PaymentMandateStatus.Pending" v-tooltip="$t('%1SQ')" class="icon clock small gray" />
         </template>
     </IconContainer>
 </template>

@@ -128,7 +128,7 @@ export class ViesHelperStatic {
         if (!result.isValid) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('Ongeldig BTW-nummer: {number}', {'number': vatNumber}),
+                message: $t('%1To', {'number': vatNumber}),
                 field: 'VATNumber',
             });
         }
@@ -154,7 +154,7 @@ export class ViesHelperStatic {
             if (!response.valid) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t('Het opgegeven BTW-nummer is ongeldig of niet BTW-plichtig: {vat-number}', {'vat-number': formatted}),
+                    message: $t('%1TG', {'vat-number': formatted}),
                     field: 'VATNumber',
                 });
             }
@@ -168,7 +168,7 @@ export class ViesHelperStatic {
 
             throw new SimpleError({
                 code: 'service_unavailable',
-                message: $t('De Europese BTW-nummer validatie service (VIES) is tijdelijk niet beschikbaar. Probeer het later opnieuw.'),
+                message: $t('%1Sf'),
                 field: 'VATNumber',
             });
         }

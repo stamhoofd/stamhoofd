@@ -1,15 +1,15 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="mandates !== null" class="st-view shade">
-            <STNavigationBar :title=" $t(`Afrekenen`)" />
+            <STNavigationBar :title=" $t(`%X8`)" />
             <main class="center">
-                <h1>{{ $t('Afrekenen') }}</h1>
+                <h1>{{ $t('%X8') }}</h1>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
                 
                 <div class="container categorized-box">
                     <h2>
-                        {{ $t('Betaling') }}
+                        {{ $t('%kP') }}
                     </h2>
 
                     <template v-if="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
@@ -17,7 +17,7 @@
                             <STGrid>
                                 <PaymentMandateRadioRow v-for="mandate of mandates" :key="mandate.id" v-model="mandateId" :mandate="mandate">
                                     <p v-if="mandateId === mandate.id && !mandate.isDefault && saveMandateAsDefault" class="style-description-small">
-                                        <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('Zal worden ingesteld als standaard bankkaart') }}</span></span>
+                                        <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('%1UJ') }}</span></span>
                                     </p>
                                 </PaymentMandateRadioRow>
 
@@ -27,26 +27,26 @@
                                     </template>
 
                                     <h3 class="style-title-list">
-                                        {{ $t('Nieuwe kaart') }}
+                                        {{ $t('%1TD') }}
                                     </h3>
                                     <p class="style-description-small">
-                                        {{ $t('Betaal met een andere kaart') }}
+                                        {{ $t('%1SB') }}
                                     </p>
 
                                     <p v-if="model.requiresMandate && mandateId === null && saveMandateAsDefault" class="style-description-small">
-                                        <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('Zal worden ingesteld als standaard bankkaart') }}</span></span>
+                                        <span class="style-tag success"><span class="icon success tiny" /><span>{{ $t('%1UJ') }}</span></span>
                                     </p>
 
                                     <div v-else-if="!model.requiresMandate && mandateId === null" class="option">
                                         <Checkbox v-model="createMandate">
-                                            {{ $t('Bankkaart opslaan') }}
+                                            {{ $t('%1T8') }}
                                         </Checkbox>
                                         <Checkbox v-if="createMandate && (!saveMandateAsDefault || mandates.length > 0)" v-model="saveMandateAsDefault">
                                             <h3 class="style-title-list">
-                                                {{ $t('Instellen als standaard bankkaart') }}
+                                                {{ $t('%1Tc') }}
                                             </h3>
                                             <p v-if="model.requiresMandate" class="style-description-small">
-                                                {{ $t('Deze kaart zal ook worden gebruikt voor periodieke aanrekeningen') }}
+                                                {{ $t('%1Qc') }}
                                             </p>
                                         </Checkbox>
                                     </div>
@@ -57,7 +57,7 @@
 
                     <template v-if="model.requiresMandate && mandateId === null">
                         <hr v-if="(mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates)">
-                        <STInputBox error-fields="createMandate" :error-box="errors.errorBox" class="max" :title="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? $t('Toestemming') : ''">
+                        <STInputBox error-fields="createMandate" :error-box="errors.errorBox" class="max" :title="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? $t('%1QC') : ''">
                             <STList>
                                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
                                     <template #left>
@@ -65,11 +65,11 @@
                                     </template>
 
                                     <h3 class="style-title-list">
-                                        {{ $t('Deze kaart opslaan en voor periodieke aanrekeningen gebruiken') }}
+                                        {{ $t('%1S1') }}
                                     </h3>
 
                                     <p class="style-description-small">
-                                        {{ $t('We raden af om een persoonlijke kaart te gebruiken.') }}
+                                        {{ $t('%1Tt') }}
                                     </p>
                                 </STListItem>
                             </STList>
@@ -78,7 +78,7 @@
 
                     <div v-if="!mandateId" class="container">
                         <hr v-if="(model.requiresMandate && mandateId === null)">
-                        <STInputBox v-if="model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates && (model.requiresMandate || mandates?.length) " error-fields="method" :error-box="errors.errorBox" class="max" :title="$t('Betaalmethode')">
+                        <STInputBox v-if="model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates && (model.requiresMandate || mandates?.length) " error-fields="method" :error-box="errors.errorBox" class="max" :title="$t('%M7')">
                             <PaymentSelectionList v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                         </STInputBox>
                         <PaymentSelectionList v-else v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
@@ -86,37 +86,37 @@
                 </div>
 
                 <div v-if="model.requiresMandate && model.packages.length" class="container categorized-box">
-                    <h2>{{ $t('Periodiek te betalen') }}</h2>
+                    <h2>{{ $t('%1Qx') }}</h2>
                     <STInputBox class="max">
                         <STList>
                             <STPackageRow v-for="pack of model.packages.filter(p => p.meta.requiresMandate)" :key="pack.id" :pack="pack" />
                         </STList>
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ $t('Kosten worden op het einde van de maand afgerekend of wekelijks als het openstaand bedrag hoger dan 50 euro wordt.') }}
+                        {{ $t('%1Qw') }}
                     </p>
                 </div>
 
                 <div v-if="proFormaData?.invoice && proFormaData.invoice.totalWithVAT !== 0" class="container categorized-box">
-                    <h2>{{ $t('Nu te betalen') }}</h2>
+                    <h2>{{ $t('%10c') }}</h2>
                     <InvoiceItemsBox :invoice="proFormaData.invoice" />
                 </div>
 
                 <div v-else-if="proFormaData?.payment && proFormaData.payment.price !== 0" class="container categorized-box">
-                    <h2>{{ $t('Nu te betalen') }}</h2>
+                    <h2>{{ $t('%10c') }}</h2>
                     <PaymentItemsBox :payment="proFormaData.payment" />
                 </div>
             </main>
             <STToolbar>
                 <template v-if="loadingProForma || proFormaData?.payment" #left>
-                    <span v-if="!loadingProForma" data-testid="total-text">{{ $t('Nu te betalen') }}: {{ formatPrice(proFormaData!.payment!.price) }}</span>
+                    <span v-if="!loadingProForma" data-testid="total-text">{{ $t('%10c') }}: {{ formatPrice(proFormaData!.payment!.price) }}</span>
                     <span v-else class="style-placeholder-skeleton" />
                 </template>
                 <template #right>
                     <LoadingButton :loading="loadingProForma || loading">
                         <button v-if="proFormaData?.payment?.price === 0" class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
                             <span class="icon play small" />
-                            <span>{{ $t('Activeren') }}</span>
+                            <span>{{ $t('%1Lx') }}</span>
                         </button>
 
                         <button v-else class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
@@ -283,7 +283,7 @@ async function loadProForma() {
                 const to =  response.payment.price
 
                 if (from === 0 && to > from && to < 1_00_00) {
-                    Toast.info($t('Er wordt een kleine kost aangerekend van {price} voor de verificatie van je bankkaart', {price: Formatter.price(to)})).show()
+                    Toast.info($t('%1Rx', {price: Formatter.price(to)})).show()
                 }
 
             }
@@ -315,7 +315,7 @@ async function goNext() {
         if (createMandate.value === false && !props.model.checkout.mandate && props.model.requiresMandate) {
             throw new SimpleError({
                 code: 'required_checkbox',
-                message: $t('Verplicht aan te vinken: voor deze pakketten is het verplicht om een bankkaart te koppelen waarop de periodieke kosten verrekend kunnen worden (meestal één keer per maand tenzij je niets gebruikt).'),
+                message: $t('%1SW'),
                 field: 'createMandate'
             })
         }

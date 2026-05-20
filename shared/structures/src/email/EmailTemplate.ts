@@ -293,7 +293,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationRejected: return $t('%Al');
             case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cl');
 
-            case EmailTemplateType.InvoiceGenerationErrors: return $t('Fout bij automatische facturatie');
+            case EmailTemplateType.InvoiceGenerationErrors: return $t('%1Sm');
         }
     }
 
@@ -386,7 +386,7 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%CV');
 
             case EmailTemplateType.InvoiceGenerationErrors:
-                return $t('Facturatie');
+                return $t('%1Mm');
         }
     }
 

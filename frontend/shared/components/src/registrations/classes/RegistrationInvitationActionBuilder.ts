@@ -76,7 +76,7 @@ export class RegistrationInvitationActionBuilder {
 export function getDeleteInvitationAction({organizationId, context, owner, eventOrigin, afterDelete}: {organizationId: string, context: SessionContext, owner: any, eventOrigin: RegistrationInvitationEvenOrigin | undefined, afterDelete?: () => void}): TableAction<RegistrationInvitation> | null {
         
         return new InMemoryTableAction({
-            name: $t('Verwijder'),
+            name: $t('%Kk'),
             destructive: true,
             priority: 1,
             groupIndex: 100,
@@ -85,8 +85,8 @@ export function getDeleteInvitationAction({organizationId, context, owner, event
             icon: 'trash',
             enabled: true,
             handler: async (invitations: RegistrationInvitation[]) => {
-                const message = invitations.length === 1 ? $t('Weet je zeker dat je de uitnodiging van {name} wilt verwijderen?', {name: invitations[0].member.name}) : $t('Weet je zeker dat je {count} uitnodigingen wilt verwijderen?', {count: invitations.length});
-                const isConfirm = await CenteredMessage.confirm(message, $t('Verwijder'));
+                const message = invitations.length === 1 ? $t('%1Tv', {name: invitations[0].member.name}) : $t('Weet je zeker dat je {count} uitnodigingen wilt verwijderen?', {count: invitations.length});
+                const isConfirm = await CenteredMessage.confirm(message, $t('%Kk'));
 
                 if (isConfirm) {
                     deleteInvitations({
@@ -126,6 +126,6 @@ async function deleteInvitations({invitations, organizationId, context, owner, e
             return;
         }
     
-        const successMessage = invitations.length === 1 ? $t('De uitnodiging is verwijderd') : $t('{count} uitnodigingen zijn verwijderd', { count: invitations.length });
+        const successMessage = invitations.length === 1 ? $t('%1Tu') : $t('%1U8', { count: invitations.length });
         new Toast(successMessage, 'success green').show();
     }

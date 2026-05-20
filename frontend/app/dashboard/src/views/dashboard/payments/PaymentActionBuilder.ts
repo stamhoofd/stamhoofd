@@ -315,7 +315,7 @@ export class PaymentActionBuilder {
                     options: [
                         {
                             id: 'all',
-                            name: $t(`Alle betalingen van verenigingen`),
+                            name: $t(`%1TH`),
                             value: [
                                 EmailRecipientSubfilter.create({
                                     type: EmailRecipientFilterType.PaymentOrganization,
@@ -345,7 +345,7 @@ export class PaymentActionBuilder {
                         },
                         {
                             id: 'none',
-                            name: $t(`Geen betalingen van verenigingen`),
+                            name: $t(`%1QL`),
                             value: [],
                         },
                     ],

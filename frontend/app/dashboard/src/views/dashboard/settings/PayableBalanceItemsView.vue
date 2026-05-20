@@ -1,6 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`Openstaand bedrag`)" />
+        <STNavigationBar :title="$t(`%76`)" />
 
         <main>
             <h1>{{ $t('%vX', {organization: item.organization.name}) }}</h1>

@@ -302,7 +302,7 @@ function getReplacements() {
 
         errors: Replacement.create({
             token: 'errors',
-            html: '<p>'+ Formatter.escapeHtml($t(`Foutmelding 1`)) + '</p><p>' + Formatter.escapeHtml($t(`Foutmelding 2`)) + '</p>',
+            html: '<p>'+ Formatter.escapeHtml($t(`%1Su`)) + '</p><p>' + Formatter.escapeHtml($t(`%1Rl`)) + '</p>',
         }),
 
     };

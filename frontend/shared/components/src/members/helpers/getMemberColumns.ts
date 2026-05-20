@@ -444,7 +444,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
     if (waitingList) {
         allColumns.push(
             new Column<ObjectType, string[]>({
-                name: $t('Uitgenodigd voor'),
+                name: $t('%1UD'),
                 enabled: true,
                 // todo?
                 allowSorting: false,
@@ -456,7 +456,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 },
                 format: (v) => {
                     if (v.length === 0) {
-                        return $t('Nog niet uitgenodigd');
+                        return $t('%1QP');
                     }
                     return Formatter.joinLast(v.sort(), ', ', ' ' + $t(`%M1`) + ' ');
                 },

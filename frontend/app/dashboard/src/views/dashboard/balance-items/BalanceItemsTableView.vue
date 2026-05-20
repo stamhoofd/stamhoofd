@@ -190,7 +190,7 @@ const allColumns: Column<ObjectType, any>[] = [
     ...(organization.value && organization.value.meta.invoicesEnabled ? [
         new Column<ObjectType, number>({
             id: 'priceInvoiced',
-            name: $t('Gefactureerd bedrag'),
+            name: $t('%1US'),
             getValue: object => object.priceInvoiced,
             format: (val, width) => Formatter.price(val),
             getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),

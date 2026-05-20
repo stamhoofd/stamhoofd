@@ -39,7 +39,7 @@ fetchMember(props.memberId)
 .then(m => member.value = m)
 .catch(error => {
     console.error(error);
-    Toast.error($t('Het lid kon niet worden geopend.')).show();
+    Toast.error($t('%1U7')).show();
     dismiss().catch(console.error);
 });
 </script>

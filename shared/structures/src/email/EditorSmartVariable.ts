@@ -335,7 +335,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'errors',
-            name: $t('Foutmeldingen'),
+            name: $t('%1U2'),
         }));
 
         // Fill examples using the example replacements

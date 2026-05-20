@@ -32,7 +32,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'cannot_fail',
                 message: 'A payment that has been invoiced cannot be marked as failed. Instead create a separate chargeback payment with a negative amount.',
-                human: $t('Een betaling kan niet worden geannuleerd als het al werd gefactureerd. Maak in de plaats daarvan een chargeback aan, die kan je apart crediteren.')
+                human: $t('%1RI')
             })
         }
 
@@ -342,7 +342,7 @@ export class PaymentService {
      * Try to cancel a payment that is still pending
      */
     static shouldTryToCancel(status: PaymentStatus, payment: Payment): boolean {
-        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
+        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && (payment.method !== PaymentMethod.DirectDebit || STAMHOOFD.environment === 'development')) {
             let timeout = STAMHOOFD.environment === 'development' ? 60 * 1000 * 2 : 60 * 1000 * 30;
 
             // If payconiq and not yet 'identified' (scanned), cancel after 5 minutes
@@ -724,7 +724,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'cannot_create_mandate_for_provider',
                     message: 'Saving a payment method is not yet supported for this payment method',
-                    human: $t('Deze betaalmethode wordt nog niet ondersteund voor het opslaan van een betaalmethode, maak een andere keuze.')
+                    human: $t('%1U0')
                 })
             }
         }
@@ -844,7 +844,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'missing_email',
                             message: 'Email address is required for online payments via Stripe',
-                            human: $t('Een e-mailadres is noodzakelijk voor online betalingen')
+                            human: $t('%1SJ')
                         })
                     }
                     const stripeResult = await StripeHelper.createPayment({
@@ -1028,7 +1028,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'cannot_create_mandate_without_payment',
                     message: 'Cannot create saved payment method without payment of a small amount',
-                    human: $t(`We kunnen geen betaalmethode opslaan zonder een betaling van een klein bedrag`),
+                    human: $t(`%1Ss`),
                 });
             }
 
@@ -1054,7 +1054,7 @@ export class PaymentService {
                  throw new SimpleError({
                     code: 'mandates_disabled',
                     message: 'Cannot pay with mandate',
-                    human: $t('Betalen via opgeslagen bankkaart niet (meer) mogelijk')
+                    human: $t('%1SK')
                 });
             }
             
@@ -1077,7 +1077,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Mandate not found',
-                    human: $t('Deze betaalmethode kon niet teruggevonden worden. Herlaad de pagina en probeer opnieuw.'),
+                    human: $t('%1TQ'),
                     field: 'mandateId'
                 });
             }
@@ -1086,7 +1086,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'mandate_not_valid',
                     message: 'Mandate not valid',
-                    human: $t('Deze opgeslagen betaalmethode is niet (meer) geldig en kan niet gebruikt worden. Maak een andere keuze.'),
+                    human: $t('%1QA'),
                     field: 'mandateId'
                 });
             }
@@ -1114,7 +1114,7 @@ export class PaymentService {
                  throw new SimpleError({
                     code: 'mandates_disabled',
                     message: 'Cannot pay with mandate',
-                    human: $t('Bankkaart opslaan niet mogelijk')
+                    human: $t('%1R1')
                 });
             }
         }

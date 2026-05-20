@@ -11,6 +11,7 @@ import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStruct
 import { Context } from '../../../../helpers/Context.js';
 import { invoiceFilterCompilers } from '../../../../sql-filters/invoices.js';
 import { invoiceSorters } from '../../../../sql-sorters/invoices.js';
+import { InvoiceService } from '../../../../services/InvoiceService.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -183,6 +184,12 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (JSON.stringify(nextFilter) === JSON.stringify(requestQuery.pageFilter)) {
                 console.error('Found infinite loading loop for', requestQuery);
                 next = undefined;
+            }
+        }
+
+        for (const invoice of invoices) {
+            if (invoice.number && STAMHOOFD.environment === 'development') {
+                await InvoiceService.generatePdf(invoice)
             }
         }
 

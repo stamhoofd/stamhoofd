@@ -230,9 +230,9 @@ export function useRegistrationQuickActions(): QuickActions {
                         group: invitationDataForIcon.group,
                         organization: invitationDataForIcon.organization,
                     },
-                    prefix: $t('Uitnodiging'),
-                    title: $t('Schrijf {firstName} in voor {groups}', {firstName: member.member.firstName, groups: groupsText}),
-                    description: $t('Je kan {firstName} nu inschrijven voor {groups}.', {firstName: member.member.firstName, groups: groupsText}),
+                    prefix: $t('%1S3'),
+                    title: $t('%1UP', {firstName: member.member.firstName, groups: groupsText}),
+                    description: $t('%1T4', {firstName: member.member.firstName, groups: groupsText}),
                     action: () => {
                         chooseGroupForMember({member, defaultOrganization: invitationDataForIcon.organization, displayOptions: {action: 'present', modalDisplayStyle: 'popup'}}).catch(console.error);
                     },
@@ -262,7 +262,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     arr.push({
                         leftComponent: RegistrationInvitationIcon,
                         leftProps: { event, group: event.group },
-                        prefix: $t('Uitnodiging'),
+                        prefix: $t('%1S3'),
                         title: $t('%1Mp', { event: event.name }),
                         description,
                         action: () => openEvent({event, show}),
@@ -283,7 +283,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     arr.push({
                         leftComponent: EventIcon,
                         leftProps: { event },
-                        prefix: $t('Aankomende activiteit'),
+                        prefix: $t('%1SL'),
                         title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
                         description: Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate)),
                         action: () => openEvent({event, show}),

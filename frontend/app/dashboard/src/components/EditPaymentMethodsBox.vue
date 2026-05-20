@@ -86,11 +86,11 @@
 
             <template v-if="$isStamhoofd && (enableMandates || sortedPaymentMethods.find(p => PaymentMethodHelper.canCreateMandate(p)))">
                 <hr>
-                <h2>{{ $t('Bankkaarten opslaan') }}</h2>
-                <p>{{ $t('Sta toe om de gegevens van bankkaarten (Bancontact, iDEAL en kredietkaart) op te slaan voor later gebruik. Deze kunnen dan gebruikt worden door beheerders om betalingen te innen via SEPA domiciliëring of creditcard - of geselecteerd worden bij het afrekenen. Voorlopig enkel ondersteund voor B2B betalingen via Mollie.') }}</p>
+                <h2>{{ $t('%1SI') }}</h2>
+                <p>{{ $t('%1Ry') }}</p>
 
                 <STList>
-                    <CheckboxListItem v-model="enableMandates" :label="$t('Toelaten om bankkaarten op te slaan en te hergebruiken')" :description="$t('Betalingen via SEPA domiciliëring kunnen tot 3 werkdagen in beslag nemen en voor lange tijd teruggevorderd worden. Pas zeker je algemene voorwaarden aan.')" />
+                    <CheckboxListItem v-model="enableMandates" :label="$t('%1S0')" :description="$t('%1RD')" />
                 </STList>
             </template>
         </div>
@@ -538,10 +538,10 @@ const enableMandates = computed({
         }
         if (!enableMandates) {
             CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je opgeslagen betaalgegevens wilt uitschakelen?'),
-                description: $t('Dit maakt reeds opgeslagen betaalmethodes of automatische aanrekeningen onbruikbaar in het systeem.'),
-                requireCheckbox: $t('Ja, ik begrijp de gevolgen'),
-                confirmText: $t('Uitschakelen'),
+                title: $t('%1Si'),
+                description: $t('%1Q8'),
+                requireCheckbox: $t('%1Sc'),
+                confirmText: $t('%1TV'),
                 destructive: true
             }).then((confirmed) => {
                 if (confirmed) {

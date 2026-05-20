@@ -62,10 +62,10 @@
                                         <span class="icon email" />
                                     </template>
                                     <h2 class="style-title-list">
-                                        {{ $t('Uitnodigingen') }}
+                                        {{ $t('%1TY') }}
                                     </h2>
                                     <p class="style-description">
-                                        {{ $t('Bekijk de uitnodigingen voor {group}.', {group: event.group.settings.name.toString()}) }}
+                                        {{ $t('%1QH', {group: event.group.settings.name.toString()}) }}
                                     </p>
                                     <template #right>
                                         <span class="style-description-small">{{ formatInteger(invitationsCount) }}</span>

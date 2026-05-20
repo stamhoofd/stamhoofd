@@ -16,11 +16,11 @@
         </p>
 
         <h3 class="style-title-list">
-            <span>{{ $t('Uitgenodigd voor {name}', {name: invitationGroupData.name}) }}</span>
+            <span>{{ $t('%1R6', {name: invitationGroupData.name}) }}</span>
         </h3>
 
         <p v-if="invitation.createdAt" class="style-description-small">
-            {{ $t('Uitgenodigd op {date}', {date: Formatter.date(invitation.createdAt) }) }}
+            {{ $t('%1UO', {date: Formatter.date(invitation.createdAt) }) }}
         </p>
 
         <template #right>

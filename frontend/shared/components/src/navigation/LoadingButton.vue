@@ -58,6 +58,7 @@ export default class LoadingButton extends VueComponent {
     &.max {
         display: block;
         width: 100%;
+        max-width: none;
     }
 
     &.bottom {

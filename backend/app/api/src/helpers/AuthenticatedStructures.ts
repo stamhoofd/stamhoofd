@@ -1238,7 +1238,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'group_not_found',
                     message: 'Group not found',
-                    human: $t(`Groep niet gevonden`),
+                    human: $t(`%1SM`),
                 })
             }
 
@@ -1276,7 +1276,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'member_not_found',
                     message: 'Member not found',
-                    human: $t(`Lid niet gevonden`),
+                    human: $t(`%EO`),
                 })
             }
 
@@ -1285,7 +1285,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'group_not_found',
                     message: 'Group not found',
-                    human: $t(`Groep niet gevonden`),
+                    human: $t(`%1SM`),
                 })
             }
 

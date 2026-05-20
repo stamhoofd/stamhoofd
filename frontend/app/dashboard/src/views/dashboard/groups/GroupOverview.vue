@@ -72,10 +72,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/email.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Uitnodigingen') }}
+                            {{ $t('%1TY') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Bekijk de uitnodigingen voor {group}.', {group: group.settings.name.toString()}) }}
+                            {{ $t('%1QH', {group: group.settings.name.toString()}) }}
                         </p>
                         <template #right>
                             <span class="style-description-small">{{ formatInteger(invitationsCount) }}</span>
@@ -190,7 +190,7 @@
                                 {{ $t('%Lj') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('Stop inschrijvingen van leden via het ledenportaal (behalve voor uitgenodigde leden). Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.') }}
+                                {{ $t('%1QD') }}
                             </p>
                             <template #right>
                                 <button type="button" class="button secundary danger hide-smartphone">

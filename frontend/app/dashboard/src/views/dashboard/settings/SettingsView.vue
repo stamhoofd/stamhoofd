@@ -143,10 +143,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/transfer-outgoing.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Uitgaande facturen') }}
+                        {{ $t('%1Tp') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Beheer de nummering van je uitgaande facturen.') }}
+                        {{ $t('%1Rv') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -245,7 +245,7 @@
                             {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Steun kwetsbare gezinnen') }}
+                            {{ $t('%1Te') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -393,10 +393,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Facturen en betaalinstellingen') }}
+                            {{ $t('%1S7') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Beheer hoe je betaalt voor Stamhoofd, download jouw facturen en bekijk jouw tegoed') }}
+                            {{ $t('%1UG') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

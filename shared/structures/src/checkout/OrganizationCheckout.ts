@@ -72,7 +72,7 @@ export class PackagePurchases extends AutoEncoder {
                         throw new SimpleError({
                             code: 'already_active',
                             message: 'Cannot activate this package because of conflicting package',
-                            human: $t('Dit pakket is ondertussen al geactiveerd, je kan het niet nog eens activeren. Herlaad de pagina.')
+                            human: $t('%1Qa')
                         })
                     }
                 }
@@ -91,7 +91,7 @@ export class PackagePurchases extends AutoEncoder {
                 throw new SimpleError({
                     code: 'invalid_package',
                     message: 'Package valid until date is too far in the future',
-                    human: $t('Je kan dit pakket nog niet zoveel op voorhand verlengen')
+                    human: $t('%1Sv')
                 });
             }
         }

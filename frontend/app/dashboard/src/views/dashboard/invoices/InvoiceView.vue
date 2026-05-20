@@ -128,7 +128,7 @@
             <h2>{{ $t('%1JH') }}</h2>
 
             <p v-if="invoice.payments.length === 0" class="info-box">
-                {{ $t('Deze factuur werd nog niet betaald') }}
+                {{ $t('%1TW') }}
             </p>
 
             <STList v-else>

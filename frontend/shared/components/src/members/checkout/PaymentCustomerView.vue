@@ -2,10 +2,10 @@
     <SaveView :loading="loading" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="companies.length === 0 && !editCompany" :title="$t(`%uE`)" @save="goNext">
         <h1>{{ $t('%1Ke') }}</h1>
         <p v-if="invoicesEnabled && !allowNonDefault">
-            {{ $t('Deze gegevens komen op jouw facturen. Kijk het even na.') }}
+            {{ $t('%1Rd') }}
         </p>
         <p v-else-if="invoicesEnabled">
-            {{ $t('Deze gegevens komen op jouw factuur. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.') }}
+            {{ $t('%1RH') }}
         </p>
         <p v-else>
             {{ $t('%eQ') }}
@@ -26,7 +26,7 @@
                     </template>
 
                     <template #right>
-                        <button v-tooltip="$t('Bewerken')" type="button" class="button edit icon gray" @click="openEditCompany(company)" />
+                        <button v-tooltip="$t('%f9')" type="button" class="button edit icon gray" @click="openEditCompany(company)" />
                     </template>
                 </CompanyRow>
             </STList>
@@ -34,7 +34,7 @@
             <STList v-else>
                 <CompanyRow :company="companies[0]" :selectable="false" :is-default="companies.length > 1">
                     <template #right>
-                        <button v-tooltip="$t('Bewerken')" type="button" class="button edit icon gray" @click="openEditCompany(companies[0])" />
+                        <button v-tooltip="$t('%f9')" type="button" class="button edit icon gray" @click="openEditCompany(companies[0])" />
                     </template>
                 </CompanyRow>
             </STList>
@@ -45,11 +45,11 @@
                 </button>
                 <button v-else-if="!allowNonDefault" type="button" class="button text" @click="editInvoiceSettings">
                     <span class="icon settings small" />
-                    <span>{{ $t('Wijzig standaard facturatiegegevens') }}</span>
+                    <span>{{ $t('%1RW') }}</span>
                 </button>
                 <button v-else type="button" class="button text" @click="editInvoiceSettings">
                     <span class="icon edit" />
-                    <span>{{ $t('Wijzig facturatiegegevens') }}</span>
+                    <span>{{ $t('%1R3') }}</span>
                 </button>
             </p>
             <p v-else class="warning-box">

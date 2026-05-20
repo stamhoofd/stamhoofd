@@ -71,7 +71,7 @@ export class RecordAnswerHelper {
             throw new SimpleError({
                 code: 'invalid_record_type',
                 message: `Cannot change record type from ${original.type} to ${updated.type}`,
-                human: $t(`Je kan het type van de bestaande vraag '{name}' niet wijzigen.`, {name: original.name}),
+                human: $t(`%1Qn`, {name: original.name}),
             })
         }
 
@@ -79,7 +79,7 @@ export class RecordAnswerHelper {
             throw new SimpleError({
                 code: 'invalid_record_type',
                 message: `Cannot change record file type from ${original.fileType} to ${updated.fileType}`,
-                human: $t(`Je kan het bestandstype van de bestaande vraag '{name}' niet wijzigen.`, {name: original.name}),
+                human: $t(`%1SP`, {name: original.name}),
             })
         }
     }

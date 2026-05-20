@@ -13,7 +13,7 @@
                 <div class="container">
                     <hr>
                     <h2 class="style-with-button">
-                        <div>{{ $t('Bankkaarten') }}</div>
+                        <div>{{ $t('%1UB') }}</div>
                     </h2>
                     <PaymentMandatesBox :paying-organization-id="organization.id" :selling-organization-id="platform.membershipOrganizationId!" />
                 </div>
@@ -21,7 +21,7 @@
                 <div class="container">
                     <hr>
                     <h2 class="style-with-button">
-                        <div>{{ $t('Pakketten') }}</div>
+                        <div>{{ $t('%1Qj') }}</div>
                         <div class="hover-show">
                             <button class="button icon gray add" type="button" @click="createPackage()" />
                         </div>

@@ -97,7 +97,7 @@ export class PaymentMandate extends AutoEncoder {
             return '•••• ' + this.details.cardNumber;
         }
 
-        return $t('Onbekende betaalmethode');
+        return $t('%1R2');
     }
 
     get formattedExpiryDate() {

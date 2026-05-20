@@ -40,9 +40,9 @@ export class PaymentFilterBuilders {
 
     static get invoiced() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`Gefactureerd`),
+            name: $t(`%1JO`),
             options: [
-                new MultipleChoiceUIFilterOption($t('Nog niet gefactureerd'), null),
+                new MultipleChoiceUIFilterOption($t('%1JB'), null),
             ],
             wrapper: {
                 invoiceId: FilterWrapperMarker

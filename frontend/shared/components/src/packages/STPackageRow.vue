@@ -3,7 +3,7 @@
         <template #left>
             <IconContainer :icon="pack.meta.isWebshops ? 'basket' : 'group'" :class="{'gray': !pack.status.isActive, 'secundary': pack.status.isActive && pack.meta.isTrial}">
                 <template #aside>
-                    <span v-if="pack.meta.isTrial" v-tooltip="$t('Proefperiode')" :class="'icon trial small stroke ' + (pack.status.isActive ? 'secundary' : '')" />
+                    <span v-if="pack.meta.isTrial" v-tooltip="$t('%1IH')" :class="'icon trial small stroke ' + (pack.status.isActive ? 'secundary' : '')" />
                     <span v-else-if="pack.status.isActive" class="icon success small primary" />
                 </template>
             </IconContainer>
@@ -14,29 +14,29 @@
         <p class="style-description-small" v-text="pack.meta.humanPricing" />
 
         <p v-if="pack.endDate && pack.endDate <= now" class="style-description-small">
-            {{ $t('Stopgezet op {date}', {date: formatDate(pack.endDate)}) }}
+            {{ $t('%1TC', {date: formatDate(pack.endDate)}) }}
         </p>
 
         <p v-if="pack.meta.startDate > now" class="style-description-small">
-            {{ $t('Vanaf {date}', {date: formatStartDate(pack.meta.startDate)}) }}
+            {{ $t('%kR', {date: formatStartDate(pack.meta.startDate)}) }}
         </p>
 
         <p v-if="!pack.validAt && pack.endDate" class="style-description-small">
-            {{ $t('Geldig tot {date}', {date: formatEndDate(pack.endDate)}) }}
+            {{ $t('%1QT', {date: formatEndDate(pack.endDate)}) }}
         </p>
         <p v-if="pack.validAt && pack.endDate" class="style-description-small">
             {{ capitalizeFirstLetter(formatDateRange(pack.meta.startDate, pack.endDate)) }}
         </p>
         <p v-if="pack.validAt && !pack.endDate" class="style-description-small">
-            {{ $t('Zonder einddatum') }}
+            {{ $t('%1TN') }}
         </p>
 
         <p v-if="$app === 'admin' && !pack.meta.allowRenew" class="style-description-small">
-            {{ $t('Kan niet verlengd worden') }}
+            {{ $t('%1SO') }}
         </p>
 
         <p v-if="$app === 'admin' && pack.meta.allowRenew && pack.meta.keepPricesOnRenewal" class="style-description-small">
-            {{ $t('Prijzen blijven behouden bij verlengen') }}
+            {{ $t('%1RT') }}
         </p>
 
         <template #right>

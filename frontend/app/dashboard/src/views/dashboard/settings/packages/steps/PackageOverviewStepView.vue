@@ -1,8 +1,8 @@
 <template>
-    <SaveView :loading="loading" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="!acceptTerms" :title="$t(`Overzicht`)" @save="goNext">
-        <h1>{{ $t('Overzicht') }}</h1>
+    <SaveView :loading="loading" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" data-submit-last-field :disabled="!acceptTerms" :title="$t(`%YI`)" @save="goNext">
+        <h1>{{ $t('%YI') }}</h1>
         <p>
-            <I18nComponent :t="$t('Meer info over alle prijzen en een prijscalculator kan je terugvinden op <button>onze website</button>')">
+            <I18nComponent :t="$t('%1Sr')">
                 <template #button="{content}">
                     <a :href="'https://'+ LocalizedDomains.marketing +'/prijzen'" class="inline-link" target="_blank">
                         {{ content }}
@@ -20,7 +20,7 @@
 
         <STInputBox :error-box="errors.errorBox" error-fields="terms" class="max">
             <Checkbox v-model="acceptTerms">
-                <I18nComponent :t="$t('Ik ga akkoord met de <button>algemene voorwaarden</button>')">
+                <I18nComponent :t="$t('%1SS')">
                     <template #button="{content}">
                         <a :href="'https://'+ LocalizedDomains.marketing +'/terms/algemene-voorwaarden'" target="_blank" class="inline-link">
                             {{ content }}

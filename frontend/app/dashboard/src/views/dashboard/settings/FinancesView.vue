@@ -147,10 +147,10 @@
                                 <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ item.organization.meta.invoicesEnabled ? $t('Facturen en betaalinstellingen') : $t('%NL') }}
+                                {{ item.organization.meta.invoicesEnabled ? $t('%1S7') : $t('%NL') }}
                             </h2>
                             <p class="style-description">
-                                {{ item.organization.meta.invoicesEnabled ? $t('Download jouw facturen en bekijk jouw tegoed') : $t('%NM', {organization: item.organization.name}) }}
+                                {{ item.organization.meta.invoicesEnabled ? $t('%1QW') : $t('%NM', {organization: item.organization.name}) }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />

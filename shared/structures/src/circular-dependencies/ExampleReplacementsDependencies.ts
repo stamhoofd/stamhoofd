@@ -139,10 +139,10 @@ function fillReplacements(replacements: Replacement[]) {
         iban: 'BE1234 1234 1234',
         ibanName: $t(`%ID`),
         customer: PaymentCustomer.create({
-            firstName: $t('Jan Janssens').split(' ')[0],
-            lastName: $t('Jan Janssens').split(' ').slice(1).join(' '),
-            phone: $t('+32 479 11 11 11'),
-            email: $t('jan.janssens@voorbeeld.be')
+            firstName: $t('%58').split(' ')[0],
+            lastName: $t('%58').split(' ').slice(1).join(' '),
+            phone: $t('%1Qk'),
+            email: $t('%1Q9')
         }),
         transferDescription: '+++111/111/111+++',
         transferSettings: TransferSettings.create({

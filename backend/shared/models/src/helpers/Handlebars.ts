@@ -103,6 +103,10 @@ Handlebars.registerHelper('coalesce', (...args) => {
     return args.find(a => a !== null && a !== undefined) ?? null;
 });
 
+Handlebars.registerHelper('$t', (t: string) => {
+    return $t(t);
+});
+
 Handlebars.registerHelper('days', (a, b) => {
     if (!(a instanceof Date) || !(b instanceof Date)) {
         return 0;

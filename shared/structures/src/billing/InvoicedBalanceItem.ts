@@ -105,7 +105,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
         if (balanceItem.VATPercentage === null) {
             throw new SimpleError({
                 message: 'Cannot create InvoicedBalanceItem for balance item without VAT percentage',
-                human: $t('%1Ij'),
+                human: $t('%1TA', {item: balanceItem.itemTitle}),
                 code: 'balance_item_without_vat_percentage',
             });
         }
@@ -150,7 +150,25 @@ export class InvoicedBalanceItem extends AutoEncoder {
             item.quantity = -item.quantity;
         }
 
+        item.roundUnitPriceWithoutDifferenceInTotal()
         return item;
+    }
+
+    roundUnitPriceWithoutDifferenceInTotal() {
+
+        // Round unit price cleaner
+        const recalculated = STMath.round(this.totalWithoutVAT * 10_000 / this.quantity);
+        if (recalculated !== this.unitPrice) {
+            if (STMath.round(recalculated * this.quantity / 1_00_00_00) * 100 === this.totalWithoutVAT) {
+                if (this.addedToUnitPriceToCorrectVAT !== 0) {
+                    const originalUnitPrice = this.unitPrice - this.addedToUnitPriceToCorrectVAT
+                    this.addedToUnitPriceToCorrectVAT = recalculated - originalUnitPrice
+                }
+                this.unitPrice = recalculated;
+                //this.addedToUnitPriceToCorrectVAT = 
+            }
+        }
+
     }
 
     /**

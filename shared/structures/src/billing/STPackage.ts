@@ -210,41 +210,41 @@ export class STPackageMeta extends AutoEncoder {
 
         if (this.unitPrice) {
             if (this.pricingType === STPricingType.PerMember) {
-                strs.push($t(`{price} per lid, per jaar`, {price: Formatter.price(this.unitPrice)}));
+                strs.push($t(`%1T2`, {price: Formatter.price(this.unitPrice)}));
             } else if (this.pricingType === STPricingType.PerYear) {
-                strs.push($t(`{price} per jaar`, {price: Formatter.price(this.unitPrice)}));
+                strs.push($t(`%1RJ`, {price: Formatter.price(this.unitPrice)}));
             } else if (this.pricingType === STPricingType.Fixed) {
-                strs.push($t(`{amount} x {price} éénmalig`, {amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice)}));
+                strs.push($t(`%1RX`, {amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice)}));
             }
 
             if (this.minimumAmount) {
                 if (this.pricingType !== STPricingType.Fixed) {
-                    strs.push($t(`Minimum aantal van {amount} per jaar`, {amount: Formatter.integer(this.minimumAmount)}));
+                    strs.push($t(`%1Ta`, {amount: Formatter.integer(this.minimumAmount)}));
                 }
             }
         }
 
-        let suffix = $t('per stuk / ticket')
+        let suffix = $t('%1U3')
         if (this.type === STPackageType.Members) {
-            suffix = $t('per lid');
+            suffix = $t('%1Ts');
         }
 
         let minimumSuffix = '';
         let maximumSuffix = '';
 
         if (this.serviceFeeMinimum) {
-            minimumSuffix = $t('met een minimum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMinimum)});
+            minimumSuffix = $t('%1RM', {price: Formatter.price(this.serviceFeeMinimum)});
 
             if (this.type === STPackageType.Members) {
-                minimumSuffix = $t('met een minimum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMinimum)});
+                minimumSuffix = $t('%1RM', {price: Formatter.price(this.serviceFeeMinimum)});
             }
         }
 
         if (this.serviceFeeMaximum) {
-            maximumSuffix = $t('met een maximum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMaximum)});
+            maximumSuffix = $t('%1Tl', {price: Formatter.price(this.serviceFeeMaximum)});
 
             if (this.type === STPackageType.Members) {
-                maximumSuffix = $t('met een maximum van {price} per stuk of ticket', {price: Formatter.price(this.serviceFeeMaximum)});
+                maximumSuffix = $t('%1Tl', {price: Formatter.price(this.serviceFeeMaximum)});
             }
         }
 
@@ -257,7 +257,7 @@ export class STPackageMeta extends AutoEncoder {
         }
 
         if (strs.length === 0) {
-            strs.push($t(`Gratis`));
+            strs.push($t(`%1Mn`));
         }
 
         return strs.join('\n');

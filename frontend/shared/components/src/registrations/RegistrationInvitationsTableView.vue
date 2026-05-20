@@ -4,7 +4,7 @@
             {{ description }}
         </p>
         <template #empty>
-            {{ $t('Geen uitnodigingen') }}
+            {{ $t('%1RO') }}
         </template>
     </ModernTableView>
 </template>
@@ -35,16 +35,16 @@ const props = withDefaults(defineProps<{
 });
 
 const description = computed(() => {
-    let base = $t('Uitnodigingen zijn zichtbaar voor leden in het ledenportaal.');
+    let base = $t('%1TI');
 
     if (hasRestrictions(props.group)) {
-        base += ' ' + $t('Restricties van een groep zijn niet van toepassing op uitgenodigde leden.');
+        base += ' ' + $t('%1Tw');
     }
 
     // if group has waiting list
     if (props.group.waitingList !== null) {
         const groupName = props.group.settings.name.toString();
-        base += ' ' + $t('Door leden op de wachtlijst uit te nodigen kunnen ze zelf inschrijven voor {group}.', {group: groupName});
+        base += ' ' + $t('%1QG', {group: groupName});
     }
 
     return base;
@@ -63,7 +63,7 @@ function hasRestrictions(group: Group) {
 const getActionBuilder = useRegistrationInvitationActionBuilder();
 const actions = getActionBuilder({group: props.group, eventOrigin: 'invitations-table'}).getActions();
 
-const title = $t('Uitnodigingen');
+const title = $t('%1TY');
 
 useRegistrationInvitationEventListener('updated', async (value) => {
     if (value.groupIds.has(props.group.id)) {
@@ -102,7 +102,7 @@ if (props.updateTotal) {
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'memberName',
-        name: $t('Naam'),
+        name: $t('%1Os'),
         getValue: invitation => invitation.member.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -122,7 +122,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, Date>({
         id: 'createdAt',
-        name: $t('Uitgenodigd op'),
+        name: $t('%1QV'),
         getValue: invitation => invitation.createdAt,
         format: (value, width) => {
             if (width < 150) {

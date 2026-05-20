@@ -202,7 +202,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invoiced',
                             message: 'You cannot change VAT settings of balance items when the balance item has been invoiced',
-                            human: $t('Je kan de BTW-instellingen niet meer wijzigen na facturatie. Zet het aantal op 0 en maak een nieuw item aan indien nodig.')
+                            human: $t('%1Rt')
                         })
                     }
                 }

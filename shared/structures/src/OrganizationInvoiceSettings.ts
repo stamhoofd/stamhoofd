@@ -1,4 +1,5 @@
 import { AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Image } from './files/Image.js';
 
 export class OrganizationInvoiceSettings extends AutoEncoder {
     /**
@@ -25,4 +26,13 @@ export class OrganizationInvoiceSettings extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     fixedPrefix: string
+
+    @field({ decoder: Image, nullable: true })
+    background: Image | null
+
+    /**
+     * Use a different background for the 2nd and later backgrounds
+     */
+    @field({ decoder: Image, nullable: true })
+    secondBackground: Image | null
 }

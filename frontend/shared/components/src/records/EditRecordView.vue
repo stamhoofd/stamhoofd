@@ -16,7 +16,7 @@
 
             <div>
                 <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
-                    <Dropdown v-model="type" v-tooltip="areMultipleTypesAvailable ? undefined : $t(`Het type is niet meer wijzigbaar nadat een vraag is opgeslagen.`)" :disabled="!areMultipleTypesAvailable">
+                    <Dropdown v-model="type" v-tooltip="areMultipleTypesAvailable ? undefined : $t(`%1Ty`)" :disabled="!areMultipleTypesAvailable">
                         <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
                             <option v-for="_type in group.values" :key="_type.value" :value="_type.value" :disabled="_type.disabled">
                                 {{ _type.name }}
@@ -26,7 +26,7 @@
                 </STInputBox>
 
                 <STInputBox v-if="type === RecordType.File" error-fields="fileType" :error-box="errors.errorBox" :title="$t(`%iq`)">
-                    <Dropdown v-model="fileType" v-tooltip="enableAllTypes ? undefined : $t(`Het bestandtype is niet meer wijzigbaar nadat een vraag is opgeslagen.`)" :disabled="!enableAllTypes">
+                    <Dropdown v-model="fileType" v-tooltip="enableAllTypes ? undefined : $t(`%1QR`)" :disabled="!enableAllTypes">
                         <option v-for="item in availableFileTypes" :key="item.value || 'null'" :value="item.value">
                             {{ item.name }}
                         </option>
@@ -302,7 +302,7 @@ const availableTypes: {name: string, values: {value: RecordType, name: string, d
         ],
     },
     {
-        name: $t(`Andere`),
+        name: $t(`%1JG`),
         values: [
             {
                 value: RecordType.Address,

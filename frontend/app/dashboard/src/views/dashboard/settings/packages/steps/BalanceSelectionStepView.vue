@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" :title="$t(`Openstaand bedrag`)" @save="goNext">
+    <SaveView :loading="loading" :error-box="errors.errorBox" save-icon-right="arrow-right" :save-text="$t('%16p')" :title="$t(`%76`)" @save="goNext">
         <h1>{{ title.title }}</h1>
         <p v-if="title.description">
             {{ title.description }}
@@ -107,18 +107,18 @@ const title = computed(() => {
     if (canSelect.value) {
         if (props.model.checkout.purchases.empty) {
             return {
-                title: $t('Wat wil je betalen?'),
-                description: $t('Alle prijzen zijn inclusief BTW.')
+                title: $t('%1Sk'),
+                description: $t('%1TP')
             }
         }
         return {
-            title: $t('Betaal je dit meteen ook?'),
-            description: $t('Deze items stonden nog op ‘te betalen’. Bespaar jezelf wat werk door deze mee af te rekenen. Alle prijzen zijn inclusief BTW.'),
+            title: $t('%1UQ'),
+            description: $t('%1Sn'),
         }
     } else {
         return {
-            title:  $t('Dit rekenen we mee af'),
-            description: $t('Deze items stonden nog open en zullen mee aangerekend worden. Alle prijzen zijn inclusief BTW.')
+            title:  $t('%1QO'),
+            description: $t('%1S6')
         }
     }
 })

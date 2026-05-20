@@ -183,7 +183,7 @@ const actions: TableAction<ObjectType>[] = [
     }),
 
     new AsyncTableAction({
-        name: $t('Aanrekenen via opgeslagen betaalkaart'),
+        name: $t('%1Qi'),
         icon: 'receive',
         priority: 11,
         groupIndex: 3,
@@ -193,10 +193,10 @@ const actions: TableAction<ObjectType>[] = [
         destructive: true,
         handler: async (selection) => {
             if (!await CenteredMessage.confirm({
-                title: $t('Ben je zeker dat je dit wilt aanrekenen?'),
-                description: $t('Je rekent de openstaande bedragen rechstreeks en meteen af via de creditcard of bankkaart van deze personen.'),
-                requireCheckbox: $t('Geld inhouden van bankkaart'),
-                confirmText: $t('Ja, nu aanrekenen')
+                title: $t('%1Q6'),
+                description: $t('%1QN'),
+                requireCheckbox: $t('%1Ti'),
+                confirmText: $t('%1TZ')
             })) {
                 return;
             }

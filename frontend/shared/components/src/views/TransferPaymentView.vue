@@ -296,10 +296,10 @@ const preventLeave = (event: BeforeUnloadEvent) => {
 
     if (props.type === 'packages') {
         // Chrome requires returnValue to be set
-        event.returnValue = $t(`Jouw aankoop is al bevestigd! Je kan niet meer van betaalmethode veranderen.`);
+        event.returnValue = $t(`%1Qe`);
 
         // This message is not visible on most browsers
-        return $t(`Jouw aankoop is al bevestigd! Je kan niet meer van betaalmethode veranderen.`);
+        return $t(`%1Qe`);
     }
 
     // Chrome requires returnValue to be set
@@ -363,7 +363,7 @@ async function generateQRCode() {
 
 function helpMe() {
     if (props.type === 'packages') {
-        new CenteredMessage($t(`%kI`), $t(`Jouw aankoop is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.`)).addCloseButton().show();
+        new CenteredMessage($t(`%kI`), $t(`%1UH`)).addCloseButton().show();
     }
     else if (props.type === 'order') {
         new CenteredMessage($t(`%kI`), $t(`%12v`)).addCloseButton().show();

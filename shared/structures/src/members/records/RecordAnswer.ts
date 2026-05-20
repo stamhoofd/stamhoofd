@@ -216,7 +216,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`'{number}' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.`, {number: this.value}),
+                    message: $t(`%1RF`, {number: this.value}),
                     field: 'input',
                 });
             }

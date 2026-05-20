@@ -145,7 +145,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: nrrRaw.value.length === 0 ? $t(`%z4`) : $t(`Dit is geen geldig rijksregisternummer. Je kan dit nummer vinden op de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.`),
+                message: nrrRaw.value.length === 0 ? $t(`%z4`) : $t(`%1T9`),
                 field: 'nationalRegisterNumber',
             }));
         }

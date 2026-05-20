@@ -81,11 +81,11 @@
                         <Checkbox v-model="invoicesEnabled" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Facturen aanmaken voor alle betalingen') }}
+                        {{ $t('%1S8') }}
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('Maak facturen aan voor alle betalingen en stel BTW-tarieven in.') }}
+                        {{ $t('%1Re') }}
                     </p>
                 </STListItem>
 

@@ -102,7 +102,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             const group = await Group.getByID(invitation.groupId);
     
             if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
-                throw Context.auth.error($t(`Je hebt geen toegansrechten om deze uitnodiging te verwijderen.`));
+                throw Context.auth.error($t(`%1UN`));
             }
 
             await invitation.delete();
@@ -114,7 +114,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 code: 'duplicate_entry',
                 statusCode: 409,
                 message: 'Duplicate entry',
-                human: puts.length === 1 ? $t(`Het lid is al uitgenodigd voor deze groep.`) : $t(`De leden werden al uitgenodigd.`),
+                human: puts.length === 1 ? $t(`%1RS`) : $t(`%1RP`),
             });
         }
 
@@ -132,7 +132,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
         const group = await Group.getByID(invitation.groupId);
 
         if (!group || group.organizationId !== organizationId || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
-            throw Context.auth.error($t(`Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.`));
+            throw Context.auth.error($t(`%1ST`));
         }
 
         // cannot invite for waiting list
@@ -152,7 +152,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             // read access is suficient
             || !await Context.auth.canAccessMember(member, PermissionLevel.Read)
             ) {
-                throw Context.auth.error($t(`Je hebt geen toegansrechten om dit lid uit te nodigen.`));
+                throw Context.auth.error($t(`%1Qv`));
         }
 
         // cannot invite if already registered
@@ -161,7 +161,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 code: 'bad_group',
                 statusCode: 400,
                 message: 'The member is already registered for this group',
-                human: $t('Dit lid is al ingeschreven voor deze groep'),
+                human: $t('%1S2'),
             })
         }
     }

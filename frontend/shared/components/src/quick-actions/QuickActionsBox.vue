@@ -33,10 +33,10 @@
 
         <div v-if="shouldShowButton" class="style-button-bar">
             <button v-if="isShowAll" class="button text" type="button" @click="toggleShowAll">
-                {{ $t('Toon minder') }}
+                {{ $t('%1U1') }}
             </button>
             <button v-else class="button text" type="button" @click="toggleShowAll">
-                {{ $t('Toon {extra} meer', {extra: actions.length - props.maxActionsToShow}) }}
+                {{ $t('%1U9', {extra: actions.length - props.maxActionsToShow}) }}
             </button>
         </div>
     </LoadingBoxTransition>

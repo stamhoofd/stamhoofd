@@ -170,7 +170,7 @@ export class CenteredMessage {
         // Some magic to make sure TypeScript infers the return type of the promise based on the value of the buttons
         const Buttons extends readonly {
             text: string;
-            value: string | boolean;
+            value: string | boolean | null;
             type?: 'destructive' | 'primary' | 'secundary';
             icon?: string;
             availabilityDelay?: number;

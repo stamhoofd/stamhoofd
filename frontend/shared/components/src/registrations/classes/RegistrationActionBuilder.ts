@@ -856,7 +856,7 @@ export class RegistrationActionBuilder {
 
             return [
                 new InMemoryTableAction({
-                    name: $t('Uitnodigen'),
+                    name: $t('%1Qq'),
                     icon: 'success',
                     priority: 15,
                     groupIndex: 2,
@@ -871,7 +871,7 @@ export class RegistrationActionBuilder {
                 }),
 
                 new InMemoryTableAction({
-                    name: $t('Verwijder uitnodiging'),
+                    name: $t('%1Rb'),
                     icon: 'canceled',
                     priority: 14,
                     groupIndex: 2,
@@ -892,7 +892,7 @@ export class RegistrationActionBuilder {
 
             if (eventGroups.length > 0) {
                 childActions.push(new MenuTableAction({
-                    name: $t('Activiteiten'),
+                    name: $t('%uB'),
                     groupIndex: 0,
                     enabled,
                     childActions: () => eventGroups.map((g) => {
@@ -914,7 +914,7 @@ export class RegistrationActionBuilder {
 
         const actions = [
             new MenuTableAction({
-                name: $t(`Uitnodigen voor`),
+                name: $t(`%1QU`),
                 priority: this.isWaitingList ? 2 : 1,
                 groupIndex: this.isWaitingList ? 2 : 5,
                 needsSelection: true,
@@ -930,7 +930,7 @@ export class RegistrationActionBuilder {
 
         if (this.isWaitingList) {
             actions.push(new MenuTableAction({
-                name: $t(`Uitnodiging verwijderen voor`),
+                name: $t(`%1RK`),
                 priority: 1,
                 groupIndex: 2,
                 needsSelection: true,

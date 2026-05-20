@@ -56,7 +56,7 @@ const hasReviewChanges = review.hasChanges;
 const patchOrganization = usePatchOrganization()
 const dismiss = useDismiss()
 
-const title = props.isReview ? setupTranslations.getReviewTitle(SetupStepType.Payment) : $t('Betaalmethodes voor inschrijvingen');
+const title = props.isReview ? setupTranslations.getReviewTitle(SetupStepType.Payment) : $t('%41');
 const original = useRequiredOrganization()
 const {patched: organization, patch, addPatch, hasChanges, reset} = usePatch(original)
 
@@ -82,7 +82,7 @@ async function save() {
             await review.save();
         }
 
-        new Toast($t('De wijzigingen zijn opgeslagen'), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await dismiss({ force: true });
     }
     catch (e) {

@@ -9,7 +9,7 @@
 
         <main v-else-if="!payment || PaymentStatus.Failed">
             <p class="style-title-prefix flex">
-                <span>{{ $t('Even geduld...') }}</span>
+                <span>{{ $t('%1RU') }}</span>
                 <ProgressRing :radius="7" :stroke="2" :loading="true" />
             </p>
 
@@ -19,7 +19,7 @@
             <p>{{ $t('%kM') }}</p>
 
             <p class="warning-box">
-                {{ $t('Sluit dit scherm niet tot je betaling werd bevestigd. Het kan zijn dat de betaling nog mislukt, zo blijf je op de hoogte.') }}
+                {{ $t('%1St') }}
             </p>
         </main>
 

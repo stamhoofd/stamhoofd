@@ -312,7 +312,7 @@ export class Invoice extends AutoEncoder {
 
         // Calculate difference between the invoice price and the payments price
         const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
-        if (this.payments.length > 0 && Math.abs(difference) < 5_00) { // Correct maximum 5 cents
+        if (this.payments.length > 0 && Math.abs(difference) < 3_00) { // Correct maximum 2 cents
             this.payableRoundingAmount = difference;
         }
         else {
@@ -357,7 +357,7 @@ export class Invoice extends AutoEncoder {
 
             // If toAddToTaxablePrice > 0 -> te weinig aangerekend - difference moet worden toegevoegd aan taxableprice
             // If toAddToTaxablePrice < 0 -> te veel aangerekend - difference moet worden toegevoegd aan taxableprice
-
+            const incorrectableItems: Set<InvoicedBalanceItem> = new Set()
             function getNext() {
                 // Rank items by difference
                 items.sort((a, b) => {
@@ -371,7 +371,7 @@ export class Invoice extends AutoEncoder {
                     return bDiff - aDiff; // Sort descending
                 });
 
-                const next = items[0];
+                const next = items.find(i => !incorrectableItems.has(i))
                 if (!next) {
                     return;
                 }
@@ -396,6 +396,18 @@ export class Invoice extends AutoEncoder {
                 const addition = Math.sign(currentToAddToTaxablePrice) * Math.sign(next.quantity) * step;
                 next.unitPrice += addition;
                 next.addedToUnitPriceToCorrectVAT += addition;
+
+                const afterCurrent = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
+                const afterCurrentToAddToTaxablePrice = STMath.round((precise - afterCurrent) / 100) * 100;
+
+                if (Math.abs(afterCurrentToAddToTaxablePrice) > Math.abs(currentToAddToTaxablePrice)) {
+                    // Revert
+                    next.unitPrice -= addition;
+                    next.addedToUnitPriceToCorrectVAT -= addition;
+                    incorrectableItems.add(next)
+                } else {
+                    next.roundUnitPriceWithoutDifferenceInTotal()
+                }
 
                 // todo
                 next = getNext();

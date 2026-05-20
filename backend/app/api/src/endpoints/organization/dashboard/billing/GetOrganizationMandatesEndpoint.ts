@@ -38,7 +38,7 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('Dit is tijdelijk onbeschikbaar, probeer later opnieuw')
+                human: $t('%1Rz')
             })
         }
         
@@ -48,7 +48,7 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
                 statusCode: 404,
                 code: 'not_found',
                 message: 'Selling organization not found',
-                human: $t('Deze organisatie bestaat niet (meer)'),
+                human: $t('%1R5'),
                 field: 'sellingOrganization'
             })
         }
