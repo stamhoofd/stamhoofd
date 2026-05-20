@@ -190,7 +190,7 @@ function checkCanReadEmailInformation() {
 * @param email
 * @returns A ComputedRef of the email information. The value will be null at first. After the fetch the value will be set.
 */
-export function useEmailInformation(email: string | ComputedRef<string | null | undefined>): Ref<null | EmailInformation> {
+export function useEmailInformation(email: string | ComputedRef<string | null | undefined> | string[] | ComputedRef<string[] | null | undefined>): Ref<null | EmailInformation> {
     if (!checkCanReadEmailInformation()) {
         return ref(null);
     }
@@ -214,14 +214,18 @@ export function useEmailInformation(email: string | ComputedRef<string | null | 
             return;
         }
 
-        if (didRegisterEmails.includes(e)) {
-            return;
-        }
-        deregister();
-
-        if (e) {
-            emailInformationManager.registerEmail(e);
-            didRegisterEmails.push(e);
+        if (Array.isArray(e)) {
+            for (const item of e) {
+                if (!didRegisterEmails.includes(item)) {
+                    emailInformationManager.registerEmail(item);
+                    didRegisterEmails.push(item);
+                }
+            }
+        } else {
+            if (!didRegisterEmails.includes(e)) {
+                emailInformationManager.registerEmail(e);
+                didRegisterEmails.push(e);
+            }
         }
     }
 

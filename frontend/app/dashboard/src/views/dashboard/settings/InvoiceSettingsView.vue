@@ -40,7 +40,11 @@
             {{ $t('%1Sd') }} {{ '123'.padStart(padZeroLength, '0') }}. {{ $t('%1Sq') }}
         </p>
 
-        <div class="split-inputs">
+        <hr>
+        <h2>{{ $t('Facturen doorsturen naar boekhoudsoftware en PEPPOL') }}</h2>
+        <p>{{ $t('Om facturen in Stamhoofd ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.') }}</p>
+
+        <!--<div class="split-inputs">
             <div>
                 <ImageInput v-model="background" :validator="errors.validator" :resolutions="resolutions" :required="false" :title="$t(`%1QM`)" />
             </div>
@@ -48,14 +52,30 @@
             <div v-if="background">
                 <ImageInput v-model="secondBackground" :placeholder="background" :validator="errors.validator" :resolutions="resolutions" :required="false" :title="$t(`%1SX`)" />
             </div>
-        </div>
+        </div>-->
+
+        <EmailInput v-for="n in emailCount" :key="n" :title="$t(`%1FK`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`%1FK`)" @update:model-value="setEmail(n - 1, $event)">
+            <template #right>
+                <EmailAddressWarning :email="getEmail(n-1)" />
+                <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
+            </template>
+        </EmailInput>
+
+        <p v-if="emailCount === 0" class="info-box">
+            {{ $t('Er zijn nog geen e-mailadressen ingesteld') }}
+        </p>
+
+        <button class="button text" type="button" @click="addEmail('')">
+            <span class="icon add" />
+            <span>{{ $t('E-mailadres') }}</span>
+        </button>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
-import { ImageInput } from '@stamhoofd/components';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
@@ -73,6 +93,7 @@ import { OrganizationPrivateMetaData, ResolutionFit, ResolutionRequest } from '@
 import { OrganizationInvoiceSettings } from '@stamhoofd/structures/OrganizationInvoiceSettings.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
+import EmailAddressWarning from '@stamhoofd/components/email/EmailAddressWarning.vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -94,6 +115,8 @@ function resetTextForMonth(index: number) {
     const d = Formatter.luxon().set({month: index, day: 1});
     return Formatter.date(d.toJSDate(), false)
 }
+
+const emailCount = computed(() => forwardEmailHandlers.value.length);
 
 const background = computed({
     get: () => patchedOrganization.value.privateMeta?.invoiceSettings.background ?? null,
@@ -120,6 +143,48 @@ const secondBackground = computed({
         })
     }
 });
+
+const forwardEmailHandlers = computed(() => patchedOrganization.value.privateMeta?.invoiceSettings.forwardEmailHandlers ?? []);
+
+function getEmail(n: number) {
+    return forwardEmailHandlers.value[n];
+}
+
+function setEmail(n: number, email: string) {
+    const _forwardEmailHandlers = forwardEmailHandlers.value.slice();
+    _forwardEmailHandlers[n] = email;
+    addPatch({
+        privateMeta: OrganizationPrivateMetaData.patch({
+            invoiceSettings: OrganizationInvoiceSettings.patch({
+                forwardEmailHandlers: _forwardEmailHandlers as any
+            })
+        })
+    })
+}
+
+function deleteEmail(n: number) {
+    const _forwardEmailHandlers = forwardEmailHandlers.value.slice();
+    _forwardEmailHandlers.splice(n, 1);
+    addPatch({
+        privateMeta: OrganizationPrivateMetaData.patch({
+            invoiceSettings: OrganizationInvoiceSettings.patch({
+                forwardEmailHandlers: _forwardEmailHandlers as any
+            })
+        })
+    })
+}
+
+function addEmail(str: string) {
+    const _forwardEmailHandlers = forwardEmailHandlers.value.slice();
+    _forwardEmailHandlers.push(str);
+    addPatch({
+        privateMeta: OrganizationPrivateMetaData.patch({
+            invoiceSettings: OrganizationInvoiceSettings.patch({
+                forwardEmailHandlers: _forwardEmailHandlers as any
+            })
+        })
+    })
+}
 
 const resetMonth = computed({
     get: () => patchedOrganization.value.privateMeta?.invoiceSettings.resetMonth ?? null,

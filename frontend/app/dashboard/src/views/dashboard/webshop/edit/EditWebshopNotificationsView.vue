@@ -7,7 +7,7 @@
 
         <EmailInput v-for="n in emailCount" :key="n" :title="$t(`%1FK`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`%1FK`)" @update:model-value="setEmail(n - 1, $event)">
             <template #right>
-                <span v-if="isBlocked(n-1)" v-tooltip="getInvalidEmailDescription(n-1)" class="icon warning yellow" />
+                <EmailAddressWarning :email="getEmail(n-1)" />
                 <button class="button icon trash gray" type="button" @click="deleteEmail(n - 1)" />
             </template>
         </EmailInput>
@@ -29,17 +29,14 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
-import { getInvalidEmailDescription as getInvalidEmailDescriptionHelper } from '@stamhoofd/components/helpers/getInvalidEmailDescription.ts';
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
+import EmailAddressWarning from '@stamhoofd/components/email/EmailAddressWarning.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
 
@@ -49,7 +46,6 @@ const viewTitle = 'Meldingen';
 const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
-const context = useContext();
 const organizationManager = useOrganizationManager();
 
 const user = computed(() => organizationManager.value.user);
@@ -59,10 +55,6 @@ const emails = computed(() => webshop.value.privateMeta.notificationEmails);
 function getEmail(n: number) {
     return emails.value[n];
 }
-
-onMounted(() => {
-    checkBounces().catch(console.error);
-});
 
 function setEmail(n: number, email: string) {
     const notificationEmails = emails.value.slice();
@@ -92,45 +84,6 @@ function addEmail(str: string) {
             notificationEmails: notificationEmails as any,
         }),
     }));
-}
-
-function isBlocked(n: number) {
-    const email = getEmail(n);
-    return emailInformation.value.find(e => e.email === email && (e.markedAsSpam || e.hardBounce || e.unsubscribedAll));
-}
-
-function getInvalidEmailDescription(n: number) {
-    const email = getEmail(n);
-    const find = emailInformation.value.find(e => e.email === email);
-    if (!find) {
-        return null;
-    }
-
-    return getInvalidEmailDescriptionHelper(find);
-}
-
-const checkingBounces = ref(false);
-const emailInformation = ref<EmailInformation[]>([]);
-
-async function checkBounces() {
-    if (checkingBounces.value) {
-        return;
-    }
-    checkingBounces.value = true;
-
-    try {
-        const response = await context.value.authenticatedServer.request({
-            method: 'POST',
-            path: '/email/check-bounces',
-            body: emails.value,
-            decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>),
-        });
-        emailInformation.value = response.data;
-    }
-    catch (e) {
-        console.error(e);
-    }
-    checkingBounces.value = false;
 }
 
 const suggestions = computed(() => [user.value.email].filter(e => !emails.value.includes(e)));

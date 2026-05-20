@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Image } from './files/Image.js';
 
 export class OrganizationInvoiceSettings extends AutoEncoder {
@@ -35,4 +35,17 @@ export class OrganizationInvoiceSettings extends AutoEncoder {
      */
     @field({ decoder: Image, nullable: true })
     secondBackground: Image | null
+
+    /**
+     * Send a copy of invoice XML to these email addresses.
+     * Generally the go to way for implementing PEPPOL or importing it in your finance system.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    forwardEmailHandlers: string[]
+
+    /**
+     * Only send XML's for customers with a VAT number OR custom peppol endpoint
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion, defaultValue: () => true })
+    forwardOnlyVAT: boolean
 }

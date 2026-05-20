@@ -20,23 +20,23 @@
 
 <script lang="ts" setup>
 import { usePresent } from '@simonbackx/vue-app-navigation';
+import { Toast } from '@stamhoofd/components';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
 import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
-import { InMemoryTableAction  } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import type {TableAction} from '@stamhoofd/components/tables/classes/TableAction.ts';
+import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
-import type { Invoice, InvoiceStruct, StamhoofdFilter, STInvoicePrivate } from '@stamhoofd/structures';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import type { Invoice, InvoiceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import InvoiceView from './InvoiceView.vue';
-import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage';
-import { Toast } from '@stamhoofd/components';
 import { InvoicesExcelExport } from './InvoicesExcelExport';
-import { AppManager } from '@stamhoofd/networking/AppManager';
 
 const props = withDefaults(
     defineProps<{
@@ -157,6 +157,23 @@ const allColumns: Column<ObjectType, any>[] = [
         format: value => Formatter.price(value),
         minimumWidth: 50,
         recommendedWidth: 100,
+    }),
+
+    new Column<ObjectType, boolean>({
+        id: 'didSendPeppol',
+        name: $t('Doorgestuurd'),
+        getValue: object => object.didSendPeppol,
+        getStyle: (value) => {
+            if (!value) {
+                return "gray"
+            }
+            return ""
+        },
+        format: value => value ? $t("Ja") : $t("Nee"),
+        minimumWidth: 50,
+        recommendedWidth: 400,
+        enabled: false,
+        allowSorting: false
     }),
 
 ];

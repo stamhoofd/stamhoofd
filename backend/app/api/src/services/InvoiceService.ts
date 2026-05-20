@@ -1,8 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Email } from '@stamhoofd/email';
+import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, Invoice, InvoicedBalanceItem, Payment } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
-import type { OrganizationInvoiceSettings } from '@stamhoofd/structures/OrganizationInvoiceSettings.js';
 import { Formatter } from '@stamhoofd/utility';
 import { ViesHelper } from '../helpers/ViesHelper.js';
 import { BalanceItemService } from './BalanceItemService.js';
@@ -10,7 +11,7 @@ import { InvoicePdfService } from './InvoicePdfService.js';
 import { InvoiceXMlService } from './InvoiceXMLService.js';
 
 export class InvoiceService {
-    static async createFrom(organization: { id: string, privateMeta: {invoiceSettings: OrganizationInvoiceSettings} }, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
+    static async createFrom(organization: Organization, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
         if (struct.number) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -266,6 +267,8 @@ export class InvoiceService {
             // Create PDF
             await InvoicePdfService.generatePdf(model)
             await InvoiceXMlService.generateXml(model)
+
+            await this.forwardInvoice(model, organization)
         }
         catch (e) {
             try {
@@ -278,5 +281,87 @@ export class InvoiceService {
         }
 
         return model;
+    }
+
+    private static shouldForwardInvoice(invoice: Invoice, organization: Organization) {
+         if (invoice.didSendPeppol) {
+            return {
+                value: false
+            };
+        }
+
+        if (!invoice.customer.company?.peppolEndpointId) {
+            return {
+                value: false,
+                reason: 'No customer peppol endpoint id found for this invoice'
+            }
+        }
+
+        // Legally sending an invoice via PEPPOL is not always required.
+        // Logic: send if required or a custom peppol endpoint id is set
+        if (organization.privateMeta.invoiceSettings.forwardOnlyVAT) {
+            if (!invoice.customer.company?.customPeppolEndpointId) {
+                if (!invoice.customer?.company?.VATNumber || !invoice.customer?.company?.VATNumber.startsWith('BE')) {
+                    return {
+                        value: false,
+                        reason: 'Skipping PEPPOL for invoice ' + invoice.id + ', recipient no Belgian VAT number and no custom peppol endpoint id set'
+                    }
+                }
+            }
+        }
+
+        return {
+            value: true
+        }
+    }
+
+    /**
+     * This is used for PEPPOL.
+     * Invoice is forwarded to an external invoicing tool which will send it via PEPPOL.
+     */
+    static async forwardInvoice(invoice: Invoice, organization: Organization) {
+        const {value, reason} = this.shouldForwardInvoice(invoice, organization);
+
+        if (!value) {
+            if (reason) {
+                console.log('Skipped sending PEPPOL: ', reason)
+            }
+            return;
+        }
+
+        if (!organization.privateMeta.invoiceSettings.forwardEmailHandlers.length) {
+            console.error('PEPPOL email handlers NOT CONFIGURED')
+            return;
+        }
+
+        const xml = await invoice.xml?.withSignedUrl();
+
+        if (!xml) {
+            console.error('Could not send PEPPOL for invoice ' + invoice.id + ', xml not set')
+            return;
+        }
+
+         // Send the e-mail
+        Email.send({
+            // From address is fixed for sender validation
+            from: Email.getWebmasterFromEmail(),
+            to: organization.privateMeta.invoiceSettings.forwardEmailHandlers.map(d => {
+                return {
+                    email: d
+                }
+            }),
+            subject: $t('Factuur') + ' ' + invoice.number,
+            text: $t('Factuur in bijlage'),
+            attachments: [
+                {
+                    filename: invoice.generateCustomerFilename('xml'),
+                    href: xml.getPublicPath(),
+                    contentType: 'application/xml'
+                }
+            ]
+        })
+
+        invoice.didSendPeppol = true;
+        await invoice.save();
     }
 }
