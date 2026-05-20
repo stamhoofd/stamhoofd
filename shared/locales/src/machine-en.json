@@ -7263,6 +7263,10 @@
     "original": "Gefactureerd bedrag",
     "translation": "Invoiced amount"
   },
+  "%1UT": {
+    "original": "Dit werd afgesplits in een aparte lijn omdat het gewenste bedrag door afronding (tot op 1 cent per lijn op bedragen exclusief BTW) anders niet kan worden bekomen. Deze lijn telt niet als een extra stuk.",
+    "translation": "This has been separated into a different line because, with rounding (to the nearest cent per line on amounts excluding VAT), the desired amount could not otherwise be achieved. This line does not count as an additional item."
+  },
   "%2": {
     "original": "Aansluiting/verzekering Stamhoofd*",
     "translation": "Affiliation/insurance Stamhoofd*"

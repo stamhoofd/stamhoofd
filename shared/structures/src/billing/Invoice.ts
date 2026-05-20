@@ -429,7 +429,7 @@ export class Invoice extends AutoEncoder {
                     VATIncluded: false,
                     VATExcempt: items[0].VATExcempt,
                     name: items[0].name,
-                    description: $t('Dit werd afgesplits in een aparte lijn omdat het gewenste bedrag door afronding (tot op 1 cent per lijn op bedragen exclusief BTW) anders niet kan worden bekomen. Deze lijn telt niet als een extra stuk.')
+                    description: $t('%1UT')
                 });
                 this.addItem(add)
             }}

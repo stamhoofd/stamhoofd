@@ -7311,6 +7311,10 @@
     "original": "Gefactureerd bedrag",
     "translation": "Montant facturé"
   },
+  "%1UT": {
+    "original": "Dit werd afgesplits in een aparte lijn omdat het gewenste bedrag door afronding (tot op 1 cent per lijn op bedragen exclusief BTW) anders niet kan worden bekomen. Deze lijn telt niet als een extra stuk.",
+    "translation": "Cette ligne a été séparée car, à cause de l’arrondi (à un centime près par ligne, sur les montants hors TVA), il n’était pas possible d’obtenir le montant exact autrement. Cette ligne ne compte pas comme un article supplémentaire."
+  },
   "%1Y": {
     "original": "1 week",
     "translation": "1 semaine"

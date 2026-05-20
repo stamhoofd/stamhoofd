@@ -5601,5 +5601,6 @@
   "%1UO": "Uitgenodigd op {date}",
   "%1UP": "Schrijf {firstName} in voor {groups}",
   "%1UQ": "Betaal je dit meteen ook?",
-  "%1US": "Gefactureerd bedrag"
+  "%1US": "Gefactureerd bedrag",
+  "%1UT": "Dit werd afgesplits in een aparte lijn omdat het gewenste bedrag door afronding (tot op 1 cent per lijn op bedragen exclusief BTW) anders niet kan worden bekomen. Deze lijn telt niet als een extra stuk."
 }
