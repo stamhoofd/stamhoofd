@@ -646,3 +646,16 @@ export class SQLSubQuery implements SQLExpression {
         ]);
     }
 }
+
+export class SQLAggregateColumnExpression implements SQLExpression {
+    constructor(private readonly type: SQLAggregateColumnType, private readonly expression: SQLExpression) {
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            this.type + '(',
+            this.expression.getSQL(options),
+            ')',
+        ]);
+    }
+}

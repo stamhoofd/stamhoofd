@@ -2,9 +2,8 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete.js';
 import type { SQLExpression } from './SQLExpression.js';
 import { isSQLExpression } from './SQLExpression.js';
-import type { SQLColumnExpressionParams, SQLScalarValue } from './SQLExpressions.js';
-import { SQLCast, SQLMax, SQLMin } from './SQLExpressions.js';
-import { SQLAssignment, SQLCalculation, SQLCoalesce, SQLColumnExpression, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLSubQuery, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
+import type { SQLAggregateColumnType, SQLColumnExpressionParams, SQLScalarValue } from './SQLExpressions.js';
+import { SQLAggregateColumnExpression, SQLAssignment, SQLCalculation, SQLCast, SQLCoalesce, SQLColumnExpression, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLMax, SQLMin, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLSubQuery, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
 import { SQLInsert } from './SQLInsert.js';
 import { SQLJoin, SQLJoinType } from './SQLJoin.js';
 import type { SQLJsonValueType } from './SQLJsonExpressions.js';
@@ -155,6 +154,10 @@ class StaticSQL {
 
     max(expression: SQLExpression): SQLMax {
         return new SQLMax(expression);
+    }
+
+    aggregateColumn(type: SQLAggregateColumnType, expression: SQLExpression) {
+        return new SQLAggregateColumnExpression(type, expression);
     }
 }
 
