@@ -127,7 +127,6 @@ async function chargeServiceFees() {
                     .where('status', BalanceItemStatus.Due)
                     .where('startDate', startOfDay)
                     .where('endDate', endOfDay)
-                    .log()
                     .first(false);
 
                 console.log('startDate', startOfDay)
