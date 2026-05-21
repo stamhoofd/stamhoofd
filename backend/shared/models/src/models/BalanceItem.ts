@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Payment } from './Payment.js';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -723,5 +724,16 @@ export class BalanceItem extends QueryableModel {
         }
 
         return await base.fetch();
+    }
+
+    override save(): Promise<boolean> {
+        if (this.unitPrice % 100 !== 0) {
+            throw new SimpleError({
+                statusCode: 500,
+                code: 'unrounded_balance_item',
+                message: 'Balance item unitPrices should be rounded up to 1 cent'
+            })
+        }
+        return super.save()
     }
 }

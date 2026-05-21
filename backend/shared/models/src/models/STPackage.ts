@@ -65,6 +65,19 @@ export class STPackage extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     lastEmailAt: Date | null = null;
 
+    /**
+     * Helper to handle edge cases where validUntil is null but removeAt is set
+     */
+    get endDate() {
+        if (!this.removeAt) {
+            return this.validUntil;
+        }
+        if (!this.validUntil) {
+            return this.removeAt
+        }
+        return new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
+    }
+
     async activate() {
         if (this.validAt !== null) {
             return;

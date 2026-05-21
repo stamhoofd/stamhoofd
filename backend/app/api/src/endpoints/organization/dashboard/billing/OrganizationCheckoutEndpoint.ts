@@ -120,7 +120,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                 model.disableSave();
             }
 
-            const balanceItem = await STPackageService.chargePackage(model, undefined, checkout.customer ?? undefined);
+            const balanceItem = await STPackageService.chargePackage(model, sellingOrganization, checkout.customer?.company);
             if (balanceItem) {
                 balanceItem.VATExcempt = PaymentService.getVATExcempt({
                     company: checkout.customer?.company,

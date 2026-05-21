@@ -6,6 +6,7 @@ import { Payment, PrivatePayment } from './members/Payment.js';
 import type { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
+import { STPricingType, STPackageTypeHelper, getPricingTypeName, getPricingTypeSuffix } from './billing/STPackage.js';
 
 export enum BalanceItemStatusV352 {
     Hidden = 'Hidden',
@@ -142,6 +143,7 @@ export enum BalanceItemRelationType {
     Discount = 'Discount', // Name and id of the related discount
 
     STPackage = 'STPackage', // Purchase - Stamhoofd specific
+    STPricingType = 'STPricingType', // Purchase - Stamhoofd specific
 }
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
@@ -155,6 +157,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
         case BalanceItemRelationType.Discount: return $t(`%176`);
         case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
+        case BalanceItemRelationType.STPricingType: return $t(`Prijstype`);
     }
 }
 
@@ -169,6 +172,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
         case BalanceItemRelationType.Discount: return $t(`%177`);
         case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
+        case BalanceItemRelationType.STPricingType: return $t(`Berekeningswijze prijzen`);
     }
 }
 
@@ -795,10 +799,37 @@ export class BalanceItem extends AutoEncoder {
                 }
                 return list.join('\n');
             }
+            case BalanceItemType.STPackage: {
+                const list: string[] = []
+                const base = this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Van {startDate} tot {endDate}`, {startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate)}) : $t(`Voor {date}`, {date: Formatter.date(this.startDate)})) : null;
+                
+                if (base) {
+                    list.push(base);
+                }
+                
+                return list.join('\n');
+            }
         }
         return null;
     }
 
+    /**
+     * When displayed as a single item
+     */
+    get unitPriceSuffix() {
+        switch (this.type) {
+            case BalanceItemType.STPackage: {
+                const packageType = this.relations.get(BalanceItemRelationType.STPricingType);
+                if (packageType) {
+                    const decoded = Object.values(STPricingType).includes(packageType.id as STPricingType) ? packageType.id as STPricingType : null;
+                    if (decoded) {
+                        return getPricingTypeSuffix(decoded)
+                    }
+                }
+            }
+        }
+        return null;
+    }
     static getDetailsHTMLTable(items: BalanceItem[]): string {
         const grouped = GroupedBalanceItems.group(BalanceItem.filterBalanceItems(items));
 
@@ -982,6 +1013,16 @@ export class GroupedBalanceItems {
         }
         return this.items[0].itemTitle;
     }
+
+    get unitPriceSuffix() {
+        if (this.items.length === 1) {
+            // Return normal prefix
+            return this.items[0].unitPriceSuffix;
+        }
+
+        return this.items[0].unitPriceSuffix;
+    }
+
 
     get itemDescription() {
         if (this.items.length === 1) {

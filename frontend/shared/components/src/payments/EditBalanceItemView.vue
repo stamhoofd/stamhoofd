@@ -10,7 +10,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="balanceItem.relations.size === 0" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)" class="max">
+        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="description" :error-box="errors.errorBox" :title="$t(`%6o`)" class="max">
             <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`%gp`)">
         </STInputBox>
         <STList v-else>
@@ -20,6 +20,15 @@
                 </h3>
                 <p class="style-definition-text">
                     {{ getBalanceItemTypeName(patchedBalanceItem.type) }}
+                </p>
+            </STListItem>
+
+            <STListItem v-if="balanceItem.startDate || balanceItem.endDate">
+                <h3 class="style-definition-label">
+                    {{ $t('Periode') }}
+                </h3>
+                <p class="style-definition-text">
+                    {{ formatDateRange(balanceItem.startDate ?? balanceItem.endDate!, balanceItem.endDate ?? balanceItem.startDate!) }}
                 </p>
             </STListItem>
 

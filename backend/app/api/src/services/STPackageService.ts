@@ -1,12 +1,13 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { PaymentCustomer} from '@stamhoofd/structures';
-import { STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import type { Company, PaymentCustomer} from '@stamhoofd/structures';
+import { getPricingTypeName, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, STMath } from '@stamhoofd/utility';
 import { GroupBuilder } from '../helpers/GroupBuilder.js';
+import { PaymentService } from './PaymentService.js';
 
 export class STPackageService {
     static async getActivePackages(organizationId: string) {
@@ -92,7 +93,7 @@ export class STPackageService {
         return await BalanceItem.select()
             .where('packageId', pack.id)
             .where('status', BalanceItemStatus.Due)
-            .count(SQL.column('amount'));
+            .sum(SQL.column('amount'));
     }
 
     /**
@@ -100,25 +101,15 @@ export class STPackageService {
      *
      * Convertable into STInvoiceItem (or the diffence if amount is increased)
      * Use this to calculate prices or create an invoice
-     * This will calculate the price to expand the package to the given amount.
+     * This will calculate the price to expand the package to the given amount
      * If you want to renew a package, you need to create a new package first
      */
-    static async chargePackage(pack: STPackage, date?: Date, customer?: PaymentCustomer): Promise<BalanceItem | null> {
+    static async chargePackage(pack: STPackage, sellingOrganization: Organization, company: Company | null | undefined, date?: Date): Promise<BalanceItem | null> {
         let unitPrice = Math.round(pack.meta.unitPrice);
 
         let amount = await this.getChargeableQuantity(pack);
-
-        if (amount < pack.meta.minimumAmount) {
-            // Minimum should get applied first, because we might already have paid for the minimum (paid amount)
-            amount = pack.meta.minimumAmount;
-        }
-
         const paid = await this.getPaidOrPendingQuantity(pack);
         amount -= paid;
-
-        if (amount <= 0) {
-            amount = 0;
-        }
 
         if (amount <= 0) {
             return null;
@@ -127,15 +118,15 @@ export class STPackageService {
         /// When pricing type is memebrs, the price is calculated per year.
         /// If a shorter period is remaining, we give a discount in order
         /// to no need to handle it more complicated
-        let now = date ?? new Date();
+        let now = date ?? Formatter.luxon().startOf('day').toJSDate();
         if (now < pack.meta.startDate) {
             // When creating a new package, we sometimes buy it for the future, so use that date instead of now
             now = pack.meta.startDate;
         }
 
-        if (pack.validUntil && pack.meta.pricingType !== STPricingType.Fixed) {
-            const totalDays = Math.round((pack.validUntil.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24));
-            let remainingDays = Math.round((pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (pack.endDate && pack.meta.pricingType !== STPricingType.Fixed) {
+            const totalDays = Math.round((pack.endDate.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24));
+            let remainingDays = Math.round((pack.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
             /// First 3 months are full price
             const paidDays = 30 * 3;
@@ -160,37 +151,38 @@ export class STPackageService {
         const item = new BalanceItem();
         item.type = BalanceItemType.STPackage;
         item.description = pack.meta.name + ' ' + (
-            pack.validUntil
-                ? $t('%1LM', { startDate: Formatter.date(now, true), endDate: Formatter.date(pack.validUntil, true) })
-                : $t('%1LN', { startDate: Formatter.date(pack.meta.startDate, true) })
+            pack.endDate
+                ? $t('%1LM', { startDate: Formatter.startDate(now, false, true), endDate: Formatter.endDate(pack.endDate, false, true) })
+                : $t('%1LN', { startDate: Formatter.startDate(pack.meta.startDate, false, true) })
         );
         item.relations.set(BalanceItemRelationType.STPackage, BalanceItemRelation.create({
             id: pack.id,
             name: TranslatedString.create(pack.meta.name),
         }));
+        item.relations.set(BalanceItemRelationType.STPricingType, BalanceItemRelation.create({
+            id: pack.meta.pricingType,
+            name: TranslatedString.create(getPricingTypeName(pack.meta.pricingType)),
+        }));
+
         item.packageId = pack.id;
         item.startDate = now;
 
-        if (pack.validUntil) {
-            item.endDate = pack.validUntil;
+        if (pack.endDate) {
+            item.endDate = pack.endDate;
         }
 
         item.payingOrganizationId = pack.organizationId;
-        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
-        if (!membershipOrganizationId) {
-            throw new SimpleError({
-                code: 'unavailable',
-                message: 'No membership organization id set on the platform',
-                human: 'Package purchases are currently unavailable',
-            });
-        }
-        item.organizationId = membershipOrganizationId;
+        item.organizationId = sellingOrganization.id;
         item.VATPercentage = 21;
         item.VATIncluded = false;
-        item.VATExcempt = null;
+        item.VATExcempt = PaymentService.getVATExcempt({
+            company,
+            sellingOrganization,
+            type: 'services'
+        });
         item.quantity = amount;
-        item.unitPrice = unitPrice;
-        item.createdAt = now;
+        item.unitPrice = STMath.round(unitPrice / 100) * 100;
+        item.createdAt = new Date();
         item.status = BalanceItemStatus.Hidden;
 
         return item;

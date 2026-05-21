@@ -8,3 +8,4 @@ import './delete-archived-data.js';
 import './mollie-chargebacks.js';
 import './invoices.js';
 import './service-fees.js';
+import './members-fees.js';

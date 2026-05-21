@@ -2,16 +2,17 @@ import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { registerCron } from '@stamhoofd/crons';
 import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment, sendEmailTemplate } from '@stamhoofd/models';
-import type { IterableSQLSelect } from '@stamhoofd/sql';
 import { EmailTemplateType, InvoiceStruct, PaymentStatus, Replacement } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
+import { useSavedIterator } from './helpers/useSavedIterator.js';
 
 registerCron('invoices', invoices);
 
-let lastFullRun = new Date(0);
-let savedIterator: IterableSQLSelect<Organization> | null = null;
+const {iterate, isHoursAgo} = useSavedIterator(() => {
+    return Organization.select();
+}, {limit: 10, maxQueries: 5})
 
 const bootAt = new Date();
 
@@ -21,7 +22,7 @@ async function invoices() {
         return;
     }
 
-    if (lastFullRun.getTime() > new Date().getTime() - 1000 * 60 * 60 * 12) {
+    if (!isHoursAgo(12)) {
         return;
     }
 
@@ -30,22 +31,13 @@ async function invoices() {
     }
 
     // Get the next x organization to send e-mails for
-    if (savedIterator === null) {
-        savedIterator = Organization.select().limit(10).all();
-    }
-
-    for await (const organization of savedIterator.maxQueries(5)) {
+    for await (const organization of iterate()) {
         if (!organization.meta.invoicesEnabled) {
             continue;
         }
 
         // Create all invoices for this organization
         await createInvoicesFor(organization)
-    }
-
-    if (savedIterator.isDone) {
-        savedIterator = null;
-        lastFullRun = new Date();
     }
 }
 

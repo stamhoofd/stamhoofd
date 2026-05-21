@@ -80,6 +80,21 @@ export enum STPricingType {
     PerMember = 'PerMember',
 }
 
+export function getPricingTypeName(type: STPricingType) {
+    switch (type) {
+        case STPricingType.Fixed: return $t('Eénmalig')
+        case STPricingType.PerYear: return $t('Per jaar')
+        case STPricingType.PerMember: return $t('Per lid, per jaar')
+    }
+}
+export function getPricingTypeSuffix(type: STPricingType) {
+    switch (type) {
+        case STPricingType.Fixed: return $t('éénmalig')
+        case STPricingType.PerYear: return $t('per jaar')
+        case STPricingType.PerMember: return $t('per lid, per jaar')
+    }
+}
+
 export class STPackageMeta extends AutoEncoder {
     get name(): string {
         return STPackageTypeHelper.getName(this.type);

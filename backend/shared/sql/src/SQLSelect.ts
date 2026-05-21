@@ -30,6 +30,7 @@ export type IterableSQLSelectOptions = {
      * The loop will cancel after this amount of queries - but you can continue to loop over the results when starting a new for loop.
      */
     maxQueries?: number;
+    nextEachHook?: () => void
 };
 
 export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & { getName(): string };
@@ -365,12 +366,14 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                 };
             },
             get isDone() {
+                console.log('is done', !!next, 'stack index', stackIndex, 'stack length', stack.length)
                 return !next && (stackIndex + 1) >= stack.length;
             },
             async next(): Promise<IteratorResult<T, undefined>> {
                 stackIndex++;
 
                 if (stackIndex < stack.length) {
+                    options?.nextEachHook?.()
                     return {
                         done: false,
                         value: stack[stackIndex],
@@ -419,7 +422,8 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
                     next.andWhere(primaryKey, '>', lastId);
                 }
-
+                
+                options?.nextEachHook?.()
                 return {
                     done: false,
                     value: stack[stackIndex],

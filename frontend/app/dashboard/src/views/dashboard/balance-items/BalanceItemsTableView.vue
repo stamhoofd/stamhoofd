@@ -244,7 +244,7 @@ const allColumns: Column<ObjectType, any>[] = [
         id: 'createdAt',
         name: $t('%1JJ'),
         getValue: object => object.createdAt,
-        format: (value, width) => width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true),
+        format: (v, width) => width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true)),
         minimumWidth: 120,
         recommendedWidth: 160,
     }),
