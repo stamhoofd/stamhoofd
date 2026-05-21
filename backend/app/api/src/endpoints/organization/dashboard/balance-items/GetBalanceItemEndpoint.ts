@@ -20,7 +20,7 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
 
         const params = Endpoint.parseParameters(request.url, '/balance-items/@id', { id: String });
 
-        if (params) {
+        if (params && params.id !== 'count') {
             return [true, params as Params];
         }
         return [false];
