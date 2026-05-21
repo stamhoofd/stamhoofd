@@ -778,11 +778,27 @@ export class RegistrationActionBuilder {
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
                         configurationId: 'registrations',
+                        title: this.getExcelTitle(selection),
                     }),
                 }),
             ],
             modalDisplayStyle: 'popup',
         });
+    }
+
+    private getExcelTitle(selection: TableActionSelection<PlatformRegistration>) {
+        if (selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1) {
+            return [...selection.markedRows.values()][0].member.member.name;
+        }
+        const parts = [
+            this.organizations.length === 1 && this.context.auth.hasSomePlatformAccess() ? this.organizations[0].name : null,
+            this.organizations.length === 1 && this.organizations[0].period.period.id !== this.platform.period.id ? this.organizations[0].period.period.name : null,
+            this.categories.length === 1 ? this.categories[0].settings.name :
+                (this.groups.length === 1 ? this.groups[0].settings.name : null),
+            $t('Inschrijvingen'),
+        ];
+
+        return parts.filter(Boolean).join(' - ');
     }
 
     private async exportToPdf(members: PlatformMember[]) {
