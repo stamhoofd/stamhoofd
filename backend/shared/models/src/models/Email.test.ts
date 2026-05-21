@@ -896,7 +896,7 @@ describe('Model.Email', () => {
                     organizationId: organization.id,
                     type: BalanceItemType.Other,
                     amount: 2,
-                    unitPrice: 12_99,
+                    unitPrice: 12_99_00,
                     description: 'Test balance item',
                 }).create();
                 await CachedBalance.updateForUsers(organization.id, [existingUser.id]);
@@ -940,12 +940,12 @@ describe('Model.Email', () => {
                 // Check if the table is correct
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch('<table');
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch('2 x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).html).toMatch(Formatter.price(12_99)); // unit price
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(Formatter.price(12_99_00)); // unit price
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch('<td>' + expectedAmount); // total price in table
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch('Test balance item'); // description
 
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch('2 x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).text).toMatch(Formatter.price(12_99)); // unit price
+                expect(EmailMocker.getSucceededEmail(0).text).toMatch(Formatter.price(12_99_00)); // unit price
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(expectedAmount); // total price in table
                 expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toMatch('test balance item'); // description
             }, 15_000);
