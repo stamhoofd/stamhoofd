@@ -47,10 +47,6 @@
                 UiTPAS-kansentarief op webshops (onvolledig)
             </Checkbox>
 
-            <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
-                {{ $t('%18D') }} (beta)
-            </Checkbox>
-
             <Checkbox :model-value="getFeatureFlag('registration-invites')" @update:model-value="setFeatureFlag('registration-invites', !!$event)">
                 {{ $t('%1R9') }}
             </Checkbox>

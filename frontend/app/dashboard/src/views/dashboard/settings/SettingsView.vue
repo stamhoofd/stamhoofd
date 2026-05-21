@@ -283,7 +283,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="$feature('members-import')" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.MembersImport)">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.MembersImport)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
                         </template>
