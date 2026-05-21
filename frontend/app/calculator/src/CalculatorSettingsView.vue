@@ -91,7 +91,7 @@ import type { CalculationInput } from './classes/CalculationInput';
 import { Country } from './classes/Country';
 import { ModuleType } from './classes/ModuleType';
 import { calculatePaymentMethodUsage, getPaymentMethodDescription, getPaymentMethodName, PaymentMethod } from './classes/PaymentMethod';
-import type { TransactionFee } from './classes/TariffDefinition';
+import type { TransferFee } from './classes/TariffDefinition';
 import { StamhoofdTariffs } from './classes/tariffs/stamhoofd';
 
 const props = defineProps<{
@@ -100,7 +100,7 @@ const props = defineProps<{
 
 const module = computed(() => props.input.module);
 
-function sortMap(map: Map<PaymentMethod, TransactionFee[]> | undefined): Map<PaymentMethod, TransactionFee[]> | undefined {
+function sortMap(map: Map<PaymentMethod, TransferFee[]> | undefined): Map<PaymentMethod, TransferFee[]> | undefined {
     if (props.input.options.country === Country.BE) {
         return map;
     }
@@ -109,7 +109,7 @@ function sortMap(map: Map<PaymentMethod, TransactionFee[]> | undefined): Map<Pay
     if (!map) {
         return undefined;
     }
-    const newMap = new Map<PaymentMethod, TransactionFee[]>();
+    const newMap = new Map<PaymentMethod, TransferFee[]>();
     const order = [PaymentMethod.iDEAL, PaymentMethod.CreditCard, PaymentMethod.Bancontact, PaymentMethod.Payconiq];
     for (const method of order) {
         if (map.has(method)) {

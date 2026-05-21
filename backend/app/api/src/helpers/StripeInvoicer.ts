@@ -10,22 +10,22 @@ import { PaymentService } from '../services/PaymentService.js';
 import { AuthenticatedStructures } from './AuthenticatedStructures.js';
 
 export class ApplicationFeeDetails {
-    transactionFee = 0
+    transferFee = 0
     serviceFee = 0
     count = 0;
     minimumDate: Date | null = null
     maximumDate: Date | null = null
 
-    constructor(details: { count?: number, transactionFee: number, serviceFee: number,minimumDate: Date | null, maximumDate: Date | null}) {
+    constructor(details: { count?: number, transferFee: number, serviceFee: number,minimumDate: Date | null, maximumDate: Date | null}) {
         this.count = details.count ?? 0
-        this.transactionFee = details.transactionFee
+        this.transferFee = details.transferFee
         this.serviceFee = details.serviceFee
         this.minimumDate = details.minimumDate
         this.maximumDate = details.maximumDate
     }
 
     get amount() {
-        return this.transactionFee + this.serviceFee
+        return this.transferFee + this.serviceFee
     }
 
     static fromStripe(transaction: Stripe.BalanceTransaction) {
@@ -42,12 +42,12 @@ export class ApplicationFeeDetails {
             throw new Error('Invalid serviceFee metadata')
     }
         const serviceFee = parsed * 100; // in cents
-        const transactionFee = transaction.amount * 100 - serviceFee;
+        const transferFee = transaction.amount * 100 - serviceFee;
 
         return new ApplicationFeeDetails({
             count: 1,
             serviceFee,
-            transactionFee,
+            transferFee,
             minimumDate: new Date(transaction.created * 1000),
             maximumDate: new Date(transaction.created * 1000)
         })
@@ -63,7 +63,7 @@ export class ApplicationFeeDetails {
 
     combine(other: ApplicationFeeDetails) {
         this.serviceFee += other.serviceFee
-        this.transactionFee += other.transactionFee
+        this.transferFee += other.transferFee
         this.count += other.count
         if (other.minimumDate && (this.minimumDate === null || other.minimumDate < this.minimumDate)) {
             this.minimumDate = other.minimumDate
@@ -241,9 +241,9 @@ export class StripeReportInvoicer {
             balanceItems.push(item)
         }
 
-        if (applicationFee.transactionFee !== 0) {
+        if (applicationFee.transferFee !== 0) {
             const item = new BalanceItem();
-            item.type = BalanceItemType.TransactionFee;
+            item.type = BalanceItemType.TransferFee;
             item.description = $t('Transactiekosten ingehouden via Stripe tussen {startDate} en {endDate}', {
                 startDate: Formatter.startDate(this.start, false, true),
                 endDate: Formatter.endDate(this.end, false, true)
@@ -258,7 +258,7 @@ export class StripeReportInvoicer {
             });
             item.VATIncluded = true;
             item.quantity = 1;
-            item.unitPrice = applicationFee.transactionFee;
+            item.unitPrice = applicationFee.transferFee;
             item.createdAt = new Date();
             item.status = BalanceItemStatus.Hidden;
             item.startDate = this.start

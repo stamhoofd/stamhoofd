@@ -92,7 +92,7 @@ export enum BalanceItemType {
      */
     STPackage = 'STPackage',
     ServiceFee = 'ServiceFee',
-    TransactionFee = 'TransactionFee'
+    TransferFee = 'TransferFee'
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -115,7 +115,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.RegistrationBundleDiscount: return $t(`%16L`);
         case BalanceItemType.STPackage: return $t('%1Ms');
         case BalanceItemType.ServiceFee: return $t('Servicekosten');
-        case BalanceItemType.TransactionFee: return $t('Transactiekosten');
+        case BalanceItemType.TransferFee: return $t('Transactiekosten');
     }
 }
 
@@ -131,7 +131,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string {
         case BalanceItemType.RegistrationBundleDiscount: return 'label';
         case BalanceItemType.STPackage: return 'box';
         case BalanceItemType.ServiceFee: return 'calculator';
-        case BalanceItemType.TransactionFee: return 'calculator';
+        case BalanceItemType.TransferFee: return 'calculator';
     }
 }
 
@@ -597,7 +597,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
             case BalanceItemType.STPackage: return this.description;
             case BalanceItemType.ServiceFee: return $t('servicekosten');
-            case BalanceItemType.TransactionFee: return $t('transactiekosten');
+            case BalanceItemType.TransferFee: return $t('transactiekosten');
         }
     }
 
@@ -621,7 +621,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%BV`);
             case BalanceItemType.STPackage: return $t('%1Mu');
             case BalanceItemType.ServiceFee: return $t('servicekosten');
-            case BalanceItemType.TransactionFee: return $t('transactiekosten');
+            case BalanceItemType.TransferFee: return $t('transactiekosten');
         }
     }
 
@@ -756,7 +756,7 @@ export class BalanceItem extends AutoEncoder {
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
             }
             case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Servicekosten tussen {startDate} en {endDate}`, {startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true)}) : $t(`Servicekosten op {date}`, {date: Formatter.date(this.startDate, true)})) : $t('Servicekosten');
-            case BalanceItemType.TransactionFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Transactiekosten tussen {startDate} en {endDate}`, {startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true)}) : $t(`Transactiekosten op {date}`, {date: Formatter.date(this.startDate, true)})) : $t('Transactiekosten');
+            case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Transactiekosten tussen {startDate} en {endDate}`, {startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true)}) : $t(`Transactiekosten op {date}`, {date: Formatter.date(this.startDate, true)})) : $t('Transactiekosten');
         }
     }
 
@@ -1017,7 +1017,7 @@ export class GroupedBalanceItems {
         if (this.items[0].type === BalanceItemType.ServiceFee) {
             return $t('Servicekosten')
         }
-        if (this.items[0].type === BalanceItemType.TransactionFee) {
+        if (this.items[0].type === BalanceItemType.TransferFee) {
             return $t('Transactiekosten')
         }
         return this.items[0].itemTitle;

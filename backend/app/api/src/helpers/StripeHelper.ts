@@ -268,7 +268,7 @@ export class StripeHelper {
         const fullMetadata = {
             ...(metadata ?? {}),
             organizationVATNumber: organization.meta.VATNumber,
-            transactionFee: fee,
+            transferFee: fee,
             serviceFee: serviceFee, // For historic reasons, this is stored in cents
         };
 

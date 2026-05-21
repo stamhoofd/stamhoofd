@@ -6,7 +6,7 @@ import { ModuleType } from './ModuleType';
 import { calculatePaymentMethodUsage, getPaymentMethodName, PaymentMethod } from './PaymentMethod';
 import { Formatter } from '@stamhoofd/utility';
 
-export class TransactionFee {
+export class TransferFee {
     provider: string | null = null; // the payment provider for which this fee applies, e.g., 'Stripe', 'Mollie', etc.
     onlyRegisteredBusinesses = false; // if true, this fee only applies to registered businesses, not individuals
 
@@ -33,7 +33,7 @@ export class TransactionFee {
      */
     isInflated = false; // if true, this fee is manually inflated to ensure it is at least a certain amount
 
-    constructor(options: Partial<TransactionFee> = {}) {
+    constructor(options: Partial<TransferFee> = {}) {
         this.onlyRegisteredBusinesses = options.onlyRegisteredBusinesses ?? false;
         this.provider = options.provider || null;
         this.fixed = options.fixed || 0;
@@ -100,7 +100,7 @@ export class Tier {
     /**
      * If multiple fees are added to a payment method, they present multiple options, so we can use the cheapest one.
      */
-    transactionFees: Map<PaymentMethod, TransactionFee[]>;
+    transactionFees: Map<PaymentMethod, TransferFee[]>;
 
     /**
      * Minimum amount of tickets or registrations for this tier that will get charged
@@ -113,7 +113,7 @@ export class Tier {
 
     constructor(options: Partial<Tier>) {
         this.fees = options.fees || new Fees();
-        this.transactionFees = options.transactionFees || new Map<PaymentMethod, TransactionFee[]>();
+        this.transactionFees = options.transactionFees || new Map<PaymentMethod, TransferFee[]>();
         this.minimumAmount = options.minimumAmount ?? null;
         this.minimumPersons = options.minimumPersons ?? null; // minimum persons for this tier, if set, it will not allow less than this amount of persons
         this.maximumAmount = options.maximumAmount ?? null;
