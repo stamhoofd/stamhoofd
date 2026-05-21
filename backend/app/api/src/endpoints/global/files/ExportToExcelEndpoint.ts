@@ -163,7 +163,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 console.log('Done writing excel file');
 
-                const url = 'https://' + STAMHOOFD.domains.api + '/v' + Version + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(type);
+                const url = 'https://' + STAMHOOFD.domains.api + '/v' + Version + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(request.title ?? type);
                 return url;
             }, 2);
         });

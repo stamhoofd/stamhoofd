@@ -49,6 +49,12 @@ export class ExcelExportRequest extends AutoEncoder {
 
     @field({ decoder: ExcelWorkbookFilter })
     workbookFilter: ExcelWorkbookFilter;
+
+    /**
+     * File name to use for the excel file, without extension.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    title: string | null = null;
 }
 
 export class ExcelExportResponse extends AutoEncoder {
