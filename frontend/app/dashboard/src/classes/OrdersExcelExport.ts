@@ -839,15 +839,16 @@ export class OrdersExcelExport {
             XLSX.utils.book_append_sheet(wb, this.createSettlements(webshop, orders), $t(`%xS`));
         }
 
+        const fileName = Formatter.fileSlug(webshop.meta.name) + '.xlsx';
         if (AppManager.shared.downloadFile) {
             const data: ArrayBuffer = XLSX.write(wb, { type: 'array' });
             const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            AppManager.shared.downloadFile(blob, $t(`%xT`)).catch((e) => {
+            AppManager.shared.downloadFile(blob, fileName).catch((e) => {
                 Toast.fromError(e).show();
             });
         }
         else {
-            XLSX.writeFile(wb, $t(`%xT`));
+            XLSX.writeFile(wb, fileName);
         }
     }
 }
