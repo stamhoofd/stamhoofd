@@ -129,9 +129,6 @@ async function chargeServiceFees() {
                     .where('endDate', endOfDay)
                     .first(false);
 
-                console.log('startDate', startOfDay)
-                console.log('existing', existing)
-
                 if (existing) {
                     existing.unitPrice += totalFees;
                     await existing.save();
