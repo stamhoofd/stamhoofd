@@ -84,7 +84,7 @@
                 </p>
             </template>
 
-            <template v-if="$isStamhoofd && (enableMandates || sortedPaymentMethods.find(p => PaymentMethodHelper.canCreateMandate(p)))">
+            <template v-if="$isStamhoofd && (enableMandates || sortedPaymentMethods.find(p => PaymentMethodHelper.canCreateMandate(p))) && type === 'registration'">
                 <hr>
                 <h2>{{ $t('%1SI') }}</h2>
                 <p>{{ $t('%1Ry') }}</p>

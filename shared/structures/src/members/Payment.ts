@@ -38,6 +38,9 @@ export class Payment extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
+    
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    roundingAmount = 0
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 92 })
     @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
@@ -175,6 +178,18 @@ export class Payment extends AutoEncoder {
         }
 
         return str + '</tbody></table>';
+    }
+
+    get priceBreakdown() {
+        const breakdown = [{name: $t('%2U'), price: this.price}];
+
+        if (this.roundingAmount !== 0) {
+            breakdown.unshift({
+                name: $t('Afronding'),
+                price: this.roundingAmount
+            })
+        }
+        return  breakdown
     }
 }
 

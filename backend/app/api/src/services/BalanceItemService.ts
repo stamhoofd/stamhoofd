@@ -91,8 +91,8 @@ export const BalanceItemService = {
      *
      * Does not execute the update immediately, but schedules it to be run in the background.
      */
-    async scheduleUpdate(item: BalanceItem) {
-        await this.scheduleUpdates([item]);
+    scheduleUpdate(item: BalanceItem) {
+        this.scheduleUpdates([item]);
 
         // Todo: optimize
         if (item.type === BalanceItemType.RegistrationBundleDiscount) {
@@ -110,7 +110,7 @@ export const BalanceItemService = {
     async updatePaidAndPending(items: BalanceItem[]) {
         console.log('updatePaidAndPending for', items.length, 'items');
         await BalanceItem.updatePricePaid(Formatter.uniqueArray(items.map(i => i.id)));
-        await this.scheduleUpdates(items);
+        this.scheduleUpdates(items);
     },
 
     /**
@@ -152,7 +152,7 @@ export const BalanceItemService = {
      * Update how many every object in the system owes or needs to be reimbursed
      * and also updates the pricePaid/pricePending cached values in Balance items and members
      */
-    async scheduleUpdates(items: BalanceItem[]) {
+    scheduleUpdates(items: BalanceItem[]) {
         console.log('Schedule outstanding balance for', items.length, 'items');
 
         for (const item of items) {

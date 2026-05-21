@@ -123,7 +123,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             const balanceItem = await STPackageService.chargePackage(model, undefined, checkout.customer ?? undefined);
             if (balanceItem) {
                 balanceItem.VATExcempt = PaymentService.getVATExcempt({
-                    customer: checkout.customer,
+                    company: checkout.customer?.company,
                     sellingOrganization,
                     type: 'services'
                 });
@@ -237,7 +237,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;
             item.VATExcempt = PaymentService.getVATExcempt({
-                customer: checkout.customer,
+                company: checkout.customer?.company,
                 sellingOrganization,
                 type: 'services'
             });

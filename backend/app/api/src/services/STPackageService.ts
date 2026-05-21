@@ -1,7 +1,8 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { PaymentCustomer, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import type { PaymentCustomer} from '@stamhoofd/structures';
+import { STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
@@ -206,9 +207,21 @@ export class STPackageService {
     }
 
     private static async getOrganizationPackagesMap(organizationId: string): Promise<Map<STPackageType, STPackageStatus>> {
+        const map = new Map<STPackageType, STPackageStatus>();
+
+        if (STAMHOOFD.userMode === 'platform' || organizationId === ((await Platform.getShared()).membershipOrganizationId)) {
+            map.set(STPackageType.Webshops, STPackageStatus.create({
+                startDate: new Date(0),
+            }))
+
+            map.set(STPackageType.Members, STPackageStatus.create({
+                startDate: new Date(0),
+            }))
+            return map
+        }
+
         const packages = await this.getForOrganizationIncludingExpired(organizationId);
 
-        const map = new Map<STPackageType, STPackageStatus>();
         for (const pack of packages) {
             const exist = map.get(pack.meta.type);
             if (exist) {

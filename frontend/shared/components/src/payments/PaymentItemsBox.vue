@@ -21,23 +21,18 @@
         </STGridItem>
     </STGrid>
 
-    <PriceBreakdownBox :price-breakdown="[{name: $t('%2U'), price: payment.price}]" />
+    <PriceBreakdownBox :price-breakdown="payment.priceBreakdown" />
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
 import type { BalanceItem, PaymentGeneral } from '@stamhoofd/structures';
-import { BalanceItemWithPayments } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { EditBalanceItemView } from '.';
-import { GlobalEventBus } from '../EventBus';
-import { useContext } from '../hooks/useContext.js';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 
@@ -50,7 +45,6 @@ const props = withDefaults(
     },
 );
 
-const context = useContext()
 const present = usePresent()
 const sortedItems = computed(() => {
     return props.payment.balanceItemPayments.slice().sort((a, b) => {

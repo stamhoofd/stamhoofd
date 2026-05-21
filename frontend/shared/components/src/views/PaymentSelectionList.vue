@@ -4,7 +4,11 @@
             {{ getWarning(selectedPaymentMethod) }}
         </p>
 
-        <STList class="payment-selection-list">
+        <p v-if="sortedPaymentMethods.length === 0" class="error-box">
+            {{ $t('Er zijn momenteel geen betaalmethodes ingesteld. Neem contact op of herlaad de pagina en probeer zo meteen opnieuw.') }}
+        </p>
+
+        <STList v-else class="payment-selection-list">
             <STListItem v-for="paymentMethod in sortedPaymentMethods" :key="paymentMethod" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
                     <Radio v-model="selectedPaymentMethod" name="choose-payment-method" :value="paymentMethod" data-testid="payment-method-option" />

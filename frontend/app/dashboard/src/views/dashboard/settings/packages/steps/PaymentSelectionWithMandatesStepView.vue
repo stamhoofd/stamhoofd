@@ -55,8 +55,8 @@
                         </STInputBox>
                     </template>
 
-                    <template v-if="model.requiresMandate && mandateId === null">
-                        <hr v-if="(mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates)">
+                    <template v-if="model.requiresMandate && mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
+                        <hr v-if="(mandates.length)">
                         <STInputBox error-fields="createMandate" :error-box="errors.errorBox" class="max" :title="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? $t('%1QC') : ''">
                             <STList>
                                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
@@ -77,7 +77,7 @@
                     </template>
 
                     <div v-if="!mandateId" class="container">
-                        <hr v-if="(model.requiresMandate && mandateId === null)">
+                        <hr v-if="(model.requiresMandate && mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates)">
                         <STInputBox v-if="model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates && (model.requiresMandate || mandates?.length) " error-fields="method" :error-box="errors.errorBox" class="max" :title="$t('%M7')">
                             <PaymentSelectionList v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                         </STInputBox>

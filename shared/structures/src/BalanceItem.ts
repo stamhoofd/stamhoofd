@@ -90,6 +90,7 @@ export enum BalanceItemType {
      * Platform package activation (features)
      */
     STPackage = 'STPackage',
+    ServiceFee = 'ServiceFee'
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -111,6 +112,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.CancellationFee: return $t(`%17G`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`%16L`);
         case BalanceItemType.STPackage: return $t('%1Ms');
+        case BalanceItemType.ServiceFee: return $t('Servicekosten');
     }
 }
 
@@ -125,6 +127,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string {
         case BalanceItemType.CancellationFee: return 'canceled';
         case BalanceItemType.RegistrationBundleDiscount: return 'label';
         case BalanceItemType.STPackage: return 'box';
+        case BalanceItemType.ServiceFee: return 'calculator';
     }
 }
 
@@ -446,6 +449,12 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: DateDecoder })
     createdAt = new Date();
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    startDate: Date | null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    endDate: Date | null;
+
     @field({ decoder: new EnumDecoder(BalanceItemStatusV352) })
     @field({ decoder: new EnumDecoder(BalanceItemStatus), version: 353,
         upgrade(old) {
@@ -580,6 +589,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
             case BalanceItemType.STPackage: return this.description;
+            case BalanceItemType.ServiceFee: return $t('servicekosten');
         }
     }
 
@@ -602,11 +612,8 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%BV`);
             case BalanceItemType.STPackage: return $t('%1Mu');
+            case BalanceItemType.ServiceFee: return $t('servicekosten');
         }
-    }
-
-    get groupTitle(): string {
-        return this.itemTitle;
     }
 
     get groupDescription() {
@@ -739,6 +746,7 @@ export class BalanceItem extends AutoEncoder {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
             }
+            case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Servicekosten tussen {startDate} en {endDate}`, {startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate)}) : $t(`Servicekosten op {date}`, {date: Formatter.date(this.startDate)})) : $t('Servicekosten');
         }
     }
 
@@ -968,7 +976,11 @@ export class GroupedBalanceItems {
             // Return normal prefix
             return this.items[0].itemTitle;
         }
-        return this.items[0].groupTitle;
+
+        if (this.items[0].type === BalanceItemType.ServiceFee) {
+            return $t('Servicekosten')
+        }
+        return this.items[0].itemTitle;
     }
 
     get itemDescription() {

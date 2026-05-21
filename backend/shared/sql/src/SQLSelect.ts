@@ -43,6 +43,8 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _groupBy: SQLExpression[] = [];
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
     _max_execution_time: number | null = null;
+    _log = false;
+
     private _name: string | null = null;
     static slowQueryThresholdMs: number | null = null;
 
@@ -57,6 +59,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             this._transformer = columns.shift() as any;
         }
         this._columns = columns.map(c => typeof c === 'string' ? new SQLColumnExpression(c) : c) as any;
+    }
+
+    log() {
+        this._log = true;
+        return this;
     }
 
     clone(): this {
@@ -196,6 +203,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         }
 
         const { query, params } = normalizeSQLQuery(this.getSQL());
+
+        if (this._log) {
+            console.log(query, params)
+        }
 
         // when debugging: log all queries
         // console.log(query, params);

@@ -140,6 +140,47 @@
                     </p>
                 </STListItem>
 
+                <STListItem v-if="payment.serviceFeePayout">
+                    <h3 class="style-definition-label">
+                        {{ $t('Servicekost') }}
+                    </h3>
+
+                    <p class="style-definition-text">
+                        {{ formatPrice(payment.serviceFeePayout) }}
+                    </p>
+                    <p class="style-description-small">
+                        <template v-if="VATPercentage > 0">
+                            {{ $t('%hN', {percentage: VATPercentage.toString()}) }}
+                        </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="payment.serviceFeeManualCharged">
+                    <h3 class="style-definition-label">
+                        {{ $t('Servicekost') }}
+                    </h3>
+
+                    <p class="style-definition-text">
+                        {{ formatPrice(payment.serviceFeeManualCharged) }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ $t('Excl. BTW - Dit bedrag werd reeds aangerekend') }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-else-if="payment.serviceFeeManual">
+                    <h3 class="style-definition-label">
+                        {{ $t('Servicekost') }}
+                    </h3>
+
+                    <p class="style-definition-text">
+                        {{ formatPrice(payment.serviceFeeManual) }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ $t('Excl. BTW - Dit bedrag wordt achteraf aangerekend via jouw ingestelde betaalmethode.') }}
+                    </p>
+                </STListItem>
+
                 <STListItem v-if="payment.invoiceId" :selectable="true">
                     <h3 class="style-definition-label">
                         {{ $t('%1Mm') }}

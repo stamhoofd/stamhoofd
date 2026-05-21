@@ -116,6 +116,14 @@ export class InvoiceService {
                     message: 'You cannot invoice a payment multiple times',
                 });
             }
+
+             if (payment.status === PaymentStatus.Failed) {
+                throw new SimpleError({
+                    code: 'failed_payment',
+                    message: 'You cannot invoice failed payments',
+                    human: $t('Je kan geen factuur maken voor een mislukte of geannuleerde betaling')
+                });
+            }
         }
 
         const balanceItemIds = Formatter.uniqueArray(struct.items.map(i => i.balanceItemId));

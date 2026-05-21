@@ -4,7 +4,7 @@ import type { Member, User } from '@stamhoofd/models';
 import { BalanceItem } from '@stamhoofd/models';
 import { BalanceItemPayment, Group, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
+import type { Checkoutable, Company, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, VATExcemptReason, Version } from '@stamhoofd/structures';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { PaymentMandateStatus, PaymentMandateType } from '@stamhoofd/structures/PaymentMandate.js';
@@ -1151,12 +1151,12 @@ export class PaymentService {
         return sellingOrganization.meta.companies[0];
     }
 
-    static getVATExcempt({ customer, sellingOrganization, type }: { customer: PaymentCustomer | null; sellingOrganization: Organization; type: 'services'|'goods' }) {
+    static getVATExcempt({ company, sellingOrganization, type }: { company: Company | null | undefined; sellingOrganization: Organization; type: 'services'|'goods' }) {
         // Validate VAT rates for this customer
         const seller = this.getDefaultCompanyForOrganization(sellingOrganization)
-        if (seller && seller.VATNumber && seller.address && customer && customer.company) {
+        if (seller && seller.VATNumber && seller.address && company) {
             // B2B validation
-            if (!customer.company.address) {
+            if (!company.address) {
                 throw new SimpleError({
                     code: 'missing_field',
                     message: 'Company address missing',
@@ -1166,7 +1166,7 @@ export class PaymentService {
             }
 
             // Reverse charged vat applicable?
-            if (customer.company.address.country !== seller.address.country && customer.company.VATNumber) {
+            if (company.address.country !== seller.address.country && company.VATNumber) {
                 if (type === 'services') {
                     return VATExcemptReason.IntraCommunityServices;
                 }
