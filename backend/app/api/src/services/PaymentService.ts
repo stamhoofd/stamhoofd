@@ -23,7 +23,7 @@ import { PaymentMandateService } from './PaymentMandateService.js';
 import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 
 export class PaymentService {
-    static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
+    static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus, paidAt?: Date) {
         if (payment.status === status) {
             return;
         }
@@ -39,7 +39,7 @@ export class PaymentService {
         await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
             if (status === PaymentStatus.Succeeded) {
                 payment.status = PaymentStatus.Succeeded;
-                payment.paidAt = new Date();
+                payment.paidAt = paidAt ?? new Date();
                 await payment.save();
 
                 // Prevent concurrency issues

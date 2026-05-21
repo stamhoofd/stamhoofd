@@ -426,6 +426,7 @@ export class Invoice extends AutoEncoder {
                 console.warn('Could not correct invoice. Adding manual item with the same VAT tax so we still apply VAT on the price to pay, which is more correct than adding after VAT')
                 const add = InvoicedBalanceItem.create({
                     balanceItemId: items[0].balanceItemId,
+                    type: items[0].type,
                     balanceInvoicedAmount: 0,
                     quantity: 1_00_00,
                     unitPrice: toAddToTaxablePrice,

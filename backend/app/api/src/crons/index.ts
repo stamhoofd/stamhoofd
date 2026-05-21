@@ -9,3 +9,4 @@ import './mollie-chargebacks.js';
 import './invoices.js';
 import './service-fees.js';
 import './members-fees.js';
+import './stripe-invoices.js';

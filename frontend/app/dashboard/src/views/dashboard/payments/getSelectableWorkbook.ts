@@ -40,7 +40,7 @@ export function getSelectableWorkbook() {
                     ...getGeneralColumns(),
 
                     ...getSettlementColumns(),
-                    ...getStripeColumns(),
+                    ...getPaymentProviderColumns(),
                     ...getTransferColumns(),
 
                     // Facturatiegegevens
@@ -192,32 +192,46 @@ function getSettlementColumns() {
     ];
 }
 
-function getStripeColumns() {
+function getPaymentProviderColumns() {
     return [
         new SelectableColumn({
             id: 'transferFee',
             name: $t(`%wZ`),
             description: $t(`%MF`),
-            category: $t(`%K`),
+            category: $t(`Betaalprovider`),
         }),
+        ...(STAMHOOFD.userMode === 'organization' ? [
+            new SelectableColumn({
+                id: 'serviceFeeManual',
+                name: $t(`Servicekosten achteraf aangerekend (excl. BTW)`),
+                description: $t('Dit is voor alle betalingen die niet via Stripe verlopen'),
+                category: $t(`Betaalprovider`),
+            }),
+            new SelectableColumn({
+                id: 'serviceFeePayout',
+                name: $t(`Servicekosten ingehouden van uitbetaling (Stripe, incl. BTW)`),
+                description: $t('Dit is voor alle betalingen die via Stripe verlopen'),
+                category: $t(`Betaalprovider`),
+            }),
+        ] : []),
         new SelectableColumn({
             id: 'stripeAccountId',
             name: $t(`%1m`),
             description: $t(`%MG`),
-            category: $t(`%K`),
+            category: $t(`Betaalprovider`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'iban',
             name: $t(`%MH`),
             description: $t(`%MI`),
-            category: $t(`%K`),
+            category: $t(`Betaalprovider`),
         }),
         new SelectableColumn({
             id: 'ibanName',
             name: $t(`%MJ`),
             description: $t(`%MK`),
-            category: $t(`%K`),
+            category: $t(`Betaalprovider`),
         }),
     ];
 }

@@ -40,10 +40,6 @@
             {{ $t('%1Sd') }} {{ '123'.padStart(padZeroLength, '0') }}. {{ $t('%1Sq') }}
         </p>
 
-        <hr>
-        <h2>{{ $t('Facturen doorsturen naar boekhoudsoftware en PEPPOL') }}</h2>
-        <p>{{ $t('Om facturen in Stamhoofd ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.') }}</p>
-
         <!--<div class="split-inputs">
             <div>
                 <ImageInput v-model="background" :validator="errors.validator" :resolutions="resolutions" :required="false" :title="$t(`%1QM`)" />
@@ -53,6 +49,14 @@
                 <ImageInput v-model="secondBackground" :placeholder="background" :validator="errors.validator" :resolutions="resolutions" :required="false" :title="$t(`%1SX`)" />
             </div>
         </div>-->
+
+        <hr>
+        <h2>{{ $t('Facturen doorsturen naar boekhoudsoftware en PEPPOL') }}</h2>
+        <p>{{ $t('Om facturen in Stamhoofd ook door te sturen naar je boekhoudsoftware, kan je het via e-mail forwaren naar je boekhoudsoftware. Die kan de XML inlezen. Je boekhoudsoftware kan vervolgens de factuur via PEPPOL naar je klant verzenden.') }}</p>
+
+        <STList>
+            <CheckboxListItem v-model="forwardOnlyVAT" :label="$t('Enkel facturen van BTW-plichtige bedrijven of bedrijven met een custom PEPPOL Endpoint ID doorsturen naar de boekhoudsoftware')" />
+        </STList>
 
         <EmailInput v-for="n in emailCount" :key="n" :title="$t(`%1FK`) + ' '+n" :model-value="getEmail(n - 1)" :validator="errors.validator" :placeholder="$t(`%1FK`)" @update:model-value="setEmail(n - 1, $event)">
             <template #right>
@@ -117,6 +121,19 @@ function resetTextForMonth(index: number) {
 }
 
 const emailCount = computed(() => forwardEmailHandlers.value.length);
+
+const forwardOnlyVAT = computed({
+    get: () => patchedOrganization.value.privateMeta?.invoiceSettings.forwardOnlyVAT ?? true,
+    set: (forwardOnlyVAT) => {
+        addPatch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                invoiceSettings: OrganizationInvoiceSettings.patch({
+                    forwardOnlyVAT
+                })
+            })
+        })
+    }
+});
 
 const background = computed({
     get: () => patchedOrganization.value.privateMeta?.invoiceSettings.background ?? null,

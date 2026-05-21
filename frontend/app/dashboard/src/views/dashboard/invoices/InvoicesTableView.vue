@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { usePresent } from '@simonbackx/vue-app-navigation';
-import { Toast } from '@stamhoofd/components';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
 import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
@@ -37,6 +37,8 @@ import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import InvoiceView from './InvoiceView.vue';
 import { InvoicesExcelExport } from './InvoicesExcelExport';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 
 const props = withDefaults(
     defineProps<{
@@ -52,8 +54,8 @@ const configurationId = computed(() => {
     return 'invoices';
 });
 
-const present = usePresent();
-const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
+const organization = useOrganization()
+const platform = usePlatform()
 const filterBuilders = usePaymentsUIFilterBuilders();
 const title = computed(() => {
     return $t('%1JA');
@@ -84,8 +86,8 @@ const allColumns: Column<ObjectType, any>[] = [
             }
             return 'info';
         },
-        minimumWidth: 50,
-        recommendedWidth: 50,
+        minimumWidth: 100,
+        recommendedWidth: 100,
     }),
 
     new Column<ObjectType, string>({
@@ -94,8 +96,8 @@ const allColumns: Column<ObjectType, any>[] = [
         getValue: object => object.customer?.company ? (object.customer?.company?.name || '') : (object.customer.name || ''),
         format: value => value || $t('%CL'),
         getStyle: value => !value ? 'gray' : '',
-        minimumWidth: 100,
-        recommendedWidth: 150,
+        minimumWidth: 150,
+        recommendedWidth: 200,
         allowSorting: false,
     }),
 
@@ -105,7 +107,7 @@ const allColumns: Column<ObjectType, any>[] = [
         getValue: object => object.customer?.company ? (object.customer?.company?.VATNumber || '') : '',
         format: value => value || $t('%1FW'),
         getStyle: value => !value ? 'gray' : '',
-        minimumWidth: 100,
+        minimumWidth: 150,
         recommendedWidth: 150,
         allowSorting: false,
         enabled: false,
@@ -162,6 +164,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, boolean>({
         id: 'didSendPeppol',
         name: $t('Doorgestuurd'),
+        description: $t('Doorgestuurd naar boekhoudsoftware'),
         getValue: object => object.didSendPeppol,
         getStyle: (value) => {
             if (!value) {
@@ -175,6 +178,42 @@ const allColumns: Column<ObjectType, any>[] = [
         enabled: false,
         allowSorting: false
     }),
+
+    ...(STAMHOOFD.userMode === 'organization' && organization.value && organization.value.id === platform.value.membershipOrganizationId ? [
+        new Column<ObjectType, string | null>({
+            id: 'reference',
+            name: $t('Referentie'),
+            getValue: object => object.reference,
+            getStyle: (value) => {
+                if (!value) {
+                    return "gray"
+                }
+                return ""
+            },
+            format: value => value || $t("Geen"),
+            minimumWidth: 200,
+            recommendedWidth: 300,
+            enabled: false,
+            allowSorting: false
+        }),
+
+        new Column<ObjectType, string | null>({
+            id: 'stripeAccountId',
+            name: 'Stripe account ID',
+            getValue: object => object.stripeAccountId,
+            getStyle: (value) => {
+                if (!value) {
+                    return "gray"
+                }
+                return ""
+            },
+            format: value => value || $t("Geen"),
+            minimumWidth: 200,
+            recommendedWidth: 300,
+            enabled: false,
+            allowSorting: false
+        }),
+    ] : [])
 
 ];
 

@@ -50,6 +50,9 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
             }
 
+            put.stripeAccountId = null;
+            put.reference = null;
+
             const model = await InvoiceService.createFrom(organization, put);
             invoices.push(model);
         }
