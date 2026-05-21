@@ -60,12 +60,18 @@ import { Formatter } from '@stamhoofd/utility';
 import { onMounted, ref } from 'vue';
 import type { SelectableWorkbook } from './SelectableWorkbook';
 
-const props = defineProps<{
-    type: ExcelExportType;
-    filter: LimitedFilteredRequest;
-    workbook: SelectableWorkbook;
-    configurationId: string; // How to store the filters for easy reuse
-}>();
+const props = withDefaults(
+    defineProps<{
+        type: ExcelExportType;
+        title?: string | null; // file name to use for the excel file, without extension
+        filter: LimitedFilteredRequest;
+        workbook: SelectableWorkbook;
+        configurationId: string; // How to store the filters for easy reuse
+    }>(),
+    {
+        title: null,
+    },
+);
 
 const visibleSheet = ref(props.workbook.sheets[0]);
 const exporting = ref(false);
@@ -126,12 +132,14 @@ async function startExport() {
 
 async function doExport() {
     try {
+        let title = Formatter.fileSlug(props.title ?? props.type);
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
             path: `/export/excel/${props.type}`,
             body: ExcelExportRequest.create({
                 filter: props.filter,
                 workbookFilter: props.workbook.getFilter(),
+                title: title,
             }),
             decoder: ExcelExportResponse as Decoder<ExcelExportResponse>,
             shouldRetry: false,
@@ -139,11 +147,13 @@ async function doExport() {
 
         if (response.data.url) {
             const url = new URL(response.data.url);
-            const filename = Formatter.fileSlug(props.type) + '.xlsx';
+            if (url.searchParams.has('name')) {
+                title = Formatter.fileSlug(url.searchParams.get('name')!)
+            }
             new Toast($t('%1B6'), 'download')
                 .setButton(
                     new ToastButton($t('%1B7'), () => {
-                        AppManager.shared.downloadFile(url, filename).catch((e) => {
+                        AppManager.shared.downloadFile(url, title + '.xlsx').catch((e) => {
                             Toast.fromError(e).setHide(15_000).show();
                         });
                     }),
