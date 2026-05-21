@@ -15,7 +15,7 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { Organization, Platform } from '@stamhoofd/structures';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import type { ComputedRef, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
@@ -121,6 +121,7 @@ export class PaymentActionBuilder {
                                     filter: selection.filter,
                                     workbook: this.selectableWorkbook.getSelectableWorkbook(),
                                     configurationId: this.configurationId.value,
+                                    title: this.getExcelTitle(),
                                 }),
                             }),
                         ],
@@ -136,6 +137,15 @@ export class PaymentActionBuilder {
         }
 
         return actions.filter(action => action !== null);
+    }
+
+     private getExcelTitle() {
+        const parts = [
+            this.organization && this.context.value.auth.hasSomePlatformAccess() ? this.organization.name : null,
+            this.methods?.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(this.methods[0]) : $t('Betalingen'),
+        ];
+
+        return parts.filter(Boolean).join(' - ');
     }
 
     private getEmailAction() {

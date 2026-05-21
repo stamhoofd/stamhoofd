@@ -396,6 +396,11 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
                         }),
                         workbook: getSelectableWorkbook(),
                         configurationId: 'configure-payment-export',
+                        title: [
+                            this.organization && this.$context.auth.hasSomePlatformAccess() ? this.organization.name : null,
+                            this.methods.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(this.methods[0]) : $t('Betalingen'),
+                            Formatter.dateRange(this.startDate, this.endDate, ' tem ', false)
+                        ].filter(Boolean).join(' - '),
                     }),
                 ],
             });
@@ -405,6 +410,8 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
         }
         this.saving = false;
     }
+
+    
 
     buildFilter(): StamhoofdFilter {
         return {

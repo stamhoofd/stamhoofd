@@ -216,6 +216,7 @@ const actions: TableAction<ObjectType>[] = [
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),
                             configurationId: configurationId.value,
+                            title: [organization.value?.name, $t('Facturen')].filter(Boolean).join(' - '),
                         }),
                     }),
                 ],

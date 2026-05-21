@@ -280,6 +280,7 @@ const actions = [
                             filter: selection.filter,
                             workbook: getSelectableWorkbook(),
                             configurationId: configurationId.value,
+                            title: [organization.value?.name, $t('Aanrekeningen')].filter(Boolean).join(' - '),
                         }),
                     }),
                 ],

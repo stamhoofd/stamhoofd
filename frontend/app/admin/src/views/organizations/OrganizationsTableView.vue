@@ -277,12 +277,25 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
                     filter: selection.filter,
                     workbook: getSelectableWorkbook(platform.value),
                     configurationId: configurationId.value,
+                    title: getExcelTitle(selection),
                 }),
             }),
         ],
         modalDisplayStyle: 'popup',
     });
 }
+
+function getExcelTitle(selection: TableActionSelection<ObjectType>) {
+        if (selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1) {
+            return [...selection.markedRows.values()][0].name;
+        }
+        const parts = [
+            props.tag?.id ? props.tag.name : null,
+            $t('#Groepen'),
+        ];
+
+        return parts.filter(Boolean).join(' - ');
+    }
 
 if (auth.hasPlatformFullAccess()) {
     actions.push(

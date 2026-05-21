@@ -78,10 +78,22 @@ export class PlatformMembershipActionBuilder {
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(),
                         configurationId: 'platform-memberships',
+                        title: this.getExcelTitle(selection),
                     }),
                 }),
             ],
             modalDisplayStyle: 'popup',
         });
+    }
+
+    private getExcelTitle(selection: TableActionSelection<PlatformMembership>) {
+        if (selection.markedRows && selection.markedRowsAreSelected  && selection.markedRows.size === 1) {
+            return [...selection.markedRows.values()][0].member.name;
+        }
+        const parts = [
+            $t('Aansluitingen'),
+        ];
+
+        return parts.filter(Boolean).join(' - ');
     }
 }
