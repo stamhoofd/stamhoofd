@@ -151,7 +151,7 @@ export class RegistrationActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                enabled: this.hasWrite,
+                enabled: () => this.hasWrite,
                 handler: (registrations: PlatformRegistration[]) => {
                     if (registrations.length) {
                         presentEditMember({ member: registrations[0].member, present: this.present, context: this.context }).catch(console.error);
@@ -165,7 +165,7 @@ export class RegistrationActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                enabled: this.context.auth.hasFullAccess(),
+                enabled: () => this.context.auth.hasFullAccess(),
                 handler: (registrations: PlatformRegistration[]) => {
                     if (registrations.length) {
                         presentEditResponsibilities({ member: registrations[0].member, present: this.present }).catch(console.error);
@@ -178,7 +178,7 @@ export class RegistrationActionBuilder {
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite && !!this.context.organization,
+                enabled: () => this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
         ];
@@ -209,7 +209,7 @@ export class RegistrationActionBuilder {
             new MenuTableAction({
                 name: $t(`%eh`),
                 groupIndex: 0,
-                enabled: organization.period.waitingLists.length > 0,
+                enabled: () => organization.period.waitingLists.length > 0,
                 childActions: () => [
                     ...organization.period.waitingLists.map((g) => {
                         return new InMemoryTableAction({
@@ -277,7 +277,7 @@ export class RegistrationActionBuilder {
             groupIndex: 7,
             needsSelection: true,
             allowAutoSelectAll: false,
-            enabled: this.hasWrite,
+            enabled: () => this.hasWrite,
             handler: async (registrations: PlatformRegistration[]) => {
                 await this.deleteRegistrations(registrations);
             },
@@ -374,8 +374,8 @@ export class RegistrationActionBuilder {
     }
 
     private getDeleteMemberAction() {
-        const enabled = STAMHOOFD.userMode === 'platform' ? (!this.context.organization && this.context.auth.hasPlatformFullAccess()) : this.context.auth.hasFullAccess();
-        if (!enabled) {
+        const enabled = () => (STAMHOOFD.userMode === 'platform' ? (!this.context.organization && this.context.auth.hasPlatformFullAccess()) : this.context.auth.hasFullAccess());
+        if (!enabled()) {
             return null;
         }
         return new InMemoryTableAction({
@@ -428,7 +428,7 @@ export class RegistrationActionBuilder {
             groupIndex: 5,
             needsSelection: true,
             allowAutoSelectAll: false,
-            enabled: this.hasWrite,
+            enabled: () => this.hasWrite,
             childActions: () => [
                 ...suggestedGroups.map((g) => {
                     return new InMemoryTableAction({
@@ -444,7 +444,7 @@ export class RegistrationActionBuilder {
                 new MenuTableAction({
                     name: $t(`%eh`),
                     groupIndex: 0,
-                    enabled: organization.period.waitingLists.length > 0,
+                    enabled: () => organization.period.waitingLists.length > 0,
                     childActions: () => [
                         ...organization.period.waitingLists.map((g) => {
                             return new InMemoryTableAction({
@@ -477,7 +477,7 @@ export class RegistrationActionBuilder {
             groupIndex: 1,
             needsSelection: true,
             allowAutoSelectAll: false,
-            enabled: this.hasWrite,
+            enabled: () => this.hasWrite,
             handler: async (registrations: PlatformRegistration[]) => {
                 await this.editRegistrations(registrations);
             },
@@ -872,7 +872,7 @@ export class RegistrationActionBuilder {
 
         const eventGroups = this.eventGroupsLinkedToWaitingList ?? [];
 
-        const enabled = this.hasWrite;
+        const enabled = () => this.hasWrite;
         
         if (this.isWaitingList && allGroups.length === 1) {
             const group = allGroups[0];

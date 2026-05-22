@@ -123,7 +123,7 @@ export class OrderActionBuilder {
                 priority: 1,
                 groupIndex: 2,
                 needsSelection: false,
-                enabled: this.webshopManager.hasWrite && (options?.includeAdd ?? false),
+                enabled: () => this.webshopManager.hasWrite && (options?.includeAdd ?? false),
                 handler: async () => {
                     await this.createOrder();
                 },
@@ -131,7 +131,7 @@ export class OrderActionBuilder {
 
             new InMemoryTableAction({
                 name: $t(`%V3`),
-                enabled: this.webshopManager.hasWrite,
+                enabled: () => this.webshopManager.hasWrite,
                 icon: 'edit',
                 priority: 1,
                 groupIndex: 2,
@@ -144,7 +144,7 @@ export class OrderActionBuilder {
 
             new MenuTableAction({
                 name: $t(`%vW`),
-                enabled: this.webshopManager.hasWrite,
+                enabled: () => this.webshopManager.hasWrite,
                 icon: 'flag',
                 priority: 1,
                 groupIndex: 2,
@@ -155,7 +155,7 @@ export class OrderActionBuilder {
 
             new MenuTableAction({
                 name: $t(`%V4`),
-                enabled: this.webshopManager.hasWrite && this.webshopManager.preview.hasTickets,
+                enabled: () => this.webshopManager.hasWrite && this.webshopManager.preview.hasTickets,
                 icon: 'flag',
                 priority: 1,
                 groupIndex: 2,
@@ -166,7 +166,7 @@ export class OrderActionBuilder {
 
             new MenuTableAction({
                 name: $t(`%V5`),
-                enabled: this.webshopManager.hasWrite,
+                enabled: () => this.webshopManager.hasWrite,
                 icon: 'flag',
                 priority: 0,
                 groupIndex: 2,
@@ -193,7 +193,7 @@ export class OrderActionBuilder {
 
             new AsyncTableAction({
                 name: $t(`%Gb`),
-                enabled: this.webshopManager.hasRead,
+                enabled: () => this.webshopManager.hasRead,
                 icon: 'email',
                 priority: 10,
                 groupIndex: 3,
@@ -205,7 +205,7 @@ export class OrderActionBuilder {
             ...(this.webshopManager.preview.meta.phoneEnabled
                 ? [new InMemoryTableAction({
                         name: $t(`%PI`),
-                        enabled: this.webshopManager.hasRead,
+                        enabled: () => this.webshopManager.hasRead,
                         icon: 'feedback-line',
                         priority: 9,
                         groupIndex: 3,
@@ -218,7 +218,7 @@ export class OrderActionBuilder {
 
             new InMemoryTableAction({
                 name: $t(`%V8`),
-                enabled: this.webshopManager.hasRead,
+                enabled: () => this.webshopManager.hasRead,
                 icon: 'download',
                 priority: 8,
                 groupIndex: 3,
@@ -230,7 +230,7 @@ export class OrderActionBuilder {
             new InMemoryTableAction({
                 name: $t(`%CJ`),
                 icon: 'trash',
-                enabled: this.webshopManager.hasWrite,
+                enabled: () => this.webshopManager.hasWrite,
                 priority: 0,
                 groupIndex: 5,
                 needsSelection: true,

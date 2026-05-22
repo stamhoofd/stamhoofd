@@ -83,7 +83,6 @@ export function getDeleteInvitationAction({organizationId, context, owner, event
             needsSelection: true,
             allowAutoSelectAll: false,
             icon: 'trash',
-            enabled: true,
             handler: async (invitations: RegistrationInvitation[]) => {
                 const message = invitations.length === 1 ? $t('%1Tv', {name: invitations[0].member.name}) : $t('Weet je zeker dat je {count} uitnodigingen wilt verwijderen?', {count: invitations.length});
                 const isConfirm = await CenteredMessage.confirm(message, $t('%Kk'));

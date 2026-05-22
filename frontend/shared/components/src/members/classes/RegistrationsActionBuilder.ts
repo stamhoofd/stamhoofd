@@ -98,7 +98,7 @@ export class RegistrationsActionBuilder {
                 new MenuTableAction({
                     name: $t(`%eh`),
                     groupIndex: 1,
-                    enabled: period.waitingLists.length > 0,
+                    enabled: () => period.waitingLists.length > 0,
                     description: addPeriodDescription ? period.period.name : undefined,
                     childActions: () => [
                         ...period.waitingLists.map((g) => {
@@ -129,7 +129,7 @@ export class RegistrationsActionBuilder {
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite,
+                enabled: () => this.hasWrite,
                 childActions: () => {
                     const base = suggestedGroups.map((g) => {
                         return new InMemoryTableAction({
@@ -173,7 +173,7 @@ export class RegistrationsActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite,
+                enabled: () => this.hasWrite,
                 handler: async () => {
                     await this.editRegistrations();
                 },
@@ -190,7 +190,7 @@ export class RegistrationsActionBuilder {
             groupIndex: 7,
             needsSelection: true,
             allowAutoSelectAll: false,
-            enabled: this.hasWrite,
+            enabled: () => this.hasWrite,
             handler: async () => {
                 await this.deleteRegistration();
             },
@@ -205,7 +205,7 @@ export class RegistrationsActionBuilder {
                     groupIndex: 2,
                     needsSelection: true,
                     allowAutoSelectAll: false,
-                    enabled: c.groups.length > 0 || c.categories.length > 0,
+                    enabled: () => c.groups.length > 0 || c.categories.length > 0,
                     childActions: () => this.getActionsForCategory(c, action),
                 });
             }),
@@ -256,7 +256,7 @@ export class RegistrationsActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 icon: 'external',
-                enabled: this.hasWrite,
+                enabled: () => this.hasWrite,
                 handler: async () => {
                     const href = '/' + appToUri('dashboard') + (STAMHOOFD.singleOrganization ? '' : ('/' + organization.uri));
                     window.open(href, '_blank');

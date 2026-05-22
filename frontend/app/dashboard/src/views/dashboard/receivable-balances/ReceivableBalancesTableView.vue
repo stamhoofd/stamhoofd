@@ -190,7 +190,7 @@ const actions: TableAction<ObjectType>[] = [
         groupIndex: 3,
         needsSelection: true,
         allowAutoSelectAll: true,
-        enabled: !!organization.value && organization.value.meta.registrationPaymentConfiguration.enableMandates,
+        enabled: () => !!organization.value && organization.value.meta.registrationPaymentConfiguration.enableMandates,
         destructive: true,
         handler: async (selection) => {
             if (!await CenteredMessage.confirm({

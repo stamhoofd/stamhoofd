@@ -165,7 +165,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
     const selectedOrganizationRegistrationPeriod = periods?.organizationPeriods.find(p => p.period.id === registration.group.periodId);
     const actions = builder.getActions({ selectedOrganizationRegistrationPeriod });
 
-    if (actions.filter(a => a.enabled).length === 0) {
+    if (actions.filter(a => a.enabled()).length === 0) {
         Toast.warning($t(`%10J`)).show();
         return;
     }

@@ -288,7 +288,7 @@ async function createActions(): Promise<void> {
             priority: 0,
             groupIndex: 1,
             needsSelection: false,
-            enabled: canAdd,
+            enabled: () => canAdd,
             handler: async () => {
                 await chooseOrganizationMembersForGroup({
                     members: [],

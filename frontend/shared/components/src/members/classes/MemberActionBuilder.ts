@@ -177,7 +177,7 @@ export class MemberActionBuilder {
                     name: $t(`%eh`),
                     groupIndex: 0,
                     description: addPeriodDescription ? period.period.name : undefined,
-                    enabled: period.waitingLists.length > 0,
+                    enabled: () => period.waitingLists.length > 0,
                     childActions: () => [
                         ...period.waitingLists.map((g) => {
                             return new InMemoryTableAction({
@@ -215,9 +215,9 @@ export class MemberActionBuilder {
     }
 
     private getDeleteAction() {
-        const enabled = STAMHOOFD.userMode === 'platform' ? (!this.context.organization && this.context.auth.hasPlatformFullAccess()) : this.context.auth.hasFullAccess();
+        const enabled = () => (STAMHOOFD.userMode === 'platform' ? (!this.context.organization && this.context.auth.hasPlatformFullAccess()) : this.context.auth.hasFullAccess());
 
-        if (!enabled) {
+        if (!enabled()) {
             return [];
         }
 
@@ -230,7 +230,7 @@ export class MemberActionBuilder {
             singleSelection: true,
             allowAutoSelectAll: false,
             icon: 'trash',
-            enabled,
+            enabled: enabled,
             handler: async (members: PlatformMember[]) => {
                 await presentDeleteMembers({
                     members,
@@ -251,7 +251,7 @@ export class MemberActionBuilder {
             singleSelection: true,
             allowAutoSelectAll: false,
             icon: 'code',
-            enabled: !this.context.organization && this.context.auth.hasPlatformFullAccess(),
+            enabled: () => !this.context.organization && this.context.auth.hasPlatformFullAccess(),
             handler: async (members: PlatformMember[]) => {
                 if (!await CenteredMessage.confirm('Alle vragenlijsten verwijderen?', 'Ja, verwijderen')) {
                     return;
@@ -305,7 +305,7 @@ export class MemberActionBuilder {
                 new MenuTableAction({
                     name: $t(`%eh`),
                     groupIndex: 1,
-                    enabled: period.waitingLists.length > 0,
+                    enabled: () => period.waitingLists.length > 0,
                     description: addPeriodDescription ? period.period.name : undefined,
                     childActions: () => [
                         ...period.waitingLists.map((g) => {
@@ -336,7 +336,7 @@ export class MemberActionBuilder {
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite,
+                enabled: () => this.hasWrite,
                 childActions: () => {
                     const base = suggestedGroups.map((g) => {
                         return new InMemoryTableAction({
@@ -452,7 +452,7 @@ export class MemberActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite,
+                enabled: () => this.hasWrite,
                 handler: async (members: PlatformMember[]) => {
                     await this.editRegistrations(members);
                 },
@@ -473,7 +473,7 @@ export class MemberActionBuilder {
             groupIndex: 7,
             needsSelection: true,
             allowAutoSelectAll: false,
-            enabled: this.hasWrite,
+            enabled: () => this.hasWrite,
             handler: async (members) => {
                 await this.deleteRegistration(members);
             },
@@ -518,7 +518,7 @@ export class MemberActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                enabled: this.hasWrite,
+                enabled: () => this.hasWrite,
                 handler: (members: PlatformMember[]) => {
                     this.editMember(members[0]);
                 },
@@ -544,7 +544,7 @@ export class MemberActionBuilder {
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                enabled: this.hasWrite && !!this.context.organization,
+                enabled: () => this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
             ...await this.getInviteMemberForGroupActionsWithGroups(),
@@ -560,7 +560,7 @@ export class MemberActionBuilder {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                enabled: this.context.auth.hasFullAccess(),
+                enabled: () => this.context.auth.hasFullAccess(),
                 handler: (members: PlatformMember[]) => {
                     this.editResponsibilities(members[0]);
                 },
@@ -623,7 +623,7 @@ export class MemberActionBuilder {
 
         const eventGroups = this.eventGroupsLinkedToWaitingList ?? [];
 
-        const enabled = this.hasWrite;
+        const enabled = () => this.hasWrite;
         
         if (this.isWaitingList && allGroups.length === 1) {
             const group = allGroups[0];
@@ -1080,7 +1080,7 @@ export function getActionsForCategory<T extends { id: string }>(
                     groupIndex: 2,
                     needsSelection: true,
                     allowAutoSelectAll: false,
-                    enabled: c.groups.length > 0 || c.categories.length > 0,
+                    enabled: () => c.groups.length > 0 || c.categories.length > 0,
                     childActions: getActionsForCategory(c, action, disableIfAll),
                 });
             }),
@@ -1097,8 +1097,8 @@ export function getActionsForCategory<T extends { id: string }>(
             }),
         ];
 
-        if (r.filter(rr => rr.enabled).length === 1) {
-            const rr = r.filter(rr => rr.enabled)[0];
+        if (r.filter(rr => rr.enabled()).length === 1) {
+            const rr = r.filter(rr => rr.enabled())[0];
             if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
                 return rr.childActions;
             }

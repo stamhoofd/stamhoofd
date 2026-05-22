@@ -305,7 +305,6 @@ if (auth.hasPlatformFullAccess()) {
             priority: 0,
             groupIndex: 1,
             needsSelection: false,
-            enabled: true,
             handler: async () => {
                 const organization = Organization.create({
                     address: Address.createDefault(I18nController.shared.countryCode),

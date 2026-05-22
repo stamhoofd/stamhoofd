@@ -168,7 +168,7 @@ export class PaymentActionBuilder {
                 icon: 'canceled',
                 priority: 1,
                 groupIndex: 4,
-                enabled: !this.isSettingPaymentStatus,
+                enabled: () => !this.isSettingPaymentStatus,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (payments: PaymentGeneral[]) => {

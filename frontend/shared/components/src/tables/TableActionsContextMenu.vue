@@ -84,7 +84,7 @@ export default class TableActionsContextMenu extends VueComponent {
         // Group all actions based on their groupIndex property, sorted by groupIndex
         return this.actions
             .filter((action) => {
-                if (!action.enabled) {
+                if (!action.enabled()) {
                     return false;
                 }
                 if (action.singleSelection && !this.isSingleSelection) {
