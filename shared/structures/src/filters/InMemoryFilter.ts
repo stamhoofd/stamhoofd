@@ -276,6 +276,9 @@ function normalizeValue(val: StamhoofdCompareValue): string | number | null {
         switch (specialValue) {
             case '$now':
                 return normalizeValue(new Date());
+            case '$rel': {
+                return normalizeValue(val['value']);
+            }
             default:
                 throw new Error('Unsupported magic value ' + specialValue);
         }
