@@ -154,13 +154,13 @@ import type { CheckoutResponse } from '@stamhoofd/structures';
 import { PaymentMethod } from '@stamhoofd/structures';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import { computed, ref, shallowRef, watch } from 'vue';
-import InvoiceItemsBox from '../../../invoices/components/InvoiceItemsBox.vue';
 import { useActivatePackages } from '../hooks/useActivatePackages';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import { Request } from '@simonbackx/simple-networking';
 import { useRequestOwner } from '@stamhoofd/networking';
 import PaymentItemsBox from '@stamhoofd/components/payments/PaymentItemsBox.vue';
+import InvoiceItemsBox from '@stamhoofd/components/payments/InvoiceItemsBox.vue';
 
 const props = defineProps<{
     model: OrganizationCheckoutViewModel;

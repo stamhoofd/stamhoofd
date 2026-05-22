@@ -19,12 +19,12 @@
 </template>
 
 <script lang="ts" setup>
-import { usePresent } from '@simonbackx/vue-app-navigation';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import { useInvoicesObjectFetcher } from '@stamhoofd/components/fetchers/useInvoicesObjectFetcher.ts';
 import { usePaymentsUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/payments.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
@@ -33,12 +33,9 @@ import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/Tabl
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import type { Invoice, InvoiceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
-import InvoiceView from './InvoiceView.vue';
 import { InvoicesExcelExport } from './InvoicesExcelExport';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
+import InvoiceView from '@stamhoofd/components/payments/InvoiceView.vue';
 
 const props = withDefaults(
     defineProps<{

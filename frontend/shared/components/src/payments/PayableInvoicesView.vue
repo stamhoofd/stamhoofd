@@ -25,7 +25,8 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
 import { Invoice } from '@stamhoofd/structures';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref  } from 'vue';
+import type {Ref} from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useContext } from '../hooks';
@@ -37,7 +38,7 @@ const props = defineProps<{
 }>();
 
 const title = $t('Facturen')
-const invoices = ref<null | Invoice[]>(null)
+const invoices = ref(null) as Ref<null | Invoice[]>
 const context = useContext();
 const owner = useRequestOwner();
 const errors = useErrors()

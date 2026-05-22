@@ -150,7 +150,7 @@ import { InvoiceTypeHelper } from '@stamhoofd/structures';
 
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import InvoiceItemsBox from './components/InvoiceItemsBox.vue';
+import InvoiceItemsBox from './InvoiceItemsBox.vue';
 import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
 
 const props = withDefaults(

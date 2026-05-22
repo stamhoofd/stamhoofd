@@ -115,27 +115,27 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
-import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
-import RadioListItem from '@stamhoofd/components/inputs/RadioListItem.vue';
-import CategorizedView from '@stamhoofd/components/layout/categorized-view/CategorizedView.vue';
-import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
-import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import PaymentCustomerSelectionBox from '@stamhoofd/components/payments/components/PaymentCustomerSelectionBox.vue';
-import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
+import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
+import RadioListItem from '@stamhoofd/components/inputs/RadioListItem.vue';
+import CategorizedBox from '@stamhoofd/components/layout/categorized-view/CategorizedBox.vue';
+import CategorizedView from '@stamhoofd/components/layout/categorized-view/CategorizedView.vue';
+import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import PaymentCustomerSelectionBox from '@stamhoofd/components/payments/components/PaymentCustomerSelectionBox.vue';
 import type { Company, PaymentCustomer } from '@stamhoofd/structures';
 import { Invoice } from '@stamhoofd/structures';
 
-import { computed, ref } from 'vue';
-import { InvoiceItemsBox } from './components';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { computed, ref } from 'vue';
+import InvoiceItemsBox from './InvoiceItemsBox.vue';
 
 const props = withDefaults(
     defineProps<{

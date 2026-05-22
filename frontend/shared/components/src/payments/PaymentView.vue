@@ -181,7 +181,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="payment.invoiceId" :selectable="true">
+                <STListItem v-if="canWrite && payment.invoiceId" :selectable="true" @click="openInvoice">
                     <h3 class="style-definition-label">
                         {{ $t('%1Mm') }}
                     </h3>
@@ -431,15 +431,18 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
+import { Company, Invoice, LimitedFilteredRequest, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
+import { useInvoicesObjectFetcher } from '../fetchers';
+import EditInvoiceView from './EditInvoiceView.vue';
 import EditPaymentView from './EditPaymentView.vue';
+import InvoiceView from './InvoiceView.vue';
 import PaymentItemsBox from './PaymentItemsBox.vue';
 
 const props = withDefaults(
@@ -466,6 +469,7 @@ const owner = useRequestOwner();
 const markingPaid = ref(false);
 const platform = usePlatform();
 const present = usePresent();
+const show = useShow();
 const organization = useOrganization();
 
 async function reload() {
@@ -618,6 +622,38 @@ async function createInvoice() {
     }
     catch (e) {
         Toast.fromError(e).show();
+    }
+}
+const fetchInvoice = useInvoicesObjectFetcher()
+async function openInvoice() {
+    if (!props.payment.invoiceId) {
+        return;
+    }
+
+    try {
+        const result = await fetchInvoice.fetch(new LimitedFilteredRequest({
+            filter: {
+                id: props.payment.invoiceId
+            },
+            limit: 1
+        }))
+        if (result.results.length === 1) {
+            const invoice = result.results[0];
+            await show({
+                components: [
+                    new ComponentWithProperties(InvoiceView, {
+                            invoice
+                     })
+                ],
+            })
+        } else {
+            throw new SimpleError({
+                code: 'not_found',
+                message: $t('Deze factuur kon niet worden gevonden')
+            })
+        }
+    } catch (e) {
+        Toast.fromError(e).show()
     }
 }
 </script>
