@@ -1,42 +1,45 @@
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest } from '@stamhoofd/structures';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '../../../../../shared/utility/dist/Formatter';
-import AsyncRelationUIFilterView from './AsyncRelationUIFilterView.vue';
+import type { ObjectFetcher } from '../tables';
+import { fetchAll } from '../tables';
+import RelationUIFilterView from './RelationUIFilterView.vue';
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
-export enum AsyncRelationUIFilterMode {
+export enum RelationUIFilterMode {
     And = 'And',
     Or = 'Or',
 }
 
-export type AsyncRelationFilterOption<T extends string | number | Date | null | boolean> = {
+export type RelationFilterOption<T extends string | number | Date | null | boolean> = {
     name: string;
     value: T;
 }
 
-export type AsyncRelationUIFilterConfig = {
-    mode?: AsyncRelationUIFilterMode,
+export type RelationUIFilterConfig = {
+    mode?: RelationUIFilterMode,
     /**
      * Debounce in ms for loading options when the search query changed.
      */
     searchDebounce?: number
 }
 
-export class AsyncRelationUIFilter<T extends string | number | Date | null | boolean> extends UIFilter<AsyncRelationFilterBuilder<T>> {
-    readonly loadOptions: (searchFilter: string) => Promise<AsyncRelationFilterOption<T>[]>
+export class RelationUIFilter<T extends string | number | Date | null | boolean> extends UIFilter<RelationFilterBuilder<T>> {
+    readonly relationFetcher: RelationFetcher<any, T>;
     name: string = '';
-    values: AsyncRelationFilterOption<T>[] = [];
-    config: AsyncRelationUIFilterConfig;
+    values: RelationFilterOption<T>[] = [];
+    config: RelationUIFilterConfig;
 
-    constructor(data: Partial<AsyncRelationUIFilter<T>>, options: { isInverted?: boolean } = {}) {
+    constructor(data: Partial<RelationUIFilter<T>>, options: { isInverted?: boolean } = {}) {
         super(data, options);
         Object.assign(this, data);
     }
 
     get mode() {
-        return this.config.mode ?? AsyncRelationUIFilterMode.Or;
+        return this.config.mode ?? RelationUIFilterMode.Or;
     }
 
     /**
@@ -54,7 +57,7 @@ export class AsyncRelationUIFilter<T extends string | number | Date | null | boo
             }
         });
 
-        if (this.mode === AsyncRelationUIFilterMode.And) {
+        if (this.mode === RelationUIFilterMode.And) {
             return {
                 [this.builder.key]: items
             }
@@ -68,13 +71,13 @@ export class AsyncRelationUIFilter<T extends string | number | Date | null | boo
     }
 
     getComponent(): ComponentWithProperties {
-        return new ComponentWithProperties(AsyncRelationUIFilterView, {
+        return new ComponentWithProperties(RelationUIFilterView, {
             filter: this,
         });
     }
 
     get valuesToString() {
-        const joinWord = this.mode === AsyncRelationUIFilterMode.Or ? $t('of') : $t('en');
+        const joinWord = this.mode === RelationUIFilterMode.Or ? $t('of') : $t('en');
         return Formatter.joinLast(this.values.map(v => v.name), ', ', ` ${joinWord} ` );
     }
 
@@ -96,31 +99,31 @@ export class AsyncRelationUIFilter<T extends string | number | Date | null | boo
     }
 }
 
-export class AsyncRelationFilterBuilder<T extends string | number | Date | null | boolean> implements UIFilterBuilder<AsyncRelationUIFilter<T>> {
+export class RelationFilterBuilder<T extends string | number | Date | null | boolean> implements UIFilterBuilder<RelationUIFilter<T>> {
     readonly key: string;
     readonly name: string;
     readonly wrapFilter?: UIFilterWrapper | null;
     readonly unwrapFilter?: UIFilterUnwrapper | null;
     readonly wrapper?: WrapperFilter;
     readonly allowCreation?: boolean;
-    readonly loadOptions: (searchFilter: string) => Promise<AsyncRelationFilterOption<T>[]>
-    readonly config: AsyncRelationUIFilterConfig;
+    readonly relationFetcher: RelationFetcher<any, T>;
+    readonly config: RelationUIFilterConfig;
 
-    constructor(data: { key: string; name: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean, loadOptions: (searchFilter: string) => Promise<AsyncRelationFilterOption<T>[]>, config?: AsyncRelationUIFilterConfig }) {
+    constructor(data: { key: string; name: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean, relationFetcher: RelationFetcher<any, T>, config?: RelationUIFilterConfig }) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
         this.wrapper = data.wrapper;
         this.name = data.name;
         this.allowCreation = data.allowCreation;
-        this.loadOptions = data.loadOptions;
+        this.relationFetcher = data.relationFetcher;
         this.config = data.config ?? {};
     }
 
-    create(options?: { isInverted?: boolean; }): AsyncRelationUIFilter<T> {
-        return new AsyncRelationUIFilter({
+    create(options?: { isInverted?: boolean; }): RelationUIFilter<T> {
+        return new RelationUIFilter({
             builder: this,
-            loadOptions: this.loadOptions,
+            relationFetcher: this.relationFetcher,
             config: this.config
         }, options);
     }
@@ -139,5 +142,38 @@ export class AsyncRelationFilterBuilder<T extends string | number | Date | null 
         // todo
 
         return null;
+    }
+}
+
+export class RelationFetcher<OBJECT, T extends string | number | Date | null | boolean> {
+    private readonly fetcher: ObjectFetcher<OBJECT>;
+    private readonly limit: number;
+    private readonly getName: (object: OBJECT) => string;
+    private readonly getValue: (object: OBJECT) => T;
+
+    constructor({fetcher, getName, getValue, limit}: {
+        fetcher: ObjectFetcher<OBJECT>,
+        getName: (object: OBJECT) => string,
+        getValue: (object: OBJECT) => T,
+        limit?: number, 
+    }) {
+        this.fetcher = fetcher;
+        this.limit = limit ?? 20;
+        this.getName = getName;
+        this.getValue = getValue;
+    }
+
+    async fetch(search: string): Promise<RelationFilterOption<T>[]> {
+        const request = new LimitedFilteredRequest({
+            search,
+            limit: this.limit
+        });
+
+        const objects = await fetchAll(request, this.fetcher);
+
+        return objects.map(object => ({
+            name: this.getName(object),
+            value: this.getValue(object)
+        }));
     }
 }
