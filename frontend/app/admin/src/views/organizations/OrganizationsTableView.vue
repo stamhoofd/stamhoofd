@@ -23,7 +23,7 @@ import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import EmailView from '@stamhoofd/components/email/EmailView.vue';
-import type {RecipientMultipleChoiceOption} from '@stamhoofd/components/email/EmailView.vue';
+import type { RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers/useOrganizationsObjectFetcher.ts';
 import { useGetOrganizationUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/organizations.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -34,23 +34,26 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { OrganizationTag, StamhoofdFilter } from '@stamhoofd/structures';
-import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationPrivateMetaData } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import { Address, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, isEmptyFilter, Organization, OrganizationMetaData, OrganizationPrivateMetaData, TagHelper } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import OrganizationView from './OrganizationView.vue';
 import { useChargeOrganizationsPopup } from './composables/useChargeOrganizationsPopup';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 
 type ObjectType = Organization;
 
 const owner = useRequestOwner();
+const platformManager = usePlatformManager();
 
 const props = withDefaults(
     defineProps<{
@@ -211,7 +214,182 @@ const Route = {
     objectKey: 'organization',
 };
 
+function buildTagMenuActions(tags: OrganizationTag[], allTags: OrganizationTag[], groupIndex = 0, tagAction: (organizations: Organization[], tag: OrganizationTag, allTags: OrganizationTag[]) => Promise<void>): TableAction<Organization>[] {
+    return tags.map((tag) => {
+        const children = tag.childTags.flatMap((id) => {
+            const t = allTags.find(t => t.id === id);
+            return t ? [t] : [];
+        });
+
+        if (children.length > 0) {
+            return new MenuTableAction({
+                name: tag.name,
+                groupIndex,
+                allowAutoSelectAll: true,
+                needsSelection: true,
+                childActions: [
+                    new InMemoryTableAction({
+                        name: tag.name,
+                        groupIndex: 0,
+                        allowAutoSelectAll: true,
+                        needsSelection: true,
+                        handler: async (orgs: Organization[]) => tagAction(orgs, tag, allTags),
+                    }),
+                    ...buildTagMenuActions(children, allTags, 1, tagAction),
+                ],
+            });
+        }
+
+        return new InMemoryTableAction({
+            name: tag.name,
+            groupIndex,
+            allowAutoSelectAll: true,
+            needsSelection: true,
+            handler: async (orgs: Organization[]) => tagAction(orgs, tag, allTags),
+        });
+    });
+}
+
+async function applyTagsPatchToOrganizations(organizations: Organization[], tagsPatch: PatchableArray<string, string, string>) {
+    for (const org of organizations) {
+        const result = await context.value.getAuthenticatedServerForOrganization(org.id).request({
+            method: 'PATCH',
+            path: '/organization',
+            body: Organization.patch({
+                id: org.id,
+                meta: OrganizationMetaData.patch({
+                    tags: tagsPatch,
+                }),
+            }),
+            shouldRetry: false,
+            owner,
+            decoder: Organization as Decoder<Organization>,
+        });
+
+        org.meta.deepSet(result.data.meta);
+    }
+
+    await platformManager.value.forceUpdate();
+}
+
+async function addTagToOrganizations(organizations: Organization[], tag: OrganizationTag, _allTags: OrganizationTag[]) {
+    // backend will ensure all predecessor tags are also added
+
+    const toUpdate = organizations.filter(org => !org.meta.tags.includes(tag.id)); // filter out organizations that already have the tag
+
+    if (toUpdate.length === 0) {
+        if (organizations.length === 1) {
+            Toast.info($t('{orgName} heeft al de tag {tagName}', { orgName: organizations[0].name, tagName: tag.name })).show();
+        } else {
+            Toast.info($t('De {numOrganizations} geselecteerde #groepen hebben al de tag {tagName}', { numOrganizations: organizations.length, tagName: tag.name })).show();
+        }
+        return;
+    }
+
+    const noUpdate = organizations.filter(org => org.meta.tags.includes(tag.id));
+    let message = '';
+    if (toUpdate.length === 1) {
+        message += $t('De tag {tagName} zal worden toegevoegd aan {orgName}.', { tagName: tag.name, orgName: toUpdate[0].name });
+    } else {
+        message += $t('De tag {tagName} zal worden toegevoegd aan {numToUpdate} #groepen.', { tagName: tag.name, numToUpdate: toUpdate.length });
+    }
+    if (noUpdate.length === 1) {
+        message += ` ${$t('{orgName} heeft deze tag al.', { orgName: noUpdate[0].name })}`;
+    } else if (noUpdate.length > 1) {
+        message += ` ${$t('De overige {numNoUpdate} geselecteerde #groepen hebben deze tag al.', { numNoUpdate: noUpdate.length })}`;
+    }
+
+    const confirmed = await CenteredMessage.confirm(message, $t('Bevestigen'));
+    if (!confirmed) {
+        return;
+    }
+
+    const tagsPatch = new PatchableArray<string, string, string>();
+    tagsPatch.addPut(tag.id);
+
+    await applyTagsPatchToOrganizations(toUpdate, tagsPatch);
+
+    // after add, no reset on table fetches is needed
+}
+
+async function removeTagFromOrganizations(organizations: Organization[], tag: OrganizationTag, allTags: OrganizationTag[]) {
+    // frontend needs to remove all descendant tags as well, as the backend would otherwise re-add this tag
+    const tagsToRemove = [tag.id, ...TagHelper.getAllDescendants(tag.id, { allTags })];
+
+    const toUpdate = organizations.filter(org => org.meta.tags.some(t => tagsToRemove.includes(t))); // filter out organizations that don't have the tag
+    if (toUpdate.length === 0) {
+        if (organizations.length === 1) {
+            Toast.info($t('{orgName} heeft de tag {tagName} niet', { orgName: organizations[0].name, tagName: tag.name })).show();
+        } else {
+            Toast.info($t('Geen van de {numOrganizations} geselecteerde #groepen heeft de tag {tagName}', { numOrganizations: organizations.length, tagName: tag.name })).show();
+        }
+        return;
+    }
+
+    const noUpdate = organizations.filter(org => !org.meta.tags.some(t => tagsToRemove.includes(t)));
+    let message = '';
+    if (toUpdate.length === 1) {
+        message += $t('De tag {tagName} zal worden verwijderd van {orgName}.', { tagName: tag.name, orgName: toUpdate[0].name });
+    } else {
+        message += $t('De tag {tagName} zal worden verwijderd van {numToUpdate} #groepen.', { tagName: tag.name, numToUpdate: toUpdate.length });
+    }
+    if (noUpdate.length === 1) {
+        message += ` ${$t('{orgName} heeft deze tag niet.', { orgName: noUpdate[0].name })}`;
+    } else if (noUpdate.length > 1) {
+        message += ` ${$t('De overige {numNoUpdate} geselecteerde #groepen hebben deze tag niet.', { numNoUpdate: noUpdate.length })}`;
+    }
+
+    const confirmed = await CenteredMessage.confirm(message, $t('Bevestigen'));
+    if (!confirmed) {
+        return;
+    }
+
+    const tagsPatch = new PatchableArray<string, string, string>();
+    for (const t of tagsToRemove) {
+        tagsPatch.addDelete(t);
+    }
+
+    await applyTagsPatchToOrganizations(toUpdate, tagsPatch);
+
+    if (props.tag && tagsToRemove.includes(props.tag.id)) {
+        tableObjectFetcher.reset(true, true);
+    }
+}
+
 const actions: TableAction<Organization>[] = [];
+
+actions.push(
+    new MenuTableAction({
+        name: $t('Tag toevoegen'),
+        icon: 'label',
+        priority: 2,
+        groupIndex: 4,
+        allowAutoSelectAll: true,
+        needsSelection: true,
+        enabled: () => platform.value.config.tags.length > 0,
+        childActions: () => {
+            const allTags = platform.value.config.tags;
+            const rootTags = TagHelper.getRootTags(allTags);
+            return buildTagMenuActions(rootTags, allTags, 0, addTagToOrganizations);
+        },
+    }),
+);
+actions.push(
+    new MenuTableAction({
+        name: $t('Tag verwijderen'),
+        icon: 'label_off',
+        priority: 1,
+        groupIndex: 4,
+        allowAutoSelectAll: true,
+        needsSelection: true,
+        enabled: () => platform.value.config.tags.length > 0,
+        childActions: () => {
+            const allTags = platform.value.config.tags;
+            const rootTags = TagHelper.getRootTags(allTags);
+            return buildTagMenuActions(rootTags, allTags, 0, removeTagFromOrganizations);
+        },
+    }),
+);
 
 async function openMail(selection: TableActionSelection<Organization>) {
     const filter = selection.filter.filter;
@@ -286,16 +464,16 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
 }
 
 function getExcelTitle(selection: TableActionSelection<ObjectType>) {
-        if (selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1) {
-            return [...selection.markedRows.values()][0].name;
-        }
-        const parts = [
-            props.tag?.id ? props.tag.name : null,
-            $t('#Groepen'),
-        ];
-
-        return parts.filter(Boolean).join(' - ');
+    if (selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1) {
+        return [...selection.markedRows.values()][0].name;
     }
+    const parts = [
+        props.tag?.id ? props.tag.name : null,
+        $t('#Groepen'),
+    ];
+
+    return parts.filter(Boolean).join(' - ');
+}
 
 if (auth.hasPlatformFullAccess()) {
     actions.push(
