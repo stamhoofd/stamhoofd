@@ -409,6 +409,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 generateData: false,
             }).create();
             existingMember.details.memberNumber = 'LID-100';
+            // should have same organization id as new member with same member number
+            existingMember.organizationId = organization.id;
             await existingMember.save();
 
             const token = await Token.createToken(user);
