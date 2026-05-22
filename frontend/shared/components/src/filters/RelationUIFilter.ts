@@ -1,10 +1,9 @@
-import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
+import type { SortList, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '../../../../../shared/utility/dist/Formatter';
 import type { ObjectFetcher } from '../tables';
-import { fetchAll } from '../tables';
 import RelationUIFilterView from './RelationUIFilterView.vue';
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
@@ -147,29 +146,35 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
 
 export class RelationFetcher<OBJECT, T extends string | number | Date | null | boolean> {
     private readonly fetcher: ObjectFetcher<OBJECT>;
-    private readonly limit: number;
+    
     private readonly getName: (object: OBJECT) => string;
     private readonly getValue: (object: OBJECT) => T;
 
-    constructor({fetcher, getName, getValue, limit}: {
+    private readonly limit: number;
+    private readonly sort?: SortList;
+
+    constructor({fetcher, getName, getValue, limit, sort}: {
         fetcher: ObjectFetcher<OBJECT>,
         getName: (object: OBJECT) => string,
         getValue: (object: OBJECT) => T,
-        limit?: number, 
+        limit?: number,
+        sort?: SortList
     }) {
         this.fetcher = fetcher;
-        this.limit = limit ?? 20;
         this.getName = getName;
         this.getValue = getValue;
+        this.limit = limit ?? 20;
+        this.sort = sort;
     }
 
     async fetch(search: string): Promise<RelationFilterOption<T>[]> {
         const request = new LimitedFilteredRequest({
             search,
-            limit: this.limit
+            limit: this.limit,
+            sort: this.sort
         });
 
-        const objects = await fetchAll(request, this.fetcher);
+        const objects = (await this.fetcher.fetch(request)).results;
 
         return objects.map(object => ({
             name: this.getName(object),
