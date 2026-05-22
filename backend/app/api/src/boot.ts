@@ -1,13 +1,15 @@
 import { Column, Database, Migration } from '@simonbackx/simple-database';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
+import { checkReadOnly } from '@stamhoofd/crons';
 import { Email } from '@stamhoofd/email';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
-import { checkReadOnly } from '@stamhoofd/crons';
 
+import { AutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { StyledText } from '@simonbackx/simple-logging';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -23,9 +25,8 @@ import { DocumentService } from './services/DocumentService.js';
 import { FileSignService } from './services/FileSignService.js';
 import { PlatformMembershipService } from './services/PlatformMembershipService.js';
 import { UitpasService } from './services/uitpas/UitpasService.js';
+import { UniqueMemberNumberService } from './services/UniqueMemberNumberService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
-import { AutoEncoder } from '@simonbackx/simple-encoding';
-import { StyledText } from '@simonbackx/simple-logging';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -94,6 +95,7 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     await GlobalHelper.load();
     await UniqueUserService.check();
+    await UniqueMemberNumberService.check();
     await BootChecksService.checkDatabaseCollation();
 
     // Init platform shared struct: otherwise permissions won't work with missing responsibilities

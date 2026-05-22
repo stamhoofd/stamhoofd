@@ -1,13 +1,14 @@
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Database } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';
-import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery} from './SQLExpression.js';
+import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
 import type { SQLJoin } from './SQLJoin.js';
-import { Orderable } from './SQLOrderBy.js';
-import { Whereable } from './SQLWhere.js';
 import { SQLLogger } from './SQLLogger.js';
+import { Orderable } from './SQLOrderBy.js';
+import type { SQLWhere } from './SQLWhere.js';
+import { Whereable } from './SQLWhere.js';
 
 class EmptyClass {}
 
@@ -42,6 +43,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _limit: number | null = null;
     _offset: number | null = null;
     _groupBy: SQLExpression[] = [];
+    _having: SQLWhere | null = null;
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
     _max_execution_time: number | null = null;
     _log = false;
@@ -99,6 +101,17 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
     groupBy(...columns: SQLExpression[]): this {
         this._groupBy.push(...columns);
+        return this;
+    }
+
+    having(where: SQLWhere): this {
+        if (this._having) {
+            this._having = this._having.and(where);
+        }
+        else {
+            this._having = where;
+        }
+
         return this;
     }
 
@@ -167,6 +180,17 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                     ', ',
                 ),
             );
+        }
+
+        if (this._having) {
+            const always = this._having.isAlways;
+            if (always === false) {
+                throw new Error('Cannot use SQLSelect with a having that is not always true');
+            }
+            else if (always === null) {
+                query.push('HAVING');
+                query.push(this._having.getSQL(options));
+            }
         }
 
         if (this._orderBy) {
