@@ -23,16 +23,21 @@
             <div v-if="options === null" class="spinner-container center">
                 <Spinner />
             </div>
-            <STList v-else-if="options.length">
-                <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
-                    <template #left>
-                        <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ option.name }}
-                    </h3>
-                </STListItem>
-            </STList>
+            <div v-else-if="options.length">
+                <STList>
+                    <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ option.name }}
+                        </h3>
+                    </STListItem>
+                </STList>
+                <button v-if="hasMore" class="button text more-button" type="button" @click="fetchMore">
+                    {{ $t('Toon meer') }}
+                </button>
+            </div>
             <div v-else-if="invisibleSelectedOptions.length === 0">
                 <p class="info-box">
                     {{ emptyMessage }}
@@ -69,6 +74,7 @@ const invisibleSelectedOptions = computed(() => {
 })
 const emptyMessage = ref<string>($t('Geen opties gevonden'));
 const errors = useErrors();
+const hasMore = computed(() => props.filter.relationFetcher.hasMore);
 
 const doThrottledLoad = throttle(fetchOptions, props.filter.searchDebounce);
 
@@ -92,6 +98,16 @@ async function fetchOptions() {
     }
 
     emptyMessage.value = searchQuery.value.length === 0 ?  $t('Geen opties beschikbaar') : $t('Geen opties gevonden');
+}
+
+async function fetchMore() {
+    try {
+        const moreOptions = await props.filter.relationFetcher.fetchMore();
+        options.value = [...(options.value ?? []), ...moreOptions] as RelationFilterOption<T>[];
+    } catch (e) {
+        console.error(e);
+        errors.errorBox = new ErrorBox(e);
+    }
 }
 
 function isOptionSelected(option: RelationFilterOption<T>) {
@@ -122,5 +138,9 @@ fetchOptions().catch(console.error);
 .results{
     margin-top: 15px;
     margin-bottom: 15px;
+}
+
+.more-button{
+    margin-top: 15px;
 }
 </style>
