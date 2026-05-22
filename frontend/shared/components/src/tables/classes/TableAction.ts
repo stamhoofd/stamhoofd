@@ -31,7 +31,7 @@ export abstract class TableAction<T extends { id: string }> {
     description: string = '';
     icon: string;
     tooltip = '';
-    enabled = true;
+    enabled = () => true;
     destructive = false;
 
     /// Determines order
@@ -95,7 +95,7 @@ export abstract class TableAction<T extends { id: string }> {
         this.needsSelection = settings.needsSelection ?? true;
         this.singleSelection = settings.singleSelection ?? false;
         this.tooltip = settings.tooltip ?? this.name;
-        this.enabled = settings.enabled ?? true;
+        this.enabled = settings.enabled ?? (() => true);
         this.allowAutoSelectAll = settings.allowAutoSelectAll ?? true;
         this.childActions = settings.childActions ?? [];
         this.childMenu = settings.childMenu ?? null;
