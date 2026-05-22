@@ -142,6 +142,20 @@ export class Payment extends QueryableModel {
     serviceFeeManualCharged = 0;
 
     /**
+     * Transfer fee - if we need to charge this for a certain provider
+     *
+     * This EXCLUDES VAT
+     */
+    @column({ type: 'integer' })
+    transferFeeManual = 0;
+
+    /**
+     * Part of the transferFeeManual, that has been invoiced (added to outstanding balance)
+     */
+    @column({ type: 'integer' })
+    transferFeeManualCharged = 0;
+
+    /**
      * Included in the total price
      */
     @column({ type: 'integer', nullable: true })

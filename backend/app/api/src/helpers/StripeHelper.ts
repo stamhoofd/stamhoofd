@@ -6,6 +6,7 @@ import { calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentStat
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 import { passthroughFetch } from './passthroughFetch.js';
+import { Country } from '@stamhoofd/types/Country';
 
 export class StripeHelper {
     static get notConfiguredError() {
@@ -161,6 +162,10 @@ export class StripeHelper {
         const [model] = await StripeCheckoutSession.where({ paymentId: payment.id }, { limit: 1 });
 
         if (!model) {
+            if (payment.createdAt.getTime() > Date.now() - 1000 * 10) {
+                // Possibly missing model data because the payment has only been created just yet
+                return payment.status;
+            }
             return PaymentStatus.Failed;
         }
 

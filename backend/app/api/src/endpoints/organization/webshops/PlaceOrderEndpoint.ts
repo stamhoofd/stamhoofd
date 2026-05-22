@@ -195,13 +195,13 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, null, webshop.privateMeta.paymentConfiguration);
                 payment.provider = provider;
                 payment.stripeAccountId = stripeAccount?.id ?? null;
-                ServiceFeeHelper.setServiceFee(
+                await ServiceFeeHelper.setServiceFee(
                     payment,
                     organization,
                     webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
                     order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
                 );
-
+                await ServiceFeeHelper.setTransferFee({payment, organization, stripeAccount});
                 await payment.save();
 
                 // Deprecated field

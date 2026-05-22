@@ -10,6 +10,7 @@ import { PaymentService } from '../../../../services/PaymentService.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
+import { VATService } from '../../../../services/VATService.js';
 
 type Params = { sellingOrganizationId: string };
 type Query = undefined;
@@ -122,7 +123,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
 
             const balanceItem = await STPackageService.chargePackage(model, sellingOrganization, checkout.customer?.company);
             if (balanceItem) {
-                balanceItem.VATExcempt = PaymentService.getVATExcempt({
+                balanceItem.VATExcempt = VATService.getVATExcempt({
                     company: checkout.customer?.company,
                     sellingOrganization,
                     type: 'services'
@@ -236,7 +237,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             item.payingOrganizationId = organization.id;
             item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;
-            item.VATExcempt = PaymentService.getVATExcempt({
+            item.VATExcempt = VATService.getVATExcempt({
                 company: checkout.customer?.company,
                 sellingOrganization,
                 type: 'services'

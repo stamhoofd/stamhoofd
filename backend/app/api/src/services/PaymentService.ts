@@ -21,6 +21,7 @@ import { BalanceItemService } from './BalanceItemService.js';
 import { MollieService } from './MollieService.js';
 import { PaymentMandateService } from './PaymentMandateService.js';
 import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
+import { VATService } from './VATService.js';
 
 export class PaymentService {
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus, paidAt?: Date) {
@@ -38,6 +39,7 @@ export class PaymentService {
 
         await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
             if (status === PaymentStatus.Succeeded) {
+                console.log('Marking as succeeded', payment.id)
                 payment.status = PaymentStatus.Succeeded;
                 payment.paidAt = paidAt ?? new Date();
                 await payment.save();
@@ -96,8 +98,9 @@ export class PaymentService {
                 });
             }
 
-            // Moved to failed
+            // Moved to failed 
             if (status === PaymentStatus.Failed) {
+                console.log('Marking as failed', payment.id)
                 await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
                     const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
                         (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
@@ -194,6 +197,7 @@ export class PaymentService {
                                 status = PaymentStatus.Failed;
                             }
 
+                            console.log('Stripe setting status to', status)
                             await this.handlePaymentStatusUpdate(payment, organization, status);
                         }
                         catch (e) {
@@ -217,6 +221,7 @@ export class PaymentService {
                                     status = PaymentStatus.Failed;
                                 }
 
+                                console.log('Mollie setting status to', status)
                                 await this.handlePaymentStatusUpdate(payment, organization, status);
                             } else {
                                 console.error('Missing Mollie Credentials for payment', payment.id);
@@ -235,7 +240,7 @@ export class PaymentService {
                         }
                     }
                     else if (payment.provider === PaymentProvider.Buckaroo) {
-                        const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? '', organization.privateMeta.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+                        const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? '', organization.privateMeta.buckarooSettings?.secret ?? '', testMode);
                         try {
                             let status = await helper.getStatus(payment);
 
@@ -244,6 +249,7 @@ export class PaymentService {
                                 status = PaymentStatus.Failed;
                             }
 
+                            console.log('Buckaroo setting status to', status)
                             await this.handlePaymentStatusUpdate(payment, organization, status);
                         }
                         catch (e) {
@@ -544,7 +550,7 @@ export class PaymentService {
             else {
                 // Zero amount payment (without refunds) without specifying a company will just use the default company to link to the payment
                 // It doesn't really matter since the price is zero and we won't invoice it.
-                const company = this.getDefaultCompanyForOrganization(payingOrganization);
+                const company = VATService.getDefaultCompanyForOrganization(payingOrganization);
                 if (company) {
                     customer.company = company;
                 }
@@ -580,7 +586,7 @@ export class PaymentService {
         PaymentService.validateTotalPrice({ price, roundingAmount, checkout })
 
         const { customer, } = await PaymentService.validateCustomer({ user, checkout, payingOrganization, price, hasNegative })
-        const { seller } = PaymentService.validateVATRates({ customer, organization, balanceItems });
+        const { seller } = PaymentService.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
         
         // Create invoice instead from fictive PaymentGeneral
         const fakePaymentGeneral = PaymentGeneral.create({
@@ -691,7 +697,7 @@ export class PaymentService {
         PaymentService.validateTotalPrice({ price, roundingAmount, checkout })
 
         const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization, price, hasNegative })
-        this.validateVATRates({ customer, organization, balanceItems });
+        this.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
         
         const {method, type, mandate} = await this.validatePaymentMethod({ 
             method: checkout.paymentMethod ?? PaymentMethod.Unknown,
@@ -755,7 +761,8 @@ export class PaymentService {
 
         payment.provider = provider;
         payment.stripeAccountId = stripeAccount?.id ?? null;
-        ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
+        await ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
+        await ServiceFeeHelper.setTransferFee({payment, organization, stripeAccount});
 
         // Add transfer description
         if (payment.method === PaymentMethod.Transfer) {
@@ -1147,40 +1154,61 @@ export class PaymentService {
         }
     }
 
-    static getDefaultCompanyForOrganization(sellingOrganization: Organization) {
-        return sellingOrganization.meta.companies[0];
-    }
-
-    static getVATExcempt({ company, sellingOrganization, type }: { company: Company | null | undefined; sellingOrganization: Organization; type: 'services'|'goods' }) {
+    static validateVATRates({ customer, sellingOrganization, balanceItems }: { customer: PaymentCustomer; sellingOrganization: Organization; balanceItems: Map<BalanceItem, number> }) {
         // Validate VAT rates for this customer
-        const seller = this.getDefaultCompanyForOrganization(sellingOrganization)
-        if (seller && seller.VATNumber && seller.address && company) {
-            // B2B validation
-            if (!company.address) {
-                throw new SimpleError({
-                    code: 'missing_field',
-                    message: 'Company address missing',
-                    human: $t('%1LH'),
-                    field: 'customer.company.address',
-                });
-            }
+        const seller = VATService.getDefaultCompanyForOrganization(sellingOrganization)
+        const excempt = VATService.isVATExcempt({
+            company: customer.company,
+            sellingOrganization,
+        })
 
-            // Reverse charged vat applicable?
-            if (company.address.country !== seller.address.country && company.VATNumber) {
-                if (type === 'services') {
-                    return VATExcemptReason.IntraCommunityServices;
+        // Reverse charged vat applicable?
+        if (excempt) {
+            // Check VAT Exempt is set on each an every balance item with a non-zero price
+            for (const [item] of balanceItems) {
+                if (item.VATExcempt !== VATExcemptReason.IntraCommunityServices && item.VATExcempt !== VATExcemptReason.IntraCommunityGoods) {
+                    throw new SimpleError({
+                        code: 'VAT_error',
+                        message: 'Intra community VAT reverse charge not supported for this purchase',
+                        human: $t('%1LI'),
+                    });
                 }
-                return VATExcemptReason.IntraCommunityGoods;
+
+                // We also need to know the VAT rate exactly to be sure the VAT is removed from the purchase
+                // If VAT is not included, we don't need to know the VAT percentage until the payment is invoiced
+                if (item.VATPercentage === null && item.VATIncluded) {
+                    throw new SimpleError({
+                        code: 'VAT_error',
+                        message: 'Intra community VAT reverse charge is not supported for this purchase because of missing VAT rates',
+                        human: $t('%1LJ'),
+                    });
+                }
+            }
+        }
+        else {
+            // Fine to just not have setup VAT rates yet if the price is guaranteed to include VAT
+            for (const [item] of balanceItems) {
+                if (item.VATExcempt === VATExcemptReason.IntraCommunityGoods || item.VATExcempt === VATExcemptReason.IntraCommunityServices) {
+                    throw new SimpleError({
+                        code: 'VAT_error',
+                        message: 'Unexpected reverse charge applied',
+                        human: $t('%1LK'),
+                    });
+                }
+
+                if (seller && seller.VATNumber) {
+                    if (!item.VATIncluded && item.VATPercentage === null) {
+                        throw new SimpleError({
+                            code: 'VAT_error',
+                            message: 'Missing VAT percentage',
+                            human: $t('%1LL'),
+                        });
+                    }
+                }
             }
         }
 
-        return null
-    }
-
-    static validateVATRates({ customer, organization, balanceItems }: { customer: PaymentCustomer; organization: Organization; balanceItems: Map<BalanceItem, number> }) {
-        // Validate VAT rates for this customer
-        const seller = this.getDefaultCompanyForOrganization(organization)
-        if (seller && seller.VATNumber && seller.address && customer.company) {
+        /*if (seller && seller.VATNumber && seller.address && customer.company) {
             // B2B validation
             if (!customer.company.address) {
                 throw new SimpleError({
@@ -1191,49 +1219,7 @@ export class PaymentService {
                 });
             }
 
-            // Reverse charged vat applicable?
-            if (customer.company.address.country !== seller.address.country && customer.company.VATNumber) {
-                // Check VAT Exempt is set on each an every balance item with a non-zero price
-                for (const [item] of balanceItems) {
-                    if (item.VATExcempt !== VATExcemptReason.IntraCommunityServices && item.VATExcempt !== VATExcemptReason.IntraCommunityGoods) {
-                        throw new SimpleError({
-                            code: 'VAT_error',
-                            message: 'Intra community VAT reverse charge not supported for this purchase',
-                            human: $t('%1LI'),
-                        });
-                    }
 
-                    // We also need to know the VAT rate exactly to be sure the VAT is removed from the purchase
-                    // If VAT is not included, we don't need to know the VAT percentage until the payment is invoiced
-                    if (item.VATPercentage === null && item.VATIncluded) {
-                        throw new SimpleError({
-                            code: 'VAT_error',
-                            message: 'Intra community VAT reverse charge is not supported for this purchase because of missing VAT rates',
-                            human: $t('%1LJ'),
-                        });
-                    }
-                }
-            }
-            else {
-                // Fine to just not have setup VAT rates yet if the price is guaranteed to include VAT
-                for (const [item] of balanceItems) {
-                    if (item.VATExcempt === VATExcemptReason.IntraCommunityGoods || item.VATExcempt === VATExcemptReason.IntraCommunityServices) {
-                        throw new SimpleError({
-                            code: 'VAT_error',
-                            message: 'Unexpected reverse charge applied',
-                            human: $t('%1LK'),
-                        });
-                    }
-
-                    if (!item.VATIncluded && item.VATPercentage === null) {
-                        throw new SimpleError({
-                            code: 'VAT_error',
-                            message: 'Missing VAT percentage',
-                            human: $t('%1LL'),
-                        });
-                    }
-                }
-            }
         }
         else {
             // B2C / C2B / C2C
@@ -1258,7 +1244,7 @@ export class PaymentService {
                     }
                 }
             }
-        }
+        }*/
 
         return {seller}
     }

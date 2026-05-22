@@ -43,7 +43,7 @@ export enum VATExcemptReason {
      * IC Diensten
      * Btw verlegd: Art 21 § 2 van het Belgische btw-wetboek
      */
-    IntraCommunityServices = 'IntraCommunityServices'
+    IntraCommunityServices = 'IntraCommunityServices',
 }
 
 export function getVATExcemptReasonName(reason: VATExcemptReason): string {
@@ -70,7 +70,7 @@ export function getVATExcemptPeppolTaxCategoryCode(reason: VATExcemptReason): st
 }
 
 
-export function getVATExcemptPeppolExemptionReasonCode(reason: VATExcemptReason): string {
+export function getVATExcemptPeppolExemptionReasonCode(reason: VATExcemptReason): string | null {
     // ref https://docs.peppol.eu/poacc/billing/3.0/codelist/vatex/
     switch (reason) {
         case VATExcemptReason.IntraCommunityGoods: return 'VATEX-EU-IC'
@@ -147,6 +147,7 @@ export enum BalanceItemRelationType {
 
     STPackage = 'STPackage', // Purchase - Stamhoofd specific
     STPricingType = 'STPricingType', // Purchase - Stamhoofd specific
+    PaymentProvider = 'PaymentProvider', // Name of the payment provider associated with the fees
 }
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
@@ -161,6 +162,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.Discount: return $t(`%176`);
         case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
         case BalanceItemRelationType.STPricingType: return $t(`Prijstype`);
+        case BalanceItemRelationType.PaymentProvider: return $t(`Betaalprovider`);
     }
 }
 
@@ -176,6 +178,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.Discount: return $t(`%177`);
         case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
         case BalanceItemRelationType.STPricingType: return $t(`Berekeningswijze prijzen`);
+        case BalanceItemRelationType.PaymentProvider: return $t(`Betaalprovider waarlangs de transacties verliepen`);
     }
 }
 
@@ -811,6 +814,18 @@ export class BalanceItem extends AutoEncoder {
                 
                 if (base) {
                     list.push(base);
+                }
+                
+                return list.join('\n');
+            }
+
+            case BalanceItemType.ServiceFee:
+            case BalanceItemType.TransferFee: {
+                const list: string[] = []
+                
+                const provider = this.relations.get(BalanceItemRelationType.PaymentProvider);
+                if (provider) {
+                    list.push(provider.name.toString());
                 }
                 
                 return list.join('\n');

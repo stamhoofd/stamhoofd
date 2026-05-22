@@ -585,6 +585,10 @@ export class STPackageStatus extends AutoEncoder {
     }
 }
 
+/**
+ * @deprecated
+ * This is not correct
+ */
 export function calculateVATPercentage(address: Address, VATNumber: string | null) {
     // Determine VAT rate
     let VATRate = 0;

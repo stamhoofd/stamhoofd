@@ -5,6 +5,7 @@ import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentStatus } from
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemService } from '../services/BalanceItemService.js';
 import { PaymentService } from '../services/PaymentService.js';
+import { VATService } from '../services/VATService.js';
 
 // Charge manual service fees every night
 registerCron('service-fees', chargeServiceFees);
@@ -103,7 +104,7 @@ async function chargeServiceFees() {
                 item.payingOrganizationId = organization.id;
                 item.organizationId = membershipOrganizationId
                 item.VATPercentage = 21;
-                item.VATExcempt = PaymentService.getVATExcempt({
+                item.VATExcempt = VATService.getVATExcempt({
                     company: organization.defaultCompanies[0] ?? null,
                     sellingOrganization: membershipOrganization,
                     type: 'services'

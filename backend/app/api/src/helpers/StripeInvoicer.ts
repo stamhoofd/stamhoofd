@@ -2,12 +2,13 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, Invoice, Organization, Payment, StripeAccount } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, BalanceItemType, InvoiceStruct, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, InvoiceStruct, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 import { InvoiceService } from '../services/InvoiceService.js';
 import { PaymentService } from '../services/PaymentService.js';
 import { AuthenticatedStructures } from './AuthenticatedStructures.js';
+import { VATService } from '../services/VATService.js';
 
 export class ApplicationFeeDetails {
     transferFee = 0
@@ -222,10 +223,14 @@ export class StripeReportInvoicer {
                 startDate: Formatter.startDate(this.start, false, true),
                 endDate: Formatter.endDate(this.end, false, true)
             })
+            item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
+                id: PaymentProvider.Stripe,
+                name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe))
+            }))
             item.payingOrganizationId = organization.id;
             item.organizationId = sellingOrganization.id
             item.VATPercentage = 21;
-            item.VATExcempt = PaymentService.getVATExcempt({
+            item.VATExcempt = VATService.getVATExcempt({
                 company: organization.defaultCompanies[0] ?? null,
                 sellingOrganization,
                 type: 'services'
@@ -248,10 +253,14 @@ export class StripeReportInvoicer {
                 startDate: Formatter.startDate(this.start, false, true),
                 endDate: Formatter.endDate(this.end, false, true)
             })
+            item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
+                id: PaymentProvider.Stripe,
+                name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe))
+            }))
             item.payingOrganizationId = organization.id;
             item.organizationId = sellingOrganization.id
             item.VATPercentage = 21;
-            item.VATExcempt = PaymentService.getVATExcempt({
+            item.VATExcempt = VATService.getVATExcempt({
                 company: organization.defaultCompanies[0] ?? null,
                 sellingOrganization,
                 type: 'services'

@@ -8,6 +8,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { GroupBuilder } from '../helpers/GroupBuilder.js';
 import { PaymentService } from './PaymentService.js';
+import { VATService } from './VATService.js';
 
 export class STPackageService {
     static async getActivePackages(organizationId: string) {
@@ -175,7 +176,7 @@ export class STPackageService {
         item.organizationId = sellingOrganization.id;
         item.VATPercentage = 21;
         item.VATIncluded = false;
-        item.VATExcempt = PaymentService.getVATExcempt({
+        item.VATExcempt = VATService.getVATExcempt({
             company,
             sellingOrganization,
             type: 'services'
