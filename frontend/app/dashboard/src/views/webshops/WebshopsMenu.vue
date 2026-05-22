@@ -20,10 +20,10 @@
             <template
                 v-if="
                     enableWebshopModule &&
-                        ((fullAccess && hasWebshopArchive) || canCreateWebshops)
+                        (hasWebshopArchive || canCreateWebshops)
                 "
             >
-                <template v-if="fullAccess && hasWebshopArchive">
+                <template v-if="hasWebshopArchive">
                     <hr>
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Archive) }" @click="$navigate(Routes.Archive)">
                         <span class="icon archive" />
