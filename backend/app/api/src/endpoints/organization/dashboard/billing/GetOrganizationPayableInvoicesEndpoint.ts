@@ -1,24 +1,25 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { Invoice as InvoiceStruct} from '@stamhoofd/structures';
 import { DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Organization, Payment } from '@stamhoofd/models';
+import { BalanceItem, Invoice, Organization, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 
 type Params = { sellingOrganizationId: string };
 type Query = undefined;
-type ResponseBody = DetailedPayableBalance;
+type ResponseBody = InvoiceStruct[];
 type Body = undefined;
 
-export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/payable-balance', {sellingOrganizationId: String});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/invoices', {sellingOrganizationId: String});
 
         if (params) {
             return [true, params as Params];
@@ -55,25 +56,13 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
             })
         }
 
-        const balanceItemModels = await BalanceItem.balanceItemsForOrganization(organization.id, request.params.sellingOrganizationId);
-
-        const paymentModels = await Payment.select()
+        const invoices = await Invoice.select()
             .where('payingOrganizationId', organization.id)
-            .where('organizationId', request.params.sellingOrganizationId)
-            .andWhere(
-                SQL.whereNot('status', PaymentStatus.Failed),
-            )
-            .fetch();
+            .where('organizationId', sellingOrganization.id)
+            .where('number', '!=', null)
+            .orderBy('invoicedAt', 'DESC')
+            .fetch()
 
-        const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
-        const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
-
-        const balance = DetailedPayableBalance.create({
-            organization: await AuthenticatedStructures.organization(sellingOrganization),
-            balanceItems,
-            payments,
-        });
-
-        return new Response(balance);
+        return new Response(await AuthenticatedStructures.invoices(invoices));
     }
 }

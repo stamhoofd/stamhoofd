@@ -132,6 +132,7 @@ import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
 import PayableBalancePaymentsView from '@stamhoofd/components/payments/PayableBalancePaymentsView.vue';
+import PayableInvoicesView from '@stamhoofd/components/payments/PayableInvoicesView.vue';
 import PayableBalanceMandatesBox from '@stamhoofd/components/payments/components/PayableBalanceMandatesBox.vue';
 import PaymentRow from '@stamhoofd/components/payments/components/PaymentRow.vue';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
@@ -195,7 +196,7 @@ defineRoutes([
     },
     {
         url: Routes.Invoices,
-        component: PayableBalancePaymentsView,
+        component: PayableInvoicesView,
         present: 'popup',
         paramsToProps() {
             return {
