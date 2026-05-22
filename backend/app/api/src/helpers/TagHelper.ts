@@ -26,11 +26,8 @@ export class TagHelper extends SharedTagHelper {
 
                 // Reload platform to avoid race conditions
                 const platform = await Platform.getForEditing();
-                for (const [tag, count] of tagCounts.entries()) {
-                    const tagObject = platform.config.tags.find(t => t.id === tag);
-                    if (tagObject) {
-                        tagObject.organizationCount = count;
-                    }
+                for (const tagObject of platform.config.tags) {
+                    tagObject.organizationCount = tagCounts.get(tagObject.id) ?? 0;
                 }
                 await platform.save();
             });
