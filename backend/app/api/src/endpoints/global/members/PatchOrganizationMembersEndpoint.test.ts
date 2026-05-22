@@ -11,6 +11,7 @@ import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
+import { UniqueMemberNumberService } from '../../../services/UniqueMemberNumberService.js';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
 
 const baseUrl = `/organization/members`;
@@ -30,6 +31,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
     afterEach(async () => {
         // Delete all members (so the duplicate checks work as expected)
         await Database.delete('DELETE FROM `members`');
+        await UniqueMemberNumberService.check();
     });
 
     describe('Duplicate members', () => {
@@ -395,6 +397,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
         test('Creating a member with duplicate member number throws invalid_field', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
+            await UniqueMemberNumberService.check();
 
             const organization = await new OrganizationFactory({ }).create();
             const user = await new UserFactory({
