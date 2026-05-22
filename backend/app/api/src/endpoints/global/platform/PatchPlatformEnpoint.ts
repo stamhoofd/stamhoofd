@@ -7,7 +7,7 @@ import type { EventNotificationType, MemberResponsibility, PlatformConfig, Platf
 import { Platform as PlatformStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { QueueHandler } from '@stamhoofd/queues';
+import { isAbortedError, isCanceledError, QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context.js';
 import { MembershipCharger } from '../../../helpers/MembershipCharger.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
@@ -247,7 +247,11 @@ export class PatchPlatformEndpoint extends Endpoint<
         }
 
         if (shouldUpdateTags) {
-            await TagHelper.updateOrganizations();
+            try {
+                await TagHelper.updateOrganizations();
+            } catch (e) {
+                if (!isAbortedError(e) && !isCanceledError(e)) throw e;
+            }
         }
 
         if (shouldMoveToPeriod) {

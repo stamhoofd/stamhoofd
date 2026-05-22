@@ -7,15 +7,16 @@ import { AuditLogService } from '../services/AuditLogService.js';
 export class TagHelper extends SharedTagHelper {
     static async updateOrganizations() {
         const queueId = 'update-tags-on-organizations';
-        QueueHandler.cancel(queueId);
+        QueueHandler.abort(queueId);
 
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-            await QueueHandler.schedule(queueId, async () => {
+            await QueueHandler.schedule(queueId, async ({ abort }) => {
                 const sharedPlatform = await Platform.getShared();
 
                 const tagCounts = new Map<string, number>();
 
                 for await (const organization of Organization.select().all()) {
+                    abort.throwIfAborted();
                     organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, sharedPlatform.config.tags);
 
                     for (const tag of organization.meta.tags) {
@@ -27,6 +28,7 @@ export class TagHelper extends SharedTagHelper {
                 // Reload platform to avoid race conditions
                 const platform = await Platform.getForEditing();
                 for (const tagObject of platform.config.tags) {
+                    abort.throwIfAborted();
                     tagObject.organizationCount = tagCounts.get(tagObject.id) ?? 0;
                 }
                 await platform.save();
