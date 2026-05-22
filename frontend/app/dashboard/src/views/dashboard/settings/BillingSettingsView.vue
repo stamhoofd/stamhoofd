@@ -8,7 +8,7 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox :title="$t('%76')">
-                        <button class="style-price-big" type="button" @click="item.balanceItems.filter(b => b.isDue).length > 0 ? payBalance : undefined">
+                        <button class="style-price-big" type="button" @click="payBalance">
                             <span>
                                 {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
                             </span>
@@ -251,6 +251,9 @@ async function addCard() {
 
 
 async function payBalance() {
+    if (props.item.balanceItems.filter(b => b.isDue).length === 0) {
+        return;
+    }
     await startOrganizationCheckout({
         payBalanceMode: PayBalanceMode.Recommended,
         sellingOrganization: props.item.organization,
