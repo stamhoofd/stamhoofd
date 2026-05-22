@@ -18,6 +18,7 @@ import { TagHelper } from '../../../../helpers/TagHelper.js';
 import { ViesHelper } from '../../../../helpers/ViesHelper.js';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { VATService } from '../../../../services/VATService.js';
+import { isAbortedError, isCanceledError } from '@stamhoofd/queues';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -633,7 +634,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         if (updateTags) {
-            await TagHelper.updateOrganizations();
+            try {
+                await TagHelper.updateOrganizations();
+            } catch (e) {
+                if (!isAbortedError(e) && !isCanceledError(e)) throw e;
+            }
         }
         const struct = await AuthenticatedStructures.organization(organization);
         return new Response(struct);
