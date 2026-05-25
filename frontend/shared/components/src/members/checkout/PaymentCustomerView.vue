@@ -180,6 +180,9 @@ async function goNext() {
     errors.errorBox = null;
 
     try {
+        if (!await errors.validator.validate()) {
+            return;
+        }
         if (editCompany.value) {
             const existing = companies.value.find(c => c.id === editCompany.value!.id);
 
@@ -187,6 +190,7 @@ async function goNext() {
             const meta = OrganizationMetaData.patch({})
 
             if (existing) {
+                patchCompany.value.id = editCompany.value!.id
                 meta.companies.addPatch(patchCompany.value);
             } else if (companies.value.length !== 0) {
                 console.error('Unexpected creation of company in PaymentCustomerView')
