@@ -1,4 +1,6 @@
+import { useOrganization, usePlatform } from '@stamhoofd/components';
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
+import type { Organization, Platform } from '@stamhoofd/structures';
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -7,12 +9,25 @@ import { Formatter } from '@stamhoofd/utility';
  * -> a hook is better suited for this
  */
 export function useSelectableWorkbook() {
+    const organization = useOrganization()
+    const platform = usePlatform()
     return {
-        getSelectableWorkbook: () => getSelectableWorkbook(),
+        getSelectableWorkbook: () => getSelectableWorkbook(organization.value, platform.value),
     };
 }
 
-export function getSelectableWorkbook() {
+export function getSelectableWorkbook(organization: Organization | null, platform: Platform) {
+    let exportableRelations = Object.values(BalanceItemRelationType).filter(t => ![BalanceItemRelationType.STPackage, BalanceItemRelationType.STPricingType, BalanceItemRelationType.PaymentProvider, BalanceItemRelationType.MembershipType].includes(t));
+
+    if (organization === null || organization.id  === platform.membershipOrganizationId) {
+        if (STAMHOOFD.userMode === 'platform') {
+            // Still hide packages
+            exportableRelations = Object.values(BalanceItemRelationType).filter(t => ![BalanceItemRelationType.STPackage, BalanceItemRelationType.STPricingType, BalanceItemRelationType.PaymentProvider].includes(t));
+        } else {
+            exportableRelations = Object.values(BalanceItemRelationType);
+        }
+    }
+
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
@@ -52,7 +67,7 @@ export function getSelectableWorkbook() {
                         name: $t(`%wW`),
                     }),
 
-                    ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
+                    ...exportableRelations.map(relationType => new SelectableColumn({
                         id: `relations.${relationType}`,
                         name: getBalanceItemRelationTypeName(relationType),
                         description: getBalanceItemRelationTypeDescription(relationType),
