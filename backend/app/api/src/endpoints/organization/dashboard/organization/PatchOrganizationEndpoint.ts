@@ -632,7 +632,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 const original = organization.meta.companies.find(c => c.id === patch.id);
 
                 if (!original) {
-                    throw new Error('Could not find company');
+                    throw new SimpleError({
+                        code: 'not_found',
+                        message: 'Company not found',
+                        human: $t('De facturatiegegevens die je probeert aan te passen konden niet gevonden worden. Herlaad de pagina en probeer het opnieuw.')
+                    })
                 }
 
                 // Changed VAT number
