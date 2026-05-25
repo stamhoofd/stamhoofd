@@ -20,6 +20,10 @@
                 <span> ({{ formatPriceChange(item.addedToUnitPriceToCorrectVAT) }})</span>
             </p>
 
+            <p v-if="STAMHOOFD.environment === 'development' " class="style-description-small">
+                <span class="style-price">Balance item amount {{ formatPrice(item.balanceInvoicedAmount) }} (incl. BTW)</span>
+            </p>
+
             <p v-if="invoice.VATTotal.length > 1" class="style-description-small">
                 {{ $t('%1KT', {'percentage%': formatPercentage(item.VATPercentage * 100)}) }}
             </p>
