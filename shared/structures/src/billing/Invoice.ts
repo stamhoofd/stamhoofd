@@ -404,7 +404,8 @@ export class Invoice extends AutoEncoder {
                 const afterCurrent = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
                 const afterCurrentToAddToTaxablePrice = STMath.round((precise - afterCurrent) / 100) * 100;
 
-                if (Math.abs(afterCurrentToAddToTaxablePrice) > Math.abs(currentToAddToTaxablePrice) || afterCurrentToAddToTaxablePrice === 0 || Math.sign(afterCurrentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice)) {
+                // Math.sign is unreliable when the price is zero, so we need to be careful here and explitly exclude zero as that is the goal value.
+                if (afterCurrentToAddToTaxablePrice !== 0 && (Math.abs(afterCurrentToAddToTaxablePrice) > Math.abs(currentToAddToTaxablePrice) || Math.sign(afterCurrentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice))) {
                     // Revert
                     next.unitPrice -= addition;
                     next.addedToUnitPriceToCorrectVAT -= addition;
@@ -423,7 +424,6 @@ export class Invoice extends AutoEncoder {
             const toAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
 
             if (Math.abs(toAddToTaxablePrice) > 1_00) {
-                console.warn('Could not correct invoice. Adding manual item with the same VAT tax so we still apply VAT on the price to pay, which is more correct than adding after VAT')
                 const add = InvoicedBalanceItem.create({
                     balanceItemId: items[0].balanceItemId,
                     type: items[0].type,
