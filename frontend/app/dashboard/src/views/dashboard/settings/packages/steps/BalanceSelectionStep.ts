@@ -18,7 +18,7 @@ export class BalanceSelectionStep implements ViewStep {
             return false;
         }
 
-        return this.model.payableBalance.filteredBalanceItems.length > 0 || !!this.model.checkout.balances.size
+        return (this.model.payableBalance.filteredBalanceItems.length > 0 && this.model.payableBalance.filteredBalanceItems.find(b => b.priceOpen > 0)) || !!this.model.checkout.balances.size
     }
 
     getComponent(manager: ViewStepsManager): ComponentWithProperties {

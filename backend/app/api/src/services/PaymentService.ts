@@ -1,7 +1,7 @@
 import { createMollieClient, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { Member, User } from '@stamhoofd/models';
-import { BalanceItem } from '@stamhoofd/models';
+import { BalanceItem, Platform, UsedRegisterCode } from '@stamhoofd/models';
 import { BalanceItemPayment, Group, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { Checkoutable, Company, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
@@ -22,6 +22,7 @@ import { MollieService } from './MollieService.js';
 import { PaymentMandateService } from './PaymentMandateService.js';
 import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import { VATService } from './VATService.js';
+import { ReferralService } from './ReferralService.js';
 
 export class PaymentService {
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus, paidAt?: Date) {
@@ -61,14 +62,23 @@ export class PaymentService {
                     await BalanceItemService.flushCaches(organization.id);
                 });
 
+                if (payment.price >= 100_00 && payment.organizationId && payment.payingOrganizationId && payment.organizationId === ((await Platform.getShared()).membershipOrganizationId)) {
+                    // We spend some money
+                    const code = await UsedRegisterCode.getFor(payment.payingOrganizationId)
+                    if (code && !code.balanceItemId) {
+                        console.log('Rewarding code '+code.id+' for payment')
+
+                        // Deze code werd nog niet beloond
+                        await ReferralService.reward(code)
+                    }
+                }
+
                 // It is possible the mandate succeeds immediately, in which case we might
                 // need to save it as the default payment method
-                if (payment.status === PaymentStatus.Succeeded) {
-                    await this.saveMandateIfNeeded({
-                        payment,
-                        sellingOrganization: organization,
-                    })
-                }
+                await this.saveMandateIfNeeded({
+                    payment,
+                    sellingOrganization: organization,
+                })
                 return;
             }
 
@@ -753,6 +763,7 @@ export class PaymentService {
         payment.method = method;
         payment.type = type;
         payment.createMandate = createMandate
+        payment.mandateId = mandate?.id ?? null
 
         if (price === 0) {
             payment.status = PaymentStatus.Succeeded;
@@ -1001,6 +1012,64 @@ export class PaymentService {
         });
     }
 
+    static async validateMandate({ 
+        method,
+        paymentConfiguration,
+        mandate,
+        payingOrganization,
+        sellingOrganization,
+        user,
+    }: { 
+        method: PaymentMethod,
+        paymentConfiguration: PaymentConfiguration,
+        mandate: PaymentMandate,
+        payingOrganization: Organization | null,
+        sellingOrganization: Organization,
+        user: User | null,
+    }) {
+        if (!paymentConfiguration.enableMandates) {
+                throw new SimpleError({
+                code: 'mandates_disabled',
+                message: 'Cannot pay with mandate',
+                human: $t('%1SK')
+            });
+        }
+        
+        // Validate mandate + update payment method based on the mandate
+        if (method !== PaymentMethod.Unknown) {
+            throw new SimpleError({
+                code: 'invalid_data',
+                message: 'Cannot combine setting mandate with method'
+            });
+        }
+
+        const allMandates = await PaymentMandateService.getMandates({
+            payingOrganization,
+            sellingOrganization,
+            user,
+        });
+
+        const existingMandate = allMandates.find(m => m.id === mandate.id && m.provider === mandate.provider);
+        if (!existingMandate) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'Mandate not found',
+                human: $t('%1TQ'),
+                field: 'mandateId'
+            });
+        }
+
+        if (existingMandate.status !== PaymentMandateStatus.Valid) {
+            throw new SimpleError({
+                code: 'mandate_not_valid',
+                message: 'Mandate not valid',
+                human: $t('%1QA'),
+                field: 'mandateId'
+            });
+        }
+        return existingMandate;
+    }
+
     static async validatePaymentMethod({ 
         method,
         customer,
@@ -1031,7 +1100,20 @@ export class PaymentService {
                 throw new Error('Empty payment')
             }
 
-            if (createMandate) {
+            // We still need to validate the mandate, because
+            // we still allow setting a new default payment method
+            // for zero payments
+            // - e.g. activating a new package with an existing mandate
+            const existingMandate = mandate ? await this.validateMandate({
+                method,
+                mandate,
+                paymentConfiguration,
+                payingOrganization,
+                sellingOrganization,
+                user
+            }) : null;
+
+            if (createMandate && !existingMandate) {
                 throw new SimpleError({
                     code: 'cannot_create_mandate_without_payment',
                     message: 'Cannot create saved payment method without payment of a small amount',
@@ -1044,7 +1126,7 @@ export class PaymentService {
                 return {
                     method: PaymentMethod.Unknown,
                     type: PaymentType.Reallocation,
-                    mandate: null
+                    mandate: existingMandate
                 }
             }
 
@@ -1052,51 +1134,19 @@ export class PaymentService {
                 // Free purchase
                 method: PaymentMethod.Unknown,
                 type: PaymentType.Payment,
-                mandate: null
+                mandate: existingMandate
             }
         }
 
         if (mandate) {
-            if (!paymentConfiguration.enableMandates) {
-                 throw new SimpleError({
-                    code: 'mandates_disabled',
-                    message: 'Cannot pay with mandate',
-                    human: $t('%1SK')
-                });
-            }
-            
-            // Validate mandate + update payment method based on the mandate
-            if (method !== PaymentMethod.Unknown) {
-                throw new SimpleError({
-                    code: 'invalid_data',
-                    message: 'Cannot combine setting mandate with method'
-                });
-            }
-
-            const allMandates = await PaymentMandateService.getMandates({
+            const existingMandate = await this.validateMandate({
+                method,
+                mandate,
+                paymentConfiguration,
                 payingOrganization,
                 sellingOrganization,
-                user,
-            });
-
-            const existingMandate = allMandates.find(m => m.id === mandate.id && m.provider === mandate.provider);
-            if (!existingMandate) {
-                throw new SimpleError({
-                    code: 'not_found',
-                    message: 'Mandate not found',
-                    human: $t('%1TQ'),
-                    field: 'mandateId'
-                });
-            }
-
-            if (existingMandate.status !== PaymentMandateStatus.Valid) {
-                throw new SimpleError({
-                    code: 'mandate_not_valid',
-                    message: 'Mandate not valid',
-                    human: $t('%1QA'),
-                    field: 'mandateId'
-                });
-            }
+                user
+            })
 
             switch (existingMandate.type) {
                 case PaymentMandateType.CreditCard:

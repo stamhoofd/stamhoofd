@@ -478,6 +478,7 @@ import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PremisesView from './PremisesView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
+import ReferralView from './ReferralView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 import UitpasSettingsView from './UitpasSettingsView.vue';
@@ -682,6 +683,11 @@ defineRoutes([
                     url: Routes.Packages,
                     present: 'popup' as const,
                     component: PackageSettingsView,
+                },
+                {
+                    url: Routes.Referrals,
+                    present: 'popup' as const,
+                    component: ReferralView,
                 },
                 {
                     url: Routes.PaymentSettings,

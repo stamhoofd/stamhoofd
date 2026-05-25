@@ -255,7 +255,6 @@ watch(realCreateMandate, (n, old) => {
     if (n === null) {
         return;
     }
-    console.log('update pro forma', n)
 
     Request.cancelAll(loadProFormaBag)
     loadProForma().catch(console.error);

@@ -8,7 +8,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <STGrid>
-            <STGridItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="true">
+            <STGridItem v-for="item in filteredBalanceItems" :key="item.id" element-name="label" :selectable="canSelect">
                 <template #left>
                     <BalanceItemIcon v-if="!canSelect" :item="item" :is-payable="true" />
                     <Checkbox v-else :model-value="isItemSelected(item)" @update:model-value="setItemSelected(item, $event)" />

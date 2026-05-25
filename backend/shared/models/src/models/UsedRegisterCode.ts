@@ -1,6 +1,16 @@
 import { column } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
+import { RegisterCode } from './RegisterCode.js';
+import { Organization } from './Organization.js';
+import { STInvoiceItem } from '@stamhoofd/structures/billing/STInvoiceItem.js';
+import { Email } from '@stamhoofd/email';
+import { QueueHandler } from '@stamhoofd/queues';
+import { Formatter } from '../../../../../shared/utility/dist/Formatter.js';
+import { STPendingInvoice } from './STPendingInvoice.js';
+import { BalanceItem } from './BalanceItem.js';
+import { BalanceItemType } from '@stamhoofd/structures';
+import { Platform } from './Platform.js';
 
 export class UsedRegisterCode extends QueryableModel {
     static table = 'used_register_codes';
@@ -21,7 +31,14 @@ export class UsedRegisterCode extends QueryableModel {
     @column({ type: 'string' })
     organizationId: string;
 
+     /**
+     * Set if this has been rewarded
+     */
+    @column({ type: 'string', nullable: true })
+    balanceItemId: string | null = null;
+
     /**
+     * @deprecated Migrated to balanceItemId
      * Set if this has been rewarded
      */
     @column({ type: 'string', nullable: true })
@@ -48,4 +65,31 @@ export class UsedRegisterCode extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    static async getFor(organizationId: string): Promise<UsedRegisterCode | undefined> {
+        const code = await this.where({ organizationId }, { limit: 1 })
+        return code[0] ?? undefined
+    }
+
+    static async getAll(code: string) {
+        const used = await UsedRegisterCode.where({ 
+            code
+        })
+        return used
+    }
+
+    static async getUsed(code: string) {
+        const used = await UsedRegisterCode.select()
+            .where('code', code)
+            .andWhere('balanceItemId', '!=', null)
+            .fetch()
+        return used
+    }
+
+    static async getUsedCount(code: string) {
+        return await UsedRegisterCode.select()
+            .where('code', code)
+            .andWhere('balanceItemId', '!=', null)
+            .count();
+    }
 }

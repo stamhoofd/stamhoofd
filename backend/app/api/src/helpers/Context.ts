@@ -199,6 +199,12 @@ export class ContextInstance {
         return organization;
     }
 
+    async setManualOrganizationScope(organization: Organization) {
+        this.organization = organization;
+        this.i18n.switchToLocale({ country: organization.address.country });
+        return organization;
+    }
+
     async optionalAuthenticate({ allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<{ user?: User }> {
         try {
             return await this.authenticate({ allowWithoutAccount });
@@ -307,8 +313,12 @@ export class ContextInstance {
         );
 
         // Load member of user
-        // todo
+        await this.insecurelyAuthenticateAs(user)
 
+        return { user, token };
+    }
+
+    async insecurelyAuthenticateAs(user: User) {
         this.#auth = new AdminPermissionChecker(user, await Platform.getSharedPrivateStruct(), this.organization);
 
         if (this.organization && !this.organization.active) {
@@ -322,8 +332,6 @@ export class ContextInstance {
                 });
             }
         }
-
-        return { user, token };
     }
 }
 

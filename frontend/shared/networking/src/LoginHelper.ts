@@ -3,7 +3,7 @@ import { ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
 import type { Organization} from '@stamhoofd/structures';
-import { CreateOrganization, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { CreateOrganization, CreateOrganizationResponse, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
 import type {SessionContext} from './SessionContext';
@@ -160,8 +160,10 @@ export class LoginHelper {
                 user,
                 registerCode,
             }),
-            decoder: SignupResponse as Decoder<SignupResponse>,
+            decoder: CreateOrganizationResponse as Decoder<CreateOrganizationResponse>,
         });
+        organization.id = response.data.organization.id;
+        organization.deepSet(response.data.organization)
 
         return response.data.token;
     }

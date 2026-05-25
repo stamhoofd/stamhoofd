@@ -14,17 +14,9 @@ export class VATService {
 
         if (seller.VATNumber && seller.address && company) {
             // B2B validation
-            if (!company.address) {
-                throw new SimpleError({
-                    code: 'missing_field',
-                    message: 'Company address missing',
-                    human: $t('%1LH'),
-                    field: 'customer.company.address',
-                });
-            }
-
+            // No address -> we guess the same country as the seller (least risk of not applying VAT when it is required)
             // Reverse charged vat applicable?
-            if (company.address.country !== seller.address.country && company.VATNumber && !company.VATNumber.trim().startsWith(seller.address.country)) {
+            if ((company.address && company.address.country !== seller.address.country) && company.VATNumber && !company.VATNumber.trim().startsWith(seller.address.country)) {
                 return true;
             }
         }

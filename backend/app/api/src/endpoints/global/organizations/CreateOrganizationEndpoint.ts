@@ -1,16 +1,24 @@
+import type { Model } from '@simonbackx/simple-database';
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import type { EmailInterfaceBase } from '@stamhoofd/email';
+import { Email } from '@stamhoofd/email';
 import { AuditLog, EmailVerificationCode, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogSource, AuditLogType, CreateOrganization, PermissionLevel, Permissions, RegistrationPeriodSettings, SignupResponse, UserPermissions } from '@stamhoofd/structures';
+import { CreateOrganizationResponse} from '@stamhoofd/structures';
+import { AuditLogSource, AuditLogType, CreateOrganization, PermissionLevel, Permissions, SignupResponse, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
 import { AuditLogService } from '../../../services/AuditLogService.js';
+import { ReferralService } from '../../../services/ReferralService.js';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = CreateOrganization;
-type ResponseBody = SignupResponse;
+type ResponseBody = CreateOrganizationResponse;
 
 export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = CreateOrganization as Decoder<CreateOrganization>;
@@ -77,15 +85,24 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         // First create the organization
-        // TODO: add some duplicate validation
         const organization = new Organization();
-        organization.id = request.body.organization.id;
+        organization.id = uuidv4();
         organization.name = request.body.organization.name;
 
         organization.uri = uri;
         organization.meta = request.body.organization.meta;
         organization.address = request.body.organization.address;
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
+
+        // Delay save until after organization is saved, but do validations before the organization is saved
+        let registerCodeModels: Model[] = []
+        let delayEmails: EmailInterfaceBase[] = []
+
+        if (request.body.registerCode) {
+            const applied = await ReferralService.markUsed(organization, request.body.registerCode)
+            registerCodeModels = applied.models
+            delayEmails = applied.emails
+        }
 
         const period = await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             const period = new RegistrationPeriod();
@@ -136,14 +153,30 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         user.permissions.organizationPermissions.set(organization.id, Permissions.create({ level: PermissionLevel.Full }));
         await user.save();
 
+        for (const model of registerCodeModels) {
+            await model.save()
+        }
+
         // Correctly assign creation
         await AuditLog.update().where('type', AuditLogType.OrganizationAdded).where('objectId', organization.id).set('userId', user.id).set('source', AuditLogSource.User).update();
 
         const code = await EmailVerificationCode.createFor(user, user.email);
         code.send(user, organization, request.i18n).catch(console.error);
 
-        return new Response(SignupResponse.create({
+        for (const email of delayEmails) {
+            Email.send({
+                from: Email.getQuickFromEmail(organization.address.country),
+                ...email
+            })
+        }
+        
+        // Prepare the response as if we were authenticated
+        await Context.setManualOrganizationScope(organization)
+        await Context.insecurelyAuthenticateAs(user)
+
+        return new Response(CreateOrganizationResponse.create({
             token: code.token,
+            organization: await AuthenticatedStructures.organization(organization)
         }));
     }
 }

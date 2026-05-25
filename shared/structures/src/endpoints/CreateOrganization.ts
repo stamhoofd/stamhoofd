@@ -2,6 +2,7 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Organization } from '../Organization.js';
 import { NewUser } from '../User.js';
+import { SignupResponse } from './SignupResponse.js';
 
 export class CreateOrganization extends AutoEncoder {
     @field({ decoder: Organization })
@@ -15,4 +16,9 @@ export class CreateOrganization extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 24 })
     registerCode: string | null = null;
+}
+
+export class CreateOrganizationResponse extends SignupResponse {
+    @field({ decoder: Organization })
+    organization: Organization;
 }

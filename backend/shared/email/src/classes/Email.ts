@@ -498,6 +498,13 @@ class EmailStatic {
         };
     }
 
+    getQuickFromEmail(country: Country) {
+        return {
+            name: Formatter.capitalizeFirstLetter(STAMHOOFD.platformName ?? 'Stamhoofd'),
+            email: 'hallo@' + (new I18n(Language.Dutch, country).localizedDomains.defaultTransactionalEmail()),
+        };
+    }
+
     getWebmasterToEmail() {
         return {
             name: 'Stamhoofd',

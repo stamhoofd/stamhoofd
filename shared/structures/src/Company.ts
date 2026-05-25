@@ -13,7 +13,7 @@ export class PeppolEndointId extends AutoEncoder {
 }
 
 export class Company extends AutoEncoder {
-    @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
     /**
