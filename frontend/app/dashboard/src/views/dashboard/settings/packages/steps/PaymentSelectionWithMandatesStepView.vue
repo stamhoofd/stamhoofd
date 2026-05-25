@@ -252,7 +252,10 @@ watch(realCreateMandate, (n, old) => {
     if (n === old) {
         return;
     }
-    console.log('update pro forma')
+    if (n === null) {
+        return;
+    }
+    console.log('update pro forma', n)
 
     Request.cancelAll(loadProFormaBag)
     loadProForma().catch(console.error);
@@ -260,11 +263,6 @@ watch(realCreateMandate, (n, old) => {
 
 
 async function loadProForma() {
-    if (loading.value) {
-        return;
-    }
-    loading.value = true;
-
     try {
         const response = await activatePackages(
             props.model.checkout.patch({
@@ -290,13 +288,11 @@ async function loadProForma() {
         }
     } catch (e) {
         if (Request.isAbortError(e)) {
-            loading.value = false
             return;
         }
         Toast.fromError(e).show()
         errors.errorBox = new ErrorBox(e)
     }
-    loading.value = false
 }
 
 async function goNext() {
