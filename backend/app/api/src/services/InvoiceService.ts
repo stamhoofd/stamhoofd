@@ -152,7 +152,7 @@ export class InvoiceService {
                 }
 
                 // Todo: check we are not invoicing more than maximum invoiceable for these items
-                const maximumInvoiceable = balanceItem.priceTotal; // € - 10
+                const maximumInvoiceable = balanceItem.priceDue; // € - 10
                 const alreadyInvoiced = balanceItem.priceInvoiced; // € 5
                 const left = maximumInvoiceable - alreadyInvoiced; // € -15
                 const goingToInvoice = item.balanceInvoicedAmount;
@@ -197,6 +197,7 @@ export class InvoiceService {
 
                 if (left === 0) {
                     if (goingToInvoice < 0) {
+                        console.log(item)
                         throw new SimpleError({
                             code: 'error',
                             message: 'Cannot invoice',
