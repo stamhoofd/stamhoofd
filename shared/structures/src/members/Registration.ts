@@ -170,6 +170,12 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
         return this.trialUntil !== null && (this.deactivatedAt ? (this.trialUntil >= this.deactivatedAt) : (this.trialUntil > new Date()));
     }
 
+    /**
+    * Simple description of the registration as a string.
+    *
+    * Used for simple preview or diffing, but not ideal for user previews as
+    * links of files and images are included directly which is unreadable.
+    */
     get description() {
         const descriptions: string[] = [];
 
