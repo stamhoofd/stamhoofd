@@ -10,6 +10,6 @@ export function useOrganizationsRelationFetcher() {
         getName: (organization) => organization.name,
         getValue: (organization) => organization.id,
         sort: [{ key: 'name', order: SortItemDirection.ASC }],
-        limit: 10
+        limit: 20
     })
 }

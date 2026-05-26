@@ -8,7 +8,7 @@
     </div>
 
     <div class="results">
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
         <STList v-if="invisibleSelectedOptions.length">
             <STListItem v-for="option of invisibleSelectedOptions" :key="option.value" :selectable="true" element-name="label">
                 <template #left>
@@ -19,49 +19,52 @@
                 </h3>
             </STListItem>
         </STList>
-        <template v-if="errors.errorBox === null">
-            <div v-if="options === null" class="spinner-container center">
-                <Spinner />
-            </div>
-            <div v-else-if="options.length">
-                <STList>
-                    <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ option.name }}
-                        </h3>
-                    </STListItem>
-                </STList>
-                <button v-if="hasMore" class="button text more-button" type="button" @click="fetchMore">
-                    {{ $t('Toon meer') }}
-                </button>
-            </div>
-            <div v-else-if="invisibleSelectedOptions.length === 0">
-                <p class="info-box">
-                    {{ emptyMessage }}
-                </p>
-            </div>
+        <template v-if="infiniteObjectFetcher.errorState === null">
+            <STList>
+                <STListItem v-for="option of options" :key="option.value" :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="isOptionSelected(option as RelationFilterOption<T>)" @update:model-value="setOptionSelected(option as RelationFilterOption<T>, $event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ option.name }}
+                    </h3>
+                </STListItem>
+            </STList>
+            <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`Geen resultaten`)" />
         </template>
     </div>
 </template>
 
-<script lang="ts" setup generic="T extends string | number | Date | null | boolean">
+<script lang="ts" setup generic="T extends string | number | Date | null | boolean, ObjectType extends { id: string }">
 
-import { throttle } from '@stamhoofd/utility';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
-import { useErrors } from '../errors/useErrors';
-import Spinner from '../Spinner.vue';
+import type { ObjectFetcher } from '../tables';
+import { useInfiniteObjectFetcher } from '../tables';
+import InfiniteObjectFetcherEnd from '../tables/InfiniteObjectFetcherEnd.vue';
 import type { RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
 
 const props = defineProps<{
     filter: RelationUIFilter<T>;
 }>();
 
+const relationFetcher = props.filter.relationFetcher;
+const objectFetcher: ObjectFetcher<ObjectType> = relationFetcher.fetcher;
+const infiniteObjectFetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
+relationFetcher.configureInfiniteObjectFetcher(infiniteObjectFetcher);
+const errorBox = computed(() => {
+    if (infiniteObjectFetcher.errorState) {
+        return new ErrorBox(infiniteObjectFetcher.errorState);
+    }
+    return null;
+});
+
 const searchQuery = ref('');
-const options = ref<RelationFilterOption<T>[] | null>(null);
+watchEffect(() => {
+    infiniteObjectFetcher.setSearchQuery(searchQuery.value);
+});
+
+const options = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.objects));
 const invisibleSelectedOptions = computed(() => {
     const visibleOptions = options.value;
     if (!visibleOptions) {
@@ -71,43 +74,10 @@ const invisibleSelectedOptions = computed(() => {
     return props.filter.values.filter(option => {
         return !visibleOptions.some(vo => vo.value === option.value && vo.name === option.name);
     })
-})
-const emptyMessage = ref<string>($t('Geen opties gevonden'));
-const errors = useErrors();
-const hasMore = computed(() => props.filter.relationFetcher.hasMore);
-
-const doThrottledLoad = throttle(fetchOptions, props.filter.searchDebounce);
-
-watch(searchQuery, () => {
-    doThrottledLoad();
 });
 
 function blurFocus() {
     (document.activeElement as HTMLElement)?.blur();
-}
-
-async function fetchOptions() {
-    options.value = null;
-    errors.errorBox = null;
-
-    try {
-        options.value = await props.filter.relationFetcher.fetch(searchQuery.value);
-    } catch (e) {
-        console.error(e);
-        errors.errorBox = new ErrorBox(e);
-    }
-
-    emptyMessage.value = searchQuery.value.length === 0 ?  $t('Geen opties beschikbaar') : $t('Geen opties gevonden');
-}
-
-async function fetchMore() {
-    try {
-        const moreOptions = await props.filter.relationFetcher.fetchMore();
-        options.value = [...(options.value ?? []), ...moreOptions] as RelationFilterOption<T>[];
-    } catch (e) {
-        console.error(e);
-        errors.errorBox = new ErrorBox(e);
-    }
 }
 
 function isOptionSelected(option: RelationFilterOption<T>) {
@@ -129,8 +99,6 @@ function setOptionSelected(option: RelationFilterOption<T>, selected: boolean) {
         props.filter.values.push(option);
     }
 }
-
-fetchOptions().catch(console.error);
 </script>
 
 <style lang="scss" scoped>
@@ -138,9 +106,5 @@ fetchOptions().catch(console.error);
 .results{
     margin-top: 15px;
     margin-bottom: 15px;
-}
-
-.more-button{
-    margin-top: 15px;
 }
 </style>

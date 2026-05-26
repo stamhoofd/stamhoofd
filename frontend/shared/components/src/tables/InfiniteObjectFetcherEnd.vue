@@ -1,7 +1,7 @@
 <template>
     <div ref="el" class="infinite-object-fetcher-end">
         <p v-if="!fetcher.hasMoreObjects && fetcher.objects.length === 0" class="info-box">
-            {{ emptyMessage || 'Geen resultaten' }}
+            {{ emptyMessage }}
         </p>
 
         <div v-if="fetcher.hasMoreObjects" class="spinner-container center">
@@ -16,10 +16,13 @@ import Spinner from '../Spinner.vue';
 import type { InfiniteObjectFetcher } from './classes';
 
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     fetcher: InfiniteObjectFetcher<ObjectType>,
-    emptyMessage?: string,
-}>()
+    emptyMessage?: string
+}>(), {
+    emptyMessage: $t('Geen resultaten'),
+});
+
 const el = ref<HTMLElement | null>(null);
 
 // Keep track whether the ref stays in view

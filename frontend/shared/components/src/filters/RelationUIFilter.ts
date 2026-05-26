@@ -1,9 +1,8 @@
 import type { SortList, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest } from '@stamhoofd/structures';
 
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '../../../../../shared/utility/dist/Formatter';
-import type { ObjectFetcher } from '../tables';
+import type { InfiniteObjectFetcher, ObjectFetcher } from '../tables';
 import RelationUIFilterView from './RelationUIFilterView.vue';
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
@@ -144,20 +143,16 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     }
 }
 
-export class RelationFetcher<OBJECT, T extends string | number | Date | null | boolean> {
-    private readonly fetcher: ObjectFetcher<OBJECT>;
+
+
+export class RelationFetcher<OBJECT extends {id: string}, T extends string | number | Date | null | boolean> {
+    readonly fetcher: ObjectFetcher<OBJECT>;
     
     private readonly getName: (object: OBJECT) => string;
     private readonly getValue: (object: OBJECT) => T;
 
-    private readonly limit: number;
+    private readonly limit?: number;
     private readonly sort?: SortList;
-
-    private next?: LimitedFilteredRequest;
-
-    get hasMore() {
-        return this.next !== undefined;
-    }
 
     constructor({fetcher, getName, getValue, limit, sort}: {
         fetcher: ObjectFetcher<OBJECT>,
@@ -169,37 +164,22 @@ export class RelationFetcher<OBJECT, T extends string | number | Date | null | b
         this.fetcher = fetcher;
         this.getName = getName;
         this.getValue = getValue;
-        this.limit = limit ?? 20;
+        this.limit = limit;
         this.sort = sort;
     }
 
-    async fetchMore(): Promise<RelationFilterOption<T>[]> {
-        if (this.next === undefined) {
-            return [];
+    configureInfiniteObjectFetcher(infiniteObjectFetcher: InfiniteObjectFetcher<OBJECT>) {
+        if (this.sort) {
+            infiniteObjectFetcher.sort = this.sort;
         }
 
-        const {results, next} = await this.fetcher.fetch(this.next);
-        this.next = next;
-
-        return this.resultsToOptions(results);
+        if (this.limit) {
+            infiniteObjectFetcher.limit = this.limit;
+        }
+        
     }
 
-    async fetch(search: string): Promise<RelationFilterOption<T>[]> {
-        this.next = undefined;
-
-        const request = new LimitedFilteredRequest({
-            search,
-            limit: this.limit,
-            sort: this.sort
-        });
-
-        const {results, next} = (await this.fetcher.fetch(request));
-        this.next = next;
-
-        return this.resultsToOptions(results);
-    }
-
-    private resultsToOptions(results: OBJECT[]): RelationFilterOption<T>[] {
+    resultsToOptions(results: OBJECT[]): RelationFilterOption<T>[] {
         return results.map(object => ({
             name: this.getName(object),
             value: this.getValue(object)
