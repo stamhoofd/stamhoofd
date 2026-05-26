@@ -4,6 +4,10 @@ import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { CountryDecoder, CountryHelper } from './CountryDecoder.js';
 
+function trimAndJoin(parts: string[], separator: string = ', '): string {
+    return parts.map(part => part.trim()).filter(part => part !== '').join(separator).trim();
+}
+
 export class Address extends AutoEncoder {
     get id() {
         return this.street + ' ' + this.number + ', ' + this.postalCode + ' ' + this.city + ', ' + this.country;
@@ -29,11 +33,18 @@ export class Address extends AutoEncoder {
     country: Country;
 
     toString(): string {
-        return this.street + ' ' + this.number + ', ' + this.postalCode + ' ' + this.city + ', ' + CountryHelper.getName(this.country);
+        return trimAndJoin([
+            this.street !== '' ? this.street + ' ' + this.number : '', // if no street the number is irrelevant
+            this.postalCode + ' ' + this.city, // if no city the postal code may still be relevant
+            CountryHelper.getName(this.country)
+        ]);
     }
 
     shortString(): string {
-        return this.street + ' ' + this.number + ', ' + this.city;
+        return trimAndJoin([
+            this.street !== '' ? this.street + ' ' + this.number : '',
+            this.city
+        ]);
     }
 
     getDiffName() {
@@ -41,10 +52,11 @@ export class Address extends AutoEncoder {
     }
 
     anonymousString(currentCountry: Country = $getCountry()): string {
-        if (this.country === currentCountry) {
-            return this.street + ', ' + this.city;
+        const location = trimAndJoin([this.street, this.city]);
+        if (this.country !== currentCountry) {
+            return location === '' ? CountryHelper.getName(this.country) : location + ' (' + CountryHelper.getName(this.country) + ')';
         }
-        return this.street + ', ' + this.city + ' (' + CountryHelper.getName(this.country) + ')';
+        return location; // empty or location without country
     }
 
     equals(other: Address) {
