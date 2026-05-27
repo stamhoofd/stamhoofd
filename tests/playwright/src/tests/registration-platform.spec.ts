@@ -463,6 +463,96 @@ test.describe('Registration', () => {
                 });
             });
         });
+
+        /**
+         * Test registration without uitpas when the total price is zero.
+         * In that case the payment step is a confirmation page instead of a payment selection page.
+         *
+         * KNOWN BUG: after confirming, the app navigates back instead of showing the success view.
+         */
+        test.describe('Happy path - zero price', () => {
+            let freeOrganization: Organization;
+            let freeOrganizationPeriod: OrganizationRegistrationPeriod;
+
+            test.beforeAll(async () => {
+                freeOrganization = await new OrganizationFactory({
+                    name: `FreeVer${WorkerData.id}`,
+                }).create();
+
+                const freePeriod = await new RegistrationPeriodFactory({
+                    startDate: new Date('2000-01-01'),
+                    endDate: new Date('2001-01-01'),
+                    organization: freeOrganization,
+                }).create();
+
+                freeOrganization.periodId = freePeriod.id;
+                await freeOrganization.save();
+
+                freeOrganizationPeriod
+                    = await new OrganizationRegistrationPeriodFactory({
+                        period: freePeriod,
+                        organization: freeOrganization,
+                    }).create();
+            });
+
+            test.afterEach(async () => {
+                await WorkerData.databaseHelper.clearRegistrations();
+                await WorkerData.databaseHelper.clearMembers();
+                await WorkerData.databaseHelper.clearGroups();
+            });
+
+            test('Happy flow - zero price', async ({ page, pages }) => {
+                const group = await new GroupFactory({
+                    organization: freeOrganization,
+                    price: 0,
+                }).create();
+
+                group.settings.registrationEndDate = new Date(
+                    (
+                        group.settings.registrationEndDate ?? new Date()
+                    ).getTime()
+                    + 60 * 1000,
+                );
+                await group.save();
+
+                freeOrganizationPeriod.settings.rootCategory?.groupIds.push(
+                    group.id,
+                );
+                await freeOrganizationPeriod.save();
+
+                await new MemberFactory({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    user,
+                }).create();
+
+                const registrationFlow = new MemberPortalRegistrationFlow({
+                    page,
+                    pages,
+                });
+
+                await registrationFlow.startRegister({
+                    organizationName: freeOrganization.name,
+                    groupName: group.settings.name.toString(),
+                    memberName: 'Jane Doe',
+                });
+
+                await registrationFlow.continueMemberStep();
+
+                await test.step('should go to checkout', async () => {
+                    await registrationFlow.goToCheckout();
+                });
+
+                await test.step('payment step should be a confirmation page showing zero total', async () => {
+                    await registrationFlow.expectTotalText('Totaal: € 0');
+                });
+
+                await test.step('should show success view after confirming', async () => {
+                    await registrationFlow.confirmPaymentMethod();
+                    await registrationFlow.expectSuccessView();
+                });
+            });
+        });
     });
 
     /**
