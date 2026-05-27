@@ -463,6 +463,7 @@ export default class SeatSelectionBox extends Mixins(NavigationMixin) {
         line-height: var(--h);
         color: $color-dark;
         color: var(--color, $color-dark);
+        text-align: center;
 
         &.disabledPerson > .nr {
             position: absolute;
