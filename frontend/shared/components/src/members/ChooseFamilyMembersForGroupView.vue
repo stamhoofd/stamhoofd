@@ -7,7 +7,7 @@
             <h1>{{ $t('%dh') }} {{ group.settings.name }}</h1>
 
             <p v-if="hasNoMembers" class="info-box">
-                {{ $t('%AI') }}
+                {{ $t('Er zijn nog geen leden gekoppeld aan je account, voeg ze eerst toe (via ‘Start’) voor je hen probeert in te schrijven.') }}
             </p>
 
             <STList>
