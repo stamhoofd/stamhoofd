@@ -5,8 +5,10 @@ import { computed, ref } from 'vue';
 import { usePlatform, useUser } from '../../hooks';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
+import { RelationFilterBuilder } from '../RelationUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilder } from '../UIFilter';
+import { useOrganizationsRelationFetcher } from '../relation-fetchers/organizations';
 
 export function useAdvancedRegistrationsUIFilterBuilders() {
     const $platform = usePlatform();
@@ -16,6 +18,8 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
     const manager = usePlatformManager();
     const owner = useRequestOwner();
     const loading = ref(true);
+
+    const organizationRelationsFetcher = useOrganizationsRelationFetcher();
 
     manager.value.loadPeriods(false, true, owner).then(() => {
         loading.value = false;
@@ -31,14 +35,14 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             const hasPlatformPermissions = (user?.permissions?.platform !== null);
 
             const all: UIFilterBuilder[] = [];
-            all.push(
-                new StringFilterBuilder({
-                    name: $t('%1CF'),
-                    key: 'organizationId',
-                    allowCreation: false,
-                    wrapper: FilterWrapperMarker,
-                }),
-            );
+
+            all.push(new RelationFilterBuilder({
+                name: $t('%1PI'),
+                key: 'organizationId',
+                allowCreation: hasPlatformPermissions,
+                wrapper: FilterWrapperMarker,
+                relationFetcher: organizationRelationsFetcher
+            }));
 
             all.push(
                 new MultipleChoiceFilterBuilder({
@@ -55,28 +59,6 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                             periodId: FilterWrapperMarker,
                         },
                     ],
-                }),
-            );
-
-            all.push(
-                new StringFilterBuilder({
-                    name: $t('%1O1'),
-                    key: 'uri',
-                    allowCreation: hasPlatformPermissions,
-                    wrapper: {
-                        organization: FilterWrapperMarker,
-                    },
-                }),
-            );
-
-            all.push(
-                new StringFilterBuilder({
-                    name: $t('%CX'),
-                    key: 'name',
-                    allowCreation: hasPlatformPermissions,
-                    wrapper: {
-                        organization: FilterWrapperMarker,
-                    },
                 }),
             );
 
