@@ -217,6 +217,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                     // Add new
                     members.push(duplicate);
+
+                    await MemberUserSyncer.onChangeMember(duplicate);
+                    await Document.updateForMember(duplicate);
                     continue;
                 }
             }
