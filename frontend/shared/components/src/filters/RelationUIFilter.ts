@@ -19,10 +19,6 @@ export type RelationFilterOption<T extends string | number | Date | null | boole
 
 export type RelationUIFilterConfig = {
     mode?: RelationUIFilterMode,
-    /**
-     * Debounce in ms for loading options when the search query changed.
-     */
-    searchDebounce?: number
 }
 
 export class RelationUIFilter<T extends string | number | Date | null | boolean> extends UIFilter<RelationFilterBuilder<T>> {
@@ -38,13 +34,6 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
 
     get mode() {
         return this.config.mode ?? RelationUIFilterMode.Or;
-    }
-
-    /**
-     * Debounce in ms for loading options when the search query changed.
-     */
-    get searchDebounce() {
-        return this.config.searchDebounce === undefined ? 500 : this.config.searchDebounce;
     }
 
     doBuild(): StamhoofdFilter {
@@ -127,19 +116,69 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const { markerValue: unwrapped, isInverted } = unwrapFilterForBuilder(this, filter);
-        
-        if (unwrapped === null || unwrapped === undefined) {
+        const match = unwrapFilterForBuilder(this, filter);
+        if (!match.match || match.markerValue === undefined) {
             return null;
         }
 
-        if (!(typeof unwrapped === 'object')) {
+        const response = match.markerValue;
+        if (!response || typeof response !== 'object') {
             return null;
         }
 
-        // todo
+        const responseWithKey: StamhoofdFilter & Partial<{[key: string]: any}> = response;
+        if (!responseWithKey[this.key]) {
+            return null;
+        }
 
-        return null;
+        const value = responseWithKey[this.key];
+
+        let mode: RelationUIFilterMode = RelationUIFilterMode.And;
+        let array: any[] | undefined = undefined;
+
+        if (Array.isArray(value)) {
+            mode = RelationUIFilterMode.And;
+            array = value;
+        } else if (typeof value === 'object') {
+            const object: { $or?: any[], $and?: any[] } = value;
+            if (Object.hasOwn(object, '$or')) {
+                mode = RelationUIFilterMode.Or;
+                array = object['$or'];
+            } else if (Object.hasOwn(object, '$and')) {
+                mode = RelationUIFilterMode.And;
+                array = object['$and'];
+            }
+        }
+
+        if (!array || array.length === 0) {
+            return null;
+        }
+
+        const values: RelationFilterOption<T>[] = [];
+
+        for (const item of array) {
+            if (typeof item !== 'object') {
+                return null;
+            }
+            const object: Partial<{ $: string, name: string, value: T }> = item;
+            if (object.$ !== '$rel' || object.name === undefined || object.value === undefined) {
+                return null;
+            }
+
+            values.push({
+                name: object.name,
+                value: object.value
+            });
+        }
+
+        return new RelationUIFilter({
+            builder: this,
+            relationFetcher: this.relationFetcher,
+            values,
+            config: {
+                mode
+            }
+        });
     }
 }
 
