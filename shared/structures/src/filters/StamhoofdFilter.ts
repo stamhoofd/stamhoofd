@@ -25,8 +25,11 @@ export type StamhoofdMagicRelationFilter = {
     // value to search the relation by (will often be an id)
     value: string | number | Date | null | boolean,
     // human readable name of the relation
-    name: string
+    name: string,
+    // Sometimes multiple relation types are possible. For example for filtering a registration on groupIds, but the groups can be of different types such as 'EventRegistration' or 'Membership'. The SQL filter will be the same, but in the UI these could be handled differently.
+    type?: string
 };
+
 export type StamhoofdMagicFilter = StamhoofdMagicNowFilter | StamhoofdMagicRelationFilter;
 export type StamhoofdCompareValue = string | number | Date | null | boolean | StamhoofdMagicFilter;
 export const FilterWrapperMarker = Symbol('FilterWrapperMarker');

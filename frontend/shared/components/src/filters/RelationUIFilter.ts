@@ -1,6 +1,6 @@
-import type { SortList, StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import type { SortList, StamhoofdFilter, StamhoofdMagicRelationFilter, WrapperFilter } from '@stamhoofd/structures';
+import { isMagicRelationFilter, unwrapFilterByPath } from '@stamhoofd/structures';
 import { Formatter } from '../../../../../shared/utility/dist/Formatter';
 import type { InfiniteObjectFetcher, ObjectFetcher } from '../tables';
 import RelationUIFilterView from './RelationUIFilterView.vue';
@@ -15,6 +15,8 @@ export type RelationFilterOption<T extends string | number | Date | null | boole
 export class RelationUIFilter<T extends string | number | Date | null | boolean> extends UIFilter<RelationFilterBuilder<T>> {
     readonly relationFetcher: RelationFetcher<any, T>;
     name: string = '';
+    // The optional type of the magic relation filter.
+    type?: string;
     values: RelationFilterOption<T>[] = [];
 
     constructor(data: Partial<RelationUIFilter<T>>, options: { isInverted?: boolean } = {}) {
@@ -31,12 +33,18 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
     }
 
     doBuild(): StamhoofdFilter {
-        const items = this.values.map(value => {
-            return {
+        const items: StamhoofdMagicRelationFilter[] = this.values.map(value => {
+            const item: StamhoofdMagicRelationFilter = {
                 $: '$rel',
-                ...value
+                ...value,
             }
+            
+            return item;
         });
+
+        if (this.type && items.length > 0) {
+            items[0].type = this.type;
+        }
 
         if (items.length === 1) {
             return {
@@ -87,12 +95,16 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     readonly wrapper?: WrapperFilter;
     readonly allowCreation?: boolean;
     readonly relationFetcher: RelationFetcher<any, T>;
+    // The optional type of the magic relation filter.
+    readonly type?: string;
 
-    constructor(data: { key: string; name: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean, relationFetcher: RelationFetcher<any, T> }) {
+    constructor(data: { key: string; name: string; type?: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean, relationFetcher: RelationFetcher<any, T> }) {
         this.key = data.key;
+        this.type = data.type;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
         this.wrapper = data.wrapper;
+        console.error('wrapper test1: ', JSON.stringify(this.wrapper))
         this.name = data.name;
         this.allowCreation = data.allowCreation;
         this.relationFetcher = data.relationFetcher;
@@ -101,66 +113,65 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     create(options?: { isInverted?: boolean; }): RelationUIFilter<T> {
         return new RelationUIFilter({
             builder: this,
-            relationFetcher: this.relationFetcher
+            relationFetcher: this.relationFetcher,
+            type: this.type
         }, options);
     }
 
-    fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const match = unwrapFilterForBuilder(this, filter);
-        if (!match.match || match.markerValue === undefined) {
-            return null;
-        }
-
-        const response = match.markerValue;
-        if (!response || typeof response !== 'object') {
-            return null;
-        }
-
-        const responseWithKey: StamhoofdFilter & Partial<{[key: string]: any}> = response;
-        if (!responseWithKey[this.key]) {
-            return null;
-        }
-
-        const value = responseWithKey[this.key];
-        let array: any[] | undefined = undefined;
-
-        if (Array.isArray(value)) {
-            array = value;
-        } else if (typeof value === 'object') {
-            const object: { $in?: any[], $or?: any[] } = value;
-            if (Object.hasOwn(object, '$in')) {
-                array = object['$in'];
-            } else if (Object.hasOwn(object, '$or')) {
-                array = object['$or'];
-            }
-        }
-
+    private getOptionsFromFilter(filter: StamhoofdFilter): null | RelationFilterOption<T>[] {
+        const array = Array.isArray(filter) ? filter : [filter];
         if (!array || array.length === 0) {
             return null;
         }
-
+        
         const values: RelationFilterOption<T>[] = [];
 
+        let type: string | null = null;
+
         for (const item of array) {
-            if (typeof item !== 'object') {
+            if (!isMagicRelationFilter(item)) {
                 return null;
             }
-            const object: Partial<{ $: string, name: string, value: T }> = item;
-            if (object.$ !== '$rel' || object.name === undefined || object.value === undefined) {
-                return null;
+
+            if (type === null && item.type) {
+                type = item.type;
             }
 
             values.push({
-                name: object.name,
-                value: object.value
+                name: item.name,
+                value: item.value as T,
             });
         }
 
-        return new RelationUIFilter({
-            builder: this,
-            relationFetcher: this.relationFetcher,
-            values,
-        });
+        if (type !== null || this.type) {
+            if (type !== this.type) {
+                return null;
+            }
+        }
+
+        return values;
+    }
+
+    fromFilter(filter: StamhoofdFilter): UIFilter | null {
+        const { markerValue: unwrapped, isInverted } = unwrapFilterForBuilder(this, filter);
+        if (!unwrapped || typeof unwrapped !== 'object') {
+            return null;
+        }
+
+        for (const subKey of ['$in', '$or']) {
+            const filter = unwrapFilterByPath(unwrapped, [this.key, subKey]);
+            const options = this.getOptionsFromFilter(filter);
+            if (options) {
+                return new RelationUIFilter({
+                    builder: this,
+                    relationFetcher: this.relationFetcher,
+                    values: options,
+                    type: this.type
+                }, { isInverted });
+            }
+        }
+
+        return null;
     }
 }
 
@@ -195,7 +206,6 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
         if (this.limit) {
             infiniteObjectFetcher.limit = this.limit;
         }
-        
     }
 
     resultsToOptions(results: OBJECT[]): RelationFilterOption<T>[] {
