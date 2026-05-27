@@ -22,6 +22,14 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
         Object.assign(this, data);
     }
 
+    flatten() {
+        if (this.values.length === 0) {
+            return null;
+        }
+
+        return super.flatten();
+    }
+
     doBuild(): StamhoofdFilter {
         const items = this.values.map(value => {
             return {
@@ -29,6 +37,12 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
                 ...value
             }
         });
+
+        if (items.length === 1) {
+            return {
+                [this.builder.key]: items[0]
+            }
+        }
 
         return {
             [this.builder.key]: {

@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
+import type { StamhoofdCompareValue, StamhoofdFilter, StamhoofdMagicFilter, StamhoofdMagicRelationFilter } from './StamhoofdFilter.js';
 
 function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, StamhoofdCompareValue> {
     if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined || filter instanceof Date) {
@@ -118,6 +118,44 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
     return runners;
 }
 
+export function getMagicValue(value: StamhoofdMagicFilter): StamhoofdCompareValue {
+    const specialValue = value['$'];
+    switch (specialValue) {
+        case '$now': return value;
+        case '$rel': return getMagicRelationValue(value);
+        default: throw new SimpleError({
+            code: 'unknown_filter',
+            message: 'Unknown magic filter ' + specialValue,
+            human: $t('%1IF'),
+        });
+    }
+}
+
+export function isMagicFilter(value: any): value is StamhoofdMagicFilter {
+    if (value === null) {
+        return false;
+    }
+
+    if (typeof value === 'object' && '$' in value) {
+        return true;
+    }
+
+    return false;
+}
+
+export function isMagicRelationFilter(value: any): value is StamhoofdMagicRelationFilter {
+    if (!isMagicFilter(value)) {
+        return false;
+    }
+
+    const specialValue = value['$'];
+    return specialValue === '$rel';
+}
+
+export function getMagicRelationValue(value: StamhoofdMagicRelationFilter): StamhoofdCompareValue {
+    return assertFilterCompareValue(value['value']);
+}
+
 /**
  * Asserts val is StamhoofdCompareValue
  */
@@ -142,12 +180,8 @@ export function assertFilterCompareValue(val: any): StamhoofdCompareValue {
         return null;
     }
 
-    if (typeof val === 'object' && '$' in val) {
-        const specialValue = val['$'];
-        switch (specialValue) {
-            case '$now': return val;
-            case '$rel': return assertFilterCompareValue(val['value']);
-        }
+    if (isMagicFilter(val)) {
+        return getMagicValue(val);
     }
 
     console.error('Invalid compare value. Expected a string, number, boolean, date or null.', val);

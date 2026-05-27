@@ -1,45 +1,15 @@
-import { SimpleError } from '@simonbackx/simple-errors';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLIfNull, SQLValueType } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { assertFilterCompareValue, FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
+import { StamhoofdFilterAccessHelper } from '../helpers/StamhoofdFilterAccessHelper.js';
 import { organizationFilterCompilers } from './organizations.js';
 
 async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
-    const rawGroupIds = typeof filter === 'string'
-        ? [filter]
-        : unwrapFilter(filter as StamhoofdFilter, {
-            $in: FilterWrapperMarker,
-        })?.markerValue;
-
-    if (!Array.isArray(rawGroupIds)) {
-        throw new SimpleError({
-            code: 'invalid_field',
-            field: 'filter',
-            message: 'You must filter on a group of the organization you are trying to access',
-            human: $t(`%1HG`),
-        });
-    }
-
-    if (rawGroupIds.length === 0) {
-        return;
-    }
-
-    const groupIds = rawGroupIds.map(assertFilterCompareValue);
-
-    for (const groupId of groupIds) {
-        if (typeof groupId !== 'string') {
-            throw new SimpleError({
-                code: 'invalid_field',
-                field: 'filter',
-                message: 'Invalid group ID in filter',
-            });
-        }
-    }
-
+    const groupIds = StamhoofdFilterAccessHelper.getGroupIdsFromFilter(filter);
     const groups = await Context.auth.getGroups(groupIds as string[]);
 
     console.log('Filtering registrations on groups', groups.map(g => g.settings.name.toString()));
