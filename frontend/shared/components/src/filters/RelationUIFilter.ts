@@ -7,33 +7,19 @@ import RelationUIFilterView from './RelationUIFilterView.vue';
 import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
-export enum RelationUIFilterMode {
-    And = 'And',
-    Or = 'Or',
-}
-
 export type RelationFilterOption<T extends string | number | Date | null | boolean> = {
     name: string;
     value: T;
-}
-
-export type RelationUIFilterConfig = {
-    mode?: RelationUIFilterMode,
 }
 
 export class RelationUIFilter<T extends string | number | Date | null | boolean> extends UIFilter<RelationFilterBuilder<T>> {
     readonly relationFetcher: RelationFetcher<any, T>;
     name: string = '';
     values: RelationFilterOption<T>[] = [];
-    config: RelationUIFilterConfig;
 
     constructor(data: Partial<RelationUIFilter<T>>, options: { isInverted?: boolean } = {}) {
         super(data, options);
         Object.assign(this, data);
-    }
-
-    get mode() {
-        return this.config.mode ?? RelationUIFilterMode.Or;
     }
 
     doBuild(): StamhoofdFilter {
@@ -44,15 +30,9 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
             }
         });
 
-        if (this.mode === RelationUIFilterMode.And) {
-            return {
-                [this.builder.key]: items
-            }
-        }
-
         return {
             [this.builder.key]: {
-                $or: items
+                $in: items
             }
         }
     }
@@ -64,8 +44,7 @@ export class RelationUIFilter<T extends string | number | Date | null | boolean>
     }
 
     get valuesToString() {
-        const joinWord = this.mode === RelationUIFilterMode.Or ? $t('of') : $t('en');
-        return Formatter.joinLast(this.values.map(v => v.name), ', ', ` ${joinWord} ` );
+        return Formatter.joinLast(this.values.map(v => v.name), ', ', ` ${$t('of')} ` );
     }
 
     get styledDescription() {
@@ -94,9 +73,8 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     readonly wrapper?: WrapperFilter;
     readonly allowCreation?: boolean;
     readonly relationFetcher: RelationFetcher<any, T>;
-    readonly config: RelationUIFilterConfig;
 
-    constructor(data: { key: string; name: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean, relationFetcher: RelationFetcher<any, T>, config?: RelationUIFilterConfig }) {
+    constructor(data: { key: string; name: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter; allowCreation?: boolean, relationFetcher: RelationFetcher<any, T> }) {
         this.key = data.key;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
@@ -104,14 +82,12 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         this.name = data.name;
         this.allowCreation = data.allowCreation;
         this.relationFetcher = data.relationFetcher;
-        this.config = data.config ?? {};
     }
 
     create(options?: { isInverted?: boolean; }): RelationUIFilter<T> {
         return new RelationUIFilter({
             builder: this,
-            relationFetcher: this.relationFetcher,
-            config: this.config
+            relationFetcher: this.relationFetcher
         }, options);
     }
 
@@ -132,21 +108,16 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         }
 
         const value = responseWithKey[this.key];
-
-        let mode: RelationUIFilterMode = RelationUIFilterMode.And;
         let array: any[] | undefined = undefined;
 
         if (Array.isArray(value)) {
-            mode = RelationUIFilterMode.And;
             array = value;
         } else if (typeof value === 'object') {
-            const object: { $or?: any[], $and?: any[] } = value;
-            if (Object.hasOwn(object, '$or')) {
-                mode = RelationUIFilterMode.Or;
+            const object: { $in?: any[], $or?: any[] } = value;
+            if (Object.hasOwn(object, '$in')) {
+                array = object['$in'];
+            } else if (Object.hasOwn(object, '$or')) {
                 array = object['$or'];
-            } else if (Object.hasOwn(object, '$and')) {
-                mode = RelationUIFilterMode.And;
-                array = object['$and'];
             }
         }
 
@@ -175,14 +146,9 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
             builder: this,
             relationFetcher: this.relationFetcher,
             values,
-            config: {
-                mode
-            }
         });
     }
 }
-
-
 
 export class RelationFetcher<OBJECT extends {id: string}, T extends string | number | Date | null | boolean> {
     readonly fetcher: ObjectFetcher<OBJECT>;
