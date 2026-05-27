@@ -1,10 +1,10 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, Organization as OrganizationStruct, StamhoofdFilter} from '@stamhoofd/structures';
+import type { CountFilteredRequest, Organization as OrganizationStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -76,10 +76,17 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
             // todo: auto detect e-mailaddresses and search on admins
             searchFilter = {
-                name: {
-                    $contains: q.search,
-                },
-            };
+                $or: [
+                    {
+                        name: {
+                            $contains: q.search,
+                        }
+                    },
+                    {
+                        uri: q.search
+                    }
+                ]
+            }
 
             if (searchFilter) {
                 query.where(await compileToSQLFilter(searchFilter, filterCompilers));

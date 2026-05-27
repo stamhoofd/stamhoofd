@@ -18,8 +18,17 @@ export type StamhoofdNotFilter<T = StamhoofdCompareValue> = {
 /**
  * Magic values help with storage of filters and maintaining their meaning
  */
-export type StamhoofdMagicValues = '$now';
-export type StamhoofdCompareValue = string | number | Date | null | boolean | { $: StamhoofdMagicValues };
+export type StamhoofdMagicValues = '$now' | '$rel';
+export type StamhoofdMagicNowFilter = { $: '$now' };
+export type StamhoofdMagicRelationFilter = {
+    $: '$rel',
+    // value to search the relation by (will often be an id)
+    value: string | number | Date | null | boolean,
+    // human readable name of the relation
+    name: string
+};
+export type StamhoofdMagicFilter = StamhoofdMagicNowFilter | StamhoofdMagicRelationFilter;
+export type StamhoofdCompareValue = string | number | Date | null | boolean | StamhoofdMagicFilter;
 export const FilterWrapperMarker = Symbol('FilterWrapperMarker');
 export type WrapperFilter = StamhoofdFilter<StamhoofdCompareValue | typeof FilterWrapperMarker>;
 

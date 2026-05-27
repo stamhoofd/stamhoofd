@@ -143,8 +143,10 @@ export function assertFilterCompareValue(val: any): StamhoofdCompareValue {
     }
 
     if (typeof val === 'object' && '$' in val) {
-        if (val['$'] === '$now') {
-            return val;
+        const specialValue = val['$'];
+        switch (specialValue) {
+            case '$now': return val;
+            case '$rel': return assertFilterCompareValue(val['value']);
         }
     }
 
