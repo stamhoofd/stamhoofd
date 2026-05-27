@@ -1,6 +1,7 @@
 import type { Group } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
 export const groupSorters: SQLSortDefinitions<Group> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
@@ -18,6 +19,17 @@ export const groupSorters: SQLSortDefinitions<Group> = {
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: SQL.column('id'),
+                direction,
+            });
+        },
+    },
+    name: {
+        getValue(a) {
+            return a.settings.name.toString();
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: new SQLTranslatedString(SQL.column('settings'), '$.value.name'),
                 direction,
             });
         },

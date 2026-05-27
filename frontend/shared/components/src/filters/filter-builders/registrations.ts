@@ -1,13 +1,13 @@
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import { FilterWrapperMarker } from '@stamhoofd/structures';
+import { FilterWrapperMarker, GroupType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { usePlatform, useUser } from '../../hooks';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { RelationFilterBuilder } from '../RelationUIFilter';
-import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilder } from '../UIFilter';
+import { useEventGroupsRelationFetcher, useMembershipGroupsRelationFetcher } from '../relation-fetchers/groups';
 import { useOrganizationsRelationFetcher } from '../relation-fetchers/organizations';
 
 export function useAdvancedRegistrationsUIFilterBuilders() {
@@ -20,6 +20,8 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
     const loading = ref(true);
 
     const organizationRelationsFetcher = useOrganizationsRelationFetcher();
+    const eventGroupsRelationsFetcher = useEventGroupsRelationFetcher();
+    const membershipGroupsRelationFetcher = useMembershipGroupsRelationFetcher();
 
     manager.value.loadPeriods(false, true, owner).then(() => {
         loading.value = false;
@@ -100,15 +102,23 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                 );
             }
 
-            all.push(
-                new StringFilterBuilder({
-                    name: $t('%7a'),
-                    key: 'name',
-                    wrapper: {
-                        group: FilterWrapperMarker,
-                    },
-                }),
-            );
+            all.push(new RelationFilterBuilder({
+                name: $t('%14Z'),
+                type: GroupType.Membership,
+                key: 'groupId',
+                allowCreation: true,
+                wrapper: FilterWrapperMarker,
+                relationFetcher: membershipGroupsRelationFetcher
+            }));
+
+            all.push(new RelationFilterBuilder({
+                name: $t('Activiteit'),
+                type: GroupType.EventRegistration,
+                key: 'groupId',
+                allowCreation: true,
+                wrapper: FilterWrapperMarker,
+                relationFetcher: eventGroupsRelationsFetcher
+            }));
 
             all.unshift(
                 new GroupUIFilterBuilder({
