@@ -1,21 +1,21 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLIfNull, SQLValueType } from '@stamhoofd/sql';
-import type { StamhoofdFilter} from '@stamhoofd/structures';
-import { FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
+import type { StamhoofdFilter } from '@stamhoofd/structures';
+import { assertFilterCompareValue, FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { organizationFilterCompilers } from './organizations.js';
 
 async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
-    const groupIds = typeof filter === 'string'
+    const rawGroupIds = typeof filter === 'string'
         ? [filter]
         : unwrapFilter(filter as StamhoofdFilter, {
             $in: FilterWrapperMarker,
         })?.markerValue;
 
-    if (!Array.isArray(groupIds)) {
+    if (!Array.isArray(rawGroupIds)) {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'filter',
@@ -24,9 +24,11 @@ async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel
         });
     }
 
-    if (groupIds.length === 0) {
+    if (rawGroupIds.length === 0) {
         return;
     }
+
+    const groupIds = rawGroupIds.map(assertFilterCompareValue);
 
     for (const groupId of groupIds) {
         if (typeof groupId !== 'string') {

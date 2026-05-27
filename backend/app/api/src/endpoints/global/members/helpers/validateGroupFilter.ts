@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
+import { assertFilterCompareValue, FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
 export async function validateGroupFilter({ filter, permissionLevel, key }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel; key: string | null }) {
@@ -22,13 +22,13 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
         return false;
     }
 
-    const groupIds = typeof unwrapped.markerValue === 'string'
+    const rawGroupIds = typeof unwrapped.markerValue === 'string'
         ? [unwrapped.markerValue]
         : unwrapFilter(unwrapped.markerValue as StamhoofdFilter, {
             $in: FilterWrapperMarker,
         })?.markerValue;
 
-    if (!Array.isArray(groupIds)) {
+    if (!Array.isArray(rawGroupIds)) {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'filter',
@@ -37,13 +37,15 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
         });
     }
 
-    if (groupIds.length === 0) {
+    if (rawGroupIds.length === 0) {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'filter',
             message: 'Filtering on an empty list of groups is not supported',
         });
     }
+
+    const groupIds = rawGroupIds.map(assertFilterCompareValue);
 
     for (const groupId of groupIds) {
         if (typeof groupId !== 'string') {
