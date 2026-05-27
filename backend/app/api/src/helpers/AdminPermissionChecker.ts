@@ -787,7 +787,28 @@ export class AdminPermissionChecker {
     }
 
     async canEditUserEmail(user: User) {
-        return this.canEditUserName(user);
+        if (!await this.canEditUserName(user)) {
+            return false;
+        }
+
+        if (user.organizationId === null && !this.hasPlatformFullAccess()) {
+            return false;
+        }
+
+        // Disallow editing users that have full access permissions where you do not.
+        if (user.permissions) {
+            for (const [organizationId, permissions] of user.permissions.organizationPermissions) {
+                if (permissions.level !== PermissionLevel.Full) {
+                    continue;
+                }
+
+                if (!await this.hasFullAccess(organizationId)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
