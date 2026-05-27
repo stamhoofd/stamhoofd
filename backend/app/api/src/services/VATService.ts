@@ -4,8 +4,8 @@ import type { Company, Organization as OrganizationStruct } from '@stamhoofd/str
 import { VATExcemptReason } from '@stamhoofd/structures';
 
 export class VATService {
-    static getDefaultCompanyForOrganization(sellingOrganization: Organization | OrganizationStruct) {
-        return sellingOrganization.meta.companies[0];
+    static getDefaultCompanyForOrganization(sellingOrganization: Organization | OrganizationStruct): Company {
+        return sellingOrganization.defaultCompanies[0];
     }
 
     static isVATExcempt({ company, sellingOrganization }: { company: Company | null | undefined; sellingOrganization: Organization | OrganizationStruct}) {

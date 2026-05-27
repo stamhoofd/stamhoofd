@@ -1,14 +1,19 @@
 
 import { Request } from '@simonbackx/simple-endpoints';
-import { OrganizationFactory, RegisterCodeFactory, STCredit, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItem, OrganizationFactory, RegisterCodeFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { ApplyRegisterCodeEndpoint } from './ApplyRegisterCodeEndpoint.js';
+import { initMembershipOrganization } from '../../../../../tests/init/initMembershipOrganization.js';
 
 describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
     // Test endpoint
     const endpoint = new ApplyRegisterCodeEndpoint();
+
+    beforeAll(async () => {
+        await initMembershipOrganization();
+    })
 
     test('Cannot apply a register code if not platform admin', async () => {
         const otherOrganization =  await new OrganizationFactory({}).create();
@@ -20,7 +25,7 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
 
         const r = Request.buildJson(
             'POST', 
-            '/organization/register-code', 
+            '/billing/register-code', 
             organization.getApiHost(), 
             {
                 registerCode: code.code,
@@ -38,14 +43,14 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
         const organization =  await new OrganizationFactory({}).create();
         const user = await new UserFactory({ 
             organization,
-            permissions: Permissions.create({ level: PermissionLevel.Full }),
+            globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             email: 'admin@stamhoofd.be'
         }).create()
         const token = await Token.createToken(user)
 
         const r = Request.buildJson(
             'POST', 
-            '/organization/register-code', 
+            '/billing/register-code', 
             organization.getApiHost(), 
             {
                 registerCode: code.code,
@@ -57,8 +62,13 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
         expect(response.body).toBeUndefined();
 
         // Check if this organization has an open register code
-        const credits = await STCredit.getForOrganization(organization.id);
+        const credits = await BalanceItem.select().where('payingOrganizationId', organization.id).fetch();
         expect(credits.length).toBe(1);
-        expect(credits[0].change).toBe(code.value);
+        expect(credits[0].unitPrice).toBe(-code.value);
+
+        // Other not yet applied because no package bought yet
+        // Check if other organization has an open register code
+        const otherCredits = await BalanceItem.select().where('payingOrganizationId', otherOrganization.id).fetch();
+        expect(otherCredits.length).toBe(0);
     });
 });
