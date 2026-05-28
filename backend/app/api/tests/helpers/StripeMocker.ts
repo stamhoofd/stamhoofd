@@ -9,8 +9,9 @@ import { StripeHelper } from '../../src/helpers/StripeHelper.js';
 import { testServer } from './TestServer.js';
 import { resetNock } from './resetNock.js';
 
+export type PaymentIntent = { id: string, return_url?: string };
 export class StripeMocker {
-    paymentIntents: { id: string, return_url?: string }[] = [];
+    paymentIntents: PaymentIntent[] = [];
     charges: { id: string }[] = [];
     #forceFailure = false;
 
@@ -122,7 +123,7 @@ export class StripeMocker {
         return [200, intent];
     }
 
-    getLastIntent() {
+    getLastIntent(): PaymentIntent {
         return this.paymentIntents[this.paymentIntents.length - 1];
     }
 

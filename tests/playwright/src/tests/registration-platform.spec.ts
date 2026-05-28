@@ -792,17 +792,18 @@ test.describe('Registration', () => {
                 test.expect(intent).toBeDefined();
                 test.expect(intent.return_url).toBeDefined();
 
-                console.error('Intent return url', intent.return_url)
-
                 await test.step('should succeed the payment via StripeMocker', async () => {
                     await stripeMocker.succeedPayment(intent);
                 });
 
                 await test.step('should land on the captured success url', async () => {
+                    if (!intent.return_url) {
+                        throw new Error('Typescript assert failed')
+                    }
                     // The return URL points at the organization's registration subdomain,
                     // which is not routable in the test caddy setup — intercept it so the
                     // navigation can complete and we can assert it lands there.
-                    await page.goto(intent.return_url!);
+                    await page.goto(intent.return_url);
                     await registrationFlow.expectSuccessView()
                 });
             });
