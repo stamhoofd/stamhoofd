@@ -403,7 +403,6 @@
                         </template>
                     </STListItem>
 
-
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Referrals)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/credits.svg">
@@ -488,8 +487,6 @@ import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 
-type ttt = FreeContributionSettingsView;
-
 enum Routes {
     General = 'algemeen',
     Personalization = 'personaliseren',
@@ -505,7 +502,7 @@ enum Routes {
     RegistrationRecords = 'inschrijvingen/persoonsgegevens',
     RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
     SingleSignOn = 'sso',
-    Packages = 'pakketten',
+    Packages = 'functionaliteiten',
     PaymentSettings = 'betalingen',
     Referrals = 'referrals',
     Labs = 'experimenten',

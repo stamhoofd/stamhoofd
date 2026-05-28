@@ -7,6 +7,7 @@
                 <h1>
                     {{ $t('%tx') }}
                 </h1>
+                <BillingWarningBox v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" />
 
                 <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
                     {{ $t('%1KY') }}
@@ -201,6 +202,7 @@ import BillingSettingsView from './BillingSettingsView.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PayableBalanceItemsView from './PayableBalanceItemsView.vue';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
+import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 enum Routes {
     Transfers = 'Transfers',

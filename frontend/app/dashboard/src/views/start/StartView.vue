@@ -18,6 +18,7 @@
             <p v-if="!organization.active" class="error-box">
                 {{ $t('%Gm') }}
             </p>
+            <BillingWarningBox />
 
             <p>
                 <a :href="$domains.getDocs('stappenplan-opstart-werkjaar')" target="_blank" class="button text selected">
@@ -39,6 +40,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useDashboardQuickActions } from '@stamhoofd/components/quick-actions/hooks/useDashboardQuickActions.ts';
 import SetupStepsView from './SetupStepsView.vue';
+import BillingWarningBox from '../dashboard/settings/packages/BillingWarningBox.vue';
 
 const auth = useAuth();
 const quickActions = useDashboardQuickActions();

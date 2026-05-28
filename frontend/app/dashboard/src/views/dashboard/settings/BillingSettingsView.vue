@@ -66,12 +66,12 @@
                 </STList>
             </template>
 
-            <template v-if="item.organization.meta.invoicesEnabled">
+            <template v-if="item.organization.meta.invoicesEnabled || showPackages">
                 <hr>
                 <h2>{{ $t('%1Rm') }}</h2>
 
                 <STList>
-                    <STListItem :selectable="true" element-name="button" @click="$navigate(Routes.Invoices)">
+                    <STListItem v-if="item.organization.meta.invoicesEnabled" :selectable="true" element-name="button" @click="$navigate(Routes.Invoices)">
                         <template #left>
                             <IconContainer icon="receipt" />
                         </template>
@@ -104,6 +104,23 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem v-if="showPackages" :selectable="true" element-name="button" @click="$navigate(Routes.Packages)">
+                        <template #left>
+                            <IconContainer icon="box" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ $t('Functionaliteiten activeren') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('Activeer nieuwe fucnties') }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -128,6 +145,7 @@ import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { Toast, useGlobalEventListener, useVisibilityChange } from '@stamhoofd/components';
 import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
@@ -142,6 +160,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useLoadPayableBalance } from './hooks/useLoadPayableBalance';
 import { PayBalanceMode } from './packages/OrganizationCheckoutViewModel';
+import PackageSettingsView from './packages/PackageSettingsView.vue';
 import { useStartOrganizationCheckout } from './packages/useStartOrganizationCheckout';
 import PayableBalanceItemsView from './PayableBalanceItemsView.vue';
 
@@ -150,8 +169,14 @@ const props = defineProps<{
 }>();
 
 const organization = useRequiredOrganization()
+const platform = usePlatform()
 const startOrganizationCheckout = useStartOrganizationCheckout()
 const loadPayableBalance = useLoadPayableBalance();
+
+const showPackages = computed(() => {
+    return STAMHOOFD.userMode === 'organization' && platform.value.membershipOrganizationId !== null
+        && props.item.organization.id === platform.value.membershipOrganizationId;
+});
 
 useGlobalEventListener('payment-succeeded', async () => {
     reload().catch(console.error)
@@ -182,7 +207,8 @@ enum Routes {
     Credits = 'credits',
     Invoices = 'facturen',
     Settings = 'instellingen',
-    Items = 'items'
+    Items = 'items',
+    Packages = 'functionaliteiten'
 }
 
 defineRoutes([
@@ -220,6 +246,11 @@ defineRoutes([
                 item: props.item
             };
         },
+    },
+    {
+        url: Routes.Packages,
+        component: PackageSettingsView,
+        present: 'popup',
     },
 ]);
 

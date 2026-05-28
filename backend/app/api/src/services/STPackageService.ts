@@ -256,5 +256,6 @@ export class STPackageService {
             pack.meta.paymentFailedCount++;
             await pack.save()
         }
+        await this.updateOrganizationPackages(organizationId)
     }
 }
