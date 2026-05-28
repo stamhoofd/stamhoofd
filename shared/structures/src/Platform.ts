@@ -193,8 +193,27 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 354 })
     trialDays = 0;
 
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    maximumDays: number | null = null;
+
     @field({ decoder: new ArrayDecoder(PlatformMembershipTypeConfigPrice) })
     prices: PlatformMembershipTypeConfigPrice[] = [PlatformMembershipTypeConfigPrice.create({})];
+
+    /**
+     * Returns the latest allowed membership end date. Days memberships count both start and end date as included days.
+     */
+    getMaximumEndDate(startDate: Date, behaviour: PlatformMembershipTypeBehaviour): Date {
+        if (behaviour === PlatformMembershipTypeBehaviour.Period || this.maximumDays === null) {
+            return this.endDate;
+        }
+
+        const maxEndDate = Formatter.luxon(startDate)
+            .plus({ days: this.maximumDays - 1 })
+            .set({ hour: 23, minute: 59, second: 59, millisecond: 0 })
+            .toJSDate();
+
+        return maxEndDate < this.endDate ? maxEndDate : this.endDate;
+    }
 
     getPriceConfigForDate(date: Date): PlatformMembershipTypeConfigPrice {
         if (date === undefined) {

@@ -45,7 +45,7 @@
                         </STInputBox>
 
                         <STInputBox :title="$t('%3w')" :error-box="errors.errorBox" error-fields="endDate">
-                            <DateSelection v-model="customEndDate" class="option" :min="minimumStartDateForDaysTypes" />
+                            <DateSelection v-model="customEndDate" class="option" :min="customStartDate" :max="maximumEndDateForDaysTypes" />
                         </STInputBox>
                     </div>
                     <div v-else-if="selectedMembershipType.id === type.id">
@@ -84,7 +84,7 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import type { PlatformMember, PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { useErrors } from '../../../errors/useErrors';
 import { useOrganization, usePlatform } from '../../../hooks';
@@ -136,6 +136,42 @@ const availableMembershipTypes = computed(() => {
 });
 
 const selectedMembershipType = ref(availableMembershipTypes.value[0] ?? null);
+
+const selectedPeriodConfig = computed(() => selectedMembershipType.value?.periods.get(props.period.id) ?? null);
+
+// The maximum end date that can be selected when membership behaviour is "Days". 
+const maximumEndDateForDaysTypes = computed(() => {
+    const type = selectedMembershipType.value;
+    const periodConfig = selectedPeriodConfig.value;
+
+    if (!type || !periodConfig) {
+        return props.period.endDate;
+    }
+
+    return periodConfig.getMaximumEndDate(customStartDate.value, type.behaviour);
+});
+
+// When changing the start date, update the end date.
+// Keep the offset between the dates consistent and make sure that it's a valid
+// end date as well.
+watch(customStartDate, (startDate, oldStartDate) => {
+    if (selectedMembershipType.value?.behaviour !== PlatformMembershipTypeBehaviour.Days) {
+        return;
+    }
+
+    // Preserve the selected duration when moving the start date, then clamp to the configured maximum if needed.
+    const oldStart = Formatter.luxon(oldStartDate).startOf('day');
+    const oldEnd = Formatter.luxon(customEndDate.value).startOf('day');
+    const offsetDays = Math.max(0, Math.round(oldEnd.diff(oldStart, 'days').days));
+    const nextEndDate = Formatter.luxon(startDate).plus({ days: offsetDays }).toJSDate();
+
+    if (nextEndDate > maximumEndDateForDaysTypes.value) {
+        customEndDate.value = maximumEndDateForDaysTypes.value;
+    }
+    else {
+        customEndDate.value = nextEndDate;
+    }
+});
 
 async function save() {
     if (!selectedMembershipType.value) {
@@ -194,11 +230,12 @@ async function save() {
                 }));
             }
 
-            if (customEndDate.value > periodConfig.endDate) {
+            const maximumEndDate = periodConfig.getMaximumEndDate(customStartDate.value, selectedMembershipType.value.behaviour);
+            if (customEndDate.value > maximumEndDate) {
                 errors.addError(new SimpleError({
                     code: 'invalid_field',
                     field: 'endDate',
-                    message: $t(`%15C`, { date: Formatter.date(periodConfig.endDate) }),
+                    message: $t('%15C', { date: Formatter.date(maximumEndDate) }),
                 }));
             }
         }

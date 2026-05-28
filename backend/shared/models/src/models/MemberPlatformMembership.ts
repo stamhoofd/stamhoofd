@@ -248,6 +248,16 @@ export class MemberPlatformMembership extends QueryableModel {
             this.endDate = Formatter.luxon(this.startDate).set({ hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
         }
 
+        const maximumEndDate = periodConfig.getMaximumEndDate(this.startDate, membershipType.behaviour);
+        if (this.endDate > maximumEndDate) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'endDate',
+                message: 'End date is after the maximum allowed end date',
+                human: $t('%15C', { date: Formatter.date(maximumEndDate) }),
+            });
+        }
+
         if (periodConfig.trialDays) {
             // Check whether you are elegible for a trial
             const latestTrialDate = await this.isElegibleForTrial(member);
