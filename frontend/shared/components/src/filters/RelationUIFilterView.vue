@@ -49,6 +49,7 @@
 
 <script lang="ts" setup generic="T extends string | number | Date | null | boolean, ObjectType extends { id: string }">
 import { mergeFilters } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
@@ -86,17 +87,17 @@ const invisibleSelectedOptions = computed(() => {
         return props.filter.values;
     }
 
-    return props.filter.values.filter(option => {
+    return props.filter.values.filter((option) => {
         return !visibleOptions.some(vo => vo.value === option.value && vo.name === option.name);
-    })
+    });
 });
 
 const defaultOption: RelationFetcherSubFilterOption = {
     name: $t('Geen filter'),
-    filter: null
+    filter: null,
 };
 
-const selectedSubFilterOption = ref<RelationFetcherSubFilterOption>(defaultOption);
+const selectedSubFilterOption = ref(defaultOption) as any as Ref<RelationFetcherSubFilterOption>;
 
 async function showSubFilters(event: MouseEvent) {
     const subFilter = relationFetcher.subFilter;
@@ -107,21 +108,21 @@ async function showSubFilters(event: MouseEvent) {
     const button = event.currentTarget as HTMLElement;
 
     const options = await subFilter.loadOptions();
-    
+
     const menu = new ContextMenu([
-        [defaultOption, ...options].map(option => {
+        [defaultOption, ...options].map((option) => {
             return new ContextMenuItem({
                 name: option.name,
                 selected: selectedSubFilterOption.value.name === option.name,
                 action: () => {
                     selectedSubFilterOption.value = option;
-                    infiniteObjectFetcher.setFilter(mergeFilters([option.filter, relationFetcher.filter ?? null]))
-                }
-            })
-        })
+                    infiniteObjectFetcher.setFilter(mergeFilters([option.filter, relationFetcher.filter ?? null]));
+                },
+            });
+        }),
     ]);
 
-    menu.show({ button, xPlacement: 'left'}).catch(console.error);
+    menu.show({ button, xPlacement: 'left' }).catch(console.error);
 }
 
 function blurFocus() {
@@ -142,8 +143,7 @@ function setOptionSelected(option: RelationFilterOption<T>, selected: boolean) {
         if (index !== -1) {
             props.filter.values.splice(index, 1);
         }
-    }
-    else {
+    } else {
         props.filter.values.push(option);
     }
 }
