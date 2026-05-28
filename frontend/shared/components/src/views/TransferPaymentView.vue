@@ -201,7 +201,7 @@
 <script lang="ts" setup>
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import type { Organization, Payment, TransferSettings } from '@stamhoofd/structures';
+import type { BaseOrganization, Organization, Payment, TransferSettings } from '@stamhoofd/structures';
 import { TransferDescriptionType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 
@@ -218,7 +218,11 @@ const props = withDefaults(defineProps<{
     payment: Payment;
     created?: boolean;
     type: 'registration' | 'order' | 'packages';
-    organization: Organization;
+    organization: BaseOrganization;
+
+    /**
+     * Fallback only
+     */
     settings?: TransferSettings | null;
     isPopup?: boolean;
     finishedHandler?: ((payment: Payment | null, navigate: NavigationActions) => void) | null;
@@ -327,10 +331,11 @@ function shouldNavigateAway() {
     return false;
 }
 
+const transferSettings  = computed(() => props.payment.transferSettings ?? props.settings);
 const isBelgium = computed(() => props.organization.address.country === Country.Belgium);
-const isStructured = computed(() => props.settings?.type === TransferDescriptionType.Structured);
-const iban = computed(() => props.settings?.iban ?? props.organization.meta.transferSettings.iban ?? '');
-const creditor = computed(() => props.settings?.creditor ?? props.organization.name);
+const isStructured = computed(() => transferSettings.value?.type === TransferDescriptionType.Structured);
+const iban = computed(() => transferSettings.value?.iban ?? '');
+const creditor = computed(() => transferSettings.value?.creditor ?? props.organization.name);
 const transferDescription = computed(() => props.payment.transferDescription);
 const formattedTransferDescription = computed(() => {
     if (isStructured.value && !isBelgium.value && transferDescription.value) {

@@ -44,6 +44,11 @@
         <Checkbox v-model="allowRenew">
             Verlengbaar
         </Checkbox>
+
+        <Checkbox v-if="allowRenew" v-model="keepPricesOnRenewal">
+            Behoud prijzen bij verlengen (zoniet worden de standaard/laatste prijzen gebruikt voor verlengingen)
+        </Checkbox>
+
         <Checkbox v-model="canDeactivate">
             Opzegbaar
         </Checkbox>
@@ -145,6 +150,17 @@ const type = computed({
         addPatch({
             meta: STPackageMeta.patch({
                 type
+            })
+        })
+    }
+});
+
+const keepPricesOnRenewal = computed({
+    get: () => patchedPackage.value.meta.keepPricesOnRenewal,
+    set: (keepPricesOnRenewal) => {
+        addPatch({
+            meta: STPackageMeta.patch({
+                keepPricesOnRenewal
             })
         })
     }

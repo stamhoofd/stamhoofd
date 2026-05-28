@@ -7,7 +7,7 @@ import type {Group} from '../../Group.js';
 import type { Organization } from '../../Organization.js';
 import { PaymentCustomer } from '../../PaymentCustomer.js';
 import { PaymentMethod } from '../../PaymentMethod.js';
-import type { PriceBreakdown } from '../../PriceBreakdown.js';
+import type { PriceBreakdown, PriceBreakdownAction } from '../../PriceBreakdown.js';
 import type {PlatformMember} from '../PlatformMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
@@ -118,6 +118,12 @@ export class RegisterCheckout {
     asOrganizationId: string | null = null;
 
     /**
+     * All outstanding items - not the one we are using to pay.
+     * This is for validation and discount calculation.
+     */
+    balanceItems: BalanceItem[] | null = null
+
+    /**
      * Only allowed to be changed when isAdminFromSameOrganization
      */
     sendConfirmationEmail = false; // Whether to send a confirmation email to the user after registration
@@ -141,6 +147,7 @@ export class RegisterCheckout {
         checkout.customer = this.customer ? this.customer.clone() : null;
         checkout.cancellationFeePercentage = this.cancellationFeePercentage;
         checkout.defaultOrganization = this.defaultOrganization;
+        checkout.balanceItems = this.balanceItems?.slice() ?? null
 
         return checkout;
     }
@@ -227,42 +234,49 @@ export class RegisterCheckout {
                 this.cancellationFeePercentage = 0;
             }
         }
-        if (options?.calculate !== false) {
-            this.updatePrices();
-        }
 
         if (this.cart.isEmpty) {
             this.defaultOrganization = null;
+        }
+
+        if (options?.calculate !== false) {
+            this.updatePrices();
         }
     }
 
     unremoveRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
         this.cart.unremoveRegistration(registration);
-        if (options?.calculate !== false) {
-            this.updatePrices();
-        }
 
         if (this.cart.isEmpty) {
             this.defaultOrganization = null;
         }
+
+        if (options?.calculate !== false) {
+            this.updatePrices();
+        }
     }
 
-    addBalanceItem(balanceItem: BalanceItem, amount: number) {
+    addBalanceItem(balanceItem: BalanceItem, amount: number, options?: { calculate?: boolean }) {
         const item = BalanceItemCartItem.create({
             item: balanceItem,
             price: amount,
         });
 
         this.cart.addBalanceItem(item);
-        this.updatePrices();
+
+        if (options?.calculate !== false) {
+            this.updatePrices();
+        }
     }
 
-    removeBalanceItem(item: BalanceItemCartItem) {
+    removeBalanceItem(item: BalanceItemCartItem, options?: { calculate?: boolean }) {
         this.cart.removeBalanceItem(item);
-        this.updatePrices();
-
         if (this.cart.isEmpty) {
             this.defaultOrganization = null;
+        }
+
+        if (options?.calculate !== false) {
+            this.updatePrices();
         }
     }
 
@@ -276,12 +290,74 @@ export class RegisterCheckout {
 
     updatePrices() {
         this.cart.calculatePrices();
+        this.applyMaximumDiscounts()
 
         if (this.isAdminFromSameOrganization || !this.singleOrganization) {
             this.administrationFee = 0;
         }
         else {
             this.administrationFee = this.singleOrganization.meta.registrationPaymentConfiguration.administrationFee.calculate(this.cart.price - this.bundleDiscount - this.cart.refund) ?? 0;
+        }
+    }
+
+    /**
+     * Optional behaviour required to automatically apply
+     */
+    updateBalances(memberBalanceItems: BalanceItem[]) {
+        this.balanceItems = memberBalanceItems
+        this.updatePrices()
+    }
+
+    /**
+     * Find all negative balances for this user and members and apply them as
+     * discount, the maximum possible value.
+     */
+    applyMaximumDiscounts() {
+        if (this.isAdminFromSameOrganization) {
+            return;
+        }
+        
+        if (!this.balanceItems) {
+            return;
+        }
+
+        // Remove all negative balance items
+        for (const item of this.cart.balanceItems) {
+            if (item.price < 0) {
+                this.removeBalanceItem(item, {calculate: false})
+            }
+        }
+
+        if (!this.singleOrganizationId) {
+            return;
+        }
+        const minimumAmount = 0;
+        const totalOpenBalance = this.balanceItems.reduce((a, b) => a + b.priceOpen, 0)
+
+        if (totalOpenBalance >= 0) {
+            return;
+        }
+        const maximumAmount = -totalOpenBalance;
+
+        let totalPrice = this.totalPrice - this.administrationFee - this.freeContribution;
+
+        if (totalPrice > maximumAmount) {
+            totalPrice = maximumAmount;
+        }
+
+        for (const item of this.balanceItems) {
+            if (item.organizationId !== this.singleOrganizationId) {
+                continue;
+            }
+            if (item.priceOpen >= 0) {
+                continue
+            }
+            const remove = Math.min(totalPrice - (minimumAmount ?? 0), -item.priceOpen);
+            if (remove === 0) {
+                break;
+            }
+            this.addBalanceItem(item, -remove, {calculate: false})
+            totalPrice -= remove;
         }
     }
 
@@ -294,7 +370,7 @@ export class RegisterCheckout {
             });
         }
 
-        this.cart.validate(this, data);
+        this.cart.validate(this, data ?? this.balanceItems);
         this.updatePrices();
 
         if (this.singleOrganization && (this.singleOrganization.meta.recordsConfiguration.freeContribution?.amounts.length ?? 0) === 0) {
@@ -355,7 +431,11 @@ export class RegisterCheckout {
         return this.cart.bundleDiscountDueLater;
     }
 
-    get priceBreakown(): PriceBreakdown {
+    get showDiscountsSeparately() {
+        return !this.isAdminFromSameOrganization
+    }
+
+    getPriceBreakown(options?: { balanceItemDiscountsAction?: PriceBreakdownAction }): PriceBreakdown {
         const all: PriceBreakdown = [];
 
         // Discounts
@@ -377,6 +457,17 @@ export class RegisterCheckout {
             }
         }
 
+        let subtotal = this.cart.price + this.cart.priceDueLater
+
+        if (this.showDiscountsSeparately && this.cart.balanceItemDiscountsPrice !== 0) {
+            subtotal -= this.cart.balanceItemDiscountsPrice;
+            all.push({
+                name: $t(`Tegoed`),
+                price: this.cart.balanceItemDiscountsPrice,
+                action: options?.balanceItemDiscountsAction
+            },)
+        }
+
         all.push(...[
             {
                 name: $t(`%17F`),
@@ -396,10 +487,11 @@ export class RegisterCheckout {
             },
         ].filter(a => a.price !== 0));
 
-        if (all.length > 0 && (this.cart.price + this.cart.priceDueLater) !== 0) {
+
+        if (all.length > 0 && subtotal !== 0) {
             all.unshift({
                 name: $t(`%xJ`),
-                price: this.cart.price + this.cart.priceDueLater,
+                price: subtotal,
             });
         }
 
@@ -428,5 +520,12 @@ export class RegisterCheckout {
         }
 
         return all;
+    }
+
+    /**
+     * @deprecated Use getPriceBreakown(options)
+     */
+    get priceBreakown(): PriceBreakdown {
+        return this.getPriceBreakown()
     }
 }

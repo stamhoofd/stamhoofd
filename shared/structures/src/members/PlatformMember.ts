@@ -96,13 +96,14 @@ export class PlatformFamily {
         if (b) {
             return b;
         }
-        // Check in checkout cart
-        if (this.checkout.singleOrganization?.id === id) {
-            return this.checkout.singleOrganization;
-        }
         const q = this.pendingRegisterItems.find(i => i.organization.id === id);
         if (q) {
             return q.organization;
+        }
+
+        // Check in checkout cart
+        if (this.checkout.singleOrganization?.id === id) {
+            return this.checkout.singleOrganization;
         }
     }
 

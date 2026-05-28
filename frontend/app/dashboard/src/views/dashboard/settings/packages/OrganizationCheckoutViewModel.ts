@@ -1,4 +1,4 @@
-import type { Organization, OrganizationPackagesStatus, OrganizationCheckout, STPackage, DetailedPayableBalance } from '@stamhoofd/structures';
+import type { BaseOrganization, DetailedPayableBalance, Organization, OrganizationCheckout, OrganizationPackagesStatus, STPackage } from '@stamhoofd/structures';
 
 export enum PayBalanceMode {
     /**
@@ -30,7 +30,7 @@ export enum PayBalanceMode {
 export class OrganizationCheckoutViewModel {
     checkout: OrganizationCheckout
     packageStatus: OrganizationPackagesStatus
-    sellingOrganization: Organization
+    sellingOrganization: BaseOrganization
     payingOrganization: Organization
     packages: STPackage[]
     payableBalance: DetailedPayableBalance
@@ -41,7 +41,7 @@ export class OrganizationCheckoutViewModel {
     constructor(data: {
         checkout: OrganizationCheckout
         packageStatus: OrganizationPackagesStatus
-        sellingOrganization: Organization,
+        sellingOrganization: BaseOrganization,
         payingOrganization: Organization,
         payableBalance: DetailedPayableBalance,
         payBalanceMode: PayBalanceMode,

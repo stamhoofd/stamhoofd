@@ -16,7 +16,7 @@ const props = defineProps<{
 }>();
 const isPayable = props.item instanceof DetailedPayableBalance;
 
-const items = computed(() => props.item.filteredBalanceItems);
+const items = computed(() => isPayable ? props.item.payableBalanceItems : props.item.filteredBalanceItems);
 const filteredItems = items;
 const hasWrite = !isPayable;
 

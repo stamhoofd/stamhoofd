@@ -118,4 +118,12 @@ export class DetailedReceivableBalance extends ReceivableBalance {
     get filteredBalanceItems() {
         return BalanceItem.filterBalanceItems(this.balanceItems);
     }
+
+    get payableBalanceItems() {
+        return BalanceItem.filterPayableBalanceItems(this.balanceItems);
+    }
+
+    get discountBalanceItems() {
+        return BalanceItem.filterDiscountBalanceItems(this.balanceItems);
+    }
 }

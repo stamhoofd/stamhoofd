@@ -24,7 +24,11 @@
                 {{ formatPrice(item.price) }}
             </p>
 
-            <p v-if="item.pricePaid < 0" class="style-price-base negative small">
+            <p v-if="item.pricePaid < 0 && item.price < 0" class="style-price-base negative small">
+                {{ $t('waarvan {price} gebruikt', {price: formatPrice(-item.pricePaid )}) }}
+            </p>
+
+            <p v-else-if="item.pricePaid < 0" class="style-price-base negative small">
                 {{ $t('%1Kc', {price: formatPrice(-item.pricePaid )}) }}
             </p>
 
@@ -44,15 +48,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
-import { GlobalEventBus } from '#EventBus.ts';
-import STGridItem from '#layout/STGridItem.vue';
 import { useContext } from '#hooks/useContext.ts';
+import STGridItem from '#layout/STGridItem.vue';
+import EditBalanceItemView from '#payments/EditBalanceItemView.vue';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import type { GroupedBalanceItems } from '@stamhoofd/structures';
-import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemStatus } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';

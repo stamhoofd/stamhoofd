@@ -351,19 +351,22 @@ export class STPackage extends AutoEncoder {
         // Not yet valid / active (ignored until valid)
         pack.validAt = null;
 
-        pack.meta.startDate = new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0));
+        const start = Formatter.luxon(new Date(Math.max(new Date().getTime(), this.endDate?.getTime() ?? 0) + 1_000)).startOf('day');
+        const validUntil = start.plus({ years: 1 }).endOf('day');
+        const removeAt = validUntil.plus({months: 1}).endOf('day');
+
+
         pack.meta.paidAmount = 0;
         pack.meta.paidPrice = 0;
         pack.meta.firstFailedPayment = null;
         pack.meta.didRenewId = this.id;
 
         // Duration for renewals is always a year ATM
-        pack.validUntil = new Date(pack.meta.startDate);
-        pack.validUntil.setFullYear(pack.validUntil.getFullYear() + 1);
+        pack.meta.startDate = start.toJSDate();
+        pack.validUntil = validUntil.toJSDate()
 
         // Remove (= not renewable) if not renewed after 3 months
-        pack.removeAt = new Date(pack.validUntil);
-        pack.removeAt.setMonth(pack.removeAt.getMonth() + 3);
+        pack.removeAt = removeAt.toJSDate()
 
         if (this.meta.type === STPackageType.SingleWebshop) {
             // Deprecated package

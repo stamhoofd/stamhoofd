@@ -66,7 +66,7 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
             .fetch();
 
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
-        const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
+        const payments = await AuthenticatedStructures.payments(paymentModels);
 
         const balance = DetailedPayableBalance.create({
             organization: await AuthenticatedStructures.organization(sellingOrganization),

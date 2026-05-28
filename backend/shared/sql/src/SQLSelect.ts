@@ -224,6 +224,9 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
     async fetch(): Promise<T[]> {
         if (this._where && this._where.isAlways === false) {
+            if (this._log) {
+                console.log('query is always false')
+            }
             return [];
         }
 

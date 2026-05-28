@@ -95,6 +95,14 @@ export enum BalanceItemType {
     TransferFee = 'TransferFee'
 }
 
+export function getBalanceItemTypeVATType(type: BalanceItemType): 'services' | 'goods' | null {
+    switch (type) {
+        case BalanceItemType.Order: return null; // unknown
+        case BalanceItemType.Other: return null; // unknown
+    }
+    return 'services'
+}
+
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
     switch (type) {
         case BalanceItemStatus.Hidden: return $t(`%UC`);
@@ -551,6 +559,20 @@ export class BalanceItem extends AutoEncoder {
 
     static filterBalanceItems(items: BalanceItem[]) {
         return items.filter(i => i.priceOpen !== 0).sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+            Sorter.byDateValue(b.createdAt, a.createdAt),
+        ));
+    }
+
+    static filterPayableBalanceItems(items: BalanceItem[]) {
+        return items.filter(i => i.priceOpen > 0).sort((a, b) => Sorter.stack(
+            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+            Sorter.byDateValue(b.createdAt, a.createdAt),
+        ));
+    }
+
+    static filterDiscountBalanceItems(items: BalanceItem[]) {
+        return items.filter(i => i.priceOpen < 0).sort((a, b) => Sorter.stack(
             Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
             Sorter.byDateValue(b.createdAt, a.createdAt),
         ));

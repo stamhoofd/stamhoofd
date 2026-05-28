@@ -27,6 +27,7 @@ export class ViewStepsManager {
      */
     async saveHandler(currentStep: ViewStep | null, navigate: NavigationActions, skipping = false) {
         const nextStep = skipping ? null : this.getNextStep(currentStep);
+        console.log('next step', nextStep)
         if (nextStep) {
             if (currentStep === null) {
                 return await runDisplayOptions({
@@ -47,6 +48,8 @@ export class ViewStepsManager {
             // Assure that if the next step uses navigate.show, while the displayoptions are 'present', and we never presented
             // any view, we map the navigate show to something like present to match the display options
             const gluedNavigate = glueNavigationActions(currentStep !== null, navigate, this.displayOptions);
+            console.log('no next step', navigate, gluedNavigate, navigate === gluedNavigate)
+
             await this.finishHandler(gluedNavigate);
         }
     }

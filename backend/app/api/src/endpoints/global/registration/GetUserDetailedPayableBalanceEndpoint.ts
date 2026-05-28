@@ -1,12 +1,13 @@
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import type { Payment } from '@stamhoofd/models';
+import { BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { BalanceItem, Member, Organization } from '@stamhoofd/models';
-import { DetailedPayableBalanceCollection, DetailedPayableBalance } from '@stamhoofd/structures';
+import { DetailedPayableBalanceCollection, DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { SQL, SQLWhereExists } from '@stamhoofd/sql';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -38,7 +39,35 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
         const balanceItemModels = await BalanceItem.balanceItemsForUsersAndMembers(organization?.id ?? null, [user.id], memberIds);
 
         // todo: this is a duplicate query
-        const { payments, balanceItemPayments } = await BalanceItem.loadPayments(balanceItemModels);
+        const q = Payment.select()
+            .where(
+                SQL.where('payingUserId', user.id)
+                .or(
+                    new SQLWhereExists(SQL.subQuery(
+                        SQL.select().from('balance_items')
+                            .join(SQL.innerJoin(
+                                    SQL.table(BalanceItemPayment.table))
+                                    .where(
+                                        SQL.column(BalanceItemPayment.table, 'balanceItemId'),
+                                        SQL.column(BalanceItem.table, 'id'),
+                                    )
+                            )
+                            .where(SQL.where('memberId', memberIds).or('userId', user.id))
+                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id'))
+                        )
+                    )
+                )
+            )
+            .whereNot('status', PaymentStatus.Failed);
+
+        if (organization) {
+            q.where('organizationId', organization.id)
+        }
+
+        q.orderBy('createdAt', 'DESC')
+        q.limit(100)
+
+        const payments = await q.fetch()
 
         return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, payments));
     }
@@ -71,8 +100,8 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
         }
 
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
-        const organizations = await AuthenticatedStructures.organizations(organizationModels);
-        const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
+        const organizations = await AuthenticatedStructures.baseOrganizations(organizationModels);
+        const payments = await AuthenticatedStructures.payments(paymentModels);
 
         return DetailedPayableBalanceCollection.create({
             organizations: organizations.map((o) => {

@@ -1,21 +1,17 @@
-import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { ManyToOneRelation } from '@simonbackx/simple-database';
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment} from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem} from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
-import { Formatter, sleep } from '@stamhoofd/utility';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration } from '@stamhoofd/models';
+import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PermissionLevel, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
-import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
 import { Context } from '../../../helpers/Context.js';
-import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
-import { StripeHelper } from '../../../helpers/StripeHelper.js';
 import { updateMemberDetailsUitpasNumber } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { BalanceItemService } from '../../../services/BalanceItemService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
@@ -135,6 +131,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Validate balance items (can only happen serverside)
         const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id);
+        console.log('cart ids', balanceItemIds)
         let memberBalanceItemsStructs: BalanceItemStruct[] = [];
         let balanceItemsModels: BalanceItem[] = [];
         if (balanceItemIds.length > 0) {
@@ -831,6 +828,21 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 mappedBalanceItems.set(balanceItem, item.price);
                 createdBalanceItems.push(balanceItem);
             }
+
+            // Apply discounts
+             // Automatically add discounts
+            /*const { price: totalPriceBefore, roundingAmount: roundingAmountBefore } = PaymentService.calculateTotalPrice({ 
+                balanceItems: mappedBalanceItems, 
+                organization
+            })
+
+            await BalanceItemService.applyDiscountsToCheckout({
+                totalPrice: totalPriceBefore - roundingAmountBefore,
+                balanceItems: mappedBalanceItems,
+                sellingOrganizationId: organization.id,
+                payingOrganizationId: payingOrganization?.id,
+                payingUserId: user?.id
+            });*/
 
             try {
                 const response = await PaymentService.createPayment({

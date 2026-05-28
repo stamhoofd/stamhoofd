@@ -3,13 +3,13 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationPackagesStatus, OrganizationCheckout, STPackageStruct } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationCheckout, OrganizationPackagesStatus, STPackageStruct } from '@stamhoofd/structures';
+import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
+import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
-import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
-import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { VATService } from '../../../../services/VATService.js';
 
 type Params = { sellingOrganizationId: string };
@@ -89,8 +89,8 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         }
 
         const packages: STPackageStruct[] = [];
-        const balanceItems: Map<BalanceItem, number> = new Map();
         const models: STPackage[] = [];
+        const balanceItems: Map<BalanceItem, number> = new Map();
 
         const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
 
@@ -175,9 +175,9 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
 
         // Validate balance items (can only happen serverside)
         const balanceItemIds = [...request.body.balances.keys()]
-        let balanceItemsModels: BalanceItem[] = [];
+
         if (balanceItemIds.length > 0) {
-            balanceItemsModels = await BalanceItem.select().where('id', balanceItemIds).andWhere('organizationId', sellingOrganization.id).limit(balanceItemIds.length).fetch();
+            const balanceItemsModels = await BalanceItem.select().where('id', balanceItemIds).andWhere('organizationId', sellingOrganization.id).limit(balanceItemIds.length).fetch();
 
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
@@ -224,13 +224,28 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         }
 
         // If still zero payment
-        const { price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({ 
+        let { price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({ 
             balanceItems, 
             organization: sellingOrganization
         })
-        const minimumAmount = 2_00;
+        const minimumAmount = checkout.createMandate && !checkout.mandate ? 2_00 : 0;
+
+        // Automatically add discounts
+        await BalanceItemService.applyDiscountsToCheckout({
+            totalPrice: totalPrice - roundingAmount,
+            minimumAmount,
+            balanceItems,
+            sellingOrganizationId: sellingOrganization.id,
+            payingOrganizationId: organization.id
+        });
+
+        // Update price and rounding
+        ({ price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({ 
+            balanceItems, 
+            organization: sellingOrganization
+        }))
         
-        if (totalPrice < minimumAmount && checkout.createMandate && !checkout.mandate) {
+        if (totalPrice < minimumAmount) {
             const item = new BalanceItem();
             item.type = BalanceItemType.AdministrationFee;
             item.description = $t('%1Q4')

@@ -13,6 +13,9 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
     items: IDRegisterItem[] = [];
 
+    /**
+     * todo: we should be able to move this to a Map
+     */
     @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
     balanceItems: BalanceItemCartItem[] = [];
 
@@ -236,6 +239,16 @@ export class RegisterCart {
     get price() {
         return this.items.reduce((total, item) => item.calculatedPrice + total, 0)
             + this.balanceItems.reduce((total, item) => {
+                return total + item.price;
+            }, 0);
+    }
+
+    get balanceItemDiscounts() {
+        return this.balanceItems.filter(b => b.price < 0)
+    }
+
+    get balanceItemDiscountsPrice() {
+        return this.balanceItemDiscounts.reduce((total, item) => {
                 return total + item.price;
             }, 0);
     }

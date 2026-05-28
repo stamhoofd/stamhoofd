@@ -109,6 +109,34 @@ export class MemberPortalRegistrationFlow {
         await test.expect(totalText).toContainText(text);
     }
 
+    private cartCreditRow() {
+        return this.page
+            .locator('.pricing-box .left')
+            .filter({ hasText: 'Tegoed' });
+    }
+
+    async expectCartCredit(price: string) {
+        const creditRow = this.cartCreditRow();
+        await test.expect(creditRow).toBeVisible();
+
+        // The price lives in the sibling .right cell of the breakdown row.
+        const creditPrice = creditRow.locator('xpath=following-sibling::div[1]');
+        await test.expect(creditPrice).toContainText(price);
+    }
+
+    async openCartCreditDetails() {
+        await this.cartCreditRow().getByRole('button').click();
+    }
+
+    async expectCreditDetail(name: string) {
+        await test.expect(this.page.getByText(name)).toBeVisible();
+    }
+
+    async closeCreditDetails(name: string) {
+        await this.page.keyboard.press('Escape');
+        await test.expect(this.page.getByText(name)).toBeHidden();
+    }
+
     async confirmPaymentMethod() {
         await this.page.getByTestId('confirm-payment-method-button').click();
     }

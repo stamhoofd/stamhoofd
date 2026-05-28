@@ -22,12 +22,12 @@
             <template v-else>
                 <STList>
                     <RegisterItemRow v-for="item in cart.items" :key="item.id" class="right-stack" :item="item" />
-                    <BalanceItemCartItemRow v-for="item in cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
+                    <BalanceItemCartItemRow v-for="item in visibleBalanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
                 </STList>
-                <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
+                <PriceBreakdownBox :price-breakdown="checkout.getPriceBreakown({balanceItemDiscountsAction: {icon: 'info-circle', handler: showDiscountSheet}})" />
 
                 <p class="style-button-bar right-align">
-                    <LoadingButton :loading="loading">
+                    <LoadingButton :loading="loading || loadingBalances">
                         <button class="button primary" type="button" data-testid="go-to-checkout-button" @click="goToCheckout">
                             <span v-if="checkout.totalPrice">{{ $t('%X8') }}</span>
                             <span v-else>{{ $t('%X9') }}</span>
@@ -52,6 +52,10 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import { computed, onActivated, onMounted, ref } from 'vue';
+import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import BalanceItemCartItemDiscountsSheet from '@stamhoofd/components/members/components/group/BalanceItemCartItemDiscountsSheet.vue';
+import { useRequestOwner } from '@stamhoofd/networking';
 
 const memberManager = useMemberManager();
 const checkout = computed(() => memberManager.family.checkout);
@@ -59,8 +63,12 @@ const cart = computed(() => checkout.value.cart);
 const errors = useErrors();
 const context = useContext();
 const navigate = useNavigationActions();
-
+const owner = useRequestOwner(undefined, {cancelOnDeactivated: true});
 const loading = ref(false);
+
+const showDiscountsSeparately = computed(() => checkout.value.showDiscountsSeparately);
+const visibleBalanceItems = computed(() => showDiscountsSeparately.value ? cart.value.balanceItems.filter(b => b.price >= 0) : cart.value.balanceItems)
+const loadingBalances = computed(() => checkout.value.balanceItems === null)
 
 onMounted(() => {
     checkout.value.updatePrices();
@@ -74,8 +82,10 @@ onMounted(() => {
     }
 });
 onActivated(() => {
+    memberManager.updateBalances(checkout.value, {owner}).catch(console.error)
     checkout.value.updatePrices();
 });
+
 
 async function goToCheckout() {
     if (loading.value) {
@@ -100,5 +110,20 @@ async function goToCheckout() {
         loading.value = false;
     }
 }
+
+const { presentPositionableSheet } = usePositionableSheet();
+
+async function showDiscountSheet(event: MouseEvent) {
+    await presentPositionableSheet(event, {
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(BalanceItemCartItemDiscountsSheet, {
+                    items: cart.value.balanceItemDiscounts
+                }),
+            }),
+        ],
+    }, { minimumHeight: 185, width: 500 });
+}
+
 
 </script>

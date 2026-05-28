@@ -1,11 +1,11 @@
 <template>
-    <p v-if="filteredItems.length === 0" class="info-box">
+    <p v-if="payableBalanceItems.length === 0" class="info-box">
         {{ $t('%h9') }}
     </p>
-    <template v-else>
+    <template v-if="items.length">
         <GroupedBalanceList :item="item" />
         <BalancePriceBreakdown :item="item" />
-        <p class="style-button-bar right-align">
+        <p v-if="payableBalanceItems.length" class="style-button-bar right-align">
             <button class="button primary" type="button" @click="$emit('checkout')">
                 <span>{{ $t('%eX') }}</span>
                 <span class="icon arrow-right" />
@@ -26,6 +26,6 @@ const props = defineProps<{
 
 defineEmits(['checkout'])
 const items = computed(() => props.item.filteredBalanceItems);
-const filteredItems = items;
+const payableBalanceItems = computed(() => props.item.payableBalanceItems);
 
 </script>

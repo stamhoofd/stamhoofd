@@ -2,7 +2,7 @@ import type { Decoder} from '@simonbackx/simple-encoding';
 import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { Storage } from './Storage';
 import type { SessionContext } from './SessionContext';
-import type { BalanceItem, Platform} from '@stamhoofd/structures';
+import type { BalanceItem, Platform, RegisterCheckout} from '@stamhoofd/structures';
 import { DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, Version } from '@stamhoofd/structures';
 import { inject, reactive, watch } from 'vue';
 
@@ -141,40 +141,13 @@ export class MemberManager {
                     shouldRetry: true,
                 });
 
+                // Note: in the future when we remove balance items from the id cehckout,
+                // we should also hydrate the 'updateBalances'
                 const checkout = idCheckout.hydrate({
                     members: this.family.members,
                     groups: [...knownGroups, ...groups],
                     organizations: [organization],
                 });
-
-                try {
-                    let balanceItems: BalanceItem[] = [];
-                    if (checkout.cart.balanceItems.length) {
-                        const response = await this.$context.authenticatedServer.request({
-                            method: 'GET',
-                            path: `/user/payable-balance/detailed`,
-                            decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
-                            shouldRetry: true,
-                            owner: this,
-                            timeout: 60 * 1000,
-                        });
-
-                        const payableBalanceCollection = response.data;
-                        balanceItems = payableBalanceCollection.organizations.flatMap(o => o.balanceItems);
-                    }
-                    else {
-                        console.log('No balance items in cart');
-                    }
-
-                    console.log('Validating checkout');
-                    checkout.validate({
-                        memberBalanceItems: balanceItems,
-                    });
-                }
-                catch (e) {
-                    // Invalid cehckout
-                    console.error('Error validating checkout', e);
-                }
 
                 this.family.checkout = checkout;
                 this.watchCheckout();
@@ -182,6 +155,36 @@ export class MemberManager {
         }
         catch (e) {
             console.error(e);
+        }
+    }
+
+    async updateBalances(checkout: RegisterCheckout, options?: {owner?: any}) {
+        try {
+            let balanceItems: BalanceItem[] = [];
+            console.log('owner', options)
+            if (!checkout.cart.isEmpty) {
+                const response = await this.$context.getAuthenticatedServerForOrganization(checkout.singleOrganizationId).request({
+                    method: 'GET',
+                    path: `/user/payable-balance/detailed`,
+                    decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
+                    shouldRetry: true,
+                    owner: options?.owner ?? this,
+                    timeout: 60 * 1000,
+                });
+
+                const payableBalanceCollection = response.data;
+                balanceItems = payableBalanceCollection.organizations.flatMap(o => o.balanceItems);
+            }
+            else {
+                console.log('No balance items in cart');
+            }
+
+            console.log('Applying maximum discount', balanceItems);
+            checkout.updateBalances(balanceItems);
+        }
+        catch (e) {
+            // Invalid cehckout
+            console.error('Error applying maximum discount', e);
         }
     }
 

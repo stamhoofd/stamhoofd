@@ -20,7 +20,11 @@ export class PaymentCustomerStep implements ViewStep {
         return new ComponentWithProperties(PaymentCustomerView, {
             checkout: this.model.checkout,
             invoicesEnabled: this.model.sellingOrganization.meta.invoicesEnabled,
-            allowNonDefault: !this.model.requiresMandate, // for periodic payments, you cannot change as periodic payhments will always use the default company
+
+            // for periodic payments, you cannot change as periodic payhments will always use the default company
+            // we don't allow choosing non-default when balance items are selected, because this could affect VAT calculation
+            // of existing balance items
+            allowNonDefault: !this.model.requiresMandate && this.model.checkout.balances.size === 0,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
             },

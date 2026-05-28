@@ -17,6 +17,7 @@ import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
 import { TagHelper } from '../../../../helpers/TagHelper.js';
 import { ViesHelper } from '../../../../helpers/ViesHelper.js';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
+import { VATService } from '../../../../services/VATService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -71,6 +72,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         const errors = new SimpleErrors();
         let shouldUpdateSetupSteps = false;
+        let shouldUpdateVATExcempt = false;
         let shouldUpdateUserPermissions = false;
         let updateTags = false;
 
@@ -257,6 +259,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (request.body.meta.companies) {
                     await this.validateCompanies(organization, request.body.meta.companies);
                     shouldUpdateSetupSteps = true;
+                    shouldUpdateVATExcempt = true;
                 }
 
                 if (request.body.meta.recordsConfiguration?.recordCategories) {
@@ -612,6 +615,19 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (shouldUpdateSetupSteps) {
             await SetupStepUpdater.updateForOrganization(organization);
+        }
+
+        if (shouldUpdateVATExcempt) {
+            const platform = await Platform.getShared();
+            const sellingOrganizationId = platform.membershipOrganizationId
+            if (sellingOrganizationId) {
+                const sellingOrganization = await Organization.getByID(sellingOrganizationId, true);
+
+                await VATService.updateVATExcempt({
+                    organization,
+                    sellingOrganization
+                })
+            }
         }
 
         if (shouldUpdateUserPermissions) {

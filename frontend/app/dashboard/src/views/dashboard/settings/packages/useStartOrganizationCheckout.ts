@@ -12,7 +12,7 @@ import { useNavigationActions } from '@stamhoofd/components/types/NavigationActi
 import { PaymentHandler } from '@stamhoofd/components/views/PaymentHandler';
 import type { SessionContext } from '@stamhoofd/networking';
 import { useRequestOwner } from '@stamhoofd/networking';
-import type { CheckoutResponse, DetailedPayableBalance, OrganizationCheckout, OrganizationPackagesStatus } from '@stamhoofd/structures';
+import type { BaseOrganization, CheckoutResponse, DetailedPayableBalance, OrganizationCheckout, OrganizationPackagesStatus } from '@stamhoofd/structures';
 import { Organization, PaymentStatus } from '@stamhoofd/structures';
 import { useLoadPayableBalance } from '../hooks/useLoadPayableBalance';
 import { useCheckoutOrganizationCheckout } from './hooks/useCheckoutOrganizationCheckout';
@@ -41,7 +41,7 @@ export function useStartOrganizationCheckout() {
     async function doStartOrganizationCheckout({ checkout, displayOptions, forceNewMandate, sellingOrganizationId, sellingOrganization, payableBalance, payBalanceMode }: { 
         checkout: OrganizationCheckout; 
         sellingOrganizationId?: string;
-        sellingOrganization?: Organization;
+        sellingOrganization?: BaseOrganization;
         displayOptions: DisplayOptions;
         forceNewMandate?: boolean,
         payBalanceMode: PayBalanceMode
@@ -166,7 +166,7 @@ export function useStartOrganizationCheckout() {
 
 async function handleCheckoutResponse({response, sellingOrganization, context, navigate}: {
     response: CheckoutResponse,
-    sellingOrganization: Organization,
+    sellingOrganization: BaseOrganization,
     context: SessionContext,
     navigate: NavigationActions
 }) {

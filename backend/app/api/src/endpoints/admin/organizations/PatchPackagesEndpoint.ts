@@ -2,8 +2,8 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { STPackage } from '@stamhoofd/models';
-import { OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';
+import { Organization, Platform, STPackage } from '@stamhoofd/models';
+import { BalanceItemStatus, OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 import { STPackageService } from '../../../services/STPackageService.js';
 
@@ -38,7 +38,12 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
         }
         let updatePackages = false
         const packages = await STPackageService.getValidPackagesWithExpired(organization.id);
+        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
+        if (!membershipOrganizationId) {
+            throw new Error('Unavailable')
+        }
 
+        const membershipOrganization = await Organization.getByID(membershipOrganizationId, true);
         // Do patches
         if (request.body.packages) {
             for (const patch of request.body.packages.getPatches()) {
@@ -64,6 +69,13 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 await pack.save()
                 updatePackages = true
+
+                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0])
+                if (item) {
+                    item.status = BalanceItemStatus.Due;
+                    await item.save();
+                    console.log('Charged', item.id);
+                }
             }
 
             for (const put of request.body.packages.getPuts()) {
@@ -80,6 +92,12 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
                 updatePackages = true
 
                 packages.push(pack);
+                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0])
+                if (item) {
+                    item.status = BalanceItemStatus.Due;
+                    await item.save();
+                    console.log('Charged', item.id);
+                }
             }
         }
 

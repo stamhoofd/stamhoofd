@@ -38,14 +38,9 @@ export class STPackageService {
     static async getChargeableQuantity(pack: STPackage) {
         // If type is
         let amount = 1;
-        let membersCount: number | null = null;
-
-        if (membersCount === null && pack.meta.pricingType === STPricingType.PerMember) {
-            membersCount = await Organization.getActiveMembers(pack.organizationId);
-        }
 
         if (pack.meta.pricingType === STPricingType.PerMember) {
-            amount = membersCount ?? 1;
+            amount = await Organization.getActiveMembers(pack.organizationId);
         }
 
         if (amount < pack.meta.minimumAmount) {
@@ -113,6 +108,7 @@ export class STPackageService {
         amount -= paid;
 
         if (amount <= 0) {
+            console.log('Not charging package', pack.id, 'amount is', amount)
             return null;
         }
 

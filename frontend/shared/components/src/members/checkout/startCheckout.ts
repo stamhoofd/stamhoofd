@@ -12,6 +12,7 @@ import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
 import RegistrationSuccessView from './RegistrationSuccessView.vue';
+import { Toast } from '../../overlays/Toast';
 
 export async function startCheckout({ checkout, context, displayOptions, admin, members }: { checkout: RegisterCheckout; context: SessionContext; displayOptions: DisplayOptions; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     checkout.validate({});
@@ -136,6 +137,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     };
 
     if (payment && payment.status !== PaymentStatus.Succeeded) {
+        console.log('handle payment')
         await PaymentHandler.handlePayment({
             server,
             organization: checkout.singleOrganization!,
@@ -146,6 +148,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
             transferSettings: checkout.singleOrganization!.meta.registrationPaymentConfiguration.transferSettings,
             type: 'registration',
         }, async (_payment, navigate: NavigationActions) => {
+            console.info('Succeeded handler', navigate)
             clearAndEmit();
 
             await navigate.show({
@@ -158,16 +161,23 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
                 replace: 100, // autocorrects to all
                 force: true,
             });
-        }, () => {
+        }, (payment) => {
+            if (payment && payment.status === PaymentStatus.Failed) {
+                Toast.fromError($t('Betaling mislukt of geannuleerd')).show()
+            }
             // Silently ignore for now
-            console.log(payment);
+            console.error('Failure handler for payment', payment);
         }, () => {
+            console.log('Transfer handler')
             clearAndEmit();
         });
         return;
     }
+    console.log('no payment handler')
     GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
     clearAndEmit();
+
+    console.log('navigate', navigate)
 
     await navigate.show({
         components: [

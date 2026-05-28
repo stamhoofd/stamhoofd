@@ -7,16 +7,16 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="$t('%76')">
+                    <STInputBox :title="balanceTotal >= 0 ? $t('%76') : $t('Tegoed')">
                         <button class="style-price-big" type="button" @click="payBalance">
                             <span>
-                                {{ formatPrice(BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen) }}
+                                {{ formatPrice(Math.abs(balanceTotal)) }}
                             </span>
-                            <span v-if="BalanceItem.getOutstandingBalance(item.balanceItems.filter(b => b.isDue)).priceOpen > 0" class="icon arrow-right" />
+                            <span v-if="balanceTotal > 0" class="icon arrow-right" />
                         </button>
                     </STInputBox>
                     <p class="style-description-small">
-                        {{ $t('%1TU') }}
+                        {{ balanceTotal >= 0 ? $t('%1TU') : $t('Dit bedrag zal bij jouw volgende afrekening in mindering worden gebracht') }}
                     </p>
                 </div>
             </div>
@@ -161,6 +161,8 @@ useVisibilityChange(() => {
     reload().catch(console.error)
 })
 
+const balanceTotal = computed(() => BalanceItem.getOutstandingBalance(props.item.balanceItems.filter(b => b.isDue)).priceOpen)
+
 async function reload() {
     try {
         const payable = await loadPayableBalance(props.item.organization.id)
@@ -251,7 +253,7 @@ async function addCard() {
 
 
 async function payBalance() {
-    if (props.item.balanceItems.filter(b => b.isDue).length === 0) {
+    if (props.item.payableBalanceItems.filter(b => b.isDue).length === 0) {
         return;
     }
     await startOrganizationCheckout({

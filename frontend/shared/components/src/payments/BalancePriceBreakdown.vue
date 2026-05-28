@@ -4,22 +4,25 @@
 
 <script setup lang="ts">
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import type { DetailedReceivableBalance } from '@stamhoofd/structures';
 import { BalanceItem, DetailedPayableBalance } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { usePositionableSheet } from '../tables';
+import DiscountsSheet from './components/DiscountsSheet.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance | DetailedReceivableBalance;
 }>();
 
-const items = computed(() => props.item.filteredBalanceItems);
-const filteredItems = items;
 const isPayable = props.item instanceof DetailedPayableBalance;
 
 const priceBreakdown = computed(() => {
     const now = BalanceItem.getDueOffset();
-    const laterBalance = BalanceItem.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt !== null && i.dueAt > now));
-    const balance = BalanceItem.getOutstandingBalance(filteredItems.value.filter(i => i.dueAt === null || i.dueAt <= now));
+    const laterBalance = BalanceItem.getOutstandingBalance(props.item.filteredBalanceItems.filter(i => i.dueAt !== null && i.dueAt > now));
+    const balance = BalanceItem.getOutstandingBalance(props.item.filteredBalanceItems.filter(i => i.dueAt === null || i.dueAt <= now));
+    
+    const discountBalance = isPayable ? BalanceItem.getOutstandingBalance(props.item.discountBalanceItems) : BalanceItem.getOutstandingBalance([])
 
     if (balance.priceOpen < 0) {
         if (laterBalance.priceOpen > 0) {
@@ -30,21 +33,31 @@ const priceBreakdown = computed(() => {
         }
     }
 
+    const paid = balance.pricePaid + laterBalance.pricePaid - discountBalance.pricePaid;
+
     const all = [
         {
-            name: $t(`%ly`),
-            price: balance.pricePaid + laterBalance.pricePaid,
+            name: $t(`Tegoed`),
+            price: discountBalance.priceOpen, // only relevant shown
+            action: {
+                icon: 'info-circle',
+                handler: showDiscountSheet
+            }
+        },
+        {
+            name: paid >= 0 ? $t(`%ly`) : $t('Reeds teruggekregen'),
+            price: paid, // don't include discounts here
         },
         {
             name: $t(`%1PL`),
-            price: balance.pricePending + laterBalance.pricePending,
+            price: balance.pricePending + laterBalance.pricePending - discountBalance.pricePending, // don't include discounts here
         },
     ].filter(a => a.price !== 0);
 
     if (all.length > 0) {
         all.unshift({
             name: $t(`%lz`),
-            price: balance.payablePriceWithVAT + laterBalance.payablePriceWithVAT,
+            price: balance.payablePriceWithVAT + laterBalance.payablePriceWithVAT - discountBalance.payablePriceWithVAT,
         });
     }
 
@@ -63,5 +76,21 @@ const priceBreakdown = computed(() => {
         },
     ];
 });
+
+
+const { presentPositionableSheet } = usePositionableSheet();
+
+async function showDiscountSheet(event: MouseEvent) {
+    await presentPositionableSheet(event, {
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(DiscountsSheet, {
+                    items: props.item.discountBalanceItems
+                }),
+            }),
+        ],
+    }, { minimumHeight: 185, width: 500 });
+}
+
 
 </script>

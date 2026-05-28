@@ -7,7 +7,7 @@
 
                 <STErrorsDefault :error-box="errors.errorBox" />
                 
-                <div class="container categorized-box">
+                <div v-if="proFormaData?.payment?.price !== 0" class="container categorized-box">
                     <h2>
                         {{ $t('%kP') }}
                     </h2>
@@ -55,8 +55,9 @@
                         </STInputBox>
                     </template>
 
-                    <template v-if="model.requiresMandate && mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
+                    <template v-if="mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
                         <hr v-if="(mandates.length)">
+
                         <STInputBox error-fields="createMandate" :error-box="errors.errorBox" class="max" :title="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? $t('%1QC') : ''">
                             <STList>
                                 <STListItem :selectable="true" element-name="label" class="right-stack left-center">
@@ -64,8 +65,11 @@
                                         <Checkbox v-model="createMandate" />
                                     </template>
 
-                                    <h3 class="style-title-list">
+                                    <h3 v-if="model.requiresMandate" class="style-title-list">
                                         {{ $t('%1S1') }}
+                                    </h3>
+                                    <h3 v-else>
+                                        {{ $t('Sla deze kaart op voor latere betalingen') }}
                                     </h3>
 
                                     <p class="style-description-small">
@@ -77,12 +81,20 @@
                     </template>
 
                     <div v-if="!mandateId" class="container">
-                        <hr v-if="(model.requiresMandate && mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates)">
+                        <hr v-if="mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
                         <STInputBox v-if="model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates && (model.requiresMandate || mandates?.length) " error-fields="method" :error-box="errors.errorBox" class="max" :title="$t('%M7')">
                             <PaymentSelectionList v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                         </STInputBox>
                         <PaymentSelectionList v-else v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                     </div>
+                </div>
+                
+                <div v-else class="container categorized-box">
+                    <h2>
+                        {{ $t('Bevestiging') }}
+                    </h2>
+
+                    <p>{{ $t('Jouw bestelling zal worden geplaatst als je verder gaat. Je hoeft nu niets te betalen.') }}</p>
                 </div>
 
                 <div v-if="model.requiresMandate && model.packages.length" class="container categorized-box">
@@ -97,12 +109,12 @@
                     </p>
                 </div>
 
-                <div v-if="proFormaData?.invoice && proFormaData.invoice.totalWithVAT !== 0" class="container categorized-box">
+                <div v-if="proFormaData?.invoice && (proFormaData.invoice.totalWithVAT !== 0 || proFormaData.invoice.items.find(p => p.unitPrice < 0))" class="container categorized-box">
                     <h2>{{ $t('%10c') }}</h2>
                     <InvoiceItemsBox :invoice="proFormaData.invoice" />
                 </div>
 
-                <div v-else-if="proFormaData?.payment && proFormaData.payment.price !== 0" class="container categorized-box">
+                <div v-else-if="proFormaData?.payment && (proFormaData.payment.price !== 0 || proFormaData.payment.balanceItemPayments.find(p => p.price < 0))" class="container categorized-box">
                     <h2>{{ $t('%10c') }}</h2>
                     <PaymentItemsBox :payment="proFormaData.payment" />
                 </div>
@@ -115,8 +127,8 @@
                 <template #right>
                     <LoadingButton :loading="loadingProForma || loading">
                         <button v-if="proFormaData?.payment?.price === 0" class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
-                            <span class="icon play small" />
-                            <span>{{ $t('%1Lx') }}</span>
+                            <span class="icon success small" />
+                            <span>{{ $t('Bevestigen') }}</span>
                         </button>
 
                         <button v-else class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">

@@ -1,6 +1,6 @@
 export type PriceBreakdownAction = {
     icon: string;
-    handler?: (event: any) => void;
+    handler?: (event: MouseEvent) => void | Promise<void>;
 };
 
 export type PriceBreakdown = {

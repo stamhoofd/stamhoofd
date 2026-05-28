@@ -14,7 +14,7 @@
         <p class="style-description-small" v-text="pack.meta.humanPricing" />
 
         <p v-if="pack.endDate && pack.endDate <= now" class="style-description-small">
-            {{ $t('%1TC', {date: formatDate(pack.endDate)}) }}
+            {{ $t('%1TC', {date: formatEndDate(pack.endDate)}) }}
         </p>
 
         <p v-if="pack.meta.startDate > now" class="style-description-small">

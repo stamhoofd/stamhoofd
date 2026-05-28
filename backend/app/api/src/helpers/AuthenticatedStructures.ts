@@ -2,7 +2,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { BaseOrganization } from '@stamhoofd/structures';
+import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -53,6 +54,22 @@ export class AuthenticatedStructures {
             balanceItems,
             payingOrganizations,
         }, includeSettlements);
+    }
+
+     /**
+     *
+     * @param payments
+     * @param checkPermissions Only set to undefined when not returned in the API + not for public use
+     * @returns
+     */
+    static async payments(payments: Payment[]): Promise<PaymentStruct[]> {
+        if (payments.length === 0) {
+            return [];
+        }
+
+        return payments.map(p => {
+            return PaymentStruct.create(p)
+        })
     }
 
     static async invoices(invoices: Invoice[]): Promise<InvoiceStruct[]> {
@@ -220,6 +237,16 @@ export class AuthenticatedStructures {
 
     static webshopPreview(webshop: Webshop) {
         return WebshopPreview.create(webshop);
+    }
+
+    static async baseOrganizations(organizations: Organization[]): Promise<BaseOrganization[]> {
+        if (organizations.length === 0) {
+            return [];
+        }
+
+        return organizations.map(o => {
+            return BaseOrganization.create(o)
+        })
     }
 
     static async organizations(organizations: Organization[]): Promise<OrganizationStruct[]> {

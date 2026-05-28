@@ -1,6 +1,6 @@
 import type { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import type { Organization, Payment, TransferSettings } from '@stamhoofd/structures';
+import type { BaseOrganization, Organization, Payment, TransferSettings } from '@stamhoofd/structures';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 
 import type { NavigationActions } from '../types/NavigationActions';
@@ -8,6 +8,7 @@ import PayconiqBannerView from './PayconiqBannerView.vue';
 import PayconiqButtonView from './PayconiqButtonView.vue';
 import TransferPaymentView from './TransferPaymentView.vue';
 import { GlobalEventBus } from '../EventBus';
+import { Toast } from '../overlays/Toast';
 
 export class PaymentHandler {
     static getOS(): string {
@@ -54,10 +55,15 @@ export class PaymentHandler {
     static async handlePayment(
         settings: {
             server: Server;
-            organization: Organization;
+            organization: BaseOrganization;
             payment: Payment;
             paymentUrl: string | null;
             paymentQRCode: string | null;
+
+            /**
+             * @deprecated
+             * Only used as fall back
+             */
             transferSettings: TransferSettings | null;
             navigate: NavigationActions;
             type: 'order' | 'registration' | 'packages';
@@ -69,10 +75,10 @@ export class PaymentHandler {
         const { payment, organization, server, navigate, paymentUrl, paymentQRCode, transferSettings } = settings;
         GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
 
-        if (payment.method == PaymentMethod.PointOfSale) {
+        if (payment.method === PaymentMethod.PointOfSale) {
             successHandler(payment, navigate)?.catch(console.error);
         }
-        else if (payment.method == PaymentMethod.Transfer) {
+        else if (payment.method === PaymentMethod.Transfer) {
             if (transferHandler) {
                 transferHandler(payment)?.catch(console.error);
             }
@@ -134,6 +140,15 @@ export class PaymentHandler {
         }  else if (payment.method === PaymentMethod.DirectDebit) {
             // For now we go to DirectDebit
             successHandler(payment, navigate)?.catch(console.error);
+        } else if (payment.method === PaymentMethod.Unknown) {
+            // For now we go to DirectDebit
+            successHandler(payment, navigate)?.catch(console.error);
+        } else {
+            if (payment.status === PaymentStatus.Succeeded) {
+                successHandler(payment, navigate)?.catch(console.error);
+            } else {
+                Toast.fromError($t('Er ging iets mis bij het aanmaken van de betaling. Neem contact op als het probleem niet is opgelost nadat je de pagina hebt herladen.')).show()
+            }
         }
     }
 }

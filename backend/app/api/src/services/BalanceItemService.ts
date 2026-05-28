@@ -9,6 +9,7 @@ import { AuditLogService } from './AuditLogService.js';
 import { PaymentReallocationService } from './PaymentReallocationService.js';
 import { RegistrationService } from './RegistrationService.js';
 import { STPackageService } from './STPackageService.js';
+import { SQL } from '@stamhoofd/sql';
 
 const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
     await CachedBalance.updateForMembers(organizationId, memberIds);
@@ -311,4 +312,62 @@ export const BalanceItemService = {
             }
         }
     },
+
+    /**
+     * Apply discounts to the balance a user is going to checkout
+     */
+    async applyDiscountsToCheckout({minimumAmount, totalPrice, balanceItems, sellingOrganizationId, payingOrganizationId, payingUserId}: {
+        balanceItems: Map<BalanceItem, number>,
+        totalPrice: number,
+        minimumAmount?: number,
+        sellingOrganizationId: string,
+        payingOrganizationId?: string | null | undefined,
+        payingUserId?: string | null | undefined,
+    }) {
+        if (totalPrice <= (minimumAmount ?? 0)) {
+            return {
+                totalPrice
+            };
+        }
+
+        let items: BalanceItem[]
+        if (payingOrganizationId) {
+            items = await BalanceItem.select()
+                .where('organizationId', sellingOrganizationId)
+                .where('payingOrganizationId', payingOrganizationId)
+                .whereNot('status', BalanceItemStatus.Hidden)
+                .where('priceOpen', '<', 0)
+                .fetch()
+        } else if (payingUserId) {
+            const memberUsers = await MemberUser.select().where('usersId', payingUserId).fetch();
+            const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
+
+            items = await BalanceItem.select()
+                .where('organizationId', sellingOrganizationId)
+                .where(
+                    SQL.where('userId', payingUserId)
+                        .or('memberId', memberIds)
+                )
+                .whereNot('status', BalanceItemStatus.Hidden)
+                .where('priceOpen', '<', 0)
+                .fetch()
+        } else {
+            return {
+                totalPrice
+            };
+        }
+
+        for (const item of items) {
+            const remove = Math.min(totalPrice - (minimumAmount ?? 0), -item.priceOpen);
+            if (remove === 0) {
+                break;
+            }
+            balanceItems.set(item, -remove)
+            totalPrice -= remove;
+        }
+
+        return {
+            totalPrice
+        }
+    }
 };

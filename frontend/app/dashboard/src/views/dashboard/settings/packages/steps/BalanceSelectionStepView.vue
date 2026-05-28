@@ -16,26 +16,6 @@
 
                 <BalanceItemTitleBox :item="item" :is-payable="true" />
 
-                <!--<div v-if="isItemSelected(item) && canCustomize" class="split-inputs option" @click.stop>
-                        <div>
-                            <STInputBox :title="item.priceOpen >= 0 ? $t('%16x') : $t('%16y')">
-                                <PriceInput :currency="getItemValue(item) === item.priceOpen ? 'euro' : ('/ ' + formatFloat(Math.abs(item.priceOpen) / 100_00) + ' euro')" :model-value="Math.abs(getItemValue(item))" :min="0" :max="Math.abs(item.priceOpen)" :placeholder="$t(`%2X`)" @update:model-value="setItemValue(item, Math.abs($event) * Math.sign(item.priceOpen))" />
-                            </STInputBox>
-                        </div>
-                    </div>
-                    <p v-else class="style-description">
-                        <span v-if="!item.isDue" v-tooltip="item.dueAt ? ('Te betalen tegen ' + formatDate(item.dueAt)) : undefined" class="style-price-base disabled style-tooltip">
-                            ({{ formatPrice(item.priceOpen) }})
-                        </span>
-                        <span v-else class="style-price-base" :class="{negative: item.priceOpen < 0}">
-                            {{ formatPrice(item.priceOpen) }}
-                        </span>
-                    </p>
-
-                    <template #right>
-                        <BalanceItemIcon :item="item" :is-payable="true" />
-                    </template>-->
-
                 <template v-if="item.status === BalanceItemStatus.Canceled || item.amount" #middleRight>
                     <p v-if="item.status === BalanceItemStatus.Canceled" class="style-price-base negative">
                         -
@@ -78,29 +58,30 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ErrorBox, useContext, useErrors, useNavigationActions  } from '@stamhoofd/components';
-import type {NavigationActions} from '@stamhoofd/components';
+import type { NavigationActions } from '@stamhoofd/components';
+import { ErrorBox, useErrors, useNavigationActions, usePositionableSheet } from '@stamhoofd/components';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STGrid from '@stamhoofd/components/layout/STGrid.vue';
 import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
+import BalanceItemIcon from '@stamhoofd/components/payments/BalanceItemIcon.vue';
 import BalanceItemTitleBox from '@stamhoofd/components/payments/BalanceItemTitleBox.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItem, BalanceItemStatus, DetailedPayableBalance } from '@stamhoofd/structures';
+import { BalanceItemStatus  } from '@stamhoofd/structures';
+import type {PriceBreakdown, BalanceItem} from '@stamhoofd/structures';
 import { computed, onActivated, onMounted, ref } from 'vue';
+import { useLoadPayableBalance } from '../../hooks/useLoadPayableBalance';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { PayBalanceMode } from '../OrganizationCheckoutViewModel';
-import BalanceItemIcon from '@stamhoofd/components/payments/BalanceItemIcon.vue';
-import { useLoadPayableBalance } from '../../hooks/useLoadPayableBalance';
+import { Formatter } from '@stamhoofd/utility';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { SimpleError } from '@simonbackx/simple-errors';
+import DiscountsSheet from '@stamhoofd/components/payments/components/DiscountsSheet.vue';
 
 const props = defineProps<{
     model: OrganizationCheckoutViewModel;
     saveHandler: (navigate: NavigationActions) => Promise<void>;
 }>();
 
-const context = useContext();
-const owner = useRequestOwner();
 const errors = useErrors();
 
 const title = computed(() => {
@@ -129,7 +110,11 @@ const canSelect = computed(() => props.model.payBalanceMode === PayBalanceMode.O
 const canCustomize = false;
 
 const filteredBalanceItems = computed(() => {
-    return BalanceItem.filterBalanceItems(props.model.payableBalance.balanceItems);
+    return props.model.payableBalance.payableBalanceItems;
+});
+
+const discounts = computed(() => {
+    return props.model.payableBalance.discountBalanceItems;
 });
 
 function isItemSelected(item: BalanceItem) {
@@ -180,15 +165,20 @@ function clean() {
     if (props.model.payBalanceMode === PayBalanceMode.Required) {
         props.model.checkout.balances.clear()
 
-        for (const item of props.model.payableBalance.filteredBalanceItems) {
+        for (const item of props.model.payableBalance.payableBalanceItems) {
             props.model.checkout.balances.set(item.id, item.priceOpen)
         }
         return;
     }
 
-    for (const [id] of props.model.checkout.balances) {
-        if (!props.model.payableBalance.filteredBalanceItems.find(b => b.id === id)) {
+    for (const [id, val] of props.model.checkout.balances) {
+        const f = props.model.payableBalance.payableBalanceItems.find(b => b.id === id)
+        if (!f || f.priceOpen <= 0 || val < 0) {
             props.model.checkout.balances.delete(id)
+        } else {
+            if (val > f.priceOpen) {
+                props.model.checkout.balances.set(id, f.priceOpen)
+            }
         }
     }
 }
@@ -227,14 +217,63 @@ const total = computed(() => {
     return [...props.model.checkout.balances.values()].reduce((total, item) => total + item, 0);
 });
 
+const maximumPayable = computed(() => {
+    return filteredBalanceItems.value.reduce((a, b) => a + b.priceOpen, 0)
+})
+const totalAvailableDiscount = computed(() => {
+    return discounts.value.reduce((a, b) => a + b.priceOpen, 0)
+})
+const maximumUsableDiscount = computed(() => {
+    if (-totalAvailableDiscount.value < total.value) {
+        return totalAvailableDiscount.value
+    }
+    return -total.value
+})
+
 const priceBreakdown = computed(() => {
+    const b: PriceBreakdown = [];
+
+    if (totalAvailableDiscount.value !== 0) {
+        b.push({
+            name: $t(`Tegoed`),
+            price: maximumUsableDiscount.value,
+            description: -totalAvailableDiscount.value > maximumUsableDiscount.value ? $t('Maximum bruikbaar van in totaal {price} tegoed', {price: Formatter.price(-totalAvailableDiscount.value)}) : '',
+            action: {
+                icon: 'info-circle',
+                handler: showDiscountSheet
+            }
+        })
+    }
+
+    if (b.length) {
+        b.unshift({
+            name: $t(`Subtotaal`),
+            price: total.value,
+        })
+    }
     return [
+        ...b,
         {
             name: $t(`%xL`),
-            price: total.value,
+            price: Math.max(0, total.value + maximumUsableDiscount.value),
         },
     ];
 });
+
+const { presentPositionableSheet } = usePositionableSheet();
+
+async function showDiscountSheet(event: MouseEvent) {
+    await presentPositionableSheet(event, {
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(DiscountsSheet, {
+                    items: discounts.value
+                }),
+            }),
+        ],
+    }, { minimumHeight: 185, width: 500 });
+}
+
 
 const loading = ref(false);
 const navigate = useNavigationActions();
@@ -252,7 +291,14 @@ async function goNext() {
         // Check packages are fine (throws if renew or activation is not possible)
         props.model.validate();
 
-        // todo: validate and modify checkout
+        if (props.model.packages.length === 0 && props.model.checkout.balances.size === 0) {
+            throw new SimpleError({
+                code: 'empty_cart',
+                message: 'Cart is empty',
+                human: $t('Kies minstens één item om te betalen')
+            })
+        }
+
         await props.saveHandler(navigate);
     }
     catch (e) {

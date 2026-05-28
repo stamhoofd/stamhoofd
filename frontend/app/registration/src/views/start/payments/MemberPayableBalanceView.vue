@@ -8,7 +8,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import type { NavigationActions } from '@stamhoofd/components';
-import { GlobalEventBus, Toast, usePlatform } from '@stamhoofd/components';
+import { GlobalEventBus, Toast, useLoadOrganization, usePlatform } from '@stamhoofd/components';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
@@ -52,57 +52,72 @@ async function updateBalance() {
     }
 }
 
+let loadingCheckout = false;
 async function checkout(item: DetailedPayableBalance) {
-    const checkout = memberManager.family.checkout;
-    const items = item.filteredBalanceItems;
+    if (loadingCheckout) {
+        return;
+    }
+    loadingCheckout = true;
 
-    if (items.length > 1) {
-        return await show({
-            components: [
-                new ComponentWithProperties(
-                    SelectBalanceItemsView,
-                    {
-                        title: $t(`%1Qf`),
-                        items,
-                        isPayable: true,
-                        canCustomizeItemValue: (item: BalanceItem) => {
-                            return item.organizationId !== platform.value.membershipOrganizationId;
-                        },
-                        saveHandler: async (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => {
-                            // First clear
-                            for (const g of items) {
-                                checkout.removeBalanceItemByBalance(g);
-                            }
+    try {
+        const checkout = memberManager.family.checkout;
+        const items = item.payableBalanceItems;
 
-                            // Then add
-                            for (const g of list) {
-                                if (g.price !== 0) {
-                                    checkout.addBalanceItem(g.balanceItem, g.price)
+        if (items.length > 1) {
+            return await show({
+                components: [
+                    new ComponentWithProperties(
+                        SelectBalanceItemsView,
+                        {
+                            title: $t(`%1Qf`),
+                            items,
+                            isPayable: true,
+                            canCustomizeItemValue: (item: BalanceItem) => {
+                                return item.organizationId !== platform.value.membershipOrganizationId;
+                            },
+                            saveHandler: async (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => {
+                                // First clear
+                                for (const g of items) {
+                                    checkout.removeBalanceItemByBalance(g);
                                 }
-                            }
 
-                            await navigate.pop({ force: true });
-                            await goToCheckout(checkout, item);
+                                // Then add
+                                for (const g of list) {
+                                    if (g.price !== 0) {
+                                        checkout.addBalanceItem(g.balanceItem, g.price)
+                                    }
+                                }
+
+                                await navigate.pop({ force: true });
+                                await goToCheckout(checkout, item);
+                            },
                         },
-                    },
-                ),
-            ],
-        });
-    }
-
-    for (const g of items) {
-        const open = g.priceOpen;
-
-        if (open !== 0) {
-            checkout.addBalanceItem(g, open);
+                    ),
+                ],
+            });
         }
-    }
 
-    await goToCheckout(checkout, item);
+        for (const g of items) {
+            const open = g.priceOpen;
+
+            if (open !== 0) {
+                checkout.addBalanceItem(g, open);
+            }
+        }
+
+        await goToCheckout(checkout, item);
+    } finally {
+        loadingCheckout = false;
+    }
 }
 
+const loadOrganization = useLoadOrganization()
+
 async function goToCheckout(checkout: RegisterCheckout, item: DetailedPayableBalance) {
-    checkout.defaultOrganization = item.organization;
+    if (!checkout.defaultOrganization || checkout.defaultOrganization?.id !== item.organization.id) {
+        const org = await loadOrganization(item.organization.id)
+        checkout.defaultOrganization = org
+    }
     Toast.success($t(`%10h`)).setIcon('basket').show();
     await dismiss({ force: true });
     await GlobalEventBus.sendEvent('selectTabById', 'cart');

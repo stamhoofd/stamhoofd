@@ -5,7 +5,7 @@ import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { Payment } from './Payment.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 
@@ -663,55 +663,38 @@ export class BalanceItem extends QueryableModel {
     }
 
     static async balanceItemsForUsersAndMembers(organizationId: string | null, userIds: string[], memberIds: string[]): Promise<BalanceItem[]> {
-        if (memberIds.length == 0 && userIds.length == 0) {
+        if (memberIds.length === 0 && userIds.length === 0) {
             return [];
         }
 
-        const params: any[] = [];
-        const where: string[] = [];
-
-        if (memberIds.length) {
-            if (memberIds.length == 1) {
-                where.push(`memberId = ?`);
-                params.push(memberIds[0]);
-            }
-            else {
-                where.push(`memberId IN (?)`);
-                params.push(memberIds);
-            }
-        }
-
-        // Note here, we don't search for memberId IS NULL restriction in MySQL because it slows down the query too much (500ms)
-        // Better if we do it in code here
-        if (userIds.length) {
-            if (userIds.length == 1) {
-                where.push('userId = ?');
-                params.push(userIds[0]);
-            }
-            else {
-                where.push('userId IN (?)');
-                params.push(userIds);
-            }
-        }
-
-        const requiredWhere: string[] = [];
+        const base = BalanceItem.select()
+            .whereNot('status', BalanceItemStatus.Hidden);
 
         if (organizationId) {
-            requiredWhere.push('organizationId = ?');
-            params.push(organizationId);
+            base.andWhere('organizationId', organizationId)
         }
 
-        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE (${where.join(' OR ')}) ${requiredWhere.length ? (' AND ' + requiredWhere.join(' AND ')) : ''} AND ${BalanceItem.table}.status != ?`;
-        params.push(BalanceItemStatus.Hidden);
-
-        const [rows] = await Database.select(query, params);
-        const balanceItems = BalanceItem.fromRows(rows, BalanceItem.table);
-
-        // Filter out items of other members
-        if (memberIds.length) {
-            return balanceItems.filter(b => !b.memberId || memberIds.includes(b.memberId));
+        if (memberIds.length && userIds.length) {
+            // Don't include other members than the provided members
+            base.andWhere(
+                SQL.where('memberId', memberIds)
+                // Include null member
+                .or(
+                    // Don't include balances of other members, even when userId matches
+                    // this allows removing access for a member
+                    SQL.where('userId', userIds)
+                    .and('memberId', null)
+                )
+            )
+        } else if (memberIds.length) {
+            base.andWhere('memberId', memberIds)
+        } else if (userIds.length) {
+            base.andWhere('userId', userIds)
         }
-        return balanceItems;
+
+        base.andWhere('priceOpen', '!=', 0)
+
+        return await base.fetch();
     }
 
     static async balanceItemsForOrganization(payingOrganizationId: string, organizationId?: string): Promise<BalanceItem[]> {

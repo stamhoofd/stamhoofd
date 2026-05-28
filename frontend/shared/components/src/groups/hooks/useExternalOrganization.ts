@@ -2,12 +2,31 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, unref, watchEffect } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useContext, useOrganization } from '../../hooks';
 import { SearchOrganizationView } from '../../members';
 import type { NavigationActions } from '../../types/NavigationActions';
+
+export function useLoadOrganization() {
+    const context = useContext()
+    const owner = useRequestOwner()
+
+    async function loadOrganization(id: string) {
+        const response = await context.value.getOptionalAuthenticatedServerForOrganization(id).request({
+            method: 'GET',
+            path: '/organization',
+            decoder: Organization as Decoder<Organization>,
+            shouldRetry: true,
+            owner,
+        });
+
+        return response.data
+    }
+
+    return loadOrganization
+}
 
 export function useExternalOrganization(organizationId: Ref<string | null>, organizationHint?: Organization | null | Ref<Organization | null>) {
     const organization = useOrganization();

@@ -1,8 +1,9 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { BalanceItem, BalanceItemWithPayments } from '../BalanceItem.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
-import { Organization } from '../Organization.js';
+import { BaseOrganization, Organization } from '../Organization.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import { Payment } from '../members/Payment.js';
 
 export class PayableBalance extends AutoEncoder {
     @field({ decoder: Organization })
@@ -31,17 +32,27 @@ export class PayableBalanceCollection extends AutoEncoder {
 }
 
 export class DetailedPayableBalance extends AutoEncoder {
-    @field({ decoder: Organization })
-    organization: Organization;
+    @field({ decoder: BaseOrganization })
+    organization: BaseOrganization;
 
     @field({ decoder: new ArrayDecoder(BalanceItemWithPayments) })
     balanceItems: BalanceItemWithPayments[] = [];
 
+    // todo
     @field({ decoder: new ArrayDecoder(PaymentGeneral) })
-    payments: PaymentGeneral[] = [];
+    @field({ decoder: new ArrayDecoder(Payment), ...NextVersion})
+    payments: Payment[] = [];
 
     get filteredBalanceItems() {
         return BalanceItem.filterBalanceItems(this.balanceItems);
+    }
+
+    get payableBalanceItems() {
+        return BalanceItem.filterPayableBalanceItems(this.balanceItems);
+    }
+
+    get discountBalanceItems() {
+        return BalanceItem.filterDiscountBalanceItems(this.balanceItems);
     }
 }
 

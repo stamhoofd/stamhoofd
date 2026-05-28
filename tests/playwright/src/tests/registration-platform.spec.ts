@@ -9,6 +9,7 @@ import type {
     RegistrationPeriod,
     User} from '@stamhoofd/models';
 import {
+    BalanceItemFactory,
     GroupFactory,
     MemberFactory,
     OrganizationFactory,
@@ -16,6 +17,7 @@ import {
     RegistrationPeriodFactory
 } from '@stamhoofd/models';
 import {
+    BalanceItemType,
     MemberDetails,
     PermissionLevel,
     Permissions,
@@ -544,6 +546,112 @@ test.describe('Registration', () => {
                 });
 
                 await test.step('payment step should be a confirmation page showing zero total', async () => {
+                    await registrationFlow.expectTotalText('Totaal: € 0');
+                });
+
+                await test.step('should show success view after confirming', async () => {
+                    await registrationFlow.confirmPaymentMethod();
+                    await registrationFlow.expectSuccessView();
+                });
+            });
+        });
+
+        /**
+         * Test registration when the member has an outstanding credit (a negative balance item).
+         * The credit should automatically be applied as a discount, capped at the cart price,
+         * so a € 30 registration paid with a € 40 credit becomes free.
+         */
+        test.describe('Happy path - balance credit', () => {
+            let creditOrganization: Organization;
+            let creditOrganizationPeriod: OrganizationRegistrationPeriod;
+
+            test.beforeAll(async () => {
+                creditOrganization = await new OrganizationFactory({
+                    name: `CreditVer${WorkerData.id}`,
+                }).create();
+
+                const creditPeriod = await new RegistrationPeriodFactory({
+                    startDate: new Date('2000-01-01'),
+                    endDate: new Date('2001-01-01'),
+                    organization: creditOrganization,
+                }).create();
+
+                creditOrganization.periodId = creditPeriod.id;
+                await creditOrganization.save();
+
+                creditOrganizationPeriod
+                    = await new OrganizationRegistrationPeriodFactory({
+                        period: creditPeriod,
+                        organization: creditOrganization,
+                    }).create();
+            });
+
+            test.afterEach(async () => {
+                await WorkerData.databaseHelper.clearRegistrations();
+                await WorkerData.databaseHelper.clearMembers();
+                await WorkerData.databaseHelper.clearGroups();
+            });
+
+            test('Happy flow - credit reduces price to zero', async ({ page, pages }) => {
+                const group = await new GroupFactory({
+                    organization: creditOrganization,
+                    price: 30_0000,
+                }).create();
+
+                group.settings.registrationEndDate = new Date(
+                    (
+                        group.settings.registrationEndDate ?? new Date()
+                    ).getTime()
+                    + 60 * 1000,
+                );
+                await group.save();
+
+                creditOrganizationPeriod.settings.rootCategory?.groupIds.push(
+                    group.id,
+                );
+                await creditOrganizationPeriod.save();
+
+                const member = await new MemberFactory({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    user,
+                }).create();
+
+                const creditName = 'Terugbetaling kamp';
+                await new BalanceItemFactory({
+                    organizationId: creditOrganization.id,
+                    memberId: member.id,
+                    type: BalanceItemType.Other,
+                    description: creditName,
+                    amount: 1,
+                    unitPrice: -40_0000,
+                }).create();
+
+                const registrationFlow = new MemberPortalRegistrationFlow({
+                    page,
+                    pages,
+                });
+
+                await registrationFlow.startRegister({
+                    organizationName: creditOrganization.name,
+                    groupName: group.settings.name.toString(),
+                    memberName: 'John Doe',
+                });
+
+                await registrationFlow.continueMemberStep();
+
+                await test.step('cart should apply the credit as a discount', async () => {
+                    await registrationFlow.expectCartCredit('- € 30');
+                });
+
+                await test.step('credit details popup should show the balance item name', async () => {
+                    await registrationFlow.openCartCreditDetails();
+                    await registrationFlow.expectCreditDetail(creditName);
+                    await registrationFlow.closeCreditDetails(creditName);
+                });
+
+                await test.step('should go to checkout with a zero total', async () => {
+                    await registrationFlow.goToCheckout();
                     await registrationFlow.expectTotalText('Totaal: € 0');
                 });
 
