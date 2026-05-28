@@ -44,6 +44,11 @@ export const groupFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    deletedAt: createColumnFilter({
+        expression: SQL.column('deletedAt'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
     bundleDiscounts: createWildcardColumnFilter(
         (key: string) => ({
             expression: SQL.jsonExtract(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`, true),

@@ -7,7 +7,9 @@ import { RelationFetcher, RelationFetcherSubFilter } from '../RelationUIFilter';
 type ObjectType = Group;
 
 export function useGroupsRelationFetcher() {
-    const fetcher = useGroupsObjectFetcher();
+    const fetcher = useGroupsObjectFetcher({requiredFilter: {
+        deletedAt: null
+    }});
     const organizationManager = useOrganizationManager();
     const owner = useRequestOwner();
 
