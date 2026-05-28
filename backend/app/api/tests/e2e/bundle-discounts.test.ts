@@ -11,6 +11,7 @@ import { initAdmin } from '../init/initAdmin.js';
 import { initBundleDiscount } from '../init/initBundleDiscount.js';
 import { initPermissionRole } from '../init/initPermissionRole.js';
 import { initStripe } from '../init/initStripe.js';
+import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
 
 const baseUrl = `/members/register`;
 
@@ -40,6 +41,8 @@ describe('E2E.Bundle Discounts', () => {
             endDate: new Date(2030, 11, 31),
             previousPeriodId: previousPeriod.id,
         }).create();
+
+        await initMembershipOrganization()
     });
 
     beforeEach(async () => {

@@ -12,6 +12,7 @@ import { testServer } from '../helpers/TestServer.js';
 import { initAdmin } from '../init/initAdmin.js';
 import { initStripe } from '../init/initStripe.js';
 import { registrationUpdateQueue } from '../../src/services/BalanceItemService.js';
+import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
 
 const baseUrl = `/members/register`;
 
@@ -42,6 +43,8 @@ describe('E2E.Documents', () => {
             endDate: new Date(2030, 11, 31),
             previousPeriodId: previousPeriod.id,
         }).create();
+
+        await initMembershipOrganization()
     });
 
     beforeEach(async () => {

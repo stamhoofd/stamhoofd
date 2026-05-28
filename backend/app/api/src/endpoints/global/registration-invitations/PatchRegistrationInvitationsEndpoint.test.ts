@@ -117,7 +117,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 patch,
                 organization,
                 user,
-            })).rejects.toThrow('Je hebt geen toegansrechten om iemand uit te nodigen voor deze groep.');
+            })).rejects.toThrow('Je hebt geen toegangsrechten om iemand uit te nodigen voor deze groep.');
         })
 
         test('Should fail if no read access to member', async () => {
@@ -162,7 +162,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 patch,
                 organization,
                 user,
-            })).rejects.toThrow('Je hebt geen toegansrechten om dit lid uit te nodigen.');
+            })).rejects.toThrow('Je hebt geen toegangsrechten om dit lid uit te nodigen.');
         })
 
         test('Should fail if already registered', async () => {
@@ -399,7 +399,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 patch,
                 organization,
                 user,
-            })).rejects.toThrow('Je hebt geen toegansrechten om deze uitnodiging te verwijderen.');
+            })).rejects.toThrow('Je hebt geen toegangsrechten om deze uitnodiging te verwijderen.');
         })
     });
 });

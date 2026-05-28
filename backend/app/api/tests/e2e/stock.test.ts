@@ -12,6 +12,7 @@ import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/das
 import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint.js';
 import { StripeMocker } from '../helpers/StripeMocker.js';
 import { testServer } from '../helpers/TestServer.js';
+import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
 
 const address = Address.create({
     street: 'Demostraat',
@@ -255,6 +256,8 @@ describe('E2E.Stock', () => {
             }),
         }).create();
         token = await Token.createToken(user);
+
+        await initMembershipOrganization()
     });
 
     afterAll(() => {

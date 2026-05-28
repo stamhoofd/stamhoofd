@@ -896,7 +896,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         await Member.loadRegistrations(members, true);
 
         return new Response(RegisterResponse.create({
-            payment: payment ? await AuthenticatedStructures.paymentGeneral(payment) : null,
+            payment: payment ? await AuthenticatedStructures.paymentGeneral(payment, true) : null,
             members: await AuthenticatedStructures.membersBlob(members),
             registrations: registrations.map(r => Member.getRegistrationWithTinyMemberStructure(r)),
             paymentUrl,

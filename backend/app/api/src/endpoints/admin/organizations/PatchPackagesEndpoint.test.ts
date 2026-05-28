@@ -4,8 +4,8 @@ import { AccessRight, OrganizationPackagesStatus, STPackage, STPackageBundle, ST
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initAdmin, initPlatformAdmin } from '../../../../tests/init/index.js';
+import { initMembershipOrganization } from '../../../../tests/init/initMembershipOrganization.js';
 import { PatchPackagesEndpoint } from './PatchPackagesEndpoint.js';
-import { PatchableArray } from '@simonbackx/simple-encoding';
 
 const baseUrl = `/organization/packages`;
 const endpoint = new PatchPackagesEndpoint();
@@ -13,6 +13,10 @@ const endpoint = new PatchPackagesEndpoint();
 describe('Endpoint.PatchPackagesEndpoint', () => {
     beforeEach(async () => {
         TestUtils.setEnvironment('userMode', 'organization');
+    });
+
+    beforeAll(async () => {
+        await initMembershipOrganization()
     });
 
     describe('Permission checking', () => {
