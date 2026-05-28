@@ -115,8 +115,7 @@ export class BuckarooHelper {
             const status = this.getStatusFromResponse(response);
 
             return status === PaymentStatus.Pending || status === PaymentStatus.Created || status === PaymentStatus.Succeeded;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
         return false;
@@ -205,8 +204,7 @@ export class BuckarooHelper {
             await dbPayment.save();
 
             return response['RequiredAction']?.['RedirectURL'] ?? null;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             throw new SimpleError({
                 code: 'buckaroo_error',

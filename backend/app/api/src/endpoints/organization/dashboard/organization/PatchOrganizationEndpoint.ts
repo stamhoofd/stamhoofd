@@ -222,8 +222,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (request.body.privateMeta.buckarooSettings !== undefined) {
                     if (request.body.privateMeta.buckarooSettings === null) {
                         organization.privateMeta.buckarooSettings = null;
-                    }
-                    else {
+                    } else {
                         organization.privateMeta.buckarooSettings = organization.privateMeta.buckarooSettings ?? BuckarooSettings.create({});
                         organization.privateMeta.buckarooSettings.patchOrPut(request.body.privateMeta.buckarooSettings);
 
@@ -454,8 +453,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             // Save the organization
             await organization.save();
-        }
-        else {
+        } else {
             if (request.body.name || request.body.address || request.body.website || request.body.meta?.companies || request.body.meta?.recordsConfiguration || request.body.meta?.registrationPaymentConfiguration) {
                 throw new SimpleError({
                     code: 'permission_denied',
@@ -619,14 +617,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (shouldUpdateVATExcempt) {
             const platform = await Platform.getShared();
-            const sellingOrganizationId = platform.membershipOrganizationId
+            const sellingOrganizationId = platform.membershipOrganizationId;
             if (sellingOrganizationId) {
                 const sellingOrganization = await Organization.getByID(sellingOrganizationId, true);
 
                 await VATService.updateVATExcempt({
                     organization,
-                    sellingOrganization
-                })
+                    sellingOrganization,
+                });
             }
         }
 
@@ -651,8 +649,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Company not found',
-                        human: $t('De facturatiegegevens die je probeert aan te passen konden niet gevonden worden. Herlaad de pagina en probeer het opnieuw.')
-                    })
+                        human: $t('De facturatiegegevens die je probeert aan te passen konden niet gevonden worden. Herlaad de pagina en probeer het opnieuw.'),
+                    });
                 }
 
                 // Changed VAT number
@@ -675,8 +673,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 await ViesHelper.checkCompany(put, put);
             }
-        }
-        else {
+        } else {
             if (companies.length > 5) {
                 throw new SimpleError({
                     code: 'invalid_field',

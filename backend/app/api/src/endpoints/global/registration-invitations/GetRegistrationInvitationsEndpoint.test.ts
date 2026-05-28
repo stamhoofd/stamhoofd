@@ -30,7 +30,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             },
         });
 
-        return testServer.test<PaginatedResponse<RegistrationInvitationStruct[], LimitedFilteredRequest>>(endpoint, request)
+        return testServer.test<PaginatedResponse<RegistrationInvitationStruct[], LimitedFilteredRequest>>(endpoint, request);
     };
 
     afterEach(async () => {
@@ -46,7 +46,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
 
                 const resources = new Map();
-    
+
                 resources.set(
                     PermissionsResourceType.Groups, new Map([[
                         group.id,
@@ -55,31 +55,31 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                         }),
                     ]]),
                 );
-                
+
                 const user = await new UserFactory({
                     organization,
                     permissions: Permissions.create({
-                            level: PermissionLevel.None,
-                            resources,
-                        }),
+                        level: PermissionLevel.None,
+                        resources,
+                    }),
                 }).create();
 
                 const member = await new MemberFactory({
                     organization, user,
                     firstName: 'John',
                     lastName: 'Doe',
-                    birthDay: {year: 1994, month: 6, day: 24}
+                    birthDay: { year: 1994, month: 6, day: 24 },
                 }).create();
 
                 const member2 = await new MemberFactory({
                     organization, user,
                     firstName: 'Test1',
                     lastName: 'Test1',
-                    birthDay: {year: 1998, month: 3, day: 1}
+                    birthDay: { year: 1998, month: 3, day: 1 },
                 }).create();
 
                 // invitations for group
-                await new RegistrationInvitationFactory({ group, member, organization  }).create();
+                await new RegistrationInvitationFactory({ group, member, organization }).create();
                 await new RegistrationInvitationFactory({ group, member: member2, organization }).create();
 
                 // invitations for other group
@@ -94,7 +94,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 // assert
                 expect(response.status).toBe(200);
                 expect(response.body.results).toHaveLength(2);
-                expect(response.body.results.map((r) => r.id)).not.toContain(invitationForOtherGroup.id);
+                expect(response.body.results.map(r => r.id)).not.toContain(invitationForOtherGroup.id);
             });
 
             test('cannot read invitations for other group', async () => {
@@ -104,7 +104,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
 
                 const resources = new Map();
-    
+
                 resources.set(
                     PermissionsResourceType.Groups, new Map([[
                         group.id,
@@ -113,31 +113,31 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                         }),
                     ]]),
                 );
-                
+
                 const user = await new UserFactory({
                     organization,
                     permissions: Permissions.create({
-                            level: PermissionLevel.None,
-                            resources,
-                        }),
+                        level: PermissionLevel.None,
+                        resources,
+                    }),
                 }).create();
 
                 const member = await new MemberFactory({
                     organization, user,
                     firstName: 'John',
                     lastName: 'Doe',
-                    birthDay: {year: 1994, month: 6, day: 24}
+                    birthDay: { year: 1994, month: 6, day: 24 },
                 }).create();
 
                 const member2 = await new MemberFactory({
                     organization, user,
                     firstName: 'Test1',
                     lastName: 'Test1',
-                    birthDay: {year: 1998, month: 3, day: 1}
+                    birthDay: { year: 1998, month: 3, day: 1 },
                 }).create();
 
                 // invitations for group
-                await new RegistrationInvitationFactory({ group, member, organization  }).create();
+                await new RegistrationInvitationFactory({ group, member, organization }).create();
                 await new RegistrationInvitationFactory({ group, member: member2, organization }).create();
 
                 // invitations for other group
@@ -146,7 +146,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 // assert
                 await expect(getInvitations({
                     filter: {
-                        groupId: group2.id
+                        groupId: group2.id,
                     },
                     organization,
                     user,
@@ -160,7 +160,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 const groupName = 'test groep';
                 const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
                 const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                
+
                 const user = await new UserFactory({
                     organization,
                     permissions: Permissions.create({ level: PermissionLevel.Read }),
@@ -170,21 +170,21 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                     organization, user,
                     firstName: 'John',
                     lastName: 'Doe',
-                    birthDay: {year: 1994, month: 6, day: 24}
+                    birthDay: { year: 1994, month: 6, day: 24 },
                 }).create();
 
                 const member2 = await new MemberFactory({
                     organization, user,
                     firstName: 'Test1',
                     lastName: 'Test1',
-                    birthDay: {year: 1998, month: 3, day: 1}
+                    birthDay: { year: 1998, month: 3, day: 1 },
                 }).create();
 
                 const organization2 = await new OrganizationFactory({}).create();
                 const groupOfOtherOrganization = await new GroupFactory({ organization: organization2 }).create();
 
                 // invitations for group
-                await new RegistrationInvitationFactory({ group, member, organization  }).create();
+                await new RegistrationInvitationFactory({ group, member, organization }).create();
                 await new RegistrationInvitationFactory({ group, member: member2, organization }).create();
 
                 // invitations for other group
@@ -194,7 +194,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 const invitationForOtherOrganization = await new RegistrationInvitationFactory({
                     group: groupOfOtherOrganization,
                     member,
-                    organization: organization2
+                    organization: organization2,
                 }).create();
 
                 const response = await getInvitations({
@@ -207,15 +207,15 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 expect(response.status).toBe(200);
                 // should only include registrations for organization of user
                 expect(response.body.results).toHaveLength(3);
-                expect(response.body.results.map((r) => r.id)).not.toContain(invitationForOtherOrganization.id);
+                expect(response.body.results.map(r => r.id)).not.toContain(invitationForOtherOrganization.id);
             });
 
             test('cannot read invitations for other organization', async () => {
-                 const organization = await new OrganizationFactory({}).create();
+                const organization = await new OrganizationFactory({}).create();
                 const groupName = 'test groep';
                 const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
                 const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                
+
                 const user = await new UserFactory({
                     organization,
                     permissions: Permissions.create({ level: PermissionLevel.Read }),
@@ -225,21 +225,21 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                     organization, user,
                     firstName: 'John',
                     lastName: 'Doe',
-                    birthDay: {year: 1994, month: 6, day: 24}
+                    birthDay: { year: 1994, month: 6, day: 24 },
                 }).create();
 
                 const member2 = await new MemberFactory({
                     organization, user,
                     firstName: 'Test1',
                     lastName: 'Test1',
-                    birthDay: {year: 1998, month: 3, day: 1}
+                    birthDay: { year: 1998, month: 3, day: 1 },
                 }).create();
 
                 const organization2 = await new OrganizationFactory({}).create();
                 const groupOfOtherOrganization = await new GroupFactory({ organization: organization2 }).create();
 
                 // invitations for group
-                await new RegistrationInvitationFactory({ group, member, organization  }).create();
+                await new RegistrationInvitationFactory({ group, member, organization }).create();
                 await new RegistrationInvitationFactory({ group, member: member2, organization }).create();
 
                 // invitations for other group
@@ -249,12 +249,12 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 await new RegistrationInvitationFactory({
                     group: groupOfOtherOrganization,
                     member,
-                    organization: organization2
+                    organization: organization2,
                 }).create();
 
                 const response = await getInvitations({
                     filter: {
-                        organizationId: organization2.id
+                        organizationId: organization2.id,
                     },
                     organization,
                     user,
@@ -270,13 +270,13 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             beforeEach(async () => {
                 TestUtils.setEnvironment('userMode', 'platform');
             });
-            
+
             test('can read all invitations for read access for platform', async () => {
                 const organization = await new OrganizationFactory({}).create();
                 const groupName = 'test groep';
                 const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
                 const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                
+
                 const user = await new UserFactory({
                     globalPermissions: Permissions.create({ level: PermissionLevel.Read }),
                 }).create();
@@ -285,21 +285,21 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                     organization, user,
                     firstName: 'John',
                     lastName: 'Doe',
-                    birthDay: {year: 1994, month: 6, day: 24}
+                    birthDay: { year: 1994, month: 6, day: 24 },
                 }).create();
 
                 const member2 = await new MemberFactory({
                     organization, user,
                     firstName: 'Test1',
                     lastName: 'Test1',
-                    birthDay: {year: 1998, month: 3, day: 1}
+                    birthDay: { year: 1998, month: 3, day: 1 },
                 }).create();
 
                 const organization2 = await new OrganizationFactory({}).create();
                 const groupOfOtherOrganization = await new GroupFactory({ organization: organization2 }).create();
 
                 // invitations for group
-                await new RegistrationInvitationFactory({ group, member, organization  }).create();
+                await new RegistrationInvitationFactory({ group, member, organization }).create();
                 await new RegistrationInvitationFactory({ group, member: member2, organization }).create();
 
                 // invitations for other group
@@ -309,7 +309,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 const invitationForOtherOrganization = await new RegistrationInvitationFactory({
                     group: groupOfOtherOrganization,
                     member,
-                    organization: organization2
+                    organization: organization2,
                 }).create();
 
                 const response = await getInvitations({
@@ -322,7 +322,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 expect(response.status).toBe(200);
                 // should only include registrations for organization of user
                 expect(response.body.results).toHaveLength(4);
-                expect(response.body.results.map((r) => r.id)).toContain(invitationForOtherOrganization.id);
+                expect(response.body.results.map(r => r.id)).toContain(invitationForOtherOrganization.id);
             });
 
             test('can only read invitations for group with tag if only access to groups with tags', async () => {
@@ -335,7 +335,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
 
                 organization1.periodId = period.id;
                 await organization1.save();
-                
+
                 const groupName = 'test groep';
                 const group = await new GroupFactory({ organization: organization1, name: new TranslatedString(groupName), period }).create();
                 const group2 = await new GroupFactory({ organization: organization1, name: new TranslatedString(groupName), period }).create();
@@ -353,34 +353,34 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                         }),
                     ]]),
                 );
-                
+
                 const user = await new UserFactory({
                     globalPermissions: Permissions.create({
-                    level: PermissionLevel.None,
-                    roles: [],
-                    resources,
-                }),
+                        level: PermissionLevel.None,
+                        roles: [],
+                        resources,
+                    }),
                 }).create();
 
                 const member = await new MemberFactory({
                     organization: organization1, user,
                     firstName: 'John',
                     lastName: 'Doe',
-                    birthDay: {year: 1994, month: 6, day: 24}
+                    birthDay: { year: 1994, month: 6, day: 24 },
                 }).create();
 
                 const member2 = await new MemberFactory({
                     organization: organization1, user,
                     firstName: 'Test1',
                     lastName: 'Test1',
-                    birthDay: {year: 1998, month: 3, day: 1}
+                    birthDay: { year: 1998, month: 3, day: 1 },
                 }).create();
 
-                const organization2 = await new OrganizationFactory({tags: [tag], period}).create();
+                const organization2 = await new OrganizationFactory({ tags: [tag], period }).create();
                 const groupOfOtherOrganization = await new GroupFactory({ organization: organization2, period }).create();
 
                 // invitations for group
-                await new RegistrationInvitationFactory({ group, member, organization: organization1  }).create();
+                await new RegistrationInvitationFactory({ group, member, organization: organization1 }).create();
                 await new RegistrationInvitationFactory({ group, member: member2, organization: organization1 }).create();
 
                 // invitations for other group
@@ -390,7 +390,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 const invitationForOtherOrganization = await new RegistrationInvitationFactory({
                     group: groupOfOtherOrganization,
                     member,
-                    organization: organization2
+                    organization: organization2,
                 }).create();
 
                 const response = await getInvitations({
@@ -404,7 +404,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 expect(response.status).toBe(200);
                 // should only include registrations for organization of user
                 expect(response.body.results).toHaveLength(1);
-                expect(response.body.results.map((r) => r.id)).toContain(invitationForOtherOrganization.id);
+                expect(response.body.results.map(r => r.id)).toContain(invitationForOtherOrganization.id);
 
                 // should not have access to all invitations of organization1
                 await expect(getInvitations({
@@ -425,7 +425,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
 
                 organization.periodId = period.id;
                 await organization.save();
-                
+
                 const groupName = 'test groep';
                 const group = await new GroupFactory({ organization, name: new TranslatedString(groupName), period }).create();
                 const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName), period }).create();
@@ -443,34 +443,34 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                         }),
                     ]]),
                 );
-                
+
                 const user = await new UserFactory({
                     globalPermissions: Permissions.create({
-                    level: PermissionLevel.None,
-                    roles: [],
-                    resources,
-                }),
+                        level: PermissionLevel.None,
+                        roles: [],
+                        resources,
+                    }),
                 }).create();
 
                 const member = await new MemberFactory({
                     organization, user,
                     firstName: 'John',
                     lastName: 'Doe',
-                    birthDay: {year: 1994, month: 6, day: 24}
+                    birthDay: { year: 1994, month: 6, day: 24 },
                 }).create();
 
                 const member2 = await new MemberFactory({
                     organization, user,
                     firstName: 'Test1',
                     lastName: 'Test1',
-                    birthDay: {year: 1998, month: 3, day: 1}
+                    birthDay: { year: 1998, month: 3, day: 1 },
                 }).create();
 
-                const organization2 = await new OrganizationFactory({tags: [tag], period}).create();
+                const organization2 = await new OrganizationFactory({ tags: [tag], period }).create();
                 const groupOfOtherOrganization = await new GroupFactory({ organization: organization2, period }).create();
 
                 // invitations for group
-                await new RegistrationInvitationFactory({ group, member, organization  }).create();
+                await new RegistrationInvitationFactory({ group, member, organization }).create();
                 await new RegistrationInvitationFactory({ group, member: member2, organization }).create();
 
                 // invitations for other group
@@ -480,7 +480,7 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 await new RegistrationInvitationFactory({
                     group: groupOfOtherOrganization,
                     member,
-                    organization: organization2
+                    organization: organization2,
                 }).create();
 
                 await expect(getInvitations({
@@ -491,5 +491,4 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             });
         });
     });
-
 });

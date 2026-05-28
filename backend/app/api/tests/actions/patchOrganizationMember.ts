@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization } from '@stamhoofd/models';

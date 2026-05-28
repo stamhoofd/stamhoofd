@@ -1,5 +1,5 @@
 import { GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, Group as GroupStruct, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
-import type { Organization} from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { Group, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/models';
 
 export class GroupBuilder {
@@ -18,8 +18,7 @@ export class GroupBuilder {
             // Setup default groups if possible
             if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
                 await this.createSGVGroups(period);
-            }
-            else if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization === UmbrellaOrganization.ChiroNationaal) {
+            } else if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization === UmbrellaOrganization.ChiroNationaal) {
                 await this.createChiroGroups(period);
             }
         }
@@ -53,8 +52,7 @@ export class GroupBuilder {
             }
 
             await organizationPeriod.save();
-        }
-        else {
+        } else {
             const newGroups = groups.filter(g => !oldGroups.find(gg => gg.id === g.id));
             const sortedGroupIds = newGroups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id);
             let root = organizationPeriod.settings.rootCategory!;

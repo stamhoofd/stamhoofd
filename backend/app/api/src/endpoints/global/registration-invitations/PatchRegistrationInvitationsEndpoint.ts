@@ -16,7 +16,6 @@ type Body = PatchableArrayAutoEncoder<RegistrationInvitationRequest>;
 type ResponseBody = RegistrationInvitationStruct[];
 
 export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-     
     bodyDecoder = new PatchableArrayDecoder(
         RegistrationInvitationRequest as Decoder<RegistrationInvitationRequest>,
         RegistrationInvitationRequest.patchType() as Decoder<AutoEncoderPatchType<RegistrationInvitationRequest>>,
@@ -67,7 +66,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                         .where('groupId', invitation.groupId)
                         .andWhere('memberId', invitation.memberId)
                         .first(false);
-                    
+
                     if (duplicate) {
                         invitations.push(duplicate);
                     }
@@ -100,7 +99,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
 
             // Anyone with write access to the group can delete invitations for the group
             const group = await Group.getByID(invitation.groupId);
-    
+
             if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                 throw Context.auth.error($t(`%1UN`));
             }
@@ -145,14 +144,14 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
         }
 
         const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
-        
+
         if (!member
             // in userMode 'organization' we can only invite members from the same organization
             || (STAMHOOFD.userMode === 'organization' && member.organizationId !== organizationId)
             // read access is suficient
             || !await Context.auth.canAccessMember(member, PermissionLevel.Read)
-            ) {
-                throw Context.auth.error($t(`%1Qv`));
+        ) {
+            throw Context.auth.error($t(`%1Qv`));
         }
 
         // cannot invite if already registered
@@ -162,7 +161,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 statusCode: 400,
                 message: 'The member is already registered for this group',
                 human: $t('%1S2'),
-            })
+            });
         }
     }
 }

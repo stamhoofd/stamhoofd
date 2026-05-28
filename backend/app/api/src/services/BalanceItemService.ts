@@ -53,7 +53,7 @@ const bundleDiscountsUpdateQueue = new ThrottledQueue(async (registrationIds: st
 }, { maxDelay: 10_000 });
 
 export class BalanceItemService {
-    static listening = false
+    static listening = false;
 
     static listen() {
         if (this.listening) {
@@ -66,7 +66,7 @@ export class BalanceItemService {
             }
 
             if (event.type === 'created' || event.type === 'deleted') {
-                await this.scheduleUpdate(event.model);
+                this.scheduleUpdate(event.model);
                 return;
             }
 
@@ -81,7 +81,7 @@ export class BalanceItemService {
                 || 'payingOrganizationId' in event.changedFields
                 || 'registrationId' in event.changedFields
             ) {
-                await this.scheduleUpdate(event.model);
+                this.scheduleUpdate(event.model);
             }
         });
     }
@@ -206,7 +206,7 @@ export class BalanceItemService {
     static async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
         if (payment && payment.type === PaymentType.Chargeback) {
             const realPayment = payment.reversingPaymentId ? (await Payment.getByID(payment.reversingPaymentId) ?? null) : null;
-            await this.handleChargeback(balanceItem, payment, realPayment, organization)
+            await this.handleChargeback(balanceItem, payment, realPayment, organization);
             return;
         }
 
@@ -301,15 +301,15 @@ export class BalanceItemService {
     }
 
     /**
-     * 
+     *
      */
     static async handleChargeback(balanceItem: BalanceItem, chargeback: Payment | null, payment: Payment | null, organization: Organization) {
         if (balanceItem.failedAt) {
             // Already ran side effects
-            return
+            return;
         }
 
-        console.log('Handling chargeback for balanceItem', balanceItem)
+        console.log('Handling chargeback for balanceItem', balanceItem);
 
         if (balanceItem.type === BalanceItemType.STPackage || balanceItem.type === BalanceItemType.ServiceFee || balanceItem.type === BalanceItemType.TransferFee) {
             // If this was charged by an admin via an existing mandate
@@ -320,13 +320,13 @@ export class BalanceItemService {
                 // Mark all active packages as failed
                 const payingOrganizationId = payment.payingOrganizationId ?? chargeback?.payingOrganizationId;
                 if (payingOrganizationId) {
-                    await STPackageService.markFailedPayment(payingOrganizationId)
+                    await STPackageService.markFailedPayment(payingOrganizationId);
                 }
             }
         }
 
-        balanceItem.failedAt = new Date()
-        await balanceItem.save()
+        balanceItem.failedAt = new Date();
+        await balanceItem.save();
     }
 
     static async markFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
@@ -358,28 +358,28 @@ export class BalanceItemService {
     /**
      * Apply discounts to the balance a user is going to checkout
      */
-    static async applyDiscountsToCheckout({minimumAmount, totalPrice, balanceItems, sellingOrganizationId, payingOrganizationId, payingUserId}: {
-        balanceItems: Map<BalanceItem, number>,
-        totalPrice: number,
-        minimumAmount?: number,
-        sellingOrganizationId: string,
-        payingOrganizationId?: string | null | undefined,
-        payingUserId?: string | null | undefined,
+    static async applyDiscountsToCheckout({ minimumAmount, totalPrice, balanceItems, sellingOrganizationId, payingOrganizationId, payingUserId }: {
+        balanceItems: Map<BalanceItem, number>;
+        totalPrice: number;
+        minimumAmount?: number;
+        sellingOrganizationId: string;
+        payingOrganizationId?: string | null | undefined;
+        payingUserId?: string | null | undefined;
     }) {
         if (totalPrice <= (minimumAmount ?? 0)) {
             return {
-                totalPrice
+                totalPrice,
             };
         }
 
-        let items: BalanceItem[]
+        let items: BalanceItem[];
         if (payingOrganizationId) {
             items = await BalanceItem.select()
                 .where('organizationId', sellingOrganizationId)
                 .where('payingOrganizationId', payingOrganizationId)
                 .whereNot('status', BalanceItemStatus.Hidden)
                 .where('priceOpen', '<', 0)
-                .fetch()
+                .fetch();
         } else if (payingUserId) {
             const memberUsers = await MemberUser.select().where('usersId', payingUserId).fetch();
             const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
@@ -388,14 +388,14 @@ export class BalanceItemService {
                 .where('organizationId', sellingOrganizationId)
                 .where(
                     SQL.where('userId', payingUserId)
-                        .or('memberId', memberIds)
+                        .or('memberId', memberIds),
                 )
                 .whereNot('status', BalanceItemStatus.Hidden)
                 .where('priceOpen', '<', 0)
-                .fetch()
+                .fetch();
         } else {
             return {
-                totalPrice
+                totalPrice,
             };
         }
 
@@ -404,12 +404,12 @@ export class BalanceItemService {
             if (remove === 0) {
                 break;
             }
-            balanceItems.set(item, -remove)
+            balanceItems.set(item, -remove);
             totalPrice -= remove;
         }
 
         return {
-            totalPrice
-        }
+            totalPrice,
+        };
     }
 };

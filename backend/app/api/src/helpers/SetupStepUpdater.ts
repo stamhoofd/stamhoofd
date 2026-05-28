@@ -14,12 +14,12 @@ import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import type {
     MemberResponsibility,
     Platform as PlatformStruct,
-    SetupSteps} from '@stamhoofd/structures';
+    SetupSteps } from '@stamhoofd/structures';
 import {
     AuditLogSource,
     GroupType,
     RecordCategory,
-    SetupStepType
+    SetupStepType,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService.js';
@@ -111,14 +111,14 @@ export class SetupStepUpdater {
         SetupStepType,
         SetupStepOperation
     > = {
-            [SetupStepType.Responsibilities]: this.updateStepResponsibilities,
-            [SetupStepType.Companies]: this.updateStepCompanies,
-            [SetupStepType.Groups]: this.updateStepGroups,
-            [SetupStepType.Premises]: this.updateStepPremises,
-            [SetupStepType.Emails]: this.updateStepEmails,
-            [SetupStepType.Payment]: this.updateStepPayment,
-            [SetupStepType.Registrations]: this.updateStepRegistrations,
-        };
+        [SetupStepType.Responsibilities]: this.updateStepResponsibilities,
+        [SetupStepType.Companies]: this.updateStepCompanies,
+        [SetupStepType.Groups]: this.updateStepGroups,
+        [SetupStepType.Premises]: this.updateStepPremises,
+        [SetupStepType.Emails]: this.updateStepEmails,
+        [SetupStepType.Payment]: this.updateStepPayment,
+        [SetupStepType.Registrations]: this.updateStepRegistrations,
+    };
 
     static async updateSetupStepsForAllOrganizationsInCurrentPeriod({
         batchSize,
@@ -312,8 +312,7 @@ export class SetupStepUpdater {
                 totalSteps,
                 finishedSteps,
             });
-        }
-        else {
+        } else {
             // if no premise types, remove step
             setupSteps.remove(SetupStepType.Premises);
         }
@@ -346,8 +345,7 @@ export class SetupStepUpdater {
                     platform.config.organizationLevelRecordsConfiguration.recordCategories,
                     organization.getBaseStructureWithPrivateMeta(), // private data needed for answers
                 );
-            }
-            catch (error) {
+            } catch (error) {
                 console.error('Error validating record categories for organization', organization.id, error);
                 finishedSteps = 0;
             }
@@ -375,10 +373,10 @@ export class SetupStepUpdater {
         const allRecords = responsibilityIds.length === 0
             ? []
             : await MemberResponsibilityRecord.select()
-                .where('responsibilityId', responsibilityIds)
-                .where('organizationId', organization.id)
-                .where(SQL.where('endDate', SQLWhereSign.Greater, now).or('endDate', null))
-                .fetch();
+                    .where('responsibilityId', responsibilityIds)
+                    .where('organizationId', organization.id)
+                    .where(SQL.where('endDate', SQLWhereSign.Greater, now).or('endDate', null))
+                    .fetch();
 
         // Remove invalid responsibilities: members that are not registered in the current period
         const memberIds = Formatter.uniqueArray(allRecords.map(r => r.memberId));
@@ -444,8 +442,7 @@ export class SetupStepUpdater {
                         totalRecordsWithThisResponsibility++;
                     }
                 }
-            }
-            else {
+            } else {
                 for (const record of records) {
                     if (record.responsibilityId === responsibilityId && record.groupId === group.id) {
                         totalRecordsWithThisResponsibility++;
@@ -488,8 +485,7 @@ export class SetupStepUpdater {
 
         if (finishedSteps >= totalSteps) {
             setupSteps.markReviewed(SetupStepType.Emails, { userId: 'backend', userName: 'backend' });
-        }
-        else {
+        } else {
             setupSteps.resetReviewed(SetupStepType.Emails);
         }
     }
@@ -510,11 +506,11 @@ export class SetupStepUpdater {
 
         const groupsWithDefaultAgeGroups = defaultAgeGroupIds.length > 0
             ? await Group.select()
-                .where('organizationId', organization.id)
-                .where('periodId', platform.period.id)
-                .where('defaultAgeGroupId', defaultAgeGroupIds)
-                .where('deletedAt', null)
-                .fetch()
+                    .where('organizationId', organization.id)
+                    .where('periodId', platform.period.id)
+                    .where('defaultAgeGroupId', defaultAgeGroupIds)
+                    .where('deletedAt', null)
+                    .fetch()
             : [];
 
         let totalSteps = 0;
@@ -530,8 +526,7 @@ export class SetupStepUpdater {
             if (!processedDefaultAgeGroupIds.has(defaultAgeGroup.id)) {
                 totalSteps += defaultAgeGroup.minimumRequiredMembers;
                 processedDefaultAgeGroupIds.set(defaultAgeGroup.id, Math.min(defaultAgeGroup.minimumRequiredMembers, group.settings.registeredMembers ?? 0));
-            }
-            else {
+            } else {
                 processedDefaultAgeGroupIds.set(defaultAgeGroup.id,
                     Math.min(
                         defaultAgeGroup.minimumRequiredMembers,
@@ -550,8 +545,7 @@ export class SetupStepUpdater {
 
         if (finishedSteps >= totalSteps) {
             setupSteps.markReviewed(SetupStepType.Registrations, { userId: 'backend', userName: 'backend' });
-        }
-        else {
+        } else {
             setupSteps.resetReviewed(SetupStepType.Registrations);
         }
     }

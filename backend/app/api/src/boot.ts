@@ -49,7 +49,7 @@ if (new Date().getTimezoneOffset() !== 0) {
     throw new Error('Process should always run in UTC timezone');
 }
 
-const seeds = async (options: {shutdown: () => Promise<void>}) => {
+const seeds = async (options: { shutdown: () => Promise<void> }) => {
     if (await checkReadOnly()) {
         console.error(new StyledText(`[SEEDS] `).addClass('migration', 'tag'), new StyledText('MySQL is in read-only mode: Seeds are disabled.').addClass('error'));
         return;
@@ -66,8 +66,7 @@ const seeds = async (options: {shutdown: () => Promise<void>}) => {
                 }
             }
         });
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to run seeds:');
         console.error(e);
     }
@@ -82,13 +81,13 @@ function productionLog(message: string) {
 
 export const boot = async (options: { killProcess: boolean }) => {
     // Make sure we use the current environment for connecting to the database
-    await Database.reload({})
+    await Database.reload({});
 
     productionLog('Running server at v' + Version);
     productionLog('Running server at port ' + STAMHOOFD.PORT);
     productionLog('Running server on DB ' + process.env.DB_DATABASE); // note, should always use process env here
     console.log('Node version is: ' + process.version);
-    
+
     AutoEncoder.skipDefaultValuesVersion = 10000; // todo
 
     loadLogger();
@@ -174,8 +173,7 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
         CpuService.startMonitoring();
-    }
-    else if (STAMHOOFD.environment === 'development') {
+    } else if (STAMHOOFD.environment === 'development') {
         const { loadDebugFunctions } = await import('./debug.js');
         loadDebugFunctions({ routerServer });
     }
@@ -211,8 +209,7 @@ export const boot = async (options: { killProcess: boolean }) => {
         try {
             await routerServer.close();
             productionLog('HTTP server stopped');
-        }
-        catch (err) {
+        } catch (err) {
             console.error('Failed to stop HTTP server:');
             console.error(err);
         }
@@ -233,8 +230,7 @@ export const boot = async (options: { killProcess: boolean }) => {
                 console.log(`${Email.currentQueue.length} emails still in queue. Waiting 500ms...`);
                 await sleep(500);
             }
-        }
-        catch (err) {
+        } catch (err) {
             console.error('Failed to wait for emails to finish:');
             console.error(err);
         }
@@ -242,8 +238,7 @@ export const boot = async (options: { killProcess: boolean }) => {
         try {
             await Database.end();
             productionLog('MySQL connections closed');
-        }
-        catch (err) {
+        } catch (err) {
             console.error('Failed to close MySQL connection:');
             console.error(err);
         }

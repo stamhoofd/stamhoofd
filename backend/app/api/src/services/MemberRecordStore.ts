@@ -11,7 +11,7 @@ export type RecordCacheEntry = { record: RecordSettings; rootCategoryId: string;
  * - It allows fast retrieving of record settings by id (for permission checking)
  */
 class MemberRecordStoreService {
-    private  cache = new Map<string, RecordCacheEntry>();
+    private cache = new Map<string, RecordCacheEntry>();
 
     init() {
         // Should only be used in userMode platform
@@ -23,9 +23,9 @@ class MemberRecordStoreService {
         this.loadIfNeeded().catch(console.error);
     }
 
-    private  listening = false;
+    private listening = false;
 
-    private  listen() {
+    private listen() {
         // Create listeners to update data as organizations and platform is updated
         if (this.listening) {
             return;
@@ -86,8 +86,8 @@ class MemberRecordStoreService {
         });
     }
 
-    private  _loadAllPromise: Promise<void> | null = null;
-    private  _didLoadAll = false;
+    private _loadAllPromise: Promise<void> | null = null;
+    private _didLoadAll = false;
 
     private async loadIfNeeded() {
         if (this._didLoadAll) {
@@ -96,8 +96,7 @@ class MemberRecordStoreService {
 
         if (this._loadAllPromise) {
             await this._loadAllPromise;
-        }
-        else {
+        } else {
             if (STAMHOOFD.userMode !== 'platform') {
                 // Important to throw an error because in tests the userMode can change in between tests
                 throw new Error('Should only be loaded in userMode platform.');
@@ -106,8 +105,7 @@ class MemberRecordStoreService {
             this._loadAllPromise = (async () => {
                 try {
                     await this.loadAll();
-                }
-                catch (e) {
+                } catch (e) {
                     // Failed to load
                     this._loadAllPromise = null;
                     throw e;
@@ -164,7 +162,7 @@ class MemberRecordStoreService {
         this.listen();
     }
 
-     async getRecord(id: string): Promise<RecordCacheEntry | null> {
+    async getRecord(id: string): Promise<RecordCacheEntry | null> {
         await this.loadIfNeeded();
         return this.cache.get(id) ?? null;
     }

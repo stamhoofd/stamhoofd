@@ -59,8 +59,7 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 },
             };
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
-        }
-        else {
+        } else {
             // Platform context: check platform access
             const tags = Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Read);
 
@@ -124,8 +123,7 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         try {
             data = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',

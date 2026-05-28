@@ -83,8 +83,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 },
                             },
                         };
-                    }
-                    else {
+                    } else {
                         // Can only access current period
                         scopeFilter = {
                             registrations: {
@@ -95,8 +94,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             },
                         };
                     }
-                }
-                else {
+                } else {
                     // Check which normal membership groups we have access to and filter on those
                     const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.WaitingList]);
                     Context.auth.cacheGroups(groups);
@@ -197,8 +195,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         ],
                     };
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to parse phone number', search, e);
             }
         }
@@ -216,8 +213,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         // e-mail or name based searching
         if (searchFilter) {
             // already done
-        }
-        else if (search.includes('@')) {
+        } else if (search.includes('@')) {
             const isCompleteAddress = DataValidator.isEmailValid(search);
 
             // Member email address contains, or member parent contains
@@ -240,8 +236,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     },
                 ],
             } as any as StamhoofdFilter;
-        }
-        else {
+        } else {
             searchFilter = {
                 name: {
                     $contains: search,
@@ -260,8 +255,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         try {
             data = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',

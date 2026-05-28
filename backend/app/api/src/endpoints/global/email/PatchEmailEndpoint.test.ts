@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod, User} from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -698,8 +698,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
             if (recipient.email) {
                 expect(loginDetails?.html).toContain(recipient.email || ''); // If no email, won't contain it
-            }
-            else {
+            } else {
                 // Cehck loginDetails is an empty string
                 expect(loginDetails?.html).toBe(undefined);
                 expect(loginDetails?.value).toBe('');
@@ -719,11 +718,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             expect(firstNameMember).toBeDefined();
             if (recipient.memberId === memberWithEmail.id) {
                 expect(firstNameMember?.value).toBe(memberWithEmail.details.firstName);
-            }
-            else if (recipient.memberId === memberWithoutEmail.id) {
+            } else if (recipient.memberId === memberWithoutEmail.id) {
                 expect(firstNameMember?.value).toBe(memberWithoutEmail.details.firstName);
-            }
-            else {
+            } else {
                 throw new Error('Recipient has unexpected memberId ' + recipient.memberId);
             }
 

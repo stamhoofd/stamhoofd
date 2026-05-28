@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { DetailedReceivableBalance, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 
@@ -113,8 +113,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
 
                 if (memberIds.length === 0) {
                     q.where(SQL.column(BalanceItem.table, 'userId'), request.params.id);
-                }
-                else {
+                } else {
                     q.where(
                         SQL.where(SQL.column(BalanceItem.table, 'userId'), request.params.id)
                             .or(SQL.column(BalanceItem.table, 'memberId'), memberIds),

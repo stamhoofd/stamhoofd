@@ -1,6 +1,6 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, EmailAddress } from '@stamhoofd/email';
@@ -92,8 +92,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
 
             await email.save();
             return new Response(undefined);
-        }
-        else {
+        } else {
             if (!request.body.email) {
                 throw new SimpleError({
                     code: 'missing_field',
@@ -109,8 +108,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 if (!await Context.auth.hasFullAccess(organization.id)) {
                     throw Context.auth.error();
                 }
-            }
-            else {
+            } else {
                 if (!Context.auth.hasPlatformFullAccess()) {
                     throw Context.auth.error();
                 }
@@ -147,8 +145,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 if (!isBlocked && wasBlocked && !Context.auth.hasPlatformFullAccess()) {
                     try {
                         unblockLimiter.track(organization?.id ?? '', 1);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         Email.sendWebmaster({
                             subject: '[Limiet] Limiet bereikt voor aantal unblocks',
                             text: 'Beste, \nDe limiet werd bereikt voor het aantal email unblocks per week. \nUser: ' + user.email + '\n\nVereniging: ' + (organization ? (organization.id + ' (' + organization.name + ')') : 'platform') + '\n\n' + e.message + '\n\nStamhoofd',
@@ -176,8 +173,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                     const command = new DeleteSuppressedDestinationCommand(input);
                     const response = await client.send(command);
                     console.log('Removed from AWS suppression list', request.body.email, response);
-                }
-                catch (error) {
+                } catch (error) {
                     console.error('Error removing from suppression list', request.body.email, error);
                 }
             }

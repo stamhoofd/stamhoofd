@@ -12,9 +12,9 @@ import { checkPermissionsFor } from './checkPermissionsFor.js';
 import { checkUitpasNumbers } from './checkUitpasNumbers.js';
 import { getSocialTariffForEvent } from './getSocialTariffForEvent.js';
 import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers.js';
-import type { GetPassResponse} from './PassholderEndpoints.js';
+import type { GetPassResponse } from './PassholderEndpoints.js';
 import { PassholderEndpoints } from './PassholderEndpoints.js';
-import type { RegisterTicketSaleRequest, RegisterTicketSaleResponse} from './registerTicketSales.js';
+import type { RegisterTicketSaleRequest, RegisterTicketSaleResponse } from './registerTicketSales.js';
 import { registerTicketSales } from './registerTicketSales.js';
 import { searchUitpasEvents } from './searchUitpasEvents.js';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers.js';
@@ -202,8 +202,7 @@ export class UitpasService {
                 }
                 try {
                     newlyRegistered = await registerTicketSales(access_token, toBeRegisteredUitpasRequests);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error('Failed to register UiTPAS ticket sales', e);
                 }
             }
@@ -269,8 +268,7 @@ export class UitpasService {
                         }
                     }
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to update UiTPAS-numbers after order update', e);
             }
         });
@@ -353,8 +351,7 @@ export class UitpasService {
         let access_token!: string;
         try {
             access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) && e.hasCode('uitpas_api_not_configured_for_platform')) {
                 console.error('UiTPAS API has not been configured for this platform, so defaulting to an unknown status for number ', uitpasNumber);
                 // Ignore and return status of unknown
@@ -444,8 +441,7 @@ export class UitpasService {
                         });
                     }
                 }
-            }
-            else {
+            } else {
                 // non-official flow
                 access_token_platform = access_token_platform ?? await UitpasTokenRepository.getAccessTokenFor();
                 await checkUitpasNumbers(access_token_platform, item.uitpasNumbers.map(p => p.uitpasNumber));

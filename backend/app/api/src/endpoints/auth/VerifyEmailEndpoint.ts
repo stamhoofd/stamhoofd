@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, Token, User } from '@stamhoofd/models';
@@ -71,8 +71,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         try {
             await user.save();
-        }
-        catch (e) {
+        } catch (e) {
             // Duplicate key probably
             if (e.code && e.code == 'ER_DUP_ENTRY') {
                 throw new SimpleError({

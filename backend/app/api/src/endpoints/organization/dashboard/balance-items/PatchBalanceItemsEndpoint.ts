@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Member, Order, User } from '@stamhoofd/models';
@@ -165,8 +165,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                             });
                         }
                         model.memberId = null;
-                    }
-                    else {
+                    } else {
                         model.memberId = (await this.validateMemberId(patch.memberId)).id;
                     }
                 }
@@ -191,7 +190,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 const VATPercentageBefore = model.VATPercentage;
                 const includedBefore = model.VATIncluded;
-                const excemptBefore = model.VATExcempt
+                const excemptBefore = model.VATExcempt;
 
                 model.VATIncluded = patch.VATIncluded === undefined ? model.VATIncluded : patch.VATIncluded;
                 model.VATPercentage = patch.VATPercentage === undefined ? model.VATPercentage : patch.VATPercentage;
@@ -202,8 +201,8 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invoiced',
                             message: 'You cannot change VAT settings of balance items when the balance item has been invoiced',
-                            human: $t('%1Rt')
-                        })
+                            human: $t('%1Rt'),
+                        });
                     }
                 }
 
@@ -229,8 +228,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     if (model.pricePaid === 0) {
                         model.status = BalanceItemStatus.Hidden;
                     }
-                }
-                else if (patch.status) {
+                } else if (patch.status) {
                     model.status = patch.status;
                 }
 

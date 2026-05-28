@@ -33,8 +33,7 @@ export function deleteExpiredTemporaryMemberAccess() {
 
         if (filtered.length === 0) {
             userMemberTemporaryAccessCache.delete(userId);
-        }
-        else {
+        } else {
             userMemberTemporaryAccessCache.set(userId, filtered);
         }
     }

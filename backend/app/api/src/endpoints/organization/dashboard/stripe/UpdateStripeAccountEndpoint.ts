@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import { AuditLogSource, PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';

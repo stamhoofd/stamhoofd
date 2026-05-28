@@ -60,8 +60,7 @@ export default new Migration(async () => {
                     break;
                 }
                 id = orders[orders.length - 1].id;
-            }
-            catch (e) {
+            } catch (e) {
                 if (e.toString() && e.toString().includes('RangeError')) {
                     console.error('Found decoding issue at ' + id);
                     console.error(e);
@@ -81,8 +80,7 @@ export default new Migration(async () => {
                             console.log('Deleting order');
                             // Delete
                             await _orders[0].delete();
-                        }
-                        else {
+                        } else {
                             console.error('Could not find causing order');
                             throw e;
                         }

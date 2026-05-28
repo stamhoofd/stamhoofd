@@ -1,8 +1,8 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
-import type { ChallengeGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct} from '@stamhoofd/structures';
+import type { ChallengeGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
 import { CreateTokenStruct, LoginMethod, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';

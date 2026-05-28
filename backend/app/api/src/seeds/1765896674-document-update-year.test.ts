@@ -1,4 +1,4 @@
-import type { RegistrationPeriod} from '@stamhoofd/models';
+import type { RegistrationPeriod } from '@stamhoofd/models';
 import { DocumentTemplate, DocumentTemplateFactory, GroupFactory, OrganizationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { migrateDocumentYears } from './1765896674-document-update-year.js';
 

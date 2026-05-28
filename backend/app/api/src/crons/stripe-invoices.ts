@@ -5,11 +5,11 @@ import { Organization, Platform } from '@stamhoofd/models';
 
 registerCron('stripe-invoices', createStripeInvoices);
 
-let lastStripeInvoice: Date | null = null
+let lastStripeInvoice: Date | null = null;
 
 async function createStripeInvoices() {
     if (STAMHOOFD.environment !== 'production') {
-        //return;
+        // return;
     }
 
     if (STAMHOOFD.userMode === 'platform') {
@@ -21,28 +21,28 @@ async function createStripeInvoices() {
     }
 
     // Wait for the next day before doing a new check
-    const today = new Date()
+    const today = new Date();
     if (lastStripeInvoice && Formatter.dateIso(lastStripeInvoice) === Formatter.dateIso(today)) {
-        console.log('Stripe check done for this day')
-        return
+        console.log('Stripe check done for this day');
+        return;
     }
-    console.log('Creating Stripe Invoices...')
+    console.log('Creating Stripe Invoices...');
 
     if (!STAMHOOFD.STRIPE_SECRET_KEY) {
-        console.log('No stripe key set')
-        return
+        console.log('No stripe key set');
+        return;
     }
 
-    const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId
+    const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
     if (!membershipOrganizationId) {
         return;
     }
 
-    const membershipOrganization = await Organization.getByID(membershipOrganizationId, true)
-    
+    const membershipOrganization = await Organization.getByID(membershipOrganizationId, true);
+
     const invoicer = new StripeInvoicer({
         secretKey: STAMHOOFD.STRIPE_SECRET_KEY,
-    })
-    await invoicer.generateAllInvoices(membershipOrganization)
-    lastStripeInvoice = new Date()
+    });
+    await invoicer.generateAllInvoices(membershipOrganization);
+    lastStripeInvoice = new Date();
 }

@@ -35,8 +35,7 @@ export class PassholderEndpoints {
                 headers: this.getHeaders(),
                 signal: AbortSignal.timeout(10000),
             });
-        }
-        catch (error) {
+        } catch (error) {
             if (isTimeout(error)) {
                 throw new SimpleError({
                     statusCode: 408,
@@ -60,8 +59,7 @@ export class PassholderEndpoints {
         try {
             const json = await handleUitpasResponse(response);
             return jsonToGetPassResponse(json);
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 if (e.hasCode('https://api.publiq.be/probs/uitpas/pass-not-found')) {
                     throw new SimpleError({
@@ -168,8 +166,7 @@ function assertValidGetPassResponse(json: unknown): asserts json is GetPassRespo
                 }
             });
         }
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Invalid response when retrieving pass by UiTPAS number:', json);
         throw new SimpleError({
             code: 'invalid_response_retrieving_pass_by_uitpas_number',

@@ -115,8 +115,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     }
                     organizationPeriod.settings = organizationPeriod.settings.patch(patch.settings);
                 }
-            }
-            else {
+            } else {
                 /// Only allow editing category group ids
                 if (patch.settings) {
                     // Only allow adding groups if we have create permissions in a given category group
@@ -184,8 +183,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         if (locked) {
                             throw Context.auth.error($t(`%F1`));
                         }
-                    }
-                    else if (locked !== categoryAfter.settings.locked) {
+                    } else if (locked !== categoryAfter.settings.locked) {
                         throw Context.auth.error($t(`%F2`));
                     }
 
@@ -349,8 +347,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             s.settings.reservedMembers = 0;
             try {
                 await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
-            }
-            catch (e) {
+            } catch (e) {
                 // Can happen when a group is no longer valid anymore when duplicating a period
                 console.error('Error creating group', s.id, e);
             }
@@ -563,8 +560,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
                     model.waitingListId = null;
                 }
-            }
-            else if (patch.waitingList.isPatch()) {
+            } else if (patch.waitingList.isPatch()) {
                 if (!model.waitingListId) {
                     throw new SimpleError({
                         code: 'invalid_field',
@@ -579,8 +575,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     allowPatchWaitingListPeriod: shouldUpdatePeriodIds,
                     isPatchingEvent,
                 });
-            }
-            else {
+            } else {
                 if (model.waitingListId) {
                     // for now don't delete, as waiting lists can be shared between multiple groups
                     // await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(model.waitingListId)
@@ -608,8 +603,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     }
 
                     model.waitingListId = existing.id;
-                }
-                else {
+                } else {
                     const requiredPeriod = period ?? await RegistrationPeriod.getByID(model.periodId);
 
                     if (!requiredPeriod) {
@@ -635,8 +629,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.waitingListId = group.id;
                 }
             }
-        }
-        else if (shouldUpdatePeriodIds && model.waitingListId && period) {
+        } else if (shouldUpdatePeriodIds && model.waitingListId && period) {
             // update waiting list period
             await throwIfUpdateWaitingListPeriodWithMultipleGroups(model.waitingListId);
             await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
@@ -672,8 +665,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             if (!await Context.auth.hasFullAccess(organizationId)) {
                 throw Context.auth.error($t(`%FA`));
             }
-        }
-        else {
+        } else {
             // For events, permission checking needs to happen outside this method (access to event = access to group)
         }
 
@@ -759,8 +751,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 }
 
                 model.waitingListId = existing.id;
-            }
-            else {
+            } else {
                 struct.waitingList.type = GroupType.WaitingList;
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                     struct.waitingList,

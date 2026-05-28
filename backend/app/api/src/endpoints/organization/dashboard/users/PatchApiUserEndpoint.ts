@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { isPatch } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
@@ -67,12 +67,10 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                             message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
                         });
                     }
-                }
-                else {
+                } else {
                     if (editUser.permissions) {
                         editUser.permissions.patchOrPut(request.body.permissions);
-                    }
-                    else {
+                    } else {
                         editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null;
                     }
 

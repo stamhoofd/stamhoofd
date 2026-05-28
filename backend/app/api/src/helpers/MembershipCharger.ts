@@ -79,8 +79,7 @@ export const MembershipCharger = {
                 // Force price update (required because could have changed - especially for free memberships in combination with deletes)
                 try {
                     await membership.calculatePrice(member);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error('Failed to update price for membership. Not charged.', membership.id, e);
                     continue;
                 }
@@ -193,8 +192,7 @@ export const MembershipCharger = {
                 try {
                     await membership.calculatePrice(member);
                     await membership.save();
-                }
-                catch (e) {
+                } catch (e) {
                     console.error('Failed to update price for membership', membership.id, e);
                     continue;
                 }

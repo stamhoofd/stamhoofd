@@ -36,7 +36,7 @@ export class GetGroupsCountEndpoint extends Endpoint<Params, Query, Body, Respon
                 throw Context.auth.error();
             }
         }
-        
+
         const query = await GetGroupsEndpoint.buildQuery(request.query);
 
         const count = await query

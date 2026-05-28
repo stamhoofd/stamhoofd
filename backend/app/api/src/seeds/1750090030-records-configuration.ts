@@ -20,10 +20,10 @@ class OldOrganizationRecordsConfiguration extends AutoEncoder {
 }
 
 class OldOrganizationMetaData extends AutoEncoder {
-    @field({ 
-        decoder: OldOrganizationRecordsConfiguration, 
+    @field({
+        decoder: OldOrganizationRecordsConfiguration,
         version: 53,
-        defaultValue: () => OldOrganizationRecordsConfiguration.create({})
+        defaultValue: () => OldOrganizationRecordsConfiguration.create({}),
     })
     recordsConfiguration: OldOrganizationRecordsConfiguration = OldOrganizationRecordsConfiguration.create({});
 }
@@ -33,9 +33,9 @@ export class OldOrganization extends QueryableModel {
     static table = 'organizations';
 
     @column({
-    primary: true, type: 'string', beforeSave(value) {
-        return value ?? uuidv4();
-    }
+        primary: true, type: 'string', beforeSave(value) {
+            return value ?? uuidv4();
+        },
     })
     id!: string;
 
@@ -47,7 +47,6 @@ export class OldOrganization extends QueryableModel {
 }
 
 export async function startRecordsConfigurationMigration() {
-
     // migrate recordsConfiguration of organizations
     for await (const oldOrganization of OldOrganization.select()
         // prevent migrating same organizations twice if something goes wrong

@@ -86,14 +86,12 @@ export class MemberUserSyncerStatic {
                     if (!allEmails.includes(user.email.toLocaleLowerCase())) {
                         if (!user.hasAccount()) {
                             await this.unlinkUser(user, member);
-                        }
-                        else {
+                        } else {
                             // Make sure only linked as a parent, not as user self
                             // This makes sure we don't inherit permissions and aren't counted as 'being' the member
                             await this.linkUser(user.email, member, true);
                         }
-                    }
-                    else if (!member.details.calculatedParentsHaveAccess && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
+                    } else if (!member.details.calculatedParentsHaveAccess && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
                         await this.unlinkUser(user, member);
                     }
                 }
@@ -196,8 +194,7 @@ export class MemberUserSyncerStatic {
                     }),
                 );
                 user.permissions = user.permissions.patch(patch);
-            }
-            else {
+            } else {
                 const patch = user.permissions.convertPatch(
                     Permissions.patch({
                         responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getBaseStructure()) as any,
@@ -351,8 +348,7 @@ export class MemberUserSyncerStatic {
                         user.memberId = member.id;
                     }
                     await this.updateInheritedPermissions(user);
-                }
-                else {
+                } else {
                     let shouldSave = false;
 
                     // Clear clearly wrong name
@@ -381,8 +377,7 @@ export class MemberUserSyncerStatic {
                         await user.save();
                     }
                 }
-            }
-            else {
+            } else {
                 // Create a new placeholder user
                 user = new User();
                 user.organizationId = member.organizationId;
@@ -395,8 +390,7 @@ export class MemberUserSyncerStatic {
                 if (!asParent) {
                     user.memberId = member.id;
                     await this.updateInheritedPermissions(user);
-                }
-                else {
+                } else {
                     if (!name && user.firstName?.toLocaleLowerCase() === member.details.firstName?.toLocaleLowerCase() && user.lastName?.toLocaleLowerCase() === member.details.lastName?.toLocaleLowerCase()) {
                         user.firstName = null;
                         user.lastName = null;

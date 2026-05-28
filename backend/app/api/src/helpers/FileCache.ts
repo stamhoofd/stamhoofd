@@ -136,8 +136,7 @@ export class FileCache {
         let stat: fs.Stats;
         try {
             stat = await fs.promises.stat(filePath);
-        }
-        catch (e) {
+        } catch (e) {
             if (e.code == 'ENOENT') {
                 throw new SimpleError({
                     code: 'file_expired',

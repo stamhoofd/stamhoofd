@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
@@ -61,8 +61,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
 
                 try {
                     await model.save();
-                }
-                catch (e) {
+                } catch (e) {
                     // Duplicate key probably
                     if (e.code && e.code == 'ER_DUP_ENTRY') {
                         throw new SimpleError({
@@ -93,8 +92,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
 
                 try {
                     await model.save();
-                }
-                catch (e) {
+                } catch (e) {
                     // Duplicate key probably
                     if (e.code && e.code == 'ER_DUP_ENTRY') {
                         throw new SimpleError({

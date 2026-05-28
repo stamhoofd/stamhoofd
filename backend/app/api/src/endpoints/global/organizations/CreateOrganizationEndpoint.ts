@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
 import { AuditLog, EmailVerificationCode, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, User } from '@stamhoofd/models';
-import { CreateOrganizationResponse} from '@stamhoofd/structures';
+import { CreateOrganizationResponse } from '@stamhoofd/structures';
 import { AuditLogSource, AuditLogType, CreateOrganization, PermissionLevel, Permissions, SignupResponse, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -95,13 +95,13 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
 
         // Delay save until after organization is saved, but do validations before the organization is saved
-        let registerCodeModels: Model[] = []
-        let delayEmails: EmailInterfaceBase[] = []
+        let registerCodeModels: Model[] = [];
+        let delayEmails: EmailInterfaceBase[] = [];
 
         if (request.body.registerCode) {
-            const applied = await ReferralService.markUsed(organization, request.body.registerCode)
-            registerCodeModels = applied.models
-            delayEmails = applied.emails
+            const applied = await ReferralService.markUsed(organization, request.body.registerCode);
+            registerCodeModels = applied.models;
+            delayEmails = applied.emails;
         }
 
         const period = await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
@@ -115,8 +115,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
 
         try {
             await organization.save();
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             throw new SimpleError({
                 code: 'creating_organization',
@@ -154,7 +153,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         await user.save();
 
         for (const model of registerCodeModels) {
-            await model.save()
+            await model.save();
         }
 
         // Correctly assign creation
@@ -166,17 +165,17 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         for (const email of delayEmails) {
             Email.send({
                 from: Email.getQuickFromEmail(organization.address.country),
-                ...email
-            })
+                ...email,
+            });
         }
-        
+
         // Prepare the response as if we were authenticated
-        await Context.setManualOrganizationScope(organization)
-        await Context.insecurelyAuthenticateAs(user)
+        await Context.setManualOrganizationScope(organization);
+        await Context.insecurelyAuthenticateAs(user);
 
         return new Response(CreateOrganizationResponse.create({
             token: code.token,
-            organization: await AuthenticatedStructures.organization(organization)
+            organization: await AuthenticatedStructures.organization(organization),
         }));
     }
 }

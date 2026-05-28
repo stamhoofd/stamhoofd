@@ -1,6 +1,6 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { EmailTemplate, Platform } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
@@ -60,7 +60,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
-        const platform = await Platform.getShared()
+        const platform = await Platform.getShared();
 
         const types = (request.query.types ?? [...Object.values(EmailTemplateType)]).filter((type) => {
             if (!organization) {
@@ -88,10 +88,10 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                 // Required for event emails when logged in as the platform admin
                     (request.query.webshopId || request.query.groupIds)
                         ? await EmailTemplate.where({
-                            webshopId: request.query.webshopId ?? null,
-                            groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null,
-                            type: { sign: 'IN', value: types },
-                        })
+                                webshopId: request.query.webshopId ?? null,
+                                groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null,
+                                type: { sign: 'IN', value: types },
+                            })
                         : []
                 );
 

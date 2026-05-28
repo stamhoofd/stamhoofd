@@ -1,10 +1,10 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { BalanceItem as BalanceItemStruct, CountFilteredRequest, StamhoofdFilter} from '@stamhoofd/structures';
+import type { BalanceItem as BalanceItemStruct, CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
@@ -95,8 +95,7 @@ export class GetBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Respo
 
         try {
             balanceItems = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',

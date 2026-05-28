@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Event, EventNotification, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
@@ -39,8 +39,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             if (!await Context.auth.hasSomeAccess(organization.id)) {
                 throw Context.auth.error();
             }
-        }
-        else {
+        } else {
             if (!Context.auth.hasSomePlatformAccess()) {
                 throw Context.auth.error();
             }
@@ -104,8 +103,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     }
 
                     notification.periodId = period.id;
-                }
-                else {
+                } else {
                     await this.validateEventDate(notification, model);
                 }
             }
@@ -275,8 +273,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
 
         try {
             RecordCategory.validate(type.recordCategories, struct);
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace('recordAnswers');
             }

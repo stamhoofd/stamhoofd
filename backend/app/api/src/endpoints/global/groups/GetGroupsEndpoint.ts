@@ -62,7 +62,7 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
             searchFilter = {
                 name: {
-                    $contains: q.search
+                    $contains: q.search,
                 },
             };
 

@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Event, Group, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, PermissionLevel } from '@stamhoofd/structures';
@@ -67,8 +67,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 period,
                 { allowedIds: [putGroup.id] },
             );
-        }
-        else {
+        } else {
             if (group.type !== GroupType.EventRegistration) {
                 throw new SimpleError({
                     code: 'invalid_group',
@@ -88,8 +87,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (!await Context.auth.hasSomeAccess(organization.id)) {
                 throw Context.auth.error();
             }
-        }
-        else {
+        } else {
             if (!Context.auth.hasSomePlatformAccess()) {
                 throw Context.auth.error();
             }
@@ -143,8 +141,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             if (put.group) {
                 await this.saveEventAndLinkExistingGroup(event, put.group);
-            }
-            else {
+            } else {
                 await event.save();
             }
 
@@ -213,8 +210,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             const eventOrganization = await Context.auth.checkEventAccess(event);
             if (eventOrganization) {
                 event.meta.organizationCache = NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name });
-            }
-            else {
+            } else {
                 event.meta.organizationCache = null;
             }
 
@@ -237,8 +233,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
                         event.groupId = null;
                     }
-                }
-                else if (patch.group.isPatch()) {
+                } else if (patch.group.isPatch()) {
                     if (!event.groupId) {
                         throw new SimpleError({
                             code: 'invalid_field',
@@ -251,13 +246,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
                     const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
                     group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period, { isPatchingEvent: true });
-                }
-                else {
+                } else {
                     if (event.groupId === patch.group.id) {
                         // ignore: bad practice: puts are not allowed like this
                         // risk of deleting data
-                    }
-                    else {
+                    } else {
                         if (event.groupId) {
                             // need to delete old group first
                             await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
@@ -267,8 +260,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         event.groupId = group.id;
                     }
                 }
-            }
-            else {
+            } else {
                 if (patch.startDate || patch.endDate) {
                     // Correct period id if needed
                     const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
@@ -292,8 +284,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (group || patch.organizationId !== undefined) {
                 if (event.organizationId === null) {
                     // No validation required
-                }
-                else {
+                } else {
                     // Validate organizationId of group
                     if (event.groupId) {
                         group = group ?? (await Group.getByID(event.groupId) ?? null);
@@ -312,8 +303,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (patch.webshopId !== undefined) {
                 if (patch.webshopId === null) {
                     event.webshopId = null;
-                }
-                else {
+                } else {
                     const webshop = await Webshop.getByID(patch.webshopId);
                     if (!webshop || (event.organizationId && webshop.organizationId !== event.organizationId)) {
                         throw new SimpleError({
@@ -475,8 +465,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         field: 'typeId',
                     });
                 }
-            }
-            else {
+            } else {
                 throw new SimpleError({
                     code: 'invalid_period',
                     message: 'No period found for this start date',
@@ -553,8 +542,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                 await event.syncGroupRequirements(existingGroup);
             });
-        }
-        catch (e) {
+        } catch (e) {
             // reset the group
             existingGroup.type = originalGroupType;
             existingGroup.settings.eventId = null;

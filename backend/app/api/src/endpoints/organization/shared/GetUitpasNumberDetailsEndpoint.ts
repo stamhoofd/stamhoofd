@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/structures';
 
@@ -53,14 +53,12 @@ export class GetUitpasNumberDetailsEndpoint extends Endpoint<Params, Query, Body
                     uitpasNumber,
                     socialTariff,
                 }));
-            }
-            catch (error) {
+            } catch (error) {
                 if (isSimpleError(error) || isSimpleErrors(error)) {
                     error.addNamespace(i.toString());
                     error.addNamespace('uitpasNumbers');
                     simpleErrors.addError(error);
-                }
-                else {
+                } else {
                     throw error;
                 }
             }

@@ -56,11 +56,11 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                     const platform = await Platform.getShared();
 
                     // Add organization scope filter
-                    scopeFilter = {           
+                    scopeFilter = {
                         group: {
                             $elemMatch: {
                                 periodId: platform.periodIdIfPlatform,
-                            }
+                            },
                         },
                         organization: {
                             $elemMatch: {
@@ -82,20 +82,18 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                         scopeFilter = {
                             organizationId: organization.id,
                         };
-                    }
-                    else {
+                    } else {
                         // Can only access current period
                         scopeFilter = {
                             organizationId: organization.id,
                             group: {
                                 $elemMatch: {
                                     periodId: organization.periodId,
-                                }
+                                },
                             },
                         };
                     }
-                }
-                else {
+                } else {
                     const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.EventRegistration]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
@@ -163,8 +161,7 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
 
         try {
             data = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',

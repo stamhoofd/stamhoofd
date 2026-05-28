@@ -39,14 +39,12 @@ export async function checkUitpasNumbers(access_token: string, uitpasNumbers: st
                     ),
                 });
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace(i.toString());
                 e.addNamespace('uitpasNumbers');
                 simpleErrors.addError(e);
-            }
-            else {
+            } else {
                 throw e;
             }
         }

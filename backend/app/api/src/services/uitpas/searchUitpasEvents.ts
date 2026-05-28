@@ -124,8 +124,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         const hasNl = entrs.find(([key]) => key === 'nl');
         if (hasNl) {
             event.location = locationName.nl;
-        }
-        else {
+        } else {
             const lang = entrs[0];
             event.location = lang ? lang[1] : '';
         }

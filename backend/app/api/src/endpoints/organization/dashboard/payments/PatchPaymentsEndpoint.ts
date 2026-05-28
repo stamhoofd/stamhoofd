@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Payment, User } from '@stamhoofd/models';
@@ -40,7 +40,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        const {user} = await Context.authenticate();
+        const { user } = await Context.authenticate();
 
         if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error();
@@ -74,7 +74,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             payment.status = PaymentStatus.Created;
             payment.method = put.method;
             payment.customer = put.customer;
-            payment.adminUserId = user.id
+            payment.adminUserId = user.id;
 
             const payingOrganizationId = put.payingOrganizationId ?? put.payingOrganization?.id ?? null;
 
@@ -82,8 +82,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 if (Context.auth.hasSomePlatformAccess()) {
                     if (await Context.auth.hasFullAccess(payingOrganizationId, PermissionLevel.Full)) {
                         payment.payingOrganizationId = payingOrganizationId;
-                    }
-                    else {
+                    } else {
                         // silently ignore
                     }
                 }
@@ -234,8 +233,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     payment.paidAt = put.paidAt;
                     await payment.save();
                 }
-            }
-            else {
+            } else {
                 for (const balanceItem of balanceItems) {
                     await BalanceItemService.markUpdated(balanceItem, payment, organization);
                 }
@@ -269,8 +267,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 if (patch.transferSettings && payment.method == PaymentMethod.Transfer) {
                     if (patch.transferSettings.isPut()) {
                         payment.transferSettings = patch.transferSettings;
-                    }
-                    else if (payment.transferSettings !== null) {
+                    } else if (payment.transferSettings !== null) {
                         payment.transferSettings = payment.transferSettings.patch(patch.transferSettings);
                     }
                 }
@@ -312,8 +309,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     if (Context.auth.hasSomePlatformAccess()) {
                         if (await Context.auth.hasFullAccess(payingOrganizationId, PermissionLevel.Full)) {
                             payment.payingOrganizationId = payingOrganizationId;
-                        }
-                        else {
+                        } else {
                             // silently ignore
                         }
                     }

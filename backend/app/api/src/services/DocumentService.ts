@@ -33,8 +33,7 @@ export class DocumentService {
                     // If a group is changed - update the documents for it
                     await Document.updateForGroup(event.model.id, event.model.organizationId);
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to update documents after group change', e);
             }
         });

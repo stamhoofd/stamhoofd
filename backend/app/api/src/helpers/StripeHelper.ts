@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { I18n } from '@stamhoofd/backend-i18n';
-import type { BalanceItem, BalanceItemPayment, Organization, StripeAccount} from '@stamhoofd/models';
+import type { BalanceItem, BalanceItemPayment, Organization, StripeAccount } from '@stamhoofd/models';
 import { Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
 import { calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -69,15 +69,13 @@ export class StripeHelper {
                 if (charge.payment_method_details.sepa_debit.last4) {
                     if (charge.payment_method_details.sepa_debit.country === 'BE') {
                         payment.iban = charge.payment_method_details.sepa_debit.country + '•• ' + charge.payment_method_details.sepa_debit.bank_code + '• •••• ' + charge.payment_method_details.sepa_debit.last4;
-                    }
-                    else {
+                    } else {
                         payment.iban = '•••• ' + charge.payment_method_details.sepa_debit.last4;
                     }
                 }
             }
             await payment.save();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed processing charge', e);
         }
     }
@@ -146,8 +144,7 @@ export class StripeHelper {
                 if (intent.status === 'canceled' || intent.status === 'requires_payment_method') {
                     return PaymentStatus.Failed;
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error cancelling payment intent', e);
             }
         }
@@ -223,7 +220,7 @@ export class StripeHelper {
             };
             statementDescriptor: string;
             i18n: I18n;
-            metadata: { [key: string]: string | undefined};
+            metadata: { [key: string]: string | undefined };
             organization: Organization;
         },
     ): Promise<{ paymentUrl: string }> {
@@ -253,11 +250,9 @@ export class StripeHelper {
 
         if (payment.method === PaymentMethod.iDEAL) {
             fee = calculateFee(21, 20); // € 0,21 + 0,2%
-        }
-        else if (payment.method === PaymentMethod.Bancontact) {
+        } else if (payment.method === PaymentMethod.Bancontact) {
             fee = calculateFee(24, 20); // € 0,24 + 0,2%
-        }
-        else {
+        } else {
             fee = calculateFee(25, 150); // € 0,25 + 1,5%
         }
 
@@ -340,8 +335,7 @@ export class StripeHelper {
                 paymentIntentModel.accountId = stripeAccount.accountId;
             }
             await paymentIntentModel.save();
-        }
-        else {
+        } else {
             // Use checkout flow
             const data: Stripe.Checkout.SessionCreateParams = {
                 mode: 'payment',

@@ -1,7 +1,7 @@
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import type { LimitedFilteredRequest, PlatformMember} from '@stamhoofd/structures';
+import type { LimitedFilteredRequest, PlatformMember } from '@stamhoofd/structures';
 import { ExcelExportType, getGroupTypeName, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
@@ -164,8 +164,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 if (registration.payingOrganizationId) {
                     const organization = registration.member.organizations.find(o => o.id === registration.payingOrganizationId);
                     value = organization ? organization.name : $t(`%Gr`);
-                }
-                else {
+                } else {
                     value = $t(`%18s`);
                 }
 

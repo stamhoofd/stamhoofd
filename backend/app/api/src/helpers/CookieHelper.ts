@@ -38,8 +38,7 @@ export class CookieHelper {
             response.headers['set-cookie'] = [
                 cookies,
             ];
-        }
-        else {
+        } else {
             if (!Array.isArray(currentCookies)) {
                 currentCookies = [currentCookies.toString()];
                 response.headers['set-cookie'] = currentCookies;

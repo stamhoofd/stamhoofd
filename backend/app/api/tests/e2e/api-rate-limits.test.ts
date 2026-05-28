@@ -61,19 +61,16 @@ describe('E2E.APIRateLimits', () => {
             if (i < 25) {
                 try {
                     await expect(promise).toResolve();
-                }
-                catch (e) {
+                } catch (e) {
                     let error: any = null;
                     try {
                         await promise;
-                    }
-                    catch (e) {
+                    } catch (e) {
                         error = e;
                     }
                     throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
                 }
-            }
-            else {
+            } else {
                 await expect(promise).rejects.toThrow(
                     STExpect.simpleError({
                         code: 'rate_limit',
@@ -95,19 +92,16 @@ describe('E2E.APIRateLimits', () => {
             if (i < 25) {
                 try {
                     await expect(promise).toResolve();
-                }
-                catch (e) {
+                } catch (e) {
                     let error: any = null;
                     try {
                         await promise;
-                    }
-                    catch (e) {
+                    } catch (e) {
                         error = e;
                     }
                     throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
                 }
-            }
-            else {
+            } else {
                 await expect(promise).rejects.toThrow(
                     STExpect.simpleError({
                         code: 'rate_limit',
@@ -129,19 +123,16 @@ describe('E2E.APIRateLimits', () => {
             if (i < 50) {
                 try {
                     await expect(promise).toResolve();
-                }
-                catch (e) {
+                } catch (e) {
                     let error: any = null;
                     try {
                         await promise;
-                    }
-                    catch (e) {
+                    } catch (e) {
                         error = e;
                     }
                     throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
                 }
-            }
-            else {
+            } else {
                 await expect(promise).rejects.toThrow(
                     STExpect.simpleError({
                         code: 'rate_limit',
@@ -163,19 +154,16 @@ describe('E2E.APIRateLimits', () => {
             if (i < 125) {
                 try {
                     await expect(promise).toResolve();
-                }
-                catch (e) {
+                } catch (e) {
                     let error: any = null;
                     try {
                         await promise;
-                    }
-                    catch (e) {
+                    } catch (e) {
                         error = e;
                     }
                     throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
                 }
-            }
-            else {
+            } else {
                 await expect(promise).rejects.toThrow(
                     STExpect.simpleError({
                         code: 'rate_limit',

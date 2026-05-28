@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod} from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { BundleDiscountGroupPriceSettings, GroupPrice, GroupType, LimitedFilteredRequest } from '@stamhoofd/structures';

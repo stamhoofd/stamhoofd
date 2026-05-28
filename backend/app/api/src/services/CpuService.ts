@@ -56,8 +56,7 @@ class StaticCpuService {
         }
         if (size === this.maxSamples) {
             return this.samples.reduce((a, b) => a + b, 0) / size;
-        }
-        else {
+        } else {
             // To read before current index
             const toReadBeforeIndex = Math.min(size, this.currentIndex);
             const toReadFromEnd = size - toReadBeforeIndex;
@@ -89,13 +88,11 @@ class StaticCpuService {
         if (five > 80) {
             // Danger zone, in this case we don't want to log all slow queries any longer because the information won't be trustworthy.
             SQLLogger.slowQueryThresholdMs = null;
-        }
-        else {
+        } else {
             if (five < 20) {
                 // No load, safe to log all slow queries
                 SQLLogger.slowQueryThresholdMs = 300;
-            }
-            else {
+            } else {
                 SQLLogger.slowQueryThresholdMs = 500;
             }
         }

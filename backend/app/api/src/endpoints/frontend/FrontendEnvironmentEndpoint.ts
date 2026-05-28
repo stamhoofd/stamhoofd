@@ -1,6 +1,6 @@
 import type {
     DecodedRequest,
-    Request} from '@simonbackx/simple-endpoints';
+    Request } from '@simonbackx/simple-endpoints';
 import {
     Endpoint,
     Response,

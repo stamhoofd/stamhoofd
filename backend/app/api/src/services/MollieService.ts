@@ -1,4 +1,4 @@
-import type { Mandate , Payment as MolliePaymentType} from '@mollie/api-client';
+import type { Mandate, Payment as MolliePaymentType } from '@mollie/api-client';
 import { ApiMode, createMollieClient, MandateMethod, MandateStatus, PaymentMethod as molliePaymentMethod, PaymentStatus as molliePaymentStatus, OnboardingStatus, ProfileStatus, SequenceType } from '@mollie/api-client';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Payment, User } from '@stamhoofd/models';
@@ -14,24 +14,24 @@ import { Context } from '../helpers/Context.js';
 export class MollieService {
     client: ReturnType<typeof createMollieClient>;
     sellingOrganization: Organization;
-    createdAt: Date
+    createdAt: Date;
 
-    private constructor({sellingOrganization, accessToken}: {sellingOrganization: Organization, accessToken: string}) {
-        this.sellingOrganization = sellingOrganization
+    private constructor({ sellingOrganization, accessToken }: { sellingOrganization: Organization; accessToken: string }) {
+        this.sellingOrganization = sellingOrganization;
         this.client = createMollieClient({ accessToken });
-        this.createdAt = new Date()
+        this.createdAt = new Date();
     }
 
-    static #cachedServices: Map<string, MollieService> = new Map()
+    static #cachedServices: Map<string, MollieService> = new Map();
 
     /**
      * Cached instances can be used for maximum 30 seconds
      */
     isOutdated() {
-        return this.createdAt.getTime() < Date.now() - 30_000
+        return this.createdAt.getTime() < Date.now() - 30_000;
     }
 
-    static async create({sellingOrganization}: {sellingOrganization: Organization}) {
+    static async create({ sellingOrganization }: { sellingOrganization: Organization }) {
         const cached = this.#cachedServices.get(sellingOrganization.id);
         if (cached && !cached.isOutdated()) {
             return cached;
@@ -39,7 +39,7 @@ export class MollieService {
         const token = await MollieToken.getTokenFor(sellingOrganization.id);
         if (!token) {
             if (cached) {
-                this.#cachedServices.delete(sellingOrganization.id)
+                this.#cachedServices.delete(sellingOrganization.id);
             }
             return null;
         }
@@ -47,7 +47,7 @@ export class MollieService {
         this.#cachedServices.set(sellingOrganization.id, service);
         return service;
     }
-    
+
     /**
      * Set initial onboarding values + enable bancontact
      */
@@ -74,27 +74,27 @@ export class MollieService {
                         description: $t(`%x1`),
                         categoryCode: 8398,
                     },
-                })
+                });
             } catch (e) {
                 console.error('Failed to submit onboarding data', e);
             }
         }
     }
 
-    #verifiedCustomerIds: Set<string> = new Set()
+    #verifiedCustomerIds: Set<string> = new Set();
 
     /**
      * Gets the customer id for a given payingOrganization or user.
      * If no customer exists, it will create a new mollie customer if customer (payment customer) is set as parameter
      */
-    async getCustomerId({ payingOrganization, user, customer }: { 
-        payingOrganization: Organization | null, 
-        user: User | null,
+    async getCustomerId({ payingOrganization, user, customer }: {
+        payingOrganization: Organization | null;
+        user: User | null;
 
         /**
          * Required to be able to create a new customer
          */
-        customer?: PaymentCustomer
+        customer?: PaymentCustomer;
     }): Promise<string | null> {
         if (!payingOrganization) {
             // Not yet supported for users
@@ -106,23 +106,22 @@ export class MollieService {
             return null;
         }
 
-
         if (payingOrganization.serverMeta.mollieCustomerId) {
-            const customerId = payingOrganization.serverMeta.mollieCustomerId
+            const customerId = payingOrganization.serverMeta.mollieCustomerId;
             if (this.#verifiedCustomerIds.has(customerId)) {
                 return customerId;
             }
 
             // check still valid
             try {
-                const c = await this.client.customers.get(customerId, {testmode: this.testMode});
+                const c = await this.client.customers.get(customerId, { testmode: this.testMode });
 
                 if ((c.mode === ApiMode.test) === this.testMode) {
                     this.#verifiedCustomerIds.add(customerId);
                     return customerId;
                 }
             } catch (e) {
-                console.error('Error getting customer', e)
+                console.error('Error getting customer', e);
                 // Customer is not valid anymore, we need to create a new one
             }
         }
@@ -140,93 +139,93 @@ export class MollieService {
                 organizationId: payingOrganization.id,
                 userId: user?.id,
             },
-            testmode: this.testMode
-        })
+            testmode: this.testMode,
+        });
 
-        const customerId = mollieCustomer.id
+        const customerId = mollieCustomer.id;
         this.#verifiedCustomerIds.add(customerId);
 
-        payingOrganization.serverMeta.mollieCustomerId = mollieCustomer.id
-        console.log('Saving new mollie customer', mollieCustomer, 'for organization', payingOrganization.id)
-        await payingOrganization.save()
-        
-        return customerId
+        payingOrganization.serverMeta.mollieCustomerId = mollieCustomer.id;
+        console.log('Saving new mollie customer', mollieCustomer, 'for organization', payingOrganization.id);
+        await payingOrganization.save();
+
+        return customerId;
     }
 
-    #cachedMandates: Map<string, PaymentMandate[]> = new Map()
+    #cachedMandates: Map<string, PaymentMandate[]> = new Map();
 
-    async getMandates({ payingOrganization, user }: { 
-        payingOrganization: Organization | null, 
-        user: User | null,
+    async getMandates({ payingOrganization, user }: {
+        payingOrganization: Organization | null;
+        user: User | null;
     }): Promise<PaymentMandate[]> {
-        const customerId = await this.getCustomerId({payingOrganization, user});
+        const customerId = await this.getCustomerId({ payingOrganization, user });
         if (!customerId) {
             return [];
         }
 
         const cached = this.#cachedMandates.get(customerId);
         if (cached) {
-            //return cached;
+            // return cached;
         }
 
         // Poll mollie status
         // Mollie payment is required
-        const mandates: PaymentMandate[] = []
+        const mandates: PaymentMandate[] = [];
 
         try {
-            const m = await this.client.customerMandates.page({ 
-                customerId, 
+            const m = await this.client.customerMandates.page({
+                customerId,
                 limit: 250,
-                testmode: this.testMode
-            })
+                testmode: this.testMode,
+            });
 
             for (const mandate of m) {
-                const paymentMandate = MollieService.mollieManateToStamhoofd({mandate, payingOrganization, user});
+                const paymentMandate = MollieService.mollieManateToStamhoofd({ mandate, payingOrganization, user });
                 if (paymentMandate) {
-                    mandates.push(paymentMandate)
+                    mandates.push(paymentMandate);
                 }
             }
         } catch (e) {
-            console.error(e)
+            console.error(e);
         }
 
         // todo: remove duplicate mandates?
         return mandates;
     }
 
-    async deleteMandate({ mandateId, payingOrganization, user }: { 
-        mandateId: string,
-        payingOrganization: Organization | null, 
-        user: User | null,
+    async deleteMandate({ mandateId, payingOrganization, user }: {
+        mandateId: string;
+        payingOrganization: Organization | null;
+        user: User | null;
     }) {
-        const customerId = await this.getCustomerId({payingOrganization, user});
+        const customerId = await this.getCustomerId({ payingOrganization, user });
         if (!customerId) {
-            return
+            return;
         }
 
         await this.client.customerMandates.revoke(
             mandateId,
             {
                 customerId,
-                testmode: this.testMode
-            }
-        )
+                testmode: this.testMode,
+            },
+        );
     }
 
-    private static mollieManateToStamhoofd({ mandate, payingOrganization, user }: { 
-        mandate: Mandate,
-        payingOrganization: Organization | null, 
-        user: User | null,
+    private static mollieManateToStamhoofd({ mandate, payingOrganization, user }: {
+        mandate: Mandate;
+        payingOrganization: Organization | null;
+        user: User | null;
     }): PaymentMandate | null {
         let type: PaymentMandateType;
         switch (mandate.method) {
             case MandateMethod.creditcard: {
-                type = PaymentMandateType.CreditCard
+                type = PaymentMandateType.CreditCard;
                 break;
             }
 
             case MandateMethod.directdebit: {
-                type = PaymentMandateType.DirectDebit
+                type = PaymentMandateType.DirectDebit;
                 break;
             }
 
@@ -254,22 +253,22 @@ export class MollieService {
                 cardNumber: 'cardNumber' in details ? details.cardNumber : null,
                 iban: 'consumerAccount' in details ? details.consumerAccount : null,
                 bic: ('consumerBic' in details ? details.consumerBic : undefined),
-                expiryDate: ('cardExpiryDate' in details ? DateTime.fromISO(details.cardExpiryDate, {zone: Formatter.timezone}).toJSDate() : null), // todo: parse date correctly in Brussels timezone!
+                expiryDate: ('cardExpiryDate' in details ? DateTime.fromISO(details.cardExpiryDate, { zone: Formatter.timezone }).toJSDate() : null), // todo: parse date correctly in Brussels timezone!
                 brand: ('cardLabel' in details ? details.cardLabel : null),
-            })
-        })
+            }),
+        });
     }
 
     private static mollieMandateStatusToStamhoofd(mandate: Mandate): PaymentMandateStatus {
         switch (mandate.status) {
             case MandateStatus.valid: {
-                return PaymentMandateStatus.Valid
+                return PaymentMandateStatus.Valid;
             }
             case MandateStatus.invalid: {
-                return PaymentMandateStatus.Invalid
+                return PaymentMandateStatus.Invalid;
             }
             case MandateStatus.pending: {
-                return PaymentMandateStatus.Pending
+                return PaymentMandateStatus.Pending;
             }
         }
     }
@@ -277,15 +276,15 @@ export class MollieService {
     private static paymentMethodToMollie(method: PaymentMethod) {
         switch (method) {
             case PaymentMethod.Bancontact:
-                return molliePaymentMethod.bancontact
+                return molliePaymentMethod.bancontact;
             case PaymentMethod.CreditCard:
-                return molliePaymentMethod.creditcard
+                return molliePaymentMethod.creditcard;
             case PaymentMethod.DirectDebit:
-                return molliePaymentMethod.directdebit
+                return molliePaymentMethod.directdebit;
             case PaymentMethod.iDEAL:
-                return molliePaymentMethod.ideal
+                return molliePaymentMethod.ideal;
             case PaymentMethod.Transfer:
-                return molliePaymentMethod.banktransfer
+                return molliePaymentMethod.banktransfer;
         }
 
         return null;
@@ -294,15 +293,14 @@ export class MollieService {
     async getProfiles(): Promise<MollieProfile[]> {
         try {
             const response = await this.client.profiles.page({
-                limit: 250
-            })
+                limit: 250,
+            });
             return response.map(p => MollieProfile.create({
                 ...p,
                 mode: p.mode === ApiMode.live ? MollieProfileMode.Live : MollieProfileMode.Test,
-                status: p.status === ProfileStatus.unverified ? MollieProfileStatus.Unverified : (p.status === ProfileStatus.blocked ? MollieProfileStatus.Blocked : MollieProfileStatus.Verified)
+                status: p.status === ProfileStatus.unverified ? MollieProfileStatus.Unverified : (p.status === ProfileStatus.blocked ? MollieProfileStatus.Blocked : MollieProfileStatus.Verified),
             }));
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to parse mollie profiles', e);
             return [];
         }
@@ -316,8 +314,7 @@ export class MollieService {
                 canReceiveSettlements: !!response.canReceiveSettlements,
                 status: response.status === OnboardingStatus.needsData ? MollieStatus.NeedsData : (response.status === OnboardingStatus.inReview ? MollieStatus.InReview : (MollieStatus.Completed)),
             });
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error when requesting Mollie onboarding status:');
             console.error(e);
             return null;
@@ -326,13 +323,13 @@ export class MollieService {
 
     async getProfileId(website?: string): Promise<string | undefined> {
         if (this.sellingOrganization.privateMeta.mollieProfile?.id) {
-            return this.sellingOrganization.privateMeta.mollieProfile.id
+            return this.sellingOrganization.privateMeta.mollieProfile.id;
         }
 
         try {
             const profiles = await this.client.profiles.page({
                 limit: 250,
-            })
+            });
 
             // Search profile with Stamhoofd as name
             if (website) {
@@ -351,8 +348,7 @@ export class MollieService {
             }
 
             return profiles[0]?.id ?? undefined;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error when requesting Mollie profile id:');
             console.error(e);
             return undefined;
@@ -369,7 +365,7 @@ export class MollieService {
     }
 
     static async createPayment(
-        { sellingOrganization, payment, mandate, redirectUrl, webhookUrl, cancelUrl, description, metadata, payingOrganization, user, customer}: {
+        { sellingOrganization, payment, mandate, redirectUrl, webhookUrl, cancelUrl, description, metadata, payingOrganization, user, customer }: {
             payment: Payment;
             mandate: PaymentMandate | null;
             redirectUrl: string;
@@ -377,14 +373,14 @@ export class MollieService {
             webhookUrl: string;
             description: string;
             metadata: { [key: string]: string | undefined };
-            sellingOrganization: Organization,
-            payingOrganization: Organization | null,
-            user: User | null,
-            customer: PaymentCustomer,
+            sellingOrganization: Organization;
+            payingOrganization: Organization | null;
+            user: User | null;
+            customer: PaymentCustomer;
         },
     ): Promise<{ paymentUrl: string | null }> {
-        const mollieService = await MollieService.create({sellingOrganization});
-        const profileId = await mollieService?.getProfileId();                    
+        const mollieService = await MollieService.create({ sellingOrganization });
+        const profileId = await mollieService?.getProfileId();
         const method = MollieService.paymentMethodToMollie(payment.method);
 
         if (!mollieService || !profileId || !method) {
@@ -398,8 +394,7 @@ export class MollieService {
             payingOrganization: payingOrganization ?? null,
             user,
             customer,
-        }) ?? undefined
-
+        }) ?? undefined;
 
         const data: Parameters<typeof mollieService.client.payments.create>[0] = {
             amount: {
@@ -418,13 +413,13 @@ export class MollieService {
             webhookUrl,
             metadata: {
                 paymentId: payment.id,
-                ...metadata
+                ...metadata,
             },
             locale: mollieService.locale,
         };
-        console.log('Creating payment', data)
+        console.log('Creating payment', data);
         const molliePayment = await mollieService.client.payments.create(data);
-        console.log('Payment response', molliePayment)
+        console.log('Payment response', molliePayment);
 
         const paymentUrl = molliePayment.getCheckoutUrl();
 
@@ -434,12 +429,12 @@ export class MollieService {
         dbPayment.mollieId = molliePayment.id;
         await dbPayment.save();
 
-        const {status} = await mollieService.getStatusFor(molliePayment, payment, false)
+        const { status } = await mollieService.getStatusFor(molliePayment, payment, false);
         payment.status = status;
-        
+
         return {
             paymentUrl: paymentUrl,
-        }
+        };
     }
 
     static async saveChargeInfo(mollieData: MolliePaymentType, payment: Payment) {
@@ -459,34 +454,33 @@ export class MollieService {
                     payment.iban = '•••• ' + details.cardNumber;
                 }
 
-                payment.mandateId = mollieData.mandateId ?? null
+                payment.mandateId = mollieData.mandateId ?? null;
                 await payment.save();
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed processing charge', e);
         }
     }
 
-    async getStatusFor(mollieData: MolliePaymentType, payment: Payment, cancel = false): Promise<{status: PaymentStatus}> {
-        await MollieService.saveChargeInfo(mollieData, payment)
+    async getStatusFor(mollieData: MolliePaymentType, payment: Payment, cancel = false): Promise<{ status: PaymentStatus }> {
+        await MollieService.saveChargeInfo(mollieData, payment);
 
         if (mollieData.status === molliePaymentStatus.paid) {
             return {
-                status: PaymentStatus.Succeeded, 
-            }
+                status: PaymentStatus.Succeeded,
+            };
         } else if (mollieData.status === molliePaymentStatus.failed) {
             return {
-                status: PaymentStatus.Failed, 
-            }
+                status: PaymentStatus.Failed,
+            };
         } else if (mollieData.status === molliePaymentStatus.expired) {
             return {
-                status: PaymentStatus.Failed, 
-            }
+                status: PaymentStatus.Failed,
+            };
         } else if (mollieData.status === molliePaymentStatus.canceled) {
             return {
-                status: PaymentStatus.Failed, 
-            }
+                status: PaymentStatus.Failed,
+            };
         }
 
         // Pending payments should be cancellable
@@ -496,42 +490,41 @@ export class MollieService {
             // Try to cancel
             try {
                 const newData = await this.client.payments.cancel(mollieData.id, {
-                    testmode: this.testMode
+                    testmode: this.testMode,
                 });
                 console.log('Cancelled Mollie Payment ' + payment.id);
-                return await this.getStatusFor(newData, payment, false)
+                return await this.getStatusFor(newData, payment, false);
             } catch (e) {
-                console.error('Failed to cancel Mollie Payment ' + payment.id, {cause: e})
+                console.error('Failed to cancel Mollie Payment ' + payment.id, { cause: e });
             }
-
         } else if (cancel) {
-            console.log('Cannot cancel Mollie Payment ' + payment.id);  
+            console.log('Cannot cancel Mollie Payment ' + payment.id);
         }
 
-        if (mollieData.status === molliePaymentStatus.open ) {
+        if (mollieData.status === molliePaymentStatus.open) {
             // Nothink happend yet
             return {
-                status: PaymentStatus.Created, 
-            }
+                status: PaymentStatus.Created,
+            };
         }
 
         return {
-            status: PaymentStatus.Pending, 
-        }
+            status: PaymentStatus.Pending,
+        };
     }
 
     async getStatus(payment: Payment, cancel = false) {
         const molliePayment = await MolliePayment.select().where('paymentId', payment.id).first(false);
         if (!molliePayment) {
-            throw new Error('Mollie Payment not found for payment ' + payment.id)
+            throw new Error('Mollie Payment not found for payment ' + payment.id);
         }
 
         const mollieData = await this.client.payments.get(molliePayment.mollieId, {
-            testmode: this.testMode
+            testmode: this.testMode,
         });
 
-        console.log(mollieData)
+        console.log(mollieData);
 
-        return this.getStatusFor(mollieData, payment, cancel)
+        return this.getStatusFor(mollieData, payment, cancel);
     }
 }

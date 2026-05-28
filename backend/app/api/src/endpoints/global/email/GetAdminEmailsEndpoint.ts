@@ -80,8 +80,7 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
             scopeFilter = mergeFilters([scopeFilter, {
                 $or: filters,
             }]);
-        }
-        else {
+        } else {
             scopeFilter = mergeFilters([scopeFilter, {
                 $or: [
                     {

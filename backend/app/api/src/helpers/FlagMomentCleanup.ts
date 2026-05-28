@@ -82,8 +82,7 @@ export class FlagMomentCleanup {
                     ),
                 )
                 .fetch();
-        }
-        else {
+        } else {
             return await MemberResponsibilityRecord.select()
                 .join(SQL.innerJoin(
                     SQL.table(Organization.table))

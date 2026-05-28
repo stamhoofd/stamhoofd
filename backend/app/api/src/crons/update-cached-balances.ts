@@ -17,10 +17,10 @@ async function updateCachedBalances() {
      * Cached balances of member should be updated before the cached balances of the user
      * because the cached balances of the user are dependent on the cached balances of the member.
      */
-    .orderBy('objectType', 'ASC')
+        .orderBy('objectType', 'ASC')
     // minimize the number of queries when updating
-    .orderBy('organizationId', 'ASC')
-    .limit(100).fetch();
+        .orderBy('organizationId', 'ASC')
+        .limit(100).fetch();
 
     // Group by object type, next by organization id
     const grouped = new Map<ReceivableBalanceType, Map<string, CachedBalance[]>>();
@@ -51,7 +51,7 @@ async function updateCachedBalances() {
         const bIsMember = b[0] === ReceivableBalanceType.member;
         if (aIsMember && !bIsMember) return -1;
         if (!aIsMember && bIsMember) return 1;
-        return 0; 
+        return 0;
     });
 
     for (const [objectType, organizationMap] of objectTypeMemberFirst) {

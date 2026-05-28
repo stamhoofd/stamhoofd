@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod, User} from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { EmailStatus, LimitedFilteredRequest, PermissionLevel, Permissions, Replacement } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

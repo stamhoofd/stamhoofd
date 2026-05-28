@@ -55,8 +55,7 @@ export class ViesHelperStatic {
         if (company.companyNumber) {
             if (company.VATNumber !== null && company.address.country === Country.Belgium) {
                 // Already validated
-            }
-            else {
+            } else {
                 // Need to validate
                 const result = await ViesHelper.checkCompanyNumber(company.address.country, company.companyNumber);
                 patch.companyNumber = result.companyNumber;
@@ -103,12 +102,10 @@ export class ViesHelperStatic {
                 companyNumber: corrected.substring(2),
                 VATNumber: corrected,
             };
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 // Ignore: normal that it is not a valid VAT number
-            }
-            else {
+            } else {
                 // Other errors should be thrown
                 throw e;
             }
@@ -128,7 +125,7 @@ export class ViesHelperStatic {
         if (!result.isValid) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('%1To', {'number': vatNumber}),
+                message: $t('%1To', { number: vatNumber }),
                 field: 'VATNumber',
             });
         }
@@ -136,7 +133,7 @@ export class ViesHelperStatic {
         const formatted = result.value ?? vatNumber;
 
         if (STAMHOOFD.environment === 'development' && formatted === 'NL301828519B01') {
-            return formatted
+            return formatted;
         }
 
         try {
@@ -154,12 +151,11 @@ export class ViesHelperStatic {
             if (!response.valid) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t('%1TG', {'vat-number': formatted}),
+                    message: $t('%1TG', { 'vat-number': formatted }),
                     field: 'VATNumber',
                 });
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 throw e;
             }

@@ -1,4 +1,3 @@
-
 import { Request } from '@simonbackx/simple-endpoints';
 import { BalanceItem, OrganizationFactory, RegisterCodeFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
@@ -13,50 +12,50 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
 
     beforeAll(async () => {
         await initMembershipOrganization();
-    })
+    });
 
     test('Cannot apply a register code if not platform admin', async () => {
-        const otherOrganization =  await new OrganizationFactory({}).create();
-        const code = await new RegisterCodeFactory({organization: otherOrganization}).create();
+        const otherOrganization = await new OrganizationFactory({}).create();
+        const code = await new RegisterCodeFactory({ organization: otherOrganization }).create();
 
-        const organization =  await new OrganizationFactory({}).create();
-        const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create()
-        const token = await Token.createToken(user)
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+        const token = await Token.createToken(user);
 
         const r = Request.buildJson(
-            'POST', 
-            '/billing/register-code', 
-            organization.getApiHost(), 
+            'POST',
+            '/billing/register-code',
+            organization.getApiHost(),
             {
                 registerCode: code.code,
-            }
+            },
         );
-        r.headers.authorization = 'Bearer '+token.accessToken
+        r.headers.authorization = 'Bearer ' + token.accessToken;
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow('You do not have permissions for this action');
     });
 
     test('Can apply a register code and apply the discount', async () => {
-        const otherOrganization =  await new OrganizationFactory({}).create();
-        const code = await new RegisterCodeFactory({organization: otherOrganization}).create();
+        const otherOrganization = await new OrganizationFactory({}).create();
+        const code = await new RegisterCodeFactory({ organization: otherOrganization }).create();
 
-        const organization =  await new OrganizationFactory({}).create();
-        const user = await new UserFactory({ 
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
             organization,
             globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-            email: 'admin@stamhoofd.be'
-        }).create()
-        const token = await Token.createToken(user)
+            email: 'admin@stamhoofd.be',
+        }).create();
+        const token = await Token.createToken(user);
 
         const r = Request.buildJson(
-            'POST', 
-            '/billing/register-code', 
-            organization.getApiHost(), 
+            'POST',
+            '/billing/register-code',
+            organization.getApiHost(),
             {
                 registerCode: code.code,
-            }
+            },
         );
-        r.headers.authorization = 'Bearer '+token.accessToken
+        r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeUndefined();

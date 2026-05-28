@@ -25,7 +25,7 @@ export const registrationCachedBalanceJoin = SQL.leftJoin(
         new SQLSelectAs(
             new SQLSum(
                 SQL.calculation(SQL.column('amountOpen'))
-                    .add(SQL.column('amountPending'))
+                    .add(SQL.column('amountPending')),
             ),
             new SQLAlias('toPay'),
         ),
@@ -33,7 +33,7 @@ export const registrationCachedBalanceJoin = SQL.leftJoin(
             new SQLSum(
                 SQL.calculation(SQL.column('amountOpen'))
                     .add(SQL.column('amountPaid'))
-                    .add(SQL.column('amountPending'))
+                    .add(SQL.column('amountPending')),
             ),
             new SQLAlias('price'),
         ),

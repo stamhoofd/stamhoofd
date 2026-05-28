@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 
@@ -46,7 +46,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const { put } of request.body.getPuts()) {
             if (put.payingOrganizationId) {
                 if (!await Context.auth.hasFullAccess(put.payingOrganizationId)) {
-                    Context.auth.error($t('Geen toegang om facturen te schrijven aan deze organisatie'))
+                    Context.auth.error($t('Geen toegang om facturen te schrijven aan deze organisatie'));
                 }
             }
 

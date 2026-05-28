@@ -14,17 +14,13 @@ export async function assertBalances(
     const q = BalanceItem.select();
     if ('user' in selector && selector.user.id) {
         q.where('userId', selector.user.id);
-    }
-    else if ('member' in selector && selector.member.id) {
+    } else if ('member' in selector && selector.member.id) {
         q.where('memberId', selector.member.id);
-    }
-    else if ('organization' in selector && selector.organization.id) {
+    } else if ('organization' in selector && selector.organization.id) {
         q.where('organizationId', selector.organization.id);
-    }
-    else if ('payingOrganization' in selector && selector.payingOrganization.id) {
+    } else if ('payingOrganization' in selector && selector.payingOrganization.id) {
         q.where('payingOrganizationId', selector.payingOrganization.id);
-    }
-    else {
+    } else {
         throw new Error('Selector must contain either user or member with an id');
     }
 
@@ -32,8 +28,7 @@ export async function assertBalances(
 
     try {
         expect(userBalances).toIncludeAllMembers(balances.map(b => expect.objectContaining(b)));
-    }
-    catch (e) {
+    } catch (e) {
         // List all the balances that were found and the ones that were missing
         if (userBalances.length !== balances.length) {
             console.error('Difference in number of balances found:', userBalances.length, 'expected:', balances.length);
@@ -45,8 +40,7 @@ export async function assertBalances(
                 try {
                     expect(userBalance).toEqual(expect.objectContaining(expectedBalance));
                     found = true;
-                }
-                catch (e) {
+                } catch (e) {
                     // ignore
                 }
             }

@@ -93,8 +93,7 @@ export class PeriodHelper {
             for await (const organization of Organization.select().all()) {
                 try {
                     await this.moveOrganizationToPeriod(organization, period);
-                }
-                catch (error) {
+                } catch (error) {
                     console.error('Error moving organization to period', organization.id, error);
                 }
             }

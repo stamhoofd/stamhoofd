@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Platform } from '@stamhoofd/models';
 import type { Platform as PlatformStruct } from '@stamhoofd/structures';

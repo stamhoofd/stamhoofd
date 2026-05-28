@@ -18,7 +18,7 @@ export class InvoiceXMlService {
             throw new Error('Cannot generate UBL for invoice without pdf');
         }
 
-        const company = invoice.customer.company
+        const company = invoice.customer.company;
 
         if (!company || !company.address) {
             throw new Error('Cannot generate UBL for invoice without company');
@@ -26,21 +26,21 @@ export class InvoiceXMlService {
 
         const seller = invoice.seller;
         if (!seller.address) {
-            throw new Error('Missing seller address')
+            throw new Error('Missing seller address');
         }
 
         const sellerPeppolEndpointId = seller.peppolEndpointId;
         const sellerPeppolCompanyId = seller.peppolCompanyId;
 
-        const customerPeppolEndpointId = company.peppolEndpointId
+        const customerPeppolEndpointId = company.peppolEndpointId;
         const customerPeppolCompanyId = company.peppolCompanyId;
 
         if (!sellerPeppolEndpointId || !sellerPeppolCompanyId) {
-            throw new Error('Missing seller peppol id')
+            throw new Error('Missing seller peppol id');
         }
 
         if (!customerPeppolEndpointId || !customerPeppolCompanyId) {
-            throw new Error('Missing customer peppol id')
+            throw new Error('Missing customer peppol id');
         }
 
         const companyNumberOrVAT = company.VATNumber ?? company.companyNumber;
@@ -52,23 +52,23 @@ export class InvoiceXMlService {
             throw new Error('Cannot generate UBL for invoice outside belgium');
         }
         const companyNumber = (company.VATNumber ? company.VATNumber.substring(2) : companyNumberOrVAT).replace(/\D+/g, '');
-        
+
         const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
         const payment = payments[0] ?? null;
 
         const pdfBuffer = await InvoicePdfService.downloadPdf(invoice);
         if (!pdfBuffer) {
-            throw new Error('Pdf unavailable')
+            throw new Error('Pdf unavailable');
         }
 
-        const type = invoice.totalWithVAT < 0 ? 'CreditNote': 'Invoice';
+        const type = invoice.totalWithVAT < 0 ? 'CreditNote' : 'Invoice';
         const multiplyAmounts = invoice.totalWithVAT < 0 ? -1 : 1;
 
-        let customerEmail: string | null =  company.administrationEmail ?? invoice.customer.email ?? null;
+        let customerEmail: string | null = company.administrationEmail ?? invoice.customer.email ?? null;
         if (!customerEmail && invoice.payingOrganizationId) {
-            const payingOrganization = await Organization.getByID(invoice.payingOrganizationId)
+            const payingOrganization = await Organization.getByID(invoice.payingOrganizationId);
             if (payingOrganization) {
-                customerEmail = (await payingOrganization.getInvoicingToEmail()) ?? null
+                customerEmail = (await payingOrganization.getInvoicingToEmail()) ?? null;
             }
         }
 
@@ -78,11 +78,11 @@ export class InvoiceXMlService {
             return Formatter.escapeHtml(a);
         }
 
-        function price(price: number, options?: {invert?: boolean, round?: boolean}) {
+        function price(price: number, options?: { invert?: boolean; round?: boolean }) {
             if (options?.round ?? true) {
-                return esc((STMath.round((options?.invert ? multiplyAmounts : 1) * price / 100)/100).toFixed(2))
+                return esc((STMath.round((options?.invert ? multiplyAmounts : 1) * price / 100) / 100).toFixed(2));
             }
-            return esc(((options?.invert ? multiplyAmounts : 1) * price / 100_00).toString())
+            return esc(((options?.invert ? multiplyAmounts : 1) * price / 100_00).toString());
         }
 
         // Docs: https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/
@@ -90,11 +90,11 @@ export class InvoiceXMlService {
 
         // General
         ubl += `<cbc:ID>${esc(invoice.number)}</cbc:ID>`;
-        const date = invoice.invoicedAt
+        const date = invoice.invoicedAt;
         ubl += `<cbc:IssueDate>${esc(Formatter.dateIso(date))}</cbc:IssueDate>`;
 
         // PEPPOL allows credit notes as negative invoices, so we always use invoice type code = invoice
-        
+
         if (type === 'Invoice') {
             ubl += `<cbc:DueDate>${esc(Formatter.dateIso(new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30)))}</cbc:DueDate>`;
             ubl += `<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>`;
@@ -115,7 +115,7 @@ export class InvoiceXMlService {
                     <cbc:EmbeddedDocumentBinaryObject mimeCode="application/pdf" filename="${esc(filename)}">${base64}</cbc:EmbeddedDocumentBinaryObject>
                 </cac:Attachment>
             </cac:AdditionalDocumentReference>`;
-        
+
         // Supplier
         ubl += `
             <cac:AccountingSupplierParty>
@@ -133,41 +133,45 @@ export class InvoiceXMlService {
                         </cac:Country>
                     </cac:PostalAddress>
                     ${
-                        seller.VATNumber ? `
+                        seller.VATNumber
+                            ? `
                         <cac:PartyTaxScheme>
                             <cbc:CompanyID>${esc(seller.VATNumber)}</cbc:CompanyID>
                             <cac:TaxScheme>
                                 <cbc:ID>VAT</cbc:ID>
                             </cac:TaxScheme>
-                        </cac:PartyTaxScheme>` : ``
+                        </cac:PartyTaxScheme>`
+                            : ``
                     }
                     <cac:PartyLegalEntity>
                         <cbc:RegistrationName>${esc(seller.name)}</cbc:RegistrationName>
                         <cbc:CompanyID schemeID="${esc(sellerPeppolCompanyId.schemeID)}">${esc(sellerPeppolCompanyId.id)}</cbc:CompanyID>
                     </cac:PartyLegalEntity>
                     ${
-                        seller.administrationEmail ? `
+                        seller.administrationEmail
+                            ? `
                         <cac:Contact>
                             <cbc:ElectronicMail>${esc(seller.administrationEmail)}</cbc:ElectronicMail>
-                        </cac:Contact>` : ``
+                        </cac:Contact>`
+                            : ``
                     }
                 </cac:Party>
             </cac:AccountingSupplierParty>`;
 
-        /*const vatUbl = invoice.meta.companyVATNumber 
+        /* const vatUbl = invoice.meta.companyVATNumber
             ? `<cac:PartyTaxScheme>
                     <cbc:CompanyID>${esc(invoice.meta.companyVATNumber.replace(/[^A-z0-9]+/g, ''))}</cbc:CompanyID>
                     <cac:TaxScheme>
                         <cbc:ID>VAT</cbc:ID>
                     </cac:TaxScheme>
-                </cac:PartyTaxScheme>` 
+                </cac:PartyTaxScheme>`
             : ``;
 
         const contactUbl = customerEmail
             ? `<cac:Contact>
                     <cbc:ElectronicMail>${esc(customerEmail)}</cbc:ElectronicMail>
                 </cac:Contact>`
-            : '';*/
+            : ''; */
 
         // Customer
         ubl += `
@@ -186,36 +190,40 @@ export class InvoiceXMlService {
                         </cac:Country>
                     </cac:PostalAddress>
                     ${
-                        company.VATNumber ? `
+                        company.VATNumber
+                            ? `
                         <cac:PartyTaxScheme>
                             <cbc:CompanyID>${esc(company.VATNumber)}</cbc:CompanyID>
                             <cac:TaxScheme>
                                 <cbc:ID>VAT</cbc:ID>
                             </cac:TaxScheme>
-                        </cac:PartyTaxScheme>` : ``
+                        </cac:PartyTaxScheme>`
+                            : ``
                     }
                     <cac:PartyLegalEntity>
                         <cbc:RegistrationName>${esc(company.name)}</cbc:RegistrationName>
                         <cbc:CompanyID schemeID="0208">${esc(companyNumber)}</cbc:CompanyID>
                     </cac:PartyLegalEntity>
                     ${
-                        customerEmail ? `
+                        customerEmail
+                            ? `
                         <cac:Contact>
                             <cbc:ElectronicMail>${esc(customerEmail)}</cbc:ElectronicMail>
-                        </cac:Contact>` : ``
+                        </cac:Contact>`
+                            : ``
                     }
                 </cac:Party>
             </cac:AccountingCustomerParty>`;
-        
+
         // Payment means
-        // Codes: 
+        // Codes:
         // 49 = direct debit
         // 48 = bank card
         // 54 = credit card
         // 55 = debit card
         // 59 = SEPA direct debit
         // 68 = Online payment service <- probably way to go for all except tranfer
-        // 30 = credit transfer (Payment by credit movement of funds from one account to another.) <- way to go for 
+        // 30 = credit transfer (Payment by credit movement of funds from one account to another.) <- way to go for
 
         if (!payment) {
             // Het bedrag werd reeds ingehouden van jouw Stripe balans.
@@ -235,7 +243,6 @@ export class InvoiceXMlService {
                                     <cbc:Name>Stamhoofd</cbc:Name>
                                 </cac:PayeeFinancialAccount>
                             </cac:PaymentMeans>`;
-
                 } else if (payment.status === PaymentStatus.Succeeded) {
                     const code = 48; // card - don't specify more
 
@@ -246,13 +253,11 @@ export class InvoiceXMlService {
             }
         }
 
-        
-
         // Tax breakdown
         ubl += `<cac:TaxTotal>
             <cbc:TaxAmount currencyID="EUR">${price(invoice.VATTotalAmount)}</cbc:TaxAmount>`;
 
-        if (invoice.VATTotal.length > 0 ) {
+        if (invoice.VATTotal.length > 0) {
             for (const c of invoice.VATTotal) {
                 ubl += `<cac:TaxSubtotal>
                         <cbc:TaxableAmount currencyID="EUR">${price(c.taxablePrice)}</cbc:TaxableAmount>
@@ -269,7 +274,7 @@ export class InvoiceXMlService {
                     </cac:TaxSubtotal>`;
             }
         }
-            
+
         ubl += `</cac:TaxTotal>`;
 
         // Totals
@@ -291,14 +296,14 @@ export class InvoiceXMlService {
 
         for (const item of invoicedItems) {
             // We need to show prices exluding VAT and round here if needed
-            let unitPrice = item.unitPrice
-            const totalPrice = item.totalWithoutVAT
+            let unitPrice = item.unitPrice;
+            const totalPrice = item.totalWithoutVAT;
             let quantity = item.quantity;
             //
-            //if (invoice.meta.areItemsIncludingVAT) {
+            // if (invoice.meta.areItemsIncludingVAT) {
             //    unitPrice = invoice.meta.includingVATToExcludingVAT(unitPrice)
             //    price = invoice.meta.includingVATToExcludingVAT(price)
-            //}
+            // }
 
             // unitPrice cant be negative, quantity can.
             if (unitPrice < 0) {
@@ -312,7 +317,7 @@ export class InvoiceXMlService {
             ubl += `
                 <cac:${type}Line>
                     <cbc:ID>${item.id}</cbc:ID>
-                    <cbc:${type === 'Invoice' ? 'Invoiced' : 'Credited'}Quantity unitCode="EA">${(quantity/100_00).toString()}</cbc:${type === 'Invoice' ? 'Invoiced' : 'Credited'}Quantity>
+                    <cbc:${type === 'Invoice' ? 'Invoiced' : 'Credited'}Quantity unitCode="EA">${(quantity / 100_00).toString()}</cbc:${type === 'Invoice' ? 'Invoiced' : 'Credited'}Quantity>
                     <cbc:LineExtensionAmount currencyID="EUR">${price(totalPrice)}</cbc:LineExtensionAmount>
                     <cac:Item>
                         ${item.description ? `<cbc:Description>${esc(item.description)}</cbc:Description>` : ''}
@@ -326,7 +331,7 @@ export class InvoiceXMlService {
                         </cac:ClassifiedTaxCategory>
                     </cac:Item>
                     <cac:Price>
-                        <cbc:PriceAmount currencyID="EUR">${price(unitPrice, {invert: false, round: false})}</cbc:PriceAmount>
+                        <cbc:PriceAmount currencyID="EUR">${price(unitPrice, { invert: false, round: false })}</cbc:PriceAmount>
                     </cac:Price>
                 </cac:${type}Line>`;
         }
@@ -342,7 +347,7 @@ export class InvoiceXMlService {
     static async uploadXml(invoice: Invoice, fileContent: Buffer) {
         const fileId = uuidv4();
 
-         let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
+        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
         if (prefix.length > 0) {
             prefix += '/';
         }
@@ -370,7 +375,7 @@ export class InvoiceXMlService {
             Key: key,
             Body: fileContent,
             ContentType: 'application/xml',
-            ACL: 'private'
+            ACL: 'private',
         });
         await Image.getS3Client().send(cmd);
 
@@ -383,8 +388,8 @@ export class InvoiceXMlService {
                 statusCode: 500,
             });
         }
-        
-        return fileStruct
+
+        return fileStruct;
     }
 
     static async generateXml(invoice: Invoice) {
@@ -394,27 +399,26 @@ export class InvoiceXMlService {
         }
 
         if (invoice.customer.company?.VATNumber === null) {
-            console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient not subject to VAT')
+            console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient not subject to VAT');
             return;
         }
 
         // Check VAT number is belgian
         if (!invoice.customer.company?.VATNumber.startsWith('BE')) {
-            console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient outside Belgium')
+            console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient outside Belgium');
             return;
         }
 
         try {
             const content = await this.buildXml(invoice);
 
-            const file = await this.uploadXml(invoice, Buffer.from(content, 'utf-8'))
-            invoice.xml = file
+            const file = await this.uploadXml(invoice, Buffer.from(content, 'utf-8'));
+            invoice.xml = file;
 
-            await invoice.save()
+            await invoice.save();
         } catch (e) {
             console.error('Failed to generate XML', invoice.id, e);
             return;
         }
     }
-
 }

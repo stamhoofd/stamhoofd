@@ -40,8 +40,7 @@ export class AddressValidatorStatic {
 
             // Don't do validation on last letters
             postalCode = numbers;
-        }
-        else {
+        } else {
             postalCode = postalCode.trim();
         }
 
@@ -50,8 +49,7 @@ export class AddressValidatorStatic {
             if (!/\d{4}/.test(numbers)) {
                 postalCode = numbers;
                 address.city = address.city.substring(4).trim();
-            }
-            else {
+            } else {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Postal code is required',
@@ -93,8 +91,7 @@ export class AddressValidatorStatic {
                 const c = await City.getByID(city.parentCityId ?? city.id);
                 try {
                     await this.syncCity(c!);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error('Ignored error while syncing city');
                     console.error(e);
                 }
@@ -115,8 +112,7 @@ export class AddressValidatorStatic {
 
                 if (bestStreet && bestScore < 3) {
                     address.street = bestStreet.name;
-                }
-                else {
+                } else {
                     // Search for the street
                     bestScore = 0;
                     bestStreet = undefined;
@@ -144,8 +140,7 @@ export class AddressValidatorStatic {
                         field: 'street',
                     });
                 }
-            }
-            else {
+            } else {
                 // Skip validation for some regions that don't support validation
             }
         }
@@ -180,8 +175,7 @@ export class AddressValidatorStatic {
                 streetNames.push(...streets);
                 url = result.volgende;
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e.response.data);
             throw new Error('Failed to fetch streets');
         }
@@ -238,8 +232,7 @@ export class AddressValidatorStatic {
             for (const city of cities) {
                 try {
                     await this.syncCity(city);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error('Failed city sync for ' + city.name, e);
                 }
             }

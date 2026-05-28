@@ -16,7 +16,6 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<PlatformMembership[], LimitedFilteredRequest>;
 
-
 const sorters = platformMembershipSorters;
 const filterCompilers = platformMembershipFilterCompilers;
 
@@ -37,9 +36,9 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
     }
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
-       if (!Context.auth.hasPlatformFullAccess()) {
-           throw Context.auth.error();
-       }
+        if (!Context.auth.hasPlatformFullAccess()) {
+            throw Context.auth.error();
+        }
 
         const query = MemberPlatformMembership.select()
             .setMaxExecutionTime(15 * 1000)
@@ -77,21 +76,21 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
         if (search.match(/^\d{4}-\d{6}-\d{1,2}$/) || search.match(/^\d{9,10}$/)) {
             return {
                 member: {
-                        memberNumber: {
+                    memberNumber: {
                         $eq: search,
                     },
-                    
-                }
+
+                },
             };
         }
 
         return {
-                member: {
-                    name: {
-                        $contains: search,
-                    }
-                }
-            };
+            member: {
+                name: {
+                    $contains: search,
+                },
+            },
+        };
     }
 
     static async buildData(requestQuery: LimitedFilteredRequest) {
@@ -101,8 +100,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
 
         try {
             data = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',
@@ -118,7 +116,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
         const balanceItemIds = Formatter.uniqueArray(data.map(d => d.balanceItemId));
         const members = await Member.getByIDs(...memberIds);
         const organizations = await Organization.getByIDs(...organizationIds);
-        const balanceItems = await BalanceItem.getByIDs(...balanceItemIds)
+        const balanceItems = await BalanceItem.getByIDs(...balanceItemIds);
         const balanceItemStructures = await BalanceItem.getStructureWithPayments(balanceItems);
 
         const results: PlatformMembership[] = [];
@@ -149,7 +147,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 ...model,
                 balanceItem: balanceItem,
                 member: PlatformMembershipMemberDetails.create(member),
-                organization: PlatformMembershipOrganizationDetails.create(organization)
+                organization: PlatformMembershipOrganizationDetails.create(organization),
             }));
         }
 
@@ -182,9 +180,9 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.authenticate();
 
-       if (!Context.auth.hasPlatformFullAccess()) {
-           throw Context.auth.error();
-       }
+        if (!Context.auth.hasPlatformFullAccess()) {
+            throw Context.auth.error();
+        }
 
         const maxLimit = 1000;
 

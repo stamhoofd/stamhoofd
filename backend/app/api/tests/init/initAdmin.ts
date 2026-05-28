@@ -1,6 +1,6 @@
-import type { Organization} from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { Token, UserFactory } from '@stamhoofd/models';
-import type { AccessRight} from '@stamhoofd/structures';
+import type { AccessRight } from '@stamhoofd/structures';
 import { PermissionLevel, PermissionRole, Permissions } from '@stamhoofd/structures';
 import { initPermissionRole } from './initPermissionRole.js';
 

@@ -53,7 +53,7 @@ export default new Migration(async () => {
 
     // Set as platform organization
     platform.membershipOrganizationId = organization.id;
-    await platform.save()
+    await platform.save();
 
     // Do something here
     return Promise.resolve();

@@ -5,7 +5,7 @@ import { PaymentMethod, PaymentProvider, STPackageType } from '@stamhoofd/struct
 import { VATService } from '../services/VATService.js';
 import { STMath } from '@stamhoofd/utility';
 
-const CACHE_TIMEOUT = 1000 * 60 * 5 // 5 minutes
+const CACHE_TIMEOUT = 1000 * 60 * 5; // 5 minutes
 
 export class ServiceFeeHelper {
     static #cachedOrganization: Organization | null = null;
@@ -16,7 +16,7 @@ export class ServiceFeeHelper {
      */
     static async getInvoicingOrganization() {
         if (this.#cachedOrganization && this.#cachedOrganizationDate && this.#cachedOrganizationDate > new Date(Date.now() - CACHE_TIMEOUT)) {
-            return this.#cachedOrganization
+            return this.#cachedOrganization;
         }
         const platform = await Platform.getShared();
         const membershipId = platform.membershipOrganizationId;
@@ -24,9 +24,9 @@ export class ServiceFeeHelper {
             return null;
         }
 
-        const org = await Organization.getByID(membershipId, true)
+        const org = await Organization.getByID(membershipId, true);
         this.#cachedOrganization = org;
-        this.#cachedOrganizationDate = new Date()
+        this.#cachedOrganizationDate = new Date();
 
         return org;
     }
@@ -40,8 +40,8 @@ export class ServiceFeeHelper {
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'Payments are temporarily unavailable due to a lack of VAT settings',
-                human: $t('Online betalingen zijn tijdelijk onbeschikbaar op het platform door een probleem met de berekening van BTW-tarieven op kosten.')
-            })
+                human: $t('Online betalingen zijn tijdelijk onbeschikbaar op het platform door een probleem met de berekening van BTW-tarieven op kosten.'),
+            });
         }
 
         const customer = organization.defaultCompanies[0];
@@ -105,8 +105,7 @@ export class ServiceFeeHelper {
             if (payment.provider === PaymentProvider.Stripe && payment.stripeAccountId) {
                 // Don't chagne
                 vat = await this.getVATPercentage(organization);
-            }
-            else {
+            } else {
                 // don't charge VAT (we'll add the VAT to the invoice)
             }
             serviceFee = serviceFee * (100 + vat) / 100;
@@ -118,8 +117,7 @@ export class ServiceFeeHelper {
         console.log('Service fee for payment', payment.id, type, 'is', serviceFee);
         if (payment.provider === PaymentProvider.Stripe && payment.stripeAccountId) {
             payment.serviceFeePayout = serviceFee;
-        }
-        else {
+        } else {
             payment.serviceFeeManual = serviceFee;
         }
     }
@@ -130,18 +128,18 @@ export class ServiceFeeHelper {
     static async setTransferFee({
         payment,
         organization,
-        stripeAccount
+        stripeAccount,
     }: {
-        payment: Payment,
-        organization: Organization,
-        stripeAccount?: StripeAccount | null | undefined
+        payment: Payment;
+        organization: Organization;
+        stripeAccount?: StripeAccount | null | undefined;
     }) {
         if (payment.provider !== PaymentProvider.Stripe && payment.provider !== PaymentProvider.Buckaroo) {
             return;
         }
 
         if (payment.provider === PaymentProvider.Stripe && !stripeAccount) {
-            throw new Error('Missing StripeAccount')
+            throw new Error('Missing StripeAccount');
         }
 
         const totalPrice = STMath.round(payment.price / 100); // Convert from 4 decimal places to 2 decimal places for this calculation
@@ -164,12 +162,10 @@ export class ServiceFeeHelper {
 
         if (payment.method === PaymentMethod.iDEAL) {
             fee = calculateFee(21, 20); // € 0,21 + 0,2%
-        }
-        else if (payment.method === PaymentMethod.Bancontact) {
-            fee =  calculateFee(24, 20); // € 0,24 + 0,2%
-        }
-        else {
-            fee =  calculateFee(25, 150); // € 0,25 + 1,5%
+        } else if (payment.method === PaymentMethod.Bancontact) {
+            fee = calculateFee(24, 20); // € 0,24 + 0,2%
+        } else {
+            fee = calculateFee(25, 150); // € 0,25 + 1,5%
         }
 
         payment.transferFee = fee * 100; // Convert back to 4 decimal places for storage
@@ -181,7 +177,5 @@ export class ServiceFeeHelper {
         } else {
             console.log('Transfer fee for payment', payment.id, 'is', payment.transferFee);
         }
-
     }
-
 }

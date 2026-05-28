@@ -11,22 +11,22 @@ import { AuthenticatedStructures } from './AuthenticatedStructures.js';
 import { VATService } from '../services/VATService.js';
 
 export class ApplicationFeeDetails {
-    transferFee = 0
-    serviceFee = 0
+    transferFee = 0;
+    serviceFee = 0;
     count = 0;
-    minimumDate: Date | null = null
-    maximumDate: Date | null = null
+    minimumDate: Date | null = null;
+    maximumDate: Date | null = null;
 
-    constructor(details: { count?: number, transferFee: number, serviceFee: number,minimumDate: Date | null, maximumDate: Date | null}) {
-        this.count = details.count ?? 0
-        this.transferFee = details.transferFee
-        this.serviceFee = details.serviceFee
-        this.minimumDate = details.minimumDate
-        this.maximumDate = details.maximumDate
+    constructor(details: { count?: number; transferFee: number; serviceFee: number; minimumDate: Date | null; maximumDate: Date | null }) {
+        this.count = details.count ?? 0;
+        this.transferFee = details.transferFee;
+        this.serviceFee = details.serviceFee;
+        this.minimumDate = details.minimumDate;
+        this.maximumDate = details.maximumDate;
     }
 
     get amount() {
-        return this.transferFee + this.serviceFee
+        return this.transferFee + this.serviceFee;
     }
 
     static fromStripe(transaction: Stripe.BalanceTransaction) {
@@ -35,13 +35,13 @@ export class ApplicationFeeDetails {
 
         const serviceFeeStr = metadata.serviceFee as unknown;
         if (serviceFeeStr === undefined || typeof serviceFeeStr !== 'string') {
-            throw new Error('Missing serviceFee metadata')
+            throw new Error('Missing serviceFee metadata');
         }
 
         const parsed = parseInt(serviceFeeStr);
         if (isNaN(parsed) || !isFinite(parsed)) {
-            throw new Error('Invalid serviceFee metadata')
-    }
+            throw new Error('Invalid serviceFee metadata');
+        }
         const serviceFee = parsed * 100; // in cents
         const transferFee = transaction.amount * 100 - serviceFee;
 
@@ -50,27 +50,27 @@ export class ApplicationFeeDetails {
             serviceFee,
             transferFee,
             minimumDate: new Date(transaction.created * 1000),
-            maximumDate: new Date(transaction.created * 1000)
-        })
+            maximumDate: new Date(transaction.created * 1000),
+        });
     }
 
     add(fee: Stripe.BalanceTransaction) {
-        this.combine(ApplicationFeeDetails.fromStripe(fee))
+        this.combine(ApplicationFeeDetails.fromStripe(fee));
     }
 
     remove(fee: Stripe.BalanceTransaction) {
-        this.combine(ApplicationFeeDetails.fromStripe(fee))
+        this.combine(ApplicationFeeDetails.fromStripe(fee));
     }
 
     combine(other: ApplicationFeeDetails) {
-        this.serviceFee += other.serviceFee
-        this.transferFee += other.transferFee
-        this.count += other.count
+        this.serviceFee += other.serviceFee;
+        this.transferFee += other.transferFee;
+        this.count += other.count;
         if (other.minimumDate && (this.minimumDate === null || other.minimumDate < this.minimumDate)) {
-            this.minimumDate = other.minimumDate
+            this.minimumDate = other.minimumDate;
         }
         if (other.maximumDate && (this.maximumDate === null || other.maximumDate > this.maximumDate)) {
-            this.maximumDate = other.maximumDate
+            this.maximumDate = other.maximumDate;
         }
     }
 }
@@ -110,13 +110,13 @@ class StripeReport {
 
 export class StripeReportInvoicer {
     private readonly report: StripeReport;
-    start: Date
-    end: Date
-    
+    start: Date;
+    end: Date;
+
     constructor(report: StripeReport, start: Date, end: Date) {
         this.report = report;
-        this.start = start
-        this.end = end
+        this.start = start;
+        this.end = end;
     }
 
     async generateInvoices(sellingOrganization: Organization, reference: string) {
@@ -132,7 +132,7 @@ export class StripeReportInvoicer {
                 // Send email notification of this error
                 Email.sendWebmaster({
                     subject: 'Aanmaken Stripe facturen voor ' + account + ' - ' + reference + ' mislukt',
-                    html: 'Aanmaken Stripe facturen voor ' + account + ' - ' + reference + ' mislukt. <br><br> ' + e.toString()
+                    html: 'Aanmaken Stripe facturen voor ' + account + ' - ' + reference + ' mislukt. <br><br> ' + e.toString(),
                 });
             }
         }
@@ -140,7 +140,7 @@ export class StripeReportInvoicer {
     }
 
     static async hasInvoice(sellingOrganization: Organization, reference: string) {
-        return !!await Invoice.select().where('organizationId', sellingOrganization.id).where('reference', reference).where('number', '!=', null).first(false)
+        return !!await Invoice.select().where('organizationId', sellingOrganization.id).where('reference', reference).where('number', '!=', null).first(false);
     }
 
     async generateInvoice(sellingOrganization: Organization, reference: string, accountId: string, applicationFee: ApplicationFeeDetails) {
@@ -154,16 +154,16 @@ export class StripeReportInvoicer {
         }
 
         // Search for the organization in Stamhoofd
-        const stripeAccount = await StripeAccount.select().where('accountId', accountId).first(false)
+        const stripeAccount = await StripeAccount.select().where('accountId', accountId).first(false);
         if (!stripeAccount) {
             if (STAMHOOFD.environment === 'test') {
                 console.error('No organization found for Stripe account ' + accountId);
-                return
+                return;
             }
             throw new SimpleError({
                 code: 'stripe_account_not_found',
                 message: 'No organization found for Stripe account ' + accountId,
-            })
+            });
         }
         const organization = await Organization.getByID(stripeAccount.organizationId);
 
@@ -171,7 +171,7 @@ export class StripeReportInvoicer {
             throw new SimpleError({
                 code: 'organization_not_found',
                 message: 'No organization found for Stripe account ' + accountId,
-            })
+            });
         }
 
         const existingInvoices = await Invoice.select()
@@ -185,7 +185,7 @@ export class StripeReportInvoicer {
             if (!i.stripeAccountId && i.totalWithVAT === applicationFee.amount) {
                 i.stripeAccountId = accountId;
 
-                console.log('Set stripe account id for invoice ' + i.number + ' to ' + accountId)
+                console.log('Set stripe account id for invoice ' + i.number + ' to ' + accountId);
                 await i.save();
             }
 
@@ -193,7 +193,7 @@ export class StripeReportInvoicer {
                 throw new SimpleError({
                     code: 'invoice_already_exists_with_different_amount',
                     message: 'Invoice without account id already exists with different amount ' + organization.id + ' expected ' + applicationFee.amount + ' got ' + i.totalWithVAT + ' in invoice ' + i.number,
-                })
+                });
             }
 
             if (i.stripeAccountId === accountId) {
@@ -201,49 +201,49 @@ export class StripeReportInvoicer {
                     throw new SimpleError({
                         code: 'invoice_already_exists_with_different_amount',
                         message: 'Invoice already exists with different amount ' + organization.id + ' expected ' + applicationFee.amount + ' got ' + i.totalWithVAT + ' in invoice ' + i.number,
-                    })
+                    });
                 }
 
                 // Already invoiced
-                console.warn('Tried to invoice an already invoiced.')
+                console.warn('Tried to invoice an already invoiced.');
                 return;
             }
         }
 
         const customer = PaymentCustomer.create({
-            company: sellingOrganization.defaultCompanies[0]
+            company: sellingOrganization.defaultCompanies[0],
         });
 
         const balanceItems: BalanceItem[] = [];
-        
+
         if (applicationFee.serviceFee !== 0) {
             const item = new BalanceItem();
             item.type = BalanceItemType.ServiceFee;
             item.description = $t('Servicekosten ingehouden via Stripe tussen {startDate} en {endDate}', {
                 startDate: Formatter.startDate(this.start, false, true),
-                endDate: Formatter.endDate(this.end, false, true)
-            })
+                endDate: Formatter.endDate(this.end, false, true),
+            });
             item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
                 id: PaymentProvider.Stripe,
-                name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe))
-            }))
+                name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),
+            }));
             item.payingOrganizationId = organization.id;
-            item.organizationId = sellingOrganization.id
+            item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;
             item.VATExcempt = VATService.getVATExcempt({
                 company: organization.defaultCompanies[0] ?? null,
                 sellingOrganization,
-                type: 'services'
+                type: 'services',
             });
             item.VATIncluded = true;
             item.quantity = 1;
             item.unitPrice = applicationFee.serviceFee;
             item.createdAt = new Date();
             item.status = BalanceItemStatus.Hidden;
-            item.startDate = this.start
-            item.endDate = this.end
-            await item.save()
-            balanceItems.push(item)
+            item.startDate = this.start;
+            item.endDate = this.end;
+            await item.save();
+            balanceItems.push(item);
         }
 
         if (applicationFee.transferFee !== 0) {
@@ -251,33 +251,33 @@ export class StripeReportInvoicer {
             item.type = BalanceItemType.TransferFee;
             item.description = $t('Transactiekosten ingehouden via Stripe tussen {startDate} en {endDate}', {
                 startDate: Formatter.startDate(this.start, false, true),
-                endDate: Formatter.endDate(this.end, false, true)
-            })
+                endDate: Formatter.endDate(this.end, false, true),
+            });
             item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
                 id: PaymentProvider.Stripe,
-                name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe))
-            }))
+                name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),
+            }));
             item.payingOrganizationId = organization.id;
-            item.organizationId = sellingOrganization.id
+            item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;
             item.VATExcempt = VATService.getVATExcempt({
                 company: organization.defaultCompanies[0] ?? null,
                 sellingOrganization,
-                type: 'services'
+                type: 'services',
             });
             item.VATIncluded = true;
             item.quantity = 1;
             item.unitPrice = applicationFee.transferFee;
             item.createdAt = new Date();
             item.status = BalanceItemStatus.Hidden;
-            item.startDate = this.start
-            item.endDate = this.end
-            await item.save()
-            balanceItems.push(item)
+            item.startDate = this.start;
+            item.endDate = this.end;
+            await item.save();
+            balanceItems.push(item);
         }
 
         const systemUser = await User.getSystem();
-        
+
         // Done validation
         const payment = new Payment();
         payment.adminUserId = systemUser.id;
@@ -294,13 +294,13 @@ export class StripeReportInvoicer {
         payment.roundingAmount = 0;
         payment.method = PaymentMethod.Unknown;
         payment.type = PaymentType.Payment;
-        payment.createMandate = null
+        payment.createMandate = null;
 
         payment.provider = PaymentProvider.Stripe;
-        payment.stripeAccountId = stripeAccount.id
-        await payment.save()
+        payment.stripeAccountId = stripeAccount.id;
+        await payment.save();
 
-         for (const balanceItem of balanceItems) {
+        for (const balanceItem of balanceItems) {
             // Create one balance item payment to pay it in one payment
             const balanceItemPayment = new BalanceItemPayment();
             balanceItemPayment.balanceItemId = balanceItem.id;
@@ -333,25 +333,24 @@ export class StripeReportInvoicer {
 export class StripeInvoicer {
     private stripe: Stripe;
 
-    constructor({secretKey}: { secretKey: string}) {
-        this.stripe = new Stripe(secretKey, {apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 1, timeout: 10000});
+    constructor({ secretKey }: { secretKey: string }) {
+        this.stripe = new Stripe(secretKey, { apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 1, timeout: 10000 });
     }
 
     static getMonthUnixStartEnd(date: Date) {
         const start = Math.floor((new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0).getTime()) / 1000);
         const end = Math.ceil((new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0, 0).getTime() - 1000) / 1000);
-        return {start, end};
+        return { start, end };
     }
 
     // Loops all months until all invoices are generated
-    async generateAllInvoices(sellingOrganization: Organization, options?: {force?: boolean, start?: Date}) {
+    async generateAllInvoices(sellingOrganization: Organization, options?: { force?: boolean; start?: Date }) {
         const startMonth = options?.start ?? new Date(2026, 0, 1);
         const stopAt = new Date(Date.now() + (STAMHOOFD.environment === 'production' ? (-60 * 60 * 24 * 1000) : (60 * 60 * 24 * 1000 * 31))); // One day margin before creating invoices
-        let currentMonth = new Date(startMonth)
-        
-         
+        let currentMonth = new Date(startMonth);
+
         while (true) {
-            const {start, end} = StripeInvoicer.getMonthUnixStartEnd(currentMonth);
+            const { start, end } = StripeInvoicer.getMonthUnixStartEnd(currentMonth);
 
             if (end >= stopAt.getTime() / 1000) {
                 // Stop
@@ -362,8 +361,8 @@ export class StripeInvoicer {
         }
     }
 
-    async generateInvoices(sellingOrganization: Organization, month: Date, options?: {force?: boolean}) {
-        const {start, end} = StripeInvoicer.getMonthUnixStartEnd(month);
+    async generateInvoices(sellingOrganization: Organization, month: Date, options?: { force?: boolean }) {
+        const { start, end } = StripeInvoicer.getMonthUnixStartEnd(month);
         const reference = 'stripe-fees-' + Formatter.dateIso(new Date(start * 1000));
 
         try {
@@ -377,21 +376,21 @@ export class StripeInvoicer {
                 const reportFees = await this.fetchBalanceItems({
                     created: {
                         gte: start,
-                        lte: end
+                        lte: end,
                     },
                     type: 'application_fee',
                     expand: ['data.source', 'data.source.originating_transaction'],
-                })
+                });
                 const reportRefund = await this.fetchBalanceItems({
                     created: {
                         gte: start,
-                        lte: end
+                        lte: end,
                     },
                     type: 'application_fee_refund',
                     expand: ['data.source', 'data.source.originating_transaction'],
-                })
+                });
 
-                const report = reportFees.combine(reportRefund)
+                const report = reportFees.combine(reportRefund);
                 const invoicer = new StripeReportInvoicer(report, new Date(start * 1000), new Date(end * 1000));
                 await invoicer.generateInvoices(sellingOrganization, reference);
             });
@@ -401,15 +400,15 @@ export class StripeInvoicer {
             // Send email notification of this error
             Email.sendWebmaster({
                 subject: 'Aanmaken Stripe facturen voor ' + Formatter.dateNumber(month) + ' mislukt',
-                html: 'Aanmaken Stripe facturen voor ' + Formatter.dateNumber(month) + ' mislukt. <br><br> ' + e.toString()
+                html: 'Aanmaken Stripe facturen voor ' + Formatter.dateNumber(month) + ' mislukt. <br><br> ' + e.toString(),
             });
         }
     }
 
     private async fetchBalanceItems(options: Stripe.BalanceTransactionListParams) {
         // For the given payout, fetch all balance items
-        const params = {...options};
-        const report = new StripeReport()
+        const params = { ...options };
+        const report = new StripeReport();
 
         for await (const balanceItem of this.stripe.balanceTransactions.list(params)) {
             report.add(balanceItem);

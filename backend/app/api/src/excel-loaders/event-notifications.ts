@@ -1,6 +1,6 @@
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
-import type { EventNotification, LimitedFilteredRequest} from '@stamhoofd/structures';
+import type { EventNotification, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetEventNotificationsEndpoint } from '../endpoints/global/events/GetEventNotificationsEndpoint.js';

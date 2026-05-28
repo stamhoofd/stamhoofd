@@ -1,9 +1,9 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Organization } from '@stamhoofd/models';
-import type { SQLWhere} from '@stamhoofd/sql';
+import type { SQLWhere } from '@stamhoofd/sql';
 import { scalarToSQLExpression, SQL, SQLMatch, SQLWhereLike } from '@stamhoofd/sql';
 import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -48,8 +48,7 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             // give higher relevance if the searchindex includes the exact sentence
             // give lower relevance if the last word is not a complete match
             matchValue = `>("${query}") (${query}) <(${query}*)`;
-        }
-        else {
+        } else {
             // give higher relevance if the searchindex includes the exact word
             matchValue = `>${query} ${query}*`;
         }

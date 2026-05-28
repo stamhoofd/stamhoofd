@@ -104,8 +104,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                     // We set a custom domainname for webshops already
                     // This is not used at this moment
                     organization.privateMeta.mailFromDomain = defaultFromDomain;
-                }
-                else {
+                } else {
                     // CNAME domain: for SPF + MX + A record
                     organization.privateMeta.mailFromDomain = organization.privateMeta.pendingRegisterDomain;
                 }
@@ -126,8 +125,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                             value: (STAMHOOFD.domains.registrationCname[organization.address.country] ?? STAMHOOFD.domains.registrationCname['']) + '.',
                         }));
                     }
-                }
-                else {
+                } else {
                     organization.privateMeta.dnsRecords.push(DNSRecord.create({
                         type: DNSRecordType.CNAME,
                         name: organization.privateMeta.mailFromDomain + '.',
@@ -149,8 +147,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
 
                     organization.serverMeta.privateDKIMKey = priv;
                     organization.serverMeta.publicDKIMKey = pub;
-                }
-                else {
+                } else {
                     priv = organization.serverMeta.privateDKIMKey;
                     pub = organization.serverMeta.publicDKIMKey;
                 }
@@ -170,8 +167,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                     description: $t(`%Ee`),
                     optional: true,
                 }));
-            }
-            else {
+            } else {
                 if (oldMailDomain) {
                     organization.deleteAWSMailIdenitity(oldMailDomain).catch(console.error);
                 }
@@ -189,8 +185,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             }
 
             await organization.save();
-        }
-        else {
+        } else {
             // Validate DNS-records if not empty
             console.log('Validating domains');
             await organization.updateDNSRecords();

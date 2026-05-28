@@ -35,20 +35,20 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
-                        level: PermissionLevel.None,
-                        resources,
-                    }),
+                    level: PermissionLevel.None,
+                    resources,
+                }),
             }).create();
 
             const member = await new MemberFactory({
                 organization, user,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
@@ -56,7 +56,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
             patch.addPut(RegistrationInvitationRequest.create({
                 groupId: group.id,
                 memberId: member.id,
-            }))
+            }));
 
             const response = await patchInvitations({
                 patch,
@@ -89,20 +89,20 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
-                        level: PermissionLevel.None,
-                        resources,
-                    }),
+                    level: PermissionLevel.None,
+                    resources,
+                }),
             }).create();
 
             const member = await new MemberFactory({
                 organization, user,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
@@ -118,7 +118,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 user,
             })).rejects.toThrow('Je hebt geen toegangsrechten om iemand uit te nodigen voor deze groep.');
-        })
+        });
 
         test('Should fail if no read access to member', async () => {
             const organization = await new OrganizationFactory({}).create();
@@ -134,7 +134,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
@@ -147,7 +147,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
@@ -155,7 +155,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
             patch.addPut(RegistrationInvitationRequest.create({
                 groupId: group.id,
                 memberId: member.id,
-            }))
+            }));
 
             // assert
             await expect(patchInvitations({
@@ -163,7 +163,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 user,
             })).rejects.toThrow('Je hebt geen toegangsrechten om dit lid uit te nodigen.');
-        })
+        });
 
         test('Should fail if already registered', async () => {
             const organization = await new OrganizationFactory({}).create();
@@ -179,23 +179,23 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
-                        level: PermissionLevel.None,
-                        resources,
-                    }),
+                    level: PermissionLevel.None,
+                    resources,
+                }),
             }).create();
 
             const member = await new MemberFactory({
                 organization, user,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
-            await new RegistrationFactory({member, group}).create();
+            await new RegistrationFactory({ member, group }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
@@ -210,9 +210,8 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 user,
             })).rejects.toThrow('The member is already registered for this group');
-        })
-
-    })
+        });
+    });
 
     describe('Patch invitation', () => {
         test('Should not be supported', async () => {
@@ -229,20 +228,20 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
-                        level: PermissionLevel.None,
-                        resources,
-                    }),
+                    level: PermissionLevel.None,
+                    resources,
+                }),
             }).create();
 
             const member = await new MemberFactory({
                 organization, user,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
@@ -259,8 +258,8 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 user,
             })).rejects.toThrow('Patching invitations is not supported. Only puts and deletes are supported.');
-        })
-    })
+        });
+    });
 
     describe('Delete invitation', () => {
         test('Happy path', async () => {
@@ -277,13 +276,13 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
-                        level: PermissionLevel.None,
-                        resources,
-                    }),
+                    level: PermissionLevel.None,
+                    resources,
+                }),
             }).create();
 
             const member = await new MemberFactory({
@@ -291,10 +290,10 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 user,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
-            const invitation = await new RegistrationInvitationFactory({member, group, organization}).create();
+            const invitation = await new RegistrationInvitationFactory({ member, group, organization }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
@@ -325,13 +324,13 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
-                        level: PermissionLevel.None,
-                        resources,
-                    }),
+                    level: PermissionLevel.None,
+                    resources,
+                }),
             }).create();
 
             // user has no access to this member
@@ -339,10 +338,10 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
-            const invitation = await new RegistrationInvitationFactory({member, group, organization}).create();
+            const invitation = await new RegistrationInvitationFactory({ member, group, organization }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
@@ -357,7 +356,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
             // assert
             expect(response.body).toBeDefined();
             expect(response.body).toHaveLength(0);
-        })
+        });
 
         test('Should fail if no write access to group', async () => {
             const organization = await new OrganizationFactory({}).create();
@@ -373,7 +372,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                     }),
                 ]]),
             );
-            
+
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
@@ -386,10 +385,10 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization, user,
                 firstName: 'John',
                 lastName: 'Doe',
-                birthDay: {year: 1994, month: 6, day: 24}
+                birthDay: { year: 1994, month: 6, day: 24 },
             }).create();
 
-            const invitation = await new RegistrationInvitationFactory({member, group, organization}).create();
+            const invitation = await new RegistrationInvitationFactory({ member, group, organization }).create();
 
             const patch: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
@@ -400,6 +399,6 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
                 organization,
                 user,
             })).rejects.toThrow('Je hebt geen toegangsrechten om deze uitnodiging te verwijderen.');
-        })
+        });
     });
 });

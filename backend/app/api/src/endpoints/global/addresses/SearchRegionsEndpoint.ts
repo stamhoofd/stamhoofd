@@ -43,12 +43,10 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
             if (/^[a-z0-9]*$/i.test(word)) {
                 if (index === words.length - 1) {
                     cleanedWords.push('+' + word + '*');
-                }
-                else {
+                } else {
                     cleanedWords.push('+' + word);
                 }
-            }
-            else {
+            } else {
                 cleanedWords.push('+"' + word + '"');
             }
         }

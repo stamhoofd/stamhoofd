@@ -1,7 +1,7 @@
 import type { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { BalanceItem } from '@stamhoofd/models';
-import type { BalanceItemWithPayments} from '@stamhoofd/structures';
+import type { BalanceItemWithPayments } from '@stamhoofd/structures';
 import { BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';

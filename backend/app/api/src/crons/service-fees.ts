@@ -14,12 +14,12 @@ async function chargeServiceFees() {
     if (STAMHOOFD.environment !== 'development' && (new Date().getHours() > 5 || new Date().getHours() < 2)) {
         return;
     }
-    const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId
+    const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
     if (!membershipOrganizationId) {
         return;
     }
 
-    const membershipOrganization = await Organization.getByID(membershipOrganizationId, true)
+    const membershipOrganization = await Organization.getByID(membershipOrganizationId, true);
 
     // Succeeded payments
     const payments = await Payment.select()
@@ -80,44 +80,44 @@ async function chargeServiceFees() {
             const groupedByDate = new Map<string, Payment[]>();
 
             for (const p of payments) {
-                const date = Formatter.dateNumber(p.createdAt)
-                const existing = groupedByDate.get(date)
+                const date = Formatter.dateNumber(p.createdAt);
+                const existing = groupedByDate.get(date);
                 if (existing) {
-                    existing.push(p)
+                    existing.push(p);
                 } else {
-                    groupedByDate.set(date, [p])
+                    groupedByDate.set(date, [p]);
                 }
             }
 
             for (const [day, payments] of groupedByDate) {
-                const date = new Date(Math.min(...payments.map(p=>p.createdAt.getTime())));
-                const startOfDay = Formatter.luxon(date).startOf('day').toJSDate()
-                const endOfDay = Formatter.luxon(date).endOf('day').toJSDate()
+                const date = new Date(Math.min(...payments.map(p => p.createdAt.getTime())));
+                const startOfDay = Formatter.luxon(date).startOf('day').toJSDate();
+                const endOfDay = Formatter.luxon(date).endOf('day').toJSDate();
 
                 // Ms don't work when querying MySQL, they get lost
-                startOfDay.setMilliseconds(0)
-                endOfDay.setMilliseconds(0)
+                startOfDay.setMilliseconds(0);
+                endOfDay.setMilliseconds(0);
 
                 const item = new BalanceItem();
                 item.type = BalanceItemType.ServiceFee;
-                item.description = $t('Servicekosten op {date}', {date: day})
+                item.description = $t('Servicekosten op {date}', { date: day });
                 item.payingOrganizationId = organization.id;
-                item.organizationId = membershipOrganizationId
+                item.organizationId = membershipOrganizationId;
                 item.VATPercentage = 21;
                 item.VATExcempt = VATService.getVATExcempt({
                     company: organization.defaultCompanies[0] ?? null,
                     sellingOrganization: membershipOrganization,
-                    type: 'services'
+                    type: 'services',
                 });
                 item.VATIncluded = false;
                 item.quantity = 1;
                 item.unitPrice = totalFees;
                 item.createdAt = new Date();
                 item.status = BalanceItemStatus.Due;
-                item.startDate = startOfDay
-                item.endDate = endOfDay
+                item.startDate = startOfDay;
+                item.endDate = endOfDay;
 
-                // Check if we find an existing one 
+                // Check if we find an existing one
                 const existing = await BalanceItem.select()
                     .where('type', BalanceItemType.ServiceFee)
                     .where('organizationId', membershipOrganizationId)
@@ -133,18 +133,18 @@ async function chargeServiceFees() {
                 if (existing) {
                     existing.unitPrice += totalFees;
                     await existing.save();
-                    BalanceItemService.scheduleUpdate(existing)
+                    BalanceItemService.scheduleUpdate(existing);
                 } else {
-                    await item.save()
-                    BalanceItemService.scheduleUpdate(item)
+                    await item.save();
+                    BalanceItemService.scheduleUpdate(item);
                 }
 
-                const {changedRows} = await Payment.update()
+                const { changedRows } = await Payment.update()
                     .where('id', payments.map(p => p.id))
                     .set('serviceFeeManualCharged', SQL.column('serviceFeeManual'))
                     .update();
                 if (changedRows !== payments.length) {
-                    console.error('Unexpected change in serviceFeeManualCharged. Expected ' + payments.length + ', updated only ' + changedRows)
+                    console.error('Unexpected change in serviceFeeManualCharged. Expected ' + payments.length + ', updated only ' + changedRows);
                 }
             }
         }

@@ -1,9 +1,9 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, User, Webshop} from '@stamhoofd/models';
+import type { Organization, User, Webshop } from '@stamhoofd/models';
 import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';

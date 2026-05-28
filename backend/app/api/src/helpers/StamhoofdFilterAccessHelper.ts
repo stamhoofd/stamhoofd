@@ -5,15 +5,14 @@ import { FilterWrapperMarker, getMagicRelationValue, isMagicFilter, isMagicRelat
 export class StamhoofdFilterAccessHelper {
     static getGroupIdsFromFilter(filter: StamhoofdFilter): StamhoofdFilter<StamhoofdCompareValue>[] {
         let rawGroupIds: StamhoofdFilter<StamhoofdCompareValue>[] | null = null;
-    
+
         if (typeof filter === 'string' || isMagicFilter(filter)) {
             rawGroupIds = [filter];
-        }
-        else {
+        } else {
             const { markerValue } = unwrapFilter(filter, {
                 $in: FilterWrapperMarker,
             });
-    
+
             if (!Array.isArray(markerValue)) {
                 throw new SimpleError({
                     code: 'invalid_field',
@@ -30,19 +29,19 @@ export class StamhoofdFilterAccessHelper {
                     message: 'Filtering on an empty list of groups is not supported',
                 });
             }
-    
+
             rawGroupIds = markerValue;
         }
-    
-        return rawGroupIds.map(raw => {
+
+        return rawGroupIds.map((raw) => {
             if (typeof raw === 'string') {
                 return raw;
             }
-    
+
             if (isMagicRelationFilter(raw)) {
                 return getMagicRelationValue(raw);
             }
-    
+
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'filter',

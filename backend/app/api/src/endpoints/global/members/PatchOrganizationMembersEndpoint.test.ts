@@ -85,7 +85,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             );
 
             const user = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.None, resources  }),
+                permissions: Permissions.create({ level: PermissionLevel.None, resources }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
             }).create();
 
@@ -95,7 +95,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 birthDay,
                 generateData: true,
                 // should be member of the same organization
-                organization
+                organization,
             }).create();
 
             const token = await Token.createToken(user);
@@ -138,7 +138,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             );
 
             const user = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.None, resources  }),
+                permissions: Permissions.create({ level: PermissionLevel.None, resources }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
             }).create();
 
@@ -149,7 +149,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 birthDay,
                 generateData: true,
                 // should be member of the same organization
-                organization
+                organization,
             }).create();
 
             const memberToPatch = await new MemberFactory({
@@ -158,7 +158,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 birthDay,
                 generateData: true,
                 // should be member of the same organization
-                organization
+                organization,
             }).create();
 
             // Register this member
@@ -175,8 +175,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const patch = MemberWithRegistrationsBlob.patch({
                 id: memberToPatch.id,
                 details: MemberDetails.patch({
-                    firstName
-                })
+                    firstName,
+                }),
             });
 
             arr.addPatch(patch);
@@ -206,7 +206,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             );
 
             const user = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.None, resources  }),
+                permissions: Permissions.create({ level: PermissionLevel.None, resources }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
             }).create();
 
@@ -218,8 +218,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 // member of other organization
                 organization: otherOrganization,
                 details: MemberDetails.create({
-                    email: 'existing@test.be'
-                })
+                    email: 'existing@test.be',
+                }),
             }).create();
 
             const token = await Token.createToken(user);
@@ -889,9 +889,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
                 STExpect.simpleError({
                     code: 'invalid_field',
-                    field: 'changes.0.patch.details.recordAnswers.' + commentsRecord.id+'.settings.id',
+                    field: 'changes.0.patch.details.recordAnswers.' + commentsRecord.id + '.settings.id',
                     message: 'Expected record settings id to match map key',
-                })
+                }),
             );
         });
 
@@ -958,7 +958,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 STExpect.simpleError({
                     code: 'missing_field',
                     field: 'changes.0.patch.details.recordAnswers.changes.' + commentsRecord.id,
-                })
+                }),
             );
         });
 

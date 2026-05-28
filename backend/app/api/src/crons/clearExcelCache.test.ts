@@ -132,7 +132,7 @@ describe('clearExcelCacheHelper', () => {
         });
 
         fsMock.readdir.mockReturnValue(
-             
+
             Promise.resolve([...directories, file1]) as any,
         );
         // #endregion

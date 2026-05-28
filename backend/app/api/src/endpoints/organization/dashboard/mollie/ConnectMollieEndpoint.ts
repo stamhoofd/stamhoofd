@@ -1,9 +1,9 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { MollieToken } from '@stamhoofd/models';
-import type { Organization as OrganizationStruct} from '@stamhoofd/structures';
+import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
@@ -48,9 +48,9 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         const mollieToken = await MollieToken.create(organization, request.body.code);
-        const service = await MollieService.create({sellingOrganization: organization})
+        const service = await MollieService.create({ sellingOrganization: organization });
         if (service) {
-            await service.setupOnboarding()
+            await service.setupOnboarding();
 
             // Check settlements after linking (shouldn't block)
             checkMollieSettlementsFor(mollieToken.accessToken, true).catch(console.error);

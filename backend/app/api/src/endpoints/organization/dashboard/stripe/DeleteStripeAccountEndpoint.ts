@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import { AuditLogType, PermissionLevel } from '@stamhoofd/structures';
@@ -56,8 +56,7 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
 
         try {
             await stripe.accounts.del(model.accountId);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Tried deleting account but failed', e);
         }
 

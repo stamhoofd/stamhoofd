@@ -43,8 +43,7 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
                     message: 'You do not have access to this group',
                     human: $t(`%15f`, { groupName: group.settings.name }),
                 });
-            }
-            else {
+            } else {
                 // Return false so we add additional scope filters (only view overlap)
                 return false;
             }

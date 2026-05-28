@@ -240,9 +240,9 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
         const organizationIds = organizations.results.map(o => o.id);
         const responsibilities = organizationIds.length
             ? await MemberResponsibilityRecord.select()
-                .where('organizationId', organizationIds)
-                .where('endDate', null)
-                .fetch()
+                    .where('organizationId', organizationIds)
+                    .where('endDate', null)
+                    .fetch()
             : [];
 
         // Load groups and members

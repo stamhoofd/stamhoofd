@@ -1,6 +1,6 @@
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { OrganizationTag} from '@stamhoofd/structures';
+import type { OrganizationTag } from '@stamhoofd/structures';
 import { AuditLogSource, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
 import { AuditLogService } from '../services/AuditLogService.js';
 

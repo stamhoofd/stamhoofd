@@ -1,4 +1,3 @@
-
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
@@ -158,8 +157,7 @@ describe('E2E.Stock', () => {
             for (const price of productPrices) {
                 if (item.productPrice.id == price.id) {
                     expect(item.reservedPrices.get(price.id)).toBe(item.amount);
-                }
-                else {
+                } else {
                     expect(item.reservedPrices.get(price.id) ?? 0).toBe(0);
                 }
             }
@@ -257,7 +255,7 @@ describe('E2E.Stock', () => {
         }).create();
         token = await Token.createToken(user);
 
-        await initMembershipOrganization()
+        await initMembershipOrganization();
     });
 
     afterAll(() => {

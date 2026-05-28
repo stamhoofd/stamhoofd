@@ -3,8 +3,8 @@ import { Email } from '@stamhoofd/email';
 import { Organization } from '@stamhoofd/models';
 import { BalanceItem, Invoice, InvoicedBalanceItem, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
-import { EmailTemplateType, PaymentStatus, Recipient, Replacement  } from '@stamhoofd/structures';
-import type {Invoice as InvoiceStruct} from '@stamhoofd/structures';
+import { EmailTemplateType, PaymentStatus, Recipient, Replacement } from '@stamhoofd/structures';
+import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ViesHelper } from '../helpers/ViesHelper.js';
 import { BalanceItemService } from './BalanceItemService.js';
@@ -43,7 +43,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'invalid_invoiced_amount',
                 message: 'Unexpected 0 totalBalanceInvoicedAmount',
-                statusCode: 400
+                statusCode: 400,
             });
         }
 
@@ -81,7 +81,7 @@ export class InvoiceService {
         model.reference = struct.reference;
 
         // todo: permission checks
-        //model.negativeInvoiceId = struct.negativeInvoiceId;
+        // model.negativeInvoiceId = struct.negativeInvoiceId;
 
         if (Math.abs(model.payableRoundingAmount) > 10_00) {
             throw new SimpleError({
@@ -117,11 +117,11 @@ export class InvoiceService {
                 });
             }
 
-             if (payment.status === PaymentStatus.Failed) {
+            if (payment.status === PaymentStatus.Failed) {
                 throw new SimpleError({
                     code: 'failed_payment',
                     message: 'You cannot invoice failed payments',
-                    human: $t('Je kan geen factuur maken voor een mislukte of geannuleerde betaling')
+                    human: $t('Je kan geen factuur maken voor een mislukte of geannuleerde betaling'),
                 });
             }
         }
@@ -135,7 +135,7 @@ export class InvoiceService {
             // Force update
             options!.balanceItems = undefined;
         }
-        
+
         const balanceItems = options?.balanceItems ?? await BalanceItem.getByIDs(...balanceItemIds);
         await model.save();
 
@@ -159,11 +159,11 @@ export class InvoiceService {
 
                 if (item.quantity === 0) {
                     // should not be saved!
-                     throw new SimpleError({
+                    throw new SimpleError({
                         statusCode: 400,
                         code: 'zero_quantity',
                         message: 'Cannot invoice a quantity of zero',
-                        human: $t('%1RZ')
+                        human: $t('%1RZ'),
                     });
                 }
 
@@ -177,8 +177,8 @@ export class InvoiceService {
                                 'a-euro': Formatter.price(goingToInvoice),
                                 'name': balanceItem.getStructure().itemTitle,
                                 'left-euro': Formatter.price(-left),
-                            })
-                        })
+                            }),
+                        });
                     }
 
                     if (goingToInvoice < left) {
@@ -190,22 +190,22 @@ export class InvoiceService {
                                 'a-euro': Formatter.price(-goingToInvoice),
                                 'name': balanceItem.getStructure().itemTitle,
                                 'left-euro': Formatter.price(-left),
-                            })
-                        })
+                            }),
+                        });
                     }
                 }
 
                 if (left === 0) {
                     if (goingToInvoice < 0) {
-                        console.log(item)
+                        console.log(item);
                         throw new SimpleError({
                             code: 'error',
                             message: 'Cannot invoice',
                             human: $t('%1R7', {
                                 'a-euro': Formatter.price(-goingToInvoice),
                                 'name': balanceItem.getStructure().itemTitle,
-                            })
-                        })
+                            }),
+                        });
                     } else if (goingToInvoice > 0) {
                         throw new SimpleError({
                             code: 'error',
@@ -213,8 +213,8 @@ export class InvoiceService {
                             human: $t('%1QE', {
                                 'a-euro': Formatter.price(-goingToInvoice),
                                 'name': balanceItem.getStructure().itemTitle,
-                            })
-                        })
+                            }),
+                        });
                     }
                 }
 
@@ -227,8 +227,8 @@ export class InvoiceService {
                                 'a-euro': Formatter.price(-goingToInvoice),
                                 'name': balanceItem.getStructure().itemTitle,
                                 'left-euro': Formatter.price(left),
-                            })
-                        })
+                            }),
+                        });
                     } else if (goingToInvoice > left) {
                         throw new SimpleError({
                             code: 'error',
@@ -237,8 +237,8 @@ export class InvoiceService {
                                 'a-euro': Formatter.price(-goingToInvoice),
                                 'name': balanceItem.getStructure().itemTitle,
                                 'left-euro': Formatter.price(left),
-                            })
-                        })
+                            }),
+                        });
                     }
                 }
 
@@ -274,21 +274,19 @@ export class InvoiceService {
             await InvoiceCounter.assignNextNumber(model, organization.privateMeta.invoiceSettings);
 
             // Update invoiced cache
-            await BalanceItemService.updateInvoiced(struct.items.map(i => i.balanceItemId))
+            await BalanceItemService.updateInvoiced(struct.items.map(i => i.balanceItemId));
 
             // Create PDF
-            await InvoicePdfService.generatePdf(model)
-            await InvoiceXMlService.generateXml(model)
+            await InvoicePdfService.generatePdf(model);
+            await InvoiceXMlService.generateXml(model);
 
             if (!await this.forwardInvoice(model, organization)) {
-                await this.sendCustomerEmail(model, organization)
+                await this.sendCustomerEmail(model, organization);
             }
-        }
-        catch (e) {
+        } catch (e) {
             try {
                 await model.delete();
-            }
-            catch (ee) {
+            } catch (ee) {
                 console.error('Error while trying to delete invoice because of fail save', ee, 'Deleting because of error', e);
             }
             throw e;
@@ -298,17 +296,17 @@ export class InvoiceService {
     }
 
     private static shouldForwardInvoice(invoice: Invoice, organization: Organization) {
-         if (invoice.didSendPeppol) {
+        if (invoice.didSendPeppol) {
             return {
-                value: false
+                value: false,
             };
         }
 
         if (!invoice.customer.company?.peppolEndpointId) {
             return {
                 value: false,
-                reason: 'No customer peppol endpoint id found for this invoice'
-            }
+                reason: 'No customer peppol endpoint id found for this invoice',
+            };
         }
 
         // Legally sending an invoice via PEPPOL is not always required.
@@ -318,15 +316,15 @@ export class InvoiceService {
                 if (!invoice.customer?.company?.VATNumber || !invoice.customer?.company?.VATNumber.startsWith('BE')) {
                     return {
                         value: false,
-                        reason: 'Skipping PEPPOL for invoice ' + invoice.id + ', recipient no Belgian VAT number and no custom peppol endpoint id set'
-                    }
+                        reason: 'Skipping PEPPOL for invoice ' + invoice.id + ', recipient no Belgian VAT number and no custom peppol endpoint id set',
+                    };
                 }
             }
         }
 
         return {
-            value: true
-        }
+            value: true,
+        };
     }
 
     /**
@@ -334,35 +332,35 @@ export class InvoiceService {
      * Invoice is forwarded to an external invoicing tool which will send it via PEPPOL.
      */
     static async forwardInvoice(invoice: Invoice, organization: Organization) {
-        const {value, reason} = this.shouldForwardInvoice(invoice, organization);
+        const { value, reason } = this.shouldForwardInvoice(invoice, organization);
 
         if (!value) {
             if (reason) {
-                console.log('Skipped sending PEPPOL: ', reason)
+                console.log('Skipped sending PEPPOL: ', reason);
             }
             return;
         }
 
         if (!organization.privateMeta.invoiceSettings.forwardEmailHandlers.length) {
-            console.error('PEPPOL email handlers NOT CONFIGURED')
+            console.error('PEPPOL email handlers NOT CONFIGURED');
             return;
         }
 
         const xml = await invoice.xml?.withSignedUrl();
 
         if (!xml) {
-            console.error('Could not send PEPPOL for invoice ' + invoice.id + ', xml not set')
+            console.error('Could not send PEPPOL for invoice ' + invoice.id + ', xml not set');
             return;
         }
 
-         // Send the e-mail
+        // Send the e-mail
         Email.send({
             // From address is fixed for sender validation
             from: Email.getWebmasterFromEmail(),
-            to: organization.privateMeta.invoiceSettings.forwardEmailHandlers.map(d => {
+            to: organization.privateMeta.invoiceSettings.forwardEmailHandlers.map((d) => {
                 return {
-                    email: d
-                }
+                    email: d,
+                };
             }),
             subject: $t('Factuur') + ' ' + invoice.number,
             text: $t('Factuur in bijlage'),
@@ -370,10 +368,10 @@ export class InvoiceService {
                 {
                     filename: invoice.generateCustomerFilename('xml'),
                     href: xml.getPublicPath(),
-                    contentType: 'application/xml'
-                }
-            ]
-        })
+                    contentType: 'application/xml',
+                },
+            ],
+        });
 
         invoice.didSendPeppol = true;
         await invoice.save();
@@ -381,13 +379,13 @@ export class InvoiceService {
     }
 
     static async sendCustomerEmail(invoice: Invoice, organization: Organization) {
-        let email = (invoice.customer.email || invoice.customer.company?.administrationEmail) ?? undefined
-        let bcc = invoice.customer.company?.administrationEmail        
-        
+        let email = (invoice.customer.email || invoice.customer.company?.administrationEmail) ?? undefined;
+        let bcc = invoice.customer.company?.administrationEmail;
+
         if (!email && invoice.payingOrganizationId) {
-            const payingOrganization = await Organization.getByID(invoice.payingOrganizationId)
+            const payingOrganization = await Organization.getByID(invoice.payingOrganizationId);
             if (payingOrganization) {
-                email = (await payingOrganization.getInvoicingToEmail()) ?? undefined
+                email = (await payingOrganization.getInvoicingToEmail()) ?? undefined;
             }
         }
 
@@ -396,15 +394,15 @@ export class InvoiceService {
         }
 
         if (!email) {
-            console.log('Skipped sending invoice email: no email address found for ' + invoice.id)
+            console.log('Skipped sending invoice email: no email address found for ' + invoice.id);
             return;
         }
 
         const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
-        const isPaid = payments.every(p => p.status === PaymentStatus.Succeeded)
+        const isPaid = payments.every(p => p.status === PaymentStatus.Succeeded);
 
-        const pdf = await invoice.pdf?.withSignedUrl()
-        const xml = await invoice.xml?.withSignedUrl()
+        const pdf = await invoice.pdf?.withSignedUrl();
+        const xml = await invoice.xml?.withSignedUrl();
 
         const recipients = [
             Recipient.create({
@@ -435,7 +433,7 @@ export class InvoiceService {
                         value: Formatter.price(Math.abs(invoice.totalWithVAT)),
                     }),
                 ],
-            }))
+            }));
         }
 
         await sendEmailTemplate(organization, {
@@ -455,26 +453,31 @@ export class InvoiceService {
                 }),
             ],
             template: {
-                type: isPaid ? (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoicePaid : EmailTemplateType.CreditNotePaid)
-                : (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoiceUnpaid : EmailTemplateType.CreditNoteUnpaid),
+                type: isPaid
+                    ? (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoicePaid : EmailTemplateType.CreditNotePaid)
+                    : (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoiceUnpaid : EmailTemplateType.CreditNoteUnpaid),
             },
             type: 'transactional',
             attachments: [
-                ...(pdf ? [
-                    {
-                        filename: invoice.generateCustomerFilename('pdf'),
-                        href: pdf.getPublicPath(),
-                        contentType: 'application/pdf'
-                    }
-                ] : []),
-                ...(xml ? [
-                    {
-                        filename: invoice.generateCustomerFilename('xml'),
-                        href: xml.getPublicPath(),
-                        contentType: 'application/xml'
-                    }
-                ] : [])
-            ]
+                ...(pdf
+                    ? [
+                            {
+                                filename: invoice.generateCustomerFilename('pdf'),
+                                href: pdf.getPublicPath(),
+                                contentType: 'application/pdf',
+                            },
+                        ]
+                    : []),
+                ...(xml
+                    ? [
+                            {
+                                filename: invoice.generateCustomerFilename('xml'),
+                                href: xml.getPublicPath(),
+                                contentType: 'application/xml',
+                            },
+                        ]
+                    : []),
+            ],
         });
     }
 }

@@ -1,7 +1,7 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, StripeAccount, Webshop} from '@stamhoofd/models';
+import type { Organization, StripeAccount, Webshop } from '@stamhoofd/models';
 import { OrganizationFactory, Ticket, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { Cart, CartItem, CartReservedSeat, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 

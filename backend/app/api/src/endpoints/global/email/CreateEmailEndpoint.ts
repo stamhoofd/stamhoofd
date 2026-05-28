@@ -1,8 +1,8 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform, RateLimiter } from '@stamhoofd/models';
-import type { EmailPreview} from '@stamhoofd/structures';
+import type { EmailPreview } from '@stamhoofd/structures';
 import { EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
@@ -106,8 +106,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             model.senderId = sender.id;
             model.fromAddress = sender.email;
             model.fromName = sender.name;
-        }
-        else {
+        } else {
             if (request.body.senderId) {
                 throw new SimpleError({
                     code: 'invalid_sender',

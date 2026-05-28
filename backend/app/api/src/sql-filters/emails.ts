@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { emailRecipientsFilterCompilers } from './email-recipients.js';
 

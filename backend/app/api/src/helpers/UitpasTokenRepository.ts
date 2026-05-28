@@ -51,8 +51,7 @@ export class UitpasTokenRepository {
             let repo = new UitpasTokenRepository(model);
             try {
                 await repo.getNewAccessToken();
-            }
-            catch (e) {
+            } catch (e) {
                 return false; // not valid
             }
             // valid -> store

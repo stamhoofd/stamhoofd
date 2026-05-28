@@ -153,8 +153,7 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
                 const allPreviousGroups = groupMap.get(originalGroupId);
                 if (allPreviousGroups) {
                     allPreviousGroups.push(newGroup);
-                }
-                else {
+                } else {
                     groupMap.set(originalGroupId, [newGroup]);
                 }
             }
@@ -444,8 +443,7 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
                 // deprecated -> set to false
                 registration.canRegister = false;
             }
-        }
-        else {
+        } else {
             registration.groupId = newGroup.id;
         }
 
@@ -605,8 +603,7 @@ async function calculateBestCurrentPeriodSpan(groups: Group[]): Promise<{ startD
         const { startDate, endDate } = group.settings as { startDate: Date; endDate: Date };
         if (startDate && endDate && differenceInDays(startDate, endDate) < 150) {
             shortGroups.push(group);
-        }
-        else {
+        } else {
             longGroups.push(group);
         }
     }

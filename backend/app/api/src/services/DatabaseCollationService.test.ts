@@ -10,8 +10,7 @@ describe('DatabaseCollationService', () => {
             expect(error).toContain('MySQL collation mismatch');
             expect(error).toContain('expected utf8mb4_0900_ai_ci');
             expect(error).toContain('collation_connection=utf8mb4_general_ci');
-        }
-        finally {
+        } finally {
             await Database.statement('SET collation_connection = DEFAULT');
         }
     });

@@ -1,7 +1,7 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { MollieToken } from '@stamhoofd/models';
-import type { Organization as OrganizationStruct} from '@stamhoofd/structures';
+import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { CheckMollieResponse, PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
@@ -37,7 +37,7 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error();
         }
 
-        const service = await MollieService.create({sellingOrganization: organization })
+        const service = await MollieService.create({ sellingOrganization: organization });
 
         if (!service) {
             organization.privateMeta.mollieOnboarding = null;
@@ -64,8 +64,7 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
             const profile = profiles.find(p => p.id === s);
             if (!profile) {
                 organization.privateMeta.mollieProfile = null;
-            }
-            else {
+            } else {
                 organization.privateMeta.mollieProfile = profile;
             }
         }

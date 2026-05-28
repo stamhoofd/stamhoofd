@@ -84,8 +84,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // We won't create a payment. The balance will get added to the outstanding amount of the member / already paying organization
             whoWillPayNow = 'nobody';
-        }
-        else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
+        } else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
             // Paying balance to a different organization requires finance permissions
             // we'll check later if you are also registering members, which requires full permissions
             if (!await Context.auth.canManageFinances(request.body.asOrganizationId)) {
@@ -107,8 +106,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             try {
                 limiter.track(organization.id, 1);
-            }
-            catch (e) {
+            } catch (e) {
                 Email.sendWebmaster({
                     subject: '[Limiet] Limiet bereikt voor aantal inschrijvingen',
                     text: 'Beste, \nDe limiet werd bereikt voor het aantal inschrijvingen per dag. \nVereniging: ' + organization.id + ' (' + organization.name + ')' + '\n\n' + e.message + '\n\nStamhoofd',
@@ -131,7 +129,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Validate balance items (can only happen serverside)
         const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id);
-        console.log('cart ids', balanceItemIds)
+        console.log('cart ids', balanceItemIds);
         let memberBalanceItemsStructs: BalanceItemStruct[] = [];
         let balanceItemsModels: BalanceItem[] = [];
         if (balanceItemIds.length > 0) {
@@ -151,8 +149,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)],
             );
             members = await Member.getBlobByIds(...memberIds);
-        }
-        else {
+        } else {
             // Load the user family (required to correctly calculate discounts across family members)
             members = await Member.getMembersWithRegistrationForUser(user);
         }
@@ -191,8 +188,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 try {
                     isUpdated = await updateMemberDetailsUitpasNumber(member.details);
-                }
-                catch (e) {
+                } catch (e) {
                     // catch all errors
                 }
 
@@ -247,8 +243,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     });
                 }
             }
-        }
-        else {
+        } else {
             const blob = await AuthenticatedStructures.membersBlob(members, true);
             const family = PlatformFamily.create(blob, {
                 platform: await Platform.getSharedStruct(),
@@ -292,8 +287,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // Safe and important to ignore: we are only updating the outstanding amounts
                 // If we would throw here, that could leak personal data (e.g. that the user uses financial support)
                 request.body.totalPrice = totalPrice;
-            }
-            else {
+            } else {
                 // when whoWillPay = organization/member, we should throw or the payment amount could be different / incorrect.
                 // This never leaks information because in this case the user already has full access to the organization (asOrganizationId) or the member
                 throw new SimpleError({
@@ -416,8 +410,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (checkout.isAdminFromSameOrganization) {
                 registration.sendConfirmationEmail = checkout.sendConfirmationEmail;
-            }
-            else {
+            } else {
                 registration.sendConfirmationEmail = true;
                 if (checkout.asOrganizationId) {
                     // use group default
@@ -547,8 +540,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (registration.payingOrganizationId) {
                 // We no longer also charge the member. This has been removed, ref STA-288
                 balanceItem.payingOrganizationId = registration.payingOrganizationId;
-            }
-            else {
+            } else {
                 balanceItem.memberId = registration.memberId;
 
                 if (!checkout.asOrganizationId) {
@@ -779,8 +771,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (request.body.asOrganizationId) {
                 balanceItem.payingOrganizationId = request.body.asOrganizationId;
-            }
-            else {
+            } else {
                 balanceItem.userId = user.id;
 
                 // Connect this to the oldest member
@@ -830,9 +821,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // Apply discounts
-             // Automatically add discounts
-            /*const { price: totalPriceBefore, roundingAmount: roundingAmountBefore } = PaymentService.calculateTotalPrice({ 
-                balanceItems: mappedBalanceItems, 
+            // Automatically add discounts
+            /* const { price: totalPriceBefore, roundingAmount: roundingAmountBefore } = PaymentService.calculateTotalPrice({
+                balanceItems: mappedBalanceItems,
                 organization
             })
 
@@ -842,7 +833,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 sellingOrganizationId: organization.id,
                 payingOrganizationId: payingOrganization?.id,
                 payingUserId: user?.id
-            });*/
+            }); */
 
             try {
                 const response = await PaymentService.createPayment({
@@ -856,7 +847,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     createMandate: null,
                     useMandate: null,
                     paymentConfiguration: organization.meta.registrationPaymentConfiguration,
-                    privatePaymentConfiguration: organization.privateMeta.registrationPaymentConfiguration
+                    privatePaymentConfiguration: organization.privateMeta.registrationPaymentConfiguration,
                 });
 
                 if (response) {
@@ -864,13 +855,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     paymentQRCode = response.paymentQRCode;
                     payment = response.payment;
                 }
-            }
-            finally {
+            } finally {
                 // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
                 await BalanceItemService.updatePaidAndPending(createdBalanceItems);
             }
-        }
-        else {
+        } else {
             // Mark as paid/valid without creating a payment
             for (const balanceItem of markValidList) {
                 await BalanceItemService.markPaid(balanceItem, null, organization);

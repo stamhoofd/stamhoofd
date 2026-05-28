@@ -1,6 +1,6 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailAddress } from '@stamhoofd/email';
@@ -64,8 +64,7 @@ export class GetEmailAddressEndpoint extends Endpoint<Params, Query, Body, Respo
                 ...email,
                 organization: organization ? OrganizationSimple.create(organization) : null,
             }));
-        }
-        else {
+        } else {
             if (!request.query.email) {
                 throw new SimpleError({
                     code: 'missing_field',
@@ -86,8 +85,7 @@ export class GetEmailAddressEndpoint extends Endpoint<Params, Query, Body, Respo
             );
             if (organization) {
                 query.andWhere('organizationId', organization.id);
-            }
-            else {
+            } else {
                 // No need
             }
 

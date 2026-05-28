@@ -1,9 +1,9 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { STPackageService } from '../../../../services/STPackageService.js';
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
 
 type Params = Record<string, never>;
@@ -17,7 +17,7 @@ type Body = undefined;
 
 export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;
-    
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
@@ -31,7 +31,7 @@ export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return [false];
     }
 
-    async handle({query}: DecodedRequest<Params, Query, Body>) {
+    async handle({ query }: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 

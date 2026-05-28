@@ -205,8 +205,7 @@ async function sendTemplate({
 
         if (!upToDate) {
             console.log('No recipients found for organization', organization.name, organization.id);
-        }
-        else {
+        } else {
             const now = new Date();
             now.setMilliseconds(0);
 
@@ -221,7 +220,7 @@ async function sendTemplate({
                     .set(
                         'reminderEmailCount',
                         SQL.calculation(SQL.column('reminderEmailCount'))
-                            .add(readDynamicSQLExpression(1))
+                            .add(readDynamicSQLExpression(1)),
                     )
                     .where('id', balanceItemIds)
                     .where('organizationId', organization.id)
@@ -230,8 +229,7 @@ async function sendTemplate({
                     .update();
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Error sending email for organization', e, organization.name, organization.id);
     }
 }

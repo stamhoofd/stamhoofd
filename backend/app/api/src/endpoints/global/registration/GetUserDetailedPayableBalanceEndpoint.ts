@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { BalanceItem, Member, Organization } from '@stamhoofd/models';
@@ -42,32 +42,32 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
         const q = Payment.select()
             .where(
                 SQL.where('payingUserId', user.id)
-                .or(
-                    new SQLWhereExists(SQL.subQuery(
-                        SQL.select().from('balance_items')
-                            .join(SQL.innerJoin(
+                    .or(
+                        new SQLWhereExists(SQL.subQuery(
+                            SQL.select().from('balance_items')
+                                .join(SQL.innerJoin(
                                     SQL.table(BalanceItemPayment.table))
                                     .where(
                                         SQL.column(BalanceItemPayment.table, 'balanceItemId'),
                                         SQL.column(BalanceItem.table, 'id'),
-                                    )
-                            )
-                            .where(SQL.where('memberId', memberIds).or('userId', user.id))
-                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id'))
-                        )
-                    )
-                )
+                                    ),
+                                )
+                                .where(SQL.where('memberId', memberIds).or('userId', user.id))
+                                .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
+                        ),
+                        ),
+                    ),
             )
             .whereNot('status', PaymentStatus.Failed);
 
         if (organization) {
-            q.where('organizationId', organization.id)
+            q.where('organizationId', organization.id);
         }
 
-        q.orderBy('createdAt', 'DESC')
-        q.limit(100)
+        q.orderBy('createdAt', 'DESC');
+        q.limit(100);
 
-        const payments = await q.fetch()
+        const payments = await q.fetch();
 
         return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, payments));
     }

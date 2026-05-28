@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members.js';
 import { organizationFilterCompilers } from './organizations.js';

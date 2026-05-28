@@ -74,8 +74,7 @@ export class FileSignService {
                 }
 
                 return true;
-            }
-            catch (e) {
+            } catch (e) {
                 if (e instanceof jose.errors.JWSSignatureVerificationFailed) {
                     return false;
                 }
@@ -120,8 +119,7 @@ export class FileSignService {
                 ...file,
                 signedUrl: url,
             });
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to generate signedUrl for file:', e);
             return null;
         }

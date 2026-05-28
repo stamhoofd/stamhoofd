@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import type { Invoice as InvoiceStruct} from '@stamhoofd/structures';
+import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 import { DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -19,7 +19,7 @@ export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<Params, Que
         if (request.method !== 'GET') {
             return [false];
         }
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/invoices', {sellingOrganizationId: String});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/invoices', { sellingOrganizationId: String });
 
         if (params) {
             return [true, params as Params];
@@ -41,10 +41,10 @@ export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<Params, Que
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('%1Rz')
-            })
+                human: $t('%1Rz'),
+            });
         }
-        
+
         const sellingOrganization = await Organization.getByID(id);
         if (!sellingOrganization || !sellingOrganization.active) {
             throw new SimpleError({
@@ -52,8 +52,8 @@ export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<Params, Que
                 code: 'not_found',
                 message: 'Selling organization not found',
                 human: $t('%1R5'),
-                field: 'sellingOrganization'
-            })
+                field: 'sellingOrganization',
+            });
         }
 
         const invoices = await Invoice.select()
@@ -61,7 +61,7 @@ export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<Params, Que
             .where('organizationId', sellingOrganization.id)
             .where('number', '!=', null)
             .orderBy('invoicedAt', 'DESC')
-            .fetch()
+            .fetch();
 
         return new Response(await AuthenticatedStructures.invoices(invoices));
     }

@@ -8,10 +8,10 @@ export class VATService {
         return sellingOrganization.defaultCompanies[0];
     }
 
-    static async updateVATExcempt({ organization, sellingOrganization }: { organization: Organization; sellingOrganization: Organization | OrganizationStruct}) {
-        const company = organization.defaultCompanies[0]
-        const exempt = this.isVATExcempt({company, sellingOrganization})
-        console.log('updating VAT excempt', exempt)
+    static async updateVATExcempt({ organization, sellingOrganization }: { organization: Organization; sellingOrganization: Organization | OrganizationStruct }) {
+        const company = organization.defaultCompanies[0];
+        const exempt = this.isVATExcempt({ company, sellingOrganization });
+        console.log('updating VAT excempt', exempt);
 
         if (exempt) {
             const items = await BalanceItem.select()
@@ -27,8 +27,8 @@ export class VATService {
                 if (!item.VATExcempt) {
                     const type = getBalanceItemTypeVATType(item.type);
                     if (type) {
-                        item.VATExcempt = this.getVATExcemptType({type})
-                        await item.save()
+                        item.VATExcempt = this.getVATExcemptType({ type });
+                        await item.save();
                     }
                 }
             }
@@ -45,15 +45,15 @@ export class VATService {
             for (const item of items) {
                 if (item.VATExcempt) {
                     item.VATExcempt = null;
-                    await item.save()
+                    await item.save();
                 }
             }
         }
     }
 
-    static isVATExcempt({ company, sellingOrganization }: { company: Company | null | undefined; sellingOrganization: Organization | OrganizationStruct}) {
+    static isVATExcempt({ company, sellingOrganization }: { company: Company | null | undefined; sellingOrganization: Organization | OrganizationStruct }) {
         // Validate VAT rates for this customer
-        const seller = this.getDefaultCompanyForOrganization(sellingOrganization)
+        const seller = this.getDefaultCompanyForOrganization(sellingOrganization);
 
         if (seller.VATNumber && seller.address && company) {
             // B2B validation
@@ -64,22 +64,22 @@ export class VATService {
             }
         }
 
-        return false
+        return false;
     }
 
-    static getVATExcemptType({ type }: { type: 'services'|'goods' }) {
+    static getVATExcemptType({ type }: { type: 'services' | 'goods' }) {
         if (type === 'services') {
             return VATExcemptReason.IntraCommunityServices;
         }
         return VATExcemptReason.IntraCommunityGoods;
     }
 
-    static getVATExcempt({ company, sellingOrganization, type }: { company: Company | null | undefined; sellingOrganization: Organization | OrganizationStruct; type: 'services'|'goods' }) {
+    static getVATExcempt({ company, sellingOrganization, type }: { company: Company | null | undefined; sellingOrganization: Organization | OrganizationStruct; type: 'services' | 'goods' }) {
         // Reverse charged vat applicable?
-        if (this.isVATExcempt({company, sellingOrganization})) {
-            return this.getVATExcemptType({type})
+        if (this.isVATExcempt({ company, sellingOrganization })) {
+            return this.getVATExcemptType({ type });
         }
 
-        return null
+        return null;
     }
 }

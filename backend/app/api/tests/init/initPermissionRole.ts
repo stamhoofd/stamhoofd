@@ -1,6 +1,6 @@
-import type { Organization} from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { Platform } from '@stamhoofd/models';
-import type { AccessRight} from '@stamhoofd/structures';
+import type { AccessRight } from '@stamhoofd/structures';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 
 export async function initPermissionRole(
@@ -14,8 +14,7 @@ export async function initPermissionRole(
     if (organization) {
         organization.privateMeta.roles.push(role);
         await organization.save();
-    }
-    else {
+    } else {
         const platform = await Platform.getForEditing();
         platform.privateConfig.roles.push(role);
         await platform.save();

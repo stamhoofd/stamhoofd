@@ -1,5 +1,5 @@
 import { Order, Organization, Webshop } from '@stamhoofd/models';
-import type { BalanceItemPaymentsHtmlTableItem, PaymentGeneral} from '@stamhoofd/structures';
+import type { BalanceItemPaymentsHtmlTableItem, PaymentGeneral } from '@stamhoofd/structures';
 import { BalanceItemRelationType, BalanceItemType, getBalanceItemPaymentsHtmlTable, PaymentMethod, PaymentMethodHelper, Replacement, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { createOrderDataHTMLTable } from '../helpers/email-html-helpers.js';
@@ -106,8 +106,7 @@ export function getEmailReplacementsForPayment(payment: PaymentGeneral, options:
                 });
                 paymentUrl = 'https://' + webshopStruct.getUrl(organization) + '/order/' + (singleOrder.id);
             }
-        }
-        else {
+        } else {
             // Fallback (should not happen, but better than leaving {{orderUrl}} in place)
             orderUrlReplacement = Replacement.create({
                 token: 'orderUrl',
@@ -221,12 +220,10 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
                                     webshop: webshop.meta.name,
                                     orderNumber: order.number ?? '',
                                 }));
-                            }
-                            else {
+                            } else {
                                 overviewContext.add(webshop.meta.name);
                             }
-                        }
-                        else {
+                        } else {
                             overviewContext.add($t('%1L0', {
                                 orderNumber: order.number ?? '',
                             }));
@@ -239,8 +236,7 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
                 const memberName = balanceItem.relations.get(BalanceItemRelationType.Member)?.name.toString();
                 if (memberName) {
                     registrationMemberNames.add(memberName);
-                }
-                else {
+                } else {
                     overviewContext.add(balanceItem.itemTitle);
                 }
 

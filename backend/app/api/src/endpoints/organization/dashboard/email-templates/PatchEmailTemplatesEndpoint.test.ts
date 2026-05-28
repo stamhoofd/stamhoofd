@@ -1,7 +1,7 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod} from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

@@ -26,7 +26,7 @@ const start = async () => {
 
     // Reload database so we are sure we are running on the correct database in the
     // environment
-    await Database.reload({})
+    await Database.reload({});
 
     let killSignalReceived = false;
     const handler = () => {
@@ -50,15 +50,15 @@ const start = async () => {
 
     // External migrations
     if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {
-        throw new Error('Migrations failed')
+        throw new Error('Migrations failed');
     }
     if (!await Migration.runAll(path.dirname(emailPath) + '/../migrations')) {
-        throw new Error('Email migrations failed')
+        throw new Error('Email migrations failed');
     }
 
     // Internal
     if (!await Migration.runAll(import.meta.dirname + '/migrations')) {
-        throw new Error('Internal migrations failed')
+        throw new Error('Internal migrations failed');
     }
 
     if (killSignalReceived) {
@@ -67,7 +67,7 @@ const start = async () => {
     }
 
     // Reload database to prevent connection state leakage
-    await Database.reload({})
+    await Database.reload({});
 
     process.off('SIGTERM', handler);
     process.off('SIGINT', handler);

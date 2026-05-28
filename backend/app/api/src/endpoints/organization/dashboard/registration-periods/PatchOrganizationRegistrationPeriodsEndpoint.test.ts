@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { Organization} from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { GroupSettings, Group as GroupStruct, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
 

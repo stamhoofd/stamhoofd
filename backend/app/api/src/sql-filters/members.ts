@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Member, MemberUser } from '@stamhoofd/models';
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLJsonExtract, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';

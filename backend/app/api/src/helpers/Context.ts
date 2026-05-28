@@ -5,7 +5,7 @@ import type { User } from '@stamhoofd/models';
 import { Organization, Platform, RateLimiter, Token } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
 
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { ApiUserRateLimits } from '@stamhoofd/structures';
 import { AdminPermissionChecker } from './AdminPermissionChecker.js';
@@ -156,8 +156,7 @@ export class ContextInstance {
     async setOptionalOrganizationScope(options?: { willAuthenticate?: boolean }) {
         try {
             return await this.setOrganizationScope(options);
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) && e.hasCode('invalid_host')) {
                 return null;
             }
@@ -208,8 +207,7 @@ export class ContextInstance {
     async optionalAuthenticate({ allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<{ user?: User }> {
         try {
             return await this.authenticate({ allowWithoutAccount });
-        }
-        catch (e) {
+        } catch (e) {
             if (e.code === 'not_authenticated') {
                 // Do not allow to optional authenticate to inactive organizations
                 if (this.organization && !this.organization.active) {
@@ -232,8 +230,7 @@ export class ContextInstance {
             try {
                 const decoded = await DecodedRequest.fromRequest(this.request, undefined, undefined, AuthorizationPostBody as Decoder<AuthorizationPostBody>);
                 header = decoded.body.header_authorization;
-            }
-            catch (e) {
+            } catch (e) {
                 // Ignore: failed to read from body
             }
         }
@@ -313,7 +310,7 @@ export class ContextInstance {
         );
 
         // Load member of user
-        await this.insecurelyAuthenticateAs(user)
+        await this.insecurelyAuthenticateAs(user);
 
         return { user, token };
     }

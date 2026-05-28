@@ -2,7 +2,7 @@ import { field } from '@simonbackx/simple-encoding';
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { StripeAccount } from '@stamhoofd/models';
-import type { BalanceItemPaymentDetailed} from '@stamhoofd/structures';
+import type { BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';

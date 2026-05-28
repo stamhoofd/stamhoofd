@@ -1,6 +1,6 @@
-import type { Endpoint} from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { RegistrationPeriod} from '@stamhoofd/models';
+import type { RegistrationPeriod } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordTextAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

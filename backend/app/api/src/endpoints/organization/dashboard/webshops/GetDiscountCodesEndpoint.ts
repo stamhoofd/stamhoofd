@@ -1,8 +1,8 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
-import type { DiscountCode} from '@stamhoofd/structures';
+import type { DiscountCode } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';

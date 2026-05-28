@@ -13,8 +13,7 @@ export default new Migration(async () => {
     await logger.setContext({ tags: ['seed'] }, async () => {
         if (STAMHOOFD.userMode === 'platform') {
             await RegistrationPeriod.updatePreviousNextPeriods(null);
-        }
-        else {
+        } else {
             for await (const organization of Organization.select().all()) {
                 await RegistrationPeriod.updatePreviousNextPeriods(organization.id);
             }

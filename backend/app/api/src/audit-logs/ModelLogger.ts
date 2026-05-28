@@ -125,8 +125,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                 if (!settings?.source) {
                     if (settings) {
                         settings.source = AuditLogSource.System;
-                    }
-                    else {
+                    } else {
                         settings = { source: AuditLogSource.System };
                     }
                 }
@@ -148,11 +147,9 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
             if (settings?.source) {
                 log.source = settings.source;
-            }
-            else if (context) {
+            } else if (context) {
                 log.source = userId ? AuditLogSource.User : AuditLogSource.Anonymous;
-            }
-            else {
+            } else {
                 log.source = AuditLogSource.System;
             }
 
@@ -179,8 +176,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                                 key: AuditLogReplacement.key(renamedKey),
                                 type: AuditLogPatchItemType.Changed,
                             }));
-                        }
-                        else {
+                        } else {
                             log.patchList.push(...ObjectDiffer.diff(
                                 key in oldModel ? oldModel[key] : undefined,
                                 key in event.model ? event.model[key] : undefined,
@@ -196,8 +192,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                         // No changes or all skipped
                         return false;
                     }
-                }
-                else {
+                } else {
                     return false;
                 }
             }
@@ -235,8 +230,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
             try {
                 log.validate();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('AuditLog dit not pass validation', log);
             }
 
@@ -250,8 +244,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                 events: d.slice(0, 1),
             });
             return saved;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to save log', e, log);
         }
         return false;

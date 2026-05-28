@@ -3,9 +3,9 @@ import type { FinancialSupportSettings, Organization as OrganizationStruct, Plat
 
 /**
  * Get the financial support settings from the platform if userMode is platform, or from the organization otherwise.
- * @param platform 
+ * @param platform
  * @param getOrganization callback to prevent fetching the organization if not needed
- * @returns 
+ * @returns
  */
 export async function getFinancialSupportSettingsAsync(platform: Platform | PlatformStruct, getOrganization: () => Promise<Organization | OrganizationStruct | null>): Promise<FinancialSupportSettings | null> {
     if (STAMHOOFD.userMode === 'platform') {

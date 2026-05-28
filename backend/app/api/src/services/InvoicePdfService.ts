@@ -1,7 +1,7 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { signInternal } from '@stamhoofd/backend-env';
-import type { Invoice} from '@stamhoofd/models';
+import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import type { Address } from '@stamhoofd/structures';
@@ -13,8 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class InvoicePdfService {
     static async generateHtml(invoice: Invoice) {
-        const organization = await Organization.getByID(invoice.organizationId, true)
-        const platform = await Platform.getShared()
+        const organization = await Organization.getByID(invoice.organizationId, true);
+        const platform = await Platform.getShared();
         const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
         const payment = payments[0] ?? null;
 
@@ -32,7 +32,7 @@ export class InvoicePdfService {
                 `${address.street} ${address.number}, ${address.city}`,
             ];
             if (includeCountry) {
-                arr.push(CountryHelper.getName(address.country))
+                arr.push(CountryHelper.getName(address.country));
             }
             return arr.join('\n');
         };
@@ -65,8 +65,7 @@ export class InvoicePdfService {
         if (!hasMultipleVATRates && firstVATSubtotal) {
             if (firstVATSubtotal.VATExcempt) {
                 vatExcemptNote = getVATExcemptInvoiceNote(firstVATSubtotal.VATExcempt);
-            }
-            else if (firstVATSubtotal.VATPercentage === 0) {
+            } else if (firstVATSubtotal.VATPercentage === 0) {
                 vatExcemptNote = $t('%1Q3');
             }
         }
@@ -130,7 +129,7 @@ export class InvoicePdfService {
                 customer: {
                     name: customer.dynamicName,
                     contactName: !!customer.company && !!customer.name ? customer.name : null,
-                    address: company?.address ? formatAddress(company.address ?? null, seller.address?.country !== company.address.country ) : null,
+                    address: company?.address ? formatAddress(company.address ?? null, seller.address?.country !== company.address.country) : null,
                     companyNumber: company?.companyNumber ?? '',
                     VATNumber: company?.VATNumber ?? '',
                 },
@@ -138,9 +137,9 @@ export class InvoicePdfService {
 
             payment: payment
                 ? {
-                    methodName: payment.method ? PaymentMethodHelper.getName(payment.method) : '',
-                    transferDescription: payment.transferDescription ?? '',
-                }
+                        methodName: payment.method ? PaymentMethodHelper.getName(payment.method) : '',
+                        transferDescription: payment.transferDescription ?? '',
+                    }
                 : null,
 
             isCreditNote,
@@ -154,15 +153,15 @@ export class InvoicePdfService {
             showStripeMessage,
         };
 
-        const file = await fs.readFile(import.meta.dirname+'/data/invoice.hbs.html', 'utf-8')
-        const renderedHtml = await render(file , context);
+        const file = await fs.readFile(import.meta.dirname + '/data/invoice.hbs.html', 'utf-8');
+        const renderedHtml = await render(file, context);
         return renderedHtml;
     }
 
     static async uploadPdf(invoice: Invoice, fileContent: Buffer) {
         const fileId = uuidv4();
 
-         let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
+        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
         if (prefix.length > 0) {
             prefix += '/';
         }
@@ -190,7 +189,7 @@ export class InvoicePdfService {
             Key: key,
             Body: fileContent,
             ContentType: 'application/pdf',
-            ACL: 'private'
+            ACL: 'private',
         });
         await Image.getS3Client().send(cmd);
 
@@ -203,8 +202,8 @@ export class InvoicePdfService {
                 statusCode: 500,
             });
         }
-        
-        return fileStruct
+
+        return fileStruct;
     }
 
     static async downloadPdf(invoice: Invoice) {
@@ -222,10 +221,10 @@ export class InvoicePdfService {
             // Issue with system trusted CA in development
             const result = await fetch(c, {
                 method: 'GET',
-                signal: controller.signal
+                signal: controller.signal,
             });
             if (result.status === 200) {
-                return Buffer.from(await result.arrayBuffer())
+                return Buffer.from(await result.arrayBuffer());
             } else {
                 // todo
             }
@@ -242,7 +241,7 @@ export class InvoicePdfService {
     static async generatePdf(invoice: Invoice) {
         const html = await this.generateHtml(invoice);
         if (!html) {
-            throw new Error('Failed to render invoice ' + invoice.id)
+            throw new Error('Failed to render invoice ' + invoice.id);
         }
         const form = new FormData();
 
@@ -261,14 +260,14 @@ export class InvoicePdfService {
 
         try {
             // Issue with system trusted CA in development
-            const result = await fetch((STAMHOOFD.environment === 'development' ? 'http://' : 'https://')+ STAMHOOFD.domains.rendererApi + '/v'+VERSION+'/html-to-pdf', {
+            const result = await fetch((STAMHOOFD.environment === 'development' ? 'http://' : 'https://') + STAMHOOFD.domains.rendererApi + '/v' + VERSION + '/html-to-pdf', {
                 method: 'POST',
                 body: form,
                 signal: controller.signal,
             });
             if (result.status === 200) {
                 // todo
-                const buffer = Buffer.from(await result.arrayBuffer())
+                const buffer = Buffer.from(await result.arrayBuffer());
                 const file = await this.uploadPdf(invoice, buffer);
                 invoice.pdf = file;
                 await invoice.save();

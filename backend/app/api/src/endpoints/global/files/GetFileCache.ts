@@ -1,6 +1,6 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { Readable } from 'node:stream';
 import { Context } from '../../../helpers/Context.js';
@@ -60,8 +60,7 @@ export class GetFileCache extends Endpoint<Params, Query, Body, ResponseBody> {
         if (request.query.name) {
             const slug = Formatter.fileSlug(request.query.name) + extension;
             response.headers['Content-Disposition'] = `attachment; filename="${slug}"`;
-        }
-        else {
+        } else {
             response.headers['Content-Disposition'] = `attachment; filename="bestand${extension}"`;
         }
         response.headers['Content-Length'] = contentLength.toString();

@@ -17,11 +17,11 @@ export default new Migration(async () => {
 
     await migrateDuplicateMemberNumbers({
         dryRun: false,
-        doLog: true
+        doLog: true,
     });
 });
 
-async function migrateDuplicateMemberNumbers({dryRun, doLog}: {dryRun: boolean, doLog: boolean}) {
+async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolean; doLog: boolean }) {
     // first get all duplicate numbers (if the number is not duplicate it should not be removed, even if invalid)
     const duplicateMemberNumbers = await getDuplicateMemberNumbers();
     const invalidNumbers = new Set<string>();
@@ -51,7 +51,7 @@ async function migrateDuplicateMemberNumbers({dryRun, doLog}: {dryRun: boolean, 
                     testRemoved.add(memberNumber);
                     // console.log(`Remove invalid member number: ${memberNumber} (memberId: ${member.id})`);
                 }
-                
+
                 // remove number
                 member.details.memberNumber = null;
                 member.memberNumber = null;
@@ -85,11 +85,11 @@ async function migrateDuplicateMemberNumbers({dryRun, doLog}: {dryRun: boolean, 
                 await mergeMultipleMembers(members);
             }
         } else {
-            if (doLog){
+            if (doLog) {
                 console.log('Duplicate member numbers are not the same: ' + members.map(m => m.details.name).join(', '));
             }
-            
-            await removeMemberNumbersOfNotRecentUpdatedMembers(members, {doLog, dryRun});
+
+            await removeMemberNumbersOfNotRecentUpdatedMembers(members, { doLog, dryRun });
         }
     }
 
@@ -103,8 +103,8 @@ async function migrateDuplicateMemberNumbers({dryRun, doLog}: {dryRun: boolean, 
 
 /**
  * Members are the same if they have the same first and last name (at leat for this migration)
- * @param members 
- * @returns 
+ * @param members
+ * @returns
  */
 function areSameMembers(members: Member[]) {
     const firstMember = members[0];
@@ -123,7 +123,7 @@ function normalizeName(name: string) {
     return name.trim().toLowerCase();
 }
 
-async function removeMemberNumbersOfNotRecentUpdatedMembers(members: Member[], {doLog, dryRun}: {doLog: boolean, dryRun: boolean}) {
+async function removeMemberNumbersOfNotRecentUpdatedMembers(members: Member[], { doLog, dryRun }: { doLog: boolean; dryRun: boolean }) {
     if (members.length < 2) {
         return;
     }

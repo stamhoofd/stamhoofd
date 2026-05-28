@@ -1,9 +1,9 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform, Registration } from '@stamhoofd/models';
-import type { SQLExpression, SQLSortDefinitions} from '@stamhoofd/sql';
+import type { SQLExpression, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, RegistrationWithMemberBlob, StamhoofdFilter, RegistrationsBlob } from '@stamhoofd/structures';
 import { GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, assertSort } from '@stamhoofd/structures';
@@ -108,8 +108,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                                 },
                             },
                         };
-                    }
-                    else {
+                    } else {
                         // Can only access current period
                         scopeFilter = {
                             member: {
@@ -122,8 +121,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                             },
                         };
                     }
-                }
-                else {
+                } else {
                     // Check which normal membership groups we have access to and filter on those
                     const groups = await Group.getAll(organization.id, organization.periodId, true, [GroupType.Membership, GroupType.WaitingList]);
                     Context.auth.cacheGroups(groups);
@@ -202,8 +200,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         try {
             data = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',
@@ -217,8 +214,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         for (const registration of data) {
             if (registration.group.settings.implicitlyAllowViewRegistrations) {
                 // okay, only need to check if we can access the members (next step)
-            }
-            else {
+            } else {
                 if (!await Context.auth.canAccessRegistration(registration, permissionLevel)) {
                     throw Context.auth.error();
                 }

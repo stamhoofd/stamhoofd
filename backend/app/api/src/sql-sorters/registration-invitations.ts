@@ -11,7 +11,7 @@ export const registrationInvitationSorters: SQLSortDefinitions<RegistrationInvit
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    'id': {
+    id: {
         getValue(invitation) {
             return invitation.id;
         },
@@ -22,7 +22,7 @@ export const registrationInvitationSorters: SQLSortDefinitions<RegistrationInvit
             });
         },
     },
-    'createdAt': {
+    createdAt: {
         getValue(invitation) {
             return invitation.createdAt;
         },

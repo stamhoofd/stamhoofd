@@ -1,6 +1,6 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Order, Ticket } from '@stamhoofd/models';
@@ -91,8 +91,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             items: [item],
                         }),
                     ]);
-                }
-                else {
+                } else {
                     return new Response([
                         TicketPublic.create({
                             ...ticket,
@@ -104,8 +103,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             return new Response([
                 TicketOrder.create(ticket),
             ]);
-        }
-        else {
+        } else {
             if (!request.query.orderId) {
                 throw new SimpleError({
                     code: 'not_found',

@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventNotification, Member, MemberResponsibilityRecord, Organization, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
-import type { EmailTemplateType} from '@stamhoofd/structures';
+import type { EmailTemplateType } from '@stamhoofd/structures';
 import { PermissionLevel, Recipient, RecordCategory, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AdminPermissionChecker } from '../helpers/AdminPermissionChecker.js';

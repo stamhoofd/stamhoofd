@@ -114,13 +114,11 @@ function readHeaders(message: any) {
                     headers[(header.name as string).toLowerCase()] = header.value;
                 }
             }
-        }
-        else {
+        } else {
             console.log('[AWS] Missing mail headers', message);
         }
         return headers;
-    }
-    catch (e) {
+    } catch (e) {
         console.log('[AWS] Failed to read headers', e, message);
         return {};
     }
@@ -172,8 +170,7 @@ async function handleBounce(message: any) {
                     response: recipient.diagnosticCode || '',
                     subject: message.mail.commonHeaders?.subject || '',
                 });
-            }
-            else if (
+            } else if (
                 type === 'Transient'
             ) {
                 const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
@@ -197,8 +194,7 @@ async function handleBounce(message: any) {
             }
         }
         console.log('[AWS BOUNCES] For domain ' + source);
-    }
-    else {
+    } else {
         console.log("[AWS BOUNCES] 'bounce' field missing in bounce message");
     }
 }
@@ -236,8 +232,7 @@ async function handleComplaint(message: any) {
                         response: recipient.diagnosticCode || '',
                         subject: message.mail.commonHeaders?.subject || '',
                     });
-                }
-                else {
+                } else {
                     await saveLog({
                         id: b.feedbackId,
                         email,
@@ -262,8 +257,7 @@ async function handleComplaint(message: any) {
                 });
             }
         }
-    }
-    else {
+    } else {
         console.log('[AWS COMPLAINTS] Missing complaint field');
     }
 }
@@ -286,8 +280,7 @@ async function handleForward(message: any) {
                 Email.send(options);
             }
         }
-    }
-    else {
+    } else {
         console.log('[AWS FORWARDING] Missing mail, content or receipt field');
     }
 }
@@ -341,28 +334,23 @@ async function readFromQueue(queueUrl: string) {
                         // Docs: https://docs.aws.amazon.com/ses/latest/dg/event-publishing-retrieving-sns-contents.html
                         if (message.bounce) {
                             await handleBounce(message);
-                        }
-                        else if (message.complaint) {
+                        } else if (message.complaint) {
                             await handleComplaint(message);
                         }
                         // Read message content
                         // https://docs.aws.amazon.com/ses/latest/dg/receiving-email-notifications-contents.html
                         else if (message.mail && message.content && message.receipt) {
                             await handleForward(message);
-                        }
-                        else {
+                        } else {
                             console.log('[AWS Queue] Unsupported message');
                         }
-                    }
-                    else {
+                    } else {
                         console.log("[AWS Queue] 'Message' field missing");
                     }
-                }
-                else {
+                } else {
                     console.log('[AWS Queue] Message Body missing in bounce');
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.log('[AWS Queue] Message processing failed:');
                 console.log('[AWS Queue]', e);
 
@@ -374,8 +362,7 @@ async function readFromQueue(queueUrl: string) {
 
     if (didProcess) {
         console.log(`[AWS Queue] Processed ${didProcess} message(s) from queue`);
-    }
-    else {
+    } else {
         console.log(`[AWS Queue] No message to process from queue`);
     }
     return didProcess;

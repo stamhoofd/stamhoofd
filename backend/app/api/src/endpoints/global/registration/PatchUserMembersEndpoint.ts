@@ -1,11 +1,11 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { isEmptyPatch, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Document, Member, RateLimiter } from '@stamhoofd/models';
-import type { MemberDetails, MembersBlob} from '@stamhoofd/structures';
+import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
 import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import type { OneToManyRelation } from '@simonbackx/simple-database';

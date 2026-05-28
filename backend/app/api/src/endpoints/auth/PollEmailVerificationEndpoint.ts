@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { EmailVerificationCode } from '@stamhoofd/models';
 import { PollEmailVerificationRequest, PollEmailVerificationResponse } from '@stamhoofd/structures';

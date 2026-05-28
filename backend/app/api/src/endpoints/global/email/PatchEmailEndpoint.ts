@@ -1,10 +1,10 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
-import type { EmailPreview} from '@stamhoofd/structures';
+import type { EmailPreview } from '@stamhoofd/structures';
 import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Context } from '../../../helpers/Context.js';
@@ -77,8 +77,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 if (!await Context.auth.canAccessEmail(model, PermissionLevel.Write)) {
                     throw Context.auth.error();
                 }
-            }
-            else {
+            } else {
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',
@@ -86,16 +85,14 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     statusCode: 400,
                 });
             }
-        }
-        else if (model.senderId) {
+        } else if (model.senderId) {
             // Update data, to avoid sending from an old address
             const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
             const sender = list.find(e => e.id === model.senderId);
             if (sender) {
                 model.fromAddress = sender.email;
                 model.fromName = sender.name;
-            }
-            else {
+            } else {
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',

@@ -83,8 +83,7 @@ export class ThrottledQueue<T> {
             const batch = batchSize < items.length ? items.slice(i, i + batchSize) : items;
             try {
                 await this.handler(batch);
-            }
-            catch (error) {
+            } catch (error) {
                 console.error('Error processing batch in ThrottledQueue:', error);
             }
         }

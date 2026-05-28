@@ -1,7 +1,7 @@
 import { Request, Response } from '@simonbackx/simple-endpoints';
-import type { Organization, RegistrationPeriod} from '@stamhoofd/models';
+import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import type { BalanceItemWithPayments, StamhoofdFilter} from '@stamhoofd/structures';
+import type { BalanceItemWithPayments, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight, ChargeRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint.js';

@@ -80,13 +80,13 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     {
                         name: {
                             $contains: q.search,
-                        }
+                        },
                     },
                     {
-                        uri: q.search
-                    }
-                ]
-            }
+                        uri: q.search,
+                    },
+                ],
+            };
 
             if (searchFilter) {
                 query.where(await compileToSQLFilter(searchFilter, filterCompilers));
@@ -132,8 +132,7 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         try {
             data = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',

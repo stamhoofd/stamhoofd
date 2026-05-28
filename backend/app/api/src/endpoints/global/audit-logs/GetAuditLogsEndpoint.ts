@@ -1,11 +1,11 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog } from '@stamhoofd/models';
-import type { SQLSortDefinitions} from '@stamhoofd/sql';
+import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { AuditLog as AuditLogStruct, CountFilteredRequest, StamhoofdFilter} from '@stamhoofd/structures';
+import type { AuditLog as AuditLogStruct, CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -49,16 +49,14 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
                 scopeFilter = {
                     organizationId: organization.id,
                 };
-            }
-            else {
+            } else {
                 if (!q.filter || typeof q.filter !== 'object' || !('objectId' in q.filter)) {
                     scopeFilter = {
                         organizationId: organization.id,
                     };
                 }
             }
-        }
-        else {
+        } else {
             if (!Context.auth.hasPlatformFullAccess()) {
                 throw Context.auth.error();
             }

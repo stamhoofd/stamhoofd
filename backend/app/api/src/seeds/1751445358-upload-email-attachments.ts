@@ -38,8 +38,7 @@ export default new Migration(async () => {
                         // Private files
                         if (email.userId) {
                             prefix += 'users/' + email.userId + '/';
-                        }
-                        else {
+                        } else {
                             // Public files
                             prefix += 'p/';
                         }
@@ -83,8 +82,7 @@ export default new Migration(async () => {
 
                         attachment.file = fileStruct;
                         attachment.content = null; // Clear the base64 content
-                    }
-                    catch (e) {
+                    } catch (e) {
                         console.error('Failed to upload base64 attachment for email ' + email.id, e);
                         continue; // Skip this email if it fails
                     }

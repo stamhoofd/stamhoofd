@@ -25,19 +25,16 @@ export default new Migration(async () => {
                 email.senderId = sender.id;
                 await email.save();
                 count += 1;
-            }
-            else {
+            } else {
                 console.warn(`No sender found for email ${email.fromAddress} in platform config`);
             }
-        }
-        else {
+        } else {
             const sender = organization.privateMeta.emails.find(s => s.email === email.fromAddress);
             if (sender) {
                 email.senderId = sender.id;
                 await email.save();
                 count += 1;
-            }
-            else {
+            } else {
                 console.warn(`No sender found for email ${email.fromAddress} in organization ${organization.id}`);
             }
         }

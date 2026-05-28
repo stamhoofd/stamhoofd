@@ -206,8 +206,7 @@ export const PaymentReallocationService = {
 
                 if (matchMethod.alterPayments) {
                     await this.swapPayments(negativeItem, match);
-                }
-                else {
+                } else {
                     if (match.remaining !== -negativeItem.remaining) {
                         if (!canReachZero) {
                             continue;
@@ -322,8 +321,7 @@ export const PaymentReallocationService = {
 
                         negativeItem.remaining -= swap;
                         match.remaining += swap;
-                    }
-                    else {
+                    } else {
                         if (options.exactOnly && !(price === negativeItem.remaining || price === -match.remaining)) {
                             continue;
                         }
@@ -341,8 +339,7 @@ export const PaymentReallocationService = {
                         return;
                     }
                 }
-            }
-            else {
+            } else {
                 if (price > 0) {
                     if (price > -negativeItem.remaining || price > match.remaining) {
                         if (!options.split) {
@@ -366,8 +363,7 @@ export const PaymentReallocationService = {
 
                         negativeItem.remaining += swap;
                         match.remaining -= swap;
-                    }
-                    else {
+                    } else {
                         if (options.exactOnly && !(price === -negativeItem.remaining || price === match.remaining)) {
                             continue;
                         }

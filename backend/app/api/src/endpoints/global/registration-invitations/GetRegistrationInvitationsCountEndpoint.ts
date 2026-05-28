@@ -30,7 +30,7 @@ export class GetRegistrationInvitationsCountEndpoint extends Endpoint<Params, Qu
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
         await Context.authenticate();
-        
+
         const query = await GetRegistrationInvitationsEndpoint.buildQuery(request.query);
 
         const count = await query

@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -107,8 +107,7 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
 
         if (!trial) {
             query.where(noTrial);
-        }
-        else {
+        } else {
             query.whereNot(noTrial);
         }
 
@@ -174,8 +173,7 @@ export class GetChargeMembershipsSummaryEndpoint extends Endpoint<Params, Query,
 
         if (!trial) {
             query.where(trialQ);
-        }
-        else {
+        } else {
             query.whereNot(trialQ);
         }
 

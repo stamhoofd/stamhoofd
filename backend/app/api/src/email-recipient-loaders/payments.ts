@@ -1,4 +1,4 @@
-import type { RecipientLoader} from '@stamhoofd/models';
+import type { RecipientLoader } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Order, Organization, Payment, User, Webshop } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { LimitedFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
@@ -206,8 +206,7 @@ async function getRecipients(result: PaginatedResponse<PaymentGeneral[], Limited
         recipients.push(...await getUserRecipients(userIds, replacementOptions));
         recipients.push(...await getMemberRecipients(memberIds, replacementOptions));
         recipients.push(...await getOrderRecipients(orderIds, replacementOptions));
-    }
-    else {
+    } else {
         recipients.push(...await getOrganizationRecipients(organizationIds, replacementOptions, subFilter));
     }
 
@@ -273,8 +272,7 @@ async function getMembersForOrganizations(organizationIds: string[], filter: Sta
         const membersForOrganization = result.get(organizationId);
         if (membersForOrganization) {
             membersForOrganization.push(member);
-        }
-        else {
+        } else {
             result.set(organizationId, [member]);
         }
     }
@@ -301,7 +299,7 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
 
     if (subFilter === null) {
         // Use full admins instead
-        const admins = await User.getAdmins(allOrganizationIds, {verified: true});
+        const admins = await User.getAdmins(allOrganizationIds, { verified: true });
         for (const { organizationId, payment } of ids) {
             const organization = organizationMap.get(organizationId);
             if (!organization) {

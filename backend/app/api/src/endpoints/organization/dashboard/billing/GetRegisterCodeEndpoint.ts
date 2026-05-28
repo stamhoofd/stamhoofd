@@ -11,7 +11,6 @@ type Body = undefined;
 type ResponseBody = RegisterCodeStatus;
 
 export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
@@ -27,41 +26,41 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         if (!await Context.auth.hasSomeAccess(organization.id)) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
-        const codes = await RegisterCode.where({ organizationId: organization.id })
-        let code = codes[0]
+        const codes = await RegisterCode.where({ organizationId: organization.id });
+        let code = codes[0];
 
         if (codes.length === 0) {
-            code = new RegisterCode()
-            code.organizationId = organization.id
-            code.description = 'Doorverwezen door '+ organization.name
-            code.value = 25_00_00
-            await code.generateCode()
-            await code.save()
+            code = new RegisterCode();
+            code.organizationId = organization.id;
+            code.description = 'Doorverwezen door ' + organization.name;
+            code.value = 25_00_00;
+            await code.generateCode();
+            await code.save();
         }
 
-        const usedCodes = await UsedRegisterCode.getAll(code.code)
-        const allOrganizations = await Organization.getByIDs(...usedCodes.flatMap(u => u.organizationId ? [u.organizationId] : []))
-        const allBalances = await BalanceItem.getByIDs(...usedCodes.flatMap(u => u.balanceItemId ? [u.balanceItemId] : []))
+        const usedCodes = await UsedRegisterCode.getAll(code.code);
+        const allOrganizations = await Organization.getByIDs(...usedCodes.flatMap(u => u.organizationId ? [u.organizationId] : []));
+        const allBalances = await BalanceItem.getByIDs(...usedCodes.flatMap(u => u.balanceItemId ? [u.balanceItemId] : []));
 
         return new Response(RegisterCodeStatus.create({
             code: code.code,
             value: code.value,
             invoiceValue: code.invoiceValue,
-            usedCodes: usedCodes.map(c => {
+            usedCodes: usedCodes.map((c) => {
                 const creditValue = (c.balanceItemId ? (allBalances.find(credit => credit.id === c.balanceItemId)?.priceWithoutVAT) : null) ?? null;
-                return UsedRegisterCodeStruct.create({ 
+                return UsedRegisterCodeStruct.create({
                     id: c.id,
                     organizationName: allOrganizations.find(o => o.id === c.organizationId)?.name ?? 'Onbekend',
                     createdAt: c.createdAt,
-                    creditValue: creditValue !== null ? -creditValue : null
-                })
-            })
-        }))
+                    creditValue: creditValue !== null ? -creditValue : null,
+                });
+            }),
+        }));
     }
 }

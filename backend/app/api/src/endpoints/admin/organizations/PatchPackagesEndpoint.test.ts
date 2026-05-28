@@ -16,7 +16,7 @@ describe('Endpoint.PatchPackagesEndpoint', () => {
     });
 
     beforeAll(async () => {
-        await initMembershipOrganization()
+        await initMembershipOrganization();
     });
 
     describe('Permission checking', () => {
@@ -43,7 +43,7 @@ describe('Endpoint.PatchPackagesEndpoint', () => {
                 path: baseUrl,
                 host: organization.getApiHost(),
                 body: OrganizationPackagesStatus.patch({
-                    
+
                 }),
                 headers: {
                     authorization: 'Bearer ' + adminToken.accessToken,
@@ -60,8 +60,8 @@ describe('Endpoint.PatchPackagesEndpoint', () => {
         const { adminToken } = await initPlatformAdmin();
 
         const patch = OrganizationPackagesStatus.patch({});
-        
-        const pack = STPackageBundleHelper.getCurrentPackage(STPackageBundle.Webshops, new Date())
+
+        const pack = STPackageBundleHelper.getCurrentPackage(STPackageBundle.Webshops, new Date());
         pack.validAt = new Date(); // ignored by backend for now
         patch.packages.addPut(pack);
 
@@ -100,10 +100,10 @@ describe('Endpoint.PatchPackagesEndpoint', () => {
 
         const patch = OrganizationPackagesStatus.patch({});
         const removeAt = new Date();
-        removeAt.setMilliseconds(0)
+        removeAt.setMilliseconds(0);
         patch.packages.addPatch(STPackage.patch({
             id: package1.id,
-            removeAt
+            removeAt,
         }));
 
         // Try to request all members at organization

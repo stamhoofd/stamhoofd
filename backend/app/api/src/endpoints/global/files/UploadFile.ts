@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { File } from '@stamhoofd/structures';
@@ -8,7 +8,7 @@ import formidable from 'formidable';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, BooleanDecoder, field } from '@simonbackx/simple-encoding';
 import { Context } from '../../../helpers/Context.js';
 import { limiter } from './UploadImage.js';
@@ -133,8 +133,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         if (request.query.isPrivate && user) {
             // Private files
             prefix += 'users/' + user.id + '/';
-        }
-        else {
+        } else {
             // Public files
             prefix += 'p/';
         }

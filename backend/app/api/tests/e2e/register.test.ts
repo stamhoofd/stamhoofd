@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod} from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
@@ -442,8 +442,8 @@ describe('E2E.Register', () => {
                 totalPrice: 5800,
             });
 
-            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization
-                , token);
+            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization,
+                token);
             expect(receivableBalanceBefore).toBeDefined();
             expect(receivableBalanceBefore.body.balanceItems.length).toBe(0);
             expect(receivableBalanceBefore.body.amountOpen).toBe(0);
@@ -1197,8 +1197,7 @@ describe('E2E.Register', () => {
                 expect(trialUntil!.getFullYear()).toBe(2023);
                 expect(trialUntil!.getMonth()).toBe(4);
                 expect(trialUntil!.getDate()).toBe(19);
-            }
-            finally {
+            } finally {
                 vitest.useRealTimers().resetAllMocks();
             }
         });

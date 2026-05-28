@@ -10,9 +10,9 @@ import { useSavedIterator } from './helpers/useSavedIterator.js';
 
 registerCron('invoices', invoices);
 
-const {iterate, isHoursAgo} = useSavedIterator(() => {
+const { iterate, isHoursAgo } = useSavedIterator(() => {
     return Organization.select();
-}, {limit: 10, maxQueries: 5})
+}, { limit: 10, maxQueries: 5 });
 
 const bootAt = new Date();
 
@@ -37,7 +37,7 @@ async function invoices() {
         }
 
         // Create all invoices for this organization
-        await createInvoicesFor(organization)
+        await createInvoicesFor(organization);
     }
 }
 
@@ -49,12 +49,12 @@ async function createInvoicesFor(organization: Organization) {
 
     // Belgian rules: allowed to invoice up to the 15th day of the next month. We extend it with one month to fix mistakes.
     const today = Formatter.luxon();
-    const startDate = today.day <= 15 ? today.minus({month: 2}).startOf('month') : today.minus({month: 1}).startOf('month');
+    const startDate = today.day <= 15 ? today.minus({ month: 2 }).startOf('month') : today.minus({ month: 1 }).startOf('month');
 
-    // Don't invoice below 1 euro - unless we reached the timeout date for invoices (end of month + 15 days - 3 days margin) 
-    const invoiceLimit = STAMHOOFD.environment === 'development' ? 0 : 1_0000
+    // Don't invoice below 1 euro - unless we reached the timeout date for invoices (end of month + 15 days - 3 days margin)
+    const invoiceLimit = STAMHOOFD.environment === 'development' ? 0 : 1_0000;
     function getPaymentTimeoutDate(p: Payment) {
-        return Formatter.luxon(p.paidAt ?? p.createdAt).plus({month: 1}).set({day: 15 - 3}).startOf('day').toJSDate()
+        return Formatter.luxon(p.paidAt ?? p.createdAt).plus({ month: 1 }).set({ day: 15 - 3 }).startOf('day').toJSDate();
     }
 
     console.log('Fetching all payments between ' + Formatter.dateTime(startDate.toJSDate()) + ' and now for ' + organization.name);
@@ -86,21 +86,21 @@ async function createInvoicesFor(organization: Organization) {
         const id = JSON.stringify(blob);
         const existing = groups.get(id);
         if (existing) {
-            existing.push(payment)
+            existing.push(payment);
         } else {
-            groups.set(id, [payment])
+            groups.set(id, [payment]);
         }
     }
 
     console.log('Invoicing ' + groups.size + ' customers');
 
-    const errors: string[] = []
-    const invoices: Invoice[] = []
+    const errors: string[] = [];
+    const invoices: Invoice[] = [];
     let skipped = 0;
 
     for (const [_, payments] of groups) {
         // Group from last to newest (so we use the last customer details if the address changed during the month)
-        payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
+        payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
         const customer = payments[0].customer!.dynamicName;
         try {
             const generalStructs = await AuthenticatedStructures.paymentsGeneral(payments, false);
@@ -115,25 +115,25 @@ async function createInvoicesFor(organization: Organization) {
             if (invoice.totalWithVAT >= 0 && invoice.totalWithVAT < invoiceLimit) {
                 const first = new Date(Math.min(...payments.map(p => getPaymentTimeoutDate(p).getTime())));
                 if (first > new Date()) {
-                    console.log('Delaying invoicing ' + customer + ' at ' + organization.id + ' until ' + Formatter.dateIso(first))
+                    console.log('Delaying invoicing ' + customer + ' at ' + organization.id + ' until ' + Formatter.dateIso(first));
                     skipped += 1;
                     continue;
                 } else {
-                    console.log('Invoiced low priced invoice, because of date ' + Formatter.dateIso(first) + ' being in the past')
+                    console.log('Invoiced low priced invoice, because of date ' + Formatter.dateIso(first) + ' being in the past');
                 }
             }
 
             const model = await InvoiceService.createFrom(organization, invoice);
-            invoices.push(model)
+            invoices.push(model);
         } catch (e) {
             console.error(payments.map(p => p.id), e);
 
-            const prefix = customer + ' ('+payments.map(p => '<a href="'+Formatter.escapeHtml('https://'+organization.getDashboardHost() + '/boekhouding/betalingen/' + p.id)+'">'+ Formatter.escapeHtml($t('%14a') + ' ' + p.id.substring(0, 8))+'</a>').join(', ') + '): ';
+            const prefix = customer + ' (' + payments.map(p => '<a href="' + Formatter.escapeHtml('https://' + organization.getDashboardHost() + '/boekhouding/betalingen/' + p.id) + '">' + Formatter.escapeHtml($t('%14a') + ' ' + p.id.substring(0, 8)) + '</a>').join(', ') + '): ';
 
             if (isSimpleError(e) || isSimpleErrors(e)) {
-                errors.push(prefix + Formatter.escapeHtml(e.getHuman()))
+                errors.push(prefix + Formatter.escapeHtml(e.getHuman()));
             } else {
-                errors.push(prefix + Formatter.escapeHtml($t('%1ED')))
+                errors.push(prefix + Formatter.escapeHtml($t('%1ED')));
             }
         }
     }
@@ -143,7 +143,7 @@ async function createInvoicesFor(organization: Organization) {
     if (errors.length) {
         await sendEmailTemplate(organization, {
             template: {
-                type: EmailTemplateType.InvoiceGenerationErrors
+                type: EmailTemplateType.InvoiceGenerationErrors,
             },
             recipients: await organization.getAdminRecipients(),
             type: 'transactional',
@@ -151,9 +151,9 @@ async function createInvoicesFor(organization: Organization) {
             defaultReplacements: [
                 Replacement.create({
                     token: 'errors',
-                    html: '<ul><li>'+errors.join('</li><li>')+'</li></ul>' + (skipped > 0 ? '<p>'+Formatter.escapeHtml(skipped === 1 ? $t('%1U4') : $t('%1Sp', {count: skipped}))+'</p>' : '')
-                })
-            ]
-        })
+                    html: '<ul><li>' + errors.join('</li><li>') + '</li></ul>' + (skipped > 0 ? '<p>' + Formatter.escapeHtml(skipped === 1 ? $t('%1U4') : $t('%1Sp', { count: skipped })) + '</p>' : ''),
+                }),
+            ],
+        });
     }
 }

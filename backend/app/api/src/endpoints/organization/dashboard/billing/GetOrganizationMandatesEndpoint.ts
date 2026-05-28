@@ -21,7 +21,7 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates', {sellingOrganizationId: String});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates', { sellingOrganizationId: String });
 
         if (params) {
             return [true, params as Params];
@@ -38,10 +38,10 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('%1Rz')
-            })
+                human: $t('%1Rz'),
+            });
         }
-        
+
         const sellingOrganization = await Organization.getByID(id);
         if (!sellingOrganization || !sellingOrganization.active) {
             throw new SimpleError({
@@ -49,16 +49,16 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
                 code: 'not_found',
                 message: 'Selling organization not found',
                 human: $t('%1R5'),
-                field: 'sellingOrganization'
-            })
+                field: 'sellingOrganization',
+            });
         }
 
         const mandates = await PaymentMandateService.getMandates({
             sellingOrganization,
             user,
-            payingOrganization
-        })
+            payingOrganization,
+        });
 
-       return new Response(PaymentMandateService.groupByMandate(mandates).mandates);
+        return new Response(PaymentMandateService.groupByMandate(mandates).mandates);
     }
 }

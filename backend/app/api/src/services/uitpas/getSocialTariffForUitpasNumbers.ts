@@ -90,8 +90,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
 
         if (json) {
             console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber} with event id ${eventId}:`, json);
-        }
-        else {
+        } else {
             console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber} with event id ${eventId}:`, response.statusText);
         }
 
@@ -168,14 +167,12 @@ export async function getSocialTariffForUitpasNumbers(access_token: string, uitp
         const uitpasNumber = uitpasNumbers[i];
         try {
             reducedPrices[i] = await getSocialTariffForUitpasNumber(access_token, uitpasNumber, basePrice, uitpasEventUrl);
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace(i.toString());
                 e.addNamespace('uitpasNumbers');
                 simpleErrors.addError(e);
-            }
-            else {
+            } else {
                 throw e;
             }
         }

@@ -9,7 +9,7 @@ import { StripeHelper } from '../../src/helpers/StripeHelper.js';
 import { testServer } from './TestServer.js';
 import { resetNock } from './resetNock.js';
 
-export type PaymentIntent = { id: string, return_url?: string };
+export type PaymentIntent = { id: string; return_url?: string };
 export class StripeMocker {
     paymentIntents: PaymentIntent[] = [];
     charges: { id: string }[] = [];
@@ -213,7 +213,7 @@ export class StripeMocker {
         const account = new StripeAccount();
         account.organizationId = organizationId;
         account.accountId = this.createId('acct');
-        account.setMetaFromStripeAccount({...defaultBlobData, type});
+        account.setMetaFromStripeAccount({ ...defaultBlobData, type });
         await account.save();
         return account;
     }

@@ -13,7 +13,7 @@ type ResponseBody = OrganizationPackagesStatus;
 type Body = AutoEncoderPatchType<OrganizationPackagesStatus>;
 
 export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = OrganizationPackagesStatus.patchType() as Decoder<AutoEncoderPatchType<OrganizationPackagesStatus>>
+    bodyDecoder = OrganizationPackagesStatus.patchType() as Decoder<AutoEncoderPatchType<OrganizationPackagesStatus>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -36,41 +36,41 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
         if (!Context.auth.hasPlatformFullAccess()) {
             throw Context.auth.error();
         }
-        let updatePackages = false
+        let updatePackages = false;
         const packages = await STPackageService.getValidPackagesWithExpired(organization.id);
         const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
         if (!membershipOrganizationId) {
-            throw new Error('Unavailable')
+            throw new Error('Unavailable');
         }
 
         const membershipOrganization = await Organization.getByID(membershipOrganizationId, true);
         // Do patches
         if (request.body.packages) {
             for (const patch of request.body.packages.getPatches()) {
-                const pack = packages.find(p => p.id === patch.id)
+                const pack = packages.find(p => p.id === patch.id);
                 if (!pack) {
                     throw new SimpleError({
                         code: 'not_found',
-                        message: 'Package not found with id '+patch.id
-                    })
+                        message: 'Package not found with id ' + patch.id,
+                    });
                 }
 
                 if (patch.meta !== undefined) {
-                    pack.meta.patchOrPut(patch.meta)
+                    pack.meta.patchOrPut(patch.meta);
                 }
 
                 if (patch.validUntil !== undefined) {
-                    pack.validUntil = patch.validUntil
+                    pack.validUntil = patch.validUntil;
                 }
 
                 if (patch.removeAt !== undefined) {
-                    pack.removeAt = patch.removeAt
+                    pack.removeAt = patch.removeAt;
                 }
 
-                await pack.save()
-                updatePackages = true
+                await pack.save();
+                updatePackages = true;
 
-                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0])
+                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0]);
                 if (item) {
                     item.status = BalanceItemStatus.Due;
                     await item.save();
@@ -79,20 +79,20 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             for (const put of request.body.packages.getPuts()) {
-                const pack = new STPackage()
+                const pack = new STPackage();
                 pack.id = put.put.id;
-                pack.validAt = new Date()
-                pack.organizationId = organization.id
+                pack.validAt = new Date();
+                pack.organizationId = organization.id;
 
-                pack.meta = put.put.meta
-                pack.validUntil = put.put.validUntil
-                pack.removeAt = put.put.removeAt
+                pack.meta = put.put.meta;
+                pack.validUntil = put.put.validUntil;
+                pack.removeAt = put.put.removeAt;
 
-                await pack.save()
-                updatePackages = true
+                await pack.save();
+                updatePackages = true;
 
                 packages.push(pack);
-                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0])
+                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0]);
                 if (item) {
                     item.status = BalanceItemStatus.Due;
                     await item.save();
@@ -102,7 +102,7 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         if (updatePackages) {
-            await STPackageService.updateOrganizationPackages(organization.id)
+            await STPackageService.updateOrganizationPackages(organization.id);
         }
 
         return new Response(OrganizationPackagesStatus.create({

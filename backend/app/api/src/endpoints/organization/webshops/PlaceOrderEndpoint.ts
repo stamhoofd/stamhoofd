@@ -90,8 +90,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
                 try {
                     limiter.track(organization.id, 1);
-                }
-                catch (e) {
+                } catch (e) {
                     Email.sendWebmaster({
                         subject: '[Limiet] Limiet bereikt voor aantal bestellingen',
                         text: 'Beste, \nDe limiet werd bereikt voor het aantal bestellingen per dag. \nVereniging: ' + organization.id + ' (' + organization.name + ')' + '\n\n' + e.message + '\n\nStamhoofd',
@@ -174,8 +173,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 // Mark this order as paid
                 await order.markPaid(null, organization, webshop);
                 await order.save();
-            }
-            else {
+            } else {
                 const payment = new Payment();
                 payment.organizationId = organization.id;
                 payment.method = request.body.paymentMethod;
@@ -201,7 +199,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
                     order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
                 );
-                await ServiceFeeHelper.setTransferFee({payment, organization, stripeAccount});
+                await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount });
                 await payment.save();
 
                 // Deprecated field
@@ -253,8 +251,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     balanceItem.status = BalanceItemStatus.Due;
                     await balanceItem.save();
                     await payment.save();
-                }
-                else if (payment.method === PaymentMethod.PointOfSale) {
+                } else if (payment.method === PaymentMethod.PointOfSale) {
                     // Not really paid, but needed to create the tickets if needed
                     await order.markPaid(payment, organization, webshop);
 
@@ -265,8 +262,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     balanceItem.status = BalanceItemStatus.Due;
                     await balanceItem.save();
                     await payment.save();
-                }
-                else {
+                } else {
                     const cancelUrl = 'https://' + webshop.getHost() + '/payment?id=' + encodeURIComponent(payment.id) + '&cancel=true';
                     const redirectUrl = 'https://' + webshop.getHost() + '/payment?id=' + encodeURIComponent(payment.id);
                     const exchangeUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
@@ -292,10 +288,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             },
                         });
                         paymentUrl = stripeResult.paymentUrl;
-                    }
-                    else if (payment.provider === PaymentProvider.Mollie) {
+                    } else if (payment.provider === PaymentProvider.Mollie) {
                         // Mollie payment
-                        const mollieService = await MollieService.create({sellingOrganization: organization});
+                        const mollieService = await MollieService.create({ sellingOrganization: organization });
                         if (!mollieService) {
                             throw new SimpleError({
                                 code: '',
@@ -326,7 +321,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 webshop: webshop.id,
                                 payment: payment.id,
                             },
-                            locale: mollieService.locale
+                            locale: mollieService.locale,
                         });
                         console.log(molliePayment);
                         paymentUrl = molliePayment.getCheckoutUrl();
@@ -336,11 +331,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         dbPayment.paymentId = payment.id;
                         dbPayment.mollieId = molliePayment.id;
                         await dbPayment.save();
-                    }
-                    else if (payment.provider == PaymentProvider.Payconiq) {
+                    } else if (payment.provider == PaymentProvider.Payconiq) {
                         ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, exchangeUrl));
-                    }
-                    else if (payment.provider == PaymentProvider.Buckaroo) {
+                    } else if (payment.provider == PaymentProvider.Buckaroo) {
                         // Increase request timeout because buckaroo is super slow
                         request.request.request?.setTimeout(60 * 1000);
                         const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? '', organization.privateMeta?.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
@@ -357,8 +350,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 }),
                             });
                         }
-                    }
-                    else {
+                    } else {
                         throw new Error('Unknown payment provider');
                     }
                 }
@@ -369,8 +361,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     order: OrderStruct.create({ ...order, payment: PaymentStruct.create(payment) }),
                 }));
             }
-        }
-        catch (e) {
+        } catch (e) {
             // Mark order as failed to release stock
             if (order) {
                 await order.deleteOrderBecauseOfCreationError();

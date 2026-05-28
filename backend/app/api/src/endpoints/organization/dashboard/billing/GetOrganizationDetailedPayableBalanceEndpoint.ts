@@ -18,7 +18,7 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
         if (request.method !== 'GET') {
             return [false];
         }
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/payable-balance', {sellingOrganizationId: String});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/payable-balance', { sellingOrganizationId: String });
 
         if (params) {
             return [true, params as Params];
@@ -40,10 +40,10 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('%1Rz')
-            })
+                human: $t('%1Rz'),
+            });
         }
-        
+
         const sellingOrganization = await Organization.getByID(id);
         if (!sellingOrganization || !sellingOrganization.active) {
             throw new SimpleError({
@@ -51,8 +51,8 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
                 code: 'not_found',
                 message: 'Selling organization not found',
                 human: $t('%1R5'),
-                field: 'sellingOrganization'
-            })
+                field: 'sellingOrganization',
+            });
         }
 
         const balanceItemModels = await BalanceItem.balanceItemsForOrganization(organization.id, request.params.sellingOrganizationId);

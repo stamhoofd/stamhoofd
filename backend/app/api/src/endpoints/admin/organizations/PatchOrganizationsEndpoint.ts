@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
@@ -133,8 +133,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             if (STAMHOOFD.userMode === 'platform') {
                 const periodId = (await Platform.getShared()).periodIdIfPlatform;
                 organization.periodId = periodId;
-            }
-            else {
+            } else {
                 period = new RegistrationPeriod();
                 period.configureForNewOrganization();
                 await period.save();
@@ -147,8 +146,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
             try {
                 await organization.save();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
                 throw new SimpleError({
                     code: 'creating_organization',

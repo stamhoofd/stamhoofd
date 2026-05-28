@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
@@ -100,8 +100,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                         type: 'transactional',
                     });
                 })().catch(console.error);
-            }
-            else {
+            } else {
                 // This is safe, because we are the first one. There is no password yet.
                 // If a hacker tries this, he won't be able to sign in, because he needs to
                 // verify the e-mail first (same as if the user didn't exist)

@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import type { GroupCategory} from '@stamhoofd/structures';
+import type { GroupCategory } from '@stamhoofd/structures';
 import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -60,11 +60,9 @@ export async function migratePrices() {
                         }),
                     }),
                 ];
-            }
-            else if (group.status === GroupStatus.Archived) {
+            } else if (group.status === GroupStatus.Archived) {
                 archivedGroups.push(group);
-            }
-            else {
+            } else {
                 filteredGroups.push(group);
             }
         }
@@ -116,8 +114,7 @@ export async function migratePrices() {
                                 if (!categoryDiscountForFamily) {
                                     categoryDiscountForFamily = createBundleDiscount(oldPrices, category, allBundleDiscounts);
                                 }
-                            }
-                            else if (!categoryDiscountForMember) {
+                            } else if (!categoryDiscountForMember) {
                                 categoryDiscountForMember = createBundleDiscount(oldPrices, category, allBundleDiscounts);
                             }
                         }
@@ -194,8 +191,7 @@ export async function migratePrices() {
                                     price: 0,
                                     reducedPrice: null,
                                 }) })];
-                        }
-                        else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
+                        } else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
                             customDiscounts = undefined;
                         }
 
@@ -221,8 +217,7 @@ export async function migratePrices() {
                                     price: 0,
                                     reducedPrice: null,
                                 }) })];
-                        }
-                        else if (areDiscountsEqual(categoryDiscountForMember.discounts, discounts)) {
+                        } else if (areDiscountsEqual(categoryDiscountForMember.discounts, discounts)) {
                             customDiscounts = undefined;
                         }
 
@@ -297,8 +292,7 @@ function createCategoryMap(groups: Group[], archivedGroups: Group[], categories:
                 const otherGroups = categoryMap.get(category.id);
                 if (otherGroups) {
                     otherGroups.push(group);
-                }
-                else {
+                } else {
                     categoryMap.set(category.id, [group]);
                 }
             }

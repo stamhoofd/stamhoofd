@@ -1,5 +1,5 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { Member, MemberPlatformMembership} from '@stamhoofd/models';
+import type { Member, MemberPlatformMembership } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { scalarToSQLExpression, SQL, SQLCharLength, SQLWhereLike } from '@stamhoofd/sql';
@@ -28,12 +28,10 @@ export class MemberNumberService {
 
                 member.details.memberNumber = memberNumber;
                 await member.save();
-            }
-            catch (error) {
+            } catch (error) {
                 if (isSimpleError(error) || isSimpleErrors(error)) {
                     throw error;
-                }
-                else {
+                } else {
                     console.error(error);
                     throw new SimpleError({
                         code: 'assign_member_number',
@@ -48,8 +46,7 @@ export class MemberNumberService {
     private static async createMemberNumber(member: Member, membership: MemberPlatformMembership): Promise<string | undefined> {
         if (STAMHOOFD.MEMBER_NUMBER_ALGORITHM === MemberNumberAlgorithm.Incremental) {
             return this.createIncrementalMemberNumber();
-        }
-        else if (STAMHOOFD.MEMBER_NUMBER_ALGORITHM === MemberNumberAlgorithm.KSA) {
+        } else if (STAMHOOFD.MEMBER_NUMBER_ALGORITHM === MemberNumberAlgorithm.KSA) {
             return this.createKSAMemberNumber(member, membership);
         }
     }
@@ -128,8 +125,7 @@ export class MemberNumberService {
                         human: $t(`%Fy`),
                     });
                 }
-            }
-            else {
+            } else {
                 doesExist = false;
             }
         }
@@ -153,8 +149,7 @@ export class MemberNumberService {
 
         if (this.largestMemberNumberCache !== null) {
             nextNumber = this.largestMemberNumberCache + 1;
-        }
-        else {
+        } else {
             // Find largest member number in the database
             // The required length prevents string-sorting with different lengths, causing an unexpected order
             const query = await SQL.select('memberNumber')

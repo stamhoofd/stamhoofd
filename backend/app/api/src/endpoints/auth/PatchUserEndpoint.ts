@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { isPatch } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, Member, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
@@ -64,8 +64,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     // Also propage the name change to other users of the same member if needed
                     await MemberUserSyncer.onChangeMember(member);
                 }
-            }
-            else {
+            } else {
                 editUser.firstName = request.body.firstName ?? editUser.firstName;
                 editUser.lastName = request.body.lastName ?? editUser.lastName;
             }
@@ -89,12 +88,10 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                             message: $t(`%DG`),
                         });
                     }
-                }
-                else {
+                } else {
                     if (editUser.permissions) {
                         editUser.permissions.patchOrPut(request.body.permissions);
-                    }
-                    else {
+                    } else {
                         editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null;
                     }
 

@@ -53,14 +53,12 @@ export class StripePayoutChecker {
                 // Get all payments for this payout
                 try {
                     await this.fetchBalanceItems(payout);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error('Error for payout ' + payout.id);
                     console.error(e);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -119,8 +117,7 @@ export class StripePayoutChecker {
                             if (stripePayments.length === 1) {
                                 paymentId = stripePayments[0].paymentId;
                                 console.log('Found missing payment metadata for payment intent ', originatingTransaction.payment_intent, paymentId);
-                            }
-                            else {
+                            } else {
                                 // Probably a card payment
                                 // Search for the checkout session
                                 const checkoutSession = await this.stripePlatform.checkout.sessions.list({
@@ -138,12 +135,10 @@ export class StripePayoutChecker {
                                     if (stripeCheckoutSessions.length === 1) {
                                         paymentId = stripeCheckoutSessions[0].paymentId;
                                         console.log('Found missing payment metadata for payment intent ', originatingTransaction.payment_intent, paymentId);
-                                    }
-                                    else {
+                                    } else {
                                         console.log('No payment found for checkout session ' + session.id);
                                     }
-                                }
-                                else {
+                                } else {
                                     console.log('No Stripe Checkout Sessions found for payment intent ' + paymentIntentId);
                                 }
                             }

@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, Webshop } from '@stamhoofd/models';
@@ -48,8 +48,7 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
             if (webshop.domain !== null) {
                 webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(webshop.domain);
                 await webshop.updateDNSRecords();
-            }
-            else {
+            } else {
                 webshop.privateMeta.dnsRecords = [];
                 webshop.meta.domainActive = false;
             }

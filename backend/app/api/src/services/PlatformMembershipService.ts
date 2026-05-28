@@ -353,8 +353,7 @@ export class PlatformMembershipService {
                                 // Update the price and dates of this active membership (could have changed)
                                 try {
                                     await m.calculatePrice(me, cheapestMembership.registration);
-                                }
-                                catch (e) {
+                                } catch (e) {
                                     // Ignore error: membership might not be available anymore
                                     if (!silent) {
                                         console.error('Failed to calculate price for active membership', m.id, e);
@@ -377,14 +376,12 @@ export class PlatformMembershipService {
                                     console.log('Removing membership because cheaper membership found or duplicate, for: ' + me.id + ' - membership ' + m.id);
                                 }
                                 await m.doDelete();
-                            }
-                            else if (m.membershipTypeId === cheapestMembership.membership.id) {
+                            } else if (m.membershipTypeId === cheapestMembership.membership.id) {
                                 // Update price
                                 if (!m.locked) {
                                     try {
                                         await m.calculatePrice(me);
-                                    }
-                                    catch (e) {
+                                    } catch (e) {
                                     // Ignore error: membership might not be available anymore
                                         if (!silent) {
                                             console.error('Failed to calculate price for undeletable membership', m.id, e);
@@ -409,8 +406,7 @@ export class PlatformMembershipService {
                     if (me.details.memberNumber === null) {
                         try {
                             await MemberNumberService.assignMemberNumber(me, membership);
-                        }
-                        catch (error) {
+                        } catch (error) {
                             console.error(`Failed to assign member number for id ${me.id}: ${error.message}`);
                             // If the assignment of the member number fails the membership is not created but the member is registered
                             continue;

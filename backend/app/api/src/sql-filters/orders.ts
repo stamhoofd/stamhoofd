@@ -121,7 +121,7 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             expression: SQL.jsonExtract(SQL.column('data'), '$.value.discountCodes[*].code'),
             type: SQLValueType.JSONArray,
             nullable: true,
-        })
+        }),
     },
     items: createExistsFilter(
         /**
@@ -230,14 +230,14 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                 ).where(
                     SQL.column('balance_items', 'id'),
                     SQL.column('balance_item_payments', 'balanceItemId'),
-                )
+                ),
             )
             .join(
                 SQL.join(
                     SQL.table('payments'),
                 ).where(
                     SQL.column('payments', 'id'),
-                    SQL.column('balance_item_payments', 'paymentId')
+                    SQL.column('balance_item_payments', 'paymentId'),
                 ),
             )
             .where(
@@ -247,7 +247,7 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             // payments on structure filter away failed payments -> also filter out failed payments in backend
             .whereNot(
                 SQL.column('payments', 'status'),
-                PaymentStatus.Failed
+                PaymentStatus.Failed,
             ),
         {
             ...baseSQLFilterCompilers,

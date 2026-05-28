@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { Company, PaymentCustomer} from '@stamhoofd/structures';
+import type { Company, PaymentCustomer } from '@stamhoofd/structures';
 import { getPricingTypeName, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
@@ -108,7 +108,7 @@ export class STPackageService {
         amount -= paid;
 
         if (amount <= 0) {
-            console.log('Not charging package', pack.id, 'amount is', amount)
+            console.log('Not charging package', pack.id, 'amount is', amount);
             return null;
         }
 
@@ -139,8 +139,7 @@ export class STPackageService {
 
             if (pack.meta.pricingType === STPricingType.PerMember) {
                 unitPrice = Math.round(Math.min(unitPrice, unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)));
-            }
-            else {
+            } else {
                 unitPrice = Math.round(unitPrice);
             }
         }
@@ -175,7 +174,7 @@ export class STPackageService {
         item.VATExcempt = VATService.getVATExcempt({
             company,
             sellingOrganization,
-            type: 'services'
+            type: 'services',
         });
         item.quantity = amount;
         item.unitPrice = STMath.round(unitPrice / 100) * 100;
@@ -201,12 +200,12 @@ export class STPackageService {
         if (STAMHOOFD.userMode === 'platform' || organizationId === ((await Platform.getShared()).membershipOrganizationId)) {
             map.set(STPackageType.Webshops, STPackageStatus.create({
                 startDate: new Date(0),
-            }))
+            }));
 
             map.set(STPackageType.Members, STPackageStatus.create({
                 startDate: new Date(0),
-            }))
-            return map
+            }));
+            return map;
         }
 
         const packages = await this.getForOrganizationIncludingExpired(organizationId);
@@ -215,8 +214,7 @@ export class STPackageService {
             const exist = map.get(pack.meta.type);
             if (exist) {
                 exist.merge(pack.createStatus());
-            }
-            else {
+            } else {
                 map.set(pack.meta.type, pack.createStatus());
             }
         }
@@ -239,23 +237,22 @@ export class STPackageService {
                 const builder = new GroupBuilder(organization);
                 await builder.build();
             }
-        }
-        else {
+        } else {
             console.error("Couldn't find organization when updating packages " + organizationId);
         }
     }
 
     static async markFailedPayment(organizationId: string) {
-        console.log('Marking packages with failed payment for '+organizationId)
+        console.log('Marking packages with failed payment for ' + organizationId);
 
         // Mark all active packages as failed
-        const activePackages = await this.getActivePackages(organizationId)
+        const activePackages = await this.getActivePackages(organizationId);
         for (const pack of activePackages) {
-            console.log('Marking package with failed payment '+pack.id)
-            pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
+            console.log('Marking package with failed payment ' + pack.id);
+            pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date();
             pack.meta.paymentFailedCount++;
-            await pack.save()
+            await pack.save();
         }
-        await this.updateOrganizationPackages(organizationId)
+        await this.updateOrganizationPackages(organizationId);
     }
 }

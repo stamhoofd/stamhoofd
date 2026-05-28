@@ -1,6 +1,6 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
@@ -74,8 +74,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 });
             }
             event = await stripe.webhooks.constructEventAsync(await request.request.bodyPromise!, sig, secret);
-        }
-        catch (err) {
+        } catch (err) {
             throw new SimpleError({
                 code: 'invalid_signature',
                 message: 'Invalid signature',
@@ -96,8 +95,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                             model.setMetaFromStripeAccount(account);
                             await model.save();
                         });
-                    }
-                    else {
+                    } else {
                         console.warn('Could not find stripe account with id', id);
                     }
                 }
@@ -126,8 +124,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 const [model] = await StripeCheckoutSession.where({ stripeSessionId: checkoutId }, { limit: 1 });
                 if (model && model.organizationId) {
                     await this.checkDebounced(model.paymentId, model.organizationId);
-                }
-                else {
+                } else {
                     console.warn('Could not find stripe checkout session with id', checkoutId);
                 }
                 break;
@@ -148,8 +145,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 const intentId = request.body.data.object.payment_intent;
                 if (intentId && typeof intentId === 'string') {
                     await this.updateIntent(intentId);
-                }
-                else {
+                } else {
                     console.log('Received charge event without payment intent', request.body);
                 }
                 break;
@@ -170,13 +166,11 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 const organization = await Organization.getByID(organizationId);
                 if (organization) {
                     await PaymentService.pollStatus(paymentId, organization);
-                }
-                else {
+                } else {
                     console.warn('Could not find organization with id', organizationId);
                 }
             }, 1000);
-        }
-        catch (e) {
+        } catch (e) {
             if (isDebouncedError(e)) {
                 // Okay, we are debounced (new request came in)
                 console.log('Debounced', paymentId);
@@ -191,8 +185,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
         const [model] = await StripePaymentIntent.where({ stripeIntentId: intentId }, { limit: 1 });
         if (model && model.organizationId) {
             await this.checkDebounced(model.paymentId, model.organizationId);
-        }
-        else {
+        } else {
             console.warn('Could not find stripe payment intent with id', intentId);
         }
     }

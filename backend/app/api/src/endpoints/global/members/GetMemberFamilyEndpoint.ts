@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
 import { Member } from '@stamhoofd/models';
@@ -38,8 +38,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!await Context.auth.hasSomeAccess(organization.id)) {
                 throw Context.auth.error();
             }
-        }
-        else {
+        } else {
             if (!Context.auth.hasSomePlatformAccess()) {
                 throw Context.auth.error();
             }

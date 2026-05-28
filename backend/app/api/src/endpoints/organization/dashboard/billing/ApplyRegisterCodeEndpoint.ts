@@ -14,7 +14,7 @@ type ResponseBody = undefined;
 
 class Body extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    registerCode: string
+    registerCode: string;
 }
 
 /**
@@ -22,7 +22,7 @@ class Body extends AutoEncoder {
  */
 
 export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = Body as Decoder<Body>
+    bodyDecoder = Body as Decoder<Body>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
@@ -39,10 +39,10 @@ export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate()
+        await Context.authenticate();
 
         if (!Context.auth.hasPlatformFullAccess()) {
-            throw Context.auth.error()
+            throw Context.auth.error();
         }
 
         let code = request.body.registerCode;
@@ -52,15 +52,15 @@ export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
                 const url = new URL(code);
                 const codeParam = url.searchParams.get('code');
                 if (codeParam) {
-                    console.log('Parsed code from URL', codeParam)
+                    console.log('Parsed code from URL', codeParam);
                     code = codeParam;
                 }
             } catch (e) {
-                console.error('Tried parsing code as URL but failed', code)
+                console.error('Tried parsing code as URL but failed', code);
             }
         }
 
-        const {models, emails} = await ReferralService.markUsed(organization, code)
+        const { models, emails } = await ReferralService.markUsed(organization, code);
 
         for (const model of models) {
             await model.save();
@@ -70,21 +70,20 @@ export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
             Email.send({
                 ...email,
                 from: Email.getQuickFromEmail(organization.address.country),
-            })
+            });
         }
 
         if (organization.meta.packages.isPaid) {
             // Already bought something: apply credit to other organization immediately
-            const code = await UsedRegisterCode.getFor(organization.id)
+            const code = await UsedRegisterCode.getFor(organization.id);
             if (code && !code.balanceItemId) {
-                console.log('Rewarding code '+code.id+' for payment')
+                console.log('Rewarding code ' + code.id + ' for payment');
 
                 // Deze code werd nog niet beloond
-                await ReferralService.reward(code)
+                await ReferralService.reward(code);
             }
         }
 
         return new Response(undefined);
     }
 }
-

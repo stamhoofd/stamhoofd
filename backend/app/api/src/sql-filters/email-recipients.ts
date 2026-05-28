@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLConcat, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 
 export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {

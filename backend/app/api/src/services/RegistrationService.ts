@@ -81,7 +81,7 @@ export const RegistrationService = {
     /**
      * Delete all the invitations for the group and member linked to the registration.
      * Will not throw if it fails.
-     * @param registration 
+     * @param registration
      */
     async handleWaitingListRegistrationAndInvitation(registration: Registration): Promise<void> {
         const group = await Group.getByID(registration.groupId);
@@ -96,7 +96,7 @@ export const RegistrationService = {
             .where('groupId', registration.groupId)
             .andWhere('memberId', registration.memberId)
             .first(false);
-        
+
         const waitingListIds = new Set<string>();
 
         if (group.waitingListId) {
@@ -124,7 +124,7 @@ export const RegistrationService = {
                     .where('deactivatedAt', null)
                     .whereNot('registeredAt', null)
                     .first(false);
-                
+
                 if (waitingListRegistration) {
                     // unsubscribe for waiting list (waiting lists cannot have a price -> balance items should not be updated)
                     await RegistrationService.deactivate(waitingListRegistration);
@@ -334,8 +334,7 @@ export const RegistrationService = {
                         }),
                     ];
                     await updated.save();
-                }
-                else {
+                } else {
                     if (updated.stockReservations.length) {
                         updated.stockReservations = [];
                         await updated.save();

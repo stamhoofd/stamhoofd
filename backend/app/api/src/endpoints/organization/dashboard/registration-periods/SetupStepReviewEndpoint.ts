@@ -1,9 +1,9 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import type { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct} from '@stamhoofd/structures';
+import type { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct } from '@stamhoofd/structures';
 import { SetupStepType } from '@stamhoofd/structures';
 
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
@@ -71,8 +71,7 @@ export class SetupStepReviewEndpoint extends Endpoint<Params, Query, Body, Respo
                 userId: user.id,
                 userName: user.name ?? '?',
             });
-        }
-        else {
+        } else {
             setupSteps.resetReviewed(stepType);
         }
 

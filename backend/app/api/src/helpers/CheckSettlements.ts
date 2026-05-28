@@ -39,8 +39,7 @@ export async function checkAllStripePayouts(checkAll = false) {
                 stripeAccount: account.accountId,
             });
             await checker.checkSettlements(checkAll);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -63,8 +62,7 @@ export async function checkSettlements(checkAll = false) {
     const token = STAMHOOFD.MOLLIE_ORGANIZATION_TOKEN;
     if (!token) {
         console.error('Missing mollie organization token');
-    }
-    else {
+    } else {
         await checkMollieSettlementsFor(token, checkAll);
     }
 
@@ -77,19 +75,16 @@ export async function checkSettlements(checkAll = false) {
         for (const token of mollieTokens) {
             if (token.createdAt < new Date(2021, 8 /* september! */, 8)) {
                 console.log('Skipped mollie token that is too old');
-            }
-            else {
+            } else {
                 try {
                     await token.refreshIfNeeded();
                     await checkMollieSettlementsFor(token.accessToken, checkAll);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -135,22 +130,18 @@ export async function checkMollieSettlementsFor(token: string, checkAll = false)
                             await updateSettlement(token, settlement);
                         }
                     }
-                }
-                else {
+                } else {
                     console.error('Unreadable settlements');
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(request.data);
                 throw e;
             }
-        }
-        else {
+        } else {
             console.error('Failed to fetch settlements');
             console.error(request.data);
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 }
@@ -199,12 +190,10 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
                         console.log('Updated settlement of payment ' + payment.id);
                         console.log(payment.settlement);
                     }
-                }
-                else {
+                } else {
                     console.log('Missing payment ' + mp.paymentId);
                 }
-            }
-            else {
+            } else {
                 // Probably a payment in a different system/platform
                 // console.log("No mollie payment found for id "+mollie.id)
             }
@@ -214,8 +203,7 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
         if (request.data._links.next) {
             await updateSettlement(token, settlement, molliePayments[molliePayments.length - 1].id);
         }
-    }
-    else {
+    } else {
         console.error(request.data);
     }
 }

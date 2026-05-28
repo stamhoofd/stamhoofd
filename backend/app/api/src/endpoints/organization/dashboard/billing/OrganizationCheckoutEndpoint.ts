@@ -28,7 +28,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/checkout', {sellingOrganizationId: String});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/checkout', { sellingOrganizationId: String });
 
         if (params) {
             return [true, params as Params];
@@ -66,10 +66,10 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('%1Rz')
-            })
+                human: $t('%1Rz'),
+            });
         }
-        
+
         const sellingOrganization = await Organization.getByID(id);
         if (!sellingOrganization || !sellingOrganization.active) {
             throw new SimpleError({
@@ -77,8 +77,8 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                 code: 'not_found',
                 message: 'Selling organization not found',
                 human: $t('%1R5'),
-                field: 'sellingOrganization'
-            })
+                field: 'sellingOrganization',
+            });
         }
 
         if (sellingOrganization.id === organization.id) {
@@ -126,7 +126,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                 balanceItem.VATExcempt = VATService.getVATExcempt({
                     company: checkout.customer?.company,
                     sellingOrganization,
-                    type: 'services'
+                    type: 'services',
                 });
                 balanceItems.set(balanceItem, balanceItem.priceWithVAT);
             }
@@ -137,9 +137,9 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             } else {
                 // Security addition
                 if (balanceItem && balanceItem.id) {
-                    throw new Error('Unexpected balance item save')
+                    throw new Error('Unexpected balance item save');
                 }
-                balanceItem?.disableSave()
+                balanceItem?.disableSave();
             }
 
             models.push(model);
@@ -147,7 +147,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             if (model.meta.requiresMandate) {
                 if (checkout.proForma) {
                     if (!checkout.createMandate) {
-                        checkout.createMandate = CreateMandateSettings.create({saveAsDefault: true})
+                        checkout.createMandate = CreateMandateSettings.create({ saveAsDefault: true });
                     }
                 } else {
                     // setting checkout.mandate is not enough - we also need to set it as default.
@@ -155,15 +155,15 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                     if (!checkout.createMandate) {
                         throw new SimpleError({
                             code: '',
-                            message: $t('%1Rh')
-                        })
+                            message: $t('%1Rh'),
+                        });
                     }
 
                     if (!checkout.createMandate.saveAsDefault) {
                         throw new SimpleError({
                             code: '',
-                            message: $t('%1Qp')
-                        })
+                            message: $t('%1Qp'),
+                        });
                     }
                 }
             }
@@ -174,7 +174,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         await BalanceItemService.flushCaches(organization.id);
 
         // Validate balance items (can only happen serverside)
-        const balanceItemIds = [...request.body.balances.keys()]
+        const balanceItemIds = [...request.body.balances.keys()];
 
         if (balanceItemIds.length > 0) {
             const balanceItemsModels = await BalanceItem.select().where('id', balanceItemIds).andWhere('organizationId', sellingOrganization.id).limit(balanceItemIds.length).fetch();
@@ -219,15 +219,15 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                         message: $t(`%vg`),
                     });
                 }
-                balanceItems.set(item, amount)
+                balanceItems.set(item, amount);
             }
         }
 
         // If still zero payment
-        let { price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({ 
-            balanceItems, 
-            organization: sellingOrganization
-        })
+        let { price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({
+            balanceItems,
+            organization: sellingOrganization,
+        });
         const minimumAmount = checkout.createMandate && !checkout.mandate ? 2_00 : 0;
 
         // Automatically add discounts
@@ -236,37 +236,37 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             minimumAmount,
             balanceItems,
             sellingOrganizationId: sellingOrganization.id,
-            payingOrganizationId: organization.id
+            payingOrganizationId: organization.id,
         });
 
         // Update price and rounding
-        ({ price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({ 
-            balanceItems, 
-            organization: sellingOrganization
-        }))
-        
+        ({ price: totalPrice, roundingAmount } = PaymentService.calculateTotalPrice({
+            balanceItems,
+            organization: sellingOrganization,
+        }));
+
         if (totalPrice < minimumAmount) {
             const item = new BalanceItem();
             item.type = BalanceItemType.AdministrationFee;
-            item.description = $t('%1Q4')
+            item.description = $t('%1Q4');
             item.payingOrganizationId = organization.id;
             item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;
             item.VATExcempt = VATService.getVATExcempt({
                 company: checkout.customer?.company,
                 sellingOrganization,
-                type: 'services'
+                type: 'services',
             });
             item.VATIncluded = !item.VATExcempt; // Makes sure price with VAT always matches unitPrice
             item.quantity = 1;
-            item.unitPrice = minimumAmount - (totalPrice - roundingAmount); 
+            item.unitPrice = minimumAmount - (totalPrice - roundingAmount);
             item.createdAt = new Date();
             item.status = BalanceItemStatus.Hidden;
 
             if (!request.body.proForma) {
                 await item.save();
             } else {
-                item.disableSave()
+                item.disableSave();
             }
 
             balanceItems.set(item, item.priceWithVAT);
@@ -283,9 +283,9 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
 
             return new Response(CheckoutResponse.create({
                 payment: result.payment,
-                invoice: result.invoice
+                invoice: result.invoice,
             }));
-        } 
+        }
 
         const result = await PaymentService.createPayment({
             balanceItems,
@@ -297,7 +297,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             createMandate: checkout.createMandate,
             useMandate: checkout.mandate,
             paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
-            privatePaymentConfiguration: sellingOrganization.privateMeta.registrationPaymentConfiguration
+            privatePaymentConfiguration: sellingOrganization.privateMeta.registrationPaymentConfiguration,
         });
 
         if (!result) {
@@ -322,5 +322,5 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         }));
     }
 
-    setPayment
+    setPayment;
 }

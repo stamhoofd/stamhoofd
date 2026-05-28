@@ -27,8 +27,7 @@ export class UniqueUserService {
                     console.warn('Unique constraint is missing. Creating it now...');
                     await this.createConstraint();
                 }
-            }
-            else {
+            } else {
                 if (await this.hasUniqueConstraint()) {
                     console.warn('Unique constraint exists but should be removed. Deleting it now...');
                     await this.dropConstraint();
@@ -41,8 +40,7 @@ export class UniqueUserService {
         try {
             await Database.statement('ALTER TABLE `users` ADD UNIQUE INDEX `' + UNIQUE_KEY_NAME + '` (`email`) USING BTREE;');
             console.log('Unique constraint created.');
-        }
-        catch (e) {
+        } catch (e) {
             console.error(chalk.red('Failed to create unique constraint on email column of users table:'));
             console.error(e);
         }
@@ -52,8 +50,7 @@ export class UniqueUserService {
         try {
             await Database.statement('ALTER TABLE `users` DROP INDEX `' + UNIQUE_KEY_NAME + '`;');
             console.log('Unique constraint dropped.');
-        }
-        catch (e) {
+        } catch (e) {
             console.error(chalk.red('Failed to drop unique constraint on email column of users table:'));
             console.error(e);
         }

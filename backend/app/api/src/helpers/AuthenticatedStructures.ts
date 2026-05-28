@@ -56,7 +56,7 @@ export class AuthenticatedStructures {
         }, includeSettlements);
     }
 
-     /**
+    /**
      *
      * @param payments
      * @param checkPermissions Only set to undefined when not returned in the API + not for public use
@@ -67,9 +67,9 @@ export class AuthenticatedStructures {
             return [];
         }
 
-        return payments.map(p => {
-            return PaymentStruct.create(p)
-        })
+        return payments.map((p) => {
+            return PaymentStruct.create(p);
+        });
     }
 
     static async invoices(invoices: Invoice[]): Promise<InvoiceStruct[]> {
@@ -109,8 +109,7 @@ export class AuthenticatedStructures {
 
             if (existingGroup) {
                 waitingLists.push(existingGroup);
-            }
-            else {
+            } else {
                 waitingListsToFetch.push(waitingListId);
             }
         }
@@ -176,13 +175,11 @@ export class AuthenticatedStructures {
                     .where(whereGroupIds)
                     .orWhere(whereWaitingList)
                     .fetch();
-            }
-            else {
+            } else {
                 groups = await Group.select()
                     .where(whereGroupIds).fetch();
             }
-        }
-        else if (organizationIds.length && periodIds.length) {
+        } else if (organizationIds.length && periodIds.length) {
             groups = await Group.select()
                 .where(whereWaitingList)
                 .fetch();
@@ -244,9 +241,9 @@ export class AuthenticatedStructures {
             return [];
         }
 
-        return organizations.map(o => {
-            return BaseOrganization.create(o)
-        })
+        return organizations.map((o) => {
+            return BaseOrganization.create(o);
+        });
     }
 
     static async organizations(organizations: Organization[]): Promise<OrganizationStruct[]> {
@@ -262,8 +259,7 @@ export class AuthenticatedStructures {
             const array = periodIdOrganizationsMap.get(periodId);
             if (array !== undefined) {
                 array.push(organization);
-            }
-            else {
+            } else {
                 periodIdOrganizationsMap.set(periodId, [organization]);
             }
         }
@@ -314,8 +310,7 @@ export class AuthenticatedStructures {
                         organizationIdsToGetWebshopsFor.push(organization.id);
                     }
                     organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData });
-                }
-                else {
+                } else {
                     // Should never happen
                     throw new Error('Organization registration period model not found for organization id ' + organizationId + ' and period id ' + periodId);
                 }
@@ -325,14 +320,14 @@ export class AuthenticatedStructures {
         // Get webshop previews
         const webshops = organizationIdsToGetWebshopsFor.length > 0
             ? await Webshop.where(
-                {
-                    organizationId: {
-                        sign: 'IN',
-                        value: organizationIdsToGetWebshopsFor,
+                    {
+                        organizationId: {
+                            sign: 'IN',
+                            value: organizationIdsToGetWebshopsFor,
+                        },
                     },
-                },
-                { select: Webshop.selectColumnsWithout(undefined, 'products', 'categories') },
-            )
+                    { select: Webshop.selectColumnsWithout(undefined, 'products', 'categories') },
+                )
             : [];
 
         const webshopPreviews = new Map<string, WebshopPreview[]>();
@@ -348,8 +343,7 @@ export class AuthenticatedStructures {
 
             if (array) {
                 array.push(preview);
-            }
-            else {
+            } else {
                 webshopPreviews.set(organizationId, [preview]);
             }
         }
@@ -383,8 +377,7 @@ export class AuthenticatedStructures {
                     privateMeta: organization.privateMeta.removedPrivateKeys,
                     webshops: webshopPreviews.get(organization.id)?.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)),
                 });
-            }
-            else {
+            } else {
                 result = OrganizationStruct.create({
                     ...baseStruct,
                     period,
@@ -474,21 +467,22 @@ export class AuthenticatedStructures {
         // Load responsibilities
         const responsibilities = members.length > 0
             ? await MemberResponsibilityRecord.select()
-                .where('memberId', members.map(m => m.id))
-                .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
-                .fetch()
+                    .where('memberId', members.map(m => m.id))
+                    .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
+                    .fetch()
             : [];
         const platformMemberships = members.length > 0
             ? await MemberPlatformMembership.select()
-                .where('memberId', members.map(m => m.id))
-                .where('deletedAt', null)
-                .where('periodId', relevantPeriodIds)
-                .fetch()
+                    .where('memberId', members.map(m => m.id))
+                    .where('deletedAt', null)
+                    .where('periodId', relevantPeriodIds)
+                    .fetch()
             : [];
         const registrationInvitations = members.length > 0
             ? await RegistrationInvitation.select()
-                .where('memberId', members.map(m => m.id))
-                .fetch() : [];
+                    .where('memberId', members.map(m => m.id))
+                    .fetch()
+            : [];
 
         const memberRegistrationInvitations: Map<string, MemberRegistrationInvitation[]> = registrationInvitations.length > 0 ? await this.memberRegistrationInvitations(registrationInvitations) : new Map();
 
@@ -673,8 +667,7 @@ export class AuthenticatedStructures {
                         const g = allGroups.get(r.groupId);
                         if (g) {
                             base.group = g;
-                        }
-                        else {
+                        } else {
                             console.error('Group not preloaded for registration', r.id, r.groupId);
                         }
 
@@ -809,8 +802,7 @@ export class AuthenticatedStructures {
             const array = eventIdsMapping.get(notificationId);
             if (array) {
                 array.push(eventId);
-            }
-            else {
+            } else {
                 eventIdsMapping.set(notificationId, [eventId]);
             }
 
@@ -969,7 +961,7 @@ export class AuthenticatedStructures {
         return (await this.receivableBalancesHelper(balances)).map(({ balance, object }) => ReceivableBalanceStruct.create({ ...balance, object }));
     }
 
-    private static async receivableBalancesHelper(balances: CachedBalance[]): Promise< { balance: CachedBalance; object: ReceivableBalanceObject }[]> {
+    private static async receivableBalancesHelper(balances: CachedBalance[]): Promise<{ balance: CachedBalance; object: ReceivableBalanceObject }[]> {
         if (balances.length === 0) {
             return [];
         }
@@ -1099,8 +1091,7 @@ export class AuthenticatedStructures {
                         })),
                     });
                 }
-            }
-            else if (balance.objectType === ReceivableBalanceType.member) {
+            } else if (balance.objectType === ReceivableBalanceType.member) {
                 const member = members.find(m => m.id === balance.objectId) ?? null;
                 if (member) {
                     object = ReceivableBalanceObject.create({
@@ -1110,8 +1101,7 @@ export class AuthenticatedStructures {
                         contacts: getMemberContacts(member, balance),
                     });
                 }
-            }
-            else if (balance.objectType === ReceivableBalanceType.registration) {
+            } else if (balance.objectType === ReceivableBalanceType.registration) {
                 const registration = registrations.find(r => r.id === balance.objectId) ?? null;
                 if (!registration) {
                     continue;
@@ -1125,8 +1115,7 @@ export class AuthenticatedStructures {
                         contacts: getMemberContacts(member, balance),
                     });
                 }
-            }
-            else if (balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers) {
+            } else if (balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers) {
                 const user = users.find(m => m.id === balance.objectId) ?? null;
                 if (user) {
                     const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
@@ -1203,15 +1192,13 @@ export class AuthenticatedStructures {
                             id: '',
                             name: $t(`%wi`) + ' ' + Platform.shared.config.name,
                         });
-                    }
-                    else {
+                    } else {
                         userStruct = NamedObject.create({
                             id: '',
                             name: $t(`%Gr`),
                         });
                     }
-                }
-                else {
+                } else {
                     userStruct = NamedObject.create({
                         id: user.id,
                         name: (user.firstName || user.lastName) ? (user.firstName + ' ' + user.lastName) : user.email,
@@ -1266,7 +1253,7 @@ export class AuthenticatedStructures {
                     code: 'group_not_found',
                     message: 'Group not found',
                     human: $t(`%1SM`),
-                })
+                });
             }
 
             const result = MemberRegistrationInvitation.create({
@@ -1278,8 +1265,8 @@ export class AuthenticatedStructures {
                     periodId: group.periodId,
                 }),
                 organizationId: invitation.organizationId,
-                createdAt: invitation.createdAt
-            })
+                createdAt: invitation.createdAt,
+            });
 
             let array = results.get(invitation.memberId);
             if (!array) {
@@ -1304,7 +1291,7 @@ export class AuthenticatedStructures {
                     code: 'member_not_found',
                     message: 'Member not found',
                     human: $t(`%EO`),
-                })
+                });
             }
 
             const group = groups.find(g => g.id === invitation.groupId);
@@ -1313,7 +1300,7 @@ export class AuthenticatedStructures {
                     code: 'group_not_found',
                     message: 'Group not found',
                     human: $t(`%1SM`),
-                })
+                });
             }
 
             return RegistrationInvitationStruct.create({
@@ -1322,7 +1309,7 @@ export class AuthenticatedStructures {
                     id: group.id,
                     name: group.settings.name,
                     type: group.type,
-                    periodId: group.periodId
+                    periodId: group.periodId,
                 }),
                 organizationId: invitation.organizationId,
                 member: InvitationMemberData.create({
@@ -1331,7 +1318,7 @@ export class AuthenticatedStructures {
                     lastName: member.lastName,
                     birthDay: member.details.birthDay,
                 }),
-                createdAt: invitation.createdAt
+                createdAt: invitation.createdAt,
             });
         });
     }

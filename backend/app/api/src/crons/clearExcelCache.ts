@@ -59,8 +59,7 @@ export async function clearExcelCacheHelper({ lastExcelClear, now, cachePath, en
                     await fs.rm(path, { recursive: true, force: true });
                     console.log('Removed', path);
                 }
-            }
-            catch (error) {
+            } catch (error) {
                 console.error(error);
             }
         }

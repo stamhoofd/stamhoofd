@@ -58,7 +58,7 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('organizations', 'id'),
                 SQL.column(MemberPlatformMembership.table, 'organizationId'),
             ),
-        organizationFilterCompilers
+        organizationFilterCompilers,
     ),
     member: createExistsFilter(
         SQL.select()
@@ -67,6 +67,6 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('members', 'id'),
                 SQL.column(MemberPlatformMembership.table, 'memberId'),
             ),
-        memberFilterCompilers
-    )
+        memberFilterCompilers,
+    ),
 };

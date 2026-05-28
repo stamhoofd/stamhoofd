@@ -1,7 +1,7 @@
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod} from '@stamhoofd/models';
+import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -925,8 +925,7 @@ describe('Endpoint.RegisterMembers', () => {
                 expect(trialUntil!.getFullYear()).toBe(2023);
                 expect(trialUntil!.getMonth()).toBe(4);
                 expect(trialUntil!.getDate()).toBe(19);
-            }
-            finally {
+            } finally {
                 vitest.useRealTimers();
             }
         }, 20_00000);

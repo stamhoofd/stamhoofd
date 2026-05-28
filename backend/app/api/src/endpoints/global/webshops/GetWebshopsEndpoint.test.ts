@@ -383,8 +383,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 expect(response.status).toBe(200);
                 expect(response.body.results).toHaveLength(1);
                 expect(response.body.results[0].id).toBe(closedWebshop.id);
-            }
-            finally {
+            } finally {
                 await Database.statement('SET collation_connection = DEFAULT');
             }
         });

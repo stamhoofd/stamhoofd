@@ -1,9 +1,9 @@
-import type { DecodedRequest} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { Response } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import type { Organization} from '@stamhoofd/models';
+import type { Organization } from '@stamhoofd/models';
 import { Platform, Token, User, Webshop } from '@stamhoofd/models';
-import type { LoginMethod, StartOpenIDFlowStruct} from '@stamhoofd/structures';
+import type { LoginMethod, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 import { LoginProviderType, OpenIDClientConfiguration, Token as TokenStruct } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { generators, Issuer } from 'openid-client';
@@ -148,17 +148,14 @@ export class SSOService {
         if (this.provider === LoginProviderType.SSO) {
             if (this.organization) {
                 configuration = this.organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({});
-            }
-            else {
+            } else {
                 configuration = this.platform.serverConfig.ssoConfiguration ?? OpenIDClientConfiguration.create({});
             }
-        }
-        else if (this.provider === LoginProviderType.Google) {
+        } else if (this.provider === LoginProviderType.Google) {
             if (this.organization) {
                 // Not supported yet
                 configuration = null;
-            }
-            else {
+            } else {
                 configuration = this.platform.serverConfig.googleConfiguration ?? OpenIDClientConfiguration.create({});
             }
         }
@@ -221,15 +218,13 @@ export class SSOService {
                 await this.getClient();
                 await this.organization.save();
                 return;
-            }
-            else {
+            } else {
                 this.platform.serverConfig.ssoConfiguration = configuration;
                 await this.getClient();
                 await this.platform.save();
                 return;
             }
-        }
-        else if (this.provider === LoginProviderType.Google) {
+        } else if (this.provider === LoginProviderType.Google) {
             if (!this.organization) {
                 this.platform.serverConfig.googleConfiguration = configuration;
                 await this.getClient();
@@ -331,8 +326,7 @@ export class SSOService {
 
                 if (allowedHost.host === givenUrl.host && givenUrl.protocol === 'https:') {
                     redirectUri = givenUrl.href;
-                }
-                else {
+                } else {
                     throw new SimpleError({
                         code: 'redirect_uri_not_allowed',
                         message: 'Redirect uri not allowed',
@@ -340,8 +334,7 @@ export class SSOService {
                         statusCode: 400,
                     });
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 throw new SimpleError({
                     code: 'invalid_redirect_uri',
                     message: 'Invalid redirect uri',
@@ -385,8 +378,7 @@ export class SSOService {
         let parsed: URL;
         try {
             parsed = new URL(uri);
-        }
-        catch (e) {
+        } catch (e) {
             throw new SimpleError({
                 code: 'invalid_redirect_uri',
                 message: 'Invalid redirect uri',
@@ -465,8 +457,7 @@ export class SSOService {
             response.status = 302;
 
             return response;
-        }
-        catch (e) {
+        } catch (e) {
             const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`%G0`));
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
@@ -548,8 +539,7 @@ export class SSOServiceWithSession {
 
             if (tokenSet.refresh_token) {
                 console.log('OK. Refresh token received!');
-            }
-            else {
+            } else {
                 console.log('No refresh token');
             }
 
@@ -600,8 +590,7 @@ export class SSOServiceWithSession {
                         statusCode: 500,
                     });
                 }
-            }
-            else {
+            } else {
                 if (this.session.userId && user.id !== this.session.userId) {
                     throw new SimpleError({
                         code: 'invalid_user',
@@ -640,8 +629,7 @@ export class SSOServiceWithSession {
                 const st = new TokenStruct(token);
                 redirectUri.searchParams.set('oid_rt', st.refreshToken);
                 redirectUri.searchParams.set('s', session.spaState);
-            }
-            else {
+            } else {
                 redirectUri.searchParams.set('s', session.spaState);
                 redirectUri.searchParams.set('msg', 'Je account is succesvol gekoppeld');
             }
@@ -650,8 +638,7 @@ export class SSOServiceWithSession {
             response.status = 302;
 
             return response;
-        }
-        catch (e) {
+        } catch (e) {
             const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`%G0`));
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);

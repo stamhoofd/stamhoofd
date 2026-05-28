@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
@@ -47,7 +47,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         const webshop = new Webshop();
 
-        webshop.id = uuidv4()
+        webshop.id = uuidv4();
         webshop.meta = request.body.meta;
         webshop.meta.domainActive = false;
         webshop.privateMeta = request.body.privateMeta;
@@ -91,8 +91,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 await this.checkDomainUri(webshop);
                 updateDNS = true;
             }
-        }
-        else {
+        } else {
             if (request.body.domain) {
                 webshop.domain = request.body.domain;
 
@@ -126,11 +125,9 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             let suffix = '';
             if (tried < possibleSuffixes.length) {
                 suffix = '-' + possibleSuffixes[tried];
-            }
-            else if (tried > 9) {
+            } else if (tried > 9) {
                 suffix = '-' + Math.floor(Math.random() * 100000);
-            }
-            else {
+            } else {
                 suffix = '-' + (tried - possibleSuffixes.length + 2);
             }
 
@@ -197,11 +194,9 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
             if (tried < possibleSuffixes.length) {
                 webshop.domainUri = original + possibleSuffixes[tried];
-            }
-            else if (tried > 9) {
+            } else if (tried > 9) {
                 webshop.domainUri = original + Math.floor(Math.random() * 100000);
-            }
-            else {
+            } else {
                 webshop.domainUri = original + (tried - possibleSuffixes.length + 2);
             }
 

@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
@@ -39,8 +39,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (!await Context.auth.canManageAdmins(organization.id)) {
                 throw Context.auth.error();
             }
-        }
-        else {
+        } else {
             // Fast throw first (more in depth checking for patches later)
             if (!Context.auth.canManagePlatformAdmins()) {
                 throw Context.auth.error();
@@ -77,8 +76,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         if (organization) {
             admin.permissions = UserPermissions.limitedAdd(admin.permissions, request.body.permissions, organization.id);
-        }
-        else {
+        } else {
             admin.permissions = UserPermissions.add(admin.permissions, request.body.permissions);
         }
 

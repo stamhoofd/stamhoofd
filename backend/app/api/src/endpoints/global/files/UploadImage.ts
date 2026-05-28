@@ -1,6 +1,6 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, BooleanDecoder, field, ObjectData } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Image, RateLimiter } from '@stamhoofd/models';
@@ -125,8 +125,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                 try {
                     const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
                     resolve([files.file[0], resolutions]);
-                }
-                catch (e) {
+                } catch (e) {
                     reject(e);
                 }
             });

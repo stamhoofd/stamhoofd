@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { MollieToken } from '@stamhoofd/models';
@@ -49,8 +49,7 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
             const response = new Response(url);
             response.headers['Content-Type'] = 'text/plain';
             return response;
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleErrors(e) || isSimpleError(e)) {
                 throw e;
             }

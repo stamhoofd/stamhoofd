@@ -41,8 +41,7 @@ async function checkDNS() {
         }
         try {
             await organization.updateDNSRecords();
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -229,8 +228,7 @@ async function doCheckPayments(payments: Payment[]) {
                     await PaymentService.pollStatus(payment.id, organization);
                     continue;
                 }
-            }
-            else {
+            } else {
                 // deprecated
             }
 
@@ -240,8 +238,7 @@ async function doCheckPayments(payments: Payment[]) {
                 payment.status = PaymentStatus.Failed;
                 await payment.save();
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -303,8 +300,7 @@ async function checkFailedBuckarooPayments() {
                     continue;
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -312,8 +308,7 @@ async function checkFailedBuckarooPayments() {
     if (payments.length === 0) {
         didCheckBuckaroo = true;
         lastBuckarooId = '';
-    }
-    else {
+    } else {
         lastBuckarooId = payments[payments.length - 1].id;
     }
 }
@@ -402,8 +397,7 @@ async function checkDrips() {
         console.log(organization.name);
         try {
             await organization.checkDrips();
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }

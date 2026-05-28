@@ -122,8 +122,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                             });
                         }
                     }
-                }
-                else {
+                } else {
                     webshop.domain = null;
                     webshop.privateMeta.dnsRecords = [];
                     webshop.meta.domainActive = false;
@@ -152,8 +151,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                             human: $t(`%FP`) + ' ' + existing.meta.name + $t(`%FQ`),
                         });
                     }
-                }
-                else {
+                } else {
                     webshop.domainUri = null;
                 }
             }
@@ -197,8 +195,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
 
             try {
                 await webshop.save();
-            }
-            catch (e) {
+            } catch (e) {
                 // Duplicate key probably
                 if (e.code && e.code == 'ER_DUP_ENTRY') {
                     throw new SimpleError({

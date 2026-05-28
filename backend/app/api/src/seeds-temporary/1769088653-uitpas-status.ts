@@ -76,8 +76,7 @@ async function migrateMember(member: Member) {
 
         await member.save();
         idOfLastUpdatedMember = member.id;
-    }
-    catch (error) {
+    } catch (error) {
         if (isSimpleError(error)) {
             // if rate limited
             if (error.statusCode === 429) {

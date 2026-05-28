@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Data, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Data, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
@@ -65,7 +65,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        const {user} = await Context.authenticate();
+        const { user } = await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
@@ -79,8 +79,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             for (const p of request.body) {
                 body.addPatch(p);
             }
-        }
-        else {
+        } else {
             body = request.body;
         }
 
@@ -99,12 +98,12 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
             const orders = body.getPatches().length > 0
                 ? await Order.where({
-                    webshopId: webshop.id,
-                    id: {
-                        sign: 'IN',
-                        value: body.getPatches().map(o => o.id),
-                    },
-                })
+                        webshopId: webshop.id,
+                        id: {
+                            sign: 'IN',
+                            value: body.getPatches().map(o => o.id),
+                        },
+                    })
                 : [];
 
             // We use a getter because we need to have an up to date webshop struct
@@ -150,8 +149,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         // Mark this order as paid
                         await order.markPaid(null, organization, webshop);
                         await order.save();
-                    }
-                    else {
+                    } else {
                         const payment = new Payment();
                         payment.organizationId = organization.id;
                         payment.method = struct.data.paymentMethod;
@@ -159,7 +157,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         payment.price = totalPrice;
                         PaymentService.roundPayment(payment);
                         payment.paidAt = null;
-                        payment.adminUserId = user.id
+                        payment.adminUserId = user.id;
 
                         // Determine the payment provider (always null because no online payments here)
                         payment.provider = null;
@@ -169,7 +167,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                             webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
                             order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
                         );
-                        await ServiceFeeHelper.setTransferFee({payment, organization, stripeAccount: null});
+                        await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount: null });
                         await payment.save();
 
                         order.paymentId = payment.id;
@@ -210,22 +208,19 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                             await order.markValid(payment, []);
                             await payment.save();
                             await order.save();
-                        }
-                        else if (payment.method === PaymentMethod.PointOfSale) {
+                        } else if (payment.method === PaymentMethod.PointOfSale) {
                             // Not really paid, but needed to create the tickets if needed
                             await order.markPaid(payment, organization, webshop);
                             await payment.save();
                             await order.save();
-                        }
-                        else {
+                        } else {
                             throw new Error('Unsupported payment method');
                         }
 
                         balanceItem.description = order.generateBalanceDescription(webshop);
                         await balanceItem.save();
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     await order.deleteOrderBecauseOfCreationError();
                     throw e;
                 }
@@ -279,8 +274,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     model.markUpdated();
                     // Cancel payment if still pending
                     await BalanceItem.deleteForDeletedOrders([model.id]);
-                }
-                else {
+                } else {
                     if (previousStatus === OrderStatus.Canceled || previousStatus === OrderStatus.Deleted) {
                         model.markUpdated();
                         // Undo deletion
@@ -301,8 +295,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                         if (model.isDue) {
                             paidItem.status = BalanceItemStatus.Due;
-                        }
-                        else {
+                        } else {
                             paidItem.status = BalanceItemStatus.Canceled;
                         }
                         paidItem.description = model.generateBalanceDescription(webshop);
@@ -311,8 +304,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         // Zero out the other items
                         const otherItems = items.filter(i => i.id !== paidItem.id);
                         await BalanceItem.deleteItems(otherItems);
-                    }
-                    else if (items.length === 0
+                    } else if (items.length === 0
                         && model.totalToPay > 0) {
                         model.markUpdated();
                         const balanceItem = new BalanceItem();

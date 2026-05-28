@@ -1,10 +1,10 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, PaymentGeneral, StamhoofdFilter} from '@stamhoofd/structures';
+import type { CountFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, PaginatedResponse, TransferSettings, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -167,8 +167,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         try {
             data = await query.fetch();
-        }
-        catch (error) {
+        } catch (error) {
             if (error.message.includes('ER_QUERY_TIMEOUT')) {
                 throw new SimpleError({
                     code: 'timeout',

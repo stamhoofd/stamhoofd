@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
@@ -47,8 +47,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                     prices: [reducedPrice], // Convert to cents
                 });
                 return new Response(uitpasPriceCheckResponse);
-            }
-            else {
+            } else {
                 // OFFICIAL FLOW with an UiTPAS number
                 // request should include a reduced price (estimate by the frontend)
                 const organization = await Context.setOrganizationScope({ willAuthenticate: false });
@@ -58,8 +57,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                 });
                 return new Response(uitpasPriceCheckResponse);
             }
-        }
-        else {
+        } else {
             // NON-OFFICIAL FLOW
             // request should include UiTPAS-numbers, reduced price AND base price
             if (request.body.reducedPrice === null) {

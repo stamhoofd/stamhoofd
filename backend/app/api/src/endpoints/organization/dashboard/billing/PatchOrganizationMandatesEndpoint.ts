@@ -11,13 +11,13 @@ import { PaymentMandateService } from '../../../../services/PaymentMandateServic
 type Params = { sellingOrganizationId: string };
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<PaymentMandate>;
-type ResponseBody = PaymentMandate[]
+type ResponseBody = PaymentMandate[];
 
 export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = new PatchableArrayDecoder(
-        PaymentMandate as Decoder<PaymentMandate>, 
-        PaymentMandate.patchType() as Decoder<AutoEncoderPatchType<PaymentMandate>>, 
-        StringDecoder
+        PaymentMandate as Decoder<PaymentMandate>,
+        PaymentMandate.patchType() as Decoder<AutoEncoderPatchType<PaymentMandate>>,
+        StringDecoder,
     ) as Decoder<PatchableArrayAutoEncoder<PaymentMandate>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -25,7 +25,7 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates', {sellingOrganizationId: String});
+        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates', { sellingOrganizationId: String });
 
         if (params) {
             return [true, params as Params];
@@ -37,15 +37,15 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
         const payingOrganization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
 
-       const id = request.params.sellingOrganizationId;
+        const id = request.params.sellingOrganizationId;
         if (!id) {
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'This is temporarily unavailable',
-                human: $t('%1Rz')
-            })
+                human: $t('%1Rz'),
+            });
         }
-        
+
         const sellingOrganization = await Organization.getByID(id);
         if (!sellingOrganization || !sellingOrganization.active) {
             throw new SimpleError({
@@ -53,14 +53,14 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
                 code: 'not_found',
                 message: 'Selling organization not found',
                 human: $t('%1R5'),
-                field: 'sellingOrganization'
-            })
+                field: 'sellingOrganization',
+            });
         }
 
         const mandates = await PaymentMandateService.getMandates({
             sellingOrganization,
             user,
-            payingOrganization
+            payingOrganization,
         });
 
         for (const patch of request.body.getPatches()) {
@@ -69,8 +69,8 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'This payment mandate is not found',
-                    human: $t('%1R8')
-                })
+                    human: $t('%1R8'),
+                });
             }
 
             if (patch.isDefault === true) {
@@ -78,17 +78,17 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
                     mandateId: mandate.id,
                     sellingOrganizationId: sellingOrganization.id,
                     payingOrganizationId: payingOrganization,
-                    payingUserId: null
-                })
+                    payingUserId: null,
+                });
             }
         }
 
         const updatedMandates = await PaymentMandateService.getMandates({
             sellingOrganization,
             user,
-            payingOrganization
-        })
+            payingOrganization,
+        });
 
-       return new Response(PaymentMandateService.groupByMandate(updatedMandates).mandates);
+        return new Response(PaymentMandateService.groupByMandate(updatedMandates).mandates);
     }
 }

@@ -43,8 +43,7 @@ export class ForwardHandler {
                     }
                     model.unsubscribedAll = true;
                     await model.save();
-                }
-                else {
+                } else {
                     console.error('[Unsubscribe] Received an unsubscribe request for unknown ID ' + id + ' from ' + from);
 
                     // Forward
@@ -98,17 +97,14 @@ export class ForwardHandler {
             if (!organizationEmails) {
                 if (STAMHOOFD.environment === 'test') {
                     // ignore
-                }
-                else {
+                } else {
                     console.error('Missing reply emails for organization ' + organization.id);
                 }
                 return doBounce();
-            }
-            else {
+            } else {
                 defaultEmail = organizationEmails;
             }
-        }
-        else {
+        } else {
             return doBounce();
         }
 
@@ -123,8 +119,7 @@ export class ForwardHandler {
             if (body !== -1) {
                 const endTag = parsed.html.indexOf('>', body);
                 html = parsed.html.substring(0, endTag + 1) + '<p><i>' + Formatter.escapeHtml(extraDescription) + '<br><br></i></p>' + parsed.html.substring(endTag + 1);
-            }
-            else {
+            } else {
                 html = '<p><i>' + Formatter.escapeHtml(extraDescription) + '<br><br></i></p>' + parsed.html;
             }
         }

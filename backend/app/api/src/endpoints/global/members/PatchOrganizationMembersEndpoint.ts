@@ -81,8 +81,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (!await Context.auth.hasSomeAccess(organization.id)) {
                 throw Context.auth.error();
             }
-        }
-        else {
+        } else {
             if (!Context.auth.hasSomePlatformAccess()) {
                 throw Context.auth.error();
             }
@@ -147,8 +146,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             try {
                 await member.save();
-            }
-            catch (error) {
+            } catch (error) {
                 PatchOrganizationMembersEndpoint.throwDuplicateMemberNumberError(error);
             }
             members.push(member);
@@ -226,8 +224,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             try {
                 await member.save();
-            }
-            catch (error) {
+            } catch (error) {
                 PatchOrganizationMembersEndpoint.throwDuplicateMemberNumberError(error);
             }
 
@@ -343,8 +340,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         if (registration.periodId !== org.periodId) {
                             return false;
                         }
-                    }
-                    else {
+                    } else {
                         if (registration.periodId !== platform.periodIdIfPlatform) {
                             return false;
                         }
@@ -593,8 +589,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         message: 'Overlapping memberships',
                         human: $t(`%1ND`),
                     });
-                }
-                else if (existing) {
+                } else if (existing) {
                     await existing.doDelete();
                 }
 
@@ -604,8 +599,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (member.details.memberNumber === null) {
                     try {
                         await MemberNumberService.assignMemberNumber(member, membership);
-                    }
-                    catch (error) {
+                    } catch (error) {
                         console.error(`Failed to assign member number for id ${member.id}: ${error.message}`);
                         // If the assignment of the member number fails the membership is not created but the member is registered
                         continue;
@@ -657,8 +651,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (Context.auth.hasPlatformFullAccess()) {
                     membership.locked = p.locked ?? membership.locked;
                     await membership.save();
-                }
-                else {
+                } else {
                     if (p.locked === true) {
                         throw Context.auth.error($t('%BX'));
                     }
@@ -961,8 +954,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     private static async checkSecurityCode(member: MemberWithUsersRegistrationsAndGroups, securityCode: string) {
         try {
             securityCodeLimiter.track(member.details.name, 1);
-        }
-        catch (e) {
+        } catch (e) {
             Email.sendWebmaster({
                 subject: $t(`%E9`),
                 text: $t(`%EA`) + ' ' + member.details.name + ' ' + $t(`%1G`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
@@ -1041,11 +1033,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
-        }
-        else if (securityCode) {
-           await this.checkSecurityCode(member, securityCode);
-        }
-        else {
+        } else if (securityCode) {
+            await this.checkSecurityCode(member, securityCode);
+        } else {
             if (type === 'patch') {
                 throw Context.auth.memberNotFoundOrNoAccess();
             }

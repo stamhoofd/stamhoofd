@@ -25,7 +25,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
             getValue: (membership: PlatformMembership) => {
                 const membershipType = Platform.shared.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
                 const value = membershipType ? membershipType.name : '';
-                return {value};
+                return { value };
             },
         },
         {
@@ -66,25 +66,25 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
                 return {
                     value: membership.price / 1_0000,
                     style: {
-                    numberFormat: {
-                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
                     },
-                },
                 };
             },
         },
         {
             id: 'priceWithoutDiscount',
-            name:  $t(`%1Nm`),
+            name: $t(`%1Nm`),
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
                     value: membership.priceWithoutDiscount / 1_0000,
                     style: {
-                    numberFormat: {
-                        id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
                     },
-                },
                 };
             },
         },
@@ -214,7 +214,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
             id: 'member.firstName',
             name: $t(`%1O8`),
             width: 20,
-            getValue:(membership: PlatformMembership) => ({
+            getValue: (membership: PlatformMembership) => ({
                 value: membership.member.firstName,
             }),
         },
@@ -222,7 +222,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
             id: 'member.lastName',
             name: $t(`%1Or`),
             width: 20,
-            getValue:(membership: PlatformMembership) => ({
+            getValue: (membership: PlatformMembership) => ({
                 value: membership.member.lastName,
             }),
         },
@@ -231,7 +231,7 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
             id: 'organization.name',
             name: $t(`%1PW`),
             width: 20,
-            getValue:(membership: PlatformMembership) => ({
+            getValue: (membership: PlatformMembership) => ({
                 value: membership.organization.name,
             }),
         },
@@ -239,13 +239,12 @@ const sheet: XlsxTransformerSheet<PlatformMembership> = {
             id: 'organization.uri',
             name: $t(`%1PZ`),
             width: 20,
-            getValue:(membership: PlatformMembership) => ({
+            getValue: (membership: PlatformMembership) => ({
                 value: membership.organization.uri,
             }),
-        }
+        },
     ],
 };
-
 
 ExportToExcelEndpoint.loaders.set(ExcelExportType.PlatformMemberships, {
     fetch: async (query: LimitedFilteredRequest) => {

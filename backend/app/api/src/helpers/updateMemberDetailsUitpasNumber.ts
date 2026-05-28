@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
-import type { MemberDetails, ReviewTimes} from '@stamhoofd/structures';
+import type { MemberDetails, ReviewTimes } from '@stamhoofd/structures';
 import { UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import type { GetPassResponse } from '../services/uitpas/PassholderEndpoints.js';
 import { UitpasService } from '../services/uitpas/UitpasService.js';
@@ -42,8 +42,7 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
 
     try {
         isUpdated = await updateMemberDetailsUitpasNumber(details);
-    }
-    catch (error: any) {
+    } catch (error: any) {
         const isUitpasEqual = previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
 
         if (isSimpleError(error)) {
@@ -94,8 +93,7 @@ export function uitpasApiResponseToSocialTariff(response: GetPassResponse): Uitp
     if (response.socialTariff.endDate) {
         try {
             endDate = new Date(response.socialTariff.endDate);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             console.error('endDate: ', response.socialTariff.endDate);
 

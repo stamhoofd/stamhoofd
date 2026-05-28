@@ -1,6 +1,6 @@
-import type { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
+import type { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder, patchObject } from '@simonbackx/simple-encoding';
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
@@ -69,8 +69,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             if (!await Context.auth.hasFullAccess(organization.id)) {
                 throw Context.auth.error();
             }
-        }
-        else {
+        } else {
             if (!Context.auth.hasPlatformFullAccess()) {
                 throw Context.auth.error();
             }

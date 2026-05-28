@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Document } from '@stamhoofd/models';
 import type { CountFilteredRequest, Document as DocumentStruct, StamhoofdFilter } from '@stamhoofd/structures';

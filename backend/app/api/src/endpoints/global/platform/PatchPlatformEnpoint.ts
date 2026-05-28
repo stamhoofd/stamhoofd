@@ -113,7 +113,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     platform.config.eventNotificationTypes,
                     request.body.config.eventNotificationTypes,
                     'recordCategories',
-                )
+                );
             }
 
             const newConfig = request.body.config;
@@ -131,8 +131,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                         newConfig,
                         oldConfig,
                     );
-                }
-                else {
+                } else {
                     platform.config = patchObject(platform.config, newConfig);
                 }
             }
@@ -209,8 +208,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     });
                 }
                 platform.membershipOrganizationId = organization.id;
-            }
-            else {
+            } else {
                 platform.membershipOrganizationId = null;
             }
         }
@@ -229,8 +227,7 @@ export class PatchPlatformEndpoint extends Endpoint<
                     });
                 }
                 platform.membershipOrganizationId = organization.id;
-            }
-            else {
+            } else {
                 platform.membershipOrganizationId = null;
             }
         }
@@ -255,8 +252,7 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         if (shouldMoveToPeriod) {
             PeriodHelper.moveAllOrganizationsToPeriod(shouldMoveToPeriod).catch(console.error);
-        }
-        else if (shouldUpdateSetupSteps) {
+        } else if (shouldUpdateSetupSteps) {
             // Do not call this right away when moving to a period, because this needs to happen AFTER moving to the period
             SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod().catch(console.error);
         }

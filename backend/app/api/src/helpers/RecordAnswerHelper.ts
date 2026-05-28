@@ -9,7 +9,7 @@ export class RecordAnswerHelper {
         if (original.length === 0) {
             return;
         }
-        
+
         const updatedRecordSettings = this.getAllRecords(patchOrPut)
             // only check if the types changed
             .filter(p => p.type !== undefined || p.fileType !== undefined);
@@ -42,7 +42,7 @@ export class RecordAnswerHelper {
         Key extends string & keyof Put,
         Id extends string | number,
         Put extends (Identifiable<Id> & Encodeable & Patchable<Patch> & Record<Key, RecordCategory[]>),
-        Patch extends (Identifiable<Id> & Encodeable) | Put
+        Patch extends (Identifiable<Id> & Encodeable) | Put,
     >(originals: Put[], patchOrPuts: Put[] | Patch[] | PatchableArray<Id, Put, Patch>, key: string) {
         if (isPatchableArray(patchOrPuts)) {
             const puts = patchOrPuts.getPuts().map(p => p.put);
@@ -71,16 +71,16 @@ export class RecordAnswerHelper {
             throw new SimpleError({
                 code: 'invalid_record_type',
                 message: `Cannot change record type from ${original.type} to ${updated.type}`,
-                human: $t(`%1Qn`, {name: original.name}),
-            })
+                human: $t(`%1Qn`, { name: original.name }),
+            });
         }
 
         if (updated.fileType !== undefined && ((original.fileType ?? null) !== (updated.fileType ?? null))) {
             throw new SimpleError({
                 code: 'invalid_record_type',
                 message: `Cannot change record file type from ${original.fileType} to ${updated.fileType}`,
-                human: $t(`%1SP`, {name: original.name}),
-            })
+                human: $t(`%1SP`, { name: original.name }),
+            });
         }
     }
 
@@ -100,7 +100,7 @@ export class RecordAnswerHelper {
     private static getAllRecordsFromRecordCategoryPatch(category: AutoEncoderPatchType<RecordCategory>) {
         const results: (RecordSettings | AutoEncoderPatchType<RecordSettings>)[] = [
             ...category.records.getPatches(),
-            ...category.records.getPuts().map(p => p.put)
+            ...category.records.getPuts().map(p => p.put),
         ];
 
         if (category.childCategories) {

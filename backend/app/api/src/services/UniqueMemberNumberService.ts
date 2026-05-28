@@ -28,8 +28,7 @@ export class UniqueMemberNumberService {
                     console.warn('Unique constraint for userMode platform is missing. Creating it now...');
                     await this.createConstraintForPlatform();
                 }
-            }
-            else {
+            } else {
                 if (await this.hasUniqueConstraint(UNIQUE_KEY_PLATFORM)) {
                     console.warn('Unique constraint for userMode platform exists but should be removed. Deleting it now...');
                     await this.dropConstraint(UNIQUE_KEY_PLATFORM);
@@ -52,8 +51,7 @@ export class UniqueMemberNumberService {
         try {
             await Database.statement('ALTER TABLE `members` DROP INDEX `' + key + '`;');
             console.log('Unique constraint dropped.');
-        }
-        catch (e) {
+        } catch (e) {
             console.error(chalk.red(`Failed to drop unique constraint "${key}" of members table:`));
             console.error(e);
         }
@@ -63,8 +61,7 @@ export class UniqueMemberNumberService {
         try {
             await Database.statement('ALTER TABLE `members` ADD UNIQUE INDEX `' + UNIQUE_KEY_ORGANIZATION + '` (`memberNumber`, `organizationId`) USING BTREE;');
             console.log('Unique constraint created.');
-        }
-        catch (e) {
+        } catch (e) {
             console.error(chalk.red('Failed to create unique constraint on memberNumber and organizationId column of members table:'));
             console.error(e);
         }
@@ -74,8 +71,7 @@ export class UniqueMemberNumberService {
         try {
             await Database.statement('ALTER TABLE `members` ADD UNIQUE INDEX `' + UNIQUE_KEY_PLATFORM + '` (`memberNumber`) USING BTREE;');
             console.log('Unique constraint created.');
-        }
-        catch (e) {
+        } catch (e) {
             console.error(chalk.red('Failed to create unique constraint on memberNumber column of members table:'));
             console.error(e);
         }
