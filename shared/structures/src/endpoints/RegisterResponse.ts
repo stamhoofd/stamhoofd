@@ -1,13 +1,13 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { MembersBlob } from '../members/MemberWithRegistrationsBlob.js';
-import { Payment } from '../members/Payment.js';
+import { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { RegistrationWithTinyMember } from '../members/RegistrationWithTinyMember.js';
 
 export class RegisterResponse extends AutoEncoder {
-    @field({ decoder: Payment, nullable: true })
-    payment: Payment | null = null;
+    @field({ decoder: PaymentGeneral, nullable: true })
+    payment: PaymentGeneral | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 28 })
     paymentUrl: string | null = null;

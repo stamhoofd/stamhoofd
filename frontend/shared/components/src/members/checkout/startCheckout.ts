@@ -5,14 +5,14 @@ import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
 import { GlobalEventBus } from '../../EventBus';
+import { Toast } from '../../overlays/Toast';
+import PaymentSuccessView from '../../payments/PaymentSuccessView.vue';
 import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { updateContextFromMembersBlob } from '../helpers/updateContextFromMembersBlob';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
-import RegistrationSuccessView from './RegistrationSuccessView.vue';
-import { Toast } from '../../overlays/Toast';
 
 export async function startCheckout({ checkout, context, displayOptions, admin, members }: { checkout: RegisterCheckout; context: SessionContext; displayOptions: DisplayOptions; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     checkout.validate({});
@@ -42,6 +42,19 @@ function getIdCheckout({ checkout, admin }: { checkout: RegisterCheckout; admin?
     if (!admin) {
         idCheckout.redirectUrl = new URL(organization.registerUrl);
         idCheckout.cancelUrl = new URL(organization.registerUrl);
+
+        if (idCheckout.redirectUrl.hostname !== window.location.hostname) {
+            // If we are not using the default member admin page
+            // use the current location instead.
+            idCheckout.redirectUrl = new URL(window.location.href);
+            idCheckout.cancelUrl = new URL(window.location.href);
+
+            if (idCheckout.redirectUrl.pathname.endsWith('/mandje')) {
+                // Remove, so we go to start
+                idCheckout.redirectUrl.pathname = idCheckout.redirectUrl.pathname.substring(0, idCheckout.redirectUrl.pathname.length - '/mandje'.length)
+                idCheckout.cancelUrl = idCheckout.redirectUrl;
+            }
+        }
     }
     else {
         idCheckout.redirectUrl = new URL(window.location.href);
@@ -137,7 +150,6 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     };
 
     if (payment && payment.status !== PaymentStatus.Succeeded) {
-        console.log('handle payment')
         await PaymentHandler.handlePayment({
             server,
             organization: checkout.singleOrganization!,
@@ -147,15 +159,13 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
             navigate,
             transferSettings: checkout.singleOrganization!.meta.registrationPaymentConfiguration.transferSettings,
             type: 'registration',
-        }, async (_payment, navigate: NavigationActions) => {
-            console.info('Succeeded handler', navigate)
+        }, async (payment, navigate: NavigationActions) => {
             clearAndEmit();
 
             await navigate.show({
                 components: [
-                    new ComponentWithProperties(RegistrationSuccessView, {
-                        registrations,
-                        checkout: checkout,
+                    new ComponentWithProperties(PaymentSuccessView, {
+                        payment
                     }),
                 ],
                 replace: 100, // autocorrects to all
@@ -173,17 +183,13 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
         });
         return;
     }
-    console.log('no payment handler')
     GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
     clearAndEmit();
 
-    console.log('navigate', navigate)
-
     await navigate.show({
         components: [
-            new ComponentWithProperties(RegistrationSuccessView, {
-                registrations,
-                checkout: checkout,
+            new ComponentWithProperties(PaymentSuccessView, {
+                payment
             }),
         ],
         replace: 100,

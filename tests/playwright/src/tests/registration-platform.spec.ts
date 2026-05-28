@@ -2,12 +2,13 @@
 import { test } from '../test-fixtures/platform.js';
 
 // other imports
-import { UitpasMocker } from '@stamhoofd/backend/tests/helpers';
+import { StripeMocker, UitpasMocker } from '@stamhoofd/backend/tests/helpers';
 import type {
     Organization,
     OrganizationRegistrationPeriod,
     RegistrationPeriod,
-    User} from '@stamhoofd/models';
+    User
+} from '@stamhoofd/models';
 import {
     BalanceItemFactory,
     GroupFactory,
@@ -19,6 +20,7 @@ import {
 import {
     BalanceItemType,
     MemberDetails,
+    PaymentMethod,
     PermissionLevel,
     Permissions,
     PropertyFilter,
@@ -28,7 +30,8 @@ import {
 } from '@stamhoofd/structures';
 import { MemberPortalRegistrationFlow } from '../flows/MemberPortalRegistrationFlow.js';
 import type {
-    YouthOrganization1Context} from '../helpers/index.js';
+    YouthOrganization1Context
+} from '../helpers/index.js';
 import {
     TableHelper,
     TestMembers,
@@ -658,6 +661,149 @@ test.describe('Registration', () => {
                 await test.step('should show success view after confirming', async () => {
                     await registrationFlow.confirmPaymentMethod();
                     await registrationFlow.expectSuccessView();
+                });
+            });
+        });
+
+        /**
+         * Test registration with an online payment method (Bancontact via Stripe).
+         * The browser is redirected to a mocked Stripe page; the StripeMocker is then used
+         * to mark the payment succeeded, and the test navigates to the return URL the
+         * mocker captured from the Stripe API request.
+         */
+        test.describe('Happy path - online payment via Stripe', () => {
+            let stripeOrganization: Organization;
+            let stripeOrganizationPeriod: OrganizationRegistrationPeriod;
+            let stripeMocker: StripeMocker;
+
+            test.beforeAll(async () => {
+
+                // Required so Stripe fee VAT can be calculated; the platform
+                // refuses online payments without an invoicing organization.
+                //const platform = await Platform.getForEditing();
+                //if (!platform.membershipOrganizationId) {
+                //    const membershipOrganization = await new OrganizationFactory({}).create();
+                //    platform.membershipOrganizationId = membershipOrganization.id;
+                //    await platform.save();
+                //}
+
+                stripeOrganization = await new OrganizationFactory({
+                    name: `BancontactVer${WorkerData.id}`,
+                }).create();
+
+                const stripePeriod = await new RegistrationPeriodFactory({
+                    startDate: new Date('2000-01-01'),
+                    endDate: new Date('2001-01-01'),
+                    organization: stripeOrganization,
+                }).create();
+
+                stripeOrganization.periodId = stripePeriod.id;
+                await stripeOrganization.save();
+
+                stripeOrganizationPeriod
+                    = await new OrganizationRegistrationPeriodFactory({
+                        period: stripePeriod,
+                        organization: stripeOrganization,
+                    }).create();
+            });
+
+            test.afterEach(async () => {
+                stripeMocker?.stop();
+                await WorkerData.databaseHelper.clearRegistrations();
+                await WorkerData.databaseHelper.clearMembers();
+                await WorkerData.databaseHelper.clearGroups();
+            });
+
+            test('Happy flow - Bancontact via Stripe', async ({ page, pages }) => {
+                stripeMocker = new StripeMocker();
+                stripeMocker.start();
+
+                const stripeAccount = await stripeMocker.createStripeAccount(
+                    stripeOrganization.id,
+                    'standard'
+                );
+                stripeOrganization.meta.registrationPaymentConfiguration.paymentMethods.push(
+                    PaymentMethod.Bancontact,
+                );
+                stripeOrganization.privateMeta.registrationPaymentConfiguration.stripeAccountId
+                    = stripeAccount.id;
+                await stripeOrganization.save();
+
+                const group = await new GroupFactory({
+                    organization: stripeOrganization,
+                    price: 25_0000,
+                }).create();
+
+                group.settings.registrationEndDate = new Date(
+                    (
+                        group.settings.registrationEndDate ?? new Date()
+                    ).getTime()
+                    + 60 * 1000,
+                );
+                await group.save();
+
+                stripeOrganizationPeriod.settings.rootCategory?.groupIds.push(
+                    group.id,
+                );
+                await stripeOrganizationPeriod.save();
+
+                await new MemberFactory({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    user,
+                }).create();
+
+                // Intercept the Stripe-hosted payment page so the redirect lands somewhere.
+                await page.route('https://paymenturl/', route =>
+                    route.fulfill({
+                        contentType: 'text/html',
+                        body: '<html><body data-testid="stripe-mock-page">Mock Stripe Bancontact page</body></html>',
+                    }),
+                );
+
+                const registrationFlow = new MemberPortalRegistrationFlow({
+                    page,
+                    pages,
+                });
+
+                await registrationFlow.startRegister({
+                    organizationName: stripeOrganization.name,
+                    groupName: group.settings.name.toString(),
+                    memberName: 'John Doe',
+                });
+
+                await registrationFlow.continueMemberStep();
+                await registrationFlow.goToCheckout();
+                await registrationFlow.expectTotalText('Totaal: € 25');
+
+                await test.step('should select Bancontact and confirm', async () => {
+                    await registrationFlow.selectPaymentMethod('Bancontact');
+                    await registrationFlow.confirmPaymentMethod();
+                });
+
+                await test.step('should redirect to mocked Stripe payment page', async () => {
+                    await page.waitForURL('https://paymenturl/');
+                    await test
+                        .expect(page.getByTestId('stripe-mock-page'))
+                        .toBeVisible();
+                });
+
+                const intent = stripeMocker.getLastIntent();
+                test.expect(intent).toBeDefined();
+                test.expect(intent.return_url).toBeDefined();
+
+                console.error('Intent return url', intent.return_url)
+
+                await test.step('should succeed the payment via StripeMocker', async () => {
+                    await stripeMocker.succeedPayment(intent);
+                });
+
+                await test.step('should land on the captured success url', async () => {
+                    // The return URL points at the organization's registration subdomain,
+                    // which is not routable in the test caddy setup — intercept it so the
+                    // navigation can complete and we can assert it lands there.
+                    await page.goto(intent.return_url!);
+                    await registrationFlow.expectSuccessView()
                 });
             });
         });

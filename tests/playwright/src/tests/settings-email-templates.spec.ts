@@ -66,19 +66,11 @@ test.describe('Settings email templates', () => {
     });
 
     async function login(page: Page, pages: Pages) {
-        await pages.dashboard.goto();
-
-        const searchInput = page.getByTestId('organization-search-input');
-        await searchInput.click();
-        await searchInput.fill(organizationName);
-
-        await page.getByTestId('organization-button').first().click();
-
-        await page.getByTestId('email-input').fill(email);
-        await page.getByTestId('password-input').fill(password);
-        await page.getByTestId('login-button').click();
-
-        await expect(page.getByTestId('organization-name')).toContainText(organizationName);
+        await pages.dashboard.login({
+            organizationUri: organization.uri,
+            email,
+            password
+        })
     }
 
     function activePopup(page: Page) {

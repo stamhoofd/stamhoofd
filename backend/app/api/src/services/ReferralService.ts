@@ -18,7 +18,7 @@ export class ReferralService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid register code',
-                human: 'Je hebt al een doorverwijzingscode gebruikt',
+                human: $t('Je hebt al een doorverwijzingscode gebruikt'),
                 field: 'registerCode',
             });
         }
@@ -28,14 +28,22 @@ export class ReferralService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid register code',
-                human: 'De doorverwijzingscode die je hebt opgegeven is niet langer geldig',
+                human: $t('De doorverwijzingscode die je hebt opgegeven is niet langer geldig'),
                 field: 'registerCode',
             });
         }
 
         const otherOrganization = code.organizationId ? await Organization.getByID(code.organizationId) : undefined
         
-        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId!;
+        const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
+        if (!membershipOrganizationId) {
+             throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Referral codes unavailable',
+                human: $t('Doorverwijzingscodes zijn momenteel niet beschikbaar'),
+                field: 'registerCode',
+            });
+        }
         const membershipOrganization = await Organization.getByID(membershipOrganizationId, true)
 
         const delayEmails: EmailInterfaceBase[] = []

@@ -1,4 +1,5 @@
-import type { Page } from '@playwright/test';
+import { expect  } from '@playwright/test';
+import type {Page} from '@playwright/test';
 import { appToUri } from '@stamhoofd/structures';
 import { WorkerData } from '../worker/WorkerData.js';
 
@@ -41,9 +42,13 @@ export class DashboardPage {
         await emailInput.click();
         await emailInput.fill(options.email);
 
+        // Try to fix weird flaky tests where the password field ends up added to the email field
+        await expect(emailInput).toHaveValue(options.email); // catch misfiling immediately
+
         const passwordInput = this.page.getByTestId('password-input');
         await passwordInput.click();
         await passwordInput.fill(options.password);
+        await expect(passwordInput).toHaveValue(options.password);
 
         const tokenResponsePromise = this.page.waitForResponse((response) => {
             return response.url().includes('/oauth/token')

@@ -10,6 +10,7 @@ TestUtils.setup();
 // All other imports perferably later
 import { Logger, Pages } from '../helpers/index.js';
 import { WorkerHelper } from '../setup/helpers/WorkerHelper.js';
+import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
 
 /**
  * Base test fixture (unauthenticated)
@@ -36,6 +37,9 @@ export const test = base.extend<
 
             // run all tests for worker
             console.log('Running tests for worker ', workerInfo.workerIndex);
+
+            // Make sure we have a membership organization set
+            await initMembershipOrganization()
 
             await use();
 

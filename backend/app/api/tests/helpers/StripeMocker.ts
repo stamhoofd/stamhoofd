@@ -10,7 +10,7 @@ import { testServer } from './TestServer.js';
 import { resetNock } from './resetNock.js';
 
 export class StripeMocker {
-    paymentIntents: { id: string }[] = [];
+    paymentIntents: { id: string, return_url?: string }[] = [];
     charges: { id: string }[] = [];
     #forceFailure = false;
 
@@ -73,7 +73,7 @@ export class StripeMocker {
                 }
 
                 if (resource === 'payment_intents') {
-                    return this.#createPaymentIntent();
+                    return this.#createPaymentIntent(body);
                 }
 
                 return [500];
@@ -105,11 +105,13 @@ export class StripeMocker {
         return [200, intent];
     }
 
-    #createPaymentIntent() {
+    #createPaymentIntent(body: string) {
+        const decoded = this.decodeBody(body) as { return_url?: string };
         const intent = {
             object: 'payment_intent',
             id: this.createId('pi'),
             status: 'requires_action',
+            return_url: decoded.return_url,
             next_action: {
                 redirect_to_url: {
                     url: 'https://paymenturl',
@@ -206,11 +208,11 @@ export class StripeMocker {
         });
     }
 
-    async createStripeAccount(organizationId: string): Promise<StripeAccount> {
+    async createStripeAccount(organizationId: string, type: 'express' | 'standard' = 'express'): Promise<StripeAccount> {
         const account = new StripeAccount();
         account.organizationId = organizationId;
         account.accountId = this.createId('acct');
-        account.setMetaFromStripeAccount(defaultBlobData);
+        account.setMetaFromStripeAccount({...defaultBlobData, type});
         await account.save();
         return account;
     }

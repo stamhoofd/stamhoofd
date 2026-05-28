@@ -137,13 +137,20 @@ export class MemberPortalRegistrationFlow {
         await test.expect(this.page.getByText(name)).toBeHidden();
     }
 
+    async selectPaymentMethod(name: string) {
+        await this.page
+            .locator('.payment-selection-list label')
+            .filter({ hasText: name })
+            .click();
+    }
+
     async confirmPaymentMethod() {
         await this.page.getByTestId('confirm-payment-method-button').click();
     }
 
     async expectSuccessView() {
         await test
-            .expect(this.page.getByTestId('registration-success-view'))
+            .expect(this.page.getByTestId('payment-success-view'))
             .toBeVisible();
     }
 

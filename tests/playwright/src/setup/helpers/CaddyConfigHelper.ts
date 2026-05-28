@@ -3,6 +3,13 @@ import type { FrontendProjectName} from './FrontendService.js';
 import { FrontendService } from './FrontendService.js';
 
 /**
+ * Old domains and ports will get reused
+ * 
+ * E.g. worker 102 will use same domains and ports as worker 2
+ */
+const maximumRunners = 100;
+
+/**
  * Helper to create caddy configuration for playwright
  */
 export class CaddyConfigHelper {
@@ -22,7 +29,12 @@ export class CaddyConfigHelper {
         service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer',
         workerId: string,
     ) {
-        return `playwright-${service}-${workerId}.stamhoofd`;
+        return `playwright-${service}-${this.cycledWorkerId(workerId)}.stamhoofd`;
+    }
+
+    static cycledWorkerId( workerId: string) {
+        const asNumber = parseInt(workerId);
+        return asNumber % maximumRunners
     }
 
     /**
@@ -38,8 +50,7 @@ export class CaddyConfigHelper {
     static getPort(
         service: 'api',
         workerId: string) {
-        const asNumber = parseInt(workerId);
-        return 6000 + asNumber;
+        return 6000 + this.cycledWorkerId(workerId);
     }
 
     /**
@@ -128,9 +139,8 @@ export class CaddyConfigHelper {
      */
     static createDefault() {
         const routes: { match: { host: string[] }[] }[] = [];
-        const maximumWorkers = 20;
 
-        for (let workerId = 0; workerId < maximumWorkers; workerId += 1) {
+        for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
             routes.push(
                 this.createFrontendRoute('dashboard', workerId.toString()),
                 this.createFrontendRoute('webshop', workerId.toString()),

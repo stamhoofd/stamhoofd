@@ -2,6 +2,7 @@ import { User } from '@stamhoofd/models';
 import { CaddyConfigHelper } from '../../setup/helpers/CaddyConfigHelper.js';
 import { DatabaseHelper } from '../../setup/helpers/DatabaseHelper.js';
 import { UserConfigurator } from './UserConfigurator.js';
+import { initMembershipOrganization } from '../../init/initMembershipOrganization.js';
 
 export type StamhoofdUrls = {
     readonly api: string;
@@ -118,6 +119,7 @@ class WorkerDataInstance {
         // reset the database, except for the user if one
         await this.databaseHelper.reset(this._user ? this._user.id : null);
         await this.resetUser();
+        await initMembershipOrganization()
     }
 
     /**
