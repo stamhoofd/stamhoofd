@@ -37,6 +37,9 @@
                     <h3 class="style-title-list">
                         {{ option.name }}
                     </h3>
+                    <p v-if="option.description" class="style-description-small">
+                        {{ option.description }}
+                    </p>
                 </STListItem>
             </STList>
             <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`Geen resultaten`)" />
@@ -93,7 +96,7 @@ const defaultOption: RelationFetcherSubFilterOption = {
     filter: null
 };
 
-const selectedSubFilterOption = ref(defaultOption);
+const selectedSubFilterOption = ref(defaultOption as RelationFetcherSubFilterOption);
 
 async function showSubFilters(event: MouseEvent) {
     const subFilter = relationFetcher.subFilter;

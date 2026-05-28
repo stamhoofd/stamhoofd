@@ -10,6 +10,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../Mu
 import { RelationFilterBuilder } from '../RelationUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import type { UIFilterBuilder } from '../UIFilter';
+import { useEventGroupsRelationFetcher } from '../relation-fetchers/event-groups';
 import { useGroupsRelationFetcher } from '../relation-fetchers/groups';
 import { useOrganizationsRelationFetcher } from '../relation-fetchers/organizations';
 
@@ -27,10 +28,9 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
     const loading = ref(true);
 
     const organizationRelationsFetcher = useOrganizationsRelationFetcher();
-    // const eventGroupsRelationsFetcher = useEventGroupsRelationFetcher();
-    // const membershipGroupsRelationFetcher = useMembershipGroupsRelationFetcher();
 
     const groupsRelationFetcher = useGroupsRelationFetcher();
+    const eventGroupsRelationFetcher = useEventGroupsRelationFetcher();
 
     manager.value.loadPeriods(false, true, owner).then(() => {
         loading.value = false;
@@ -141,7 +141,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             key: 'groupId',
             allowCreation: true,
             wrapper: FilterWrapperMarker,
-            relationFetcher: groupsRelationFetcher({periodId, type: GroupType.EventRegistration})
+            relationFetcher: eventGroupsRelationFetcher({periodId})
         }));
 
         all.unshift(
