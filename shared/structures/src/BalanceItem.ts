@@ -627,7 +627,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%ls`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
-            case BalanceItemType.STPackage: return this.description;
+            case BalanceItemType.STPackage: return this.itemTitle;
             case BalanceItemType.ServiceFee: return $t('servicekosten');
             case BalanceItemType.TransferFee: return $t('transactiekosten');
             case BalanceItemType.ReferralDiscount: return $t('referralkorting');        
