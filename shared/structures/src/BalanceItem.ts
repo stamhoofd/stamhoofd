@@ -2,11 +2,11 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
+import { getPricingTypeSuffix, STPricingType } from './billing/STPackage.js';
 import { Payment, PrivatePayment } from './members/Payment.js';
 import type { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
-import { STPricingType, STPackageTypeHelper, getPricingTypeName, getPricingTypeSuffix } from './billing/STPackage.js';
 
 export enum BalanceItemStatusV352 {
     Hidden = 'Hidden',
@@ -92,7 +92,12 @@ export enum BalanceItemType {
      */
     STPackage = 'STPackage',
     ServiceFee = 'ServiceFee',
-    TransferFee = 'TransferFee'
+    TransferFee = 'TransferFee',
+
+    /**
+     * Discount by referral
+     */
+    ReferralDiscount = 'ReferralDiscount'
 }
 
 export function getBalanceItemTypeVATType(type: BalanceItemType): 'services' | 'goods' | null {
@@ -124,6 +129,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.STPackage: return $t('%1Ms');
         case BalanceItemType.ServiceFee: return $t('Servicekosten');
         case BalanceItemType.TransferFee: return $t('Transactiekosten');
+        case BalanceItemType.ReferralDiscount: return $t('Referralkorting');
     }
 }
 
@@ -140,6 +146,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string {
         case BalanceItemType.STPackage: return 'box';
         case BalanceItemType.ServiceFee: return 'calculator';
         case BalanceItemType.TransferFee: return 'calculator';
+        case BalanceItemType.ReferralDiscount: return 'label';
     }
 }
 
@@ -623,6 +630,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.STPackage: return this.description;
             case BalanceItemType.ServiceFee: return $t('servicekosten');
             case BalanceItemType.TransferFee: return $t('transactiekosten');
+            case BalanceItemType.ReferralDiscount: return $t('referralkorting');        
         }
     }
 
@@ -647,6 +655,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.STPackage: return $t('%1Mu');
             case BalanceItemType.ServiceFee: return $t('servicekosten');
             case BalanceItemType.TransferFee: return $t('transactiekosten');
+            case BalanceItemType.ReferralDiscount: return $t('referralkorting');
         }
     }
 
@@ -783,6 +792,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Servicekosten tussen {startDate} en {endDate}`, {startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true)}) : $t(`Servicekosten op {date}`, {date: Formatter.date(this.startDate, true)})) : $t('Servicekosten');
             case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Transactiekosten tussen {startDate} en {endDate}`, {startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true)}) : $t(`Transactiekosten op {date}`, {date: Formatter.date(this.startDate, true)})) : $t('Transactiekosten');
         }
+        return this.description
     }
 
     /**
@@ -873,6 +883,7 @@ export class BalanceItem extends AutoEncoder {
         }
         return null;
     }
+
     static getDetailsHTMLTable(items: BalanceItem[]): string {
         const grouped = GroupedBalanceItems.group(BalanceItem.filterBalanceItems(items));
 

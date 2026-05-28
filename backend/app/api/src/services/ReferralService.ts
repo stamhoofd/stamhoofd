@@ -51,7 +51,7 @@ export class ReferralService {
 
         if (code.value > 0) {
             credit = new BalanceItem();
-            credit.type = BalanceItemType.Other; // todo: ReferralDiscount
+            credit.type = BalanceItemType.ReferralDiscount;
             credit.description = otherOrganization ? ('Tegoed gekregen van '+otherOrganization.name) : code.description
             credit.payingOrganizationId = organization.id
             credit.organizationId = membershipOrganization.id
@@ -149,7 +149,7 @@ export class ReferralService {
         const usedCount = await UsedRegisterCode.getUsedCount(usedCode.code) + 1
 
         const credit = new BalanceItem();
-        credit.type = BalanceItemType.Other; // todo: ReferralDiscount
+        credit.type = BalanceItemType.ReferralDiscount;
         credit.description = $t('{organization-name} doorverwezen 🙌', {'organization-name': organization.name})
         credit.payingOrganizationId = code.organizationId
         credit.organizationId = (await Platform.getShared()).membershipOrganizationId! // where do we get this discount from
