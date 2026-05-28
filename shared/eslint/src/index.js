@@ -51,13 +51,16 @@ const baseRules = [
             'import/no-cycle': ['warn', { maxDepth: 100, ignoreExternal: false }],
         },
     },
+
+    stylistic.configs.customize({
+        // the following options are the default values
+        indent: 4,
+        quotes: 'single',
+        semi: true,
+        jsx: false,
+    }),
     {
-        files: ['**/*.js', '**/*.ts'],
-        plugins: {
-            '@stylistic': stylistic,
-        },
         rules: {
-            ...stylistic.configs.recommended,
             '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: true, avoidEscape: true }],
         },
     },
@@ -79,7 +82,7 @@ const baseRules = [
             ...vitest.configs.recommended.rules,
             'vitest/no-conditional-expect': 'warn',
             'vitest/expect-expect': 'warn',
-            'vitest/valid-expect': ['warn', {maxArgs: 2}] // Allow to pass a message by variable
+            'vitest/valid-expect': ['warn', { maxArgs: 2 }], // Allow to pass a message by variable
         },
     },
 
@@ -95,7 +98,7 @@ const baseRules = [
             '@typescript-eslint/no-unsafe-member-access': 'off',
             '@typescript-eslint/no-unsafe-argument': 'off',
         },
-    }
+    },
 ];
 
 export default {
