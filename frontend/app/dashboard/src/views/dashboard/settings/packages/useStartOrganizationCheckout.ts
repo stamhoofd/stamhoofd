@@ -27,50 +27,49 @@ import { PaymentSelectionWithMandatesStep } from './steps/PaymentSelectionWithMa
 export function useStartOrganizationCheckout() {
     const context = useContext();
     const platform = usePlatform();
-    const payingOrganization = useRequiredOrganization()
+    const payingOrganization = useRequiredOrganization();
     const { packages: packageStatus, reload } = useOrganizationPackages({ onMounted: false });
-    const owner = useRequestOwner()
+    const owner = useRequestOwner();
     const navigationActions = useNavigationActions();
-    const checkoutOrganizationCheckout = useCheckoutOrganizationCheckout()
+    const checkoutOrganizationCheckout = useCheckoutOrganizationCheckout();
     const loadPayableBalance = useLoadPayableBalance();
-
 
     /**
      * Can throw, so please catch errors.
      */
-    async function doStartOrganizationCheckout({ checkout, displayOptions, forceNewMandate, sellingOrganizationId, sellingOrganization, payableBalance, payBalanceMode }: { 
-        checkout: OrganizationCheckout; 
+    async function doStartOrganizationCheckout({ checkout, displayOptions, forceNewMandate, sellingOrganizationId, sellingOrganization, payableBalance, payBalanceMode }: {
+        checkout: OrganizationCheckout;
         sellingOrganizationId?: string;
         sellingOrganization?: BaseOrganization;
         displayOptions: DisplayOptions;
-        forceNewMandate?: boolean,
-        payBalanceMode: PayBalanceMode
+        forceNewMandate?: boolean;
+        payBalanceMode: PayBalanceMode;
 
         /**
          * Optional, otherwise will get loaded async
          */
-        payableBalance?: DetailedPayableBalance
-    } & ({sellingOrganizationId?: string} | {sellingOrganization: Organization})) {
+        payableBalance?: DetailedPayableBalance;
+    } & ({ sellingOrganizationId?: string } | { sellingOrganization: Organization })) {
         if (!sellingOrganization && !sellingOrganizationId) {
-            sellingOrganizationId = platform.value.membershipOrganizationId ?? undefined
+            sellingOrganizationId = platform.value.membershipOrganizationId ?? undefined;
         }
 
         if (sellingOrganization) {
             if (sellingOrganizationId) {
-                throw new Error('Invalid usage')
+                throw new Error('Invalid usage');
             }
-            sellingOrganizationId = sellingOrganization.id
+            sellingOrganizationId = sellingOrganization.id;
         }
 
         if (!sellingOrganizationId) {
             throw new SimpleError({
                 code: 'unavailable',
                 message: 'Temporarily unavailable due to missing membershipOrganizationId',
-                human: $t('%1Ri')
-            })
+                human: $t('%1Ri'),
+            });
         }
 
-        let status: OrganizationPackagesStatus | undefined
+        let status: OrganizationPackagesStatus | undefined;
         if (!packageStatus.value) {
             status = await reload();
 
@@ -78,9 +77,9 @@ export function useStartOrganizationCheckout() {
                 return;
             }
         } else {
-            status = packageStatus.value
+            status = packageStatus.value;
         }
-        
+
         if (!sellingOrganization) {
             const server = context.value.getOptionalAuthenticatedServerForOrganization(sellingOrganizationId);
             const response = await server.request({
@@ -94,7 +93,7 @@ export function useStartOrganizationCheckout() {
 
         if (!payableBalance) {
             // todo: only load payable balance if we know this will be required
-            payableBalance = await loadPayableBalance(sellingOrganization.id)
+            payableBalance = await loadPayableBalance(sellingOrganization.id);
         }
 
         const model = new OrganizationCheckoutViewModel({
@@ -104,8 +103,8 @@ export function useStartOrganizationCheckout() {
             payingOrganization: payingOrganization.value,
             forceNewMandate,
             payableBalance,
-            payBalanceMode
-        })
+            payBalanceMode,
+        });
 
         // Set urls
         model.checkout.redirectUrl = new URL(window.location.href);
@@ -123,7 +122,7 @@ export function useStartOrganizationCheckout() {
         }
 
         // Validate model before starting
-        model.validate()
+        model.validate();
 
         let steps = [
             new PackageOverviewStep({ model }),
@@ -148,8 +147,8 @@ export function useStartOrganizationCheckout() {
                 navigate,
                 response,
                 sellingOrganization,
-                context: context.value
-            })
+                context: context.value,
+            });
         }, displayOptions);
 
         await stepManager.saveHandler(null, navigationActions);
@@ -157,25 +156,22 @@ export function useStartOrganizationCheckout() {
 
     return async function startOrganizationCheckout(...options: Parameters<typeof doStartOrganizationCheckout>) {
         try {
-            await doStartOrganizationCheckout(...options)
+            await doStartOrganizationCheckout(...options);
         } catch (e) {
-            Toast.fromError(e).show()
+            Toast.fromError(e).show();
         }
-    }
+    };
 }
 
-async function handleCheckoutResponse({response, sellingOrganization, context, navigate}: {
-    response: CheckoutResponse,
-    sellingOrganization: BaseOrganization,
-    context: SessionContext,
-    navigate: NavigationActions
+async function handleCheckoutResponse({ response, sellingOrganization, context, navigate }: {
+    response: CheckoutResponse;
+    sellingOrganization: BaseOrganization;
+    context: SessionContext;
+    navigate: NavigationActions;
 }) {
     const payment = response.payment;
-
-    console.log('handleCheckoutResponse', payment)
-
     const server = context.getOptionalAuthenticatedServerForOrganization(sellingOrganization.id);
-    
+
     if (payment && payment.status !== PaymentStatus.Succeeded) {
         await PaymentHandler.handlePayment({
             server,
@@ -190,7 +186,7 @@ async function handleCheckoutResponse({response, sellingOrganization, context, n
             await navigate.show({
                 components: [
                     new ComponentWithProperties(PaymentSuccessView, {
-                        payment
+                        payment,
                     }),
                 ],
                 replace: 100, // autocorrects to all
@@ -205,12 +201,13 @@ async function handleCheckoutResponse({response, sellingOrganization, context, n
         return;
     }
 
-    console.log('going!')
-
     await navigate.show({
         components: [
             new ComponentWithProperties(PaymentSuccessView, {
-                payment
+                payment,
+                fallback: {
+                    title: $t('Hoera, gelukt!'),
+                },
             }),
         ],
         replace: 100, // autocorrects to all

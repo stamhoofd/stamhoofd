@@ -4,7 +4,7 @@
         <main>
             <h1>{{ title }}</h1>
 
-            <p v-text="description" />
+            <p v-if="description" v-text="description" />
         </main>
 
         <STToolbar>
@@ -30,9 +30,18 @@ import { onMounted } from 'vue';
 import { GlobalEventBus } from '../EventBus';
 
 // We only pass in the payment for compatibility with URL handling
-const props = defineProps<{
-    payment: PaymentGeneral;
-}>();
+const props = withDefaults(
+    defineProps<{
+        payment?: PaymentGeneral | null;
+        fallback?: {
+            title: string;
+            description?: string;
+        } | null;
+    }>(), {
+        payment: null,
+        fallback: null,
+    },
+);
 
 const dismiss = useDismiss();
 const context = useContext();
@@ -40,39 +49,49 @@ const memberManager = useMemberManager();
 
 onMounted(() => {
     memberManager.family.checkout.clear();
-    
+
     // Force reload organization
     context.value.updateData(true, false, false).catch(console.error);
-    GlobalEventBus.sendEvent('payment-succeeded', props.payment).catch(console.error)
+
+    if (props.payment) {
+        GlobalEventBus.sendEvent('payment-succeeded', props.payment).catch(console.error);
+    }
 });
 
-const {title, description} = (() => {
-    let t = $t(`%1Tf`) ;
-    if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit || props.payment.method === PaymentMethod.CreditCard)) {
-        t = $t('Betaling in verwerking')
+const { title, description } = (() => {
+    if (!props.payment) {
+        return {
+            title: props.fallback?.title ?? '',
+            description: props.fallback?.description ?? '',
+        };
     }
 
-    let nameInTitle = false
+    let t = $t(`%1Tf`);
+    if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit || props.payment.method === PaymentMethod.CreditCard)) {
+        t = $t('Betaling in verwerking');
+    }
+
+    let nameInTitle = false;
 
     let d = '';
 
     if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit)) {
-        d = $t('Het kan enkele dagen duren voor we een bevestiging krijgen van je betaling. Je ontvangt een e-mail als de betaling nog zou mislukken.')
+        d = $t('Het kan enkele dagen duren voor we een bevestiging krijgen van je betaling. Je ontvangt een e-mail als de betaling nog zou mislukken.');
     }
 
     let packages = false;
     let others = 0;
-    const registrationNames: Set<string> = new Set()
+    const registrationNames: Set<string> = new Set();
     const registrationNamesPerGroup: Map<string, string[]> = new Map();
-    
-    const membershipNames: Set<string> = new Set()
+
+    const membershipNames: Set<string> = new Set();
     const membershipNamesPerGroup: Map<string, string[]> = new Map();
 
     function addRegistration(group: string | undefined, name: string | undefined) {
         if (!name) {
             return;
         }
-        registrationNames.add(name)
+        registrationNames.add(name);
 
         if (!group) {
             return;
@@ -81,16 +100,16 @@ const {title, description} = (() => {
         let l = registrationNamesPerGroup.get(group);
         if (!l) {
             l = [];
-            registrationNamesPerGroup.set(group, l)
+            registrationNamesPerGroup.set(group, l);
         }
-        l.push(name)
+        l.push(name);
     }
 
     function addMembership(group: string | undefined, name: string | undefined) {
         if (!name) {
             return;
         }
-        membershipNames.add(name)
+        membershipNames.add(name);
 
         if (!group) {
             return;
@@ -99,16 +118,16 @@ const {title, description} = (() => {
         let l = membershipNamesPerGroup.get(group);
         if (!l) {
             l = [];
-            membershipNamesPerGroup.set(group, l)
+            membershipNamesPerGroup.set(group, l);
         }
-        l.push(name)
+        l.push(name);
     }
 
     for (const item of props.payment.balanceItemPayments) {
         const i = item.balanceItem;
 
         if (i.type === BalanceItemType.PlatformMembership) {
-            addMembership(i.relations.get(BalanceItemRelationType.MembershipType)?.name.toString(), i.relations.get(BalanceItemRelationType.Member)?.name.toString())
+            addMembership(i.relations.get(BalanceItemRelationType.MembershipType)?.name.toString(), i.relations.get(BalanceItemRelationType.Member)?.name.toString());
         } else if (i.paidAt && i.paidAt.getTime() < Date.now() - 20_000) {
             // This was paid later - meaning we just paid for something that was already active
             // for packages and regisrations the message should be changed by this
@@ -116,17 +135,16 @@ const {title, description} = (() => {
         } else if (i.type === BalanceItemType.STPackage) {
             packages = true;
         } else if (i.type === BalanceItemType.Registration) {
-            addRegistration(i.relations.get(BalanceItemRelationType.Group)?.name.toString(), i.relations.get(BalanceItemRelationType.Member)?.name.toString())
+            addRegistration(i.relations.get(BalanceItemRelationType.Group)?.name.toString(), i.relations.get(BalanceItemRelationType.Member)?.name.toString());
         } else {
             others++;
         }
     }
 
-
     if (packages) {
-        t = $t('%1Rc')
-        d = $t('%1Qo') + (d ? (' ' + d) : '')
-        
+        t = $t('%1Rc');
+        d = $t('%1Qo') + (d ? (' ' + d) : '');
+
         nameInTitle = true;
     }
 
@@ -134,33 +152,33 @@ const {title, description} = (() => {
         if (registrationNamesPerGroup.size === 1) {
             if (registrationNames.size > 4) {
                 t = $t('%1RL', {
-                    'count': registrationNames.size,
-                    group: [...registrationNamesPerGroup.keys()].join()
-                })
+                    count: registrationNames.size,
+                    group: [...registrationNamesPerGroup.keys()].join(),
+                });
             } else if (registrationNames.size > 1) {
                 t = $t('%1Qm', {
                     'simon-and-sarah': Formatter.joinLast([...registrationNames.values()], ', ', ' ' + $t('%M1') + ' '),
-                    group: [...registrationNamesPerGroup.keys()].join()
-                })
+                    'group': [...registrationNamesPerGroup.keys()].join(),
+                });
             } else {
                 t = $t('%1TR', {
-                    'simon': [...registrationNames.values()].join(),
-                    group: [...registrationNamesPerGroup.keys()].join()
-                })
+                    simon: [...registrationNames.values()].join(),
+                    group: [...registrationNamesPerGroup.keys()].join(),
+                });
             }
         } else {
             if (registrationNames.size > 4) {
                 t = $t('%1Sy', {
-                    'count': registrationNames.size,
-                })
+                    count: registrationNames.size,
+                });
             } else if (registrationNames.size > 1) {
                 t = $t('%1RR', {
                     'simon-and-sarah': Formatter.joinLast([...registrationNames.values()], ', ', ' ' + $t('%M1') + ' '),
-                })
+                });
             } else {
                 t = $t('%1UF', {
-                    'simon': [...registrationNames.values()].join(),
-                })
+                    simon: [...registrationNames.values()].join(),
+                });
             }
         }
         nameInTitle = true;
@@ -170,33 +188,33 @@ const {title, description} = (() => {
         if (membershipNamesPerGroup.size === 1) {
             if (membershipNames.size > 4) {
                 t = $t('%1Rs', {
-                    'count': membershipNames.size,
-                    name: [...membershipNamesPerGroup.keys()].join()
-                })
+                    count: membershipNames.size,
+                    name: [...membershipNamesPerGroup.keys()].join(),
+                });
             } else if (membershipNames.size > 1) {
                 t = $t('%1TL', {
                     'simon-and-sarah': Formatter.joinLast([...membershipNames.values()], ', ', ' ' + $t('%M1') + ' '),
-                    name: [...membershipNamesPerGroup.keys()].join()
-                })
+                    'name': [...membershipNamesPerGroup.keys()].join(),
+                });
             } else {
                 t = $t('%1SY', {
-                    'simon': [...membershipNames.values()].join(),
-                    name: [...membershipNamesPerGroup.keys()].join()
-                })
+                    simon: [...membershipNames.values()].join(),
+                    name: [...membershipNamesPerGroup.keys()].join(),
+                });
             }
         } else {
             if (membershipNames.size > 4) {
                 t = $t('%1Sy', {
-                    'count': membershipNames.size,
-                })
+                    count: membershipNames.size,
+                });
             } else if (membershipNames.size > 1) {
                 t = $t('%1RR', {
                     'simon-and-sarah': Formatter.joinLast([...membershipNames.values()], ', ', ' ' + $t('%M1') + ' '),
-                })
+                });
             } else {
                 t = $t('%1UF', {
-                    'simon': [...membershipNames.values()].join(),
-                })
+                    simon: [...membershipNames.values()].join(),
+                });
             }
         }
         nameInTitle = true;
@@ -204,21 +222,21 @@ const {title, description} = (() => {
 
     if (others && !d && props.payment.status === PaymentStatus.Succeeded) {
         if (nameInTitle) {
-            if (others> 1) {
-                d = $t('%1Tz', {count: Formatter.integer(others)})
+            if (others > 1) {
+                d = $t('%1Tz', { count: Formatter.integer(others) });
             } else {
-                d = $t('%1SF', {count: Formatter.integer(others)})
+                d = $t('%1SF', { count: Formatter.integer(others) });
             }
         } else {
-            if (others> 1) {
-                d = $t('{count} items werden betaald', {count: Formatter.integer(others)})
+            if (others > 1) {
+                d = $t('{count} items werden betaald', { count: Formatter.integer(others) });
             } else {
-                d = $t('Eén item werd betaald', {count: Formatter.integer(others)})
+                d = $t('Eén item werd betaald', { count: Formatter.integer(others) });
             }
         }
     }
 
-    return {title: t, description: d}
+    return { title: t, description: d };
 })();
 
 </script>

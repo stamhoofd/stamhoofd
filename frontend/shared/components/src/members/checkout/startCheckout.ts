@@ -2,8 +2,9 @@ import { ViewStepsManager } from '#steps/ViewStepsManager.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
-import { PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
+import type { PlatformMember, RegisterCheckout, RegistrationWithTinyMember } from '@stamhoofd/structures';
+import { GroupType, PaymentStatus, PlatformFamily, RegisterResponse } from '@stamhoofd/structures';
+import { Formatter } from '../../../../../../shared/utility/dist/Formatter';
 import { GlobalEventBus } from '../../EventBus';
 import { Toast } from '../../overlays/Toast';
 import PaymentSuccessView from '../../payments/PaymentSuccessView.vue';
@@ -35,7 +36,7 @@ export async function startSilentRegister({ checkout, context, admin, members }:
     await silentRegister({ checkout, context, admin, members });
 }
 
-function getIdCheckout({ checkout, admin }: { checkout: RegisterCheckout; admin?: boolean;}) {
+function getIdCheckout({ checkout, admin }: { checkout: RegisterCheckout; admin?: boolean }) {
     const organization = checkout.singleOrganization!;
     const idCheckout = checkout.convert();
 
@@ -51,12 +52,11 @@ function getIdCheckout({ checkout, admin }: { checkout: RegisterCheckout; admin?
 
             if (idCheckout.redirectUrl.pathname.endsWith('/mandje')) {
                 // Remove, so we go to start
-                idCheckout.redirectUrl.pathname = idCheckout.redirectUrl.pathname.substring(0, idCheckout.redirectUrl.pathname.length - '/mandje'.length)
+                idCheckout.redirectUrl.pathname = idCheckout.redirectUrl.pathname.substring(0, idCheckout.redirectUrl.pathname.length - '/mandje'.length);
                 idCheckout.cancelUrl = idCheckout.redirectUrl;
             }
         }
-    }
-    else {
+    } else {
         idCheckout.redirectUrl = new URL(window.location.href);
         idCheckout.cancelUrl = new URL(window.location.href);
     }
@@ -72,7 +72,7 @@ function getIdCheckout({ checkout, admin }: { checkout: RegisterCheckout; admin?
         idCheckout.cancelUrl = new URL(idCheckout.cancelUrl.toString().replace(idCheckout.cancelUrl.protocol, 'https:'));
     }
 
-    return idCheckout
+    return idCheckout;
 }
 
 /**
@@ -84,7 +84,7 @@ function getIdCheckout({ checkout, admin }: { checkout: RegisterCheckout; admin?
 async function silentRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }) {
     const organization = checkout.singleOrganization!;
     const server = context.getAuthenticatedServerForOrganization(organization.id);
-    const idCheckout = getIdCheckout({checkout, admin})
+    const idCheckout = getIdCheckout({ checkout, admin });
 
     const response = await server.request({
         method: 'POST',
@@ -103,8 +103,7 @@ async function silentRegister({ checkout, context, admin, members }: { checkout:
     const clearAndEmit = () => {
         if (checkout.cart.items.length > 0) {
             GlobalEventBus.sendEvent('members-added', []).catch(console.error);
-        }
-        else if (checkout.cart.deleteRegistrations.length > 0) {
+        } else if (checkout.cart.deleteRegistrations.length > 0) {
             GlobalEventBus.sendEvent('members-deleted', []).catch(console.error);
         }
 
@@ -121,7 +120,7 @@ async function silentRegister({ checkout, context, admin, members }: { checkout:
 async function register({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     const organization = checkout.singleOrganization!;
     const server = context.getAuthenticatedServerForOrganization(organization.id);
-    const idCheckout = getIdCheckout({checkout, admin})
+    const idCheckout = getIdCheckout({ checkout, admin });
 
     const response = await server.request({
         method: 'POST',
@@ -141,8 +140,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     const clearAndEmit = () => {
         if (checkout.cart.items.length > 0) {
             GlobalEventBus.sendEvent('members-added', []).catch(console.error);
-        }
-        else if (checkout.cart.deleteRegistrations.length > 0) {
+        } else if (checkout.cart.deleteRegistrations.length > 0) {
             GlobalEventBus.sendEvent('members-deleted', []).catch(console.error);
         }
 
@@ -165,7 +163,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
             await navigate.show({
                 components: [
                     new ComponentWithProperties(PaymentSuccessView, {
-                        payment
+                        payment,
                     }),
                 ],
                 replace: 100, // autocorrects to all
@@ -173,12 +171,12 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
             });
         }, (payment) => {
             if (payment && payment.status === PaymentStatus.Failed) {
-                Toast.fromError($t('Betaling mislukt of geannuleerd')).show()
+                Toast.fromError($t('Betaling mislukt of geannuleerd')).show();
             }
             // Silently ignore for now
             console.error('Failure handler for payment', payment);
         }, () => {
-            console.log('Transfer handler')
+            console.log('Transfer handler');
             clearAndEmit();
         });
         return;
@@ -189,10 +187,48 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     await navigate.show({
         components: [
             new ComponentWithProperties(PaymentSuccessView, {
-                payment
+                payment,
+                fallback: fallback(registrations),
             }),
         ],
         replace: 100,
         force: true,
     });
+}
+
+function fallback(registrations: RegistrationWithTinyMember[]) {
+    const names = Formatter.uniqueArray(registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
+    const waitingListNames = Formatter.uniqueArray(registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
+
+    const t = $t(`Hoera, gelukt!`);
+    let d = '';
+
+    if (names.length > 0) {
+        if (names.length > 3) {
+            d += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
+        } else if (names.length > 1) {
+            d += Formatter.joinLast(names, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
+        } else {
+            d += names.join('') + ' ' + $t(`%zp`);
+        }
+    }
+
+    if (waitingListNames.length > 0) {
+        if (names.length > 0) {
+            d += ' ' + $t(`%M1`) + ' ';
+        }
+
+        if (waitingListNames.length > 3) {
+            d += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
+        } else if (waitingListNames.length > 1) {
+            d += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
+        } else {
+            d += waitingListNames.join('') + ' ' + $t(`%zr`);
+        }
+    }
+
+    return {
+        title: t,
+        description: Formatter.capitalizeFirstLetter(d),
+    };
 }
