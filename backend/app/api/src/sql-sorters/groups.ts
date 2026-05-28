@@ -23,6 +23,17 @@ export const groupSorters: SQLSortDefinitions<Group> = {
             });
         },
     },
+    periodId: {
+        getValue(a) {
+            return a.periodId;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('periodId'),
+                direction,
+            });
+        },
+    },
     name: {
         getValue(a) {
             return a.settings.name.toString();

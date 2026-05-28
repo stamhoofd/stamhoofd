@@ -175,30 +175,61 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
     }
 }
 
+export type RelationFetcherSubFilterOption = {filter: StamhoofdFilter, name: string};
+
+export class RelationFetcherSubFilter {
+    private readonly getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[];
+    private options: RelationFetcherSubFilterOption[] | null = null;
+
+    constructor({getOptions}: {getOptions: () => Promise<RelationFetcherSubFilterOption[]> | RelationFetcherSubFilterOption[]}) {
+        this.getOptions = getOptions;
+    }
+
+    async loadOptions(): Promise<RelationFetcherSubFilterOption[]> {
+        if (this.options !== null) {
+            return this.options;
+        }
+
+        this.options = await this.getOptions();
+        return this.options;
+    }
+}
+
 export class RelationFetcher<OBJECT extends {id: string}, T extends string | number | Date | null | boolean> {
     readonly fetcher: ObjectFetcher<OBJECT>;
     
     private readonly getName: (object: OBJECT) => string;
     private readonly getValue: (object: OBJECT) => T;
 
+    readonly filter?: StamhoofdFilter;
     private readonly limit?: number;
     private readonly sort?: SortList;
 
-    constructor({fetcher, getName, getValue, limit, sort}: {
+    readonly subFilter?: RelationFetcherSubFilter;
+
+    constructor({fetcher, getName, getValue, filter, limit, sort, subFilter}: {
         fetcher: ObjectFetcher<OBJECT>,
         getName: (object: OBJECT) => string,
         getValue: (object: OBJECT) => T,
+        filter?: StamhoofdFilter,
         limit?: number,
-        sort?: SortList
+        sort?: SortList,
+        subFilter?: RelationFetcherSubFilter
     }) {
         this.fetcher = fetcher;
         this.getName = getName;
         this.getValue = getValue;
+        this.filter = filter;
         this.limit = limit;
         this.sort = sort;
+        this.subFilter = subFilter;
     }
 
     configureInfiniteObjectFetcher(infiniteObjectFetcher: InfiniteObjectFetcher<OBJECT>) {
+        if (this.filter) {
+            infiniteObjectFetcher.setFilter(this.filter);
+        }
+        
         if (this.sort) {
             infiniteObjectFetcher.sort = this.sort;
         }

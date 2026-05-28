@@ -14,13 +14,14 @@ import { StringFilterBuilder } from '../StringUIFilter';
 import type { BaseUIFilterBuilder, UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from './helpers';
 import { getFilterBuildersForRecordCategories } from './record-categories';
+import type { RegistrationFilterBuilderFactory } from './registrations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
 
-    const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
+    const { loading, getRegistrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
     const organization = useOrganization();
@@ -30,7 +31,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     return {
         loading: computed(() => loading.value || loadingMembershipFilters.value),
         filterBuilders: computed(() => {
-            const all = createMemberWithRegistrationsBlobFilterBuilders({ organization, $user, $platform, financialSupportSettings, auth, registrationFilters, membershipFilters });
+            const all = createMemberWithRegistrationsBlobFilterBuilders({ organization, $user, $platform, financialSupportSettings, auth, getRegistrationFilters, membershipFilters });
 
             all.unshift(
                 new GroupUIFilterBuilder({
@@ -43,7 +44,7 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     };
 }
 
-export function createMemberWithRegistrationsBlobFilterBuilders({ organization, $user, $platform, financialSupportSettings, auth, registrationFilters, membershipFilters }: { organization: Ref<Organization | null, Organization | null>; $platform: ReturnType<typeof usePlatform>; $user: ReturnType<typeof useUser>; financialSupportSettings: ReturnType<typeof useFinancialSupportSettings>; auth: ReturnType<typeof useAuth>; registrationFilters: ComputedRef<UIFilterBuilder<UIFilter>[]>; membershipFilters: ComputedRef<UIFilterBuilder<UIFilter>[]> }) {
+export function createMemberWithRegistrationsBlobFilterBuilders({ organization, $user, $platform, financialSupportSettings, auth, getRegistrationFilters, membershipFilters }: { organization: Ref<Organization | null, Organization | null>; $platform: ReturnType<typeof usePlatform>; $user: ReturnType<typeof useUser>; financialSupportSettings: ReturnType<typeof useFinancialSupportSettings>; auth: ReturnType<typeof useAuth>; getRegistrationFilters: RegistrationFilterBuilderFactory; membershipFilters: ComputedRef<UIFilterBuilder<UIFilter>[]> }) {
     const platform = $platform.value;
     const user = $user.value;
     const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -598,7 +599,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
             new GroupUIFilterBuilder({
                 name: $t(`%c0`),
                 description: $t(`%c1`),
-                builders: registrationFilters.value.filter(f => f.name !== 'Werkjaar'),
+                builders: getRegistrationFilters({ periodId: currentPeriodId }).value,
                 wrapper: {
                     registrations: {
                         $elemMatch: {
@@ -621,7 +622,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
             new GroupUIFilterBuilder({
                 name: $t('%BU'),
                 description: $t('%8U'),
-                builders: registrationFilters.value,
+                builders: getRegistrationFilters().value,
                 wrapper: {
                     registrations: {
                         $elemMatch: FilterWrapperMarker,

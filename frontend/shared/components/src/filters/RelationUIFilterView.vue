@@ -5,6 +5,11 @@
                 <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
             </form>
         </div>
+        <div v-if="relationFetcher.subFilter">
+            <button type="button" class="button text" @click="showSubFilters">
+                <span class="icon filter" />
+            </button>
+        </div>
     </div>
 
     <div class="results">
@@ -36,13 +41,15 @@
 </template>
 
 <script lang="ts" setup generic="T extends string | number | Date | null | boolean, ObjectType extends { id: string }">
-
+import { mergeFilters } from '@stamhoofd/structures';
+import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
+import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import type { ObjectFetcher } from '../tables';
 import { useInfiniteObjectFetcher } from '../tables';
 import InfiniteObjectFetcherEnd from '../tables/InfiniteObjectFetcherEnd.vue';
-import type { RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
+import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
 
 const props = defineProps<{
     filter: RelationUIFilter<T>;
@@ -60,11 +67,14 @@ const errorBox = computed(() => {
 });
 
 const searchQuery = ref('');
+const selectedSubFilterOption = ref(null) as Ref<null | RelationFetcherSubFilterOption>;
+
 watchEffect(() => {
     infiniteObjectFetcher.setSearchQuery(searchQuery.value);
 });
 
 const options = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.objects));
+
 const invisibleSelectedOptions = computed(() => {
     const visibleOptions = options.value;
     if (!visibleOptions) {
@@ -75,6 +85,32 @@ const invisibleSelectedOptions = computed(() => {
         return !visibleOptions.some(vo => vo.value === option.value && vo.name === option.name);
     })
 });
+
+async function showSubFilters(event: MouseEvent) {
+    const subFilter = relationFetcher.subFilter;
+    if (!subFilter) {
+        return;
+    }
+
+    const button = event.currentTarget as HTMLElement;
+
+    const options = await subFilter.loadOptions();
+    
+    const menu = new ContextMenu([
+        options.map(option => {
+            return new ContextMenuItem({
+                name: option.name,
+                selected: selectedSubFilterOption.value === option,
+                action: () => {
+                    selectedSubFilterOption.value = option;
+                    infiniteObjectFetcher.setFilter(mergeFilters([option.filter, relationFetcher.filter ?? null]))
+                }
+            })
+        })
+    ]);
+
+    menu.show({ button, xPlacement: 'left'}).catch(console.error);
+}
 
 function blurFocus() {
     (document.activeElement as HTMLElement)?.blur();
@@ -103,8 +139,7 @@ function setOptionSelected(option: RelationFilterOption<T>, selected: boolean) {
 
 <style lang="scss" scoped>
 
-.results{
-    margin-top: 15px;
+.input-with-buttons {
     margin-bottom: 15px;
 }
 </style>
