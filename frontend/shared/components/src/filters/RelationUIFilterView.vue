@@ -5,6 +5,12 @@
                 <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
             </form>
         </div>
+        <div v-if="relationFetcher.subFilter">
+            <button type="button" class="button text" @click="showSubFilters">
+                <span class="icon filter" />
+                <span v-if="selectedSubFilterOption.filter" class="icon dot primary" />
+            </button>
+        </div>
     </div>
 
     <div class="results">
@@ -17,6 +23,9 @@
                 <h3 class="style-title-list">
                     {{ option.name }}
                 </h3>
+                <p v-if="option.description" class="style-description-small">
+                    {{ option.description }}
+                </p>
             </STListItem>
         </STList>
         <template v-if="infiniteObjectFetcher.errorState === null">
@@ -28,6 +37,9 @@
                     <h3 class="style-title-list">
                         {{ option.name }}
                     </h3>
+                    <p v-if="option.description" class="style-description-small">
+                        {{ option.description }}
+                    </p>
                 </STListItem>
             </STList>
             <InfiniteObjectFetcherEnd :fetcher="infiniteObjectFetcher" :empty-message="$t(`Geen resultaten`)" />
@@ -36,13 +48,14 @@
 </template>
 
 <script lang="ts" setup generic="T extends string | number | Date | null | boolean, ObjectType extends { id: string }">
-
+import { mergeFilters } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
+import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import type { ObjectFetcher } from '../tables';
 import { useInfiniteObjectFetcher } from '../tables';
 import InfiniteObjectFetcherEnd from '../tables/InfiniteObjectFetcherEnd.vue';
-import type { RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
+import type { RelationFetcherSubFilterOption, RelationFilterOption, RelationUIFilter } from './RelationUIFilter';
 
 const props = defineProps<{
     filter: RelationUIFilter<T>;
@@ -60,11 +73,13 @@ const errorBox = computed(() => {
 });
 
 const searchQuery = ref('');
+
 watchEffect(() => {
     infiniteObjectFetcher.setSearchQuery(searchQuery.value);
 });
 
 const options = computed(() => props.filter.relationFetcher.resultsToOptions(infiniteObjectFetcher.objects));
+
 const invisibleSelectedOptions = computed(() => {
     const visibleOptions = options.value;
     if (!visibleOptions) {
@@ -75,6 +90,39 @@ const invisibleSelectedOptions = computed(() => {
         return !visibleOptions.some(vo => vo.value === option.value && vo.name === option.name);
     })
 });
+
+const defaultOption: RelationFetcherSubFilterOption = {
+    name: $t('Geen filter'),
+    filter: null
+};
+
+const selectedSubFilterOption = ref<RelationFetcherSubFilterOption>(defaultOption);
+
+async function showSubFilters(event: MouseEvent) {
+    const subFilter = relationFetcher.subFilter;
+    if (!subFilter) {
+        return;
+    }
+
+    const button = event.currentTarget as HTMLElement;
+
+    const options = await subFilter.loadOptions();
+    
+    const menu = new ContextMenu([
+        [defaultOption, ...options].map(option => {
+            return new ContextMenuItem({
+                name: option.name,
+                selected: selectedSubFilterOption.value.name === option.name,
+                action: () => {
+                    selectedSubFilterOption.value = option;
+                    infiniteObjectFetcher.setFilter(mergeFilters([option.filter, relationFetcher.filter ?? null]))
+                }
+            })
+        })
+    ]);
+
+    menu.show({ button, xPlacement: 'left'}).catch(console.error);
+}
 
 function blurFocus() {
     (document.activeElement as HTMLElement)?.blur();
@@ -103,8 +151,7 @@ function setOptionSelected(option: RelationFilterOption<T>, selected: boolean) {
 
 <style lang="scss" scoped>
 
-.results{
-    margin-top: 15px;
+.input-with-buttons {
     margin-bottom: 15px;
 }
 </style>

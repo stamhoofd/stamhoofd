@@ -2,8 +2,9 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, PermissionLevel, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
+import { StamhoofdFilterAccessHelper } from '../../../../helpers/StamhoofdFilterAccessHelper.js';
 
-export async function validateGroupFilter({ filter, permissionLevel, key }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel; key: string | null }) {
+export async function validateGroupFilter({ filter, permissionLevel, key }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel; key: string | null }): Promise<boolean> {
     // Require presence of a filter
     const requiredFilter: WrapperFilter = key
         ? {
@@ -22,39 +23,15 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
         return false;
     }
 
-    const groupIds = typeof unwrapped.markerValue === 'string'
-        ? [unwrapped.markerValue]
-        : unwrapFilter(unwrapped.markerValue as StamhoofdFilter, {
-            $in: FilterWrapperMarker,
-        })?.markerValue;
-
-    if (!Array.isArray(groupIds)) {
+    if (unwrapped.markerValue === undefined) {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'filter',
-            message: 'You must filter on a group of the organization you are trying to access',
-            human: $t(`%15e`),
+            message: 'Filtering on an undefined list of groups is not supported',
         });
     }
 
-    if (groupIds.length === 0) {
-        throw new SimpleError({
-            code: 'invalid_field',
-            field: 'filter',
-            message: 'Filtering on an empty list of groups is not supported',
-        });
-    }
-
-    for (const groupId of groupIds) {
-        if (typeof groupId !== 'string') {
-            throw new SimpleError({
-                code: 'invalid_field',
-                field: 'filter',
-                message: 'Invalid group ID in filter',
-            });
-        }
-    }
-
+    const groupIds = StamhoofdFilterAccessHelper.getGroupIdsFromFilter(unwrapped.markerValue);
     const groups = await Context.auth.getGroups(groupIds as string[]);
 
     console.log('Fetching members for groups before', groups.map(g => g.settings.name.toString()));

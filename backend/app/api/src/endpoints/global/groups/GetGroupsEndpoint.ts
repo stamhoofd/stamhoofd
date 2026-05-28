@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import type { CountFilteredRequest, Group as GroupStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
@@ -61,7 +61,9 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             let searchFilter: StamhoofdFilter | null = null;
 
             searchFilter = {
-                id: q.search,
+                name: {
+                    $contains: q.search
+                },
             };
 
             if (searchFilter) {

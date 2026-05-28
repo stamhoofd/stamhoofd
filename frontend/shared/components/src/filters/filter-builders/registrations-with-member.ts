@@ -20,7 +20,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
     const auth = useAuth();
     const app = useAppContext();
 
-    const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
+    const { loading, getRegistrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
     const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
@@ -64,7 +64,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
             $platform,
             financialSupportSettings,
             auth,
-            registrationFilters,
+            getRegistrationFilters,
             membershipFilters,
         });
 

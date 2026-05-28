@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions} from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
 export const eventFilterCompilers: SQLFilterDefinitions = {
@@ -106,6 +106,11 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
                 expression: SQL.jsonExtract(SQL.column('settings'), '$.value.preRegistrationsDate'),
                 type: SQLValueType.JSONNumber,
                 nullable: true,
+            }),
+            periodId: createColumnFilter({
+                expression: SQL.column('periodId'),
+                type: SQLValueType.String,
+                nullable: false,
             }),
         },
     ),
