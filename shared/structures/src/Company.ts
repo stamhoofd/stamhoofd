@@ -5,11 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { Address } from './addresses/Address.js';
 
 export class PeppolEndointId extends AutoEncoder {
-    @field({decoder: StringDecoder })
-    schemeID: string
+    @field({ decoder: StringDecoder })
+    schemeID: string;
 
-    @field({decoder: StringDecoder })
-    id: string
+    @field({ decoder: StringDecoder })
+    id: string;
 }
 
 export class Company extends AutoEncoder {
@@ -34,12 +34,12 @@ export class Company extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, optional: true })
     administrationEmail: string | null = null;
 
-    @field({decoder: PeppolEndointId, nullable: true, ...NextVersion})
+    @field({ decoder: PeppolEndointId, nullable: true, ...NextVersion })
     customPeppolEndpointId: PeppolEndointId | null;
 
     get peppolEndpointId(): PeppolEndointId | null {
         if (this.customPeppolEndpointId) {
-            return this.customPeppolEndpointId
+            return this.customPeppolEndpointId;
         }
 
         return this.peppolCompanyId;
@@ -54,7 +54,7 @@ export class Company extends AutoEncoder {
         const companyNumberOrVAT = this.VATNumber ?? this.companyNumber;
 
         if (!companyNumberOrVAT) {
-            return null
+            return null;
         }
 
         const companyNumber = (this.VATNumber ? this.VATNumber.substring(2) : companyNumberOrVAT).replace(/\D+/g, '');
@@ -63,8 +63,8 @@ export class Company extends AutoEncoder {
 
         return PeppolEndointId.create({
             schemeID: '0208', // Belgium
-            id
-        })
+            id,
+        });
     }
 
     getDiffValue() {
@@ -85,8 +85,7 @@ export class Company extends AutoEncoder {
             if (!this.address.equals(other.address)) {
                 return false;
             }
-        }
-        else if (!!this.address !== !!other.address) {
+        } else if (!!this.address !== !!other.address) {
             return false;
         }
         if (this.administrationEmail !== other.administrationEmail) {

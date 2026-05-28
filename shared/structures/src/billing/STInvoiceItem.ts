@@ -94,8 +94,7 @@ export class STInvoiceItem extends AutoEncoder {
 
             if (pack.meta.pricingType === STPricingType.PerMember) {
                 unitPrice = Math.round(Math.min(unitPrice, unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)));
-            }
-            else {
+            } else {
                 unitPrice = Math.round(unitPrice);
             }
         }

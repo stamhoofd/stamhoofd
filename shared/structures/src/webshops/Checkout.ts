@@ -189,8 +189,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         try {
             const compiledFilter = compileToInMemoryFilter(filter, checkoutInMemoryFilterCompilers);
             return compiledFilter(this);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;
@@ -220,14 +219,12 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                     const a = WebshopFieldAnswer.create({ field, answer: '' });
                     a.validate();
                     newAnswers.push(a);
-                }
-                else {
+                } else {
                     answer.field = field;
                     answer.validate();
                     newAnswers.push(answer);
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     e.addNamespace('fieldAnswers.' + field.id);
                 }
@@ -263,8 +260,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
 
         try {
             this.cart.validate(webshop, asAdmin);
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace('cart');
             }
@@ -482,8 +478,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                     field: 'customer.phone',
                 });
             }
-        }
-        else {
+        } else {
             this.customer.phone = '';
         }
 
@@ -571,8 +566,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 }
                 if (bestPotential) {
                     bestPotential.tracker.apply();
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -597,12 +591,10 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
 
             if (this.totalPrice !== 0 && !asAdmin) {
                 this.validatePayment(webshop, organizationMeta);
-            }
-            else if (this.totalPrice === 0) {
+            } else if (this.totalPrice === 0) {
                 this.paymentMethod = PaymentMethod.Unknown;
             }
-        }
-        finally {
+        } finally {
             this.update(webshop);
         }
     }

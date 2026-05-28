@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEnc
 import { deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 
 import { AccessRight } from '../AccessRight.js';
-import type {Group} from '../Group.js';
+import type { Group } from '../Group.js';
 import { GroupType } from '../GroupType.js';
 
 import type { Organization } from '../Organization.js';
@@ -13,7 +13,7 @@ import type { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
 import type { UserWithMembers } from '../UserWithMembers.js';
 import type { Address } from '../addresses/Address.js';
-import type {PropertyFilter} from '../filters/PropertyFilter.js';
+import type { PropertyFilter } from '../filters/PropertyFilter.js';
 import type { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { getActivePeriodIds } from '../getActivePeriods.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
@@ -21,9 +21,9 @@ import type { EmergencyContact } from './EmergencyContact.js';
 import { Member } from './Member.js';
 import type { MemberProperty } from './MemberDetails.js';
 import { MemberDetails } from './MemberDetails.js';
-import type { MembersBlob} from './MemberWithRegistrationsBlob.js';
+import type { MembersBlob } from './MemberWithRegistrationsBlob.js';
 import { MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
-import type {ContinuousMembershipStatus} from './MembershipStatus.js';
+import type { ContinuousMembershipStatus } from './MembershipStatus.js';
 import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js';
 import type { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
@@ -237,8 +237,7 @@ export class PlatformFamily {
                 if (cloneMember._savingPatch || cloneMember._isCreating) {
                     console.warn('Copying from member that is being saved');
                 }
-            }
-            else {
+            } else {
                 console.warn('copyFromClone could not find member with id', member.id, 'in clone.');
             }
         }
@@ -586,8 +585,7 @@ export class PlatformRegistration extends Registration {
 
         if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
             base.push($t(`%19Q`));
-        }
-        else {
+        } else {
             if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
                 base.push($t(`%zb`));
             }
@@ -1017,14 +1015,12 @@ export class PlatformMember implements ObjectWithRecords {
                             if (!isPreviousPeriod) {
                                 return false;
                             }
-                        }
-                        else {
+                        } else {
                             return false;
                         }
                     }
                 }
-            }
-            else if (filters.previousPeriod) {
+            } else if (filters.previousPeriod) {
                 const organization = this.family.getOrganization(r.organizationId);
 
                 // Previous period is also fine
@@ -1124,7 +1120,7 @@ export class PlatformMember implements ObjectWithRecords {
         for (const group of groups) {
             const organization = this.family.getOrganization(group.organizationId);
             if (!organization) {
-                console.warn('Missing organization', group.organizationId, this, this.family)
+                console.warn('Missing organization', group.organizationId, this, this.family);
                 continue;
             }
 
@@ -1287,8 +1283,7 @@ export class PlatformMember implements ObjectWithRecords {
 
         if (options?.scopeOrganization) {
             categories.push(...options.scopeOrganization.meta.recordsConfiguration.recordCategories);
-        }
-        else {
+        } else {
             for (const organization of this.filterOrganizations({ currentPeriod: true })) {
                 categories.push(...organization.meta.recordsConfiguration.recordCategories);
             }

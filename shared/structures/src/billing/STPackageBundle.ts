@@ -147,7 +147,7 @@ export class STPackageBundleHelper {
         switch (bundle) {
             case STPackageBundle.Members: {
                 const validUntil = start.plus({ years: 1 }).endOf('day');
-                const removeAt = validUntil.plus({months: 1}).endOf('day');
+                const removeAt = validUntil.plus({ months: 1 }).endOf('day');
 
                 return STPackage.create({
                     validUntil: validUntil.toJSDate(),
@@ -159,7 +159,7 @@ export class STPackageBundleHelper {
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
                         startDate: start.toJSDate(),
-                        canDeactivate: STAMHOOFD.environment === 'development' // Cannot deactivate in production because they already paid for it.
+                        canDeactivate: STAMHOOFD.environment === 'development', // Cannot deactivate in production because they already paid for it.
                     }),
                 });
             }

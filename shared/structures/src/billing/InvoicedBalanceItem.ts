@@ -5,15 +5,15 @@ import { v4 as uuidv4 } from 'uuid';
 import type { BalanceItem } from '../BalanceItem.js';
 import { BalanceItemType, getVATExcemptPeppolTaxCategoryCode, VATExcemptReason } from '../BalanceItem.js';
 
-export function getPeppolCategoryCode(data: {VATPercentage: number, VATExcempt: VATExcemptReason | null}) {
+export function getPeppolCategoryCode(data: { VATPercentage: number; VATExcempt: VATExcemptReason | null }) {
     if (data.VATExcempt) {
-        return getVATExcemptPeppolTaxCategoryCode(data.VATExcempt)
+        return getVATExcemptPeppolTaxCategoryCode(data.VATExcempt);
     }
     if (data.VATPercentage === 0) {
         // Note: if it is exempt from tax, VATExcempt should be set instead to give a better code
-        return 'Z'
+        return 'Z';
     }
-    return 'S'
+    return 'S';
 }
 
 export class InvoicedBalanceItem extends AutoEncoder {
@@ -23,7 +23,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
     balanceItemId = '';
 
-    @field({ decoder: new EnumDecoder(BalanceItemType), version: 398})
+    @field({ decoder: new EnumDecoder(BalanceItemType), version: 398 })
     type = BalanceItemType.Other;
 
     @field({ decoder: StringDecoder })
@@ -83,7 +83,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
     VATExcempt: VATExcemptReason | null = null;
 
     get peppolCategoryCode() {
-        return getPeppolCategoryCode(this)
+        return getPeppolCategoryCode(this);
     }
 
     /**
@@ -120,7 +120,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
         if (balanceItem.VATPercentage === null) {
             throw new SimpleError({
                 message: 'Cannot create InvoicedBalanceItem for balance item without VAT percentage',
-                human: $t('%1TA', {item: balanceItem.itemTitle}),
+                human: $t('%1TA', { item: balanceItem.itemTitle }),
                 code: 'balance_item_without_vat_percentage',
             });
         }
@@ -165,7 +165,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
             item.quantity = -item.quantity;
         }
 
-        item.roundUnitPriceWithoutDifferenceInTotal()
+        item.roundUnitPriceWithoutDifferenceInTotal();
         return item;
     }
 
@@ -176,8 +176,8 @@ export class InvoicedBalanceItem extends AutoEncoder {
             // Only allow clean rounding like 15,455 or 15,45.
             if (STMath.round(recalculated * this.quantity / 1_00_00_00) * 100 === this.totalWithoutVAT) {
                 if (this.addedToUnitPriceToCorrectVAT !== 0) {
-                    const originalUnitPrice = this.unitPrice - this.addedToUnitPriceToCorrectVAT
-                    this.addedToUnitPriceToCorrectVAT = recalculated - originalUnitPrice
+                    const originalUnitPrice = this.unitPrice - this.addedToUnitPriceToCorrectVAT;
+                    this.addedToUnitPriceToCorrectVAT = recalculated - originalUnitPrice;
                 }
                 this.unitPrice = recalculated;
             }

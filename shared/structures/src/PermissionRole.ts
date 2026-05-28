@@ -223,8 +223,7 @@ export class PermissionRoleDetailed extends PermissionRole {
                 const current = this.resources.get(type)!.get(id);
                 if (!current) {
                     this.resources.get(type)!.set(id, resource);
-                }
-                else {
+                } else {
                     this.resources.get(type)!.set(id, current.merge(resource));
                 }
             }

@@ -730,88 +730,69 @@ export class GroupSettings extends AutoEncoder {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
                     who += $t(`%133`);
-                }
-                else {
+                } else {
                     who += $t(`%134`);
                 }
-            }
-            else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
+            } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
                     who += $t(`%135`);
-                }
-                else {
+                } else {
                     who += $t(`%136`);
                 }
-            }
-            else {
+            } else {
                 who += $t(`%137`);
             }
 
             if (this.minYear === this.maxYear) {
                 who += ' ' + (this.minYear);
-            }
-            else {
+            } else {
                 who += ' ' + (this.minYear) + ' - ' + (this.maxYear);
             }
-        }
-        else if (includeAge && this.maxYear) {
+        } else if (includeAge && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
                     who += $t(`%138`);
-                }
-                else {
+                } else {
                     who += $t(`%139`);
                 }
-            }
-            else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
+            } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
                     who += $t(`%13A`);
-                }
-                else {
+                } else {
                     who += $t(`%13B`);
                 }
-            }
-            else {
+            } else {
                 who += $t(`%13C`);
             }
             who += ' ' + (this.maxYear);
-        }
-        else if (includeAge && this.minYear) {
+        } else if (includeAge && this.minYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
                     who += $t(`%13D`);
-                }
-                else {
+                } else {
                     who += $t(`%13E`);
                 }
-            }
-            else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
+            } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
                     who += $t(`%13F`);
-                }
-                else {
+                } else {
                     who += $t(`%13G`);
                 }
-            }
-            else {
+            } else {
                 who += $t(`%13H`);
             }
             who += ' ' + (this.minYear);
-        }
-        else if (includeGender) {
+        } else if (includeGender) {
             if (this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
                     who += $t(`%13I`);
-                }
-                else {
+                } else {
                     who += $t(`%13J`);
                 }
-            }
-            else if (this.genderType === GroupGenderType.OnlyFemale) {
+            } else if (this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
                     who += $t(`%13K`);
-                }
-                else {
+                } else {
                     who += $t(`%13L`);
                 }
             }

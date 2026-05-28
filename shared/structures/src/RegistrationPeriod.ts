@@ -199,8 +199,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
                 const newId = groupMap.get(group.waitingList.id) ?? null;
                 if (newId) {
                     group.waitingList = newOrganizationPeriod.groups.find(g => g.id === newId) ?? null;
-                }
-                else {
+                } else {
                     group.waitingList = null;
                 }
             }

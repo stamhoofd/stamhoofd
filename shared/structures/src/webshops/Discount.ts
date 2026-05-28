@@ -1,4 +1,4 @@
-import type { Data, EncodeContext, PlainObject} from '@simonbackx/simple-encoding';
+import type { Data, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import type { CartItem, CartItemPrice } from './CartItem.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -53,8 +53,7 @@ export class ProductSelector extends AutoEncoder {
         if (!value) {
             if (optionMenu.multipleChoice) {
                 return OptionSelectionRequirement.Optional;
-            }
-            else {
+            } else {
                 for (const o of optionMenu.options) {
                     if (this.optionIds.get(o.id) ?? OptionSelectionRequirement.Optional !== OptionSelectionRequirement.Optional) {
                         return OptionSelectionRequirement.Excluded;
@@ -123,11 +122,9 @@ export class ProductSelector extends AutoEncoder {
 
         if (excludedOptions.length && requiredOptions.length === 0) {
             footnote = $t(`%ss`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`%GT`) + ' ');
-        }
-        else if (excludedOptions.length === 0 && requiredOptions.length) {
+        } else if (excludedOptions.length === 0 && requiredOptions.length) {
             footnote = $t(`%st`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`%M1`) + ' ');
-        }
-        else if (excludedOptions.length && requiredOptions.length) {
+        } else if (excludedOptions.length && requiredOptions.length) {
             footnote = $t(`%st`) + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%su`) + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t(`%GT`) + ' ');
         }
 
@@ -320,8 +317,7 @@ export class ProductDiscountSettings extends AutoEncoder {
             while (d.length < offset + amount) {
                 d.push(this.discounts[this.discounts.length - 1]);
             }
-        }
-        else if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
+        } else if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
             while (d.length < offset + amount) {
                 d.push(this.discounts[d.length % this.discounts.length]);
             }
@@ -345,24 +341,20 @@ export class ProductDiscountSettings extends AutoEncoder {
 
         if (this.cartLabel) {
             descriptions.push(this.cartLabel);
-        }
-        else if (this.discounts.length === 1) {
+        } else if (this.discounts.length === 1) {
             const discount = this.discounts[0];
 
             if (discount.percentageDiscount) {
                 if (discount.percentageDiscount >= 100 * 100) {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
                         descriptions.push($t(`%1Mn`));
-                    }
-                    else {
+                    } else {
                         descriptions.push($t(`%sv`));
                     }
-                }
-                else {
+                } else {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
                         descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`%sT`));
-                    }
-                    else {
+                    } else {
                         descriptions.push(
                             $t(`%sw`) + ' ' + Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`%sT`),
                         );
@@ -373,15 +365,13 @@ export class ProductDiscountSettings extends AutoEncoder {
             if (discount.discountPerPiece) {
                 if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
                     descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t(`%sx`));
-                }
-                else {
+                } else {
                     descriptions.push(
                         $t(`%sw`) + ' ' + Formatter.price(discount.discountPerPiece) + ' ' + $t(`%sT`),
                     );
                 }
             }
-        }
-        else {
+        } else {
             let index = 0;
             for (const discount of this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern ? [...this.discounts, ...this.discounts, ...this.discounts] : this.discounts) {
                 index += 1;
@@ -391,8 +381,7 @@ export class ProductDiscountSettings extends AutoEncoder {
                     if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {
                         if (descriptions.length > 0) {
                             s = $t(`%sy`);
-                        }
-                        else {
+                        } else {
                             s = $t(`%sz`) + ' ' + s;
                         }
                     }
@@ -401,8 +390,7 @@ export class ProductDiscountSettings extends AutoEncoder {
                 if (discount.percentageDiscount) {
                     if (discount.percentageDiscount >= 100 * 100) {
                         descriptions.push(s + ' ' + $t(`%s8`));
-                    }
-                    else {
+                    } else {
                         descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t(`%t0`) + ' ' + s);
                     }
                 }
@@ -415,8 +403,7 @@ export class ProductDiscountSettings extends AutoEncoder {
             if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
                 if (descriptions.length === 3 && this.discounts[this.discounts.length - 1].percentageDiscount === 100 * 100) {
                     descriptions = [(this.discounts.length - 1) + ' ' + $t(`%t1`)];
-                }
-                else {
+                } else {
                     descriptions.push('...');
                 }
             }
@@ -498,8 +485,7 @@ export class ProductDiscountTracker {
             const d = this.getNextDiscount(offset);
             if (d) {
                 potential += d.calculatePotential(item.price);
-            }
-            else {
+            } else {
                 break;
             }
             offset += 1;
@@ -570,12 +556,10 @@ export class Discount extends AutoEncoder {
             if (this.applyMultipleTimes) {
                 if (this.requirements.length > 1) {
                     descriptions.push($t(`%t4`));
-                }
-                else {
+                } else {
                     descriptions.push($t(`%t5`));
                 }
-            }
-            else {
+            } else {
                 descriptions.push($t(`%t6`));
             }
 

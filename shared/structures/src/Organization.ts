@@ -278,8 +278,7 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
             const value = compiledFilter(this);
             console.log('does match filter', filter, this, value);
             return value;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;

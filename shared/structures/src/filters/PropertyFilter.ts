@@ -103,13 +103,11 @@ export class PropertyFilter implements Encodeable {
         // Merge enabled when
         if (other.enabledWhen === null || this.enabledWhen === null) {
             base.enabledWhen = null;
-        }
-        else {
+        } else {
             // Merge both filters if different
             if (isEqualFilter(this.enabledWhen, other.enabledWhen)) {
                 base.enabledWhen = this.enabledWhen;
-            }
-            else {
+            } else {
                 base.enabledWhen = mergeFilters([
                     this.enabledWhen,
                     other.enabledWhen,
@@ -126,18 +124,15 @@ export class PropertyFilter implements Encodeable {
             if (this.requiredWhen === null) {
                 // Always skipable (because not enabled)
                 thisRequired = null;
-            }
-            else {
+            } else {
                 if (isEmptyFilter(this.requiredWhen)) {
                     // always required: so in fact only required when enabled
                     thisRequired = this.enabledWhen;
-                }
-                else {
+                } else {
                     if (isEqualFilter(this.enabledWhen, this.requiredWhen)) {
                         // required and enabled is identical
                         thisRequired = this.requiredWhen;
-                    }
-                    else {
+                    } else {
                         // required when it is also enabled
                         thisRequired = mergeFilters([
                             this.enabledWhen,
@@ -157,17 +152,14 @@ export class PropertyFilter implements Encodeable {
             if (other.requiredWhen === null) {
                 // Always skipable
                 otherRequired = null;
-            }
-            else {
+            } else {
                 if (isEmptyFilter(other.requiredWhen)) {
                     // Simplify without $and
                     otherRequired = other.enabledWhen;
-                }
-                else {
+                } else {
                     if (isEqualFilter(other.enabledWhen, other.requiredWhen)) {
                         otherRequired = other.requiredWhen;
-                    }
-                    else {
+                    } else {
                         otherRequired = mergeFilters([
                             other.enabledWhen,
                             other.requiredWhen,
@@ -180,21 +172,17 @@ export class PropertyFilter implements Encodeable {
         // Merge required when
         if (thisRequired === null) {
             base.requiredWhen = otherRequired;
-        }
-        else if (otherRequired === null) {
+        } else if (otherRequired === null) {
             base.requiredWhen = thisRequired;
-        }
-        else if (isEmptyFilter(thisRequired) || isEmptyFilter(otherRequired)) {
+        } else if (isEmptyFilter(thisRequired) || isEmptyFilter(otherRequired)) {
             // Always required
             base.requiredWhen = {};
-        }
-        else {
+        } else {
             // Merge both filters ($or). It is required when any matches
 
             if (isEqualFilter(thisRequired, otherRequired)) {
                 base.requiredWhen = thisRequired;
-            }
-            else {
+            } else {
                 base.requiredWhen = mergeFilters([
                     thisRequired,
                     otherRequired,

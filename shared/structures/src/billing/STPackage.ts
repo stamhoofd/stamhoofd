@@ -46,13 +46,13 @@ export class STPackageTypeHelper {
     /**
      * Used for renewal. Should this package renew as what bundle?
      */
-     static getBundle(type: STPackageType): STPackageBundle {
+    static getBundle(type: STPackageType): STPackageBundle {
         switch (type) {
-            case STPackageType.LegacyMembers: 
+            case STPackageType.LegacyMembers:
             case STPackageType.Members:
                 return STPackageBundle.Members;
 
-            case STPackageType.Webshops: 
+            case STPackageType.Webshops:
             case STPackageType.SingleWebshop:
                 return STPackageBundle.Webshops;
 
@@ -82,16 +82,16 @@ export enum STPricingType {
 
 export function getPricingTypeName(type: STPricingType) {
     switch (type) {
-        case STPricingType.Fixed: return $t('Eénmalig')
-        case STPricingType.PerYear: return $t('Per jaar')
-        case STPricingType.PerMember: return $t('Per lid, per jaar')
+        case STPricingType.Fixed: return $t('Eénmalig');
+        case STPricingType.PerYear: return $t('Per jaar');
+        case STPricingType.PerMember: return $t('Per lid, per jaar');
     }
 }
 export function getPricingTypeSuffix(type: STPricingType) {
     switch (type) {
-        case STPricingType.Fixed: return $t('éénmalig')
-        case STPricingType.PerYear: return $t('per jaar')
-        case STPricingType.PerMember: return $t('per lid, per jaar')
+        case STPricingType.Fixed: return $t('éénmalig');
+        case STPricingType.PerYear: return $t('per jaar');
+        case STPricingType.PerMember: return $t('per lid, per jaar');
     }
 }
 
@@ -101,18 +101,18 @@ export class STPackageMeta extends AutoEncoder {
     }
 
     get isTrial() {
-        return this.type.includes('Trial')
+        return this.type.includes('Trial');
     }
 
     get isWebshops() {
-        return this.type === STPackageType.Webshops || this.type === STPackageType.SingleWebshop || this.type === STPackageType.TrialWebshops
+        return this.type === STPackageType.Webshops || this.type === STPackageType.SingleWebshop || this.type === STPackageType.TrialWebshops;
     }
 
     /**
      * When service fees or per member pricing is set, a mandate is required
      */
     get requiresMandate() {
-        return this.serviceFeeFixed !== 0 || this.serviceFeePercentage !== 0 || !!this.serviceFeeMinimum || (!!this.unitPrice && this.pricingType === STPricingType.PerMember)
+        return this.serviceFeeFixed !== 0 || this.serviceFeePercentage !== 0 || !!this.serviceFeeMinimum || (!!this.unitPrice && this.pricingType === STPricingType.PerMember);
     }
 
     /**
@@ -130,7 +130,7 @@ export class STPackageMeta extends AutoEncoder {
     pricingType = STPricingType.Fixed;
 
     @field({ decoder: BooleanDecoder, version: 398, defaultValue: () => false })
-    keepPricesOnRenewal: boolean
+    keepPricesOnRenewal: boolean;
 
     /**
      * One time price for the package, per year, or per member depending on pricingType
@@ -225,21 +225,21 @@ export class STPackageMeta extends AutoEncoder {
 
         if (this.unitPrice) {
             if (this.pricingType === STPricingType.PerMember) {
-                strs.push($t(`%1T2`, {price: Formatter.price(this.unitPrice)}));
+                strs.push($t(`%1T2`, { price: Formatter.price(this.unitPrice) }));
             } else if (this.pricingType === STPricingType.PerYear) {
-                strs.push($t(`%1RJ`, {price: Formatter.price(this.unitPrice)}));
+                strs.push($t(`%1RJ`, { price: Formatter.price(this.unitPrice) }));
             } else if (this.pricingType === STPricingType.Fixed) {
-                strs.push($t(`%1RX`, {amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice)}));
+                strs.push($t(`%1RX`, { amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice) }));
             }
 
             if (this.minimumAmount) {
                 if (this.pricingType !== STPricingType.Fixed) {
-                    strs.push($t(`%1Ta`, {amount: Formatter.integer(this.minimumAmount)}));
+                    strs.push($t(`%1Ta`, { amount: Formatter.integer(this.minimumAmount) }));
                 }
             }
         }
 
-        let suffix = $t('%1U3')
+        let suffix = $t('%1U3');
         if (this.type === STPackageType.Members) {
             suffix = $t('%1Ts');
         }
@@ -248,18 +248,18 @@ export class STPackageMeta extends AutoEncoder {
         let maximumSuffix = '';
 
         if (this.serviceFeeMinimum) {
-            minimumSuffix = $t('%1RM', {price: Formatter.price(this.serviceFeeMinimum)});
+            minimumSuffix = $t('%1RM', { price: Formatter.price(this.serviceFeeMinimum) });
 
             if (this.type === STPackageType.Members) {
-                minimumSuffix = $t('%1RM', {price: Formatter.price(this.serviceFeeMinimum)});
+                minimumSuffix = $t('%1RM', { price: Formatter.price(this.serviceFeeMinimum) });
             }
         }
 
         if (this.serviceFeeMaximum) {
-            maximumSuffix = $t('%1Tl', {price: Formatter.price(this.serviceFeeMaximum)});
+            maximumSuffix = $t('%1Tl', { price: Formatter.price(this.serviceFeeMaximum) });
 
             if (this.type === STPackageType.Members) {
-                maximumSuffix = $t('%1Tl', {price: Formatter.price(this.serviceFeeMaximum)});
+                maximumSuffix = $t('%1Tl', { price: Formatter.price(this.serviceFeeMaximum) });
             }
         }
 
@@ -317,13 +317,13 @@ export class STPackage extends AutoEncoder {
             return this.validUntil;
         }
         if (!this.validUntil) {
-            return this.removeAt
+            return this.removeAt;
         }
-        return new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
+        return new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()));
     }
 
     get isActive() {
-        return !!this.validAt && (!this.endDate || this.endDate > new Date())
+        return !!this.validAt && (!this.endDate || this.endDate > new Date());
     }
 
     /**
@@ -340,8 +340,8 @@ export class STPackage extends AutoEncoder {
 
         if (!this.meta.keepPricesOnRenewal) {
             return STPackageBundleHelper.getCurrentPackage(
-                STPackageTypeHelper.getBundle(this.meta.type), 
-                new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0))
+                STPackageTypeHelper.getBundle(this.meta.type),
+                new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0)),
             );
         }
 
@@ -353,8 +353,7 @@ export class STPackage extends AutoEncoder {
 
         const start = Formatter.luxon(new Date(Math.max(new Date().getTime(), this.endDate?.getTime() ?? 0) + 1_000)).startOf('day');
         const validUntil = start.plus({ years: 1 }).endOf('day');
-        const removeAt = validUntil.plus({months: 1}).endOf('day');
-
+        const removeAt = validUntil.plus({ months: 1 }).endOf('day');
 
         pack.meta.paidAmount = 0;
         pack.meta.paidPrice = 0;
@@ -363,10 +362,10 @@ export class STPackage extends AutoEncoder {
 
         // Duration for renewals is always a year ATM
         pack.meta.startDate = start.toJSDate();
-        pack.validUntil = validUntil.toJSDate()
+        pack.validUntil = validUntil.toJSDate();
 
         // Remove (= not renewable) if not renewed after 3 months
-        pack.removeAt = removeAt.toJSDate()
+        pack.removeAt = removeAt.toJSDate();
 
         if (this.meta.type === STPackageType.SingleWebshop) {
             // Deprecated package
@@ -559,8 +558,7 @@ export class STPackageStatus extends AutoEncoder {
 
         if (status.validUntil === null) {
             this.validUntil = null;
-        }
-        else if (this.validUntil !== null) {
+        } else if (this.validUntil !== null) {
             if (status.validUntil > this.validUntil) {
                 this.validUntil = status.validUntil;
             }
@@ -568,8 +566,7 @@ export class STPackageStatus extends AutoEncoder {
 
         if (status.removeAt === null) {
             this.removeAt = null;
-        }
-        else if (this.removeAt !== null) {
+        } else if (this.removeAt !== null) {
             if (status.removeAt > this.removeAt) {
                 this.removeAt = status.removeAt;
             }
@@ -577,8 +574,7 @@ export class STPackageStatus extends AutoEncoder {
 
         if (this.firstFailedPayment === null) {
             this.firstFailedPayment = status.firstFailedPayment;
-        }
-        else if (status.firstFailedPayment !== null) {
+        } else if (status.firstFailedPayment !== null) {
             if (status.firstFailedPayment < this.firstFailedPayment) {
                 this.firstFailedPayment = status.firstFailedPayment;
             }
@@ -597,12 +593,10 @@ export function calculateVATPercentage(address: Address, VATNumber: string | nul
     let VATRate = 0;
     if (address.country === Country.Belgium) {
         VATRate = 21;
-    }
-    else {
+    } else {
         if (VATNumber && VATNumber.substr(0, 2).toUpperCase() !== 'BE') {
             VATRate = 0;
-        }
-        else {
+        } else {
             // Apply VAT rate of the home country for consumers in the EU
 
             switch (address.country) {

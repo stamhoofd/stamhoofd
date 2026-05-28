@@ -1,12 +1,12 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import type { BalanceItem } from '../../BalanceItem.js';
-import type {BundleDiscountCalculation} from '../../BundleDiscount.js';
+import type { BundleDiscountCalculation } from '../../BundleDiscount.js';
 import { Platform } from '../../Platform.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
-import type {RegisterCheckout, RegisterContext} from './RegisterCheckout.js';
-import { IDRegisterItem  } from './RegisterItem.js';
-import type {RegisterItem} from './RegisterItem.js';
+import type { RegisterCheckout, RegisterContext } from './RegisterCheckout.js';
+import { IDRegisterItem } from './RegisterItem.js';
+import type { RegisterItem } from './RegisterItem.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 
 export class IDRegisterCart extends AutoEncoder {
@@ -244,13 +244,13 @@ export class RegisterCart {
     }
 
     get balanceItemDiscounts() {
-        return this.balanceItems.filter(b => b.price < 0)
+        return this.balanceItems.filter(b => b.price < 0);
     }
 
     get balanceItemDiscountsPrice() {
         return this.balanceItemDiscounts.reduce((total, item) => {
-                return total + item.price;
-            }, 0);
+            return total + item.price;
+        }, 0);
     }
 
     get priceDueLater() {
@@ -322,13 +322,11 @@ export class RegisterCart {
                         human: $t(`%qo`),
                     }));
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     e.addNamespace('cart');
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
 
@@ -355,13 +353,11 @@ export class RegisterCart {
             try {
                 balanceItem.validate({ balanceItems: data?.memberBalanceItems });
                 cleanedBalanceItems.push(balanceItem);
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     e.addNamespace('cart');
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
             }

@@ -9,7 +9,7 @@ export type ReviewTimeType = 'records' | 'parents' | 'emergencyContacts' | 'deta
  */
 export class ReviewTime extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    name: ReviewTimeType
+    name: ReviewTimeType;
 
     /**
      * Date that this section was reviewed

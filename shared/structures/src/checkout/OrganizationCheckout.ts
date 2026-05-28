@@ -72,8 +72,8 @@ export class PackagePurchases extends AutoEncoder {
                         throw new SimpleError({
                             code: 'already_active',
                             message: 'Cannot activate this package because of conflicting package',
-                            human: $t('%1Qa')
-                        })
+                            human: $t('%1Qa'),
+                        });
                     }
                 }
             }
@@ -91,7 +91,7 @@ export class PackagePurchases extends AutoEncoder {
                 throw new SimpleError({
                     code: 'invalid_package',
                     message: 'Package valid until date is too far in the future',
-                    human: $t('%1Sv')
+                    human: $t('%1Sv'),
                 });
             }
         }

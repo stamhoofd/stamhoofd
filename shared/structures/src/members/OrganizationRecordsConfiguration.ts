@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { PropertyFilter } from '../filters/PropertyFilter.js';
-import type {Group} from '../Group.js';
+import type { Group } from '../Group.js';
 import { GroupType } from '../GroupType.js';
 import type { Organization } from '../Organization.js';
 import type { Platform } from '../Platform.js';
@@ -329,8 +329,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.uitpasNumber !== null) {
             if (clone.uitpasNumber) {
                 clone.uitpasNumber = clone.uitpasNumber.merge(parent.uitpasNumber);
-            }
-            else {
+            } else {
                 clone.uitpasNumber = parent.uitpasNumber;
             }
         }
@@ -338,8 +337,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.nationalRegisterNumber !== null) {
             if (clone.nationalRegisterNumber) {
                 clone.nationalRegisterNumber = clone.nationalRegisterNumber.merge(parent.nationalRegisterNumber);
-            }
-            else {
+            } else {
                 clone.nationalRegisterNumber = parent.nationalRegisterNumber;
             }
         }
@@ -347,8 +345,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.emailAddress !== null) {
             if (clone.emailAddress) {
                 clone.emailAddress = clone.emailAddress.merge(parent.emailAddress);
-            }
-            else {
+            } else {
                 clone.emailAddress = parent.emailAddress;
             }
         }
@@ -356,8 +353,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.phone !== null) {
             if (clone.phone) {
                 clone.phone = clone.phone.merge(parent.phone);
-            }
-            else {
+            } else {
                 clone.phone = parent.phone;
             }
         }
@@ -365,8 +361,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.gender !== null) {
             if (clone.gender) {
                 clone.gender = clone.gender.merge(parent.gender);
-            }
-            else {
+            } else {
                 clone.gender = parent.gender;
             }
         }
@@ -374,8 +369,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.birthDay !== null) {
             if (clone.birthDay) {
                 clone.birthDay = clone.birthDay.merge(parent.birthDay);
-            }
-            else {
+            } else {
                 clone.birthDay = parent.birthDay;
             }
         }
@@ -383,8 +377,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.address !== null) {
             if (clone.address) {
                 clone.address = clone.address.merge(parent.address);
-            }
-            else {
+            } else {
                 clone.address = parent.address;
             }
         }
@@ -392,8 +385,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.parents !== null) {
             if (clone.parents) {
                 clone.parents = clone.parents.merge(parent.parents);
-            }
-            else {
+            } else {
                 clone.parents = parent.parents;
             }
         }
@@ -401,8 +393,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         if (parent.emergencyContacts !== null) {
             if (clone.emergencyContacts) {
                 clone.emergencyContacts = clone.emergencyContacts.merge(parent.emergencyContacts);
-            }
-            else {
+            } else {
                 clone.emergencyContacts = parent.emergencyContacts;
             }
         }

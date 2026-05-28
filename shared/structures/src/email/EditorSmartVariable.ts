@@ -46,19 +46,16 @@ export class EditorSmartVariable extends AutoEncoder {
             if (!replacement) {
                 // Not found
                 return false;
-            }
-            else {
+            } else {
                 if (variable instanceof EditorSmartVariable) {
                     if (replacement.html) {
                         variable.html = replacement.html;
                         variable.example = '';
-                    }
-                    else if (replacement.value) {
+                    } else if (replacement.value) {
                         variable.example = replacement.value;
                         variable.html = undefined;
                     }
-                }
-                else {
+                } else {
                     // Do not change text
                 }
             }
@@ -239,7 +236,7 @@ export class EditorSmartVariable extends AutoEncoder {
             name: $t(`%hF`),
         }));
 
-         variables.push(EditorSmartVariable.create({
+        variables.push(EditorSmartVariable.create({
             id: 'totalPrice',
             name: $t(`%hF`),
         }));

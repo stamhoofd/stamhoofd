@@ -192,8 +192,7 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
         try {
             const compiledFilter = compileToInMemoryFilter(filter, registrationInMemoryFilterCompilers);
             return compiledFilter(this);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;

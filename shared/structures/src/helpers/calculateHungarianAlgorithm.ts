@@ -67,8 +67,7 @@ export function calculateHungarianAlgorithm(priceMatrix: number[][]): number[] {
                 if (inZ[w]) {
                     ys[job[w]] += delta;
                     yt[w] -= delta;
-                }
-                else {
+                } else {
                     minTo[w] -= delta;
                 }
             }

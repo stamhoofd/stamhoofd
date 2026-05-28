@@ -142,7 +142,7 @@ function fillReplacements(replacements: Replacement[]) {
             firstName: $t('%58').split(' ')[0],
             lastName: $t('%58').split(' ').slice(1).join(' '),
             phone: $t('%1Qk'),
-            email: $t('%1Q9')
+            email: $t('%1Q9'),
         }),
         transferDescription: '+++111/111/111+++',
         transferSettings: TransferSettings.create({

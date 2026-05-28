@@ -480,8 +480,7 @@ export class PlatformConfig extends AutoEncoder {
                     value: fromAddress.name ?? this.name,
                 }),
             );
-        }
-        else {
+        } else {
             base.push(
                 Replacement.create({
                     token: 'fromName',

@@ -40,8 +40,7 @@ export class SearchFilterFactory {
                         $eq: formatted,
                     };
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to parse phone number', search, e);
             }
         }

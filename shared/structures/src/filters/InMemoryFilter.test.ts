@@ -334,12 +334,12 @@ describe('InMemoryFilter', () => {
             };
 
             test({
-                filter: { age: {$lt: 5} },
+                filter: { age: { $lt: 5 } },
                 filters,
                 objects: [
                     { age: null }, // null is always smaller than anything
                     { age: 4 },
-                    { age: -5 }
+                    { age: -5 },
                 ],
                 doNotMatch: [
                     { age: 5 },
@@ -355,13 +355,13 @@ describe('InMemoryFilter', () => {
             };
 
             test({
-                filter: { name: {$lt: 'John Doe'} },
+                filter: { name: { $lt: 'John Doe' } },
                 filters,
                 objects: [
                     { name: null }, // null is always smaller than anything
-                    { name: 'Jane Doe' },                    
+                    { name: 'Jane Doe' },
                     { name: 'John Dod' },
-                    { name: 'John Do' }
+                    { name: 'John Do' },
                 ],
                 doNotMatch: [
                     { name: 'John Dof' },
@@ -378,17 +378,17 @@ describe('InMemoryFilter', () => {
             };
 
             test({
-                filter: { birthDay: {$lt: new Date(1994,5,24)} },
+                filter: { birthDay: { $lt: new Date(1994, 5, 24) } },
                 filters,
                 objects: [
                     { birthDay: null }, // null is always smaller than anything
-                    { birthDay: new Date(1994,5,23) },
-                    { birthDay: new Date(1993,5,24) },
+                    { birthDay: new Date(1994, 5, 23) },
+                    { birthDay: new Date(1993, 5, 24) },
                 ],
                 doNotMatch: [
-                    { birthDay: new Date(1994,5,25) },
-                    { birthDay: new Date(1995,5,24) },
-                    { birthDay: new Date(1994,5,24) },
+                    { birthDay: new Date(1994, 5, 25) },
+                    { birthDay: new Date(1995, 5, 24) },
+                    { birthDay: new Date(1994, 5, 24) },
                 ],
             });
         });
@@ -402,11 +402,11 @@ describe('InMemoryFilter', () => {
             };
 
             test({
-                filter: { age: {$gt: 5} },
+                filter: { age: { $gt: 5 } },
                 filters,
                 objects: [
                     { age: 10 },
-                    { age: 6 }
+                    { age: 6 },
                 ],
                 doNotMatch: [
                     { age: null }, // null is always smaller than anything
@@ -424,7 +424,7 @@ describe('InMemoryFilter', () => {
             };
 
             test({
-                filter: { name: {$gt: 'John Doe'} },
+                filter: { name: { $gt: 'John Doe' } },
                 filters,
                 objects: [
                     { name: 'John Dof' },
@@ -432,7 +432,7 @@ describe('InMemoryFilter', () => {
                 ],
                 doNotMatch: [
                     { name: null }, // null is always smaller than anything
-                    { name: 'Jane Doe' },                    
+                    { name: 'Jane Doe' },
                     { name: 'John Dod' },
                     { name: 'John Do' },
                     { name: 'John Doe' },
@@ -447,17 +447,17 @@ describe('InMemoryFilter', () => {
             };
 
             test({
-                filter: { birthDay: {$gt: new Date(1994,5,24)} },
+                filter: { birthDay: { $gt: new Date(1994, 5, 24) } },
                 filters,
                 objects: [
-                    { birthDay: new Date(1994,5,25) },
-                    { birthDay: new Date(1995,5,24) }
+                    { birthDay: new Date(1994, 5, 25) },
+                    { birthDay: new Date(1995, 5, 24) },
                 ],
                 doNotMatch: [
                     { birthDay: null }, // null is always smaller than anything
-                    { birthDay: new Date(1994,5,23) },
-                    { birthDay: new Date(1993,5,24) },
-                    { birthDay: new Date(1994,5,24) },
+                    { birthDay: new Date(1994, 5, 23) },
+                    { birthDay: new Date(1993, 5, 24) },
+                    { birthDay: new Date(1994, 5, 24) },
                 ],
             });
         });

@@ -4,10 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Group } from './Group.js';
 import { GroupPriceDiscount } from './GroupPriceDiscount.js';
 import { calculateHungarianAlgorithm } from './helpers/calculateHungarianAlgorithm.js';
-import type {RegisterCart} from './members/checkout/RegisterCart.js';
+import type { RegisterCart } from './members/checkout/RegisterCart.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
-import type {PlatformFamily, PlatformMember} from './members/PlatformMember.js';
+import type { PlatformFamily, PlatformMember } from './members/PlatformMember.js';
 import { TranslatedString } from './TranslatedString.js';
 
 export class BundleDiscount extends AutoEncoder {
@@ -167,12 +167,10 @@ class BundleDiscountCalculationGroup {
             if (this.bundle.countPerGroup) {
                 groupingCode += item.group.id;
                 group = item.group;
-            }
-            else {
+            } else {
                 // Group by family objects (for admins)
             }
-        }
-        else {
+        } else {
             member = item.member;
             groupingCode += item.member.id;
         }
@@ -285,8 +283,7 @@ export class BundleDiscountCalculation {
     getTotalFor(item: RegisterItem | RegistrationWithPlatformMember) {
         if (item instanceof RegisterItem) {
             return this.items.get(item) ?? 0;
-        }
-        else if (item instanceof RegistrationWithPlatformMember) {
+        } else if (item instanceof RegistrationWithPlatformMember) {
             return (this.registrations.get(item) ?? 0);
         }
         return 0;
@@ -306,8 +303,7 @@ export class BundleDiscountCalculation {
     add(item: RegisterItem | RegistrationWithPlatformMember) {
         if (item instanceof RegistrationWithPlatformMember) {
             this.registrations.set(item, 0);
-        }
-        else if (item instanceof RegisterItem) {
+        } else if (item instanceof RegisterItem) {
             this.items.set(item, 0);
         }
     }
@@ -393,8 +389,7 @@ export class BundleDiscountCalculation {
 
             if (item instanceof RegistrationWithPlatformMember) {
                 this.registrations.set(item, discount);
-            }
-            else {
+            } else {
                 this.items.set(item, discount);
             }
         }

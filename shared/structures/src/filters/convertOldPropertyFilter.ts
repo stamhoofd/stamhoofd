@@ -200,10 +200,10 @@ function wrapRecordAnswerFilter<T extends RecordAnswerFilterType>(filter: T, get
     return {
         recordAnswers: getInnerFilter(filter, recordId, (f: StamhoofdFilter) => {
             return {
-                value: f
-            }
-        })
-    }
+                value: f,
+            };
+        }),
+    };
 }
 
 function getInnerStamhoofdFilterForNumberFilter(filter: NumberFilter, sqlFilterId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f): StamhoofdFilter {
@@ -578,8 +578,7 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
             if (productPriceIds.has(productId)) {
                 const set = productPriceIds.get(productId)!;
                 set.add(priceId);
-            }
-            else {
+            } else {
                 productPriceIds.set(productId, new Set([priceId]));
             }
         }
@@ -954,8 +953,7 @@ export function convertOldPropertyFilter(filter: OldPropertyFilter): PropertyFil
 
     if (filter.requiredWhen === null) {
         newRequiredWhen = null;
-    }
-    else if (filter.requiredWhen.data && (filter.requiredWhen.data as FilterGroup).filters.length !== 0) {
+    } else if (filter.requiredWhen.data && (filter.requiredWhen.data as FilterGroup).filters.length !== 0) {
         newRequiredWhen = filterToStamhoofdFilter(filter.requiredWhen.data);
     }
 
@@ -977,8 +975,8 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
                 id: {
                     $eq: id,
                 },
-            }
-        }
+            },
+        };
     }
 
     switch (mode) {
@@ -986,7 +984,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
             return {
                 registrations: {
                     $elemMatch: {
-                        $or: filter.choices.map((c) => createGroupIdFilter(c.id)),
+                        $or: filter.choices.map(c => createGroupIdFilter(c.id)),
                     },
                 },
             };
@@ -995,7 +993,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
             return {
                 registrations: {
                     $elemMatch: {
-                        $and: filter.choices.map((c) => createGroupIdFilter(c.id)),
+                        $and: filter.choices.map(c => createGroupIdFilter(c.id)),
                     },
                 },
             };
@@ -1005,7 +1003,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
                 registrations: {
                     $not: {
                         $elemMatch: {
-                            $or: filter.choices.map((c) => createGroupIdFilter(c.id)),
+                            $or: filter.choices.map(c => createGroupIdFilter(c.id)),
                         },
                     },
                 },
@@ -1016,7 +1014,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
                 registrations: {
                     $not: {
                         $elemMatch: {
-                            $and: filter.choices.map((c) => createGroupIdFilter(c.id)),
+                            $and: filter.choices.map(c => createGroupIdFilter(c.id)),
                         },
                     },
                 },

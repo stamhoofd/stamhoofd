@@ -715,11 +715,9 @@ export class AuditLogPatchItem extends AutoEncoder {
     autoType() {
         if (!this.oldValue && this.value) {
             this.type = AuditLogPatchItemType.Added;
-        }
-        else if (!this.value && this.oldValue) {
+        } else if (!this.value && this.oldValue) {
             this.type = AuditLogPatchItemType.Removed;
-        }
-        else {
+        } else {
             this.type = AuditLogPatchItemType.Changed;
         }
         return this;
@@ -808,8 +806,7 @@ export class AuditLog extends AutoEncoder {
                 context: Object.fromEntries(this.replacements.entries()),
                 helpers,
             });
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Invalid render template', e);
             return ['Onbekende actie'];
         }
@@ -827,8 +824,7 @@ export class AuditLog extends AutoEncoder {
                 context: Object.fromEntries(this.replacements.entries()),
                 helpers,
             });
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Invalid render template', e);
             return ['Onbekende actie'];
         }

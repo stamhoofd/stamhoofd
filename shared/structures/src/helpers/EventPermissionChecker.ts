@@ -47,8 +47,7 @@ export class EventPermissionChecker {
 
             try {
                 organization = await getOrganization(event.organizationId);
-            }
-            catch (error) {
+            } catch (error) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Organization not found',
@@ -105,8 +104,7 @@ export class EventPermissionChecker {
                 platform,
                 userPermissions,
             );
-        }
-        else {
+        } else {
             this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, platform);
         }
     }
@@ -121,8 +119,7 @@ export class EventPermissionChecker {
     ): boolean {
         try {
             this.throwIfNoPermissionToWriteEvent(event, options);
-        }
-        catch (error) {
+        } catch (error) {
             if (isSimpleError(error) || isSimpleErrors(error)) {
                 return false;
             }
@@ -178,8 +175,7 @@ export class EventPermissionChecker {
                     statusCode: 403,
                 });
             }
-        }
-        else {
+        } else {
             for (const group of event.meta.groups) {
                 if (
                     !organizationPermissions.hasResourceAccessRight(
@@ -232,8 +228,7 @@ export class EventPermissionChecker {
                     statusCode: 403,
                 });
             }
-        }
-        else {
+        } else {
             for (const tagId of event.meta.organizationTagIds) {
                 if (
                     !platformPermissions.hasResourceAccessRight(

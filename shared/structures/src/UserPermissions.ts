@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { AccessRightHelper } from './AccessRight.js';
@@ -170,8 +170,7 @@ export class UserPermissions extends AutoEncoder {
                 const o = old?.organizationPermissions.get(organizationId)?.responsibilities;
                 if (n) {
                     n.responsibilities = o ?? [];
-                }
-                else {
+                } else {
                     if (o && o.length) {
                         // Keep responsibilities
                         const kept = Permissions.create({
@@ -186,8 +185,7 @@ export class UserPermissions extends AutoEncoder {
                 }
                 return updated;
             }
-        }
-        else {
+        } else {
             // Only allow to set the permissions for the organization in scope
             if (patch.organizationPermissions.get(organizationId) !== undefined) {
                 const clonedPatch = UserPermissions.patch({});
@@ -199,8 +197,7 @@ export class UserPermissions extends AutoEncoder {
                 const o = old?.organizationPermissions.get(organizationId)?.responsibilities;
                 if (n) {
                     n.responsibilities = o ?? [];
-                }
-                else {
+                } else {
                     if (o && o.length) {
                         // Keep responsibilities
                         const kept = Permissions.create({
@@ -243,8 +240,7 @@ export class UserPermissions extends AutoEncoder {
         if (add.globalPermissions) {
             if (cloned.globalPermissions) {
                 cloned.globalPermissions.add(add.globalPermissions);
-            }
-            else {
+            } else {
                 cloned.globalPermissions = add.globalPermissions;
             }
         }
@@ -252,8 +248,7 @@ export class UserPermissions extends AutoEncoder {
         for (const [organizationId, permissions] of add.organizationPermissions) {
             if (cloned.organizationPermissions.get(organizationId)) {
                 cloned.organizationPermissions.get(organizationId)!.add(permissions);
-            }
-            else {
+            } else {
                 cloned.organizationPermissions.set(organizationId, permissions);
             }
         }

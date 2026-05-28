@@ -29,7 +29,6 @@ export class PlatformMembershipOrganizationDetails extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     uri = '';
-
 }
 
 export class PlatformMembership extends MemberPlatformMembership {

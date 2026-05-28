@@ -6,7 +6,7 @@ import { ResolutionRequest } from '../../files/ResolutionRequest.js';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
 import type { ObjectWithRecords } from '../ObjectWithRecords.js';
-import type {RecordAnswer} from './RecordAnswer.js';
+import type { RecordAnswer } from './RecordAnswer.js';
 import { TranslatedString } from '../../TranslatedString.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
@@ -139,13 +139,11 @@ export class RecordWarning extends AutoEncoder {
                 || (priority1 === RecordWarningType.Warning && priority2 === RecordWarningType.Info)
                 || (priority1 === RecordWarningType.Error && priority2 === RecordWarningType.Info)) {
                 return -1;
-            }
-            else if ((priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Warning)
+            } else if ((priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Warning)
                 || (priority1 === RecordWarningType.Warning && priority2 === RecordWarningType.Error)
                 || (priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Error)) {
                 return 1;
-            }
-            else {
+            } else {
                 return 0;
             }
         };

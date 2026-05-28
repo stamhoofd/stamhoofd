@@ -84,8 +84,7 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
         try {
             const compiledFilter = compileToInMemoryFilter(filter, eventNotificationsInMemoryFilterCompilers);
             return compiledFilter(this);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;

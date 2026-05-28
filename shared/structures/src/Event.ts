@@ -132,8 +132,7 @@ export class Event extends AutoEncoder {
             const group = queue[queue.length - 1];
             if (group && group.title === title) {
                 group.events.push(event);
-            }
-            else {
+            } else {
                 queue.push({ title, events: [event] });
             }
         }

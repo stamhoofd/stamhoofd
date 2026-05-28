@@ -8,7 +8,7 @@ import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel
 import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import type { RecordAnswer } from './RecordAnswer.js';
-import type { RecordFilterOptions} from './RecordSettings.js';
+import type { RecordFilterOptions } from './RecordSettings.js';
 import { RecordSettings } from './RecordSettings.js';
 
 export interface Filterable {
@@ -82,12 +82,10 @@ export class RecordCategory extends AutoEncoder {
         for (const record of this.getAllFilteredRecords(value)) {
             try {
                 record.validate(value.getRecordAnswers(), requiredCategory);
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
             }
@@ -116,8 +114,7 @@ export class RecordCategory extends AutoEncoder {
 
             try {
                 answer.validate();
-            }
-            catch (e) {
+            } catch (e) {
                 // This answer is not valid anymore
                 return false;
             }
@@ -145,8 +142,7 @@ export class RecordCategory extends AutoEncoder {
             try {
                 answer.validate();
                 count += 1;
-            }
-            catch (e) {
+            } catch (e) {
                 // This answer is not valid anymore
             }
         }
@@ -305,12 +301,10 @@ export class RecordCategory extends AutoEncoder {
         for (const category of filteredCategories) {
             try {
                 category.validate(filterValue);
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
             }

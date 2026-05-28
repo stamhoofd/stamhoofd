@@ -1,4 +1,4 @@
-import type { ParsePhoneNumber} from './SearchFilterFactory.js';
+import type { ParsePhoneNumber } from './SearchFilterFactory.js';
 import { SearchFilterFactory } from './SearchFilterFactory.js';
 import type { StamhoofdFilter } from './StamhoofdFilter.js';
 

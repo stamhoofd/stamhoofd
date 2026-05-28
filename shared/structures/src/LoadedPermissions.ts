@@ -1,5 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { AccessRight} from './AccessRight.js';
+import type { AccessRight } from './AccessRight.js';
 import { AccessRightHelper } from './AccessRight.js';
 import type { MemberResponsibility } from './MemberResponsibility.js';
 import type { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
@@ -325,8 +325,7 @@ export class LoadedPermissions {
                 const current = this.resources.get(type)!.get(id);
                 if (!current) {
                     this.resources.get(type)!.set(id, resource);
-                }
-                else {
+                } else {
                     current.add(resource);
                 }
             }

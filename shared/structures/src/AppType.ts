@@ -56,8 +56,7 @@ export function uriToApp(uri: string) {
             if (translated && uri === translated) {
                 return app;
             }
-        }
-        else {
+        } else {
             for (const lang in l.translations) {
                 const translated = appToTranslatableUri(app).get(lang as Language);
                 if (translated && uri === translated) {

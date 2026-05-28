@@ -46,8 +46,7 @@ export class StockReservation extends AutoEncoder {
                 base.splice(existingIndex, 1);
                 return;
             }
-        }
-        else {
+        } else {
             base.push(add.clone());
         }
     }

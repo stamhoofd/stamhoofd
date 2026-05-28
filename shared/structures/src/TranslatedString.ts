@@ -1,4 +1,4 @@
-import type { Data, Decoder, Encodeable, EncodeContext, Patchable, PatchType} from '@simonbackx/simple-encoding';
+import type { Data, Decoder, Encodeable, EncodeContext, Patchable, PatchType } from '@simonbackx/simple-encoding';
 import { EnumDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { StringLikeObject } from '@stamhoofd/types/StringLikeObject';
@@ -166,8 +166,7 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
                 const value = patch.translations[key] as string | null;
                 if (value === null) {
                     delete c.translations[key];
-                }
-                else {
+                } else {
                     c.translations[key] = value;
                 }
             }

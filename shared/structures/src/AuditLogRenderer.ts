@@ -34,8 +34,7 @@ class RendersState {
 
         if (!this.quoteChar && this.currentHelper === null && this.context.helpers[helperName]) {
             this.currentHelper = this.context.helpers[helperName];
-        }
-        else {
+        } else {
             if (!this.currentHelper) {
                 // Default output helper
                 this.currentHelper = (_c, ...v: unknown[]) => v;
@@ -43,11 +42,9 @@ class RendersState {
 
             if (this.quoteChar) {
                 this.currentHelperArgs.push(this.pendingString);
-            }
-            else if (this.context.context[helperName]) {
+            } else if (this.context.context[helperName]) {
                 this.currentHelperArgs.push(this.context.context[helperName]);
-            }
-            else {
+            } else {
                 this.currentHelperArgs.push(undefined);
             }
         }
@@ -79,27 +76,22 @@ class RendersState {
             if (this.previousBackslash) {
                 if (char === 'n' || char === 'r' || char === 't') {
                     this.pendingString += char === 'n' ? '\n' : char === 'r' ? '\r' : '\t';
-                }
-                else {
+                } else {
                     this.pendingString += char;
                 }
                 this.previousBackslash = false;
                 this.previousIsEndCurly = false;
-            }
-            else if ((char === '"' || char === "'") && !this.quoteChar) {
+            } else if ((char === '"' || char === "'") && !this.quoteChar) {
                 this.quoteChar = char;
                 this.previousIsEndCurly = false;
-            }
-            else if (char === this.quoteChar) {
+            } else if (char === this.quoteChar) {
                 this.previousIsEndCurly = false;
                 this.endCurlyWord();
                 this.quoteChar = null;
-            }
-            else if (char === ' ' && !this.quoteChar) {
+            } else if (char === ' ' && !this.quoteChar) {
                 this.previousIsEndCurly = false;
                 this.endCurlyWord();
-            }
-            else if (char === '}') {
+            } else if (char === '}') {
                 // Ending
                 if (this.previousIsEndCurly) {
                     this.endCurlyWord();
@@ -116,12 +108,10 @@ class RendersState {
                     this.currentHelper = null;
                     this.pendingString = '';
                     this.previousIsEndCurly = false;
-                }
-                else {
+                } else {
                     this.previousIsEndCurly = true;
                 }
-            }
-            else {
+            } else {
                 this.pendingString += char;
                 this.previousIsEndCurly = false;
             }
@@ -132,8 +122,7 @@ class RendersState {
         if (this.previousBackslash) {
             if (char === 'n' || char === 'r' || char === 't') {
                 this.addOutput(char === 'n' ? '\n' : char === 'r' ? '\r' : '\t');
-            }
-            else {
+            } else {
                 this.addOutput(char);
             }
 

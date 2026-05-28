@@ -1,4 +1,4 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
 import { RecordCategory } from './members/records/RecordCategory.js';
 import type { Organization } from './Organization.js';

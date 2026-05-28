@@ -1,4 +1,4 @@
-import type { PartialWithoutMethods} from '@simonbackx/simple-encoding';
+import type { PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
@@ -290,8 +290,7 @@ export class CartItem extends AutoEncoder {
             let p: number;
             if (i < this.uitpasNumbers.length && this.product.uitpasEvent) {
                 p = this.calculateOptionsPrice(cart, this.uitpasNumbers[i].price);
-            }
-            else {
+            } else {
                 p = unitPrice;
             }
             if (i < this.seats.length) {
@@ -301,8 +300,7 @@ export class CartItem extends AutoEncoder {
                 prices.push(CartItemPrice.create({
                     price: seatPrice,
                 }));
-            }
-            else {
+            } else {
                 // Others (non seats)
                 prices.push(CartItemPrice.create({
                     price: p,
@@ -435,8 +433,7 @@ export class CartItem extends AutoEncoder {
             if (parts.length > 0 || price < 0) {
                 if (price >= 0) {
                     parts.push('+');
-                }
-                else {
+                } else {
                     parts.push('-');
                 }
             }
@@ -449,21 +446,17 @@ export class CartItem extends AutoEncoder {
             if (price === 0) {
                 if (sorted.length === 1) {
                     parts.push($t(`%1Mn`));
-                }
-                else {
+                } else {
                     parts.push(amount + ' ' + $t(`%s8`));
                 }
-            }
-            else {
+            } else {
                 if (sorted.length === 1 || amount === 1) {
                     if (amount > 1) {
                         parts.push(Formatter.price(Math.abs(price)) + ' ' + $t(`%s9`));
-                    }
-                    else {
+                    } else {
                         parts.push(Formatter.price(Math.abs(price)));
                     }
-                }
-                else {
+                } else {
                     parts.push(amount + ' × ' + Formatter.price(Math.abs(price)));
                 }
             }
@@ -528,8 +521,7 @@ export class CartItem extends AutoEncoder {
         if (this.uitpasNumbers.length) {
             if (this.uitpasNumbers.length === 1) {
                 descriptions.push($t('%wF') + ': ' + DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber));
-            }
-            else {
+            } else {
                 descriptions.push($t('%1B4') + ': ' + this.uitpasNumbers.map(item => DataValidator.formatUitpasNumber(item.uitpasNumber)).join(', '));
             }
         }
@@ -546,14 +538,12 @@ export class CartItem extends AutoEncoder {
                     const a = WebshopFieldAnswer.create({ field, answer: '' });
                     a.validate();
                     newAnswers.push(a);
-                }
-                else {
+                } else {
                     answer.field = field;
                     answer.validate();
                     newAnswers.push(answer);
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     e.addNamespace('fieldAnswers.' + field.id);
                 }
@@ -575,8 +565,7 @@ export class CartItem extends AutoEncoder {
                 message: 'Product unavailable',
                 human: $t(`%sC`, { product: this.product.name }),
             }));
-        }
-        else {
+        } else {
             this.product = product;
             const productPrice = product.prices.find(p => p.id === this.productPrice.id);
             if (!productPrice) {
@@ -586,16 +575,14 @@ export class CartItem extends AutoEncoder {
                         message: 'Product price unavailable',
                         human: $t(`%sD`, { product: this.product.name }),
                     }));
-                }
-                else {
+                } else {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
                         human: $t(`%sE`, { price: this.productPrice.name, product: this.product.name }),
                     }));
                 }
-            }
-            else {
+            } else {
                 // Only set product if we did find our product price
                 this.productPrice = productPrice;
             }
@@ -654,12 +641,10 @@ export class CartItem extends AutoEncoder {
 
         try {
             this.validateAnswers();
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 errors.addError(e);
-            }
-            else {
+            } else {
                 throw e;
             }
         }
@@ -823,8 +808,7 @@ export class CartItem extends AutoEncoder {
 
                 if (valid) {
                     return false;
-                }
-                else {
+                } else {
                     if (!admin && seatingPlan.isAdminSeat(s)) {
                         return false;
                     }

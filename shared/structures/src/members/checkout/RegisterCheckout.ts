@@ -3,16 +3,16 @@ import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, String
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import type { BalanceItem } from '../../BalanceItem.js';
-import type {Group} from '../../Group.js';
+import type { Group } from '../../Group.js';
 import type { Organization } from '../../Organization.js';
 import { PaymentCustomer } from '../../PaymentCustomer.js';
 import { PaymentMethod } from '../../PaymentMethod.js';
 import type { PriceBreakdown, PriceBreakdownAction } from '../../PriceBreakdown.js';
-import type {PlatformMember} from '../PlatformMember.js';
+import type { PlatformMember } from '../PlatformMember.js';
 import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
 import type { RegisterItem } from './RegisterItem.js';
-import type {RegistrationWithPlatformMember} from './RegistrationWithPlatformMember.js';
+import type { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 
 export type RegisterContext = {
@@ -90,8 +90,7 @@ export class IDRegisterCheckout extends AutoEncoder {
         if (context.organizations[0] && !checkout.cart.isEmpty && checkout.defaultOrganization === null) {
             const preferredId = checkout.singleOrganizationId;
             checkout.setDefaultOrganization((preferredId ? context.organizations.find(o => o.id === preferredId) : null) ?? context.organizations[0]);
-        }
-        else {
+        } else {
             if (!checkout.cart.isEmpty && !checkout.singleOrganization) {
                 throw new Error('Missing default organization');
             }
@@ -121,7 +120,7 @@ export class RegisterCheckout {
      * All outstanding items - not the one we are using to pay.
      * This is for validation and discount calculation.
      */
-    balanceItems: BalanceItem[] | null = null
+    balanceItems: BalanceItem[] | null = null;
 
     /**
      * Only allowed to be changed when isAdminFromSameOrganization
@@ -147,7 +146,7 @@ export class RegisterCheckout {
         checkout.customer = this.customer ? this.customer.clone() : null;
         checkout.cancellationFeePercentage = this.cancellationFeePercentage;
         checkout.defaultOrganization = this.defaultOrganization;
-        checkout.balanceItems = this.balanceItems?.slice() ?? null
+        checkout.balanceItems = this.balanceItems?.slice() ?? null;
 
         return checkout;
     }
@@ -228,8 +227,7 @@ export class RegisterCheckout {
             if (registration.registration.balances.reduce((total, balance) => total + balance.amountPaid + balance.amountPending, 0) > 0) {
                 // Already paid. By default we try to be undestructive. This means not refunding the already paid amount
                 this.cancellationFeePercentage = 100_00;
-            }
-            else {
+            } else {
                 // Not yet paid, by default we are undescructive. This means we try to 'refund' the already paid amount. Since it is not paid, this is no-op
                 this.cancellationFeePercentage = 0;
             }
@@ -290,12 +288,11 @@ export class RegisterCheckout {
 
     updatePrices() {
         this.cart.calculatePrices();
-        this.applyMaximumDiscounts()
+        this.applyMaximumDiscounts();
 
         if (this.isAdminFromSameOrganization || !this.singleOrganization) {
             this.administrationFee = 0;
-        }
-        else {
+        } else {
             this.administrationFee = this.singleOrganization.meta.registrationPaymentConfiguration.administrationFee.calculate(this.cart.price - this.bundleDiscount - this.cart.refund) ?? 0;
         }
     }
@@ -304,8 +301,8 @@ export class RegisterCheckout {
      * Optional behaviour required to automatically apply
      */
     updateBalances(memberBalanceItems: BalanceItem[]) {
-        this.balanceItems = memberBalanceItems
-        this.updatePrices()
+        this.balanceItems = memberBalanceItems;
+        this.updatePrices();
     }
 
     /**
@@ -316,7 +313,7 @@ export class RegisterCheckout {
         if (this.isAdminFromSameOrganization) {
             return;
         }
-        
+
         if (!this.balanceItems) {
             return;
         }
@@ -324,7 +321,7 @@ export class RegisterCheckout {
         // Remove all negative balance items
         for (const item of this.cart.balanceItems) {
             if (item.price < 0) {
-                this.removeBalanceItem(item, {calculate: false})
+                this.removeBalanceItem(item, { calculate: false });
             }
         }
 
@@ -332,7 +329,7 @@ export class RegisterCheckout {
             return;
         }
         const minimumAmount = 0;
-        const totalOpenBalance = this.balanceItems.reduce((a, b) => a + b.priceOpen, 0)
+        const totalOpenBalance = this.balanceItems.reduce((a, b) => a + b.priceOpen, 0);
 
         if (totalOpenBalance >= 0) {
             return;
@@ -350,13 +347,13 @@ export class RegisterCheckout {
                 continue;
             }
             if (item.priceOpen >= 0) {
-                continue
+                continue;
             }
             const remove = Math.min(totalPrice - (minimumAmount ?? 0), -item.priceOpen);
             if (remove === 0) {
                 break;
             }
-            this.addBalanceItem(item, -remove, {calculate: false})
+            this.addBalanceItem(item, -remove, { calculate: false });
             totalPrice -= remove;
         }
     }
@@ -432,7 +429,7 @@ export class RegisterCheckout {
     }
 
     get showDiscountsSeparately() {
-        return !this.isAdminFromSameOrganization
+        return !this.isAdminFromSameOrganization;
     }
 
     getPriceBreakown(options?: { balanceItemDiscountsAction?: PriceBreakdownAction }): PriceBreakdown {
@@ -447,8 +444,7 @@ export class RegisterCheckout {
                         name: $t('%175') + ' (' + discount.name + ')',
                         price: -value,
                     });
-                }
-                else {
+                } else {
                     all.push({
                         name: discount.name,
                         price: -value,
@@ -457,15 +453,15 @@ export class RegisterCheckout {
             }
         }
 
-        let subtotal = this.cart.price + this.cart.priceDueLater
+        let subtotal = this.cart.price + this.cart.priceDueLater;
 
         if (this.showDiscountsSeparately && this.cart.balanceItemDiscountsPrice !== 0) {
             subtotal -= this.cart.balanceItemDiscountsPrice;
             all.push({
                 name: $t(`Tegoed`),
                 price: this.cart.balanceItemDiscountsPrice,
-                action: options?.balanceItemDiscountsAction
-            },)
+                action: options?.balanceItemDiscountsAction,
+            });
         }
 
         all.push(...[
@@ -486,7 +482,6 @@ export class RegisterCheckout {
                 price: this.cart.getCancellationFees(this.cancellationFeePercentage),
             },
         ].filter(a => a.price !== 0));
-
 
         if (all.length > 0 && subtotal !== 0) {
             all.unshift({
@@ -511,8 +506,7 @@ export class RegisterCheckout {
                 name: (this.totalPrice >= 0 ? $t('%vb') : $t('%vc')),
                 price: Math.abs(this.totalPrice),
             });
-        }
-        else {
+        } else {
             all.push({
                 name: this.cart.priceDueLater ? $t(`%10c`) : $t(`%xL`),
                 price: this.totalPrice,
@@ -526,6 +520,6 @@ export class RegisterCheckout {
      * @deprecated Use getPriceBreakown(options)
      */
     get priceBreakown(): PriceBreakdown {
-        return this.getPriceBreakown()
+        return this.getPriceBreakown();
     }
 }

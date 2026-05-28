@@ -23,8 +23,7 @@ describe('SeatingPlan', () => {
                         row: 'A',
                         seat: (i + 1).toString(),
                     }));
-                }
-                else if (char == 'X') {
+                } else if (char == 'X') {
                     seats.push(SeatingPlanSeat.create({
                         label: (i + 1).toString(),
                     }));
@@ -33,21 +32,18 @@ describe('SeatingPlan', () => {
                         row: 'A',
                         seat: (i + 1).toString(),
                     }));
-                }
-                else if (char == '-') {
+                } else if (char == '-') {
                     // Available seat
                     seats.push(SeatingPlanSeat.create({
                         label: (i + 1).toString(),
                     }));
-                }
-                else if (char == ' ') {
+                } else if (char == ' ') {
                     // Hall
                     seats.push(SeatingPlanSeat.create({
                         type: SeatType.Space,
                         label: '',
                     }));
-                }
-                else {
+                } else {
                     throw new Error('Invalid character ' + char);
                 }
             }
@@ -81,8 +77,7 @@ describe('SeatingPlan', () => {
             if (input === output) {
                 // Nothing should have changed
                 expect(adjusted).toBe(null);
-            }
-            else {
+            } else {
                 expect(adjusted).toIncludeAllMembers(expectedResponse);
             }
         }

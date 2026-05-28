@@ -14,7 +14,7 @@ export enum PaymentMandateType {
 export enum PaymentMandateStatus {
     Valid = 'Valid',
     Pending = 'Pending',
-    Invalid = 'Invalid'
+    Invalid = 'Invalid',
 }
 
 export class PaymentMandateDetails extends AutoEncoder {
@@ -22,33 +22,33 @@ export class PaymentMandateDetails extends AutoEncoder {
      * Name of the card holder
      */
     @field({ decoder: StringDecoder, nullable: true })
-    name: string | null = null
+    name: string | null = null;
 
     /**
      * Full iban if direct debit
      */
     @field({ decoder: StringDecoder, nullable: true })
-    iban: string | null = null
+    iban: string | null = null;
 
     /**
      * Last 4 digits if credit card
      */
     @field({ decoder: StringDecoder, nullable: true })
-    cardNumber: string | null = null
+    cardNumber: string | null = null;
 
     /**
      * Bic code for iban numbers
      */
     @field({ decoder: StringDecoder, nullable: true })
-    bic: string | null = null
+    bic: string | null = null;
 
     // Card expiry date (timezone Brussels for now)
     @field({ decoder: DateDecoder, nullable: true })
-    expiryDate: Date | null = null
-    
+    expiryDate: Date | null = null;
+
     // Brand name: American Express Carta Si Carte Bleue Dankort Diners Club Discover JCB Laser Maestro Mastercard Unionpay Visa
     @field({ decoder: StringDecoder, nullable: true })
-    brand: string | null = null
+    brand: string | null = null;
 }
 
 export class PaymentMandate extends AutoEncoder {
@@ -62,23 +62,23 @@ export class PaymentMandate extends AutoEncoder {
     isDefault = false;
 
     @field({ decoder: new EnumDecoder(PaymentMandateStatus) })
-    status: PaymentMandateStatus
+    status: PaymentMandateStatus;
 
     @field({ decoder: new EnumDecoder(PaymentProvider) })
     provider: PaymentProvider;
 
     @field({ decoder: new EnumDecoder(PaymentMandateType) })
-    type: PaymentMandateType
+    type: PaymentMandateType;
 
     @field({ decoder: PaymentMandateDetails })
     details: PaymentMandateDetails;
 
-    @field({decoder: DateDecoder})
-    createdAt: Date
+    @field({ decoder: DateDecoder })
+    createdAt: Date;
 
     get identifier() {
         if (this.details.iban) {
-            return Formatter.iban(this.details.iban)
+            return Formatter.iban(this.details.iban);
         }
 
         if (this.details.cardNumber) {
@@ -90,7 +90,7 @@ export class PaymentMandate extends AutoEncoder {
 
     get name() {
         if (this.details.iban) {
-            return Formatter.iban(this.details.iban)
+            return Formatter.iban(this.details.iban);
         }
 
         if (this.details.cardNumber) {
@@ -104,11 +104,11 @@ export class PaymentMandate extends AutoEncoder {
         if (!this.details.expiryDate) {
             return null;
         }
-        return Formatter.monthNumber(this.details.expiryDate) + '/' + Formatter.year(this.details.expiryDate)
+        return Formatter.monthNumber(this.details.expiryDate) + '/' + Formatter.year(this.details.expiryDate);
     }
 
     get description() {
-        return this.details.name || ''
+        return this.details.name || '';
     }
 
     get bankName() {
@@ -116,7 +116,7 @@ export class PaymentMandate extends AutoEncoder {
             return null;
         }
 
-        return getBicName(this.details.bic)
+        return getBicName(this.details.bic);
     }
 }
 
@@ -129,7 +129,7 @@ function getBicName(bic: string): string | null {
     if (country !== 'BE') {
         return null;
     }
- 
+
     if (bic.startsWith('GEBA')) return 'BNP Paribas Fortis';
     if (bic.startsWith('GKCC')) return 'Belfius';
     if (bic.startsWith('NICA')) return 'Crelan';
@@ -221,6 +221,6 @@ function getBicName(bic: string): string | null {
     if (bic.startsWith('PAYV')) return 'Paynovate';
     if (bic.startsWith('RCBP')) return 'RCBP';
     if (bic.startsWith('CFFR')) return 'CFFR';
- 
+
     return null;
 }

@@ -188,12 +188,10 @@ export class SetupSteps extends AutoEncoder {
         const step = this.steps.get(stepType);
         if (step) {
             step.update(finishedSteps, totalSteps);
-        }
-        else {
+        } else {
             if (totalSteps === 0) {
                 this.steps.set(stepType, SetupStep.create({ finishedSteps: 1, totalSteps: 1 }));
-            }
-            else {
+            } else {
                 this.steps.set(stepType, SetupStep.create({ finishedSteps, totalSteps }));
             }
         }

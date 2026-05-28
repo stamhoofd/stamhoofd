@@ -4,9 +4,9 @@ import type { Platform } from '../Platform.js';
 
 /**
  * Get the financial support settings from the platform if userMode is platform, or from the organization otherwise.
- * @param platform 
- * @param organization 
- * @returns 
+ * @param platform
+ * @param organization
+ * @returns
  */
 export function getFinancialSupportSettings(platform: Platform, organization: Organization | null): FinancialSupportSettings | null {
     if (STAMHOOFD.userMode === 'platform') {
@@ -23,9 +23,9 @@ export function getFinancialSupportSettings(platform: Platform, organization: Or
 /**
  * Get the financial support settings from the platform if userMode is platform, or from the organization otherwise.
  * Returns default settings if no settings are found.
- * @param platform 
- * @param organization 
- * @returns 
+ * @param platform
+ * @param organization
+ * @returns
  */
 export function getFinancialSupportSettingsOrDefault(platform: Platform, organization: Organization | null): FinancialSupportSettings {
     return getFinancialSupportSettings(platform, organization) ?? FinancialSupportSettings.create({});

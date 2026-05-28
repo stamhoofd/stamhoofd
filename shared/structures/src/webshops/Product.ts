@@ -343,8 +343,7 @@ export class Product extends AutoEncoder {
         for (const price of this.prices) {
             if (price.remainingStock !== null) {
                 priceStocks.push(price.remainingStock);
-            }
-            else {
+            } else {
                 // Infinite stock for at least one price = no price stock
                 priceStocks = [];
                 break;
@@ -363,8 +362,7 @@ export class Product extends AutoEncoder {
                 for (const option of menu.options) {
                     if (option.remainingStock !== null) {
                         menuStocks.push(option.remainingStock);
-                    }
-                    else {
+                    } else {
                         // Infinite stock for at least one option = no menu stock
                         menuStocks = [];
                         break;

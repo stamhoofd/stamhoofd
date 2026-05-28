@@ -73,8 +73,7 @@ export class CartStockHelper {
                 text = $t('%1Dd', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                 });
-            }
-            else if (inCart > 0) {
+            } else if (inCart > 0) {
                 text = $t('%1De', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     '4': inCart.toString(),
@@ -144,8 +143,7 @@ export class CartStockHelper {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': productPrice.name,
                 });
-            }
-            else if (inCart > 0) {
+            } else if (inCart > 0) {
                 text = $t('%1Dj', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': productPrice.name,
@@ -221,8 +219,7 @@ export class CartStockHelper {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': option.name,
                 });
-            }
-            else if (inCart > 0) {
+            } else if (inCart > 0) {
                 text = $t('%1Dj', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': option.name,
@@ -280,8 +277,7 @@ export class CartStockHelper {
                 text = $t('%1H8', {
                     x: Formatter.integer(remainingStock),
                 });
-            }
-            else if (inCart > 0) {
+            } else if (inCart > 0) {
                 text = $t('%1H9', {
                     x: Formatter.integer(remainingStock),
                     4: Formatter.integer(inCart),
@@ -338,8 +334,7 @@ export class CartStockHelper {
                 text = $t('%1HD', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(product.maxPerOrder),
                 });
-            }
-            else if (inCart > 0) {
+            } else if (inCart > 0) {
                 text = $t('%1HE', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(product.maxPerOrder),
                     '4': Formatter.integer(inCart),
@@ -452,14 +447,12 @@ export class CartStockHelper {
             if (priceStock && priceStock.remaining !== null) {
                 if (options.inMultipleCartItems) {
                     maximumPriceStock += priceStock.remaining;
-                }
-                else {
+                } else {
                     if (priceStock.remaining > maximumPriceStock) {
                         maximumPriceStock = priceStock.remaining;
                     }
                 }
-            }
-            else {
+            } else {
                 // Infinite price stock
                 maximumPriceStock = null;
                 break;
@@ -468,8 +461,7 @@ export class CartStockHelper {
         if (maximumPriceStock !== null) {
             if (remaining === null) {
                 remaining = maximumPriceStock;
-            }
-            else {
+            } else {
                 remaining = Math.min(remaining, maximumPriceStock);
             }
         }
@@ -487,14 +479,12 @@ export class CartStockHelper {
                 if (optionStock && optionStock.remaining !== null) {
                     if (options.inMultipleCartItems) {
                         maximumOptionStock += optionStock.remaining;
-                    }
-                    else {
+                    } else {
                         if (optionStock.remaining > maximumOptionStock) {
                             maximumOptionStock = optionStock.remaining;
                         }
                     }
-                }
-                else {
+                } else {
                     // Infinite option stock
                     maximumOptionStock = null;
                     break;
@@ -503,8 +493,7 @@ export class CartStockHelper {
             if (maximumOptionStock !== null) {
                 if (remaining === null) {
                     remaining = maximumOptionStock;
-                }
-                else {
+                } else {
                     remaining = Math.min(remaining, maximumOptionStock);
                 }
             }

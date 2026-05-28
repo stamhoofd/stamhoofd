@@ -515,13 +515,11 @@ export class PrivateOrderWithTickets extends PrivateOrder {
                     if (existingIndex !== -1) {
                         this.tickets.splice(existingIndex, 1);
                     }
-                }
-                else {
+                } else {
                     const existing = this.tickets.find(t => t.id === ticket.id);
                     if (existing) {
                         existing.set(ticket);
-                    }
-                    else {
+                    } else {
                         this.tickets.push(ticket);
                     }
                 }

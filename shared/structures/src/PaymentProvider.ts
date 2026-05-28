@@ -6,5 +6,5 @@ export enum PaymentProvider {
 }
 
 export function getPaymentProviderName(type: PaymentProvider) {
-    return type.toString()
+    return type.toString();
 }

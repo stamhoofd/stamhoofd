@@ -106,8 +106,7 @@ export class Address extends AutoEncoder {
 
         try {
             c = CountryDecoder.decode(new ObjectData(country, { version: 0 }));
-        }
-        catch (e) {
+        } catch (e) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid country',
@@ -192,7 +191,7 @@ export class Address extends AutoEncoder {
                 human: $t(`%nw`),
             });
         }
-        const cleanAddress = Formatter.removeDuplicateSpaces(Formatter.normalizeWhitespace(addressLine1)).trim()
+        const cleanAddress = Formatter.removeDuplicateSpaces(Formatter.normalizeWhitespace(addressLine1)).trim();
 
         // STAP 1: De "Zonder Nummer" edge case aan het einde
         const znMatch = cleanAddress.match(/^(.*?)\s(z\/?n|s\/?n|z\.n\.|zonder nummer)$/i);
@@ -200,13 +199,13 @@ export class Address extends AutoEncoder {
             return { street: znMatch[1].trim(), number: znMatch[2].trim().toLowerCase() };
         }
 
-        const tailRegex = /\d{1,5}\.?\d{0,4}\s?[a-z]{0,2}\s?(?:bis|ter|quater)?\s?(?:(?:bus|bte\.?|b\.|box|boite|boîte|bt|[/\-&\s])\s?\d{0,8}\s?[a-z]{0,2}\s?[./]?\s?\d{0,4}[a-z]{0,2})?$/i
+        const tailRegex = /\d{1,5}\.?\d{0,4}\s?[a-z]{0,2}\s?(?:bis|ter|quater)?\s?(?:(?:bus|bte\.?|b\.|box|boite|boîte|bt|[/\-&\s])\s?\d{0,8}\s?[a-z]{0,2}\s?[./]?\s?\d{0,4}[a-z]{0,2})?$/i;
 
         const match = cleanAddress.match(tailRegex);
 
         if (match) {
-            let number = match[0]
-            let street = cleanAddress.substring(0, cleanAddress.length - number.length)
+            let number = match[0];
+            let street = cleanAddress.substring(0, cleanAddress.length - number.length);
 
             // De 'Wijk' uitzondering (als de straat eindigt op wijk en het nummer op een getal)
             const wijkCheck = number.trim().match(/^(\d+)\s+(\d.*)$/);
@@ -219,14 +218,14 @@ export class Address extends AutoEncoder {
             const historyMatch = number.match(/^19\d{2}-19\d{2}|19\d{2}|'\d{2}-'\d{2}\s/);
             if (historyMatch) {
                 const common = historyMatch[0].length;
-                street = street +  number.substring(0, common).trim()
-                number = number.substring(common).trim()
+                street = street + number.substring(0, common).trim();
+                number = number.substring(common).trim();
             }
 
             return { street: street.trim(), number: number.trim() };
         }
 
-       throw new SimpleError({
+        throw new SimpleError({
             code: 'invalid_field',
             message: 'Missing number in address line 1',
             human: $t(`%nx`),

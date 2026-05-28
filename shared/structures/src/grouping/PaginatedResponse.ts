@@ -1,4 +1,4 @@
-import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext} from '@simonbackx/simple-encoding';
+import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
 import { encodeObject } from '@simonbackx/simple-encoding';
 
 export class IPaginatedResponse<Result, Query> {
@@ -10,7 +10,7 @@ export class UnencodeablePaginatedResponse<Result, Query> implements IPaginatedR
     results: Result;
     next?: Query;
 
-    constructor(data: { results: Result;next?: Query }) {
+    constructor(data: { results: Result; next?: Query }) {
         this.results = data.results;
         this.next = data.next;
     }
@@ -20,7 +20,7 @@ export class PaginatedResponse<Result extends EncodableObject, Query extends Enc
     results: Result;
     next?: Query;
 
-    constructor(data: { results: Result;next?: Query }) {
+    constructor(data: { results: Result; next?: Query }) {
         this.results = data.results;
         this.next = data.next;
     }

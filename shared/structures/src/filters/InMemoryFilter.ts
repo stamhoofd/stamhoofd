@@ -66,7 +66,7 @@ function $greaterThanInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFi
         }
 
         const b = normalizeValue(assertFilterCompareValue(filter));
-        if ( b === null) {
+        if (b === null) {
             return true;
         }
         return a > b;
@@ -130,7 +130,7 @@ function $containsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilte
         if (typeof a !== 'string') {
             return false;
         }
-        
+
         return StringCompare.contains(a, needle);
     };
 }

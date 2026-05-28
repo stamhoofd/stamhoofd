@@ -163,7 +163,7 @@ export class Group extends AutoEncoder {
 
         return false;
     }
-    
+
     /**
      * Returns all parent and grandparents of this group
      */
@@ -316,8 +316,7 @@ export class Group extends AutoEncoder {
                     },
                 },
             });
-        }
-        else {
+        } else {
             if (this.settings.requirePlatformMembershipOn !== null) {
                 const requirePlatformMembershipOn = this.settings.requirePlatformMembershipOn;
 
@@ -348,8 +347,7 @@ export class Group extends AutoEncoder {
                         },
                     ],
                 });
-            }
-            else if (this.settings.requirePlatformMembershipOnRegistrationDate !== null) {
+            } else if (this.settings.requirePlatformMembershipOnRegistrationDate !== null) {
                 filter.push({
                     platformMemberships: {
                         $elemMatch: {
@@ -378,8 +376,7 @@ export class Group extends AutoEncoder {
                     },
                 },
             });
-        }
-        else if (this.settings.requireOrganizationIds.length) {
+        } else if (this.settings.requireOrganizationIds.length) {
             filter.push({
                 registrations: {
                     $elemMatch: {

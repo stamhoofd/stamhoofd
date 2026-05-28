@@ -223,8 +223,7 @@ export function getAuditLogPatchKeyName(key: string) {
                 if (result && result !== key) {
                     return result;
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
             }
         }

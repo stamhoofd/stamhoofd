@@ -27,12 +27,10 @@ export class MemberPlatformMembershipHelper {
             if (status === MembershipStatus.Inactive || ((status === MembershipStatus.Expiring || status === MembershipStatus.Temporary) && !isTemporary)) {
                 if (isTemporary) {
                     status = MembershipStatus.Temporary;
-                }
-                else {
+                } else {
                     if (membership.trialUntil && membership.trialUntil > now) {
                         status = MembershipStatus.Trial;
-                    }
-                    else {
+                    } else {
                         status = MembershipStatus.Active;
                         break;
                     }

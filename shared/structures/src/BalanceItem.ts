@@ -64,17 +64,16 @@ export function getVATExcemptPeppolTaxCategoryCode(reason: VATExcemptReason): st
     // ref https://docs.peppol.eu/poacc/billing/3.0/codelist/vatex/
     // We follow https://docs.billit.be/docs/ventilation-codes as this isn't super well documented or clear
     switch (reason) {
-        case VATExcemptReason.IntraCommunityGoods: return 'K'
-        case VATExcemptReason.IntraCommunityServices: return 'K'
+        case VATExcemptReason.IntraCommunityGoods: return 'K';
+        case VATExcemptReason.IntraCommunityServices: return 'K';
     }
 }
-
 
 export function getVATExcemptPeppolExemptionReasonCode(reason: VATExcemptReason): string | null {
     // ref https://docs.peppol.eu/poacc/billing/3.0/codelist/vatex/
     switch (reason) {
-        case VATExcemptReason.IntraCommunityGoods: return 'VATEX-EU-IC'
-        case VATExcemptReason.IntraCommunityServices: return 'VATEX-EU-IC'
+        case VATExcemptReason.IntraCommunityGoods: return 'VATEX-EU-IC';
+        case VATExcemptReason.IntraCommunityServices: return 'VATEX-EU-IC';
     }
 }
 
@@ -97,7 +96,7 @@ export enum BalanceItemType {
     /**
      * Discount by referral
      */
-    ReferralDiscount = 'ReferralDiscount'
+    ReferralDiscount = 'ReferralDiscount',
 }
 
 export function getBalanceItemTypeVATType(type: BalanceItemType): 'services' | 'goods' | null {
@@ -105,7 +104,7 @@ export function getBalanceItemTypeVATType(type: BalanceItemType): 'services' | '
         case BalanceItemType.Order: return null; // unknown
         case BalanceItemType.Other: return null; // unknown
     }
-    return 'services'
+    return 'services';
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -327,7 +326,7 @@ export class BalanceItem extends AutoEncoder {
     VATExcempt: VATExcemptReason | null = null;
 
     @field({ decoder: DateDecoder, nullable: true, version: 398 })
-    paidAt: Date | null
+    paidAt: Date | null;
 
     /**
      * @deprecated use priceWithVAT in combination with isDue
@@ -458,9 +457,9 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 335 })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     pricePending = 0;
-    
+
     @field({ decoder: IntegerDecoder, version: 398, defaultValue: () => 0 })
-    priceInvoiced: number
+    priceInvoiced: number;
 
     /**
      * How much has been invoiced
@@ -630,7 +629,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.STPackage: return this.itemTitle;
             case BalanceItemType.ServiceFee: return $t('servicekosten');
             case BalanceItemType.TransferFee: return $t('transactiekosten');
-            case BalanceItemType.ReferralDiscount: return $t('referralkorting');        
+            case BalanceItemType.ReferralDiscount: return $t('referralkorting');
         }
     }
 
@@ -708,8 +707,7 @@ export class BalanceItem extends AutoEncoder {
                 name: $t(`%1IA`),
                 price: this.priceWithVAT,
             });
-        }
-        else if (all.length > 0) {
+        } else if (all.length > 0) {
             all.unshift({
                 name: $t(`%lz`),
                 price: this.priceWithVAT,
@@ -789,10 +787,10 @@ export class BalanceItem extends AutoEncoder {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
             }
-            case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Servicekosten tussen {startDate} en {endDate}`, {startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true)}) : $t(`Servicekosten op {date}`, {date: Formatter.date(this.startDate, true)})) : $t('Servicekosten');
-            case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Transactiekosten tussen {startDate} en {endDate}`, {startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true)}) : $t(`Transactiekosten op {date}`, {date: Formatter.date(this.startDate, true)})) : $t('Transactiekosten');
+            case BalanceItemType.ServiceFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Servicekosten tussen {startDate} en {endDate}`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`Servicekosten op {date}`, { date: Formatter.date(this.startDate, true) })) : $t('Servicekosten');
+            case BalanceItemType.TransferFee: return this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Transactiekosten tussen {startDate} en {endDate}`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) }) : $t(`Transactiekosten op {date}`, { date: Formatter.date(this.startDate, true) })) : $t('Transactiekosten');
         }
-        return this.description
+        return this.description;
     }
 
     /**
@@ -841,25 +839,25 @@ export class BalanceItem extends AutoEncoder {
                 return list.join('\n');
             }
             case BalanceItemType.STPackage: {
-                const list: string[] = []
-                const base = this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Van {startDate} tot {endDate}`, {startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate)}) : $t(`Voor {date}`, {date: Formatter.date(this.startDate)})) : null;
-                
+                const list: string[] = [];
+                const base = this.startDate && this.endDate ? (Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate) ? $t(`Van {startDate} tot {endDate}`, { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) }) : $t(`Voor {date}`, { date: Formatter.date(this.startDate) })) : null;
+
                 if (base) {
                     list.push(base);
                 }
-                
+
                 return list.join('\n');
             }
 
             case BalanceItemType.ServiceFee:
             case BalanceItemType.TransferFee: {
-                const list: string[] = []
-                
+                const list: string[] = [];
+
                 const provider = this.relations.get(BalanceItemRelationType.PaymentProvider);
                 if (provider) {
                     list.push(provider.name.toString());
                 }
-                
+
                 return list.join('\n');
             }
         }
@@ -876,7 +874,7 @@ export class BalanceItem extends AutoEncoder {
                 if (packageType) {
                     const decoded = Object.values(STPricingType).includes(packageType.id as STPricingType) ? packageType.id as STPricingType : null;
                     if (decoded) {
-                        return getPricingTypeSuffix(decoded)
+                        return getPricingTypeSuffix(decoded);
                     }
                 }
             }
@@ -907,22 +905,18 @@ export class BalanceItem extends AutoEncoder {
                 if (item.isOverDue) {
                     prefixClass = 'error';
                 }
-            }
-            else if (item.status === BalanceItemStatus.Canceled) {
+            } else if (item.status === BalanceItemStatus.Canceled) {
                 prefix = $t(`%gg`);
                 prefixClass = 'error';
-            }
-            else if (item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0) {
+            } else if (item.priceOpen < 0 && item.pricePaid > item.price && item.pricePaid > 0) {
                 prefix = $t(`%gh`);
-            }
-            else if (item.priceOpen < 0) {
+            } else if (item.priceOpen < 0) {
                 prefix = $t(`%10a`);
             }
 
             if (!item.isDue) {
                 price = `(${Formatter.price(item.priceOpen)})`;
-            }
-            else {
+            } else {
                 price = Formatter.price(item.priceOpen);
             }
 
@@ -931,8 +925,7 @@ export class BalanceItem extends AutoEncoder {
                     description += `\n`;
                 }
                 description += `${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}`;
-            }
-            else {
+            } else {
                 if (description) {
                     description += `\n`;
                 }
@@ -1063,10 +1056,10 @@ export class GroupedBalanceItems {
         }
 
         if (this.items[0].type === BalanceItemType.ServiceFee) {
-            return $t('Servicekosten')
+            return $t('Servicekosten');
         }
         if (this.items[0].type === BalanceItemType.TransferFee) {
-            return $t('Transactiekosten')
+            return $t('Transactiekosten');
         }
         return this.items[0].itemTitle;
     }
@@ -1079,7 +1072,6 @@ export class GroupedBalanceItems {
 
         return this.items[0].unitPriceSuffix;
     }
-
 
     get itemDescription() {
         if (this.items.length === 1) {

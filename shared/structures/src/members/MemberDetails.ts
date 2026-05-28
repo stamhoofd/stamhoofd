@@ -80,7 +80,7 @@ export class MemberDetails extends AutoEncoder {
      * Code needed to get access to this member when detecting duplicates. It is only visible for admins, otherwise it will be null.
      *
      * Set this value if you want to gain access to a member but receive the known_member_missing_rights error code
-     * 
+     *
      * For userMode organization this code will always be null.
      */
     @field({ decoder: StringDecoder, nullable: true, version: 331 })
@@ -274,8 +274,7 @@ export class MemberDetails extends AutoEncoder {
                         if (this.hasEmail(email)) {
                             return false;
                         }
-                    }
-                    else {
+                    } else {
                         if (this.email && email === this.email) {
                             return false;
                         }
@@ -316,8 +315,7 @@ export class MemberDetails extends AutoEncoder {
                 this.unverifiedAddresses = [];
                 this.unverifiedEmails = [];
                 this.unverifiedPhones = [];
-            }
-            else {
+            } else {
                 // #region filter used unverified addresses
                 const usedAddressIds = new Set<string>();
                 if (this.unverifiedAddresses.length > 0) {
@@ -673,8 +671,7 @@ export class MemberDetails extends AutoEncoder {
         if (other.address) {
             if (this.address) {
                 this.updateAddress(this.address, other.address);
-            }
-            else {
+            } else {
                 this.address = other.address;
             }
         }
@@ -719,11 +716,9 @@ export class MemberDetails extends AutoEncoder {
 
             if (!existing) {
                 newAnswers.set(answer.settings.id, answer);
-            }
-            else if (answer.date >= existing.date) {
+            } else if (answer.date >= existing.date) {
                 newAnswers.set(answer.settings.id, answer);
-            }
-            else {
+            } else {
                 // keep existing, this one is more up-to-date, don't add the other answer
             }
         }
@@ -780,8 +775,7 @@ export class MemberDetails extends AutoEncoder {
         if (m.length) {
             // Only the first email address of parents
             emails.push(m[0].toLocaleLowerCase());
-        }
-        else {
+        } else {
             // Add all unverified email addresses (one will be right hopefully)
             if (this.unverifiedEmails.length) {
                 emails.push(...this.unverifiedEmails);
@@ -904,8 +898,7 @@ export class MemberDetails extends AutoEncoder {
                     if (allowSet && object.id === mergeTo.id && allowOverrides) {
                         mergeTo = object.clone();
                         continue;
-                    }
-                    else {
+                    } else {
                         allowSet = false;
                     }
                     if (allowOverrides) {

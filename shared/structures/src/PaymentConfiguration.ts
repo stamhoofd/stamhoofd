@@ -146,15 +146,15 @@ export class PaymentConfiguration extends AutoEncoder {
     paymentMethodSettings: Map<PaymentMethod, PaymentMethodSettings> = new Map();
 
     @field({ decoder: BooleanDecoder, version: 398, defaultValue: () => false })
-    enableMandates: boolean
+    enableMandates: boolean;
 
-    getAvailablePaymentMethods(data: { amount: number; customer: PaymentCustomer | null, forMandate?: boolean }) {
+    getAvailablePaymentMethods(data: { amount: number; customer: PaymentCustomer | null; forMandate?: boolean }) {
         return this.paymentMethods.filter((method) => {
             if (data.forMandate) {
                 if (!this.enableMandates) {
                     return false;
                 }
-                
+
                 if (!PaymentMethodHelper.canCreateMandate(method)) {
                     return false;
                 }

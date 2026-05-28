@@ -1,4 +1,4 @@
-import type { Data, Encodeable, EncodeContext, PlainObject} from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
@@ -28,8 +28,7 @@ class UitpasNumbersDecoder {
         try {
             const decoded = JSON.parse(str);
             return (new ArrayDecoder(StringDecoder)).decode(data.clone({ data: decoded, field: data.currentField, context: data.context }));
-        }
-        catch (e) {
+        } catch (e) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: `Expected JSON at ${data.currentField}`,

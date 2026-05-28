@@ -68,8 +68,7 @@ export class RecordConfigurationFactory {
                     },
                 },
             );
-        }
-        else {
+        } else {
             configuration.address = PropertyFilter.createDefault();
         }
     }
@@ -123,8 +122,7 @@ export class RecordConfigurationFactory {
                     ],
                 },
             );
-        }
-        else if (type === OrganizationType.LGBTQ) {
+        } else if (type === OrganizationType.LGBTQ) {
             // Optional emergency contact
             configuration.emergencyContacts = new PropertyFilter(
                 null,

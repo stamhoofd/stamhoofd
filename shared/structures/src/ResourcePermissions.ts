@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder, EnumDecoder, ArrayDecoder, PatchMap } from '@simonbackx/simple-encoding';
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
@@ -56,8 +56,7 @@ export class ResourcePermissions extends AutoEncoder {
             const p = new PatchMap<string, ResourcePermissions | AutoEncoderPatchType<ResourcePermissions> | null>();
             p.set(resourceId, this);
             patch.resources.set(type, p);
-        }
-        else {
+        } else {
             // No resources with this type yet
             const p = new Map<string, ResourcePermissions>();
             p.set(resourceId, this);
@@ -105,8 +104,7 @@ export class ResourcePermissions extends AutoEncoder {
 
             if (resource.level === PermissionLevel.Write) {
                 prefix = $t(`%Rw`);
-            }
-            else if (resource.level === PermissionLevel.Full) {
+            } else if (resource.level === PermissionLevel.Full) {
                 prefix = $t(`%m9`);
             }
 
@@ -128,8 +126,7 @@ export class ResourcePermissions extends AutoEncoder {
 
                 if (all.level === PermissionLevel.Write) {
                     suffix = ' ' + $t(`%Rw`);
-                }
-                else if (all.level === PermissionLevel.Full) {
+                } else if (all.level === PermissionLevel.Full) {
                     prefix = $t(`%nG`) + ' ';
                     suffix = '';
                 }

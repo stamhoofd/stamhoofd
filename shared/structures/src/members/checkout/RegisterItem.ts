@@ -178,8 +178,7 @@ export class RegisterItem implements ObjectWithRecords {
                 // Select the first one anyway
                 this.groupPrice = prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('%15L')), id: '' });
             }
-        }
-        else {
+        } else {
             this.groupPrice = data.groupPrice;
         }
 
@@ -230,8 +229,7 @@ export class RegisterItem implements ObjectWithRecords {
                                 amount: 1,
                             }),
                         );
-                    }
-                    else if (optionMenu.hidden) {
+                    } else if (optionMenu.hidden) {
                         // Add the default option if the option menu is hidden
                         this.options.push(
                             RegisterItemOption.create({
@@ -386,8 +384,7 @@ export class RegisterItem implements ObjectWithRecords {
         if (this.calculatedTrialUntil && (this.replaceRegistrations.length === 0 || this.calculatedTrialUntil >= BalanceItem.getDueOffset())) {
             this.calculatedPriceDueLater = this.calculatedPrice;
             this.calculatedPrice = 0;
-        }
-        else {
+        } else {
             this.calculatedPriceDueLater = 0;
         }
     }
@@ -423,8 +420,7 @@ export class RegisterItem implements ObjectWithRecords {
                     });
                     if (this.calculatedTrialUntil) {
                         discountsLater += value;
-                    }
-                    else {
+                    } else {
                         discountsTotal += value;
                     }
                 }
@@ -519,8 +515,7 @@ export class RegisterItem implements ObjectWithRecords {
                     human: $t(`%13o`, { group: this.group.settings.name }),
                 }),
             );
-        }
-        else {
+        } else {
             const groupPrice = this.group.settings.prices.find(p => p.id === this.groupPrice.id);
             if (!groupPrice) {
                 errors.addError(
@@ -533,8 +528,7 @@ export class RegisterItem implements ObjectWithRecords {
                         meta: { recoverable: true },
                     }),
                 );
-            }
-            else {
+            } else {
                 this.groupPrice = groupPrice;
             }
         }
@@ -598,12 +592,10 @@ export class RegisterItem implements ObjectWithRecords {
             // Check all answers are answered
             try {
                 RecordCategory.validate(this.group.settings.recordCategories, this);
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleErrors(e) || isSimpleError(e)) {
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
             }
@@ -662,9 +654,9 @@ export class RegisterItem implements ObjectWithRecords {
             return true;
         }
 
-        return this.member.member.registrationInvitations?.some(invitation => invitation.group.id === this.group.id &&
+        return this.member.member.registrationInvitations?.some(invitation => invitation.group.id === this.group.id
             // ignore invitation if already registered (for trial period the invitation will be only removed on final registration)
-            !this.member.member.registrations.some(r => r.groupId === invitation.group.id && r.registeredAt === null));
+            && !this.member.member.registrations.some(r => r.groupId === invitation.group.id && r.registeredAt === null));
     }
 
     getRequireGroupIdsError() {
@@ -849,8 +841,7 @@ export class RegisterItem implements ObjectWithRecords {
     get validationErrorForWaitingList() {
         try {
             this.validate({ forWaitingList: true });
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 return e.getHuman();
             }
@@ -862,8 +853,7 @@ export class RegisterItem implements ObjectWithRecords {
     get validationError() {
         try {
             this.validate();
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 return e.getHuman();
             }
@@ -884,8 +874,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         try {
             this.validate({ warnings: true });
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 return e.getHuman();
             }
@@ -1508,8 +1497,7 @@ export class RegisterItem implements ObjectWithRecords {
         try {
             const compiledFilter = compileToInMemoryFilter(filter, registerItemInMemoryFilterCompilers);
             return compiledFilter(this);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;

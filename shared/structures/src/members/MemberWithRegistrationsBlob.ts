@@ -38,8 +38,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         try {
             const compiledFilter = compileToInMemoryFilter(filter, memberWithRegistrationsBlobInMemoryFilterCompilers);
             return compiledFilter(this);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;

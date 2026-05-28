@@ -148,8 +148,7 @@ export class Recipient extends AutoEncoder {
             const existing = this.replacements.find(r => r.token == replacement.token);
             if (!existing) {
                 this.replacements.push(replacement);
-            }
-            else {
+            } else {
                 if (existing.value.length == 0) {
                     existing.value = replacement.value;
                 }

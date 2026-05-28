@@ -87,8 +87,7 @@ export class RecordAnswer extends AutoEncoder {
         if (!this.isEmpty) {
             try {
                 this.validate();
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e)) {
                     return [
                         RecordWarning.create({
@@ -182,11 +181,11 @@ export const RecordAnswerDecoder = new RecordAnswerDecoderStatic();
 
 class PatchRecordAnswerMapDecoderStatic extends PatchMapDecoder<string, RecordAnswer | null> {
     constructor() {
-        super(StringDecoder, new NullableDecoder(RecordAnswerDecoder))
+        super(StringDecoder, new NullableDecoder(RecordAnswerDecoder));
     }
 
     override decode(container: Data) {
-        const response = super.decode(container)
+        const response = super.decode(container);
 
         for (const [key, value] of response) {
             if (value === null) {
@@ -212,14 +211,14 @@ class PatchRecordAnswerMapDecoderStatic extends PatchMapDecoder<string, RecordAn
             }
         }
 
-        return response
+        return response;
     }
 }
 const PatchRecordAnswerMapDecoder = new PatchRecordAnswerMapDecoderStatic();
 
 class RecordAnswerMapDecoderStatic extends MapDecoder<string, RecordAnswer> {
     constructor() {
-        super(StringDecoder, RecordAnswerDecoder)
+        super(StringDecoder, RecordAnswerDecoder);
     }
 
     override patchType() {
@@ -234,7 +233,7 @@ class RecordAnswerMapDecoderStatic extends MapDecoder<string, RecordAnswer> {
                 const field = addPropertyField(currentField, key + '.settings.id');
                 if (context.medium === EncodeMedium.Database) {
                     // When deconding from database, ignore silently as we would otherwise cause issues.
-                    console.error('Found invalid RecordAnswerMap when decoding ' + field)
+                    console.error('Found invalid RecordAnswerMap when decoding ' + field);
                     value.settings.id = key;
                 } else {
                     throw new SimpleError({
@@ -249,8 +248,7 @@ class RecordAnswerMapDecoderStatic extends MapDecoder<string, RecordAnswer> {
         return response;
     }
 }
-export const RecordAnswerMapDecoder = new RecordAnswerMapDecoderStatic()
-
+export const RecordAnswerMapDecoder = new RecordAnswerMapDecoderStatic();
 
 export class RecordTextAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder, nullable: true })
@@ -288,7 +286,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%1RF`, {number: this.value}),
+                    message: $t(`%1RF`, { number: this.value }),
                     field: 'input',
                 });
             }

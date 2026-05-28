@@ -40,7 +40,7 @@ export class DetailedPayableBalance extends AutoEncoder {
 
     // todo
     @field({ decoder: new ArrayDecoder(PaymentGeneral) })
-    @field({ decoder: new ArrayDecoder(Payment), ...NextVersion})
+    @field({ decoder: new ArrayDecoder(Payment), ...NextVersion })
     payments: Payment[] = [];
 
     get filteredBalanceItems() {

@@ -86,10 +86,10 @@ export abstract class Checkoutable<T = unknown> extends AutoEncoder {
     totalPrice: number | null = null;
 
     removeBalanceItemByBalance(item: BalanceItem) {
-        this.balances.delete(item.id)
+        this.balances.delete(item.id);
     }
 
     addBalanceItem(item: BalanceItem, amount: number) {
-        this.balances.set(item.id, amount)
+        this.balances.set(item.id, amount);
     }
 }

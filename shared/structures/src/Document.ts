@@ -257,8 +257,7 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
 
             const compiledFilter = compileToInMemoryFilter(filter, defs);
             return compiledFilter(this);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;
@@ -341,8 +340,7 @@ export class Document extends AutoEncoder implements ObjectWithRecords {
         try {
             const compiledFilter = compileToInMemoryFilter(filter, documentInMemoryFilterCompilers);
             return compiledFilter(this);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error while compiling filter', e, filter);
         }
         return false;

@@ -125,8 +125,7 @@ export class TransferSettings extends AutoEncoder {
                 if (replacements.prefix.length === 4) {
                     // Add in the middle, not at the start
                     firstChars = parseInt((paddedFirst.substring(0, 3) + number.toFixed(0).padStart(4, '0') + paddedFirst.substring(3)).padStart(10, '0').substring(0, 10));
-                }
-                else {
+                } else {
                     firstChars = parseInt((number + paddedFirst).padStart(10, '0').substring(0, 10));
                 }
                 console.log('Changed first chars to', firstChars);

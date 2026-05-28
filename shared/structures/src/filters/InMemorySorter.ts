@@ -25,8 +25,7 @@ export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemo
             sorters.push((a, b) => {
                 return -d.sort(a, b);
             });
-        }
-        else {
+        } else {
             sorters.push(d.sort);
         }
     }

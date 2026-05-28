@@ -202,18 +202,18 @@ function getReplacements() {
         }),
         loginDetails: Replacement.create({
             token: 'loginDetails',
-            html: STAMHOOFD.userMode === 'organization' ?
+            html: STAMHOOFD.userMode === 'organization'
             // without security code if user mode is organization
-            `<p class="description"><em>${$t('%1EA', {
-                email: '<strong>' + $t(`%13a`) + '</strong>' },
-            )}</em></p>` :
+                ? `<p class="description"><em>${$t('%1EA', {
+                    email: '<strong>' + $t(`%13a`) + '</strong>' },
+                )}</em></p>`
             // with security code if user mode is platform
-            `<p class="description"><em>${$t('%1EA', {
-                email: '<strong>' + $t(`%13a`) + '</strong>' },
-            )} ${$t('%1EC', {
-                firstName: $t(`%13h`),
-                securityCode: `<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>`,
-            })}</em></p>`,
+                : `<p class="description"><em>${$t('%1EA', {
+                    email: '<strong>' + $t(`%13a`) + '</strong>' },
+                )} ${$t('%1EC', {
+                    firstName: $t(`%13h`),
+                    securityCode: `<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>`,
+                })}</em></p>`,
         }),
         mailDomain: Replacement.create({
             token: 'mailDomain',
@@ -318,7 +318,7 @@ function getReplacements() {
 
         errors: Replacement.create({
             token: 'errors',
-            html: '<p>'+ Formatter.escapeHtml($t(`%1Su`)) + '</p><p>' + Formatter.escapeHtml($t(`%1Rl`)) + '</p>',
+            html: '<p>' + Formatter.escapeHtml($t(`%1Su`)) + '</p><p>' + Formatter.escapeHtml($t(`%1Rl`)) + '</p>',
         }),
 
     };

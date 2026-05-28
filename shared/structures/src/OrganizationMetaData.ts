@@ -371,7 +371,7 @@ export class OrganizationMetaData extends AutoEncoder {
     /**
      * When enabled, this organization will create invoices for all payments, unless that fails (missing VAT data)
      */
-    @field({decoder: BooleanDecoder, version: 398, defaultValue: () => false})
+    @field({ decoder: BooleanDecoder, version: 398, defaultValue: () => false })
     invoicesEnabled: boolean;
 
     /**
@@ -438,10 +438,10 @@ export class OrganizationMetaData extends AutoEncoder {
     rootCategoryId = this.categories[0]?.id ?? '';
 
     @field({ decoder: StringDecoder, version: 378, nullable: true })
-    uitpasOrganizerId: string | null
+    uitpasOrganizerId: string | null;
 
     @field({ decoder: StringDecoder, version: 378, nullable: true })
-    uitpasOrganizerName: string | null
+    uitpasOrganizerName: string | null;
 
     @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus), version: 378, defaultValue: () => UitpasClientCredentialsStatus.NotConfigured })
     uitpasClientCredentialsStatus: UitpasClientCredentialsStatus;
@@ -455,7 +455,7 @@ export class OrganizationMetaData extends AutoEncoder {
     /**
      * Contains the text and settings for when data permissions are enabled - not whether it is enabled
      */
-    @field({ decoder: DataPermissionsSettings, version: 398, nullable: true})
+    @field({ decoder: DataPermissionsSettings, version: 398, nullable: true })
     dataPermission: DataPermissionsSettings | null = null;
 
     /**
@@ -492,8 +492,7 @@ export class OrganizationMetaData extends AutoEncoder {
                     value: fromAddress.name ?? organization.name,
                 }),
             );
-        }
-        else {
+        } else {
             base.push(
                 Replacement.create({
                     token: 'fromName',

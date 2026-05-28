@@ -97,8 +97,7 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
             }
             runners.push(runner);
         }
-    }
-    else {
+    } else {
         const f = wrapPlainFilter(filter);
         for (const key of Object.keys(f)) {
             const subFilter = f[key] as StamhoofdFilter;

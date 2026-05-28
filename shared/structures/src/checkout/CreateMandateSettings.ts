@@ -4,6 +4,6 @@ export class CreateMandateSettings extends AutoEncoder {
     /**
      * Ignored if it is the only created mandate
      */
-    @field({decoder: BooleanDecoder, defaultValue: () => false})
-    saveAsDefault = false
+    @field({ decoder: BooleanDecoder, defaultValue: () => false })
+    saveAsDefault = false;
 }

@@ -1,6 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
-import type {Organization} from './Organization.js';
-import type {Platform} from './Platform.js';
+import type { Organization } from './Organization.js';
+import type { Platform } from './Platform.js';
 
 export function getActivePeriodIds(periodId: string | null, organization: Organization | null, platform: Platform | null = null): Set<string> {
     const periods = new Set<string>();
@@ -22,8 +22,7 @@ export function getActivePeriodIds(periodId: string | null, organization: Organi
         if (organization.period.period.startDate >= twoMonthsAgo && organization.period.period.previousPeriodId) {
             periods.add(organization.period.period.previousPeriodId);
         }
-    }
-    else if (STAMHOOFD.userMode === 'platform') {
+    } else if (STAMHOOFD.userMode === 'platform') {
         // Same for platform
         if (platform) {
             periods.add(platform.period.id);

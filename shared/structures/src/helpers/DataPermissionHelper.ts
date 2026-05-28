@@ -4,9 +4,9 @@ import type { Platform } from '../Platform.js';
 
 /**
  * Get the data permission settings from the platform if userMode is platform, or from the organization otherwise.
- * @param platform 
- * @param organization 
- * @returns 
+ * @param platform
+ * @param organization
+ * @returns
  */
 export function getDataPermissionSettings(platform: Platform, organization: Organization | null): DataPermissionsSettings | null {
     if (STAMHOOFD.userMode === 'platform') {
@@ -23,9 +23,9 @@ export function getDataPermissionSettings(platform: Platform, organization: Orga
 /**
  * Get the data permission settings from the platform if userMode is platform, or from the organization otherwise.
  * Returns default settings if no settings are found.
- * @param platform 
- * @param organization 
- * @returns 
+ * @param platform
+ * @param organization
+ * @returns
  */
 export function getDataPermissionSettingsOrDefault(platform: Platform, organization: Organization | null): DataPermissionsSettings {
     return getDataPermissionSettings(platform, organization) ?? DataPermissionsSettings.create({});

@@ -167,8 +167,7 @@ export class Parent extends AutoEncoder {
                 if (this.type === ParentType.Parent1 || this.type === ParentType.Parent2) {
                     this.type = other.type;
                 }
-            }
-            else {
+            } else {
                 this.type = other.type;
             }
         }

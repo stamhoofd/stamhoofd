@@ -31,7 +31,7 @@ export class VATSubtotal extends AutoEncoder {
     VAT: number = 0;
 
     get peppolCategoryCode() {
-        return getPeppolCategoryCode(this)
+        return getPeppolCategoryCode(this);
     }
 }
 
@@ -227,8 +227,7 @@ export class Invoice extends AutoEncoder {
                     });
                 }
             }
-        }
-        else {
+        } else {
             for (const item of this.items) {
                 if (item.VATExcempt === VATExcemptReason.IntraCommunityServices || item.VATExcempt === VATExcemptReason.IntraCommunityGoods) {
                     throw new SimpleError({
@@ -251,8 +250,7 @@ export class Invoice extends AutoEncoder {
 
             if (!category.VATExcempt) {
                 category.VAT = STMath.round(category.taxablePrice * category.VATPercentage / 100_00) * 100;
-            }
-            else {
+            } else {
                 category.VAT = 0;
             }
             return category;
@@ -318,8 +316,7 @@ export class Invoice extends AutoEncoder {
         const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
         if (this.payments.length > 0 && Math.abs(difference) < 3_00) { // Correct maximum 2 cents
             this.payableRoundingAmount = difference;
-        }
-        else {
+        } else {
             this.payableRoundingAmount = 0;
         }
     }
@@ -361,7 +358,7 @@ export class Invoice extends AutoEncoder {
 
             // If toAddToTaxablePrice > 0 -> te weinig aangerekend - difference moet worden toegevoegd aan taxableprice
             // If toAddToTaxablePrice < 0 -> te veel aangerekend - difference moet worden toegevoegd aan taxableprice
-            const incorrectableItems: Set<InvoicedBalanceItem> = new Set()
+            const incorrectableItems: Set<InvoicedBalanceItem> = new Set();
             function getNext() {
                 // Rank items by difference
                 items.sort((a, b) => {
@@ -375,7 +372,7 @@ export class Invoice extends AutoEncoder {
                     return bDiff - aDiff; // Sort descending
                 });
 
-                const next = items.find(i => !incorrectableItems.has(i))
+                const next = items.find(i => !incorrectableItems.has(i));
                 if (!next) {
                     return;
                 }
@@ -409,35 +406,35 @@ export class Invoice extends AutoEncoder {
                     // Revert
                     next.unitPrice -= addition;
                     next.addedToUnitPriceToCorrectVAT -= addition;
-                    incorrectableItems.add(next)
+                    incorrectableItems.add(next);
                 } else {
-                    next.roundUnitPriceWithoutDifferenceInTotal()
+                    next.roundUnitPriceWithoutDifferenceInTotal();
                 }
 
                 // todo
                 next = getNext();
             }
 
-            {const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
-            const precise = items.reduce((a, b) => a + b.preciseTotalWithoutVAT, 0);
+            { const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
+                const precise = items.reduce((a, b) => a + b.preciseTotalWithoutVAT, 0);
 
-            const toAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
+                const toAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
 
-            if (Math.abs(toAddToTaxablePrice) > 1_00) {
-                const add = InvoicedBalanceItem.create({
-                    balanceItemId: items[0].balanceItemId,
-                    type: items[0].type,
-                    balanceInvoicedAmount: 0,
-                    quantity: 1_00_00,
-                    unitPrice: toAddToTaxablePrice,
-                    VATPercentage: items[0].VATPercentage,
-                    VATIncluded: false,
-                    VATExcempt: items[0].VATExcempt,
-                    name: items[0].name,
-                    description: $t('%1UT')
-                });
-                this.addItem(add)
-            }}
+                if (Math.abs(toAddToTaxablePrice) > 1_00) {
+                    const add = InvoicedBalanceItem.create({
+                        balanceItemId: items[0].balanceItemId,
+                        type: items[0].type,
+                        balanceInvoicedAmount: 0,
+                        quantity: 1_00_00,
+                        unitPrice: toAddToTaxablePrice,
+                        VATPercentage: items[0].VATPercentage,
+                        VATIncluded: false,
+                        VATExcempt: items[0].VATExcempt,
+                        name: items[0].name,
+                        description: $t('%1UT'),
+                    });
+                    this.addItem(add);
+                } }
         }
     }
 
@@ -456,7 +453,7 @@ export class Invoice extends AutoEncoder {
         if (this.totalWithVAT !== this.totalPaymentsAmount) {
             throw new SimpleError({
                 code: 'price_difference',
-                message: 'The price of the generated invoice ('+Formatter.price(this.totalWithVAT)+') ('+Formatter.price(this.totalWithoutVAT)+') did not match the price of the corresponding payments ('+Formatter.price(this.totalPaymentsAmount)+'). Possibly caused by rounding that could not be corrected automatically.',
+                message: 'The price of the generated invoice (' + Formatter.price(this.totalWithVAT) + ') (' + Formatter.price(this.totalWithoutVAT) + ') did not match the price of the corresponding payments (' + Formatter.price(this.totalPaymentsAmount) + '). Possibly caused by rounding that could not be corrected automatically.',
                 human: $t('%1Kn'),
             });
         }
@@ -494,10 +491,10 @@ export class Invoice extends AutoEncoder {
                     throw new SimpleError({
                         code: 'multiple_organizations',
                         message: 'Cannot create one invoice for multiple organizations',
-                        human: $t('Kan geen factuur aanmaken voor betalingen van verschillende organisaties tegelijk')
-                    })
+                        human: $t('Kan geen factuur aanmaken voor betalingen van verschillende organisaties tegelijk'),
+                    });
                 }
-                this.payingOrganizationId = payment.payingOrganizationId
+                this.payingOrganizationId = payment.payingOrganizationId;
             }
         }
 
@@ -509,14 +506,13 @@ export class Invoice extends AutoEncoder {
                 continue;
             }
             const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, item.amount);
-            
+
             // Remove zero invoicedItems if they were for a package (activation of a free package should not be invoiced)
             if (invoiced.totalWithoutVAT === 0 && item.balanceItem.type === BalanceItemType.STPackage) {
                 continue;
             }
             invoicedItems.push(invoiced);
         }
-        
 
         invoicedItems.sort((a, b) => {
             return Sorter.stack(

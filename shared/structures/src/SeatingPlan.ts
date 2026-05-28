@@ -438,8 +438,7 @@ export class SeatingPlan extends AutoEncoder {
                         }
                         emptySeatStack = [];
                         selectedSeatStack.push(rSeat);
-                    }
-                    else if (!seat.isValidSeat || (reservedSeats.find(s => s.equals(rSeat)) && !allowedSeats.find(s => s.equals(rSeat))) || (!asAdmin && this.isAdminSeat(rSeat))) {
+                    } else if (!seat.isValidSeat || (reservedSeats.find(s => s.equals(rSeat)) && !allowedSeats.find(s => s.equals(rSeat))) || (!asAdmin && this.isAdminSeat(rSeat))) {
                         if (allowRightSwap && emptySeatStack.length === 1 && selectedSeatStack.length) {
                             const from = selectedSeatStack[0];
                             const to = emptySeatStack[0];
@@ -459,8 +458,7 @@ export class SeatingPlan extends AutoEncoder {
                         selectedSeatStack = [];
                         leftSwapSeat = null; // When we reach a selected seat that is next to a reserved seat, we don't want to swap it any longer
                         allowRightSwap = false;
-                    }
-                    else {
+                    } else {
                         if (leftSwapSeat && selectedSeatStack.length) {
                             const from = selectedSeatStack[selectedSeatStack.length - 1];
                             const to = leftSwapSeat;

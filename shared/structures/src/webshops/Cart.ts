@@ -102,12 +102,10 @@ export class Cart extends AutoEncoder {
         for (const item of this.items) {
             try {
                 item.refresh(webshop);
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
             }
@@ -125,8 +123,7 @@ export class Cart extends AutoEncoder {
             }
             if (officialUitpasSales.has(item.product.uitpasEvent.url)) {
                 officialUitpasSales.get(item.product.uitpasEvent.url)!.push(...item.uitpasNumbers.map(p => p.uitpasNumber));
-            }
-            else {
+            } else {
                 officialUitpasSales.set(item.product.uitpasEvent.url, item.uitpasNumbers.map(p => p.uitpasNumber));
             }
         }
@@ -156,13 +153,11 @@ export class Cart extends AutoEncoder {
                 if (!webshop.meta.cartEnabled) {
                     break;
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     e.addNamespace('cart');
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
 
@@ -183,12 +178,10 @@ export class Cart extends AutoEncoder {
             // Only validate uitpas usage across items when all items are valid
             try {
                 this.validateUitpasNumbers();
-            }
-            catch (e) {
+            } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     errors.addError(e);
-                }
-                else {
+                } else {
                     throw e;
                 }
             }
