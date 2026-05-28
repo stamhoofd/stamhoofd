@@ -1,5 +1,5 @@
 <template>
-    <STList>
+    <STList v-if="options.length">
         <STListItem v-if="filter.configuration.showOptionSelectAll" :selectable="true" element-name="label">
             <template #left>
                 <Checkbox v-model="isSelectAll" />
@@ -19,6 +19,9 @@
             </STListItem>
         </template>
     </STList>
+    <p v-else class="info-box">
+        {{ $t('Geen opties') }}
+    </p>
 </template>
 
 <script lang="ts" setup>
