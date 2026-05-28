@@ -797,7 +797,8 @@ export class AdminPermissionChecker {
             }
 
             if (!this.organization) {
-                return false;
+                const org = await this.getOrganization(template.organizationId);
+                return EmailTemplateStruct.allowOrganizationLevel(template.type, org, this.platform);
             }
 
             return EmailTemplateStruct.allowOrganizationLevel(template.type, this.organization, this.platform);
