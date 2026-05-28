@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, Invoice, Organization, Payment, StripeAccount } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Invoice, Organization, Payment, StripeAccount, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, InvoiceStruct, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -275,9 +275,12 @@ export class StripeReportInvoicer {
             await item.save()
             balanceItems.push(item)
         }
+
+        const systemUser = await User.getSystem();
         
         // Done validation
         const payment = new Payment();
+        payment.adminUserId = systemUser.id;
 
         // Who will receive this money?
         payment.organizationId = sellingOrganization.id;

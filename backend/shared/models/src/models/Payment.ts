@@ -1,10 +1,11 @@
 import { column } from '@simonbackx/simple-database';
-import type { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import type { PaymentMethod} from '@stamhoofd/structures';
+import { PaymentStatus } from '@stamhoofd/structures';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentProvider, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import type { BalanceItem } from './BalanceItem.js';
 import type { BalanceItemPayment } from './BalanceItemPayment.js';
@@ -99,6 +100,12 @@ export class Payment extends QueryableModel {
     price: number;
 
     /**
+     * Total price refunded or charged back
+     */
+    @column({ type: 'integer' })
+    refundedAmount = 0
+
+    /**
      * The difference between the sum of the balance item payments price and the price of the payment, caused by rounding to 1 cent.
      * This cannot be >= 100 (= 0,01 euro) or <= -100 (=-0,01 euro)
      * 
@@ -170,6 +177,12 @@ export class Payment extends QueryableModel {
     @column({ type: 'string', nullable: true })
     invoiceId: string | null = null;
 
+    /**
+     * In case the payment was initiated by an admin or not.
+     */
+    @column({ type: 'string', nullable: true })
+    adminUserId: string | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
@@ -213,6 +226,15 @@ export class Payment extends QueryableModel {
     generateDescription(organization: Organization, reference: string, replacements: { [key: string]: string } = {}) {
         const settings = this.transferSettings ?? organization.meta.transferSettings;
         this.transferDescription = settings.generateDescription(reference, organization.address.country, replacements);
+    }
+
+    async updateRefundedAmount() {
+        this.refundedAmount = await Payment.select()
+            .where('organizationId', this.organizationId)
+            .where('reversingPaymentId', this.id)
+            .where('status', PaymentStatus.Succeeded)
+            .sum(SQL.column('price'))
+        await this.save()
     }
 
     static roundPrice(price: number) {

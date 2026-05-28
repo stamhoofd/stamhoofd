@@ -38,6 +38,9 @@ export class Payment extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    refundedAmount = 0;
     
     @field({ decoder: IntegerDecoder, ...NextVersion })
     roundingAmount = 0

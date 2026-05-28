@@ -1,4 +1,4 @@
-import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Payment, User } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { ReceivableBalanceType } from '@stamhoofd/structures';
 import { BalanceItemStatus, doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType } from '@stamhoofd/structures';
@@ -233,8 +233,10 @@ export const PaymentReallocationService = {
             if (total !== 0) {
                 throw new Error('Total is not zero');
             }
+            const systemUser = await User.getSystem();
 
             const payment = new Payment();
+            payment.adminUserId = systemUser.id;
             payment.organizationId = organizationId;
             payment.price = 0;
             payment.type = PaymentType.Reallocation;

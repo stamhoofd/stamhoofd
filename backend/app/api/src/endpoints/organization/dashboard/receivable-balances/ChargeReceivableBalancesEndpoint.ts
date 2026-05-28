@@ -36,7 +36,7 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const sellingOrganization = await Context.setOrganizationScope();
-        await Context.authenticate();
+        const {user} = await Context.authenticate();
         const query = await GetReceivableBalancesEndpoint.buildQuery(request.query);
 
         for await (const cachedBalance of query.all()) {
@@ -65,7 +65,7 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
             }
             
             let payingOrganization: Organization | null = null;
-            let user: User | null = null;
+            let customerUser: User | null = null;
             if (cachedBalance.objectType === ReceivableBalanceType.organization) {
                 const p = await Organization.getByID(cachedBalance.objectId);
                 if (!p || !(await Context.auth.hasFullAccess(p))) {
@@ -78,15 +78,15 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
             if (cachedBalance.objectType === ReceivableBalanceType.user || cachedBalance.objectType === ReceivableBalanceType.userWithoutMembers) {
                 const p = await User.getByID(cachedBalance.objectId);
                 if (!p || !(Context.auth.checkScope(p.organizationId))) {
-                    console.error('Unexpected missing user id', cachedBalance)
+                    console.error('Unexpected missing customer user id', cachedBalance)
                     continue
                 }
-                user = p
+                customerUser = p
             }
 
             const mandates = await PaymentMandateService.getMandates({
                 sellingOrganization,
-                user,
+                user: customerUser,
                 payingOrganization
             });
 
@@ -98,7 +98,7 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                 continue;
             }
 
-            const customerUser = user ?? (payingOrganization ? (await payingOrganization.getFullAdmins())[0] : null)
+            customerUser = customerUser ?? (payingOrganization ? (await payingOrganization.getFullAdmins())[0] : null)
             const customer = PaymentCustomer.create({
                 firstName: customerUser?.firstName,
                 lastName: customerUser?.lastName,
@@ -115,14 +115,15 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     cancelUrl: null,
                     redirectUrl: null
                 },
-                user,
+                user: customerUser,
+                adminUserId: user.id,
                 organization: sellingOrganization,
                 payingOrganization,
                 serviceFeeType: 'system',
                 createMandate: null,
                 useMandate: mandate,
                 paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
-                privatePaymentConfiguration: sellingOrganization.privateMeta.registrationPaymentConfiguration
+                privatePaymentConfiguration: sellingOrganization.privateMeta.registrationPaymentConfiguration,
             })
         }
 

@@ -119,10 +119,10 @@ export class PaymentMandateService {
         }
     }
 
-    static async setDefaultMandate({ mandateId, sellingOrganization, payingUserId, payingOrganizationId }: {
+    static async setDefaultMandate({ mandateId, sellingOrganizationId, payingUserId, payingOrganizationId }: {
         mandateId: string, 
 
-        sellingOrganization: Organization,
+        sellingOrganizationId: string,
 
         /**
          * Mandates for B2B payments
@@ -141,7 +141,7 @@ export class PaymentMandateService {
                 return;
             }
 
-            if (sellingOrganization.id !== (await Platform.getShared()).membershipOrganizationId) {
+            if (sellingOrganizationId !== (await Platform.getShared()).membershipOrganizationId) {
                 // Not yet supported
                 return [];
             }

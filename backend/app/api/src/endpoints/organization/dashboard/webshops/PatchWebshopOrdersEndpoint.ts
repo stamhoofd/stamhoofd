@@ -65,7 +65,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOrganizationScope();
-        await Context.authenticate();
+        const {user} = await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.hasSomeAccess(organization.id)) {
@@ -159,6 +159,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         payment.price = totalPrice;
                         PaymentService.roundPayment(payment);
                         payment.paidAt = null;
+                        payment.adminUserId = user.id
 
                         // Determine the payment provider (always null because no online payments here)
                         payment.provider = null;

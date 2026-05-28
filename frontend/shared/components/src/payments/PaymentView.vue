@@ -39,6 +39,10 @@
                 </p>
             </template>
 
+            <p v-if="payment.refundedAmount" class="warning-box">
+                {{ $t('Deze betaling werd intussen terugbetaald of teruggevorderd voor {price} in een andere betaling.', {price: formatPrice(payment.refundedAmount)}) }}
+            </p>
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <STList class="info">

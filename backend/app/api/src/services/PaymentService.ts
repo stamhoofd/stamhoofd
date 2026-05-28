@@ -25,6 +25,16 @@ import { VATService } from './VATService.js';
 import { ReferralService } from './ReferralService.js';
 
 export class PaymentService {
+    static async updateReversedPaymentsFor(payment: Payment) {
+        if (payment.reversingPaymentId) {
+            // Update refund amount of that payment
+            const reversingPayment = await Payment.getByID(payment.reversingPaymentId);
+            if (reversingPayment) {
+                await reversingPayment.updateRefundedAmount()
+            }
+        }
+    }
+
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus, paidAt?: Date) {
         if (payment.status === status) {
             return;
@@ -60,6 +70,8 @@ export class PaymentService {
 
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
+
+                    await this.updateReversedPaymentsFor(payment)
                 });
 
                 if (payment.price >= 100_00 && payment.organizationId && payment.payingOrganizationId && payment.organizationId === ((await Platform.getShared()).membershipOrganizationId)) {
@@ -77,7 +89,7 @@ export class PaymentService {
                 // need to save it as the default payment method
                 await this.saveMandateIfNeeded({
                     payment,
-                    sellingOrganization: organization,
+                    sellingOrganizationId: organization.id,
                 })
                 return;
             }
@@ -105,6 +117,8 @@ export class PaymentService {
 
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
+
+                    await this.updateReversedPaymentsFor(payment)
                 });
             }
 
@@ -147,7 +161,7 @@ export class PaymentService {
         });
     }
 
-    static async saveMandateIfNeeded({payment, sellingOrganization}: {payment: Payment, sellingOrganization: Organization}) {
+    static async saveMandateIfNeeded({payment, sellingOrganizationId}: {payment: Payment, sellingOrganizationId: string}) {
         // Save as default
         if (payment.createMandate && payment.createMandate.saveAsDefault) {
             if (payment.mandateId && payment.status === PaymentStatus.Succeeded) {
@@ -155,7 +169,7 @@ export class PaymentService {
                     await PaymentMandateService.setDefaultMandate({
                         mandateId: payment.mandateId,
                         payingOrganizationId: payment.payingOrganizationId,
-                        sellingOrganization,
+                        sellingOrganizationId,
                         payingUserId: payment.payingUserId
                     })
                 } catch (e) {
@@ -637,7 +651,7 @@ export class PaymentService {
         }
     }
 
-    static async registerChargeback(payment: Payment, amount: number) {
+    static async registerChargeback(payment: Payment, amount: number, date: Date) {
         if (amount !== payment.price) {
             // Creates issues to know what balance item was paid and what was not.
             throw new Error('Cannot register chargeback with different amount than the payment for payment ' + payment.id)
@@ -656,8 +670,7 @@ export class PaymentService {
         chargeback.payingOrganizationId = payment.payingOrganizationId
         chargeback.customer = payment.customer;
 
-        chargeback.status = PaymentStatus.Succeeded;
-        chargeback.paidAt = new Date();
+        chargeback.status = PaymentStatus.Created;
         chargeback.price = -payment.price;
         chargeback.roundingAmount = -payment.roundingAmount;
         chargeback.method = payment.method;
@@ -665,9 +678,8 @@ export class PaymentService {
 
         chargeback.provider = payment.provider;
         chargeback.stripeAccountId = payment.stripeAccountId
-
+        chargeback.reversingPaymentId = payment.id
         await chargeback.save();
-
 
         for (const original of balanceItemPayments) {
             // Create one balance item payment to pay it in one payment
@@ -682,10 +694,19 @@ export class PaymentService {
         // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
         await BalanceItemService.updatePaidAndPending(items);
 
+        const organization = await Organization.getByID(chargeback.organizationId, true)
+
+        try {
+            await this.handlePaymentStatusUpdate(chargeback, organization, PaymentStatus.Succeeded, date)
+        } catch (e) {
+            console.error('Failed to mark chargeback as succeeded', e)
+            await chargeback.delete()
+            throw e;
+        }
         return chargeback;
     }
 
-    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration}: {
+    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration, adminUserId}: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
         user: User | null;
@@ -697,6 +718,7 @@ export class PaymentService {
         useMandate: PaymentMandate | null,
         paymentConfiguration: PaymentConfiguration,
         privatePaymentConfiguration: PrivatePaymentConfiguration,
+        adminUserId?: string | null
     }) {
         if (balanceItems.size === 0) {
             return null;
@@ -764,6 +786,7 @@ export class PaymentService {
         payment.type = type;
         payment.createMandate = createMandate
         payment.mandateId = mandate?.id ?? null
+        payment.adminUserId = adminUserId ?? null
 
         if (price === 0) {
             payment.status = PaymentStatus.Succeeded;

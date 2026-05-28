@@ -63,7 +63,7 @@ export async function checkMollieChargebacksFor(service: MollieService, checkAll
                 if (payment) {
                     try {
                         const amount = Math.round(parseFloat(chargeback.amount.value) * 100) * 100;
-                        const createdPayment = await PaymentService.registerChargeback(payment, amount)
+                        const createdPayment = await PaymentService.registerChargeback(payment, amount, new Date(chargeback.createdAt))
 
                         // Link Mollie chargeback ID (so we can set settlement later in the settlements cron)
                         const molliePayment = new MolliePayment();

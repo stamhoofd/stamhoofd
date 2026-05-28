@@ -76,7 +76,7 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
             if (patch.isDefault === true) {
                 await PaymentMandateService.setDefaultMandate({
                     mandateId: mandate.id,
-                    sellingOrganization,
+                    sellingOrganizationId: sellingOrganization.id,
                     payingOrganizationId: payingOrganization,
                     payingUserId: null
                 })

@@ -244,4 +244,17 @@ export class STPackageService {
             console.error("Couldn't find organization when updating packages " + organizationId);
         }
     }
+
+    static async markFailedPayment(organizationId: string) {
+        console.log('Marking packages with failed payment for '+organizationId)
+
+        // Mark all active packages as failed
+        const activePackages = await this.getActivePackages(organizationId)
+        for (const pack of activePackages) {
+            console.log('Marking package with failed payment '+pack.id)
+            pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
+            pack.meta.paymentFailedCount++;
+            await pack.save()
+        }
+    }
 }
