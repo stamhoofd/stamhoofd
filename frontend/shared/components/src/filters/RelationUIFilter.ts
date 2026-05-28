@@ -105,7 +105,6 @@ export class RelationFilterBuilder<T extends string | number | Date | null | boo
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
         this.wrapper = data.wrapper;
-        console.error('wrapper test1: ', JSON.stringify(this.wrapper))
         this.name = data.name;
         this.allowCreation = data.allowCreation;
         this.relationFetcher = data.relationFetcher;
