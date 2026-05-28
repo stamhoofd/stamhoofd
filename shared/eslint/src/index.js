@@ -58,10 +58,12 @@ const baseRules = [
         quotes: 'single',
         semi: true,
         jsx: false,
+        severity: 'warn',
+        braceStyle: '1tbs',
     }),
     {
         rules: {
-            '@stylistic/quotes': ['error', 'single', { allowTemplateLiterals: true, avoidEscape: true }],
+            '@stylistic/quotes': ['warn', 'single', { allowTemplateLiterals: true, avoidEscape: true }],
         },
     },
     {

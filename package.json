@@ -90,8 +90,6 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
-    "@eslint/js": "^9.11.1",
-    "@stylistic/eslint-plugin": "^2.8.0",
     "@testing-library/dom": "^10.4.0",
     "@types/eslint__js": "^8.42.3",
     "@types/file-saver": "^2.0.5",
