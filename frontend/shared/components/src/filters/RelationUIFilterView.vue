@@ -8,6 +8,7 @@
         <div v-if="relationFetcher.subFilter">
             <button type="button" class="button text" @click="showSubFilters">
                 <span class="icon filter" />
+                <span v-if="selectedSubFilterOption.filter" class="icon dot primary" />
             </button>
         </div>
     </div>
@@ -22,6 +23,9 @@
                 <h3 class="style-title-list">
                     {{ option.name }}
                 </h3>
+                <p v-if="option.description" class="style-description-small">
+                    {{ option.description }}
+                </p>
             </STListItem>
         </STList>
         <template v-if="infiniteObjectFetcher.errorState === null">
@@ -42,7 +46,6 @@
 
 <script lang="ts" setup generic="T extends string | number | Date | null | boolean, ObjectType extends { id: string }">
 import { mergeFilters } from '@stamhoofd/structures';
-import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
@@ -67,7 +70,6 @@ const errorBox = computed(() => {
 });
 
 const searchQuery = ref('');
-const selectedSubFilterOption = ref(null) as Ref<null | RelationFetcherSubFilterOption>;
 
 watchEffect(() => {
     infiniteObjectFetcher.setSearchQuery(searchQuery.value);
@@ -86,6 +88,13 @@ const invisibleSelectedOptions = computed(() => {
     })
 });
 
+const defaultOption: RelationFetcherSubFilterOption = {
+    name: $t('Geen filter'),
+    filter: null
+};
+
+const selectedSubFilterOption = ref(defaultOption);
+
 async function showSubFilters(event: MouseEvent) {
     const subFilter = relationFetcher.subFilter;
     if (!subFilter) {
@@ -97,10 +106,10 @@ async function showSubFilters(event: MouseEvent) {
     const options = await subFilter.loadOptions();
     
     const menu = new ContextMenu([
-        options.map(option => {
+        [defaultOption, ...options].map(option => {
             return new ContextMenuItem({
                 name: option.name,
-                selected: selectedSubFilterOption.value === option,
+                selected: selectedSubFilterOption.value.name === option.name,
                 action: () => {
                     selectedSubFilterOption.value = option;
                     infiniteObjectFetcher.setFilter(mergeFilters([option.filter, relationFetcher.filter ?? null]))

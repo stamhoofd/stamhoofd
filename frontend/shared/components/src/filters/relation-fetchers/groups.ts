@@ -25,6 +25,7 @@ export function useGroupsRelationFetcher() {
         }
 
         let getName: (object: ObjectType) => string;
+        let getDescription: ((object: ObjectType) => string) | undefined = undefined;
         let subFilter: RelationFetcherSubFilter | undefined = undefined;
 
         if (type === GroupType.Membership && periodId === undefined) {
@@ -48,10 +49,21 @@ export function useGroupsRelationFetcher() {
             getName = (group) => group.settings.name.toString();
         }
 
+        if (type === GroupType.EventRegistration) {
+            getDescription = (group) => {
+                if (!group.event) {
+                    return ''
+                }
+                
+                return `${group.event.dateRange}`;
+            }
+        }
+
         return new RelationFetcher({
             fetcher,
             getName,
             getValue: (group) => group.id,
+            getDescription,
             filter,
             subFilter,
             sort: [{ key: 'name', order: SortItemDirection.ASC }, {key: 'periodId', order: SortItemDirection.ASC}],

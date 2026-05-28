@@ -9,6 +9,7 @@ import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export type RelationFilterOption<T extends string | number | Date | null | boolean> = {
     name: string;
+    description?: string;
     value: T;
 }
 
@@ -199,6 +200,7 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
     readonly fetcher: ObjectFetcher<OBJECT>;
     
     private readonly getName: (object: OBJECT) => string;
+    private readonly getDescription?: (object: OBJECT) => string;
     private readonly getValue: (object: OBJECT) => T;
 
     readonly filter?: StamhoofdFilter;
@@ -207,10 +209,11 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
 
     readonly subFilter?: RelationFetcherSubFilter;
 
-    constructor({fetcher, getName, getValue, filter, limit, sort, subFilter}: {
+    constructor({fetcher, getName, getDescription, getValue, filter, limit, sort, subFilter}: {
         fetcher: ObjectFetcher<OBJECT>,
         getName: (object: OBJECT) => string,
         getValue: (object: OBJECT) => T,
+        getDescription?: (object: OBJECT) => string,
         filter?: StamhoofdFilter,
         limit?: number,
         sort?: SortList,
@@ -218,6 +221,7 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
     }) {
         this.fetcher = fetcher;
         this.getName = getName;
+        this.getDescription = getDescription;
         this.getValue = getValue;
         this.filter = filter;
         this.limit = limit;
@@ -240,6 +244,16 @@ export class RelationFetcher<OBJECT extends {id: string}, T extends string | num
     }
 
     resultsToOptions(results: OBJECT[]): RelationFilterOption<T>[] {
+        const getDescription = this.getDescription;
+
+        if (getDescription) {
+            return results.map(object => ({
+                name: this.getName(object),
+                description: getDescription(object),
+                value: this.getValue(object)
+            }));
+        }
+        
         return results.map(object => ({
             name: this.getName(object),
             value: this.getValue(object)
