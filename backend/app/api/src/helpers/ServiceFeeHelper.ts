@@ -61,17 +61,6 @@ export class ServiceFeeHelper {
             return;
         }
 
-        let vat = 0;
-
-        // Calculate item count
-        if (payment.provider === PaymentProvider.Stripe && payment.stripeAccountId) {
-            // Don't chagne
-            vat = await this.getVATPercentage(organization);
-        }
-        else {
-            // don't charge VAT (we'll add the VAT to the invoice)
-        }
-
         function calculateFee(price: number, minimumFee: number | null, maximumFee: number | null, fixed: number, percentageTimes100: number) {
             if (price === 0 && !minimumFee) {
                 return 0;
@@ -109,7 +98,19 @@ export class ServiceFeeHelper {
         }
 
         // Add VAT
-        serviceFee = serviceFee * (100 + vat) / 100;
+        if (serviceFee !== 0) {
+            let vat = 0;
+
+            // Calculate item count
+            if (payment.provider === PaymentProvider.Stripe && payment.stripeAccountId) {
+                // Don't chagne
+                vat = await this.getVATPercentage(organization);
+            }
+            else {
+                // don't charge VAT (we'll add the VAT to the invoice)
+            }
+            serviceFee = serviceFee * (100 + vat) / 100;
+        }
 
         // Round service fee to 2 decimal places
         serviceFee = Math.round(serviceFee / 100) * 100;
@@ -149,6 +150,11 @@ export class ServiceFeeHelper {
             return;
         }
 
+        if (stripeAccount && stripeAccount.meta.type === 'standard') {
+            // Submerchant is charged by Stripe for the fees directly
+            return;
+        }
+
         let fee = 0;
         const vat = await this.getVATPercentage(organization);
 
@@ -164,11 +170,6 @@ export class ServiceFeeHelper {
         }
         else {
             fee =  calculateFee(25, 150); // € 0,25 + 1,5%
-        }
-
-        if (stripeAccount && stripeAccount.meta.type === 'standard') {
-            // Submerchant is charged by Stripe for the fees directly
-            fee = 0;
         }
 
         payment.transferFee = fee * 100; // Convert back to 4 decimal places for storage
