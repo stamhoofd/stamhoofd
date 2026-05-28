@@ -24,7 +24,7 @@ import STToolbar from '#navigation/STToolbar.vue';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { useMemberManager } from '@stamhoofd/networking/MemberManager';
 import type { PaymentGeneral } from '@stamhoofd/structures';
-import { BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
+import { BalanceItemRelationType, BalanceItemType, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted } from 'vue';
 import { GlobalEventBus } from '../EventBus';
@@ -48,7 +48,17 @@ onMounted(() => {
 
 const {title, description} = (() => {
     let t = $t(`%1Tf`) ;
+    if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit || props.payment.method === PaymentMethod.CreditCard)) {
+        t = $t('Betaling in verwerking')
+    }
+
+    let nameInTitle = false
+
     let d = '';
+
+    if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit)) {
+        d = $t('Het kan enkele dagen duren voor we een bevestiging krijgen van je betaling. Je ontvangt een e-mail als de betaling nog zou mislukken.')
+    }
 
     let packages = false;
     let others = 0;
@@ -112,9 +122,12 @@ const {title, description} = (() => {
         }
     }
 
+
     if (packages) {
         t = $t('%1Rc')
-        d = $t('%1Qo')
+        d = $t('%1Qo') + (d ? (' ' + d) : '')
+        
+        nameInTitle = true;
     }
 
     if (registrationNames.size) {
@@ -150,6 +163,7 @@ const {title, description} = (() => {
                 })
             }
         }
+        nameInTitle = true;
     }
 
     if (membershipNames.size) {
@@ -185,16 +199,24 @@ const {title, description} = (() => {
                 })
             }
         }
+        nameInTitle = true;
     }
 
-    if (others && !d) {
-        if (others> 1) {
-            d = $t('%1Tz', {count: Formatter.integer(others)})
+    if (others && !d && props.payment.status === PaymentStatus.Succeeded) {
+        if (nameInTitle) {
+            if (others> 1) {
+                d = $t('%1Tz', {count: Formatter.integer(others)})
+            } else {
+                d = $t('%1SF', {count: Formatter.integer(others)})
+            }
         } else {
-            d = $t('%1SF', {count: Formatter.integer(others)})
+            if (others> 1) {
+                d = $t('{count} items werden betaald', {count: Formatter.integer(others)})
+            } else {
+                d = $t('Eén item werd betaald', {count: Formatter.integer(others)})
+            }
         }
     }
-    
 
     return {title: t, description: d}
 })();

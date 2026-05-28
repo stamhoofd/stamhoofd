@@ -502,6 +502,13 @@ export class PlatformConfig extends AutoEncoder {
 
         base.push(
             Replacement.create({
+                token: 'platformName',
+                value: this.name,
+            }),
+        );
+
+        base.push(
+            Replacement.create({
                 token: 'registerUrl',
                 value: 'https://' + STAMHOOFD.domains.dashboard,
             }),

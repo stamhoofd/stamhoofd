@@ -323,7 +323,7 @@ export class StripeReportInvoicer {
         invoiceStruct.reference = reference;
         invoiceStruct.stripeAccountId = accountId;
 
-        await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded, this.end);
+        await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, this.end);
         const invoice = await InvoiceService.createFrom(sellingOrganization, invoiceStruct);
 
         return invoice;

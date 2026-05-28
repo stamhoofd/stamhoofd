@@ -8,18 +8,19 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AccessRight, Address, appToUri, Company, DNSRecordStatus, EmailTemplateType, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData.js';
 import { Group } from './Group.js';
 import { OrganizationRegistrationPeriod } from './OrganizationRegistrationPeriod.js';
-import { StripeAccount } from './StripeAccount.js';
-import { Country } from '@stamhoofd/types/Country';
-import { Language } from '@stamhoofd/types/Language';
 import { Registration } from './Registration.js';
-import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
+import { StripeAccount } from './StripeAccount.js';
 import { Token } from './Token.js';
+import type { User } from './User.js';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
@@ -304,8 +305,7 @@ export class Organization extends QueryableModel {
                 await created.save();
                 return created;
             });
-        }
-        else {
+        } else {
             oPeriod = oPeriods[0];
         }
 
@@ -368,8 +368,7 @@ export class Organization extends QueryableModel {
 
                     console.log('Did set register domain for ' + this.id + ' to ' + organization.registerDomain);
                 }
-            }
-            else {
+            } else {
                 // Clear register domain
                 if (organization.registerDomain) {
                     // We need to clear it, to prevent sending e-mails with invalid links
@@ -407,8 +406,7 @@ export class Organization extends QueryableModel {
                     type: EmailTemplateType.OrganizationStableDNS,
                     bcc: true,
                 });
-            }
-            else if (!wasActive && this.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning) && !organization.serverMeta.isDNSUnstable) {
+            } else if (!wasActive && this.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning) && !organization.serverMeta.isDNSUnstable) {
                 organization.serverMeta.didSendDomainSetupMail = true;
                 await organization.save();
 
@@ -416,15 +414,13 @@ export class Organization extends QueryableModel {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationDNSSetupComplete,
                     });
-                }
-                else {
+                } else {
                     await this.sendEmailTemplate({
                         type: EmailTemplateType.OrganizationValidDNS,
                     });
                 }
             }
-        }
-        else {
+        } else {
             // DNS settings gone broken
             if (organization.privateMeta.mailDomain) {
                 organization.privateMeta.pendingMailDomain = organization.privateMeta.pendingMailDomain ?? organization.privateMeta.mailDomain;
@@ -449,8 +445,7 @@ export class Organization extends QueryableModel {
                     type: EmailTemplateType.OrganizationUnstableDNS,
                     bcc: true,
                 });
-            }
-            else if (!organization.serverMeta.isDNSUnstable && organization.serverMeta.didSendDomainSetupMail && organization.serverMeta.DNSRecordWarningCount == 0) {
+            } else if (!organization.serverMeta.isDNSUnstable && organization.serverMeta.didSendDomainSetupMail && organization.serverMeta.DNSRecordWarningCount == 0) {
                 organization.serverMeta.DNSRecordWarningCount += 1;
                 await organization.save();
 
@@ -548,8 +543,7 @@ export class Organization extends QueryableModel {
 
             await client.send(deleteCmd);
             console.log('Deleted AWS mail idenitiy @' + this.id + ' for ' + this.privateMeta.mailDomain);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Could not delete AWS email identitiy @' + this.id + ' for ' + this.privateMeta.mailDomain);
             console.error(e);
         }
@@ -616,8 +610,7 @@ export class Organization extends QueryableModel {
                 // Recreate it immediately
                 exists = false;
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
 
@@ -864,6 +857,17 @@ export class Organization extends QueryableModel {
     /**
      * These email addresess are private
      */
+    async getFinanceAdmins() {
+        const admins = await this.getAdmins();
+        const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+
+        // Only full access
+        return filtered;
+    }
+
+    /**
+     * These email addresess are private
+     */
     async getAdminToEmails(): Promise<EmailInterfaceRecipient[]> {
         const filtered = await this.getFullAdmins();
 
@@ -880,30 +884,13 @@ export class Organization extends QueryableModel {
         return filtered.flatMap(f => f.getEmailTo());
     }
 
-    /**
-     * These email addresess are private
-     */
-    async getAdminRecipients(): Promise<Recipient[]> {
-        let filtered = await this.getFullAdmins();
-
-        if (STAMHOOFD.environment === 'production') {
-            if (filtered.length > 1) {
-                // remove stamhoofd email addresses
-                filtered = filtered.filter(e => !e.email.endsWith('@stamhoofd.be') && !e.email.endsWith('@stamhoofd.nl'));
-            }
-        }
-
-        return filtered.flatMap((f) => {
+    adminsToRecipients(admins: User[]) {
+        return admins.flatMap((f) => {
             return Recipient.create({
                 firstName: f.firstName,
                 lastName: f.lastName,
                 email: f.email,
-                replacements: [
-                    Replacement.create({
-                        token: 'organizationName',
-                        value: this.name,
-                    }),
-                ],
+                replacements: [],
             });
         });
     }
@@ -911,63 +898,77 @@ export class Organization extends QueryableModel {
     /**
      * These email addresess are private
      */
+    async getAdminRecipients(): Promise<Recipient[]> {
+        const filtered = await this.getFullAdmins();
+        return this.adminsToRecipients(filtered);
+    }
+
+    /**
+     * These email addresess are private
+     */
+    async getFinanceAdminRecipients(): Promise<Recipient[]> {
+        const filtered = await this.getFullAdmins();
+        return this.adminsToRecipients(filtered);
+    }
+
+    /**
+     * These email addresess are private
+     */
     async getInvoicingToEmails() {
         // Circular reference fix
-        const admins  = await this.getAdmins();
-        const filtered = admins.filter(a => a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)))
+        const filtered = await this.getFinanceAdmins();
 
         if (filtered.length > 0) {
-            return filtered.flatMap(f => f.getEmailTo() ).map((recipient) => {
+            return filtered.flatMap(f => f.getEmailTo()).map((recipient) => {
                 if (!recipient.name) {
-                    return recipient.email
+                    return recipient.email;
                 }
-                const cleanedName = Formatter.emailSenderName(recipient.name)
+                const cleanedName = Formatter.emailSenderName(recipient.name);
                 if (cleanedName.length < 2) {
-                    return recipient.email
+                    return recipient.email;
                 }
-                return '"'+cleanedName+'" <'+recipient.email+'>'
-            }).join(', ')
+                return '"' + cleanedName + '" <' + recipient.email + '>';
+            }).join(', ');
         }
 
-        return undefined
+        return undefined;
     }
 
     /**
      * Returns one email for invoices. since in ubl we can only add one address.
      * We choose the oldest user that was active in the last 3 months (otherwise the oldest user if noone was active)
      */
-     async getInvoicingToEmail(): Promise<string | undefined> {
+    async getInvoicingToEmail(): Promise<string | undefined> {
         // Circular reference fix
-        const admins = await this.getAdmins()
+        const admins = await this.getAdmins();
 
         const tokens = await Token.select().where('userId', admins.map(a => a.id)).fetch();
 
         // Sort by admins that were active in the last 3 months, then creation date
-        const cutoffDate = new Date(Date.now() - 1000*60*60*24*31*3)
+        const cutoffDate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 31 * 3);
         admins.sort((a, b) => {
             const aTokens = tokens.filter(t => t.userId === a.id);
             const bTokens = tokens.filter(t => t.userId === b.id);
-            const aActive = !!aTokens.find(t => t.updatedAt > cutoffDate)
-            const bActive = !!bTokens.find(t => t.updatedAt > cutoffDate)
+            const aActive = !!aTokens.find(t => t.updatedAt > cutoffDate);
+            const bActive = !!bTokens.find(t => t.updatedAt > cutoffDate);
             return Sorter.stack(
                 Sorter.byBooleanValue(aActive, bActive),
-                Sorter.byDateValue(b.createdAt, a.createdAt)
-            )
-        })
+                Sorter.byDateValue(b.createdAt, a.createdAt),
+            );
+        });
 
-        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)))
+        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
 
         if (filtered.length > 0) {
-            return filtered.map(f => f.email)[0]
+            return filtered.map(f => f.email)[0];
         }
-        const filtered2 = admins.filter(a => a.verified && a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)))
-        
+        const filtered2 = admins.filter(a => a.verified && a.permissions && (a.permissions.forOrganization(this)?.hasFullAccess() || a.permissions.forOrganization(this)?.hasAccessRight(AccessRight.OrganizationFinanceDirector)));
+
         if (filtered2.length > 0) {
-            return filtered2.map(f => f.email)[0]
+            return filtered2.map(f => f.email)[0];
         }
-        return undefined
+        return undefined;
     }
-    
 
     /**
      * Return default e-mail address if no email addresses are set.
@@ -988,10 +989,10 @@ export class Organization extends QueryableModel {
         if (mandate) {
             return {
                 provider: mandate.provider,
-                stripeAccount: null
-            }
+                stripeAccount: null,
+            };
         }
-        
+
         let stripeAccount = (config.stripeAccountId ? (await StripeAccount.getByID(config.stripeAccountId)) : null) ?? null;
         if (stripeAccount && stripeAccount.organizationId !== this.id) {
             console.warn('Stripe account ' + stripeAccount.id + ' is not linked to organization ' + this.id);

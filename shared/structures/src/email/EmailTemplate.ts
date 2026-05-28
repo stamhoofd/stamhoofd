@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Replacement } from '../endpoints/EmailRequest.js';
 import { EmailRecipientFilterType } from './Email.js';
 import { ExampleReplacements } from './exampleReplacements.js';
+import type { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 
 export enum EmailTemplateType {
     /**
@@ -133,7 +134,21 @@ export enum EmailTemplateType {
     InvoicePaid = 'InvoicePaid',
     CreditNotePaid = 'CreditNotePaid',
     InvoiceUnpaid = 'InvoiceUnpaid',
-    CreditNoteUnpaid = 'CreditNoteUnpaid'
+    CreditNoteUnpaid = 'CreditNoteUnpaid',
+
+    /**
+     * Payments
+     */
+    ChargebackPayingOrganization = 'ChargebackPayingOrganization',
+
+    /**
+     * Only used for:
+     * - Fast payment methods (creditcard) initiated by the payee
+     * - Slow payment methods (direct debit)
+     *
+     * Not for failed transfer or point of sale.
+     */
+    AutomaticChargeFailedPayingOrganization = 'AutomaticChargeFailedPayingOrganization',
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -303,6 +318,9 @@ export class EmailTemplate extends AutoEncoder {
 
             case EmailTemplateType.InvoiceUnpaid: return $t('Factuur te betalen');
             case EmailTemplateType.CreditNoteUnpaid: return $t('Creditnota te betalen');
+
+            case EmailTemplateType.ChargebackPayingOrganization: return $t('Betaling teruggevorderd');
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('Betaling mislukt');
         }
     }
 
@@ -400,6 +418,10 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.InvoiceUnpaid:
             case EmailTemplateType.CreditNoteUnpaid:
                 return $t('%1Mm');
+
+            case EmailTemplateType.ChargebackPayingOrganization:
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
+                return $t('Betalingen');
         }
     }
 
@@ -410,10 +432,16 @@ export class EmailTemplate extends AutoEncoder {
             }
         }
 
+        switch (type) {
+            case EmailTemplateType.ChargebackPayingOrganization:
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
+                return STAMHOOFD.userMode === 'organization';
+        }
+
         return true;
     }
 
-    static allowOrganizationLevel(type: EmailTemplateType): boolean {
+    static allowOrganizationLevelInGeneral(type: EmailTemplateType): boolean {
         switch (type) {
             case EmailTemplateType.DefaultMembersEmail: return true;
             case EmailTemplateType.DefaultReceivableBalancesEmail: return true;
@@ -446,6 +474,25 @@ export class EmailTemplate extends AutoEncoder {
         }
 
         return false;
+    }
+
+    static allowOrganizationLevel(type: EmailTemplateType, organization: { id: string; privateMeta: OrganizationPrivateMetaData | null | undefined }, platform: { membershipOrganizationId: string | null }): boolean {
+        if (!organization) {
+            return false;
+        }
+
+        if (!organization.privateMeta?.featureFlags.includes('organization-receivable-balances')
+            && [EmailTemplateType.OrganizationBalanceIncreaseNotification, EmailTemplateType.OrganizationBalanceReminder].includes(type)) {
+            return false;
+        }
+
+        switch (type) {
+            case EmailTemplateType.ChargebackPayingOrganization:
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
+                return STAMHOOFD.userMode === 'organization' && organization.id === platform.membershipOrganizationId;
+        }
+
+        return this.allowOrganizationLevelInGeneral(type);
     }
 
     static getPlatformTypeDescription(type: EmailTemplateType): string | null {
@@ -527,12 +574,14 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.TicketsConfirmationPOS: return $t(`%qN`);
             case EmailTemplateType.TicketsReceivedTransfer: return $t(`%qO`);
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return $t('Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een gebruiker omhoog is gegaan. Bijvoorbeeld als iemand een openstaand bedrag heeft toegevoegd bij een lid.');
-            case EmailTemplateType.UserBalanceReminder: return $t('Automatische e-mail die \'s ochtends wordt verzonden als een gebruiker nog steeds een openstaand bedrag heeft.');
+            case EmailTemplateType.UserBalanceIncreaseNotification: return $t(`Automatische e-mail die 's ochtends wordt verzonden als het saldo van een gebruiker omhoog is gegaan. Bijvoorbeeld als iemand een openstaand bedrag heeft toegevoegd bij een lid.`);
+            case EmailTemplateType.UserBalanceReminder: return $t(`Automatische e-mail die 's ochtends wordt verzonden als een gebruiker nog steeds een openstaand bedrag heeft.`);
 
-            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t('Automatische e-mail die \'s ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.');
-            case EmailTemplateType.OrganizationBalanceReminder: return $t('Automatische e-mail die \'s ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.');
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t(`Automatische e-mail die 's ochtends wordt verzonden als het saldo van een groep omhoog is gegaan.`);
+            case EmailTemplateType.OrganizationBalanceReminder: return $t(`Automatische e-mail die 's ochtends wordt verzonden als een groep nog steeds een openstaand bedrag heeft.`);
 
+            case EmailTemplateType.ChargebackPayingOrganization: return $t('Automatische email naar schuldenaar als een betaling werd teruggevorderd, bv. een SEPA domiciliering die is mislukt.');
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('Automatische email naar schuldenaar als een betaling is mislukt die werd geïniteerd door de schuldeiser (bv. via opgeslagen creditcard)');
         }
 
         return '';
@@ -749,7 +798,20 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if (type === EmailTemplateType.DefaultPaymentsEmail || type === EmailTemplateType.SavedPaymentsEmail) {
+        if (type === EmailTemplateType.ChargebackPayingOrganization
+            || type === EmailTemplateType.AutomaticChargeFailedPayingOrganization
+        ) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.paymentUrl,
+                ExampleReplacements.all.payingOrganizationName,
+                ExampleReplacements.all.platformName,
+            ];
+        }
+
+        if (type === EmailTemplateType.DefaultPaymentsEmail
+            || type === EmailTemplateType.SavedPaymentsEmail
+        ) {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.priceToPay,

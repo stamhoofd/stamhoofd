@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder} from '@s
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { EmailTemplate, Group, Webshop } from '@stamhoofd/models';
+import { EmailTemplate, Group, Platform, Webshop } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
@@ -38,7 +38,6 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
                 throw Context.auth.error();
             }
         }
-
         const templates: EmailTemplate[] = [];
 
         // Get all patches
@@ -61,11 +60,11 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         for (const put of request.body.getPuts()) {
             const struct = put.put;
 
-            if (!EmailTemplateStruct.allowOrganizationLevel(struct.type) && organization) {
+            if (organization && !EmailTemplateStruct.allowOrganizationLevel(struct.type, organization, await Platform.getShared())) {
                 throw Context.auth.error();
             }
 
-            if (!EmailTemplateStruct.allowPlatformLevel(struct.type) && !organization) {
+            if (!organization && !EmailTemplateStruct.allowPlatformLevel(struct.type)) {
                 throw Context.auth.error();
             }
 

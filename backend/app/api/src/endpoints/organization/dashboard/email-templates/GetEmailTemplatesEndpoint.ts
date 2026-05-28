@@ -2,7 +2,7 @@ import type { Decoder} from '@simonbackx/simple-encoding';
 import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { EmailTemplate } from '@stamhoofd/models';
+import { EmailTemplate, Platform } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -60,11 +60,13 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
+        const platform = await Platform.getShared()
+
         const types = (request.query.types ?? [...Object.values(EmailTemplateType)]).filter((type) => {
             if (!organization) {
                 return EmailTemplateStruct.allowPlatformLevel(type);
             }
-            return EmailTemplateStruct.allowOrganizationLevel(type);
+            return EmailTemplateStruct.allowOrganizationLevel(type, organization, platform);
         });
 
         if (types.length === 0) {

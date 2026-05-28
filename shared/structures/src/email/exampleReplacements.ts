@@ -128,6 +128,14 @@ function getReplacements() {
             token: 'platformOrOrganizationName',
             value: $t('%Aq'),
         }),
+        payingOrganizationName: Replacement.create({
+            token: 'payingOrganizationName',
+            value: $t('FC De Laatbetalers'),
+        }),
+        platformName: Replacement.create({
+            token: 'platformName',
+            value: $t('Stamhoofd'),
+        }),
         feedbackText: Replacement.create({
             token: 'feedbackText',
             html: '<p class="pre-wrap"><em>' + Formatter.escapeHtml($t('%B5')) + '</em></p>',

@@ -447,7 +447,7 @@ import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useMembersPackage } from '@stamhoofd/components/hooks/useMembersPackage.ts';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useSalesDisabled } from '@stamhoofd/components/hooks/useSalesDisabled.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -521,7 +521,7 @@ const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const present = usePresent();
 const buildEditGroupsView = useEditGroupsView();
-const organization = useOrganization();
+const organization = useRequiredOrganization();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
 const uitpasFeature = useFeatureFlag()('uitpas');
 
@@ -562,13 +562,7 @@ defineRoutes([
         paramsToProps() {
             return {
                 types: [...Object.values(EmailTemplateType)].filter((t) => {
-                    // Do not show balance reminder email templates for organizations if disabled
-                    if (!$organizationManager.value.organization.privateMeta?.featureFlags.includes('organization-receivable-balances')
-                        && [EmailTemplateType.OrganizationBalanceIncreaseNotification, EmailTemplateType.OrganizationBalanceReminder].includes(t)) {
-                        return false;
-                    }
-
-                    return EmailTemplate.allowOrganizationLevel(t);
+                    return EmailTemplate.allowOrganizationLevel(t, organization.value, platform.value);
                 }),
             };
         },

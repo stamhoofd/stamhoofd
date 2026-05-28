@@ -45,7 +45,7 @@
                         {{ (!organization ? EmailTemplate.getPlatformTypeDescription(emailTemplate.type) : null) ?? EmailTemplate.getTypeDescription(emailTemplate.type) }}
                     </p>
 
-                    <p v-if="!organization && !EmailTemplate.isSavedEmail(emailTemplate.type) && EmailTemplate.allowOrganizationLevel(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
+                    <p v-if="!organization && !EmailTemplate.isSavedEmail(emailTemplate.type) && EmailTemplate.allowOrganizationLevelInGeneral(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
                         {{ $t('%9f') }}
                     </p>
 
@@ -92,31 +92,31 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { ErrorBox } from '#errors/ErrorBox.ts';
-import SegmentedControl from '#inputs/SegmentedControl.vue';
 import { useAppContext } from '#context/appContext.ts';
-import { useAuth } from '#hooks/useAuth.ts';
-import { useContext } from '#hooks/useContext.ts';
+import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
+import SegmentedControl from '#inputs/SegmentedControl.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Group } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { usePlatform } from '../hooks';
 import EditEmailTemplateView from './EditEmailTemplateView.vue';
 
 const props = withDefaults(
     defineProps<{
-        types: EmailTemplateType[];
-        groups: Group[] | null;
+        types?: EmailTemplateType[];
+        groups?: Group[] | null;
         webshopId?: string | null;
         onSelect?: ((template: EmailTemplate) => boolean | Promise<boolean>) | null;
         createOption?: EmailTemplate | null;
@@ -126,12 +126,14 @@ const props = withDefaults(
         webshopId: null,
         types: () => {
             const app = useAppContext();
+            const organization = useOrganization();
+            const platform = usePlatform();
 
             return [...Object.values(EmailTemplateType)].filter((type) => {
-                if (app === 'admin') {
+                if (app === 'admin' || !organization.value) {
                     return EmailTemplate.allowPlatformLevel(type);
                 }
-                return EmailTemplate.allowOrganizationLevel(type);
+                return EmailTemplate.allowOrganizationLevel(type, organization.value, platform.value);
             });
         },
         onSelect: null,
@@ -144,7 +146,6 @@ const templates = ref([]) as Ref<EmailTemplate[]>;
 const errors = useErrors();
 const { patched, addPatch, addPut, addDelete, patch, hasChanges } = usePatchArray(templates);
 const owner = useRequestOwner();
-const auth = useAuth();
 const context = useContext();
 const loading = ref(true);
 const organization = useOrganization();

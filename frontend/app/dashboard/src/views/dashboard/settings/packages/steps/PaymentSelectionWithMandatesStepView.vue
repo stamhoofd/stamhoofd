@@ -6,7 +6,7 @@
                 <h1>{{ $t('%X8') }}</h1>
 
                 <STErrorsDefault :error-box="errors.errorBox" />
-                
+
                 <div v-if="proFormaData?.payment?.price !== 0" class="container categorized-box">
                     <h2>
                         {{ $t('%kP') }}
@@ -55,7 +55,7 @@
                         </STInputBox>
                     </template>
 
-                    <template v-if="mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
+                    <template v-if="(mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates) && !(!model.requiresMandate && mandates.length)">
                         <hr v-if="(mandates.length)">
 
                         <STInputBox error-fields="createMandate" :error-box="errors.errorBox" class="max" :title="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? $t('%1QC') : ''">
@@ -88,7 +88,7 @@
                         <PaymentSelectionList v-else v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                     </div>
                 </div>
-                
+
                 <div v-else class="container categorized-box">
                     <h2>
                         {{ $t('Bevestiging') }}
@@ -180,7 +180,7 @@ const props = defineProps<{
 }>();
 
 const errors = useErrors();
-const payingOrganization = useRequiredOrganization()
+const payingOrganization = useRequiredOrganization();
 
 const loading = ref(false);
 const navigate = useNavigationActions();
@@ -194,24 +194,26 @@ const paymentConfiguration = computed(() => props.model.paymentConfiguration);
 const activatePackages = useActivatePackages();
 const proFormaData = shallowRef<null | CheckoutResponse>(null);
 const loadingProForma = ref(false);
-const {mandates} = props.model.forceNewMandate || !props.model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates ? {mandates: ref([])} : useOrganizationPaymentMandates({
-    sellingOrganizationId: props.model.sellingOrganization.id,
-    errors,
-});
+const { mandates } = props.model.forceNewMandate || !props.model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates
+    ? { mandates: ref([]) }
+    : useOrganizationPaymentMandates({
+            sellingOrganizationId: props.model.sellingOrganization.id,
+            errors,
+        });
 
 watch(mandates, (n, old) => {
     if (old === null && n !== null && n.length) {
         // Select default mandate
-        mandateId.value = n[0].id
+        mandateId.value = n[0].id;
     }
 
     if (n && mandateId.value) {
         if (!n.find(pp => pp.id === mandateId.value)) {
             // Mandate became invalid: reset
-            mandateId.value = n[0]?.id ?? null
+            mandateId.value = n[0]?.id ?? null;
         }
     }
-})   
+});
 
 const mandateId = computed({
     get: () => props.model.checkout.mandate?.id ?? null,
@@ -227,39 +229,40 @@ const mandateId = computed({
             if (props.model.requiresMandate) {
                 // Save as default
                 props.model.checkout.createMandate = CreateMandateSettings.create({
-                    saveAsDefault: true
-                })
+                    saveAsDefault: true,
+                });
             }
         } else {
-            console.error('Mandate not found', mandateId)
+            console.error('Mandate not found', mandateId);
         }
     },
-})
+});
 
 const createMandate = computed({
     get: () => !!props.model.checkout.createMandate,
     set: (createMandate: boolean) => {
-        props.model.checkout.createMandate = createMandate ? CreateMandateSettings.create({
-            saveAsDefault: props.model.requiresMandate ? true : ((mandates.value?.length ?? 0) === 0)
-        }) : null;
-
+        props.model.checkout.createMandate = createMandate
+            ? CreateMandateSettings.create({
+                    saveAsDefault: props.model.requiresMandate ? true : ((mandates.value?.length ?? 0) === 0),
+                })
+            : null;
     },
-})
+});
 
 const saveMandateAsDefault = computed({
     // If we require a mandate, the choise is to select a new default payment method - so it will always be set as default
     get: () => props.model.checkout.createMandate?.saveAsDefault ?? false,
     set: (saveAsDefault: boolean) => {
         if (props.model.checkout.createMandate) {
-            props.model.checkout.createMandate.saveAsDefault = props.model.requiresMandate ? true : saveAsDefault
+            props.model.checkout.createMandate.saveAsDefault = props.model.requiresMandate ? true : saveAsDefault;
         }
     },
-})
+});
 
 // Update pro forma
 // todo: cancel previous after changes
-const realCreateMandate = computed(() => mandates.value === null ? null : ((!!props.model.checkout.createMandate || props.model.requiresMandate) && !props.model.checkout.mandate))
-const loadProFormaBag = useRequestOwner()
+const realCreateMandate = computed(() => mandates.value === null ? null : ((!!props.model.checkout.createMandate || props.model.requiresMandate) && !props.model.checkout.mandate));
+const loadProFormaBag = useRequestOwner();
 watch(realCreateMandate, (n, old) => {
     if (n === old) {
         return;
@@ -268,41 +271,39 @@ watch(realCreateMandate, (n, old) => {
         return;
     }
 
-    Request.cancelAll(loadProFormaBag)
+    Request.cancelAll(loadProFormaBag);
     loadProForma().catch(console.error);
-}, {immediate: true})
-
+}, { immediate: true });
 
 async function loadProForma() {
     try {
         const response = await activatePackages(
             props.model.checkout.patch({
-                proForma: true
+                proForma: true,
             }), {
                 shouldRetry: true,
-                owner: loadProFormaBag
-            }
-        )
-        const old = proFormaData.value
-        proFormaData.value = response
+                owner: loadProFormaBag,
+            },
+        );
+        const old = proFormaData.value;
+        proFormaData.value = response;
 
         if (old) {
             if (old.payment?.price !== undefined && response.payment?.price !== undefined) {
                 const from = old.payment.price;
-                const to =  response.payment.price
+                const to = response.payment.price;
 
                 if (from === 0 && to > from && to < 1_00_00) {
-                    Toast.info($t('%1Rx', {price: Formatter.price(to)})).show()
+                    Toast.info($t('%1Rx', { price: Formatter.price(to) })).show();
                 }
-
             }
         }
     } catch (e) {
         if (Request.isAbortError(e)) {
             return;
         }
-        Toast.fromError(e).show()
-        errors.errorBox = new ErrorBox(e)
+        Toast.fromError(e).show();
+        errors.errorBox = new ErrorBox(e);
     }
 }
 
@@ -317,21 +318,19 @@ async function goNext() {
     try {
         if (props.model.checkout.mandate) {
             // Not allowed
-            props.model.checkout.paymentMethod = PaymentMethod.Unknown
+            props.model.checkout.paymentMethod = PaymentMethod.Unknown;
         }
         if (createMandate.value === false && !props.model.checkout.mandate && props.model.requiresMandate) {
             throw new SimpleError({
                 code: 'required_checkbox',
                 message: $t('%1SW'),
-                field: 'createMandate'
-            })
+                field: 'createMandate',
+            });
         }
         await props.saveHandler(navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loading.value = false;
     }
 }

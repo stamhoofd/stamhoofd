@@ -1,11 +1,10 @@
-import { createMollieClient, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import type { Member, User } from '@stamhoofd/models';
-import { BalanceItem, Platform, UsedRegisterCode } from '@stamhoofd/models';
-import { BalanceItemPayment, Group, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Group, Organization, PayconiqPayment, Payment, Platform, sendEmailTemplate, UsedRegisterCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Checkoutable, Company, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
-import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, VATExcemptReason, Version } from '@stamhoofd/structures';
+import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Replacement, VATExcemptReason, Version } from '@stamhoofd/structures';
+import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { PaymentMandateStatus, PaymentMandateType } from '@stamhoofd/structures/PaymentMandate.js';
 import { Formatter } from '@stamhoofd/utility';
@@ -20,9 +19,8 @@ import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
 import { BalanceItemService } from './BalanceItemService.js';
 import { MollieService } from './MollieService.js';
 import { PaymentMandateService } from './PaymentMandateService.js';
-import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
-import { VATService } from './VATService.js';
 import { ReferralService } from './ReferralService.js';
+import { VATService } from './VATService.js';
 
 export class PaymentService {
     static async updateReversedPaymentsFor(payment: Payment) {
@@ -30,7 +28,7 @@ export class PaymentService {
             // Update refund amount of that payment
             const reversingPayment = await Payment.getByID(payment.reversingPaymentId);
             if (reversingPayment) {
-                await reversingPayment.updateRefundedAmount()
+                await reversingPayment.updateRefundedAmount();
             }
         }
     }
@@ -44,13 +42,17 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'cannot_fail',
                 message: 'A payment that has been invoiced cannot be marked as failed. Instead create a separate chargeback payment with a negative amount.',
-                human: $t('%1RI')
-            })
+                human: $t('%1RI'),
+            });
+        }
+
+        if (organization.id !== payment.organizationId) {
+            throw new Error('Unexpected organization, expected ' + payment.organizationId + ', received ' + organization.id);
         }
 
         await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
             if (status === PaymentStatus.Succeeded) {
-                console.log('Marking as succeeded', payment.id)
+                console.log('Marking as succeeded', payment.id);
                 payment.status = PaymentStatus.Succeeded;
                 payment.paidAt = paidAt ?? new Date();
                 await payment.save();
@@ -71,17 +73,17 @@ export class PaymentService {
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
 
-                    await this.updateReversedPaymentsFor(payment)
+                    await this.updateReversedPaymentsFor(payment);
                 });
 
                 if (payment.price >= 100_00 && payment.organizationId && payment.payingOrganizationId && payment.organizationId === ((await Platform.getShared()).membershipOrganizationId)) {
                     // We spend some money
-                    const code = await UsedRegisterCode.getFor(payment.payingOrganizationId)
+                    const code = await UsedRegisterCode.getFor(payment.payingOrganizationId);
                     if (code && !code.balanceItemId) {
-                        console.log('Rewarding code '+code.id+' for payment')
+                        console.log('Rewarding code ' + code.id + ' for payment');
 
                         // Deze code werd nog niet beloond
-                        await ReferralService.reward(code)
+                        await ReferralService.reward(code);
                     }
                 }
 
@@ -90,7 +92,11 @@ export class PaymentService {
                 await this.saveMandateIfNeeded({
                     payment,
                     sellingOrganizationId: organization.id,
-                })
+                });
+
+                if (payment.type === PaymentType.Chargeback) {
+                    await this.handleChargebackCreated(payment, organization);
+                }
                 return;
             }
 
@@ -118,13 +124,13 @@ export class PaymentService {
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
 
-                    await this.updateReversedPaymentsFor(payment)
+                    await this.updateReversedPaymentsFor(payment);
                 });
             }
 
-            // Moved to failed 
+            // Moved to failed
             if (status === PaymentStatus.Failed) {
-                console.log('Marking as failed', payment.id)
+                console.log('Marking as failed', payment.id);
                 await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
                     const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
                         (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
@@ -139,6 +145,10 @@ export class PaymentService {
                     // Flush caches so data is up to date in response
                     await BalanceItemService.flushCaches(organization.id);
                 });
+
+                if (payment.type === PaymentType.Payment) {
+                    await this.handlePaymentFailed(payment, organization);
+                }
             }
 
             // If OLD status was FAILED, we need to revert the actions
@@ -161,7 +171,65 @@ export class PaymentService {
         });
     }
 
-    static async saveMandateIfNeeded({payment, sellingOrganizationId}: {payment: Payment, sellingOrganizationId: string}) {
+    private static async handleChargebackCreated(payment: Payment, organization: Organization) {
+        if (!payment.payingOrganizationId) {
+            // For now only for B2B
+            return;
+        }
+
+        const payingOrganization = await Organization.getByID(payment.payingOrganizationId, true);
+
+        await sendEmailTemplate(organization, {
+            recipients: await payingOrganization.getFinanceAdminRecipients(),
+            defaultReplacements: [
+                Replacement.create({
+                    token: 'payingOrganizationName',
+                    value: payingOrganization.name,
+                }),
+                Replacement.create({
+                    token: 'paymentUrl',
+                    value: 'https://' + payingOrganization.getDashboardHost() + '/boekhouding/openstaand/' + organization.uri,
+                }),
+            ],
+            template: {
+                type: EmailTemplateType.ChargebackPayingOrganization,
+            },
+            type: 'transactional',
+        });
+    }
+
+    private static async handlePaymentFailed(payment: Payment, organization: Organization) {
+        if (!payment.payingOrganizationId) {
+            // For now only for B2B
+            return;
+        }
+
+        if (!((payment.adminUserId && payment.mandateId) || (payment.method === PaymentMethod.DirectDebit && payment.mandateId))) {
+            return;
+        }
+
+        const payingOrganization = await Organization.getByID(payment.payingOrganizationId, true);
+
+        await sendEmailTemplate(organization, {
+            recipients: await payingOrganization.getFinanceAdminRecipients(),
+            defaultReplacements: [
+                Replacement.create({
+                    token: 'payingOrganizationName',
+                    value: payingOrganization.name,
+                }),
+                Replacement.create({
+                    token: 'paymentUrl',
+                    value: 'https://' + payingOrganization.getDashboardHost() + '/boekhouding/openstaand/' + organization.uri,
+                }),
+            ],
+            template: {
+                type: EmailTemplateType.AutomaticChargeFailedPayingOrganization,
+            },
+            type: 'transactional',
+        });
+    }
+
+    static async saveMandateIfNeeded({ payment, sellingOrganizationId }: { payment: Payment; sellingOrganizationId: string }) {
         // Save as default
         if (payment.createMandate && payment.createMandate.saveAsDefault) {
             if (payment.mandateId && payment.status === PaymentStatus.Succeeded) {
@@ -170,8 +238,8 @@ export class PaymentService {
                         mandateId: payment.mandateId,
                         payingOrganizationId: payment.payingOrganizationId,
                         sellingOrganizationId,
-                        payingUserId: payment.payingUserId
-                    })
+                        payingUserId: payment.payingUserId,
+                    });
                 } catch (e) {
                     // Ignore as setting the payment status is more important
                     console.error(e);
@@ -189,6 +257,11 @@ export class PaymentService {
             // Get a new copy of the payment (is required to prevent concurreny bugs)
             const payment = await Payment.getByID(paymentId);
             if (!payment) {
+                return;
+            }
+
+            if (org && payment.organizationId !== org.id && org.id !== payment.payingOrganizationId) {
+                console.error('Non-matching organization found for payment', payment.id, 'org', org.id);
                 return;
             }
 
@@ -221,31 +294,29 @@ export class PaymentService {
                                 status = PaymentStatus.Failed;
                             }
 
-                            console.log('Stripe setting status to', status)
+                            console.log('Stripe setting status to', status);
                             await this.handlePaymentStatusUpdate(payment, organization, status);
-                        }
-                        catch (e) {
+                        } catch (e) {
                             console.error('Payment check failed Stripe', payment.id, e);
                             if (this.isManualExpired(payment.status, payment)) {
                                 console.error('Manually marking Stripe payment as expired', payment.id);
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                             }
                         }
-                    }
-                    else if (payment.provider === PaymentProvider.Mollie) {
+                    } else if (payment.provider === PaymentProvider.Mollie) {
                         try {
                             const mollieClient = await MollieService.create({
-                                sellingOrganization: organization
-                            }); 
+                                sellingOrganization: organization,
+                            });
                             if (mollieClient) {
-                                let {status} = await mollieClient.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment));
+                                let { status } = await mollieClient.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment));
 
                                 if (this.isManualExpired(status, payment)) {
                                     console.error('Manually marking Mollie payment as expired', payment.id);
                                     status = PaymentStatus.Failed;
                                 }
 
-                                console.log('Mollie setting status to', status)
+                                console.log('Mollie setting status to', status);
                                 await this.handlePaymentStatusUpdate(payment, organization, status);
                             } else {
                                 console.error('Missing Mollie Credentials for payment', payment.id);
@@ -254,7 +325,6 @@ export class PaymentService {
                                     await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                                 }
                             }
-
                         } catch (e) {
                             console.error('Payment check failed Mollie', payment.id, e);
                             if (this.isManualExpired(payment.status, payment)) {
@@ -262,8 +332,7 @@ export class PaymentService {
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                             }
                         }
-                    }
-                    else if (payment.provider === PaymentProvider.Buckaroo) {
+                    } else if (payment.provider === PaymentProvider.Buckaroo) {
                         const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? '', organization.privateMeta.buckarooSettings?.secret ?? '', testMode);
                         try {
                             let status = await helper.getStatus(payment);
@@ -273,18 +342,16 @@ export class PaymentService {
                                 status = PaymentStatus.Failed;
                             }
 
-                            console.log('Buckaroo setting status to', status)
+                            console.log('Buckaroo setting status to', status);
                             await this.handlePaymentStatusUpdate(payment, organization, status);
-                        }
-                        catch (e) {
+                        } catch (e) {
                             console.error('Payment check failed Buckaroo', payment.id, e);
                             if (this.isManualExpired(payment.status, payment)) {
                                 console.error('Manually marking Buckaroo payment as expired', payment.id);
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                             }
                         }
-                    }
-                    else if (payment.provider == PaymentProvider.Payconiq) {
+                    } else if (payment.provider == PaymentProvider.Payconiq) {
                         // Check status
 
                         const payconiqPayments = await PayconiqPayment.where({ paymentId: payment.id }, { limit: 1 });
@@ -302,8 +369,7 @@ export class PaymentService {
                                 console.error('Manually cancelling Payconiq payment', payment.id);
                                 if (await payconiqPayment.cancel(organization)) {
                                     status = PaymentStatus.Failed;
-                                }
-                                else {
+                                } else {
                                     console.error('Failed to manually cancel payment');
                                 }
                             }
@@ -314,8 +380,7 @@ export class PaymentService {
                             }
 
                             await this.handlePaymentStatusUpdate(payment, organization, status);
-                        }
-                        else {
+                        } else {
                             console.warn('Payconiq payment is missing for organization ' + organization.id + ' while checking payment status...');
 
                             if (this.isManualExpired(payment.status, payment)) {
@@ -323,19 +388,17 @@ export class PaymentService {
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         console.error('Invalid payment provider', payment.provider, 'for payment', payment.id);
                         if (this.isManualExpired(payment.status, payment)) {
                             console.error('Manually marking unknown payment as expired', payment.id);
                             await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
                         }
                     }
-                }
-                else {
+                } else {
                     // Do a manual update if needed
                     if (payment.status === PaymentStatus.Succeeded) {
-                        if ( (payment.provider === PaymentProvider.Mollie && STAMHOOFD.environment === 'development')) {
+                        if ((payment.provider === PaymentProvider.Mollie && STAMHOOFD.environment === 'development')) {
                             // Update the status
                             await StripeHelper.getStatus(payment, false, testMode);
                         }
@@ -400,7 +463,7 @@ export class PaymentService {
         // should be subtracted, not added
         const balanceItemsTotalPrice = payment.price - payment.roundingAmount;
 
-        const {roundingAmount, price} = this.round(balanceItemsTotalPrice);
+        const { roundingAmount, price } = this.round(balanceItemsTotalPrice);
         payment.roundingAmount = roundingAmount;
         payment.price = price;
     }
@@ -412,7 +475,7 @@ export class PaymentService {
         if (difference === 0) {
             return {
                 price: amount,
-                roundingAmount: 0
+                roundingAmount: 0,
             };
         }
 
@@ -422,11 +485,11 @@ export class PaymentService {
 
         return {
             price: amount + difference,
-            roundingAmount: difference
-        }
+            roundingAmount: difference,
+        };
     }
 
-    static calculateTotalPrice({ balanceItems, organization, members}: {
+    static calculateTotalPrice({ balanceItems, organization, members }: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
         members?: Member[];
@@ -488,19 +551,19 @@ export class PaymentService {
             });
         }
 
-        return { hasNegative, price, roundingAmount, names }
+        return { hasNegative, price, roundingAmount, names };
     }
 
-    static validateTotalPrice({ price, roundingAmount, checkout}: {
-        price: number, // already rounded
-        roundingAmount: number,
+    static validateTotalPrice({ price, roundingAmount, checkout }: {
+        price: number; // already rounded
+        roundingAmount: number;
         checkout: Pick<Checkoutable<never>, 'totalPrice'>;
     }) {
         // total price without rounding
-        const balanceItemsPrice = price - roundingAmount; 
+        const balanceItemsPrice = price - roundingAmount;
 
         // also accept rounding that might have happend in the frontend and that was correct
-        if (checkout.totalPrice !== null && checkout.totalPrice !== balanceItemsPrice && checkout.totalPrice !== price) { 
+        if (checkout.totalPrice !== null && checkout.totalPrice !== balanceItemsPrice && checkout.totalPrice !== price) {
             throw new SimpleError({
                 code: 'changed_price',
                 message: $t(`%vk`, { total: Formatter.price(price) }),
@@ -508,9 +571,9 @@ export class PaymentService {
         }
     }
 
-    static async validateCustomer({ price, hasNegative, user, checkout, payingOrganization}: {
-        price: number,
-        hasNegative: boolean,
+    static async validateCustomer({ price, hasNegative, user, checkout, payingOrganization }: {
+        price: number;
+        hasNegative: boolean;
         user: User | null;
         checkout: Pick<Checkoutable<never>, 'customer'>;
         payingOrganization?: Organization | null;
@@ -520,7 +583,7 @@ export class PaymentService {
             firstName: user?.firstName,
             lastName: user?.lastName,
             email: user?.email,
-            phone: checkout.customer?.phone
+            phone: checkout.customer?.phone,
         });
 
         // Use structured transfer description prefix
@@ -559,7 +622,7 @@ export class PaymentService {
                 if (!checkout.customer.company.equals(foundCompany)) {
                     throw new SimpleError({
                         code: 'invalid_data',
-                        message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.'
+                        message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.',
                     });
                 }
 
@@ -570,8 +633,7 @@ export class PaymentService {
                 if (orgNumber !== 0 && !isNaN(orgNumber)) {
                     prefix = orgNumber + '';
                 }
-            }
-            else {
+            } else {
                 // Zero amount payment (without refunds) without specifying a company will just use the default company to link to the payment
                 // It doesn't really matter since the price is zero and we won't invoice it.
                 const company = VATService.getDefaultCompanyForOrganization(payingOrganization);
@@ -581,7 +643,7 @@ export class PaymentService {
             }
         } else {
             if (checkout.customer && checkout.customer.company) {
-                customer.company = checkout.customer.company.clone()
+                customer.company = checkout.customer.company.clone();
                 await ViesHelper.checkCompany(checkout.customer.company, customer.company);
             }
         }
@@ -590,14 +652,14 @@ export class PaymentService {
             // Security check: because previous validation and generation might have used the VATNumber from the checkout
             throw new SimpleError({
                 code: 'changed_VAT_number',
-                message: 'Unexpected VAT number change'
-            })
+                message: 'Unexpected VAT number change',
+            });
         }
 
         return { customer, prefix };
     }
 
-    static async createProForma({ balanceItems, organization, user, members, checkout, payingOrganization}: {
+    static async createProForma({ balanceItems, organization, user, members, checkout, payingOrganization }: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
         user: User;
@@ -606,12 +668,12 @@ export class PaymentService {
         payingOrganization?: Organization | null;
     }) {
         // Calculate total price to pay
-        const { price, hasNegative, roundingAmount } = PaymentService.calculateTotalPrice({ balanceItems, organization, members })
-        PaymentService.validateTotalPrice({ price, roundingAmount, checkout })
+        const { price, hasNegative, roundingAmount } = PaymentService.calculateTotalPrice({ balanceItems, organization, members });
+        PaymentService.validateTotalPrice({ price, roundingAmount, checkout });
 
-        const { customer, } = await PaymentService.validateCustomer({ user, checkout, payingOrganization, price, hasNegative })
+        const { customer } = await PaymentService.validateCustomer({ user, checkout, payingOrganization, price, hasNegative });
         const { seller } = PaymentService.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
-        
+
         // Create invoice instead from fictive PaymentGeneral
         const fakePaymentGeneral = PaymentGeneral.create({
             id: 'pro-forma',
@@ -622,15 +684,15 @@ export class PaymentService {
                 return BalanceItemPaymentDetailed.create({
                     id: 'pro-forma-' + balanceItem.id,
                     balanceItem: balanceItem.getStructure(),
-                    price
-                })
-            })
-        })
+                    price,
+                });
+            }),
+        });
 
         let invoice: Invoice | null = null;
 
         try {
-             invoice = Invoice.create({
+            invoice = Invoice.create({
                 seller,
                 customer,
                 payments: [fakePaymentGeneral],
@@ -647,27 +709,27 @@ export class PaymentService {
 
         return {
             invoice,
-            payment: fakePaymentGeneral
-        }
+            payment: fakePaymentGeneral,
+        };
     }
 
     static async registerChargeback(payment: Payment, amount: number, date: Date) {
         if (amount !== payment.price) {
             // Creates issues to know what balance item was paid and what was not.
-            throw new Error('Cannot register chargeback with different amount than the payment for payment ' + payment.id)
+            throw new Error('Cannot register chargeback with different amount than the payment for payment ' + payment.id);
         }
-        const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch()
-        const items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)))
+        const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch();
+        const items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)));
 
-         // Done validation
+        // Done validation
         const chargeback = new Payment();
 
         // Who will receive this money?
         chargeback.organizationId = payment.organizationId!;
 
         // Who paid
-        chargeback.payingUserId = payment.payingUserId
-        chargeback.payingOrganizationId = payment.payingOrganizationId
+        chargeback.payingUserId = payment.payingUserId;
+        chargeback.payingOrganizationId = payment.payingOrganizationId;
         chargeback.customer = payment.customer;
 
         chargeback.status = PaymentStatus.Created;
@@ -677,14 +739,14 @@ export class PaymentService {
         chargeback.type = PaymentType.Chargeback;
 
         chargeback.provider = payment.provider;
-        chargeback.stripeAccountId = payment.stripeAccountId
-        chargeback.reversingPaymentId = payment.id
+        chargeback.stripeAccountId = payment.stripeAccountId;
+        chargeback.reversingPaymentId = payment.id;
         await chargeback.save();
 
         for (const original of balanceItemPayments) {
             // Create one balance item payment to pay it in one payment
             const balanceItemPayment = new BalanceItemPayment();
-            balanceItemPayment.balanceItemId = original.balanceItemId
+            balanceItemPayment.balanceItemId = original.balanceItemId;
             balanceItemPayment.paymentId = chargeback.id;
             balanceItemPayment.organizationId = chargeback.organizationId;
             balanceItemPayment.price = -original.price;
@@ -694,19 +756,19 @@ export class PaymentService {
         // Update cached balance items pending amount (only created balance items, because those are involved in the payment)
         await BalanceItemService.updatePaidAndPending(items);
 
-        const organization = await Organization.getByID(chargeback.organizationId, true)
+        const organization = await Organization.getByID(chargeback.organizationId, true);
 
         try {
-            await this.handlePaymentStatusUpdate(chargeback, organization, PaymentStatus.Succeeded, date)
+            await this.handlePaymentStatusUpdate(chargeback, organization, PaymentStatus.Succeeded, date);
         } catch (e) {
-            console.error('Failed to mark chargeback as succeeded', e)
-            await chargeback.delete()
+            console.error('Failed to mark chargeback as succeeded', e);
+            await chargeback.delete();
             throw e;
         }
         return chargeback;
     }
 
-    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration, adminUserId}: {
+    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration, adminUserId }: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
         user: User | null;
@@ -714,35 +776,35 @@ export class PaymentService {
         checkout: Pick<Checkoutable<never>, 'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
         payingOrganization?: Organization | null;
         serviceFeeType: 'webshop' | 'members' | 'tickets' | 'system';
-        createMandate: CreateMandateSettings | null,
-        useMandate: PaymentMandate | null,
-        paymentConfiguration: PaymentConfiguration,
-        privatePaymentConfiguration: PrivatePaymentConfiguration,
-        adminUserId?: string | null
+        createMandate: CreateMandateSettings | null;
+        useMandate: PaymentMandate | null;
+        paymentConfiguration: PaymentConfiguration;
+        privatePaymentConfiguration: PrivatePaymentConfiguration;
+        adminUserId?: string | null;
     }) {
         if (balanceItems.size === 0) {
             return null;
         }
 
         // Calculate total price to pay
-        const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({ balanceItems, organization, members })
-        PaymentService.validateTotalPrice({ price, roundingAmount, checkout })
+        const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({ balanceItems, organization, members });
+        PaymentService.validateTotalPrice({ price, roundingAmount, checkout });
 
-        const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization, price, hasNegative })
+        const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization, price, hasNegative });
         this.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
-        
-        const {method, type, mandate} = await this.validatePaymentMethod({ 
+
+        const { method, type, mandate } = await this.validatePaymentMethod({
             method: checkout.paymentMethod ?? PaymentMethod.Unknown,
             mandate: useMandate,
             createMandate: !!createMandate,
             customer,
             price,
             hasNegative,
-            balanceItems, 
+            balanceItems,
             paymentConfiguration,
             user,
             payingOrganization: payingOrganization ?? null,
-            sellingOrganization: organization
+            sellingOrganization: organization,
         });
 
         // Check URL's set fro online payments
@@ -762,8 +824,8 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'cannot_create_mandate_for_provider',
                     message: 'Saving a payment method is not yet supported for this payment method',
-                    human: $t('%1U0')
-                })
+                    human: $t('%1U0'),
+                });
             }
         }
 
@@ -784,9 +846,9 @@ export class PaymentService {
         payment.roundingAmount = roundingAmount;
         payment.method = method;
         payment.type = type;
-        payment.createMandate = createMandate
-        payment.mandateId = mandate?.id ?? null
-        payment.adminUserId = adminUserId ?? null
+        payment.createMandate = createMandate;
+        payment.mandateId = mandate?.id ?? null;
+        payment.adminUserId = adminUserId ?? null;
 
         if (price === 0) {
             payment.status = PaymentStatus.Succeeded;
@@ -796,7 +858,7 @@ export class PaymentService {
         payment.provider = provider;
         payment.stripeAccountId = stripeAccount?.id ?? null;
         await ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
-        await ServiceFeeHelper.setTransferFee({payment, organization, stripeAccount});
+        await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount });
 
         // Add transfer description
         if (payment.method === PaymentMethod.Transfer) {
@@ -851,13 +913,11 @@ export class PaymentService {
                 // Send a small reminder email
                 try {
                     await this.sendTransferEmail(customer, user?.id ?? null, organization, payment);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error('Failed to send transfer email');
                     console.error(e);
                 }
-            }
-            else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
+            } else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
                 if ((!checkout.redirectUrl || !checkout.cancelUrl) && !mandate) {
                     throw new Error('Should have been caught earlier');
                 }
@@ -866,7 +926,7 @@ export class PaymentService {
                 _redirectUrl.searchParams.set('paymentId', payment.id);
                 _redirectUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
 
-                const _cancelUrl = new URL(checkout.cancelUrl?? ('https://' + STAMHOOFD.domains.dashboard));
+                const _cancelUrl = new URL(checkout.cancelUrl ?? ('https://' + STAMHOOFD.domains.dashboard));
                 _cancelUrl.searchParams.set('paymentId', payment.id);
                 _cancelUrl.searchParams.set('cancel', 'true');
                 _cancelUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
@@ -875,18 +935,18 @@ export class PaymentService {
                 const cancelUrl = _cancelUrl.href;
 
                 const webhookUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
-                
+
                 if (payment.provider === PaymentProvider.Stripe) {
                     if (createMandate || mandate) {
                         // Already checked, but for security
-                        throw new Error('Unsupported')
+                        throw new Error('Unsupported');
                     }
                     if (!customer.email) {
                         throw new SimpleError({
                             code: 'missing_email',
                             message: 'Email address is required for online payments via Stripe',
-                            human: $t('%1SJ')
-                        })
+                            human: $t('%1SJ'),
+                        });
                     }
                     const stripeResult = await StripeHelper.createPayment({
                         payment,
@@ -907,8 +967,7 @@ export class PaymentService {
                         },
                     });
                     paymentUrl = stripeResult.paymentUrl;
-                }
-                else if (payment.provider === PaymentProvider.Mollie) {
+                } else if (payment.provider === PaymentProvider.Mollie) {
                     const mollieResult = await MollieService.createPayment({
                         payment,
                         redirectUrl,
@@ -927,18 +986,16 @@ export class PaymentService {
                         mandate,
                     });
                     paymentUrl = mollieResult.paymentUrl;
-                }
-                else if (payment.provider === PaymentProvider.Payconiq) {
+                } else if (payment.provider === PaymentProvider.Payconiq) {
                     if (createMandate || mandate) {
                         // Already checked, but for security
-                        throw new Error('Unsupported')
+                        throw new Error('Unsupported');
                     }
                     ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl));
-                }
-                else if (payment.provider === PaymentProvider.Buckaroo) {
+                } else if (payment.provider === PaymentProvider.Buckaroo) {
                     if (createMandate || mandate) {
                         // Already checked, but for security
-                        throw new Error('Unsupported')
+                        throw new Error('Unsupported');
                     }
 
                     // Increase request timeout because buckaroo is super slow (in development)
@@ -957,20 +1014,18 @@ export class PaymentService {
                     }
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
             throw e;
         }
 
         // TypeScript thinks status cannot change to Failed, but it can.
-        if (payment.status === PaymentStatus.Succeeded || (payment.status as PaymentStatus) === PaymentStatus.Failed) { 
+        if (payment.status === PaymentStatus.Succeeded || (payment.status as PaymentStatus) === PaymentStatus.Failed) {
             // force update
-            const updateTo = payment.status
-            payment.status = PaymentStatus.Created
+            const updateTo = payment.status;
+            payment.status = PaymentStatus.Created;
             await PaymentService.handlePaymentStatusUpdate(payment, organization, updateTo);
-        }
-        else if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown || (payment.method === PaymentMethod.DirectDebit && mandate)) {
+        } else if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown || (payment.method === PaymentMethod.DirectDebit && mandate)) {
             // Mark valid (not same as paid) if needed
             let hasBundleDiscount = false;
             for (const [balanceItem] of balanceItems) {
@@ -1000,7 +1055,7 @@ export class PaymentService {
     static async sendTransferEmail(customer: PaymentCustomer, userId: string | null, organization: Organization, payment: Payment) {
         const email = customer.dynamicEmail;
         if (!email) {
-            console.warn('Skipped sending transfer email because of missing email address', payment.id)
+            console.warn('Skipped sending transfer email because of missing email address', payment.id);
             return;
         }
         const paymentGeneral = await payment.getGeneralStructure();
@@ -1035,34 +1090,34 @@ export class PaymentService {
         });
     }
 
-    static async validateMandate({ 
+    static async validateMandate({
         method,
         paymentConfiguration,
         mandate,
         payingOrganization,
         sellingOrganization,
         user,
-    }: { 
-        method: PaymentMethod,
-        paymentConfiguration: PaymentConfiguration,
-        mandate: PaymentMandate,
-        payingOrganization: Organization | null,
-        sellingOrganization: Organization,
-        user: User | null,
+    }: {
+        method: PaymentMethod;
+        paymentConfiguration: PaymentConfiguration;
+        mandate: PaymentMandate;
+        payingOrganization: Organization | null;
+        sellingOrganization: Organization;
+        user: User | null;
     }) {
         if (!paymentConfiguration.enableMandates) {
-                throw new SimpleError({
+            throw new SimpleError({
                 code: 'mandates_disabled',
                 message: 'Cannot pay with mandate',
-                human: $t('%1SK')
+                human: $t('%1SK'),
             });
         }
-        
+
         // Validate mandate + update payment method based on the mandate
         if (method !== PaymentMethod.Unknown) {
             throw new SimpleError({
                 code: 'invalid_data',
-                message: 'Cannot combine setting mandate with method'
+                message: 'Cannot combine setting mandate with method',
             });
         }
 
@@ -1078,7 +1133,7 @@ export class PaymentService {
                 code: 'not_found',
                 message: 'Mandate not found',
                 human: $t('%1TQ'),
-                field: 'mandateId'
+                field: 'mandateId',
             });
         }
 
@@ -1087,54 +1142,56 @@ export class PaymentService {
                 code: 'mandate_not_valid',
                 message: 'Mandate not valid',
                 human: $t('%1QA'),
-                field: 'mandateId'
+                field: 'mandateId',
             });
         }
         return existingMandate;
     }
 
-    static async validatePaymentMethod({ 
+    static async validatePaymentMethod({
         method,
         customer,
         price,
         hasNegative,
-        balanceItems, 
+        balanceItems,
         paymentConfiguration,
         mandate,
         payingOrganization,
         sellingOrganization,
         user,
-        createMandate
-    }: { 
-        method: PaymentMethod,
-        customer: PaymentCustomer,
-        price: number,
-        hasNegative: boolean,
-        balanceItems: Map<BalanceItem, number>; 
-        paymentConfiguration: PaymentConfiguration,
-        mandate: PaymentMandate | null,
-        payingOrganization: Organization | null,
-        sellingOrganization: Organization,
-        user: User | null,
-        createMandate: boolean
+        createMandate,
+    }: {
+        method: PaymentMethod;
+        customer: PaymentCustomer;
+        price: number;
+        hasNegative: boolean;
+        balanceItems: Map<BalanceItem, number>;
+        paymentConfiguration: PaymentConfiguration;
+        mandate: PaymentMandate | null;
+        payingOrganization: Organization | null;
+        sellingOrganization: Organization;
+        user: User | null;
+        createMandate: boolean;
     }) {
         if (price === 0) {
             if (balanceItems.size === 0) {
-                throw new Error('Empty payment')
+                throw new Error('Empty payment');
             }
 
             // We still need to validate the mandate, because
             // we still allow setting a new default payment method
             // for zero payments
             // - e.g. activating a new package with an existing mandate
-            const existingMandate = mandate ? await this.validateMandate({
-                method,
-                mandate,
-                paymentConfiguration,
-                payingOrganization,
-                sellingOrganization,
-                user
-            }) : null;
+            const existingMandate = mandate
+                ? await this.validateMandate({
+                        method,
+                        mandate,
+                        paymentConfiguration,
+                        payingOrganization,
+                        sellingOrganization,
+                        user,
+                    })
+                : null;
 
             if (createMandate && !existingMandate) {
                 throw new SimpleError({
@@ -1149,16 +1206,16 @@ export class PaymentService {
                 return {
                     method: PaymentMethod.Unknown,
                     type: PaymentType.Reallocation,
-                    mandate: existingMandate
-                }
+                    mandate: existingMandate,
+                };
             }
 
             return {
                 // Free purchase
                 method: PaymentMethod.Unknown,
                 type: PaymentType.Payment,
-                mandate: existingMandate
-            }
+                mandate: existingMandate,
+            };
         }
 
         if (mandate) {
@@ -1168,37 +1225,37 @@ export class PaymentService {
                 paymentConfiguration,
                 payingOrganization,
                 sellingOrganization,
-                user
-            })
+                user,
+            });
 
             switch (existingMandate.type) {
                 case PaymentMandateType.CreditCard:
                     return {
                         mandate: existingMandate,
                         method: PaymentMethod.CreditCard,
-                        type: PaymentType.Payment
-                    }
+                        type: PaymentType.Payment,
+                    };
                 case PaymentMandateType.DirectDebit:
                     return {
                         mandate: existingMandate,
                         method: PaymentMethod.DirectDebit,
-                        type: PaymentType.Payment
-                    }
+                        type: PaymentType.Payment,
+                    };
             }
 
-            throw new Error('Unsupported mandate type')
+            throw new Error('Unsupported mandate type');
         }
 
         if (createMandate) {
             if (!paymentConfiguration.enableMandates) {
-                 throw new SimpleError({
+                throw new SimpleError({
                     code: 'mandates_disabled',
                     message: 'Cannot pay with mandate',
-                    human: $t('%1R1')
+                    human: $t('%1R1'),
                 });
             }
         }
-        
+
         if (method === PaymentMethod.Unknown) {
             throw new SimpleError({
                 code: 'invalid_data',
@@ -1210,7 +1267,7 @@ export class PaymentService {
         const allowedPaymentMethods = paymentConfiguration.getAvailablePaymentMethods({
             amount: price,
             customer: customer,
-            forMandate: createMandate
+            forMandate: createMandate,
         });
 
         if (!allowedPaymentMethods.includes(method)) {
@@ -1223,17 +1280,17 @@ export class PaymentService {
         return {
             method,
             type: PaymentType.Payment,
-            mandate: null
-        }
+            mandate: null,
+        };
     }
 
     static validateVATRates({ customer, sellingOrganization, balanceItems }: { customer: PaymentCustomer; sellingOrganization: Organization; balanceItems: Map<BalanceItem, number> }) {
         // Validate VAT rates for this customer
-        const seller = VATService.getDefaultCompanyForOrganization(sellingOrganization)
+        const seller = VATService.getDefaultCompanyForOrganization(sellingOrganization);
         const excempt = VATService.isVATExcempt({
             company: customer.company,
             sellingOrganization,
-        })
+        });
 
         // Reverse charged vat applicable?
         if (excempt) {
@@ -1257,8 +1314,7 @@ export class PaymentService {
                     });
                 }
             }
-        }
-        else {
+        } else {
             // Fine to just not have setup VAT rates yet if the price is guaranteed to include VAT
             for (const [item] of balanceItems) {
                 if (item.VATExcempt === VATExcemptReason.IntraCommunityGoods || item.VATExcempt === VATExcemptReason.IntraCommunityServices) {
@@ -1281,7 +1337,7 @@ export class PaymentService {
             }
         }
 
-        /*if (seller && seller.VATNumber && seller.address && customer.company) {
+        /* if (seller && seller.VATNumber && seller.address && customer.company) {
             // B2B validation
             if (!customer.company.address) {
                 throw new SimpleError({
@@ -1291,7 +1347,6 @@ export class PaymentService {
                     field: 'customer.company.address',
                 });
             }
-
 
         }
         else {
@@ -1317,8 +1372,8 @@ export class PaymentService {
                     }
                 }
             }
-        }*/
+        } */
 
-        return {seller}
+        return { seller };
     }
 };

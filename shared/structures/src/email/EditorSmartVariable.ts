@@ -137,6 +137,14 @@ export class EditorSmartVariable extends AutoEncoder {
                 name: $t(`%ok`),
             }),
             EditorSmartVariable.create({
+                id: 'platformName',
+                name: $t(`Naam van het platform (Stamhoofd)`),
+            }),
+            EditorSmartVariable.create({
+                id: 'payingOrganizationName',
+                name: $t(`Naam vereniging (betaler)`),
+            }),
+            EditorSmartVariable.create({
                 id: 'outstandingBalance',
                 name: $t(`%76`),
                 deleteMessage: $t(`%ol`),

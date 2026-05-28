@@ -500,6 +500,7 @@ import WebshopSeatingView from './orders/WebshopSeatingView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
+import { usePlatform } from '@stamhoofd/components';
 
 const props = defineProps<{ preview: WebshopPreview }>();
 const context = useContext();
@@ -512,6 +513,7 @@ const canPop = useCanPop();
 const canDismiss = useCanDismiss();
 const splitViewController = useSplitViewController();
 const owner = useRequestOwner();
+const platform = usePlatform()
 
 const loading = ref(false);
 const openTodoList = ref(true);
@@ -706,7 +708,7 @@ async function editEmails(animated = true) {
                     EmailTemplateType.TicketsConfirmationTransfer,
                     EmailTemplateType.TicketsConfirmationPOS,
                     EmailTemplateType.TicketsReceivedTransfer,
-                ].filter(t => EmailTemplate.allowOrganizationLevel(t)),
+                ].filter(t => EmailTemplate.allowOrganizationLevel(t, organization.value, platform.value)),
             }),
         ],
         modalDisplayStyle: 'popup',
