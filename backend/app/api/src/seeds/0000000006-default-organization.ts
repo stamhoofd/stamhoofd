@@ -5,13 +5,9 @@ import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 
 export default new Migration(async () => {
-    if (!STAMHOOFD.singleOrganization) {
-        return;
-    }
-
-    let organization = await Organization.getByID(STAMHOOFD.singleOrganization);
-    if (organization) {
-        console.log('Single organization already created.');
+    const platform = await Platform.getForEditing();
+    if (platform.membershipOrganizationId) {
+        console.log('Membership organization already created.');
         return;
     }
 
@@ -40,16 +36,15 @@ export default new Migration(async () => {
     }
     await registrationPeriod.save();
 
-    console.log('Creating single organization...');
-    organization = new Organization();
-    organization.id = STAMHOOFD.singleOrganization;
+    console.log('Creating membership organization...');
+    const organization = new Organization();
     organization.name = STAMHOOFD.platformName;
     organization.uri = Formatter.slug(STAMHOOFD.platformName);
     organization.periodId = registrationPeriod.id;
     organization.address = Address.create({
-        street: 'Demo',
-        number: '1',
-        postalCode: '9000',
+        street: '',
+        number: '',
+        postalCode: '',
         city: 'Gent',
         country: STAMHOOFD.fixedCountry ?? Country.Belgium,
     });
@@ -57,7 +52,6 @@ export default new Migration(async () => {
     await organization.save();
 
     // Set as platform organization
-    const platform = await Platform.getForEditing();
     platform.membershipOrganizationId = organization.id;
     await platform.save()
 
