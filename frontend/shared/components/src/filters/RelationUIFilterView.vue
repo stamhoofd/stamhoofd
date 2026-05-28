@@ -96,7 +96,7 @@ const defaultOption: RelationFetcherSubFilterOption = {
     filter: null
 };
 
-const selectedSubFilterOption = ref(defaultOption as RelationFetcherSubFilterOption);
+const selectedSubFilterOption = ref<RelationFetcherSubFilterOption>(defaultOption);
 
 async function showSubFilters(event: MouseEvent) {
     const subFilter = relationFetcher.subFilter;

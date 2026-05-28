@@ -133,6 +133,15 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
                 wrapper: FilterWrapperMarker,
                 relationFetcher: groupsRelationFetcher({periodId, type: GroupType.Membership})
             }));
+
+            all.push(new RelationFilterBuilder({
+                name: $t('Wachtlijst'),
+                type: GroupType.WaitingList,
+                key: 'groupId',
+                allowCreation: true,
+                wrapper: FilterWrapperMarker,
+                relationFetcher: groupsRelationFetcher({periodId, type: GroupType.WaitingList})
+            }));
         }
 
         all.push(new RelationFilterBuilder({

@@ -1,6 +1,6 @@
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import type { Group, StamhoofdFilter } from '@stamhoofd/structures';
-import { GroupType, SortItemDirection } from '@stamhoofd/structures';
+import type { Group, GroupType, StamhoofdFilter } from '@stamhoofd/structures';
+import { SortItemDirection } from '@stamhoofd/structures';
 import { useGroupsObjectFetcher } from '../../fetchers/useGroupsObjectsFetcher';
 import { RelationFetcher, RelationFetcherSubFilter } from '../RelationUIFilter';
 
@@ -25,10 +25,10 @@ export function useGroupsRelationFetcher() {
         }
 
         let getName: (object: ObjectType) => string;
-        let getDescription: ((object: ObjectType) => string) | undefined = undefined;
+        const getDescription: ((object: ObjectType) => string) | undefined = undefined;
         let subFilter: RelationFetcherSubFilter | undefined = undefined;
 
-        if (type === GroupType.Membership && periodId === undefined) {
+        if (periodId === undefined) {
             getName = (group) => {
                 return `${group.settings.name.toString()} (${group.settings.period?.nameShort})`;
             }
@@ -47,16 +47,6 @@ export function useGroupsRelationFetcher() {
             })
         } else {
             getName = (group) => group.settings.name.toString();
-        }
-
-        if (type === GroupType.EventRegistration) {
-            getDescription = (group) => {
-                if (!group.event) {
-                    return ''
-                }
-                
-                return `${group.event.dateRange}`;
-            }
         }
 
         return new RelationFetcher({
