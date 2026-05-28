@@ -796,7 +796,11 @@ export class AdminPermissionChecker {
                 return false;
             }
 
-            return EmailTemplateStruct.allowOrganizationLevel(template.type);
+            if (!this.organization) {
+                return false;
+            }
+
+            return EmailTemplateStruct.allowOrganizationLevel(template.type, this.organization, this.platform);
         }
 
         // Note: if the template has an organizationId of null, everyone can access it, but only for reading
