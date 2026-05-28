@@ -55,9 +55,15 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
             }
 
             const map: Map<BalanceItem, number> = new Map();
+            let total = 0;
             for (const i of items) {
                 map.set(i, i.priceOpen)
+                total += i.priceOpen;
             }
+            if (total <= 0) {
+                continue;
+            }
+            
             let payingOrganization: Organization | null = null;
             let user: User | null = null;
             if (cachedBalance.objectType === ReceivableBalanceType.organization) {
