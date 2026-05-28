@@ -169,9 +169,14 @@ export class PaymentGeneral extends Payment {
     }
 
     getShortDescription() {
-        const shortDescriptions = this.balanceItemPayments.filter(p => p.price !== 0).map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
+        let shortDescriptions = this.balanceItemPayments.filter(p => p.price !== 0).map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
 
-        // Count the number of times each description occurs and add prefix if more than 1
+        if (shortDescriptions.length === 0) {
+            // Include free items
+            shortDescriptions = this.balanceItemPayments.map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
+        }
+
+        // Count the number of times each description occurs and add prefix if more than 1 
         const counts: { [key: string]: number } = {};
         for (const shortDescription of shortDescriptions) {
             counts[shortDescription] = (counts[shortDescription] || 0) + 1;
