@@ -7,7 +7,7 @@ import type {
     Organization,
     OrganizationRegistrationPeriod,
     RegistrationPeriod,
-    User
+    User,
 } from '@stamhoofd/models';
 import {
     BalanceItemFactory,
@@ -15,7 +15,7 @@ import {
     MemberFactory,
     OrganizationFactory,
     OrganizationRegistrationPeriodFactory,
-    RegistrationPeriodFactory
+    RegistrationPeriodFactory,
 } from '@stamhoofd/models';
 import {
     BalanceItemType,
@@ -30,13 +30,13 @@ import {
 } from '@stamhoofd/structures';
 import { MemberPortalRegistrationFlow } from '../flows/MemberPortalRegistrationFlow.js';
 import type {
-    YouthOrganization1Context
+    YouthOrganization1Context,
 } from '../helpers/index.js';
 import {
     TableHelper,
     TestMembers,
     TestOrganizations,
-    WorkerData
+    WorkerData,
 } from '../helpers/index.js';
 
 /**
@@ -677,15 +677,14 @@ test.describe('Registration', () => {
             let stripeMocker: StripeMocker;
 
             test.beforeAll(async () => {
-
                 // Required so Stripe fee VAT can be calculated; the platform
                 // refuses online payments without an invoicing organization.
-                //const platform = await Platform.getForEditing();
-                //if (!platform.membershipOrganizationId) {
+                // const platform = await Platform.getForEditing();
+                // if (!platform.membershipOrganizationId) {
                 //    const membershipOrganization = await new OrganizationFactory({}).create();
                 //    platform.membershipOrganizationId = membershipOrganization.id;
                 //    await platform.save();
-                //}
+                // }
 
                 stripeOrganization = await new OrganizationFactory({
                     name: `BancontactVer${WorkerData.id}`,
@@ -720,7 +719,7 @@ test.describe('Registration', () => {
 
                 const stripeAccount = await stripeMocker.createStripeAccount(
                     stripeOrganization.id,
-                    'standard'
+                    'standard',
                 );
                 stripeOrganization.meta.registrationPaymentConfiguration.paymentMethods.push(
                     PaymentMethod.Bancontact,
@@ -798,13 +797,13 @@ test.describe('Registration', () => {
 
                 await test.step('should land on the captured success url', async () => {
                     if (!intent.return_url) {
-                        throw new Error('Typescript assert failed')
+                        throw new Error('Typescript assert failed');
                     }
                     // The return URL points at the organization's registration subdomain,
                     // which is not routable in the test caddy setup — intercept it so the
                     // navigation can complete and we can assert it lands there.
                     await page.goto(intent.return_url);
-                    await registrationFlow.expectSuccessView()
+                    await registrationFlow.expectSuccessView();
                 });
             });
         });
@@ -940,6 +939,110 @@ test.describe('Registration', () => {
 
                 // go to checkout
                 await page.getByTestId('save-button').click();
+
+                await test.step('should show success view listing every registered member', async () => {
+                    const successView = page.getByTestId('payment-success-view');
+                    await test.expect(successView).toBeVisible();
+
+                    await test
+                        .expect(successView)
+                        .toContainText('en 2 andere leden zijn ingeschreven', { ignoreCase: true });
+                });
+            });
+        });
+
+        /**
+         * Bulk-register a set of existing members into another group via the
+         * "Inschrijven voor" admin action. The admin acts as the same
+         * organization, so the checkout steps are skipped and the success
+         * view is shown directly after the cart save.
+         */
+        test.describe('Bulk register existing members', () => {
+            let organizationContext: YouthOrganization1Context;
+            let organization: Organization;
+
+            test.beforeAll(async () => {
+                organization = await new OrganizationFactory({
+                    name: `Bulk${WorkerData.id}`,
+                }).create();
+
+                organizationContext
+                    = await TestOrganizations.youthOrganization1(organization);
+
+                // Strip optional records so no extra steps appear during checkout.
+                organization.meta.recordsConfiguration.financialSupport = false;
+                organization.meta.recordsConfiguration.uitpasNumber = null;
+                await organization.save();
+
+                await WorkerData.configureUser
+                    .setOrganizationPermissions(
+                        Permissions.create({
+                            level: PermissionLevel.Full,
+                        }),
+                        organization,
+                    )
+                    .save();
+            });
+
+            test.afterAll(async () => {
+                await WorkerData.resetDatabase();
+            });
+
+            test.afterEach(async () => {
+                await WorkerData.databaseHelper.clearRegistrations();
+                await WorkerData.databaseHelper.clearMembers();
+            });
+
+            test('admin registers multiple existing members in a group at once', async ({
+                page,
+                pages,
+            }) => {
+                const sourceGroup = organizationContext.groups.bevers;
+                const targetGroup = organizationContext.groups.welpen;
+
+                // create existing members, each already registered to bevers
+                const members = await Promise.all(
+                    [1, 2, 3].map(id =>
+                        TestMembers.defaultMemberFromId({
+                            id,
+                            organization,
+                            group: sourceGroup,
+                        }),
+                    ),
+                );
+
+                // open the bevers registrations table
+                await pages
+                    .groupOverview({ organization, group: sourceGroup })
+                    .gotoRegistrations();
+
+                // select every member in the table
+                const table = new TableHelper(page);
+                await table.waitForFirstRow();
+                await table.toggleSelectAllRows();
+
+                // bulk-register them for the welpen group
+                await table.clickActions([
+                    'Inschrijven voor',
+                    'Takken',
+                    targetGroup.settings.name.toString(),
+                ]);
+
+                // confirm the cart (admin from same org skips the payment steps)
+                await page.getByTestId('save-button').click();
+
+                await test.step('should show success view listing every registered member', async () => {
+                    const successView = page.getByTestId('payment-success-view');
+                    await test.expect(successView).toBeVisible();
+
+                    // The admin checkout returns no payment, so the success view
+                    // renders the registrations fallback which lists first names.
+                    for (const member of members) {
+                        await test
+                            .expect(successView)
+                            .toContainText(member.details.firstName, { ignoreCase: true });
+                    }
+                });
             });
         });
     });
