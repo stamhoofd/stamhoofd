@@ -36,11 +36,11 @@ export interface UIFilterBuilder<F extends UIFilter = UIFilter> extends BaseUIFi
     create(options?: { isInverted?: boolean }): F;
 }
 
-export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter; isInverted?: boolean } {
+export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: StamhoofdFilter, allowInverting = false): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter; isInverted?: boolean } {
     for (const wrapper of [builder.wrapper!, ...(builder.additionalUnwrappers ?? [])].filter(w => !!w) as WrapperFilter[]) {
         const result = unwrapFilter(filter, wrapper);
 
-        if (!result.match) {
+        if (!result.match && allowInverting) {
             const invertedFilter = UIFilter.invertFilter(filter);
 
             if (invertedFilter) {
@@ -63,7 +63,7 @@ export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: Stamhoo
     if (builder.unwrapFilter) {
         const r = builder.unwrapFilter(filter);
 
-        if (r === null) {
+        if (r === null && allowInverting) {
             const invertedFilter = UIFilter.invertFilter(filter);
 
             if (invertedFilter) {
@@ -76,8 +76,7 @@ export function unwrapFilterForBuilder(builder: UIFilterBuilder, filter: Stamhoo
                     };
                 }
             }
-        }
-        else {
+        } else {
             return {
                 match: true,
                 markerValue: r,
