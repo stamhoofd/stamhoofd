@@ -17,7 +17,7 @@
         </p>
 
         <p v-if="!isPaymentFailed && !shouldFilter('webshops') && isNearing(webshopDeactivateDate) && webshopDeactivateDate" class="warning-box selectable with-button" @click="openPackages">
-            {{ $t('Jouw webshops worden automatisch uitgeschakeld vanaf {date}. Verleng jouw pakket om de webshop module langer in gebruik te houden.', { date: formatDateTime(webshopDeactivateDate) }) }}
+            {{ $t('Jouw webshops worden automatisch uitgeschakeld na {date}. Verleng jouw pakket om de webshop module langer in gebruik te houden.', { date: formatEndDate(webshopDeactivateDate) }) }}
 
             <button class="button text" type="button">
                 {{ $t('Verlengen') }}
@@ -49,7 +49,7 @@
         </p>
 
         <p v-if="!isPaymentFailed && !shouldFilter('members') && isNearing(membersDeactivateDate) && membersDeactivateDate" class="warning-box selectable with-button" @click="openPackages">
-            {{ $t('De ledenadministratie wordt uitgeschakeld vanaf {date}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.', { date: formatEndDate(membersDeactivateDate) }) }}
+            {{ $t('De ledenadministratie wordt uitgeschakeld na {date}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.', { date: formatEndDate(membersDeactivateDate) }) }}
 
             <button class="button text" type="button">
                 {{ $t('Verlengen') }}
@@ -239,8 +239,7 @@ async function openBilling() {
             ],
             modalDisplayStyle: 'popup',
         });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
