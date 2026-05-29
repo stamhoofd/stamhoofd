@@ -1,5 +1,6 @@
 export * from './AsyncComponent';
 export { default as AuthenticatedView } from './AuthenticatedView.vue';
+export { default as PermissionsCheckedView } from './PermissionsCheckedView.vue';
 export { default as ContextProvider } from './ContextProvider.vue';
 export { default as CoverImageContainer } from './CoverImageContainer.vue';
 export { default as CustomHooksContainer } from './CustomHooksContainer.vue';

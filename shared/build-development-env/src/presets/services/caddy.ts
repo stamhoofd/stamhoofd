@@ -171,7 +171,7 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
                     },
                     upstreams: [
                         {
-                            dial: '127.0.0.1:8081',
+                            dial: '127.0.0.1:8080',
                         },
                     ],
                 },
@@ -198,7 +198,7 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
                     },
                     upstreams: [
                         {
-                            dial: '127.0.0.1:8081',
+                            dial: '127.0.0.1:8080',
                         },
                     ],
                 },

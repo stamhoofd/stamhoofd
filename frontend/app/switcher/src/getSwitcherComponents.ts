@@ -23,6 +23,7 @@ export async function getUnscopedSwitcherComponent() {
         }),
     });
     if (STAMHOOFD.userMode === 'platform') {
+        // TO DO: if the user is logged in and has no permissions it should go to the member portal
         base = await getAuthComponent(base, null);
     }
     return wrapContext(session, 'auto', () => base);
