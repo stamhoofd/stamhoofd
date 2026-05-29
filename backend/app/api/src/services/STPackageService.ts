@@ -39,8 +39,8 @@ export class STPackageService {
             amount = await Organization.getActiveMembers(pack.organizationId);
         }
 
-        if (amount < pack.meta.minimumAmount) {
-            amount = pack.meta.minimumAmount;
+        if (amount < (pack.meta.minimumAmount || 1)) {
+            amount = (pack.meta.minimumAmount || 1);
         }
 
         return amount;

@@ -7,10 +7,13 @@
 
                 <STErrorsDefault :error-box="errors.errorBox" />
 
-                <div v-if="proFormaData?.payment?.price !== 0" class="container categorized-box">
+                <div v-if="proFormaData?.payment?.price !== 0 || model.requiresMandate" class="container categorized-box">
                     <h2>
                         {{ $t('%kP') }}
                     </h2>
+                    <p v-if="proFormaData?.payment?.price === 0">
+                        {{ $t('Je hoeft nu niets te betalen, maar de gekozen kaart zal gebruikt worden voor de periodieke betalingen.') }}
+                    </p>
 
                     <template v-if="mandates.length && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
                         <STInputBox error-fields="mandateId" :error-box="errors.errorBox" class="max">
