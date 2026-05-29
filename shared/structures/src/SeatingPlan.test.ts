@@ -1,4 +1,4 @@
-import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType } from './SeatingPlan.js';
+import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatMarkings, SeatType } from './SeatingPlan.js';
 
 describe('SeatingPlan', () => {
     describe('adjustSeatsForBetterFit', () => {
@@ -42,6 +42,12 @@ describe('SeatingPlan', () => {
                     seats.push(SeatingPlanSeat.create({
                         type: SeatType.Space,
                         label: '',
+                    }));
+                } else if (char == 'D') {
+                    // Disabled person seat
+                    seats.push(SeatingPlanSeat.create({
+                        label: (i + 1).toString(),
+                        markings: [SeatMarkings.DisabledPerson],
                     }));
                 } else {
                     throw new Error('Invalid character ' + char);
@@ -207,6 +213,47 @@ describe('SeatingPlan', () => {
             expectAdjustedSeats(
                 '--  --XXX-RRR  --',
                 '--  ---XXXRRR  --',
+            );
+        });
+
+        test('Disabled seats are ignored for optimal seat selection', () => {
+            // A disabled seat directly adjacent to a selected seat: no left swap (would move X away from D)
+            expectAdjustedSeats(
+                'RDX-',
+                'RDX-',
+            );
+            expectAdjustedSeats(
+                '-DX-',
+                '-DX-',
+            );
+            expectAdjustedSeats(
+                '-XD-',
+                '-XD-',
+            );
+
+            // A 1-gap between selected seats and a disabled seat triggers a right swap
+            expectAdjustedSeats(
+                '------X-D',
+                '-------XD',
+            );
+            expectAdjustedSeats(
+                '------XX-D',
+                '-------XXD',
+            );
+
+            // Selected seats on both sides of a disabled seat are independent groups
+            expectAdjustedSeats(
+                'X-DX-',
+                'X-DX-',
+            );
+
+            expectAdjustedSeats(
+                '-XXD--',
+                '-XXD--',
+            );
+            expectAdjustedSeats(
+                '-XXDX--',
+                '-XXDX--',
             );
         });
 

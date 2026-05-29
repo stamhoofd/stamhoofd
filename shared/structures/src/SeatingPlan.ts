@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 import type { Product } from './webshops/Product.js';
 import type { Webshop, WebshopPreview } from './webshops/Webshop.js';
-import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class SeatingSizeConfiguration {
     seatWidth = 30;
@@ -438,7 +438,7 @@ export class SeatingPlan extends AutoEncoder {
                         }
                         emptySeatStack = [];
                         selectedSeatStack.push(rSeat);
-                    } else if (!seat.isValidSeat || (reservedSeats.find(s => s.equals(rSeat)) && !allowedSeats.find(s => s.equals(rSeat))) || (!asAdmin && this.isAdminSeat(rSeat))) {
+                    } else if (!seat.isValidSeat || seat.markings.includes(SeatMarkings.DisabledPerson) || (reservedSeats.find(s => s.equals(rSeat)) && !allowedSeats.find(s => s.equals(rSeat))) || (!asAdmin && this.isAdminSeat(rSeat))) {
                         if (allowRightSwap && emptySeatStack.length === 1 && selectedSeatStack.length) {
                             const from = selectedSeatStack[0];
                             const to = emptySeatStack[0];
