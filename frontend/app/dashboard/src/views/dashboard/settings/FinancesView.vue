@@ -248,13 +248,16 @@ defineRoutes([
         component: PaymentsTableView,
         paramsToProps() {
             return {
-                defaultFilter: {
-                    status: {
-                        $in: [
-                            PaymentStatus.Succeeded,
-                        ],
+                defaultFilter: [
+                    {
+                        status: {
+                            $in: [
+                                PaymentStatus.Succeeded,
+                            ],
+                        },
                     },
-                },
+                    { price: { $neq: 0 } },
+                ],
             };
         },
     },
@@ -391,14 +394,13 @@ async function updateBalance() {
         });
 
         outstandingBalance.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
 
 useGlobalEventListener('payment-succeeded', async () => {
-    updateBalance().catch(console.error)
+    updateBalance().catch(console.error);
 });
 
 </script>
