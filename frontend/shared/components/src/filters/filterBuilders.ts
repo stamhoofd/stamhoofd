@@ -57,8 +57,6 @@ export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     return builders;
 };
 
-
-
 export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new MultipleChoiceFilterBuilder({
@@ -221,6 +219,17 @@ export const getCachedOutstandingBalanceUIFilterBuilders: () => UIFilterBuilders
             name: $t(`%c4`),
             type: NumberFilterFormat.Currency,
             key: 'amountPending',
+        }),
+        new NumberFilterBuilder({
+            name: $t(`Bedrag in verwerking`),
+            type: NumberFilterFormat.Currency,
+            key: 'pricePending',
+        }),
+
+        new DateFilterBuilder({
+            name: $t(`Volgende aanpassingsdatum`),
+            key: 'nextDueAt',
+            nullable: true,
         }),
     /* new MultipleChoiceFilterBuilder({
         name: 'Type',
@@ -558,8 +567,6 @@ export function useAuditLogUIFilterBuilders() {
     return all;
 }
 
-
-
 export function getDocumentsUIFilterBuilders() {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
@@ -822,17 +829,13 @@ export function useEmailRecipientsFilterBuilders() {
                     for (const condition of orConditions) {
                         if (condition.failError?.$neq === null) {
                             results.push('failError');
-                        }
-                        else if (condition.hardBounceError?.$neq === null) {
+                        } else if (condition.hardBounceError?.$neq === null) {
                             results.push('hardBounce');
-                        }
-                        else if (condition.softBounceError?.$neq === null) {
+                        } else if (condition.softBounceError?.$neq === null) {
                             results.push('softBounce');
-                        }
-                        else if (condition.spamComplaintError?.$neq === null) {
+                        } else if (condition.spamComplaintError?.$neq === null) {
                             results.push('spam');
-                        }
-                        else {
+                        } else {
                             return null;
                         }
                     }

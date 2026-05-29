@@ -1,5 +1,5 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="null" :Route="Route">
+    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :default-filter="defaultFilter" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="null" :Route="Route">
         <template #empty>
             {{ $t('%77') }}
         </template>
@@ -12,7 +12,7 @@ import type { TableAction, TableActionSelection } from '@stamhoofd/components/ta
 import { AsyncTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import type { ComponentExposed } from '@stamhoofd/components/VueGlobalHelper.ts';
 import EmailView from '@stamhoofd/components/email/EmailView.vue';
-import type {RecipientChooseOneOption, RecipientMultipleChoiceOption} from '@stamhoofd/components/email/EmailView.vue';
+import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { getCachedOutstandingBalanceUIFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
@@ -28,11 +28,12 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { ReceivableBalance, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useChargeReceivableBalances } from '@stamhoofd/components/payments/hooks/useChargeReceivableBalances';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
+import { Toast } from '@stamhoofd/components';
 
 type ObjectType = ReceivableBalance;
 
@@ -59,6 +60,13 @@ const configurationId = computed(() => {
     return 'receivable-balances';
 });
 const filterBuilders = getCachedOutstandingBalanceUIFilterBuilders();
+const defaultFilter: StamhoofdFilter = {
+    $or: [
+        { $not: { amountOpen: { $eq: 0 } } },
+        { $not: { amountPending: { $eq: 0 } } },
+        { $not: { nextDueAt: { $eq: null } } },
+    ],
+};
 
 function getRequiredFilter(): StamhoofdFilter | null {
     if (!props.objectType) {
@@ -66,21 +74,11 @@ function getRequiredFilter(): StamhoofdFilter | null {
             objectType: {
                 $in: $feature('organization-receivable-balances') ? [ReceivableBalanceType.member, ReceivableBalanceType.userWithoutMembers, ReceivableBalanceType.organization] : [ReceivableBalanceType.member, ReceivableBalanceType.userWithoutMembers],
             },
-            $or: {
-                amountOpen: { $neq: 0 },
-                amountPending: { $neq: 0 },
-                nextDueAt: { $neq: null },
-            },
         };
     }
 
     return {
         objectType: props.objectType,
-        $or: {
-            amountOpen: { $neq: 0 },
-            amountPending: { $neq: 0 },
-            nextDueAt: { $neq: null },
-        },
     };
 }
 
@@ -155,7 +153,7 @@ const allColumns: Column<ObjectType, any>[] = [
 ];
 
 const { getSelectableWorkbook } = useSelectableWorkbook();
-const charge = useChargeReceivableBalances()
+const charge = useChargeReceivableBalances();
 
 const actions: TableAction<ObjectType>[] = [
     new AsyncTableAction({
@@ -197,14 +195,16 @@ const actions: TableAction<ObjectType>[] = [
                 title: $t('%1Q6'),
                 description: $t('%1QN'),
                 requireCheckbox: $t('%1Ti'),
-                confirmText: $t('%1TZ')
+                confirmText: $t('%1TZ'),
             })) {
                 return;
             }
             await charge(new CountFilteredRequest({
                 filter: selection.filter.filter,
-                search: selection.filter.search
-            }))
+                search: selection.filter.search,
+            }));
+
+            Toast.success($t('De openstaande bedragen werden aangerekend via de standaard bankkaart van elke klant')).show();
 
             tableObjectFetcher.reset(true, true);
         },
