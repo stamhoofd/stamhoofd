@@ -53,13 +53,6 @@
         <hr>
         <h2>Geavanceerde instellingen</h2>
 
-        <Checkbox key="payconiq" v-model="forcePayconiq">
-            Payconiq API-key gebruiken
-        </Checkbox>
-        <p class="style-description-small">
-            Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" class="inline-link" target="_blank">de gids</a> door voor meer informatie.
-        </p>
-
         <Checkbox :checked="getFeatureFlag('webshop-advanced-settings')" @change="setFeatureFlag('webshop-advanced-settings', !!$event)">
             Geavanceerde instellingen voor webshops (code injection)
         </Checkbox>
@@ -175,14 +168,6 @@ export default class LabsView extends Mixins(NavigationMixin) {
                 featureFlags: featureFlags as any
             })
         })
-    }
-
-    get forcePayconiq() {
-        return this.getFeatureFlag('forcePayconiq')
-    }
-
-    set forcePayconiq(forcePayconiq: boolean) {
-        this.setFeatureFlag('forcePayconiq', forcePayconiq)
     }
 
     getFeatureFlag(flag: string) {

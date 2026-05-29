@@ -260,36 +260,34 @@
             </template>
         </template>
 
-        <template v-if="payconiqApiKey || forcePayconiq">
-            <hr>
-            <aside class="style-title-prefix">
-                Payconiq
-            </aside>
-            <h2>Online betalingen via Payconiq</h2>
-            <p class="style-description">
-                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>.
-            </p>
+        <hr>
+        <aside class="style-title-prefix">
+            Bancontact Pay | Wero
+        </aside>
+        <h2>Online betalingen via Bancontact Pay | Wero</h2>
+        <p class="style-description">
+            Vul hieronder jouw API-key in om betalingen rechtstreeks via Bancontact Pay | Wero te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>.
+        </p>
 
-            <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="'https://'+ $t('shared.domains.marketing') +'/docs/oude-payconiq-accounts/'" target="_blank">
-                Jouw API-key van Payconiq vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.
+        <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="'https://'+ $t('shared.domains.marketing') +'/docs/oude-payconiq-accounts/'" target="_blank">
+            Jouw API-key van Payconiq vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.
 
-                <span class="button text">
-                    Meer lezen
-                </span>
-            </a>
+            <span class="button text">
+                Meer lezen
+            </span>
+        </a>
 
-            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
-                <input
-                    v-model="payconiqApiKey"
-                    class="input"
-                    type="text"
-                    placeholder="API-key van Payconiq"
-                >
-            </STInputBox>
-            <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
-                Op naam van {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
-            </p>
-        </template>
+        <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
+            <input
+                v-model="payconiqApiKey"
+                class="input"
+                type="text"
+                placeholder="API-key van Bancontact Pay | Wero"
+            >
+        </STInputBox>
+        <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
+            Op naam van {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
+        </p>
 
         <template v-if="isStamhoofd">
             <hr>
@@ -446,10 +444,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     set payconiqApiKey(payconiqApiKey: string) {
-        if (this.payconiqApiKey && payconiqApiKey.length == 0) {
-            this.forcePayconiq = true;
-        }
-
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 payconiqAccounts: (payconiqApiKey.length == 0 ? [] : [PayconiqAccount.create({ apiKey: payconiqApiKey })]) as any
@@ -511,14 +505,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 featureFlags: featureFlags as any
             })
         })
-    }
-
-    get forcePayconiq() {
-        return this.getFeatureFlag('forcePayconiq')
-    }
-
-    set forcePayconiq(forcePayconiq: boolean) {
-        this.setFeatureFlag('forcePayconiq', forcePayconiq)
     }
 
     getFeatureFlag(flag: string) {

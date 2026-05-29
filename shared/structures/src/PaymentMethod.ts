@@ -1,4 +1,3 @@
-import { CheckoutMethodType } from "./webshops/WebshopMetaData";
 
 export enum PaymentMethod {
     Unknown = "Unknown",
@@ -75,7 +74,7 @@ export class PaymentMethodHelper {
             case PaymentMethod.Bancontact: return "Bancontact";
             case PaymentMethod.iDEAL: return "iDEAL";
             case PaymentMethod.CreditCard: return "Kredietkaart";
-            case PaymentMethod.Payconiq: return "Payconiq";
+            case PaymentMethod.Payconiq: return "Bancontact Pay | Wero";
         }
     }
 }
