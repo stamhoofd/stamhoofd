@@ -44,7 +44,7 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
 }
 
-export async function wrapContext(context: SessionContext, app: AppType | 'auto', buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager }) => ComponentWithProperties), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
+export async function wrapContext(context: SessionContext, app: AppType | 'auto', buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager }) => ComponentWithProperties | Promise<ComponentWithProperties>), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
     const platformManager = await PlatformManager.createFromCache(context, app, true);
     const $memberManager = new MemberManager(context, platformManager.$platform);
 
@@ -55,7 +55,7 @@ export async function wrapContext(context: SessionContext, app: AppType | 'auto'
     const $webshopManager = options?.webshop ? reactive(new WebshopManager(context, platformManager.$platform, options.webshop) as any) as WebshopManager : null;
     const $checkoutManager = $webshopManager ? reactive(new CheckoutManager($webshopManager)) : null;
 
-    const component = typeof buildComponent === 'function' ? buildComponent({ platformManager }) : buildComponent;
+    const component = typeof buildComponent === 'function' ? await buildComponent({ platformManager }) : buildComponent;
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
@@ -510,13 +510,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             moreTab.items.unshift(documentsTab);
                             moreTab.items.unshift(financesTab);
                             moreTab.items.unshift(communicationTab);
-
-                            if (STAMHOOFD.userMode === 'organization') {
-                                // In Stamhoofd we show settings in the top bar
-                                tabs.push(settingsTab);
-                            } else {
-                                moreTab.items.unshift(settingsTab);
-                            }
+                            moreTab.items.unshift(settingsTab);
                         } else {
                             if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
                                 moreTab.items.unshift(financesTab);

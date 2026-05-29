@@ -82,7 +82,7 @@ export function useGlobalRoutes() {
 
             if (paymentId) {
                 await present(new ComponentWithProperties(PaymentPendingView, {
-                    server: organizationId ? context.value.getOptionalAuthenticatedServerForOrganization(organizationId) :context.value.optionalAuthenticatedServer,
+                    server: organizationId ? context.value.getOptionalAuthenticatedServerForOrganization(organizationId) : context.value.optionalAuthenticatedServer,
                     paymentId,
                     cancel,
                     errorHandler: async function (navigationActions: NavigationActions, error: unknown) {
@@ -102,8 +102,7 @@ export function useGlobalRoutes() {
                                 replace: 100, // autocorrects to all
                                 force: true,
                             });
-                        }
-                        else {
+                        } else {
                             await navigationActions.dismiss({ force: true });
                             new CenteredMessage($t(`%Je`), $t(`%Jf`)).addCloseButton().show();
                         }
@@ -138,19 +137,17 @@ export function useGlobalRoutes() {
                     await LoginHelper.verifyEmail(session, code, token);
                     toast.hide();
                     new Toast($t(`%Ia`), 'success green').show();
-                    
-                    throw new Error('Not implemented: redirecting to the correct page after email verification.');
-                    //const newRoot = session.organization ? await getScopedSwitcherComponent(session.organization) : await getUnscopedSwitcherComponent();
-                    //await ReplaceRootEventBus.sendEvent('replace', newRoot);
-                }
-                catch (e) {
+
+                    const newRoot = session.organization ? await getScopedSwitcherComponent(session.organization) : await getUnscopedSwitcherComponent();
+                    await ReplaceRootEventBus.sendEvent('replace', newRoot);
+                } catch (e) {
                     toast.hide();
                     CenteredMessage.fromError(e).addCloseButton().show();
                 }
             }
         }
 
-        await context.value.checkSSO()
+        await context.value.checkSSO();
     });
 }
 
@@ -180,8 +177,7 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
             }
 
             doUnsubscribe = false;
-        }
-        else {
+        } else {
             if (!await CenteredMessage.confirm($t(`%If`), $t(`%Ig`), $t(`%Ih`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email }))) {
                 return;
             }
@@ -201,12 +197,10 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
 
         if (doUnsubscribe) {
             new Toast($t(`%Ii`), 'success').setHide(15 * 1000).show();
-        }
-        else {
+        } else {
             new Toast($t(`%Ij`), 'success').setHide(15 * 1000).show();
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         toast.hide();
         Toast.fromError(e).show();

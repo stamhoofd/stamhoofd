@@ -16,17 +16,21 @@ import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageV
 import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
+import { getDashboardComponent } from '@stamhoofd/dashboard/src/getDashboardComponent';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
+import getRegistrationComponent from '@stamhoofd/registration/src/getRegistrationComponent';
 import { Organization, uriToApp } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import type { Ref } from 'vue';
 import { onMounted, ref } from 'vue';
+import { getScopedSwitcherComponent, getUnscopedSwitcherComponent } from './getSwitcherComponents';
+import { getAdminComponent } from '../../admin/src/getAdminComponent';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
@@ -39,7 +43,17 @@ if (STAMHOOFD.environment === 'development') {
 const onOurDomain = window.location.hostname === STAMHOOFD.domains.dashboard || Object.values(STAMHOOFD.domains.registration ?? {}).includes(window.location.hostname);
 
 function getRootComponent(app: string | undefined, org: Organization, isAdminPossible: boolean = false) {
-    throw new Error('Not implemented yet');
+    switch (app ? uriToApp(app) : undefined) {
+        case 'dashboard':
+            return getDashboardComponent(org);
+        case 'registration':
+            return getRegistrationComponent(org);
+        case 'admin':
+            if (isAdminPossible) {
+                return getAdminComponent();
+            }
+    }
+    return getScopedSwitcherComponent(org);
 }
 
 function redirectIfNeeded(org: Organization) {
@@ -113,7 +127,7 @@ const root = new ComponentWithProperties(PromiseView, {
                         return getRootComponent(parts[0], org);
                     }
                 }
-                throw new Error('getUnscopedSwitcherComponent not implemented yet');
+                return getUnscopedSwitcherComponent();
             }
 
             if (STAMHOOFD.userMode === 'organization') {
