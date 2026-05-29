@@ -458,10 +458,23 @@ export class SeatingPlan extends AutoEncoder {
                         selectedSeatStack = [];
                         leftSwapSeat = null; // When we reach a selected seat that is next to a reserved seat, we don't want to swap it any longer
                         allowRightSwap = false;
-                    }
-                    else if (seat.markings.includes(SeatMarkings.DisabledPerson)) {
-                        // Disabled seats trigger any pending left swap but are never swap targets themselves
-                        if (leftSwapSeat && selectedSeatStack.length) {
+                    } else if (seat.markings.includes(SeatMarkings.DisabledPerson)) {
+                        // Disabled seats act as walls (never swap targets) but still trigger swaps
+                        if (allowRightSwap && emptySeatStack.length === 1 && selectedSeatStack.length) {
+                            // Right swap: move first selected seat into the 1-gap before the disabled wall
+                            const from = selectedSeatStack[0];
+                            const to = emptySeatStack[0];
+
+                            adjustedSeats = adjustedSeats.map((s) => {
+                                if (s.equals(from)) {
+                                    return to;
+                                }
+                                return s;
+                            });
+                            didChange = true;
+                        } else if (leftSwapSeat && selectedSeatStack.length > 1) {
+                            // Left swap: only when there are multiple selected seats — a single seat
+                            // sitting adjacent to a disabled seat should not be moved away from it
                             const from = selectedSeatStack[selectedSeatStack.length - 1];
                             const to = leftSwapSeat;
 
@@ -478,8 +491,7 @@ export class SeatingPlan extends AutoEncoder {
                         selectedSeatStack = [];
                         leftSwapSeat = null;
                         allowRightSwap = false;
-                    }
-                    else {
+                    } else {
                         if (leftSwapSeat && selectedSeatStack.length) {
                             const from = selectedSeatStack[selectedSeatStack.length - 1];
                             const to = leftSwapSeat;

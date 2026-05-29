@@ -219,25 +219,41 @@ describe('SeatingPlan', () => {
         });
 
         test('Disabled seats are ignored for optimal seat selection', () => {
-            // A disabled seat next to a selected seat should not trigger a left swap
+            // A disabled seat directly adjacent to a selected seat: no left swap (would move X away from D)
             expectAdjustedSeats(
                 'RDX-',
                 'RDX-',
             );
-
-            // A disabled seat as a 1-gap before selected seats should not trigger a left swap
             expectAdjustedSeats(
                 '-DX-',
                 '-DX-',
             );
+            expectAdjustedSeats(
+                '-XD-',
+                '-XD-',
+            );
 
-            // Normal gaps still trigger swaps even when disabled seats are present elsewhere
+            // Multiple selected seats adjacent to a disabled seat: left swap still fills the gap on the other side
+            expectAdjustedSeats(
+                '-XXD--',
+                'XXD---',
+            );
             expectAdjustedSeats(
                 '-XXDX--',
                 'XX-DX--',
             );
 
-            // Selected seats on both sides of a disabled seat should not be merged
+            // A 1-gap between selected seats and a disabled seat triggers a right swap
+            expectAdjustedSeats(
+                '------X-D',
+                '-------XD',
+            );
+            expectAdjustedSeats(
+                '------XX-D',
+                '-------XXD',
+            );
+
+            // Selected seats on both sides of a disabled seat are independent groups
             expectAdjustedSeats(
                 'X-DX-',
                 'X-DX-',
