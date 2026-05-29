@@ -4,7 +4,7 @@ import { unwrapFilterByPath } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import NumberUIFilterView from './NumberUIFilterView.vue';
-import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export enum UINumberFilterMode {
@@ -34,7 +34,7 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
             case UINumberFilterMode.NotEquals: return {
                 $not: {
                     [this.builder.key]: {
-                        $eq: this.value,
+                        $neq: this.value,
                     },
                 },
             };
@@ -135,7 +135,7 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
             return null;
         }
 
-        const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']);
+        const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']) ?? unwrapFilterByPath(unwrapped, [this.key]); ;
 
         if (typeof equals === 'number') {
             return new NumberUIFilter({
@@ -145,7 +145,7 @@ export class NumberFilterBuilder implements UIFilterBuilder<NumberUIFilter> {
             }, { isInverted });
         }
 
-        const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
+        const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']) ?? unwrapFilterByPath(unwrapped, [this.key, '$neq']);
 
         if (typeof notEquals === 'number') {
             return new NumberUIFilter({
