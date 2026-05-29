@@ -4,12 +4,12 @@ import path, { resolve } from 'path';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
 
 import postcssDiscardDulicates from 'postcss-discard-duplicates';
-import type {ViteUserConfig} from 'vitest/config';
+import type { ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
 // https://vitejs.dev/config/
-export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
+export async function buildConfig(options: { name: 'web-app' | 'dashboard' | 'registration' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
     if (process.env.NODE_ENV === 'production') {
         console.log('Building for production...');
     }
@@ -26,8 +26,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
             const builder = await import('@stamhoofd/test-utils');
             builder.TestUtils.loadEnvironment();
             loadedEnv = STAMHOOFD;
-        }
-        else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+        } else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
             console.log('Building env for development...', process.env.NODE_ENV);
             const builder = await import('@stamhoofd/build-development-env');
             const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
@@ -36,15 +35,13 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
             console.log('Built env for development.', process.env.NODE_ENV);
 
             loadedEnv = builtEnv;
-        }
-        else if (process.env.LOAD_ENV) {
+        } else if (process.env.LOAD_ENV) {
         // Load this in the environment
             const decode = JSON.parse(process.env.LOAD_ENV);
 
             // We restringify to make sure encoding is minified
             loadedEnv = decode;
-        }
-        else if (process.env.ENV_FILE) {
+        } else if (process.env.ENV_FILE) {
         // Reading environment from a JSON env file (JSON is needed)
             const file = path.resolve(process.env.ENV_FILE);
 
@@ -149,7 +146,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                             },
                             rollupOptions: {
                                 treeshake: 'smallest', // Increases performance
-                            }
+                            },
                         }
                     : {
                             sourcemap: true,

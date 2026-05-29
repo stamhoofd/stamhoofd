@@ -1,5 +1,5 @@
 export type Service = {
     backend: 'redirecter' | 'api' | 'renderer' | 'backup';
 } | {
-    frontend: 'dashboard' | 'registration' | 'webshop' | 'calculator';
+    frontend: 'web-app' | 'dashboard' | 'registration' | 'webshop' | 'calculator';
 };
