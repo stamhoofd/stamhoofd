@@ -3,7 +3,7 @@ import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { unwrapFilterByPath } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import DateUIFilterView from './DateUIFilterView.vue';
-import type { UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper} from './UIFilter';
+import type { StyledDescriptionChoice, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export enum UIDateFilterMode {
@@ -13,16 +13,22 @@ export enum UIDateFilterMode {
     NotEquals = 'NotEquals',
 }
 
-function getBeginningOfDay(date: Date): Date {
+function getBeginningOfDay(date: Date | null): Date | null {
+    if (date === null) {
+        return null;
+    }
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-function getEndOfDay(date: Date): Date {
+function getEndOfDay(date: Date | null): Date | null {
+    if (date === null) {
+        return null;
+    }
     return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
 }
 
 export class DateUIFilter extends UIFilter<DateFilterBuilder> {
-    value: Date = new Date();
+    value: Date | null = new Date();
     mode: UIDateFilterMode = UIDateFilterMode.Equals;
 
     // idea: add possibility to choose time also
@@ -83,16 +89,30 @@ export class DateUIFilter extends UIFilter<DateFilterBuilder> {
         });
     }
 
-    get combinationWord(): string {
-        switch (this.mode) {
-            case UIDateFilterMode.GreaterThan: return $t(`%bE`);
-            case UIDateFilterMode.LessThan: return $t(`%bF`);
-            case UIDateFilterMode.Equals: return $t(`%bG`);
-            case UIDateFilterMode.NotEquals: return $t(`%bH`);
+    getCombinationWord(mode: UIDateFilterMode): string {
+        switch (mode) {
+            case UIDateFilterMode.GreaterThan: return $t(`is na`);
+            case UIDateFilterMode.LessThan: return $t(`is voor`);
+            case UIDateFilterMode.Equals: return $t(`is`);
+            case UIDateFilterMode.NotEquals: return $t(`is niet`);
         }
     }
 
+    get combinationWord(): string {
+        return this.getCombinationWord(this.mode);
+    }
+
     get styledDescription() {
+        const choices: StyledDescriptionChoice[] = Object.values(UIDateFilterMode)
+            .map((mode) => {
+                return {
+                    id: mode,
+                    text: this.getCombinationWord(mode),
+                    action: () => this.mode = mode,
+                    isSelected: () => this.mode === mode,
+                };
+            });
+
         return [
             {
                 text: this.builder.name,
@@ -101,8 +121,9 @@ export class DateUIFilter extends UIFilter<DateFilterBuilder> {
             {
                 text: ' ' + this.combinationWord + ' ',
                 style: 'gray',
+                choices,
             }, {
-                text: Formatter.date(this.value, true),
+                text: this.value ? Formatter.date(this.value, true) : $t('leeg'),
                 style: '',
             },
         ];
@@ -112,12 +133,14 @@ export class DateUIFilter extends UIFilter<DateFilterBuilder> {
 export class DateFilterBuilder implements UIFilterBuilder<DateUIFilter> {
     key = '';
     name = '';
+    nullable = false;
     wrapFilter?: UIFilterWrapper | null;
     unwrapFilter?: UIFilterUnwrapper | null;
     wrapper?: WrapperFilter;
 
-    constructor(data: { key: string; name: string; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter }) {
+    constructor(data: { key: string; name: string; nullable?: boolean; wrapFilter?: UIFilterWrapper; unwrapFilter?: UIFilterUnwrapper; wrapper?: WrapperFilter }) {
         this.key = data.key;
+        this.nullable = data.nullable ?? false;
         this.wrapFilter = data.wrapFilter;
         this.unwrapFilter = data.unwrapFilter;
         this.name = data.name;
@@ -135,7 +158,7 @@ export class DateFilterBuilder implements UIFilterBuilder<DateUIFilter> {
 
         const equals = unwrapFilterByPath(unwrapped, [this.key, '$eq']);
 
-        if (equals instanceof Date) {
+        if (equals instanceof Date || (equals === null && this.nullable)) {
             return new DateUIFilter({
                 builder: this,
                 value: equals,
@@ -145,7 +168,7 @@ export class DateFilterBuilder implements UIFilterBuilder<DateUIFilter> {
 
         const notEquals = unwrapFilterByPath(unwrapped, ['$not', this.key, '$eq']);
 
-        if (notEquals instanceof Date) {
+        if (notEquals instanceof Date || (notEquals === null && this.nullable)) {
             return new DateUIFilter({
                 builder: this,
                 value: notEquals,
@@ -155,7 +178,7 @@ export class DateFilterBuilder implements UIFilterBuilder<DateUIFilter> {
 
         const lessThan = unwrapFilterByPath(unwrapped, [this.key, '$lt']);
 
-        if (lessThan instanceof Date) {
+        if (lessThan instanceof Date || (lessThan === null && this.nullable)) {
             return new DateUIFilter({
                 builder: this,
                 value: lessThan,
@@ -165,7 +188,7 @@ export class DateFilterBuilder implements UIFilterBuilder<DateUIFilter> {
 
         const greaterThan = unwrapFilterByPath(unwrapped, [this.key, '$gt']);
 
-        if (greaterThan instanceof Date) {
+        if (greaterThan instanceof Date || (greaterThan === null && this.nullable)) {
             return new DateUIFilter({
                 builder: this,
                 value: greaterThan,
