@@ -441,7 +441,7 @@ export class SeatingPlan extends AutoEncoder {
                         }
                         emptySeatStack = []
                         selectedSeatStack.push(rSeat)
-                    } else if (!seat.isValidSeat || (reservedSeats.find(s => s.equals(rSeat)) && !allowedSeats.find(s => s.equals(rSeat))) || (!asAdmin && this.isAdminSeat(rSeat))) {
+                    } else if (!seat.isValidSeat || seat.markings.includes(SeatMarkings.DisabledPerson) || (reservedSeats.find(s => s.equals(rSeat)) && !allowedSeats.find(s => s.equals(rSeat))) || (!asAdmin && this.isAdminSeat(rSeat))) {
                         if (allowRightSwap && emptySeatStack.length === 1 && selectedSeatStack.length) {
                             const from = selectedSeatStack[0]
                             const to = emptySeatStack[0]
