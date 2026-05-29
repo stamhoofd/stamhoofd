@@ -1,7 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import type { PaymentMethod} from '@stamhoofd/structures';
-import { PaymentStatus } from '@stamhoofd/structures';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentProvider, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Settlement, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -103,12 +101,12 @@ export class Payment extends QueryableModel {
      * Total price refunded or charged back
      */
     @column({ type: 'integer' })
-    refundedAmount = 0
+    refundedAmount = 0;
 
     /**
      * The difference between the sum of the balance item payments price and the price of the payment, caused by rounding to 1 cent.
      * This cannot be >= 100 (= 0,01 euro) or <= -100 (=-0,01 euro)
-     * 
+     *
      * For understanding the sign of the value, regard it as an extra balance item to the payment.
      *
      * Just like all prices, this price is stored per ten thousand (1 = 0,0001 ). Storing smaller units is not possible because even in balance items, the price to pay cannot be smaller than 0,0001 euro
@@ -223,6 +221,10 @@ export class Payment extends QueryableModel {
     @column({ type: 'string', nullable: true })
     ibanName: string | null = null;
 
+    get canChangeStatus() {
+        return this.price !== 0 && (this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown);
+    }
+
     generateDescription(organization: Organization, reference: string, replacements: { [key: string]: string } = {}) {
         const settings = this.transferSettings ?? organization.meta.transferSettings;
         this.transferDescription = settings.generateDescription(reference, organization.address.country, replacements);
@@ -233,8 +235,8 @@ export class Payment extends QueryableModel {
             .where('organizationId', this.organizationId)
             .where('reversingPaymentId', this.id)
             .where('status', PaymentStatus.Succeeded)
-            .sum(SQL.column('price'))
-        await this.save()
+            .sum(SQL.column('price'));
+        await this.save();
     }
 
     static roundPrice(price: number) {

@@ -95,7 +95,7 @@ export class Payment extends AutoEncoder {
     }
 
     get canChangeStatus() {
-        return this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown;
+        return this.price !== 0 && (this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown);
     }
 
     get title() {

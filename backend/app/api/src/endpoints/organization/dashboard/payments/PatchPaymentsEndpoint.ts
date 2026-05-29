@@ -254,8 +254,18 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     });
                 }
 
-                if (patch.method || patch.paidAt !== undefined || patch.status !== undefined) {
-                    if (payment.method && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(payment.method)) {
+                if (patch.method || patch.paidAt !== undefined) {
+                    if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(payment.method)) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid payment method',
+                            human: $t(`%Ex`),
+                        });
+                    }
+                }
+
+                if (patch.status !== undefined && patch.status !== payment.status) {
+                    if (!payment.canChangeStatus) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
@@ -332,7 +342,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 await payment.save();
 
-                if (patch.status) {
+                if (patch.status && patch.status !== payment.status) {
                     await PaymentService.handlePaymentStatusUpdate(payment, organization, patch.status);
                 }
 
