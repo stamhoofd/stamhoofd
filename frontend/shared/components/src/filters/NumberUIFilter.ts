@@ -34,7 +34,7 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> {
             case UINumberFilterMode.NotEquals: return {
                 $not: {
                     [this.builder.key]: {
-                        $neq: this.value,
+                        $eq: this.value,
                     },
                 },
             };
