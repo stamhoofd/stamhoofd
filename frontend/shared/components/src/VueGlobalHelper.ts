@@ -4,7 +4,7 @@ import { AppManager } from '@stamhoofd/networking/AppManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type {App, ComponentPublicInstance} from 'vue';
+import type { App, ComponentPublicInstance } from 'vue';
 
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
@@ -103,7 +103,7 @@ export class VueGlobalHelper {
         app.config.globalProperties.$isStamhoofd = STAMHOOFD.platformName.toLocaleLowerCase() === 'stamhoofd';
         app.config.globalProperties.STAMHOOFD = STAMHOOFD;
         app.config.globalProperties.$domains = LocalizedDomains;
-        app.config.globalProperties.$isPlatform =  STAMHOOFD.userMode === 'platform';
+        app.config.globalProperties.$isPlatform = STAMHOOFD.userMode === 'platform';
 
         app.config.globalProperties.pluralText = function (num: number, singular: string, plural: string) {
             return Formatter.pluralText(num, singular, plural);
@@ -111,9 +111,9 @@ export class VueGlobalHelper {
 
         // For some reason Vue does not log the error itself
         app.config.errorHandler = (err, instance, info) => {
-            console.error('Vue errorHandler caught:', err)   // the real Error object
-            console.error('Component info:', info)
-        }
+            console.error('Vue errorHandler caught:', err); // the real Error object
+            console.error('Component info:', info);
+        };
 
         app.config.warnHandler = function (msg, instance, trace) {
             // Shorter error message because the trace is complete garbage
