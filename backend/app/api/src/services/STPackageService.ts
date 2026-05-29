@@ -1,13 +1,9 @@
-import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { Company, PaymentCustomer } from '@stamhoofd/structures';
-import { getPricingTypeName, STPackageStatus, STPackageType } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
-import { Country } from '@stamhoofd/types/Country';
+import type { Company } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPricingTypeName, STPackageStatus, STPackageType, STPricingType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { GroupBuilder } from '../helpers/GroupBuilder.js';
-import { PaymentService } from './PaymentService.js';
 import { VATService } from './VATService.js';
 
 export class STPackageService {
@@ -252,6 +248,22 @@ export class STPackageService {
             pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date();
             pack.meta.paymentFailedCount++;
             await pack.save();
+        }
+        await this.updateOrganizationPackages(organizationId);
+    }
+
+    static async markBalanceRestored(organizationId: string) {
+        console.log('Marking packages as restored for ' + organizationId);
+
+        // Mark all active packages as failed
+        const activePackages = await this.getActivePackages(organizationId);
+        for (const pack of activePackages) {
+            if (pack.meta.firstFailedPayment || pack.meta.paymentFailedCount) {
+                console.log('Marking package restored ' + pack.id);
+                pack.meta.paymentFailedCount = 0;
+                pack.meta.firstFailedPayment = null;
+                await pack.save();
+            }
         }
         await this.updateOrganizationPackages(organizationId);
     }

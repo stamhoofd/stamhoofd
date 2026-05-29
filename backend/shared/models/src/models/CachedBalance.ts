@@ -1,11 +1,11 @@
 import { column } from '@simonbackx/simple-database';
-import type { SQLWhere} from '@stamhoofd/sql';
+import type { SQLWhere } from '@stamhoofd/sql';
 import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem.js';
 import { MemberUser } from './MemberUser.js';
-import { Formatter } from '@stamhoofd/utility';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -328,8 +328,7 @@ export class CachedBalance extends QueryableModel {
 
                 result[1].amountPending += amountPending;
                 result[1].amountPaid += amountPaid;
-            }
-            else {
+            } else {
                 results.push([objectId, { amountPaid, amountOpen: 0, amountPending, nextDueAt: amountOpen !== 0 ? dueAt : null }]);
             }
         }
@@ -407,10 +406,12 @@ export class CachedBalance extends QueryableModel {
 
     static async updateForOrganizations(organizationId: string, organizationIds: string[]) {
         if (organizationIds.length === 0) {
-            return;
+            return [];
         }
         const results = await this.fetchForObjects(organizationId, organizationIds, 'payingOrganizationId');
         await this.setForResults(organizationId, results, ReceivableBalanceType.organization);
+
+        return results;
     }
 
     static async updateForMembers(organizationId: string, memberIds: string[]) {
@@ -462,8 +463,7 @@ export class CachedBalance extends QueryableModel {
                     if (memberCachedBalance.nextDueAt && (!result[1].nextDueAt || memberCachedBalance.nextDueAt < result[1].nextDueAt)) {
                         result[1].nextDueAt = memberCachedBalance.nextDueAt;
                     }
-                }
-                else {
+                } else {
                     // Not possible
                     throw new Error('User not found in results');
                 }

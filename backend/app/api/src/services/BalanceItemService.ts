@@ -1,6 +1,6 @@
 import { Model } from '@simonbackx/simple-database';
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, Document, MemberUser, Order, Payment, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Document, MemberUser, Order, Payment, Platform, Webshop } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -34,10 +34,20 @@ const userUpdateQueue = new GroupedThrottledQueue(async (organizationId: string,
 }, { maxDelay: 10_000 });
 
 const organizationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, organizationIds: string[]) => {
-    await CachedBalance.updateForOrganizations(organizationId, organizationIds);
+    const results = await CachedBalance.updateForOrganizations(organizationId, organizationIds);
 
     for (const payingOrganizationId of organizationIds) {
         await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization);
+    }
+
+    const platform = await Platform.getShared();
+    if (organizationId === platform.membershipOrganizationId) {
+        // Clear failed payments
+        for (const [organizationId, result] of results) {
+            if (result.amountOpen === 0 && result.amountPending === 0) {
+                await STPackageService.markBalanceRestored(organizationId);
+            }
+        }
     }
 }, { maxDelay: 60_000 });
 
@@ -309,21 +319,7 @@ export class BalanceItemService {
             return;
         }
 
-        console.log('Handling chargeback for balanceItem', balanceItem);
-
-        if (balanceItem.type === BalanceItemType.STPackage || balanceItem.type === BalanceItemType.ServiceFee || balanceItem.type === BalanceItemType.TransferFee) {
-            // If this was charged by an admin via an existing mandate
-            // then we need to register a failed payment
-
-            if (payment && payment.adminUserId && payment.mandateId) {
-                // Mark failed payment to all organization packages
-                // Mark all active packages as failed
-                const payingOrganizationId = payment.payingOrganizationId ?? chargeback?.payingOrganizationId;
-                if (payingOrganizationId) {
-                    await STPackageService.markFailedPayment(payingOrganizationId);
-                }
-            }
-        }
+        // todo
 
         balanceItem.failedAt = new Date();
         await balanceItem.save();

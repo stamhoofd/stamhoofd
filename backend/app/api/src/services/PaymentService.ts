@@ -21,6 +21,7 @@ import { MollieService } from './MollieService.js';
 import { PaymentMandateService } from './PaymentMandateService.js';
 import { ReferralService } from './ReferralService.js';
 import { VATService } from './VATService.js';
+import { STPackageService } from './STPackageService.js';
 
 export class PaymentService {
     static async updateReversedPaymentsFor(payment: Payment) {
@@ -196,6 +197,8 @@ export class PaymentService {
             },
             type: 'transactional',
         });
+
+        await this.deactivatePackagesIfNeeded(payment, organization);
     }
 
     private static async handlePaymentFailed(payment: Payment, organization: Organization) {
@@ -204,7 +207,11 @@ export class PaymentService {
             return;
         }
 
-        if (!((payment.adminUserId && payment.mandateId) || (payment.method === PaymentMethod.DirectDebit && payment.mandateId))) {
+        if (!payment.mandateId) {
+            return;
+        }
+
+        if (!payment.adminUserId && payment.method !== PaymentMethod.DirectDebit) {
             return;
         }
 
@@ -227,6 +234,19 @@ export class PaymentService {
             },
             type: 'transactional',
         });
+
+        await this.deactivatePackagesIfNeeded(payment, organization);
+    }
+
+    private static async deactivatePackagesIfNeeded(payment: Payment, organization: Organization) {
+        // If admin initiated mandate, then mark packages as failed only
+        if ((payment.adminUserId || payment.type === PaymentType.Chargeback) && payment.mandateId && STAMHOOFD.userMode === 'organization') {
+            const platform = await Platform.getShared();
+            const payingOrganizationId = payment.payingOrganizationId;
+            if (payingOrganizationId && organization.id === platform.membershipOrganizationId) {
+                await STPackageService.markFailedPayment(payingOrganizationId);
+            }
+        }
     }
 
     static async saveMandateIfNeeded({ payment, sellingOrganizationId }: { payment: Payment; sellingOrganizationId: string }) {
@@ -737,6 +757,8 @@ export class PaymentService {
         chargeback.roundingAmount = -payment.roundingAmount;
         chargeback.method = payment.method;
         chargeback.type = PaymentType.Chargeback;
+        chargeback.mandateId = payment.mandateId; ;
+        chargeback.adminUserId = payment.adminUserId;
 
         chargeback.provider = payment.provider;
         chargeback.stripeAccountId = payment.stripeAccountId;

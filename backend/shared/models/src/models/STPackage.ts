@@ -73,9 +73,9 @@ export class STPackage extends QueryableModel {
             return this.validUntil;
         }
         if (!this.validUntil) {
-            return this.removeAt
+            return this.removeAt;
         }
-        return new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
+        return new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()));
     }
 
     async activate() {
@@ -163,8 +163,7 @@ export class STPackage extends QueryableModel {
             pack.meta.pricingType = STPricingType.Fixed;
             pack.validUntil = null;
             pack.removeAt = null;
-        }
-        else if (pack.meta.type === STPackageType.Members) {
+        } else if (pack.meta.type === STPackageType.Members) {
             pack.meta.serviceFeeFixed = 0;
             pack.meta.serviceFeePercentage = 0;
             pack.meta.serviceFeeMinimum = 0;
@@ -178,8 +177,6 @@ export class STPackage extends QueryableModel {
     }
 
     createStatus(): STPackageStatus {
-        // TODO: if payment failed: temporary set valid until to 2 weeks after last/first failed payment
-
         return STPackageStatus.create({
             startDate: this.meta.startDate,
             validUntil: this.validUntil,
@@ -218,20 +215,16 @@ export class STPackage extends QueryableModel {
         if (this.meta.type === STPackageType.Members) {
             type = EmailTemplateType.MembersExpirationReminder;
             allowDays = 32;
-        }
-        else if (this.meta.type === STPackageType.Webshops) {
+        } else if (this.meta.type === STPackageType.Webshops) {
             type = EmailTemplateType.WebshopsExpirationReminder;
             allowDays = 32;
-        }
-        else if (this.meta.type === STPackageType.SingleWebshop) {
+        } else if (this.meta.type === STPackageType.SingleWebshop) {
             type = EmailTemplateType.SingleWebshopExpirationReminder;
             allowDays = 7;
-        }
-        else if (this.meta.type === STPackageType.TrialMembers) {
+        } else if (this.meta.type === STPackageType.TrialMembers) {
             type = EmailTemplateType.TrialMembersExpirationReminder;
             allowDays = 3;
-        }
-        else if (this.meta.type === STPackageType.TrialWebshops) {
+        } else if (this.meta.type === STPackageType.TrialWebshops) {
             type = EmailTemplateType.TrialWebshopsExpirationReminder;
             allowDays = 3;
         }
@@ -250,8 +243,7 @@ export class STPackage extends QueryableModel {
                 });
             }
             this.lastEmailAt = new Date();
-        }
-        else {
+        } else {
             console.log('Skip sending expiration email for ' + this.id + ' (no type)');
         }
 
