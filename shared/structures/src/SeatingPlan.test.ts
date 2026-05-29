@@ -1,4 +1,4 @@
-import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType } from './SeatingPlan.js';
+import { ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatMarkings, SeatType } from './SeatingPlan.js';
 
 describe('SeatingPlan', () => {
     describe('adjustSeatsForBetterFit', () => {
@@ -43,7 +43,15 @@ describe('SeatingPlan', () => {
                         type: SeatType.Space,
                         label: '',
                     }));
-                } else {
+                }
+                else if (char == 'D') {
+                    // Disabled person seat
+                    seats.push(SeatingPlanSeat.create({
+                        label: (i + 1).toString(),
+                        markings: [SeatMarkings.DisabledPerson],
+                    }));
+                }
+                else {
                     throw new Error('Invalid character ' + char);
                 }
             }
@@ -207,6 +215,32 @@ describe('SeatingPlan', () => {
             expectAdjustedSeats(
                 '--  --XXX-RRR  --',
                 '--  ---XXXRRR  --',
+            );
+        });
+
+        test('Disabled seats are ignored for optimal seat selection', () => {
+            // A disabled seat next to a selected seat should not trigger a left swap
+            expectAdjustedSeats(
+                'RDX-',
+                'RDX-',
+            );
+
+            // A disabled seat as a 1-gap before selected seats should not trigger a left swap
+            expectAdjustedSeats(
+                '-DX-',
+                '-DX-',
+            );
+
+            // Normal gaps still trigger swaps even when disabled seats are present elsewhere
+            expectAdjustedSeats(
+                '-XXDX--',
+                'XX-DX--',
+            );
+
+            // Selected seats on both sides of a disabled seat should not be merged
+            expectAdjustedSeats(
+                'X-DX-',
+                'X-DX-',
             );
         });
 

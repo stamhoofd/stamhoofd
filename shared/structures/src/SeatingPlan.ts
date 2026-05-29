@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 import type { Product } from './webshops/Product.js';
 import type { Webshop, WebshopPreview } from './webshops/Webshop.js';
-import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class SeatingSizeConfiguration {
     seatWidth = 30;
@@ -458,7 +458,28 @@ export class SeatingPlan extends AutoEncoder {
                         selectedSeatStack = [];
                         leftSwapSeat = null; // When we reach a selected seat that is next to a reserved seat, we don't want to swap it any longer
                         allowRightSwap = false;
-                    } else {
+                    }
+                    else if (seat.markings.includes(SeatMarkings.DisabledPerson)) {
+                        // Disabled seats trigger any pending left swap but are never swap targets themselves
+                        if (leftSwapSeat && selectedSeatStack.length) {
+                            const from = selectedSeatStack[selectedSeatStack.length - 1];
+                            const to = leftSwapSeat;
+
+                            adjustedSeats = adjustedSeats.map((s) => {
+                                if (s.equals(from)) {
+                                    return to;
+                                }
+                                return s;
+                            });
+                            didChange = true;
+                        }
+
+                        emptySeatStack = [];
+                        selectedSeatStack = [];
+                        leftSwapSeat = null;
+                        allowRightSwap = false;
+                    }
+                    else {
                         if (leftSwapSeat && selectedSeatStack.length) {
                             const from = selectedSeatStack[selectedSeatStack.length - 1];
                             const to = leftSwapSeat;
