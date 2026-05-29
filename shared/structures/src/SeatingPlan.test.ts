@@ -43,15 +43,13 @@ describe('SeatingPlan', () => {
                         type: SeatType.Space,
                         label: '',
                     }));
-                }
-                else if (char == 'D') {
+                } else if (char == 'D') {
                     // Disabled person seat
                     seats.push(SeatingPlanSeat.create({
                         label: (i + 1).toString(),
                         markings: [SeatMarkings.DisabledPerson],
                     }));
-                }
-                else {
+                } else {
                     throw new Error('Invalid character ' + char);
                 }
             }
@@ -233,16 +231,6 @@ describe('SeatingPlan', () => {
                 '-XD-',
             );
 
-            // Multiple selected seats adjacent to a disabled seat: left swap still fills the gap on the other side
-            expectAdjustedSeats(
-                '-XXD--',
-                'XXD---',
-            );
-            expectAdjustedSeats(
-                '-XXDX--',
-                'XX-DX--',
-            );
-
             // A 1-gap between selected seats and a disabled seat triggers a right swap
             expectAdjustedSeats(
                 '------X-D',
@@ -257,6 +245,15 @@ describe('SeatingPlan', () => {
             expectAdjustedSeats(
                 'X-DX-',
                 'X-DX-',
+            );
+
+            expectAdjustedSeats(
+                '-XXD--',
+                '-XXD--',
+            );
+            expectAdjustedSeats(
+                '-XXDX--',
+                '-XXDX--',
             );
         });
 
