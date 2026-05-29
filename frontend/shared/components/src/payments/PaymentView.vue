@@ -312,7 +312,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="(payment.isPending && payment.type === PaymentType.Payment) || (payment.isFailed && payment.type !== PaymentType.Payment)" :selectable="true" @click="markPaid">
+                    <STListItem v-if="payment.canChangeStatus && (payment.isPending && payment.type === PaymentType.Payment) || (payment.isFailed && payment.type !== PaymentType.Payment)" :selectable="true" @click="markPaid">
                         <template #left>
                             <IconContainer icon="bank" class="success">
                                 <template #aside>
@@ -332,7 +332,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="payment.isSucceeded && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
+                    <STListItem v-if="payment.isSucceeded && payment.type === PaymentType.Payment && payment.canChangeStatus" :selectable="true" @click="markPending">
                         <template #left>
                             <IconContainer icon="bank" class="primary">
                                 <template #aside>
@@ -355,7 +355,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="!payment.invoiceId && (payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment && payment.type !== PaymentType.Reallocation))" :selectable="true" @click="markFailed">
+                    <STListItem v-if="!payment.invoiceId && payment.canChangeStatus && (payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment && payment.type !== PaymentType.Reallocation))" :selectable="true" @click="markFailed">
                         <template #left>
                             <IconContainer icon="bank" class="error">
                                 <template #aside>
@@ -486,8 +486,7 @@ async function reload() {
             shouldRetry: true,
         });
         props.payment.deepSet(response.data);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -514,8 +513,7 @@ async function editPayment() {
                     const updatedPayment = response.data.find(p => p.id === props.payment.id);
                     if (updatedPayment) {
                         props.payment.deepSet(updatedPayment);
-                    }
-                    else {
+                    } else {
                         await reload();
                     }
                 },
@@ -537,8 +535,7 @@ async function markPending() {
         if (!await CenteredMessage.confirm($t('%1K7'), $t('%1K8'), $t('%1K9'), undefined, false)) {
             return;
         }
-    }
-    else {
+    } else {
         if (!await CenteredMessage.confirm($t('%1KA'), $t('%1KB'), $t('%1KC'), undefined, false)) {
             return;
         }
@@ -578,8 +575,7 @@ async function mark(status: PaymentStatus) {
         props.payment.deepSet(response.data[0]);
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
         Toast.success($t(`%Mb`)).setHide(1000).show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     markingPaid.value = false;
@@ -623,12 +619,11 @@ async function createInvoice() {
             ],
             modalDisplayStyle: 'popup',
         });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
-const fetchInvoice = useInvoicesObjectFetcher()
+const fetchInvoice = useInvoicesObjectFetcher();
 async function openInvoice() {
     if (!props.payment.invoiceId) {
         return;
@@ -637,27 +632,27 @@ async function openInvoice() {
     try {
         const result = await fetchInvoice.fetch(new LimitedFilteredRequest({
             filter: {
-                id: props.payment.invoiceId
+                id: props.payment.invoiceId,
             },
-            limit: 1
-        }))
+            limit: 1,
+        }));
         if (result.results.length === 1) {
             const invoice = result.results[0];
             await show({
                 components: [
                     new ComponentWithProperties(InvoiceView, {
-                            invoice
-                     })
+                        invoice,
+                    }),
                 ],
-            })
+            });
         } else {
             throw new SimpleError({
                 code: 'not_found',
-                message: $t('Deze factuur kon niet worden gevonden')
-            })
+                message: $t('Deze factuur kon niet worden gevonden'),
+            });
         }
     } catch (e) {
-        Toast.fromError(e).show()
+        Toast.fromError(e).show();
     }
 }
 </script>
