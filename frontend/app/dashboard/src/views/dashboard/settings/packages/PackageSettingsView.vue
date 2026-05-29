@@ -100,7 +100,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import type { STPackage, STPackageType } from '@stamhoofd/structures';
-import { OrganizationCheckout, PackagePurchases, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
+import { OrganizationCheckout, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
 import { useActivatePackages } from './hooks/useActivatePackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
@@ -108,14 +108,15 @@ import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { PayBalanceMode } from './OrganizationCheckoutViewModel';
 import PackagesDetailsView from './PackagesDetailsView.vue';
 import { useStartOrganizationCheckout } from './useStartOrganizationCheckout';
+import { useUser } from '@stamhoofd/components/hooks/useUser';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
 const packages = ref([] as SelectablePackage[]);
 const loadingModule = ref(null as STPackageType | null);
 const deactivatePackage = useDeactivatePackage();
-const startOrganizationCheckout = useStartOrganizationCheckout()
-const show = useShow()
+const startOrganizationCheckout = useStartOrganizationCheckout();
+const show = useShow();
 const { packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
 
 class SelectablePackage {
@@ -125,7 +126,7 @@ class SelectablePackage {
     expiresSoon = false;
     inTrial = false;
     canStartTrial = true;
-    loading = false
+    loading = false;
 
     constructor(pack: STPackage, bundle: STPackageBundle) {
         this.package = pack;
@@ -208,8 +209,7 @@ function getUpdatedPackages() {
                 pp.canStartTrial = false;
             }
             packages.push(pp);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -232,6 +232,7 @@ async function stopTrial(pack: SelectablePackage) {
 }
 
 const activatePackages = useActivatePackages();
+const user = useUser();
 
 async function checkoutTrial(bundle: STPackageBundle, message: string) {
     if (loadingModule.value) {
@@ -247,12 +248,17 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
                     packageBundles: [bundle],
                 }),
                 paymentMethod: PaymentMethod.Unknown,
-            })
+                customer: PaymentCustomer.create({
+                    firstName: user.value?.firstName,
+                    lastName: user.value?.lastName,
+                    email: user.value?.email,
+                    company: organization.value.defaultCompanies[0],
+                }),
+            }),
         );
         await reload();
         new Toast(message, 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 
@@ -266,26 +272,26 @@ async function checkoutPackage(pack: SelectablePackage) {
     if (pack.alreadyBought && !pack.expiresSoon) {
         // not allowed: open package details instead. We support multiple because we could already have renewed.
         // this shows both conditions
-        const filteredPackages = status.value.packages.filter(p => p.isActive && (STPackageBundleHelper.isAlreadyBought(pack.bundle, p)))
+        const filteredPackages = status.value.packages.filter(p => p.isActive && (STPackageBundleHelper.isAlreadyBought(pack.bundle, p)));
 
         if (filteredPackages.length) {
             await show({
                 components: [
                     new ComponentWithProperties(PackagesDetailsView, {
-                        packages: filteredPackages
-                    })
-                ]
-            })
+                        packages: filteredPackages,
+                    }),
+                ],
+            });
         }
         return;
     }
-    
+
     const checkout = OrganizationCheckout.create({
         purchases: PackagePurchases.create({
             packageBundles: [],
         }),
         paymentMethod: PaymentMethod.Unknown,
-    })
+    });
 
     if (pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew) {
         checkout.purchases.renewPackageIds.push(pack.package.id);
@@ -293,7 +299,7 @@ async function checkoutPackage(pack: SelectablePackage) {
         // Activate instead
         checkout.purchases.packageBundles.push(pack.bundle);
     }
-    
+
     pack.loading = true;
     await startOrganizationCheckout({
         payBalanceMode: PayBalanceMode.Required,

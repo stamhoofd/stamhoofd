@@ -591,9 +591,7 @@ export class PaymentService {
         }
     }
 
-    static async validateCustomer({ price, hasNegative, user, checkout, payingOrganization }: {
-        price: number;
-        hasNegative: boolean;
+    static async validateCustomer({ user, checkout, payingOrganization }: {
         user: User | null;
         checkout: Pick<Checkoutable<never>, 'customer'>;
         payingOrganization?: Organization | null;
@@ -610,56 +608,47 @@ export class PaymentService {
         let prefix = '';
 
         if (payingOrganization) {
-            if (price !== 0 || hasNegative || checkout.customer) {
-                if (!checkout.customer) {
-                    throw new SimpleError({
-                        code: 'missing_fields',
-                        message: 'customer is required when paying as an organization',
-                        human: $t(`%vz`),
-                    });
-                }
+            if (!checkout.customer) {
+                throw new SimpleError({
+                    code: 'missing_fields',
+                    message: 'customer is required when paying as an organization',
+                    human: $t(`%vz`),
+                });
+            }
 
-                if (!checkout.customer.company) {
-                    throw new SimpleError({
-                        code: 'missing_fields',
-                        message: 'customer.company is required when paying as an organization',
-                        human: $t(`%w0`),
-                    });
-                }
+            if (!checkout.customer.company) {
+                throw new SimpleError({
+                    code: 'missing_fields',
+                    message: 'customer.company is required when paying as an organization',
+                    human: $t(`%w0`),
+                });
+            }
 
-                // Search company id
-                // this avoids needing to check the VAT number every time
-                const id = checkout.customer.company.id;
-                const foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
+            // Search company id
+            // this avoids needing to check the VAT number every time
+            const id = checkout.customer.company.id;
+            const foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
 
-                if (!foundCompany) {
-                    throw new SimpleError({
-                        code: 'invalid_data',
-                        message: $t(`%w1`),
-                    });
-                }
+            if (!foundCompany) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: $t(`%w1`),
+                });
+            }
 
-                if (!checkout.customer.company.equals(foundCompany)) {
-                    throw new SimpleError({
-                        code: 'invalid_data',
-                        message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.',
-                    });
-                }
+            if (!checkout.customer.company.equals(foundCompany)) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.',
+                });
+            }
 
-                customer.company = foundCompany;
+            customer.company = foundCompany;
 
-                const orgNumber = parseInt(payingOrganization.uri);
+            const orgNumber = parseInt(payingOrganization.uri);
 
-                if (orgNumber !== 0 && !isNaN(orgNumber)) {
-                    prefix = orgNumber + '';
-                }
-            } else {
-                // Zero amount payment (without refunds) without specifying a company will just use the default company to link to the payment
-                // It doesn't really matter since the price is zero and we won't invoice it.
-                const company = VATService.getDefaultCompanyForOrganization(payingOrganization);
-                if (company) {
-                    customer.company = company;
-                }
+            if (orgNumber !== 0 && !isNaN(orgNumber)) {
+                prefix = orgNumber + '';
             }
         } else {
             if (checkout.customer && checkout.customer.company) {
@@ -668,7 +657,7 @@ export class PaymentService {
             }
         }
 
-        if (price !== 0 && customer.company?.VATNumber !== checkout.customer?.company?.VATNumber) {
+        if (customer.company?.VATNumber !== checkout.customer?.company?.VATNumber) {
             // Security check: because previous validation and generation might have used the VATNumber from the checkout
             throw new SimpleError({
                 code: 'changed_VAT_number',
@@ -688,10 +677,10 @@ export class PaymentService {
         payingOrganization?: Organization | null;
     }) {
         // Calculate total price to pay
-        const { price, hasNegative, roundingAmount } = PaymentService.calculateTotalPrice({ balanceItems, organization, members });
+        const { price, roundingAmount } = PaymentService.calculateTotalPrice({ balanceItems, organization, members });
         PaymentService.validateTotalPrice({ price, roundingAmount, checkout });
 
-        const { customer } = await PaymentService.validateCustomer({ user, checkout, payingOrganization, price, hasNegative });
+        const { customer } = await PaymentService.validateCustomer({ user, checkout, payingOrganization });
         const { seller } = PaymentService.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
 
         // Create invoice instead from fictive PaymentGeneral
@@ -812,7 +801,7 @@ export class PaymentService {
         const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({ balanceItems, organization, members });
         PaymentService.validateTotalPrice({ price, roundingAmount, checkout });
 
-        const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization, price, hasNegative });
+        const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization });
         this.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
 
         const { method, type, mandate } = await this.validatePaymentMethod({
