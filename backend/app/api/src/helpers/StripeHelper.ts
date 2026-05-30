@@ -1,12 +1,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import type { I18n } from '@stamhoofd/backend-i18n';
-import type { BalanceItem, BalanceItemPayment, Organization, StripeAccount } from '@stamhoofd/models';
+import type { Organization, StripeAccount } from '@stamhoofd/models';
 import { Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
-import { calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 import { passthroughFetch } from './passthroughFetch.js';
-import { Country } from '@stamhoofd/types/Country';
 
 export class StripeHelper {
     static get notConfiguredError() {
@@ -241,28 +240,8 @@ export class StripeHelper {
             });
         }
 
-        let fee = 0;
-        let directCharge = false;
-        const vat = calculateVATPercentage(organization.address, organization.meta.VATNumber);
-        function calculateFee(fixed: number, percentageTimes100: number) {
-            return Math.round(Math.round(fixed + Math.max(1, totalPrice * percentageTimes100 / 100 / 100)) * (100 + vat) / 100); // € 0,21 + 0,2%
-        }
-
-        if (payment.method === PaymentMethod.iDEAL) {
-            fee = calculateFee(21, 20); // € 0,21 + 0,2%
-        } else if (payment.method === PaymentMethod.Bancontact) {
-            fee = calculateFee(24, 20); // € 0,24 + 0,2%
-        } else {
-            fee = calculateFee(25, 150); // € 0,25 + 1,5%
-        }
-
-        if (stripeAccount.meta.type === 'standard') {
-            // Submerchant is charged by Stripe for the fees directly
-            fee = 0;
-            directCharge = true;
-        }
-
-        payment.transferFee = fee * 100; // Convert back to 4 decimal places for storage
+        const directCharge = (stripeAccount.meta.type === 'standard');
+        const fee = directCharge ? 0 : Math.round(payment.transferFee / 100);
         const serviceFee = Math.round(payment.serviceFeePayout / 100);
 
         const fullMetadata = {

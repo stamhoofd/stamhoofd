@@ -43,6 +43,14 @@ export class STPackageBundleHelper {
         return false;
     }
 
+    static getTrial(bundle: STPackageBundle): STPackageBundle | null {
+        switch (bundle) {
+            case STPackageBundle.Members: return STPackageBundle.TrialMembers;
+            case STPackageBundle.Webshops:return STPackageBundle.TrialWebshops;
+        }
+        return null;
+    }
+
     static isAlreadyBought(bundle: STPackageBundle, pack: STPackage): boolean {
         switch (bundle) {
             case STPackageBundle.Members: {

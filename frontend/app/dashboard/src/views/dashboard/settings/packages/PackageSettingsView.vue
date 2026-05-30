@@ -95,6 +95,7 @@ import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import { useUser } from '@stamhoofd/components/hooks/useUser';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -108,7 +109,6 @@ import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { PayBalanceMode } from './OrganizationCheckoutViewModel';
 import PackagesDetailsView from './PackagesDetailsView.vue';
 import { useStartOrganizationCheckout } from './useStartOrganizationCheckout';
-import { useUser } from '@stamhoofd/components/hooks/useUser';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
@@ -190,7 +190,7 @@ function getUpdatedPackages() {
             continue;
         }
 
-        if (boughtPackage && boughtPackage.validUntil !== null && boughtPackage.validUntil < limit) {
+        if (boughtPackage && boughtPackage.endDate !== null && boughtPackage.endDate < limit) {
             // Allow to buy this package because it expires in less than 3 months, and it doesn't allow renewing
             expiresSoon = true;
         }
@@ -201,13 +201,23 @@ function getUpdatedPackages() {
             pp.alreadyBought = isBought;
             pp.inTrial = !isBought && isTrial;
             pp.expiresSoon = expiresSoon;
-            if (bundle === STPackageBundle.Members && !organization.value.meta.packages.canStartMembersTrial) {
+
+            const trialBundle = STPackageBundleHelper.getTrial(bundle);
+            if (trialBundle) {
+                const d = PackagePurchases.create({
+                    packageBundles: [trialBundle],
+                });
+                try {
+                    if (d.getPackages(status.value).length === 0) {
+                        pp.canStartTrial = false;
+                    }
+                } catch (e) {
+                    pp.canStartTrial = false;
+                }
+            } else {
                 pp.canStartTrial = false;
             }
 
-            if (bundle === STPackageBundle.Webshops && !organization.value.meta.packages.canStartWebshopsTrial) {
-                pp.canStartTrial = false;
-            }
             packages.push(pp);
         } catch (e) {
             console.error(e);
@@ -314,23 +324,10 @@ async function checkout(pack: SelectablePackage) {
         // Start trial
         switch (pack.bundle) {
             case STPackageBundle.Members: {
-                if (!organization.value.meta.packages.canStartMembersTrial) {
-                    new Toast($t('%1M4'), 'error').show();
-                    await checkoutPackage(pack);
-                    return;
-                }
-                // Activate trial if possible (otherwise go to confirm)
-                // this.setupMemberAdministration();
                 await checkoutTrial(STPackageBundle.TrialMembers, 'wip');
                 break;
             }
             case STPackageBundle.Webshops: {
-                if (!organization.value.meta.packages.canStartWebshopsTrial) {
-                    new Toast($t('%1M4'), 'error').show();
-                    await checkoutPackage(pack);
-                    return;
-                }
-                // Activate trial if possible (otherwise go to confirm)
                 await checkoutTrial(STPackageBundle.TrialWebshops, $t('%1M5'));
                 break;
             }

@@ -18,40 +18,30 @@
             <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0}" />
         </STInputBox>
 
-        <Checkbox v-model="enableValidUntil">
-            Einddatum toevoegen
-        </Checkbox>
+        <STList>
+            <CheckboxListItem v-model="enableValidUntil" :label="$t('Einddatum toevoegen')">
+                <div v-if="validUntil !== null" class="option">
+                    <STInputBox error-fields="settings.validUntil" :error-box="errors.errorBox">
+                        <DateSelection v-model="validUntil" :time="{hours: 23, minutes: 59}" />
+                    </STInputBox>
+                </div>
+            </CheckboxListItem>
 
-        <template v-if="validUntil !== null">
-            <STInputBox title="Einddatum" error-fields="settings.validUntil" :error-box="errors.errorBox">
-                <DateSelection v-model="validUntil" :time="{hours: 23, minutes: 59}" />
-            </STInputBox>
-        </template>
+            <CheckboxListItem v-model="enableRemoveAt" :label="$t('Vervaldatum toevoegen')">
+                <p class="style-description-small">
+                    Een vervaldatum voorkomt dat gebruikers na afloop van het pakket de proefperiode opnieuw kunnen activeren tot die datum. Indien toegestaan, kunnen ze hun oude pakket tot dan verlengen aan de oorspronkelijke prijzen. Zonder vervaldatum geldt deze onbeperkt: het pakket blijft verlengbaar en de proefperiode kan daarna nooit meer worden geactiveerd.
+                </p>
+                <div v-if="removeAt !== null" class="option">
+                    <STInputBox error-fields="settings.removeAt" :error-box="errors.errorBox">
+                        <DateSelection v-model="removeAt" :time="{hours: 23, minutes: 59}" />
+                    </STInputBox>
+                </div>
+            </CheckboxListItem>
 
-        <Checkbox v-model="enableRemoveAt">
-            Vervaldatum toevoegen
-        </Checkbox>
-
-        <template v-if="removeAt !== null">
-            <STInputBox title="Vervaldatum" error-fields="settings.removeAt" :error-box="errors.errorBox">
-                <DateSelection v-model="removeAt" :time="{hours: 23, minutes: 59}" />
-            </STInputBox>
-            <p v-if="removeAt !== null" class="style-description-small">
-                Verlengen is nog mogelijk tot aan de vervaldatum. Het pakket blijft ook zichtbaar tot aan de vervaldatum
-            </p>
-        </template>
-
-        <Checkbox v-model="allowRenew">
-            Verlengbaar
-        </Checkbox>
-
-        <Checkbox v-if="allowRenew" v-model="keepPricesOnRenewal">
-            Behoud prijzen bij verlengen (zoniet worden de standaard/laatste prijzen gebruikt voor verlengingen)
-        </Checkbox>
-
-        <Checkbox v-model="canDeactivate">
-            Opzegbaar
-        </Checkbox>
+            <CheckboxListItem v-model="allowRenew" :label="$t('Verlengbaar')" />
+            <CheckboxListItem v-if="allowRenew" v-model="keepPricesOnRenewal" :label="$t('Behoud prijzen bij verlengen')" :description="$t('Zoniet worden de standaard/laatste prijzen gebruikt voor verlengingen')" />
+            <CheckboxListItem v-model="canDeactivate" :label="$t('Opzegbaar')" />
+        </STList>
 
         <hr>
         <h2>Servicekosten</h2>
@@ -128,6 +118,7 @@ import TimeInput from '@stamhoofd/components/inputs/TimeInput.vue';
 import PermyriadInput from '@stamhoofd/components/inputs/PermyriadInput.vue';
 import PriceInput from '@stamhoofd/components/inputs/PriceInput.vue';
 import NumberInput from '@stamhoofd/components/inputs/NumberInput.vue';
+import CheckboxListItem from '@stamhoofd/components/inputs/CheckboxListItem.vue';
 
 const props = defineProps<{
     pack: STPackage;
@@ -149,10 +140,10 @@ const type = computed({
     set: (type) => {
         addPatch({
             meta: STPackageMeta.patch({
-                type
-            })
-        })
-    }
+                type,
+            }),
+        });
+    },
 });
 
 const keepPricesOnRenewal = computed({
@@ -160,10 +151,10 @@ const keepPricesOnRenewal = computed({
     set: (keepPricesOnRenewal) => {
         addPatch({
             meta: STPackageMeta.patch({
-                keepPricesOnRenewal
-            })
-        })
-    }
+                keepPricesOnRenewal,
+            }),
+        });
+    },
 });
 
 const startDate = computed({
@@ -171,19 +162,19 @@ const startDate = computed({
     set: (startDate) => {
         addPatch({
             meta: STPackageMeta.patch({
-                startDate
-            })
-        })
-    }
+                startDate,
+            }),
+        });
+    },
 });
 
 const validUntil = computed({
     get: () => patchedPackage.value.validUntil,
     set: (validUntil) => {
         addPatch({
-            validUntil
-        })
-    }
+            validUntil,
+        });
+    },
 });
 
 const enableValidUntil = computed({
@@ -193,17 +184,17 @@ const enableValidUntil = computed({
             validUntil.value = null;
             return;
         }
-        validUntil.value = props.pack.validUntil ?? new Date()
-    }
-})
+        validUntil.value = props.pack.validUntil ?? new Date();
+    },
+});
 
 const removeAt = computed({
     get: () => patchedPackage.value.removeAt,
     set: (removeAt) => {
         addPatch({
-            removeAt
-        })
-    }
+            removeAt,
+        });
+    },
 });
 
 const enableRemoveAt = computed({
@@ -213,19 +204,19 @@ const enableRemoveAt = computed({
             removeAt.value = null;
             return;
         }
-        removeAt.value = props.pack.removeAt ?? new Date()
-    }
-})
+        removeAt.value = props.pack.removeAt ?? new Date();
+    },
+});
 
 const allowRenew = computed({
     get: () => patchedPackage.value.meta.allowRenew,
     set: (allowRenew) => {
         addPatch({
             meta: STPackageMeta.patch({
-                allowRenew
-            })
-        })
-    }
+                allowRenew,
+            }),
+        });
+    },
 });
 
 const canDeactivate = computed({
@@ -233,10 +224,10 @@ const canDeactivate = computed({
     set: (canDeactivate) => {
         addPatch({
             meta: STPackageMeta.patch({
-                canDeactivate
-            })
-        })
-    }
+                canDeactivate,
+            }),
+        });
+    },
 });
 
 const serviceFeeFixed = computed({
@@ -244,10 +235,10 @@ const serviceFeeFixed = computed({
     set: (serviceFeeFixed) => {
         addPatch({
             meta: STPackageMeta.patch({
-                serviceFeeFixed
-            })
-        })
-    }
+                serviceFeeFixed,
+            }),
+        });
+    },
 });
 
 const serviceFeePercentage = computed({
@@ -255,10 +246,10 @@ const serviceFeePercentage = computed({
     set: (serviceFeePercentage) => {
         addPatch({
             meta: STPackageMeta.patch({
-                serviceFeePercentage
-            })
-        })
-    }
+                serviceFeePercentage,
+            }),
+        });
+    },
 });
 
 const serviceFeeMinimum = computed({
@@ -266,10 +257,10 @@ const serviceFeeMinimum = computed({
     set: (serviceFeeMinimum) => {
         addPatch({
             meta: STPackageMeta.patch({
-                serviceFeeMinimum
-            })
-        })
-    }
+                serviceFeeMinimum,
+            }),
+        });
+    },
 });
 
 const serviceFeeMaximum = computed({
@@ -277,10 +268,10 @@ const serviceFeeMaximum = computed({
     set: (serviceFeeMaximum) => {
         addPatch({
             meta: STPackageMeta.patch({
-                serviceFeeMaximum
-            })
-        })
-    }
+                serviceFeeMaximum,
+            }),
+        });
+    },
 });
 
 const unitPrice = computed({
@@ -288,10 +279,10 @@ const unitPrice = computed({
     set: (unitPrice) => {
         addPatch({
             meta: STPackageMeta.patch({
-                unitPrice
-            })
-        })
-    }
+                unitPrice,
+            }),
+        });
+    },
 });
 
 const pricingType = computed({
@@ -299,65 +290,62 @@ const pricingType = computed({
     set: (pricingType) => {
         addPatch({
             meta: STPackageMeta.patch({
-                pricingType
-            })
-        })
-    }
+                pricingType,
+            }),
+        });
+    },
 });
 const minimumAmount = computed({
     get: () => patchedPackage.value.meta.minimumAmount,
     set: (minimumAmount) => {
         addPatch({
             meta: STPackageMeta.patch({
-                minimumAmount
-            })
-        })
-    }
+                minimumAmount,
+            }),
+        });
+    },
 });
-
-
 
 const firstFailedPayment = computed({
     get: () => patchedPackage.value.meta.firstFailedPayment,
     set: (firstFailedPayment) => {
         addPatch({
             meta: STPackageMeta.patch({
-                firstFailedPayment
-            })
-        })
-    }
+                firstFailedPayment,
+            }),
+        });
+    },
 });
 
 const enableFailedPayment = computed({
     get: () => firstFailedPayment.value !== null,
     set: (enable) => {
         if (enable === enableFailedPayment.value) {
-            return
+            return;
         }
         if (enable) {
-            firstFailedPayment.value = new Date()
+            firstFailedPayment.value = new Date();
             addPatch(STPackage.patch({
                 meta: STPackageMeta.patch({
-                    paymentFailedCount: Math.max(patchedPackage.value.meta.paymentFailedCount, 1)
-                })
-            }))
-
+                    paymentFailedCount: Math.max(patchedPackage.value.meta.paymentFailedCount, 1),
+                }),
+            }));
         } else {
-            firstFailedPayment.value = null
+            firstFailedPayment.value = null;
             addPatch(STPackage.patch({
                 meta: STPackageMeta.patch({
-                    paymentFailedCount: 0
-                })
-            }))
+                    paymentFailedCount: 0,
+                }),
+            }));
         }
-    }
+    },
 });
 
 function getPricingTypeName(type: STPricingType) {
     switch (type) {
-        case STPricingType.Fixed: return "Eénmalig"
-        case STPricingType.PerYear: return "Per jaar"
-        case STPricingType.PerMember: return "Per lid, per jaar"
+        case STPricingType.Fixed: return 'Eénmalig';
+        case STPricingType.PerYear: return 'Per jaar';
+        case STPricingType.PerMember: return 'Per lid, per jaar';
     }
 }
 
@@ -374,11 +362,10 @@ async function save() {
             loading.value = false;
             return;
         }
-        
+
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -400,12 +387,11 @@ async function doDelete() {
     try {
         loading.value = true;
         await props.saveHandler(STPackage.patch({
-            removeAt: new Date()
+            removeAt: new Date(),
         }));
         Toast.success($t('%1Pw')).show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;

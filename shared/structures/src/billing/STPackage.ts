@@ -2,11 +2,9 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Country } from '@stamhoofd/types/Country';
-import type { Address } from '../addresses/Address.js';
+import { Formatter } from '@stamhoofd/utility';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { STPackageBundle, STPackageBundleHelper } from './STPackageBundle.js';
-import { Formatter } from '@stamhoofd/utility';
 
 export enum STPackageType {
     // Members without activities (not available in frontend anymore)
@@ -465,6 +463,15 @@ export class STPackageStatus extends AutoEncoder {
         });
     }
 
+    get isPaymentExpired() {
+        const expire = new Date();
+        expire.setDate(expire.getDate() - 28);
+        if (this.firstFailedPayment && this.firstFailedPayment < expire) {
+            return true;
+        }
+        return false;
+    }
+
     get isActive() {
         const d = new Date();
 
@@ -481,10 +488,7 @@ export class STPackageStatus extends AutoEncoder {
             return false;
         }
 
-        // Deactivate module if payment failed, and not reactivated after 4 weeks
-        const expire = new Date();
-        expire.setDate(expire.getDate() - 28);
-        if (this.firstFailedPayment && this.firstFailedPayment < expire) {
+        if (this.isPaymentExpired) {
             return false;
         }
 
@@ -501,13 +505,16 @@ export class STPackageStatus extends AutoEncoder {
 
         const d = new Date();
 
-        /// Active if it starts within 10 seconds (fixes time differences between server and clients)
-        if (this.startDate && this.startDate > new Date(d.getTime() + 10 * 1000)) {
+        // If only valid for less than 30 days, still allow to use the trial package - don't count the package as been active
+        if (this.validUntil && this.validUntil.getTime() - this.startDate.getTime() < 60 * 1000 * 60 * 24 * 31) {
             return false;
         }
 
-        // If only valid for less than 30 days, still allow to use the package
-        if (this.validUntil && this.validUntil.getTime() - this.startDate.getTime() < 60 * 1000 * 60 * 24 * 31) {
+        /**
+         * If the removeAt date is past, also disable wasActive again
+         */
+        if (this.removeAt && this.removeAt < d) {
+            // Passed!
             return false;
         }
 
@@ -517,9 +524,7 @@ export class STPackageStatus extends AutoEncoder {
         }
 
         // Deactivate module if payment failed, and not reactivated after 4 weeks
-        const expire = new Date();
-        expire.setDate(expire.getDate() - 28);
-        if (this.firstFailedPayment && this.firstFailedPayment < expire) {
+        if (this.isPaymentExpired) {
             // did not pay!
             return true;
         }
@@ -553,7 +558,7 @@ export class STPackageStatus extends AutoEncoder {
     merge(status: STPackageStatus) {
         if (status.startDate < this.startDate) {
             this.startDate = status.startDate;
-            // TODO: fix behaviour with gaps if we allow that in the future
+            // We don't support gaps in packages yet. So this is ignored here
         }
 
         if (status.validUntil === null) {
@@ -582,44 +587,4 @@ export class STPackageStatus extends AutoEncoder {
 
         this.serviceFees.push(...status.serviceFees);
     }
-}
-
-/**
- * @deprecated
- * This is not correct
- */
-export function calculateVATPercentage(address: Address, VATNumber: string | null) {
-    // Determine VAT rate
-    let VATRate = 0;
-    if (address.country === Country.Belgium) {
-        VATRate = 21;
-    } else {
-        if (VATNumber && VATNumber.substr(0, 2).toUpperCase() !== 'BE') {
-            VATRate = 0;
-        } else {
-            // Apply VAT rate of the home country for consumers in the EU
-
-            switch (address.country) {
-                case Country.Netherlands:
-                    VATRate = 21;
-                    break;
-                case Country.Luxembourg:
-                    VATRate = 17;
-                    break;
-                case Country.France:
-                    VATRate = 20;
-                    break;
-                case Country.Germany:
-                    VATRate = 19;
-                    break;
-                default: {
-                    throw new SimpleError({
-                        code: 'country_not_supported',
-                        message: 'Non-business sales to your country are not yet supported. Please enter a valid VAT number.',
-                    });
-                }
-            }
-        }
-    }
-    return VATRate;
 }
