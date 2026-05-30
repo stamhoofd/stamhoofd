@@ -86,9 +86,9 @@
                     <div v-if="!mandateId" class="container">
                         <hr v-if="mandateId === null && model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates">
                         <STInputBox v-if="model.sellingOrganization.meta.registrationPaymentConfiguration.enableMandates && (model.requiresMandate || mandates?.length) " error-fields="method" :error-box="errors.errorBox" class="max" :title="$t('%M7')">
-                            <PaymentSelectionList v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
+                            <PaymentSelectionList v-model="selectedPaymentMethod" :for-mandate="createMandate || model.requiresMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                         </STInputBox>
-                        <PaymentSelectionList v-else v-model="selectedPaymentMethod" :for-mandate="createMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
+                        <PaymentSelectionList v-else v-model="selectedPaymentMethod" :for-mandate="createMandate || model.requiresMandate" :payment-configuration="paymentConfiguration" :amount="proFormaData?.payment?.price ?? 2_00" :customer="model.checkout.customer" :country="payingOrganization.address.country" />
                     </div>
                 </div>
 

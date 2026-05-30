@@ -96,6 +96,21 @@ export class DatabaseHelper {
         await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
     }
 
+    /**
+     * Clear all billing-related tables (packages, payments, balances, mollie state) while keeping
+     * organizations and users intact. Used to reset the SAAS billing flow between tests without
+     * destroying the worker organization (whose auth token is reused across tests).
+     */
+    async clearBilling() {
+        const Database = await this.getDatabase();
+        await Database.delete('DELETE FROM `stamhoofd_packages`');
+        await Database.delete('DELETE FROM `balance_item_payments`');
+        await Database.delete('DELETE FROM `balance_items`');
+        await Database.delete('DELETE FROM `mollie_payments`');
+        await Database.delete('DELETE FROM `payments`');
+        await Database.delete('DELETE FROM `mollie_tokens`');
+    }
+
     async clearRegistrations() {
         const Database = await this.getDatabase();
         await Database.delete('DELETE FROM `registrations`');

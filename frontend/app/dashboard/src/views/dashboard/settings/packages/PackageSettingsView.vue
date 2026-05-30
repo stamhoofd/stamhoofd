@@ -21,38 +21,39 @@
                 <STErrorsDefault :error-box="errors.errorBox" />
 
                 <STList>
-                    <STListItem v-for="pack of packages" :key="pack.bundle" element-name="button" :selectable="true" class="right-stack" @click="checkout(pack)">
+                    <STListItem v-for="pack of packages" :key="pack.bundle" :data-testid="'package-' + pack.bundle" element-name="button" :selectable="true" class="right-stack" @click="checkout(pack)">
                         <template #left>
-                            <IconContainer :icon="pack.bundle === STPackageBundle.Webshops ? 'basket' : 'group'" :class="{gray: !pack.alreadyBought && !pack.inTrial, 'secundary': !pack.alreadyBought && pack.inTrial}">
+                            <IconContainer :icon="pack.bundle === STPackageBundle.Webshops ? 'basket' : 'group'" :class="{gray: pack.status === PackageStatus.Inactive, 'secundary': pack.status === PackageStatus.Trial, 'error': pack.status === PackageStatus.Expired}">
                                 <template #aside>
-                                    <span v-if="pack.alreadyBought" v-tooltip="$t('%1TO')" class="icon success small primary" />
-                                    <span v-else-if="pack.inTrial" v-tooltip="$t('%1TJ')" class="icon trial small stroke secundary" />
+                                    <span v-if="pack.status === PackageStatus.Active" v-tooltip="$t('%1TO')" class="icon success small primary" />
+                                    <span v-if="pack.status === PackageStatus.ExpiresSoon" v-tooltip="$t('Actief maar vervalt binnenkort')" class="icon warning small stroke yellow" />
+                                    <span v-else-if="pack.status === PackageStatus.Trial" v-tooltip="$t('%1TJ')" class="icon trial small stroke secundary" />
                                 </template>
                             </IconContainer>
                         </template>
 
-                        <p v-if="pack.inTrial && !pack.alreadyBought" class="style-title-prefix-list theme-secundary">
-                            <span>{{ $t('%1HY') }}</span>
-                        </p>
-
-                        <p v-if="pack.alreadyBought && pack.expiresSoon" class="style-title-prefix-list">
-                            {{ $t('%1HZ') }}
-                        </p>
-
-                        <p v-else-if="pack.alreadyBought" class="style-title-prefix-list">
-                            {{ $t('%1H0') }}
+                        <p v-if="pack.prefix" :class="'style-title-prefix-list ' + pack.prefixStyle">
+                            <span>{{ pack.prefix }}</span>
                         </p>
 
                         <h3 class="style-title-list">
-                            {{ pack.title }}
+                            <span>{{ pack.title }}</span>
+
+                            <span v-if="pack.suffix" :class="'style-tag ' + pack.suffixStyle">
+                                {{ pack.suffix }}
+                            </span>
                         </h3>
 
-                        <p v-if="pack.alreadyBought && pack.package.validUntil" class="style-description-small">
-                            {{ $t('%1Ha', {dateTime: formatEndDate(pack.package.validUntil)}) }}
+                        <p v-if="(pack.status === PackageStatus.Active || pack.status === PackageStatus.ExpiresSoon) && pack.package.endDate" class="style-description-small">
+                            {{ $t('%1Ha', {dateTime: formatEndDate(pack.package.endDate)}) }}
                         </p>
 
-                        <p v-else-if="pack.inTrial && pack.package.validUntil" class="style-description-small">
-                            {{ $t('%1Lv', {dateTime: formatEndDate(pack.package.validUntil)}) }}
+                        <p v-if="pack.status === PackageStatus.Expired && pack.package.endDate" class="style-description-small">
+                            {{ $t('Vervallen op {dateTime}', {dateTime: formatEndDate(pack.package.endDate)}) }}
+                        </p>
+
+                        <p v-else-if="pack.status === PackageStatus.Trial && pack.package.endDate" class="style-description-small">
+                            {{ $t('%1Lv', {dateTime: formatEndDate(pack.package.endDate)}) }}
 
                             <button type="button" class="inline-link error" @click.stop="stopTrial(pack)">
                                 <span>{{ $t('%1Lw') }}</span>
@@ -65,22 +66,10 @@
 
                         <template #right>
                             <LoadingButton :loading="pack.loading">
-                                <span v-if="!pack.alreadyBought && (pack.inTrial || !pack.canStartTrial)" class="button text selected">
-                                    <span>{{ $t('%1Lx') }}</span>
+                                <span class="button text selected">
+                                    <span>{{ pack.statusAction }}</span>
                                     <span class="icon arrow-right-small" />
                                 </span>
-
-                                <span v-if="!pack.alreadyBought && !pack.inTrial && pack.canStartTrial" class="button text selected">
-                                    <span>{{ $t('%1Ly') }}</span>
-                                    <span class="icon arrow-right-small" />
-                                </span>
-
-                                <span v-if="pack.alreadyBought && pack.expiresSoon" class="button text selected">
-                                    <span>{{ $t('%1Lz') }}</span>
-                                    <span class="icon arrow-right-small" />
-                                </span>
-
-                                <span v-else-if="pack.alreadyBought" class="button icon arrow-right-small" />
                             </LoadingButton>
                         </template>
                     </STListItem>
@@ -119,14 +108,127 @@ const startOrganizationCheckout = useStartOrganizationCheckout();
 const show = useShow();
 const { packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
 
+enum PackageStatus {
+    /**
+     * Inactive. Action => start trial if allowed otherwise buy package again
+     */
+    Inactive = 'Inactive',
+
+    /**
+     * Trial. Action => buy package
+     */
+    Trial = 'Trial',
+
+    /**
+     * Active action => view packages
+     */
+    Active = 'Active',
+
+    /**
+     * ExpiresSoon action => renew package if allowed otherwise buy package again
+     */
+    ExpiresSoon = 'ExpiresSoon',
+
+    /**
+     * ExpiresSoon action => renew package if allowed otherwise buy package again
+     */
+    Expired = 'Expired',
+}
+
 class SelectablePackage {
     package: STPackage;
     bundle: STPackageBundle;
-    alreadyBought = false;
+    isActive = false;
     expiresSoon = false;
+    allowRenew = false;
+    expired = false;
     inTrial = false;
     canStartTrial = true;
     loading = false;
+
+    status = PackageStatus.Inactive;
+
+    get statusAction() {
+        switch (this.status) {
+            case PackageStatus.Inactive: {
+                return $t('Uitproberen');
+            }
+
+            case PackageStatus.Trial: {
+                return $t('Activeren');
+            }
+
+            case PackageStatus.Active: {
+                return $t('Bekijk');
+            }
+
+            case PackageStatus.ExpiresSoon: {
+                if (this.allowRenew) {
+                    return $t('Verlengen');
+                }
+                return $t('Verlengen');
+            }
+
+            case PackageStatus.Expired: {
+                if (this.allowRenew) {
+                    return $t('Heractiveren');
+                }
+                return $t('Heractiveren');
+            }
+        }
+    }
+
+    get prefix() {
+        switch (this.status) {
+            case PackageStatus.Inactive: {
+                return null;
+            }
+
+            case PackageStatus.Trial: {
+                return $t('In proefperiode');
+            }
+
+            case PackageStatus.Expired: {
+                return $t('Vervallen');
+            }
+        }
+    }
+
+    get prefixStyle() {
+        switch (this.status) {
+            case PackageStatus.Inactive: {
+                return null;
+            }
+
+            case PackageStatus.Trial: {
+                return 'theme-secundary';
+            }
+
+            case PackageStatus.ExpiresSoon: {
+                return 'theme-warning';
+            }
+
+            case PackageStatus.Expired: {
+                return 'theme-error';
+            }
+        }
+    }
+
+    get suffix() {
+        switch (this.status) {
+            case PackageStatus.ExpiresSoon: {
+                return $t('Vervalt binnenkort');
+            }
+        }
+    }
+
+    get suffixStyle() {
+        switch (this.status) {
+            case PackageStatus.ExpiresSoon: {
+                return 'warn';
+            }
+        }
+    }
 
     constructor(pack: STPackage, bundle: STPackageBundle) {
         this.package = pack;
@@ -160,19 +262,19 @@ function getUpdatedPackages() {
         }
 
         const isCombineable = true;
-        let isBought = false;
+        let isActive = false;
         let isTrial = false;
-        let expiresSoon = false;
+        const expiresSoon = false;
         let boughtPackage: null | STPackage = null;
         let trialPackage: null | STPackage = null;
 
         for (const p of status.value.packages) {
-            if (!p.isActive) {
+            if (p.removeAt && p.removeAt < new Date()) {
                 continue;
             }
 
             if (STPackageBundleHelper.isAlreadyBought(bundle, p)) {
-                isBought = true;
+                isActive = isActive || p.isActive;
 
                 if (!boughtPackage || p.endDate === null || (p.endDate !== null && boughtPackage.endDate !== null && p.endDate > boughtPackage.endDate)) {
                     // Take the package that is valid for the longest possible period
@@ -180,7 +282,7 @@ function getUpdatedPackages() {
                 }
             }
 
-            if (STPackageBundleHelper.isInTrial(bundle, p)) {
+            if (STPackageBundleHelper.isInTrial(bundle, p) && p.isActive) {
                 trialPackage = p;
                 isTrial = true;
             }
@@ -190,19 +292,29 @@ function getUpdatedPackages() {
             continue;
         }
 
-        if (boughtPackage && boughtPackage.endDate !== null && boughtPackage.endDate < limit) {
-            // Allow to buy this package because it expires in less than 3 months, and it doesn't allow renewing
-            expiresSoon = true;
-        }
-
         try {
             const pack = boughtPackage ?? trialPackage ?? STPackageBundleHelper.getCurrentPackage(bundle, new Date());
             const pp = new SelectablePackage(pack, bundle);
-            pp.alreadyBought = isBought;
-            pp.inTrial = !isBought && isTrial;
-            pp.expiresSoon = expiresSoon;
+            if (isActive) {
+                if (boughtPackage && boughtPackage.endDate !== null && boughtPackage.endDate < limit) {
+                    // Allow to buy this package because it expires in less than 3 months, and it doesn't allow renewing
+                    pp.status = PackageStatus.ExpiresSoon;
+                    pp.allowRenew = boughtPackage.meta.allowRenew;
+                } else {
+                    pp.status = PackageStatus.Active;
+                }
+            } else {
+                if (isTrial) {
+                    pp.status = PackageStatus.Trial;
+                } else if (boughtPackage && boughtPackage.endDate !== null && boughtPackage.endDate < new Date()) {
+                    pp.status = PackageStatus.Expired;
+                    pp.allowRenew = boughtPackage.meta.allowRenew;
+                } else {
+                    pp.status = PackageStatus.Inactive;
+                }
+            }
 
-            const trialBundle = STPackageBundleHelper.getTrial(bundle);
+            /* const trialBundle = STPackageBundleHelper.getTrial(bundle);
             if (trialBundle) {
                 const d = PackagePurchases.create({
                     packageBundles: [trialBundle],
@@ -216,7 +328,7 @@ function getUpdatedPackages() {
                 }
             } else {
                 pp.canStartTrial = false;
-            }
+            } */
 
             packages.push(pp);
         } catch (e) {
@@ -227,13 +339,6 @@ function getUpdatedPackages() {
 }
 
 async function stopTrial(pack: SelectablePackage) {
-    if (pack.alreadyBought) {
-        return;
-    }
-
-    if (!pack.inTrial) {
-        return;
-    }
     if (!await CenteredMessage.confirm($t('%1M0'), $t('%1M1'))) {
         return;
     }
@@ -274,28 +379,8 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
 
     loadingModule.value = null;
 }
+
 async function checkoutPackage(pack: SelectablePackage) {
-    if (!status.value) {
-        return;
-    }
-
-    if (pack.alreadyBought && !pack.expiresSoon) {
-        // not allowed: open package details instead. We support multiple because we could already have renewed.
-        // this shows both conditions
-        const filteredPackages = status.value.packages.filter(p => p.isActive && (STPackageBundleHelper.isAlreadyBought(pack.bundle, p)));
-
-        if (filteredPackages.length) {
-            await show({
-                components: [
-                    new ComponentWithProperties(PackagesDetailsView, {
-                        packages: filteredPackages,
-                    }),
-                ],
-            });
-        }
-        return;
-    }
-
     const checkout = OrganizationCheckout.create({
         purchases: PackagePurchases.create({
             packageBundles: [],
@@ -303,7 +388,7 @@ async function checkoutPackage(pack: SelectablePackage) {
         paymentMethod: PaymentMethod.Unknown,
     });
 
-    if (pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew) {
+    if (pack.allowRenew) {
         checkout.purchases.renewPackageIds.push(pack.package.id);
     } else {
         // Activate instead
@@ -319,22 +404,55 @@ async function checkoutPackage(pack: SelectablePackage) {
     pack.loading = false;
 }
 
-async function checkout(pack: SelectablePackage) {
-    if (!pack.alreadyBought && !pack.inTrial && pack.canStartTrial) {
-        // Start trial
-        switch (pack.bundle) {
-            case STPackageBundle.Members: {
-                await checkoutTrial(STPackageBundle.TrialMembers, 'wip');
-                break;
-            }
-            case STPackageBundle.Webshops: {
-                await checkoutTrial(STPackageBundle.TrialWebshops, $t('%1M5'));
-                break;
-            }
-        }
+async function viewPackages(pack: SelectablePackage) {
+    if (!status.value) {
+        new Toast($t('%1M3'), 'info').show();
         return;
     }
-    await checkoutPackage(pack);
+
+    const filteredPackages = status.value.packages.filter(p => p.isActive && (STPackageBundleHelper.isAlreadyBought(pack.bundle, p)));
+
+    if (filteredPackages.length) {
+        await show({
+            components: [
+                new ComponentWithProperties(PackagesDetailsView, {
+                    packages: filteredPackages,
+                }),
+            ],
+        });
+    }
+    return;
+}
+
+async function checkout(pack: SelectablePackage) {
+    switch (pack.status) {
+        case PackageStatus.Inactive: {
+            // Start trial
+            switch (pack.bundle) {
+                case STPackageBundle.Members: {
+                    await checkoutTrial(STPackageBundle.TrialMembers, 'wip');
+                    break;
+                }
+                case STPackageBundle.Webshops: {
+                    await checkoutTrial(STPackageBundle.TrialWebshops, $t('%1M5'));
+                    break;
+                }
+            }
+            return;
+        }
+
+        case PackageStatus.Active: {
+            await viewPackages(pack);
+            return;
+        }
+
+        case PackageStatus.Trial:
+        case PackageStatus.ExpiresSoon:
+        case PackageStatus.Expired: {
+            await checkoutPackage(pack);
+            return;
+        }
+    }
 }
 
 </script>

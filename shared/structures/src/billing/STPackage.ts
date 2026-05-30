@@ -61,6 +61,19 @@ export class STPackageTypeHelper {
                 return STPackageBundle.TrialWebshops;
         }
     }
+
+    static getTrial(type: STPackageType): STPackageType | null {
+        switch (type) {
+            case STPackageType.LegacyMembers:
+            case STPackageType.Members:
+                return STPackageType.TrialMembers;
+
+            case STPackageType.Webshops:
+            case STPackageType.SingleWebshop:
+                return STPackageType.TrialWebshops;
+        }
+        return null;
+    }
 }
 
 export enum STPricingType {

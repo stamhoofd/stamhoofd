@@ -1,7 +1,7 @@
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { Company } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPricingTypeName, STPackageStatus, STPackageType, STPricingType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPricingTypeName, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { GroupBuilder } from '../helpers/GroupBuilder.js';
 import { VATService } from './VATService.js';
@@ -68,6 +68,17 @@ export class STPackageService {
             }
         }
 
+        // Stop trials
+        const trialType = STPackageTypeHelper.getTrial(pack.meta.type);
+        if (trialType) {
+            const activePackages = await this.getActivePackages(pack.organizationId);
+            for (const p of activePackages) {
+                if (p.meta.type === trialType) {
+                    await this.deactivatePackage(p);
+                }
+            }
+        }
+
         await this.updateOrganizationPackages(pack.organizationId);
     }
 
@@ -75,6 +86,14 @@ export class STPackageService {
         old.removeAt = renewedBy.meta.startDate ?? renewedBy.validAt ?? new Date();
         old.meta.allowRenew = false;
         await old.save();
+    }
+
+    static async deactivatePackage(pack: STPackage) {
+        console.log('Deactivating package', pack.meta.type, 'with id', pack.id);
+        // Deactivate
+        pack.removeAt = new Date();
+        pack.removeAt.setTime(pack.removeAt.getTime() - 5_000);
+        await pack.save();
     }
 
     static async getPaidOrPendingQuantity(pack: STPackage) {

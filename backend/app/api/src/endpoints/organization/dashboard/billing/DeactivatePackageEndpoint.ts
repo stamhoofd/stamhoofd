@@ -52,11 +52,7 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
-        // Deactivate
-        pack.removeAt = new Date();
-        pack.removeAt.setTime(pack.removeAt.getTime() - 5_000);
-        await pack.save();
-
+        await STPackageService.deactivatePackage(pack);
         await STPackageService.updateOrganizationPackages(organization.id);
 
         return new Response(undefined);

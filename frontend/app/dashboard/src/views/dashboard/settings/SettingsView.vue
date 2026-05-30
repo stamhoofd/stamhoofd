@@ -373,7 +373,7 @@
             <template v-if="!salesDisabled">
                 <hr><h2>{{ $t('%q') }}</h2>
                 <STList class="illustration-list">
-                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Packages)">
+                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" data-testid="open-packages-button" @click="$navigate(Routes.Packages)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
