@@ -1,5 +1,5 @@
-import { expect  } from '@playwright/test';
-import type {Page} from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { appToUri } from '@stamhoofd/structures';
 import { WorkerData } from '../worker/WorkerData.js';
 
@@ -64,7 +64,7 @@ export class DashboardPage {
 
         const deadline = Date.now() + 30000;
         while (Date.now() < deadline) {
-            const dashboardVisible = await this.page.getByTestId('organization-name').isVisible().catch(() => false);
+            const dashboardVisible = await this.page.locator('.account-switcher').isVisible().catch(() => false);
             if (dashboardVisible) {
                 return;
             }
@@ -82,7 +82,7 @@ export class DashboardPage {
 
         const deadline = Date.now() + 30000;
         while (Date.now() < deadline) {
-            const dashboardVisible = await this.page.getByTestId('organization-name').isVisible().catch(() => false);
+            const dashboardVisible = await this.page.getByTestId('Meer').isVisible().catch(() => false);
             if (dashboardVisible) {
                 return 'dashboard' as const;
             }

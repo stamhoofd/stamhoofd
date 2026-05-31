@@ -5,7 +5,7 @@ import { test } from '../test-fixtures/base.js';
 import { expect } from '@playwright/test';
 import type {
     Organization,
-    User} from '@stamhoofd/models';
+    User } from '@stamhoofd/models';
 import {
     OrganizationFactory,
     Token,
@@ -75,10 +75,10 @@ test.describe('Login', () => {
         await page.getByTestId('login-button').click();
 
         // wait for data-testid element to appear (h1 with name of organization)
-        await page.getByTestId('organization-name').waitFor();
+        await page.locator('.account-switcher').waitFor();
 
         // check if page contains name of organization
-        await expect(page.getByTestId('organization-name')).toContainText(
+        await expect(page.getByTestId('app-name')).toContainText(
             organizationName,
         );
     });

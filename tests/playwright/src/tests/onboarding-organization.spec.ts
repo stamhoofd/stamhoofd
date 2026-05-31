@@ -53,14 +53,14 @@ test.describe('Onboarding', () => {
         await (new ConfirmEmailPage(page)).fillCode('111111');
 
         // wait for data-testid element to appear (h1 with name of organization)
-        await page.getByTestId('organization-name').waitFor();
+        await page.locator('.account-switcher').waitFor();
 
         // check if page contains name of organization
-        await expect(page.getByTestId('organization-name')).toContainText(
+        await expect(page.getByTestId('app-name')).toContainText(
             name,
         );
     });
-    
+
     test('happy path via direct /aansluiten URL', async ({ page, pages }) => {
         await pages.dashboard.goto();
 

@@ -63,7 +63,7 @@ export class PackageScenario {
 
     async gotoPackages() {
         await this.page.goto(this.dashboardUrl);
-        await expect(this.page.getByTestId('organization-name')).toBeVisible();
+        await expect(this.page.getByTestId('app-name')).toBeVisible();
 
         // The settings tab lives under the "Meer" (More) menu in the tab bar.
         const settingsTab = this.page.getByRole('button', { name: Labels.settingsTab, exact: false });

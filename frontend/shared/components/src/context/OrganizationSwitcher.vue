@@ -5,7 +5,7 @@
         <ContextLogo :organization="organization" :app="app" />
         <div>
             <h1>
-                <span>{{ small && organization ? organization.name : getAppTitle(app, organization) }}</span><span v-if="small" class="icon arrow-down-small gray" />
+                <span data-testid="app-name">{{ small && organization ? organization.name : getAppTitle(app, organization) }}</span><span v-if="small" class="icon arrow-down-small gray" />
             </h1>
             <h2 v-if="!small && getAppDescription(app, organization) && canSwitch">
                 <span>{{ getAppDescription(app, organization) }}</span>
