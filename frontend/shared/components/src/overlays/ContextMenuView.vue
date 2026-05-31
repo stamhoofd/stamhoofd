@@ -787,12 +787,12 @@ export default class ContextMenuView extends VueComponent {
     --color-current-background-shade-darker: #{$color-background-shade-darker};
 
     border: $border-width-thin solid $color-border;
-    padding: 8px 20px;
+    padding: 8px 15px 8px 15px;
 
     @extend .style-overlay-shadow;
     border-radius: $border-radius-modals;
     box-sizing: border-box;
-    min-width: 200px;
+    min-width: 230px;
 
     @media (max-width: 450px) {
         min-width: 70vw;
@@ -817,8 +817,9 @@ export default class ContextMenuView extends VueComponent {
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         color: $color-dark;
         min-height: 26px;
-        margin: 0 -15px;
-        padding: 4px 15px;
+        margin-left: -8px;
+        margin-right: -8px;
+        padding: 3px 8px;
         border-radius: $border-radius;
 
         .icon {
@@ -859,15 +860,15 @@ export default class ContextMenuView extends VueComponent {
             white-space: nowrap;
         }
 
-        .icon:not(.arrow-right-small):not(.arrow-down-small):not(.arrow-up-small) {
-            width: 20px;
-            height: 20px;
-            font-size: 20px;
-
-            &:before {
-                font-size: 20px;
-            }
-        }
+        //.icon:not(.arrow-right-small):not(.arrow-down-small):not(.arrow-up-small) {
+        //    width: 20px;
+        //    height: 20px;
+        //    font-size: 20px;
+//
+        //    &:before {
+        //        font-size: 20px;
+        //    }
+        //}
 
         > .right {
             &:empty {
