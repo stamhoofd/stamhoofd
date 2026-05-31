@@ -144,6 +144,9 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         return GroupCategoryTree.create({ });
     }
 
+    /**
+     * @deprecated
+     */
     isCategoryDeactivated(organization: Organization, category: GroupCategoryTree) {
         if (organization.meta.packages.useActivities) {
             return false;
