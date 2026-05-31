@@ -59,6 +59,20 @@
         }
     }
 
+    &.rot {
+        &:before {
+            transition: transform 0.2s;
+        }
+
+        &.rot90:before {
+            transform: rotate(-90deg);
+        }
+
+        &.rot180:before {
+            transform: rotate(-180deg);
+        }
+    }
+
     &.stroke {
         &:before {
             position: absolute;

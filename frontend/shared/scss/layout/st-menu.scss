@@ -165,14 +165,6 @@
             padding-right: 0
         }
 
-        .icon.rot {
-            transition: transform 0.2s;
-
-            &.rot180 {
-                transform: rotate(-180deg);
-            }
-        }
-
         &.cta {
             color: $color-primary;
         }
