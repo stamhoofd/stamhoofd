@@ -152,11 +152,9 @@ const errorMessage = computed(() => {
         let simpleErrors!: SimpleErrors;
         if (isSimpleError(errors)) {
             simpleErrors = new SimpleErrors(errors);
-        }
-        else if (isSimpleErrors(errors)) {
+        } else if (isSimpleErrors(errors)) {
             simpleErrors = errors;
-        }
-        else {
+        } else {
             simpleErrors = new SimpleErrors(new SimpleError({
                 code: 'unknown_error',
                 message: errors.message,
@@ -259,8 +257,7 @@ function groupData(emails: EmailPreview[]) {
         const group = queue[queue.length - 1];
         if (group && group.title === title) {
             group.emails.push(email);
-        }
-        else {
+        } else {
             queue.push({ title, emails: [email] });
         }
     }

@@ -5,7 +5,7 @@ import type { TableAction, TableActionSelection } from '@stamhoofd/components/ta
 import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EmailView from '@stamhoofd/components/email/EmailView.vue';
-import type {RecipientChooseOneOption, RecipientMultipleChoiceOption} from '@stamhoofd/components/email/EmailView.vue';
+import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -139,7 +139,7 @@ export class PaymentActionBuilder {
         return actions.filter(action => action !== null);
     }
 
-     private getExcelTitle() {
+    private getExcelTitle() {
         const parts = [
             this.organization && this.context.value.auth.hasSomePlatformAccess() ? this.organization.name : null,
             this.methods?.length === 1 ? PaymentMethodHelper.getPluralNameCapitalized(this.methods[0]) : $t('Betalingen'),
@@ -227,8 +227,7 @@ export class PaymentActionBuilder {
 
             const message = payments.length === 1 ? $t('%Mb') : $t('%1NY', { count: payments.length });
             Toast.success(message).setHide(1000).show();
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
         this.isSettingPaymentStatus = false;
@@ -259,8 +258,7 @@ export class PaymentActionBuilder {
                     },
                 ],
             });
-        }
-        else {
+        } else {
             const organizationOption: RecipientMultipleChoiceOption = {
                 type: 'MultipleChoice',
                 name: $t('%1Ln'),
