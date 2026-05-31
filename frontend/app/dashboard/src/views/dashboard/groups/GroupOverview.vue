@@ -3,7 +3,7 @@
         <div v-if="invitationsCount !== null" id="webshop-overview" class="st-view background">
             <STNavigationBar :title="title" />
 
-            <main>
+            <main class="center">
                 <h1 class="style-navigation-title">
                     {{ title }}
 
@@ -321,7 +321,7 @@ defineRoutes([{
                 if (total !== null) {
                     invitationsCount.value = total;
                 }
-            }
+            },
         };
     },
 },
@@ -425,8 +425,7 @@ async function displayEditComponent(component: any, animated = true) {
                             await patchOrganizationPeriod(patch);
                         },
                     });
-                }
-                catch (e) {
+                } catch (e) {
                     Toast.fromError(e).show();
                     throw e;
                 }
@@ -459,8 +458,7 @@ async function editGeneral(animated = true) {
                             await patchOrganizationPeriod(patch);
                         },
                     });
-                }
-                catch (e) {
+                } catch (e) {
                     Toast.fromError(e).show();
                     throw e;
                 }
@@ -545,8 +543,7 @@ async function openGroup() {
         patch.groups.addPatch(p);
         await patchOrganizationPeriod(patch);
         new Toast('De inschrijvingen zijn terug open', 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -578,8 +575,7 @@ async function archiveGroup() {
 
         await patchOrganizationPeriod(patch);
         new Toast('De groep is gearchiveerd', 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -613,8 +609,7 @@ async function deleteGroup() {
         await patchOrganizationPeriod(patch);
         new Toast('De groep is verwijderd', 'success green').show();
         await navigationController.value?.pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -658,8 +653,7 @@ async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
             const cleaned = cat.groupIds.filter(id => id !== group.id);
             cleaned.push(group.id);
             catPatch.groupIds = cleaned as any;
-        }
-        else {
+        } else {
             // We need to delete it to fix issues if it is still there
             catPatch.groupIds.addDelete(group.id);
             catPatch.groupIds.addPut(group.id);
@@ -686,13 +680,11 @@ async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
                 // Bit ugly, but only reliable way
                 props.group.set(foundGroup);
             }
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
         new Toast(wasArchive ? 'De inschrijvingsgroep is teruggezet' : 'De inschrijvingen zijn gesloten', 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -713,8 +705,7 @@ async function closeGroup() {
 
         await patchOrganizationPeriod(patch);
         new Toast('De inschrijvingen zijn gesloten', 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -774,13 +765,11 @@ async function convertToEvent() {
         const event = await createEventFromGroup(props.group, organization.value);
         // set the created event
         await saveEvent(event);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         Toast.error($t('%1NI')).show();
         return;
-    }
-    finally {
+    } finally {
         toast.hide();
     }
 
@@ -839,8 +828,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
             const group = groupsInPeriod.find(g => g.id === groupId);
             if (group) {
                 foundGroups.push({ group, period: defaultPeriod });
-            }
-            else {
+            } else {
                 missingGroupIds.push(groupId);
             }
         }
@@ -944,8 +932,8 @@ async function createEventFromGroup(group: Group, organization: Organization) {
 
 const invitationsFetcher = useRegistrationInvitationsObjectFetcher({
     requiredFilter: {
-        groupId: props.group.id
-    }
+        groupId: props.group.id,
+    },
 });
 
 async function fetchInvitationCount() {
@@ -953,7 +941,7 @@ async function fetchInvitationCount() {
         invitationsCount.value = 0;
         return;
     }
-    
+
     try {
         invitationsCount.value = await countAll(invitationsFetcher);
     } catch (e) {
@@ -966,7 +954,7 @@ fetchInvitationCount().catch(console.error);
 
 useRegistrationInvitationEventListener('updated', async (value) => {
     // update the invitation count if invitations for this groups changed
-    // do not fetch again if the change originated in the invitations table (prevent double fetch) 
+    // do not fetch again if the change originated in the invitations table (prevent double fetch)
     if (value.origin !== 'invitations-table' && value.groupIds.has(props.group.id)) {
         fetchInvitationCount().catch(console.error);
     }

@@ -2,7 +2,7 @@
     <div class="st-view background category-view">
         <STNavigationBar :title="title" />
 
-        <main>
+        <main class="center">
             <h1 class="style-navigation-title with-icons" :class="{button: !!parentCategories.length}" @click="openCategorySelector">
                 {{ title }}
                 <span v-if="!isPublic" v-tooltip="'Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.'" class="icon lock small" />
