@@ -23,55 +23,55 @@
 </template>
 
 <script setup lang="ts">
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { defineRoutes, useDismiss, useNavigate, usePopup, useShow } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import type { ComponentPublicInstance} from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import { computed, getCurrentInstance, ref, unref } from 'vue';
 
 import type { TabBarItem, TabBarItemGroup } from './TabBarItem';
 
 const props = defineProps<{
-    group: TabBarItemGroup,
-    selectedItem: TabBarItem|null,
-    selectItem: (item: TabBarItem) => void,
-}>()
+    group: TabBarItemGroup;
+    selectedItem: TabBarItem | null;
+    selectItem: (item: TabBarItem) => void;
+}>();
 type TabBarItemWithComponent = TabBarItem & Required<Pick<TabBarItem, 'component'>>;
-const flatTabs = computed<TabBarItemWithComponent[]>(() => props.group.items.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component))
+const flatTabs = computed<TabBarItemWithComponent[]>(() => props.group.items.flatMap(t => t.items as TabBarItemWithComponent[]).filter(t => !!t.component));
 
-const dismiss = useDismiss()
-const box = ref<HTMLElement|null>(null);
-const popup = usePopup()
-const $navigate = useNavigate()
-const show = useShow()
-const instance = getCurrentInstance()
+const dismiss = useDismiss();
+const box = ref<HTMLElement | null>(null);
+const popup = usePopup();
+const $navigate = useNavigate();
+const show = useShow();
+const instance = getCurrentInstance();
 
-defineRoutes(flatTabs.value.map(tab => {
+defineRoutes(flatTabs.value.map((tab) => {
     return {
         name: tab.name,
         url: Formatter.slug(tab.name),
         handler: async (options) => {
             if (options.checkRoutes) {
-                tab.component.setCheckRoutes()
+                tab.component.setCheckRoutes();
             }
             await show({
                 ...(options as any as PushOptions),
-                components: [tab.component]
-            })
-        }
-    }
-}))
+                components: [tab.component],
+            });
+        },
+    };
+}));
 
 const selectTab = async (item: TabBarItem) => {
     if (item.action) {
-        await item.action.call(instance!.proxy as ComponentPublicInstance)
+        await item.action.call(instance!.proxy as ComponentPublicInstance);
         return;
     }
     if (!unref(popup)) {
         await $navigate(item.name);
         return;
     }
-    await dismiss({force: true})
-    props.selectItem(item)
-}
+    await dismiss({ force: true });
+    props.selectItem(item);
+};
 </script>
