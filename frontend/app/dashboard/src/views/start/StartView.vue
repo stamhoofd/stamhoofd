@@ -20,7 +20,7 @@
             </p>
             <BillingWarningBox />
 
-            <p>
+            <p v-if="$isPlatform">
                 <a :href="$domains.getDocs('stappenplan-opstart-werkjaar')" target="_blank" class="button text selected">
                     <span class="icon book" />
                     <span>{{ $t('%8T') }}</span>
@@ -29,18 +29,18 @@
 
             <QuickActionsBox :quick-actions="quickActions" />
 
-            <SetupStepsView v-if="auth.hasFullAccess()" />
+            <SetupStepsView v-if="$isPlatform && auth.hasFullAccess()" />
         </main>
     </section>
 </template>
 
 <script setup lang="ts">
-import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useDashboardQuickActions } from '@stamhoofd/components/quick-actions/hooks/useDashboardQuickActions.ts';
-import SetupStepsView from './SetupStepsView.vue';
+import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
 import BillingWarningBox from '../dashboard/settings/packages/BillingWarningBox.vue';
+import SetupStepsView from './SetupStepsView.vue';
 
 const auth = useAuth();
 const quickActions = useDashboardQuickActions();
