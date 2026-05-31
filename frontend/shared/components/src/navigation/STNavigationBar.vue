@@ -1,5 +1,5 @@
 <template>
-    <header class="st-navigation-bar-container" :class="{negative: !!($slots.default && isValidVnodes($slots.default())), scrolled}">
+    <header class="st-navigation-bar-container" :class="{collapsed: !(hasLeft || hasRight), negative: !!($slots.default && isValidVnodes($slots.default())), scrolled}">
         <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }">
             <InheritComponent name="tabbar-replacement" />
         </div>
@@ -130,8 +130,7 @@ function addListener() {
 
     if (scrollElement.value === document.documentElement) {
         window.addEventListener('scroll', onScroll, { passive: true });
-    }
-    else {
+    } else {
         scrollElement.value.addEventListener('scroll', onScroll, { passive: true });
     }
 }
@@ -143,8 +142,7 @@ function onScroll() {
     const scroll = scrollElement.value.scrollTop;
     if (scroll > 25) {
         scrolled.value = true;
-    }
-    else if (scroll < 20) {
+    } else if (scroll < 20) {
         scrolled.value = false;
     }
 }
@@ -175,8 +173,7 @@ onDeactivated(() => {
     }
     if (scrollElement.value === document.documentElement) {
         window.removeEventListener('scroll', onScroll);
-    }
-    else {
+    } else {
         scrollElement.value.removeEventListener('scroll', onScroll);
     }
     scrollElement.value = null;
@@ -199,13 +196,32 @@ onDeactivated(() => {
         }
     }
 
+    &.collapsed {
+        height: 50px;
+
+        .split-view-controller[data-has-detail="true"] > .master &  {
+            height: 40px;
+        }
+    }
+
+    /*
+
+    height: 0;
+
+    & + main {
+        // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
+        --st-navigation-bar-correction: calc(50px + var(--current-view-safe-area-top, 0px));
+    }
+
+    &:has(.context-navigation-bar) + main {
+        --st-navigation-bar-correction: calc(70px + var(--current-view-safe-area-top, 0px));
+    }*/
+
     body.web-iOS &, body.native-iOS & {
         height: 0;
 
         & + main {
             // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
-            -webkit-app-region: drag;
-
             --st-navigation-bar-correction: calc(70px + var(--current-view-safe-area-top, 0px));
         }
     }
@@ -255,13 +271,17 @@ onDeactivated(() => {
     padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
     box-sizing: border-box;
     width: 100%;
-    height: 64px;
+    height: 50px;
     opacity: 1;
     transition: opacity 0.2s;
     z-index: 201;
 
     &.large {
         height: 80px;
+    }
+
+    body.native-android &, body.web-android & {
+        height: 60px;
     }
 
     body.native-iOS &, body.web-iOS & {
@@ -363,8 +383,11 @@ onDeactivated(() => {
     }
 
     > .header {
-        height: 64px;
-        -webkit-app-region: drag;
+        height: 50px;
+
+        body.native-android &, body.web-android & {
+            height: 60px;
+        }
 
         body.native-iOS &, body.web-iOS & {
             height: 70px;
@@ -424,7 +447,7 @@ onDeactivated(() => {
 
                 align-items: center;
                 justify-content: flex-end;
-                gap: 24px;
+                gap: 16px;
 
                 body.web-iOS &, body.native-iOS & {
                     gap: 12px;
