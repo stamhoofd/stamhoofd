@@ -296,9 +296,3 @@ function createGroup() {
     }).catch(console.error);
 }
 </script>
-
-<style lang="scss">
-    .category-view {
-        --block-width: 24px;
-    }
-</style>
