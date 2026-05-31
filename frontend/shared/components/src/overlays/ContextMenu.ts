@@ -9,7 +9,6 @@ export class ContextMenuItem {
     name: string;
     description?: string;
 
-    leftIcon: string | null = null;
     rightText: string | null = null;
     icon: string | null = null;
 
@@ -19,6 +18,7 @@ export class ContextMenuItem {
      */
     selected: boolean | null = null;
     disabled: boolean | string = false;
+    destructive = false;
 
     /**
      * Return true when the context menu should get closed.
@@ -53,21 +53,19 @@ export class ContextMenu {
         return new ComponentWithProperties(GeneralContextMenuView, { menu: this });
     }
 
-    async show(position: { component?: typeof NavigationMixin; clickEvent?: TouchEvent | MouseEvent; button?: HTMLElement; x?: number; y?: number; xPlacement?: 'right' | 'left'; yPlacement?: 'bottom' | 'top' ; wrapWidth?: number; wrapHeight?: number; yOffset?: number; xOffset?: number }) {
+    async show(position: { component?: typeof NavigationMixin; clickEvent?: TouchEvent | MouseEvent; button?: HTMLElement; x?: number; y?: number; xPlacement?: 'right' | 'left'; yPlacement?: 'bottom' | 'top'; wrapWidth?: number; wrapHeight?: number; yOffset?: number; xOffset?: number }) {
         if (position.button) {
             const bounds = position.button.getBoundingClientRect();
 
             if (!position.xPlacement || position.xPlacement === 'right') {
                 position.x = bounds.left;
-            }
-            else {
+            } else {
                 position.x = bounds.right;
             }
 
             if (!position.yPlacement || position.yPlacement === 'bottom') {
                 position.y = bounds.bottom;
-            }
-            else {
+            } else {
                 position.y = bounds.top;
             }
 
@@ -101,8 +99,7 @@ export class ContextMenu {
                 components: [menuComponent],
                 modalDisplayStyle: 'overlay',
             });
-        }
-        else {
+        } else {
             await ModalStackEventBus.sendEvent('present', {
                 components: [menuComponent],
                 modalDisplayStyle: 'overlay',

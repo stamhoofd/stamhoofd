@@ -3,10 +3,10 @@
         <template v-for="(items, groupIndex) of menu.items" :key="groupIndex+'-group'">
             <ContextMenuLine v-if="groupIndex > 0" />
 
-            <ContextMenuItemView v-for="(item, index) of items" :key="index" v-tooltip="item.disabled" :context-menu-view="$refs.contextMenuView" :class="{'disabled': !!item.disabled, 'with-description': !!item.description}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item)">
-                <template v-if="item.selected !== null || item.leftIcon !== null" #left>
+            <ContextMenuItemView v-for="(item, index) of items" :key="index" v-tooltip="item.disabled" :context-menu-view="$refs.contextMenuView" :class="{'disabled': !!item.disabled, 'with-description': !!item.description, destructive: item.destructive}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item)">
+                <template v-if="item.selected !== null || item.icon !== null" #left>
                     <Checkbox v-if="item.selected !== null" :model-value="item.selected" :only-line="true" />
-                    <span v-else :class="'icon '+item.leftIcon" />
+                    <span v-else-if="item.icon" :class="'icon '+item.icon" />
                 </template>
 
                 <p>{{ item.name }}</p>
@@ -16,7 +16,6 @@
 
                 <template v-if="item.childMenu || item.icon !== null || item.rightText !== null" #right>
                     <span v-if="item.childMenu" class="icon arrow-right-small" />
-                    <span v-else-if="item.icon !== null" :class="'icon '+item.icon" />
                     <span v-else class="style-context-menu-item-description">
                         {{ item.rightText }}
                     </span>

@@ -3,6 +3,10 @@
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
             <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :context-menu-view="$refs.contextMenuView" :class="{'disabled': isDisabled(action), destructive: action.destructive}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action)">
+                <template v-if="action.icon" #left>
+                    <span :class="'icon '+action.icon" />
+                </template>
+
                 <p>{{ action.name }}</p>
                 <p v-if="action.description" class="description">
                     {{ action.description }}
@@ -10,9 +14,6 @@
 
                 <template v-if="action.hasChildActions" #right>
                     <span class="icon arrow-right-small" />
-                </template>
-                <template v-else-if="action.icon" #right>
-                    <span :class="'icon '+action.icon" />
                 </template>
             </ContextMenuItemView>
         </template>
@@ -107,8 +108,7 @@ export default class TableActionsContextMenu extends VueComponent {
                 const group = acc[acc.length - 1];
                 if (group && group[0].groupIndex === action.groupIndex) {
                     group.push(action);
-                }
-                else {
+                } else {
                     acc.push([action]);
                 }
                 return acc;
