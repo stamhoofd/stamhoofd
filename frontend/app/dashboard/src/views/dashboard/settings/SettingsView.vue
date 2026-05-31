@@ -25,7 +25,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%Lb') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%Of') }}
                     </p>
                     <template #right>
@@ -40,7 +40,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%ty') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%Og') }}
                     </p>
                     <template #right>
@@ -55,7 +55,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%Oh') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%Oi') }}
                     </p>
                     <template #right>
@@ -70,23 +70,8 @@
                     <h2 class="style-title-list">
                         {{ $t('%Oj') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%Ok') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRegistrationPeriods)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%3i') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ $t('%3e') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -100,7 +85,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%40') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3z') }}
                     </p>
                     <template #right>
@@ -115,7 +100,7 @@
                     <h2 class="style-title-list">
                         {{ true ? $t('%1Bf') : $t('%1Bg') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%1Bh') }}
                     </p>
                     <template #right>
@@ -130,7 +115,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%6c') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%Ol') }}
                     </p>
                     <template #right>
@@ -145,161 +130,29 @@
                     <h2 class="style-title-list">
                         {{ $t('%1Tp') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%1Rv') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem v-if="membersPackage" :selectable="true" class="left-center" @click="$navigate(Routes.Members)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Ledenadministratie') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Stel je betaalmethodes voor inschrijvingen, onderverdelingen, kortingen, persoonsgegevens en meer in.') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
-
-            <template v-if="membersPackage">
-                <hr><h2>{{ $t('%Om') }}</h2>
-
-                <STList class="illustration-list">
-                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationPage)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%On') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Oo') }}
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.RegistrationPaymentMethods)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%41') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%2p') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationGroups)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/group.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Op') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Oq') }}
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.BundleDiscounts)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%15q') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%15r') }}
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationRecords)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Or') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Os') }}
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.FinancialSupport)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/discount.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%1Te') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%vY') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%5j') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationFreeContributions)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Ot') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Ou') }}
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.MembersImport)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%18D') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%18d') }}
-                        </p>
-
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
 
             <hr><h2>{{ $t('%1EO') }}</h2>
 
@@ -311,7 +164,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%1EJ') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%Ov') }}
                     </p>
                     <template #right>
@@ -326,7 +179,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%1DD') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%HO') }}
                     </p>
                     <template #right>
@@ -341,7 +194,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%HH') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%Ow') }}
                     </p>
                     <template #right>
@@ -360,7 +213,7 @@
                         <h2 class="style-title-list">
                             {{ $t('%2b') }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('%HS') }}
                         </p>
                         <template #right>
@@ -380,7 +233,7 @@
                         <h2 class="style-title-list">
                             {{ $t('%1HV') }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('%1HW') }}
                         </p>
                         <template #right>
@@ -395,7 +248,7 @@
                         <h2 class="style-title-list">
                             {{ $t('%1S7') }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('%1UG') }}
                         </p>
                         <template #right>
@@ -410,7 +263,7 @@
                         <h2 class="style-title-list">
                             {{ $t("%5R") }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('%Ox') }}
                         </p>
                         <template #right>
@@ -425,7 +278,7 @@
                         <h2 class="style-title-list">
                             {{ $t('%HD') }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('%HR') }}
                         </p>
                         <template #right>
@@ -486,6 +339,7 @@ import FreeContributionSettingsView from './modules/members/FreeContributionSett
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
+import MembersSettingsView from './MembersSettingsView.vue';
 
 enum Routes {
     General = 'algemeen',
@@ -508,12 +362,13 @@ enum Routes {
     Labs = 'experimenten',
     Premises = 'lokalen',
     BalanceNotifications = 'openstaande-bedragen-notificaties',
+    Members = 'ledenadministratie',
     MembersImport = 'leden-importeren',
     Uitpas = 'uitpas',
     OrganizationRegistrationPeriods = 'werkjaren',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
-    Invoices = 'uitgaande-facturen'
+    Invoices = 'uitgaande-facturen',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -530,6 +385,10 @@ defineRoutes([
         url: Routes.General,
         component: GeneralSettingsView,
         present: 'popup',
+    },
+    {
+        url: Routes.Members,
+        component: MembersSettingsView,
     },
     {
         url: Routes.Personalization,
@@ -704,7 +563,7 @@ defineRoutes([
                                 await $organizationManager.value.patch(Organization.patch({
                                     meta: OrganizationMetaData.patch({
                                         financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
-                                    })
+                                    }),
                                 }));
                                 Toast.success($t(`%HU`)).show();
                             },
@@ -783,8 +642,7 @@ async function loadStripeAccounts(recheckStripeAccount: string | null) {
                     decoder: StripeAccount as Decoder<StripeAccount>,
                     owner,
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
             }
         }
@@ -806,14 +664,12 @@ async function loadStripeAccounts(recheckStripeAccount: string | null) {
                         owner,
                     });
                     account.deepSet(response.data);
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     loadingStripeAccounts.value = false;
