@@ -4,7 +4,7 @@
             <img :src="logoSrc" :srcset="logoSrcSet">
         </div>
         <span v-else-if="allowEmpty" class="icon gray" />
-        <div v-else class="letter-logo" :data-length="letters.length">
+        <div v-else v-color="group.id" class="letter-logo" :data-length="letters.length">
             {{ letters }}
         </div>
     </figure>
