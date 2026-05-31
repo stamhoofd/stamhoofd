@@ -35,10 +35,6 @@
             {{ $t('%15o') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('event-webshops')" @update:model-value="setFeatureFlag('event-webshops', !!$event)">
-            {{ $t('%18E') }}
-        </Checkbox>
-
         <Checkbox :model-value="getFeatureFlag('new-members-tab')" @update:model-value="setFeatureFlag('new-members-tab', !!$event)">
             {{ $t('Vernieuwd layout leden tabblad') }}
         </Checkbox>

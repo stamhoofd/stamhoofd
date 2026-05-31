@@ -179,7 +179,7 @@
                                 </template>
                             </STListItem>
 
-                            <STListItem v-if="!event.group && !event.webshopId && canWriteEvent && $feature('event-webshops')" :selectable="true" class="left-center" @click="linkWebshop">
+                            <STListItem v-if="!event.group && !event.webshopId && canWriteEvent" :selectable="true" class="left-center" @click="linkWebshop">
                                 <template #left>
                                     <IconContainer icon="basket" class="success">
                                         <template #aside>
@@ -381,8 +381,7 @@ async function loadWebshop() {
             owner,
         });
         loadedWebshop.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load webshop', e);
     }
     loadingWebshop.value = false;
@@ -404,16 +403,13 @@ const levelPrefix = computed(() => {
         if (props.event.meta.organizationTagIds !== null) {
             const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
             prefixes.push(...tagNames);
-        }
-        else {
+        } else {
             prefixes.push($t(`%XF`));
         }
-    }
-    else {
+    } else {
         if (eventOrganization.value?.id === organization.value?.id) {
             // skip
-        }
-        else {
+        } else {
             // Name of the organization
             prefixes.push(eventOrganization.value?.name ?? props.event.organizationId);
         }
@@ -487,7 +483,7 @@ defineRoutes([{
                 if (total !== null) {
                     invitationsCount.value = total;
                 }
-            }
+            },
         };
     },
 },
@@ -545,8 +541,7 @@ defineRoutes([{
                     if (updatedGroup.deletedAt) {
                         props.event.group = null;
                     }
-                }
-                else {
+                } else {
                     console.warn('Group not found in updated period', group.id, updatedPeriod.groups);
                     props.event.group = null;
                 }
@@ -647,8 +642,7 @@ async function unlinkWebshop() {
                 webshopId: null,
             }),
         );
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -684,8 +678,7 @@ async function linkWebshop(event: MouseEvent) {
                                     }),
                                 );
                                 Toast.success($t('%1Ar')).show();
-                            }
-                            catch (e) {
+                            } catch (e) {
                                 Toast.fromError(e).show();
                             }
                         },
@@ -701,8 +694,7 @@ async function linkWebshop(event: MouseEvent) {
                                     }),
                                 );
                                 Toast.success($t('%1Ar')).show();
-                            }
-                            catch (e) {
+                            } catch (e) {
                                 Toast.fromError(e).show();
                             }
                         },
@@ -758,8 +750,7 @@ async function createGroup() {
             // Navigate to the new group settings
             // $navigate(Routes.EditGroup).catch(console.error);
         });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -835,8 +826,7 @@ function duplicateEvent() {
             });
 
             await directPatch(patch, event);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             new Toast('Er ging iets mis bij het overnemen van de inschrijvingsgroep voor de nieuwe activiteit', 'warning').show();
         }
@@ -872,8 +862,7 @@ function duplicateEvent() {
                     owner,
                 });
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             new Toast('Er ging iets mis bij het overnemen van de e-mails voor de nieuwe activiteit', 'warning').show();
         }
@@ -923,8 +912,7 @@ function duplicateEvent() {
                             }
                         },
                     });
-                }
-                catch (e) {
+                } catch (e) {
                     Toast.fromError(e).show();
                     throw e;
                 }
@@ -942,10 +930,12 @@ function duplicateEvent() {
     }).catch(console.error);
 }
 
-const invitationsFetcher = useRegistrationInvitationsObjectFetcher(props.event.group ? {
-    requiredFilter: {
-        groupId: props.event.group.id
-    }} : {});
+const invitationsFetcher = useRegistrationInvitationsObjectFetcher(props.event.group
+    ? {
+            requiredFilter: {
+                groupId: props.event.group.id,
+            } }
+    : {});
 
 async function fetchInvitationCount() {
     if (!featureFlag('registration-invites')) {
@@ -958,8 +948,6 @@ async function fetchInvitationCount() {
         return;
     }
 
-
-    
     try {
         invitationsCount.value = await countAll(invitationsFetcher);
     } catch (e) {
@@ -974,9 +962,9 @@ useRegistrationInvitationEventListener('updated', async (value) => {
     if (!props.event.group) {
         return;
     }
-    
+
     // update the invitation count if invitations for this groups changed
-    // do not fetch again if the change originated in the invitations table (prevent double fetch) 
+    // do not fetch again if the change originated in the invitations table (prevent double fetch)
     if (value.origin !== 'invitations-table' && value.groupIds.has(props.event.group.id)) {
         fetchInvitationCount().catch(console.error);
     }
