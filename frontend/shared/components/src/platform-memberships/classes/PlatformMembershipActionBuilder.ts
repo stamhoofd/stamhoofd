@@ -38,9 +38,9 @@ export class PlatformMembershipActionBuilder {
 
     getActions(): TableAction<PlatformMembership>[] {
         const actions = [
-        
+
             this.getExportAction(),
-           
+
         ];
 
         return actions;
@@ -88,7 +88,7 @@ export class PlatformMembershipActionBuilder {
     }
 
     private getExcelTitle(selection: TableActionSelection<PlatformMembership>) {
-        if (selection.markedRows && selection.markedRowsAreSelected  && selection.markedRows.size === 1) {
+        if (selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1) {
             return [...selection.markedRows.values()][0].member.name;
         }
         const parts = [

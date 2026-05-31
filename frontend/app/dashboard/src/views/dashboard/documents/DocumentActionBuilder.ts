@@ -4,13 +4,14 @@ import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-a
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EmailView, { type RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
+import EmailView from '@stamhoofd/components/email/EmailView.vue';
+import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { downloadDocuments } from '@stamhoofd/document-helper';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
-import type { DocumentTemplatePrivate} from '@stamhoofd/structures';
+import type { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { DocumentData, DocumentStatus, Document as DocumentStruct, EmailRecipientFilterType, EmailRecipientSubfilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -182,8 +183,7 @@ export class DocumentActionBuilder {
                 }
             }
             new Toast(documents.length === 1 ? $t(`%KN`) : $t('%KF', { count: documents.length.toString() }), 'success').show();
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
     }
@@ -215,8 +215,7 @@ export class DocumentActionBuilder {
                 }
             }
             new Toast(documents.length === 1 ? $t(`%KP`) : $t('%KH', { count: documents.length.toString() }), 'success').show();
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
     }
@@ -249,12 +248,10 @@ export class DocumentActionBuilder {
                 this.editDocument(duplicatedDocument).catch(console.error);
 
                 new Toast($t('%KI'), 'success').show();
-            }
-            else {
+            } else {
                 new Toast($t('%KJ'), 'error red').show();
             }
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
     }
@@ -299,8 +296,7 @@ export class DocumentActionBuilder {
                     originalDocument.deepSet(d);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
     }

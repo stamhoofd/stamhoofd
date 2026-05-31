@@ -3,12 +3,13 @@ import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EmailView, { type RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
+import EmailView from '@stamhoofd/components/email/EmailView.vue';
+import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
 import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { OrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { PrivateOrderWithTickets} from '@stamhoofd/structures';
+import type { PrivateOrderWithTickets } from '@stamhoofd/structures';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, TicketPrivate } from '@stamhoofd/structures';
 
 import type { usePresent } from '@simonbackx/vue-app-navigation';
@@ -278,8 +279,7 @@ export class OrderActionBuilder {
 
         if (selection.markedRows.size > 0) {
             name = $t(`%VA`);
-        }
-        else if (!OrderRequiredFilterHelper.isDefault(this.webshopManager.preview.id, selection.filter.filter)) {
+        } else if (!OrderRequiredFilterHelper.isDefault(this.webshopManager.preview.id, selection.filter.filter)) {
             name = $t(`%VB`);
         }
 
@@ -357,8 +357,7 @@ export class OrderActionBuilder {
                 if (!wasCanceledOrDeleted) {
                     this.webshopManager.backgroundReloadWebshop();
                 }
-            }
-            else {
+            } else {
                 new Toast($t(`%VI`), 'success').setHide(1500).show();
 
                 if (status == OrderStatus.Canceled) {
@@ -368,15 +367,13 @@ export class OrderActionBuilder {
                     if (!wasCanceledOrDeleted) {
                         this.webshopManager.backgroundReloadWebshop();
                     }
-                }
-                else {
+                } else {
                     if (wasCanceledOrDeleted) {
                         this.webshopManager.backgroundReloadWebshop();
                     }
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
     }
@@ -401,8 +398,7 @@ export class OrderActionBuilder {
                             willSendEmail = true;
                         }
                     }
-                }
-                else {
+                } else {
                     if (payment.status === PaymentStatus.Succeeded) {
                         data.addPatch(Payment.patch({
                             id: payment.id,
@@ -443,12 +439,10 @@ export class OrderActionBuilder {
                     GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
                 }
                 new Toast($t(`%Mb`), 'success').setHide(1000).show();
-            }
-            catch (e) {
+            } catch (e) {
                 Toast.fromError(e).show();
             }
-        }
-        else {
+        } else {
             new Toast(paid ? $t(`%Mc`) : orders.length === 1 ? $t(`%VL`) : $t(`%VM`), 'error red').setHide(2000).show();
         }
     }
@@ -477,8 +471,7 @@ export class OrderActionBuilder {
         try {
             await this.markAs(orders, OrderStatus.Deleted);
             await this.webshopManager.orders.deleteFromDatabase(orders);
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
             return;
         }

@@ -56,7 +56,7 @@ export function useMemberActions() {
             categories: options?.categories ?? [],
             platformFamilyManager,
             owner,
-            forceWriteAccess: options?.forceWriteAccess
+            forceWriteAccess: options?.forceWriteAccess,
         });
     };
 }
@@ -509,7 +509,7 @@ export class MemberActionBuilder {
 
     async getActions(options: { includeMove?: boolean; includeEdit?: boolean;
         // true if only actions that are relevant for a waiting list should be included (to limit the amount of actions shown)
-        includeOnlyIfRelevantForWaitingList?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): Promise<TableAction<PlatformMember>[]> {
+        includeOnlyIfRelevantForWaitingList?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod; } = {}): Promise<TableAction<PlatformMember>[]> {
         const allActions: TableAction<PlatformMember>[] = [
             new InMemoryTableAction({
                 name: $t(`%XO`),
@@ -551,7 +551,7 @@ export class MemberActionBuilder {
         ];
 
         const includeOnlyRelevantForWaitingList = options.includeOnlyIfRelevantForWaitingList && this.groups.length === 1 && this.groups[0].type === GroupType.WaitingList;
-        
+
         if (!includeOnlyRelevantForWaitingList) {
             allActions.push(new InMemoryTableAction({
                 name: $t(`%ej`),
@@ -596,7 +596,7 @@ export class MemberActionBuilder {
         if (this.organizations.length === 0) {
             return [];
         }
-        
+
         if (!manualFeatureFlag('registration-invites', this.context)) {
             return [];
         }
@@ -605,15 +605,15 @@ export class MemberActionBuilder {
 
         if (this.isWaitingList) {
             await this.fetchEventGroupsLinkedToWaitingList();
-            categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess()});
+            categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess() });
         } else if (this.organizations.length === 1) {
-            categoryTree = this.organizations[0].period.adminCategoryTree
+            categoryTree = this.organizations[0].period.adminCategoryTree;
         }
 
         if (!categoryTree) {
             return [];
         }
-        
+
         const allGroups = categoryTree.getAllGroups().concat(this.eventGroupsLinkedToWaitingList ?? []);
         this._allGroupsLinkedToWaitingList = allGroups;
 
@@ -624,7 +624,7 @@ export class MemberActionBuilder {
         const eventGroups = this.eventGroupsLinkedToWaitingList ?? [];
 
         const enabled = () => this.hasWrite;
-        
+
         if (this.isWaitingList && allGroups.length === 1) {
             const group = allGroups[0];
 
@@ -640,8 +640,8 @@ export class MemberActionBuilder {
                     // disable if already invited
                     disableIfAll: (member: PlatformMember) => isMemberInvited(member, group) || isMemberRegistered(member, group),
                     handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
-                        await this.inviteForGroup(members, group, wereItemsFetched)
-                    }
+                        await this.inviteForGroup(members, group, wereItemsFetched);
+                    },
                 }),
 
                 new InMemoryTableAction({
@@ -655,13 +655,13 @@ export class MemberActionBuilder {
                     // disable if not invited
                     disableIfAll: (member: PlatformMember) => !isMemberInvited(member, group) && !isMemberRegistered(member, group),
                     handler: async (members: PlatformMember[], wereItemsFetched: boolean) => {
-                        await this.deleteInvitations(members, group, wereItemsFetched)
-                    }
+                        await this.deleteInvitations(members, group, wereItemsFetched);
+                    },
                 }),
             ];
         }
 
-        const getChildActions = ({action, disableIfAll}: {action: (items: PlatformMember[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfAll: (item: PlatformMember, group: Group) => boolean}) => {
+        const getChildActions = ({ action, disableIfAll }: { action: (items: PlatformMember[], group: Group, wereItemsFetched: boolean) => void | Promise<void>; disableIfAll: (item: PlatformMember, group: Group) => boolean }) => {
             const childActions = [];
 
             if (eventGroups.length > 0) {
@@ -674,17 +674,17 @@ export class MemberActionBuilder {
                             name: g.settings.name.toString(),
                             needsSelection: true,
                             allowAutoSelectAll: false,
-                            disableIfAll: (item) => disableIfAll(item, g),
+                            disableIfAll: item => disableIfAll(item, g),
                             handler: async (items: PlatformMember[], wereItemsFetched: boolean) => {
                                 await action(items, g, wereItemsFetched);
                             },
-                        })
+                        });
                     }),
                 }));
             }
 
             return childActions.concat(getActionsForCategory<PlatformMember>(categoryTree, action, disableIfAll));
-        }
+        };
 
         const actions = [
             new MenuTableAction({
@@ -697,9 +697,9 @@ export class MemberActionBuilder {
                 childActions: () => getChildActions({
                     // disable if already invited
                     disableIfAll: (member: PlatformMember, group: Group) => isMemberInvited(member, group) || isMemberRegistered(member, group),
-                    action: async (members, group, wereItemsFetched) => await this.inviteForGroup(members, group, wereItemsFetched)
-                })
-            })
+                    action: async (members, group, wereItemsFetched) => await this.inviteForGroup(members, group, wereItemsFetched),
+                }),
+            }),
         ];
 
         if (this.isWaitingList) {
@@ -713,8 +713,8 @@ export class MemberActionBuilder {
                 childActions: () => getChildActions({
                     // disable if not invited
                     disableIfAll: (member: PlatformMember, group: Group) => !isMemberInvited(member, group) && !isMemberRegistered(member, group),
-                    action: async (members, group, wereItemsFetched) => await this.deleteInvitations(members, group, wereItemsFetched)
-                })
+                    action: async (members, group, wereItemsFetched) => await this.deleteInvitations(members, group, wereItemsFetched),
+                }),
             }));
         }
 
@@ -946,8 +946,9 @@ export class MemberActionBuilder {
         const parts = [
             this.organizations.length === 1 && this.context.auth.hasSomePlatformAccess() ? this.organizations[0].name : null,
             this.organizations.length === 1 && this.organizations[0].period.period.id !== this.platform.period.id ? this.organizations[0].period.period.name : null,
-            this.categories.length === 1 ? this.categories[0].settings.name :
-                (this.groups.length === 1 ? this.groups[0].settings.name : null),
+            this.categories.length === 1
+                ? this.categories[0].settings.name
+                : (this.groups.length === 1 ? this.groups[0].settings.name : null),
             $t('Leden'),
         ];
 
@@ -1056,8 +1057,8 @@ export class MemberActionBuilder {
             group,
             context: this.context,
             owner: this.owner,
-            wereItemsFetched
-        })
+            wereItemsFetched,
+        });
     }
 
     private async deleteInvitations(members: PlatformMember[], group: Group, wereItemsFetched: boolean) {
@@ -1066,8 +1067,8 @@ export class MemberActionBuilder {
             group,
             context: this.context,
             owner: this.owner,
-            wereItemsFetched
-        })
+            wereItemsFetched,
+        });
     }
 }
 
@@ -1075,38 +1076,38 @@ export function getActionsForCategory<T extends { id: string }>(
     category: GroupCategoryTree,
     action: (items: T[], group: Group, wereItemsFetched: boolean) => void | Promise<void>,
     disableIfAll?: (item: T, group: Group) => boolean): TableAction<T>[] {
-        const r = [
-            ...category.categories.map((c) => {
-                return new MenuTableAction({
-                    name: c.settings.name,
-                    groupIndex: 2,
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    enabled: () => c.groups.length > 0 || c.categories.length > 0,
-                    childActions: getActionsForCategory(c, action, disableIfAll),
-                });
-            }),
-            ...category.groups.map((g) => {
-                return new InMemoryTableAction({
-                    name: g.settings.name.toString(),
-                    needsSelection: true,
-                    allowAutoSelectAll: false,
-                    disableIfAll: disableIfAll ? (item) => disableIfAll(item, g) : undefined,
-                    handler: async (items: T[], wereItemsFetched: boolean) => {
-                        await action(items, g, wereItemsFetched);
-                    },
-                });
-            }),
-        ];
+    const r = [
+        ...category.categories.map((c) => {
+            return new MenuTableAction({
+                name: c.settings.name,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled: () => c.groups.length > 0 || c.categories.length > 0,
+                childActions: getActionsForCategory(c, action, disableIfAll),
+            });
+        }),
+        ...category.groups.map((g) => {
+            return new InMemoryTableAction({
+                name: g.settings.name.toString(),
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                disableIfAll: disableIfAll ? item => disableIfAll(item, g) : undefined,
+                handler: async (items: T[], wereItemsFetched: boolean) => {
+                    await action(items, g, wereItemsFetched);
+                },
+            });
+        }),
+    ];
 
-        if (r.filter(rr => rr.enabled()).length === 1) {
-            const rr = r.filter(rr => rr.enabled())[0];
-            if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
-                return rr.childActions;
-            }
+    if (r.filter(rr => rr.enabled()).length === 1) {
+        const rr = r.filter(rr => rr.enabled())[0];
+        if (rr instanceof MenuTableAction && Array.isArray(rr.childActions)) {
+            return rr.childActions;
         }
+    }
 
-        return r;
+    return r;
 }
 
 export async function presentEditMember({ member, present, context }: { member: PlatformMember; present: ReturnType<typeof usePresent>; context: SessionContext }) {
@@ -1210,102 +1211,101 @@ export function isMemberRegistered(member: PlatformMember, group: Group) {
     return member.member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null);
 }
 
-export async function inviteMembersForGroup({members, group, context, owner, wereItemsFetched}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any, wereItemsFetched: boolean}) {
-        if (members.length === 0) {
-            return;
+export async function inviteMembersForGroup({ members, group, context, owner, wereItemsFetched }: { members: PlatformMember[]; group: Group; context: SessionContext; owner: any; wereItemsFetched: boolean }) {
+    if (members.length === 0) {
+        return;
+    }
+
+    let alreadyRegisteredCount = 0;
+    let alreadyInvitedCount = 0;
+
+    const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
+    for (const member of members) {
+        if (isMemberInvited(member, group)) {
+            // already invited
+            alreadyInvitedCount += 1;
+            continue;
         }
 
-        let alreadyRegisteredCount = 0;
-        let alreadyInvitedCount = 0;
-
-        const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
-        for (const member of members) {
-            if (isMemberInvited(member, group)) {
-                // already invited
-                alreadyInvitedCount += 1;
-                continue;
-            }
-
-            if (isMemberRegistered(member, group)) {
-                // already registered
-                alreadyRegisteredCount += 1;
-                continue;
-            }
-
-            const invitation = RegistrationInvitationRequest.create({
-                groupId: group.id,
-                memberId: member.member.id,
-            })
-
-            invitations.addPut(invitation);
+        if (isMemberRegistered(member, group)) {
+            // already registered
+            alreadyRegisteredCount += 1;
+            continue;
         }
 
-        if (alreadyRegisteredCount || alreadyInvitedCount) {
-            const groupName = group.settings.name.toString();
+        const invitation = RegistrationInvitationRequest.create({
+            groupId: group.id,
+            memberId: member.member.id,
+        });
 
-            if (members.length === 1) {
-                if (alreadyInvitedCount) {
-                    Toast.warning($t('%1Qr', { group: groupName })).show();
+        invitations.addPut(invitation);
+    }
 
-                } else {
-                    Toast.warning($t('%1Rr', {group: groupName})).show();
-                }
+    if (alreadyRegisteredCount || alreadyInvitedCount) {
+        const groupName = group.settings.name.toString();
+
+        if (members.length === 1) {
+            if (alreadyInvitedCount) {
+                Toast.warning($t('%1Qr', { group: groupName })).show();
             } else {
-                if (alreadyInvitedCount === 1) {
-                    Toast.warning($t('%1QS', {group: groupName})).show();
-                } else if (alreadyInvitedCount) {
-                    Toast.warning($t('%1SE', {count: alreadyInvitedCount, group: groupName})).show();
-                }
+                Toast.warning($t('%1Rr', { group: groupName })).show();
+            }
+        } else {
+            if (alreadyInvitedCount === 1) {
+                Toast.warning($t('%1QS', { group: groupName })).show();
+            } else if (alreadyInvitedCount) {
+                Toast.warning($t('%1SE', { count: alreadyInvitedCount, group: groupName })).show();
+            }
 
-                if (alreadyRegisteredCount === 1) {
-                    Toast.warning($t('%1SG', {group: groupName})).show();
-                } else if (alreadyRegisteredCount) {
-                    Toast.warning($t('%1UM', {count: alreadyRegisteredCount, group: groupName})).show();   
-                }
+            if (alreadyRegisteredCount === 1) {
+                Toast.warning($t('%1SG', { group: groupName })).show();
+            } else if (alreadyRegisteredCount) {
+                Toast.warning($t('%1UM', { count: alreadyRegisteredCount, group: groupName })).show();
+            }
+        }
+    }
+
+    if (invitations.getPuts().length === 0) {
+        return;
+    }
+
+    try {
+        const response = await context.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/registration-invitations',
+            body: invitations,
+            owner,
+            decoder: new ArrayDecoder(RegistrationInvitation as Decoder<RegistrationInvitation>),
+        });
+
+        const responseInvitations: RegistrationInvitation[] = response.data;
+
+        // update the invitations of the member
+        for (const invitation of responseInvitations) {
+            const member = members.find(m => m.member.id === invitation.member.id);
+            if (member && !member.member.registrationInvitations.find(i => i.id === invitation.id)) {
+                member.member.registrationInvitations.push(invitation);
             }
         }
 
-        if (invitations.getPuts().length === 0) {
-            return;
+        if (responseInvitations.length > 0) {
+            RegistrationInvitationEventBus.sendEvent('updated', {
+                groupIds: new Set([group.id]),
+                // the members table should only be refreshed if the items were fetched from the server because the reference of the items will be different then the objects of the rows, therefore setting the invitations will not update the column with invitations
+                origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync',
+            }).catch(console.error);
         }
 
-        try {
-            const response = await context.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/registration-invitations',
-                body: invitations,
-                owner,
-                decoder: new ArrayDecoder(RegistrationInvitation as Decoder<RegistrationInvitation>)
-            });
-
-            const responseInvitations: RegistrationInvitation[] = response.data;
-
-            // update the invitations of the member
-            for (const invitation of responseInvitations) {
-                const member = members.find(m => m.member.id === invitation.member.id);
-                if (member && !member.member.registrationInvitations.find(i => i.id === invitation.id)) {
-                    member.member.registrationInvitations.push(invitation);
-                }
-            }
-
-            if (responseInvitations.length > 0) {
-                RegistrationInvitationEventBus.sendEvent('updated', {
-                    groupIds: new Set([group.id]),
-                    // the members table should only be refreshed if the items were fetched from the server because the reference of the items will be different then the objects of the rows, therefore setting the invitations will not update the column with invitations
-                    origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync'
-                }).catch(console.error);
-            }
-
-            const successMessage = responseInvitations.length === 1 ? $t('%1Tr', { name: responseInvitations[0].member.name }) : $t('{count} leden zijn uitgenodigd', { count: responseInvitations.length });
-            new Toast(successMessage, 'success green').show();
-        } catch (e) {
-            console.error(e);
-            Toast.fromError(e).show();
-            return;
-        }
+        const successMessage = responseInvitations.length === 1 ? $t('%1Tr', { name: responseInvitations[0].member.name }) : $t('{count} leden zijn uitgenodigd', { count: responseInvitations.length });
+        new Toast(successMessage, 'success green').show();
+    } catch (e) {
+        console.error(e);
+        Toast.fromError(e).show();
+        return;
+    }
 }
 
-export async function deleteInvitationsForMembers({members, group, context, owner, wereItemsFetched}: {members: PlatformMember[], group: Group, context: SessionContext, owner: any, wereItemsFetched: boolean}) {
+export async function deleteInvitationsForMembers({ members, group, context, owner, wereItemsFetched }: { members: PlatformMember[]; group: Group; context: SessionContext; owner: any; wereItemsFetched: boolean }) {
     const invitations: PatchableArrayAutoEncoder<RegistrationInvitationRequest> = new PatchableArray();
 
     for (const member of members) {
@@ -1316,7 +1316,7 @@ export async function deleteInvitationsForMembers({members, group, context, owne
 
     if (invitations.getDeletes().length === 0) {
         const groupName = group.settings.name.toString();
-        Toast.warning(members.length === 1 ? $t('%1Qh', { group: groupName }) : $t('Deze leden zijn nog niet uitgenodigd voor {group}', {group: groupName})).show();
+        Toast.warning(members.length === 1 ? $t('%1Qh', { group: groupName }) : $t('Deze leden zijn nog niet uitgenodigd voor {group}', { group: groupName })).show();
         return;
     }
 
@@ -1325,7 +1325,7 @@ export async function deleteInvitationsForMembers({members, group, context, owne
             method: 'PATCH',
             path: '/registration-invitations',
             body: invitations,
-            owner
+            owner,
         });
 
         for (const invitationId of invitations.getDeletes()) {
@@ -1340,7 +1340,7 @@ export async function deleteInvitationsForMembers({members, group, context, owne
 
         RegistrationInvitationEventBus.sendEvent('updated', {
             groupIds: new Set([group.id]),
-            origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync'
+            origin: wereItemsFetched ? 'members-table-async' : 'members-table-sync',
         }).catch(console.error);
     } catch (e) {
         console.error(e);
@@ -1352,8 +1352,8 @@ export async function deleteInvitationsForMembers({members, group, context, owne
     new Toast(successMessage, 'success green').show();
 }
 
-export function getCategoryTreeOfGroupsLinkedToWaitingList({waitingList, organization, hasFullAccess}: {waitingList: Group, organization: Organization, hasFullAccess: boolean}): null | GroupCategoryTree {
-    const isWaitingList = waitingList.type === GroupType.WaitingList
+export function getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList, organization, hasFullAccess }: { waitingList: Group; organization: Organization; hasFullAccess: boolean }): null | GroupCategoryTree {
+    const isWaitingList = waitingList.type === GroupType.WaitingList;
     if (!isWaitingList) {
         return null;
     }
@@ -1366,7 +1366,7 @@ export function getCategoryTreeOfGroupsLinkedToWaitingList({waitingList, organiz
 
     return period.getCategoryTree({
         admin: true,
-        filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id
+        filterGroups: group => group.waitingList !== null && group.waitingList.id === waitingList.id,
     });
 }
 
@@ -1374,7 +1374,7 @@ export function getCategoryTreeOfGroupsLinkedToWaitingList({waitingList, organiz
  * Returns all event groups linked to the waiting list.
  * Does not throw if an error occurs.
  * @param waitingListId
- * @returns 
+ * @returns
  */
 export async function getEventGroupsLinkedToWaitingList(waitingListId: string): Promise<Group[]> {
     const request = new LimitedFilteredRequest({
@@ -1382,8 +1382,8 @@ export async function getEventGroupsLinkedToWaitingList(waitingListId: string): 
         filter: {
             waitingListId,
             // only get events
-            type: GroupType.EventRegistration
-        }
+            type: GroupType.EventRegistration,
+        },
     });
 
     const groupsObjectFetcher = useGroupsObjectFetcher();

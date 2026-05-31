@@ -795,8 +795,9 @@ export class RegistrationActionBuilder {
         const parts = [
             this.organizations.length === 1 && this.context.auth.hasSomePlatformAccess() ? this.organizations[0].name : null,
             this.organizations.length === 1 && this.organizations[0].period.period.id !== this.platform.period.id ? this.organizations[0].period.period.name : null,
-            this.categories.length === 1 ? this.categories[0].settings.name :
-                (this.groups.length === 1 ? this.groups[0].settings.name : null),
+            this.categories.length === 1
+                ? this.categories[0].settings.name
+                : (this.groups.length === 1 ? this.groups[0].settings.name : null),
             $t('Inschrijvingen'),
         ];
 
@@ -819,8 +820,8 @@ export class RegistrationActionBuilder {
             group,
             context: this.context,
             owner: this.owner,
-            wereItemsFetched
-        })
+            wereItemsFetched,
+        });
     }
 
     private async deleteInvitations(registrations: PlatformRegistration[], group: Group, wereItemsFetched: boolean) {
@@ -829,8 +830,8 @@ export class RegistrationActionBuilder {
             group,
             context: this.context,
             owner: this.owner,
-            wereItemsFetched
-        })
+            wereItemsFetched,
+        });
     }
 
     private async fetchEventGroupsLinkedToWaitingList(): Promise<void> {
@@ -851,20 +852,20 @@ export class RegistrationActionBuilder {
         if (!manualFeatureFlag('registration-invites', this.context)) {
             return [];
         }
-        
+
         let categoryTree: null | GroupCategoryTree = null;
-        
+
         if (this.isWaitingList) {
             await this.fetchEventGroupsLinkedToWaitingList();
-            categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess()});
+            categoryTree = getCategoryTreeOfGroupsLinkedToWaitingList({ waitingList: this.groups[0], organization: this.organizations[0], hasFullAccess: this.context.auth.hasFullAccess() });
         } else if (this.organizations.length === 1) {
-            categoryTree = this.organizations[0].period.adminCategoryTree
+            categoryTree = this.organizations[0].period.adminCategoryTree;
         }
 
         if (!categoryTree) {
             return [];
         }
-        
+
         const allGroups = categoryTree.getAllGroups().concat(this.eventGroupsLinkedToWaitingList ?? []);
         this._allGroupsLinkedToWaitingList = allGroups;
 
@@ -875,7 +876,7 @@ export class RegistrationActionBuilder {
         const eventGroups = this.eventGroupsLinkedToWaitingList ?? [];
 
         const enabled = () => this.hasWrite;
-        
+
         if (this.isWaitingList && allGroups.length === 1) {
             const group = allGroups[0];
 
@@ -891,8 +892,8 @@ export class RegistrationActionBuilder {
                     // disable if already invited
                     disableIfAll: (registration: PlatformRegistration) => isMemberInvited(registration.member, group) || isMemberRegistered(registration.member, group),
                     handler: async (registrations: PlatformRegistration[], wereItemsFetched: boolean) => {
-                        await this.inviteForGroup(registrations, group, wereItemsFetched)
-                    }
+                        await this.inviteForGroup(registrations, group, wereItemsFetched);
+                    },
                 }),
 
                 new InMemoryTableAction({
@@ -906,13 +907,13 @@ export class RegistrationActionBuilder {
                     // disable if not invited
                     disableIfAll: (registration: PlatformRegistration) => !isMemberInvited(registration.member, group) && !isMemberRegistered(registration.member, group),
                     handler: async (registrations: PlatformRegistration[], wereItemsFetched: boolean) => {
-                        await this.deleteInvitations(registrations, group, wereItemsFetched)
-                    }
+                        await this.deleteInvitations(registrations, group, wereItemsFetched);
+                    },
                 }),
             ];
         }
 
-        const getChildActions = ({action, disableIfAll}: {action: (items: PlatformRegistration[], group: Group, wereItemsFetched: boolean) => void | Promise<void>, disableIfAll: (item: PlatformRegistration, group: Group) => boolean}) => {
+        const getChildActions = ({ action, disableIfAll }: { action: (items: PlatformRegistration[], group: Group, wereItemsFetched: boolean) => void | Promise<void>; disableIfAll: (item: PlatformRegistration, group: Group) => boolean }) => {
             const childActions = [];
 
             if (eventGroups.length > 0) {
@@ -925,17 +926,17 @@ export class RegistrationActionBuilder {
                             name: g.settings.name.toString(),
                             needsSelection: true,
                             allowAutoSelectAll: false,
-                            disableIfAll: (item) => disableIfAll(item, g),
+                            disableIfAll: item => disableIfAll(item, g),
                             handler: async (items: PlatformRegistration[], wereItemsFetched: boolean) => {
                                 await action(items, g, wereItemsFetched);
                             },
-                        })
+                        });
                     }),
                 }));
             }
 
             return childActions.concat(getActionsForCategory<PlatformRegistration>(categoryTree, action, disableIfAll));
-        }
+        };
 
         const actions = [
             new MenuTableAction({
@@ -948,9 +949,9 @@ export class RegistrationActionBuilder {
                 childActions: () => getChildActions({
                     // disable if already invited
                     disableIfAll: (registration: PlatformRegistration, group: Group) => isMemberInvited(registration.member, group) || isMemberRegistered(registration.member, group),
-                    action: async (items, group, wereItemsFetched) => await this.inviteForGroup(items, group, wereItemsFetched)
-                })
-            })
+                    action: async (items, group, wereItemsFetched) => await this.inviteForGroup(items, group, wereItemsFetched),
+                }),
+            }),
         ];
 
         if (this.isWaitingList) {
@@ -964,8 +965,8 @@ export class RegistrationActionBuilder {
                 childActions: () => getChildActions({
                     // disable if not invited
                     disableIfAll: (registration: PlatformRegistration, group: Group) => !isMemberInvited(registration.member, group) && !isMemberRegistered(registration.member, group),
-                    action: async (items, group, wereItemsFetched) => await this.deleteInvitations(items, group, wereItemsFetched)
-                })
+                    action: async (items, group, wereItemsFetched) => await this.deleteInvitations(items, group, wereItemsFetched),
+                }),
             }));
         }
 
