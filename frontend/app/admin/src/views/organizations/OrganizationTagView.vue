@@ -161,9 +161,3 @@ async function openThisTag() {
     await navigate(Routes.All);
 }
 </script>
-
-<style lang="scss">
-    .category-view {
-        --block-width: 24px;
-    }
-</style>
