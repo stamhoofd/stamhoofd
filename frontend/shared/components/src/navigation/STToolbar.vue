@@ -95,12 +95,12 @@ function updateSize() {
     }
 
     > div {
-        padding: 10px var(--st-horizontal-padding, 40px);
+        padding: 8px var(--st-horizontal-padding, 40px);
         --default-footer-padding: 10px;
 
         padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 10px);
         background: $color-current-background;
-        border-top: $border-width-thin solid $color-border;
+        border-top: $border-width-thin solid $color-border-lighter;
         display: grid;
         grid-template-columns: 1fr auto;
 
