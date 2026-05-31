@@ -341,7 +341,7 @@ export default class EditPaymentMethodsBox extends Mixins(NavigationMixin) {
         r.push(PaymentMethod.Bancontact)
 
         // Force a given ordering
-        if (this.canEnablePaymentMethod(PaymentMethod.Payconiq) || this.getPaymentMethod(PaymentMethod.Payconiq)) {
+        if (this.canEnablePaymentMethod(PaymentMethod.Payconiq)) {
             r.push(PaymentMethod.Payconiq)
         }
 

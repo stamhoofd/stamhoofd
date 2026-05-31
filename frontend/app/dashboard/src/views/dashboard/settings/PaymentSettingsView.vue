@@ -264,7 +264,7 @@
         <aside class="style-title-prefix">
             Bancontact Pay | Wero
         </aside>
-        <h2>Online betalingen via Bancontact Pay | Wero</h2>
+        <h2>Bancontact Pay | Wero (vroeger Payconiq)</h2>
         <p class="style-description">
             Vul hieronder jouw API-key in om betalingen rechtstreeks via Bancontact Pay | Wero te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>.
         </p>
