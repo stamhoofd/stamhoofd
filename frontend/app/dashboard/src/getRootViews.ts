@@ -333,7 +333,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     const webshopsTab = new TabBarItem({
         id: 'webshops',
         icon: 'basket',
-        name: $t(`%2V`),
+        name: $t(`Verkopen`),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/webshops/WebshopsMenu.vue'), {}),
         }),
