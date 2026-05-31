@@ -32,7 +32,7 @@
             </button>
         </p>
 
-        <p v-if="!shouldFilter('members') && organization.meta.packages.isMembersTrial" class="secundary-box selectable with-button icon trial" @click="openPackages">
+        <p v-if="!hideTrial && !shouldFilter('members') && organization.meta.packages.isMembersTrial" class="secundary-box selectable with-button icon trial" @click="openPackages">
             {{ $t('Je test momenteel de ledenadministratie functie. Je ledenportaal staat nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.') }}
 
             <button class="button text" type="button">
