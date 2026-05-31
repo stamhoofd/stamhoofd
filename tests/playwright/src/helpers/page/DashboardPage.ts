@@ -10,7 +10,7 @@ export enum DashboardTab {
 
 const dashboardTabLabels: Record<DashboardTab, string> = {
     [DashboardTab.Events]: 'Activiteiten',
-    [DashboardTab.Webshops]: 'Verkoop',
+    [DashboardTab.Webshops]: 'Verkopen',
 };
 
 export class DashboardPage {
@@ -82,7 +82,7 @@ export class DashboardPage {
 
         const deadline = Date.now() + 30000;
         while (Date.now() < deadline) {
-            const dashboardVisible = await this.page.getByTestId('Meer').isVisible().catch(() => false);
+            const dashboardVisible = await this.page.getByText('Meer', { exact: true }).isVisible().catch(() => false);
             if (dashboardVisible) {
                 return 'dashboard' as const;
             }
