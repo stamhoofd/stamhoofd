@@ -38,6 +38,7 @@ export class OrderActionBuilder {
                 name: OrderStatusHelper.getName(status),
                 needsSelection: true,
                 allowAutoSelectAll: false,
+                destructive: status === OrderStatus.Canceled,
                 handler: async (orders: PrivateOrder[]) => {
                     await this.markAs(orders, status);
                 },
@@ -167,7 +168,7 @@ export class OrderActionBuilder {
             new MenuTableAction({
                 name: $t(`%V5`),
                 enabled: () => this.webshopManager.hasWrite,
-                icon: 'flag',
+                icon: 'card',
                 priority: 0,
                 groupIndex: 2,
                 needsSelection: true,
@@ -230,6 +231,7 @@ export class OrderActionBuilder {
             new InMemoryTableAction({
                 name: $t(`%CJ`),
                 icon: 'trash',
+                destructive: true,
                 enabled: () => this.webshopManager.hasWrite,
                 priority: 0,
                 groupIndex: 5,

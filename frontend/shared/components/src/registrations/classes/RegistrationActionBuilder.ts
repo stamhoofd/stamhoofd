@@ -501,6 +501,7 @@ export class RegistrationActionBuilder {
     private getExportToExcelAction() {
         return new AsyncTableAction({
             name: $t('%17U'),
+            icon: 'file-excel',
             priority: 0,
             groupIndex: 0,
             handler: async (selection: TableActionSelection<PlatformRegistration>) => {
@@ -512,6 +513,7 @@ export class RegistrationActionBuilder {
     private getExportToPdfAction() {
         return new InMemoryTableAction({
             name: $t('%17V'),
+            icon: 'file-pdf',
             priority: 0,
             groupIndex: 0,
             fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {

@@ -171,6 +171,7 @@ export class PaymentActionBuilder {
                 enabled: () => !this.isSettingPaymentStatus,
                 needsSelection: true,
                 allowAutoSelectAll: false,
+                destructive: true,
                 handler: async (payments: PaymentGeneral[]) => {
                     const filteredPayments = payments.filter(payment => (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created) && (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale));
                     if (filteredPayments.length === 0) {

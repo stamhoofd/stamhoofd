@@ -61,6 +61,7 @@ export class PlatformMembershipActionBuilder {
     private getExportToExcelAction() {
         return new AsyncTableAction({
             name: $t('%17U'),
+            icon: 'file-pdf',
             priority: 0,
             groupIndex: 0,
             handler: async (selection: TableActionSelection<PlatformMembership>) => {

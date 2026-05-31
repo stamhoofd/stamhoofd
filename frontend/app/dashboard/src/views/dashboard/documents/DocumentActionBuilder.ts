@@ -84,6 +84,7 @@ export class DocumentActionBuilder {
             new InMemoryTableAction({
                 name: $t(`%CJ`),
                 icon: 'trash',
+                destructive: true,
                 priority: 1,
                 groupIndex: 3,
                 needsSelection: true,
