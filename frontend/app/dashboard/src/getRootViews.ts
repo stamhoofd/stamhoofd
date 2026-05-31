@@ -481,10 +481,10 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             } else {
                                 tabs.push(membersTab);
                             }
-                        }
 
-                        if (platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', reactiveSession)) {
-                            tabs.push(calendarTab);
+                            if (platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', reactiveSession)) {
+                                tabs.push(calendarTab);
+                            }
                         }
 
                         if (organization?.meta.packages.useWebshops && STAMHOOFD.domains.webshop) {
