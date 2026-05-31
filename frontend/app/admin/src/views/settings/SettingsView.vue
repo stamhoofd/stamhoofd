@@ -15,7 +15,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%5d') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5e') }}
                     </p>
                     <template #right>
@@ -30,7 +30,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%3K') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3J') }}
                     </p>
                     <template #right>
@@ -45,7 +45,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%3i') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3e') }}
                     </p>
                     <template #right>
@@ -60,7 +60,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%3M') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3L') }}
                     </p>
                     <template #right>
@@ -75,7 +75,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%3a') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3P') }}
                     </p>
                     <template #right>
@@ -90,7 +90,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%8h') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5f') }}
                     </p>
                     <template #right>
@@ -105,7 +105,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%CV') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%8c') }}
                     </p>
                     <template #right>
@@ -120,7 +120,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%5g') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5h') }}
                     </p>
                     <template #right>
@@ -135,7 +135,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%89') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%8A') }}
                     </p>
                     <template #right>
@@ -154,7 +154,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%Or') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3b') }}
                     </p>
                     <template #right>
@@ -169,7 +169,7 @@
                     <h2 class="style-title-list">
                         {{ platform.config.financialSupport?.title || FinancialSupportSettings.defaultTitle }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5i') }}
                     </p>
                     <template #right>
@@ -184,7 +184,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%vY') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5j') }}
                     </p>
                     <template #right>
@@ -199,7 +199,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%5k') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5l') }}
                     </p>
                     <template #right>
@@ -218,7 +218,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%1EJ') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%HN') }}
                     </p>
                     <template #right>
@@ -233,7 +233,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%1DD') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%HO') }}
                     </p>
                     <template #right>
@@ -252,7 +252,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%3M') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3L') }}
                     </p>
                     <template #right>
@@ -267,7 +267,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%3a') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%3P') }}
                     </p>
                     <template #right>
@@ -282,7 +282,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%8h') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5f') }}
                     </p>
                     <template #right>
@@ -297,7 +297,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%CV') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%8c') }}
                     </p>
                     <template #right>
@@ -312,7 +312,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%5g') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%5h') }}
                     </p>
                     <template #right>
@@ -327,7 +327,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%89') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%8A') }}
                     </p>
                     <template #right>
@@ -346,7 +346,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%HD') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%HR') }}
                     </p>
                     <template #right>
@@ -361,7 +361,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%2b') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%HS') }}
                     </p>
                     <template #right>
@@ -376,7 +376,7 @@
                     <h2 class="style-title-list">
                         {{ $t('%12') }}
                     </h2>
-                    <p class="style-description">
+                    <p class="style-description-small">
                         {{ $t('%HT') }}
                     </p>
                     <template #right>
@@ -403,7 +403,7 @@ import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
-import type { OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration} from '@stamhoofd/structures';
+import type { OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, Platform, PlatformConfig } from '@stamhoofd/structures';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
