@@ -465,8 +465,11 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                         const organization = reactiveSession.organization;
 
                         const tabs: (TabBarItem | TabBarItemGroup)[] = [
-                            startTab,
                         ];
+
+                        if (STAMHOOFD.userMode === 'platform') {
+                            tabs.push(startTab);
+                        }
 
                         if (organization?.meta.packages.useMembers || STAMHOOFD.environment === 'development') {
                             tabs.push(membersTab);
@@ -482,6 +485,10 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             }
                         }
 
+                        if (tabs.length === 0) {
+                            tabs.push(startTab);
+                        }
+
                         const moreTab = new TabBarItemGroup({
                             icon: 'category',
                             name: $t(`%GZ`),
@@ -495,9 +502,14 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             moreTab.items.unshift(documentsTab);
                             moreTab.items.unshift(financesTab);
                             moreTab.items.unshift(communicationTab);
+
+                            if (STAMHOOFD.userMode === 'organization') {
+                                // In Stamhoofd we show settings in the top bar
+                                tabs.push(settingsTab);
+                            } else {
                             moreTab.items.unshift(settingsTab);
                         }
-                        else {
+                        } else {
                             if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
                                 moreTab.items.unshift(financesTab);
                             }
