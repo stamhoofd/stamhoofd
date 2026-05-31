@@ -11,6 +11,8 @@
                         {{ group.settings.period.nameShort }}
                     </span>
                 </h1>
+                <BillingWarningBox filter-types="members" class="data-table-prefix" />
+
                 <p v-if="canCreateEvent" class="info-box">
                     {{ $t('%1NE') }}
                     <span class="button text inherit-color" @click="convertToEvent">
@@ -29,8 +31,6 @@
                         {{ $t('%LW') }}
                     </template>
                 </p>
-
-                <BillingWarningBox filter-types="members" class="data-table-prefix" />
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
