@@ -139,6 +139,7 @@
 <script setup lang="ts">
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
+import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -146,6 +147,8 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
+import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
@@ -155,18 +158,14 @@ import { Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
-import { useSwitchablePeriod } from './useSwitchablePeriod';
-import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
 import MembersChecklistView from '../dashboard/settings/MembersChecklistView.vue';
+import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
 import GroupCategoryBox from './GroupCategoryBox.vue';
-import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
-import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
-import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
+import { useSwitchablePeriod } from './useSwitchablePeriod';
 
 const organization = useRequiredOrganization();
 const context = useContext();
 const $navigate = useNavigate();
-const collapsed = useCollapsed('leden');
 const platform = usePlatform();
 const organizationManager = useOrganizationManager();
 const present = usePresent();
