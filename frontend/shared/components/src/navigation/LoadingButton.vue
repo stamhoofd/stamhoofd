@@ -29,8 +29,7 @@ export default class LoadingButton extends VueComponent {
             setTimeout(() => {
                 this.delayLoading = false;
             }, 500);
-        }
-        else {
+        } else {
             if (val) {
                 this.delayLoading = true;
             }
@@ -44,7 +43,7 @@ export default class LoadingButton extends VueComponent {
 .loading-button {
     position: relative;
     display: block;
-    max-width: max-content;
+    //max-width: max-content;
 
     &:first-child:last-child {
         // Fixes whitespace taking up space
