@@ -245,10 +245,10 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import listIllustrationSrc from '@stamhoofd/assets/images/illustrations/list.svg'
-import scannerIllustrationSrc from '@stamhoofd/assets/images/illustrations/scanner.svg'
+import listIllustrationSrc from '@stamhoofd/assets/images/illustrations/list.svg';
+import scannerIllustrationSrc from '@stamhoofd/assets/images/illustrations/scanner.svg';
 import teamIllustrationSrc from '@stamhoofd/assets/images/illustrations/team.svg';
-import userIllustrationSrc from '@stamhoofd/assets/images/illustrations/user.svg'
+import userIllustrationSrc from '@stamhoofd/assets/images/illustrations/user.svg';
 import { Checkbox, DateSelection, NumberInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
@@ -386,7 +386,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: {
                 if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
-                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalaccounts)."
+                    return "Je moet eerst Bancontact Pay | Wero activeren via de betaalinstellingen (Instellingen > Betaalaccounts)."
                 }
                 break
             }

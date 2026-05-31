@@ -409,8 +409,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { Checkbox } from '@stamhoofd/components';
+import { BackButton, CenteredMessage, Checkbox, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, EmailTemplate, PaymentMethod, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -847,7 +846,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         list.push({
             icon: "bank",
             title: "Stel online betalingen in",
-            description: this.organization.address.country === Country.Netherlands ? "Zorg dat bestellers via iDEAL of creditcard kunnen betalen." : "Zorg dat bestellers via Bancontact, Payconiq of creditcard kunnen betalen.",
+            description: this.organization.address.country === Country.Netherlands ? "Zorg dat bestellers via iDEAL of creditcard kunnen betalen." : "Zorg dat bestellers via Bancontact of creditcard kunnen betalen.",
             action: () => this.editPaymentMethods(),
             done: this.webshopManager.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.CreditCard) ||
                   this.webshopManager.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.iDEAL) ||

@@ -22,27 +22,6 @@
             </a>
         </p>
 
-        <p v-if="!getPaymentMethod('Bancontact') && getPaymentMethod('Payconiq')" :class="'warning-box'">
-            We raden het gebruik van Payconiq af. Het is tijd om over te schakelen en Bancontact te gebruiken. Dit is veel stabieler en geeft minder problemen.
-            <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" target="_blank" class="button text">
-                Meer info
-            </a>
-        </p>
-
-        <p v-if="getPaymentMethod('Bancontact') && getPaymentMethod('Payconiq') && !isWero" :class="'warning-box'">
-            Vanaf 16 maart zal Payconiq niet meer zichtbaar zijn.
-            <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" target="_blank" class="button text">
-                Meer info
-            </a>
-        </p>
-
-        <p v-if="getPaymentMethod('Bancontact') && getPaymentMethod('Payconiq') && isWero" :class="'warning-box'">
-            Je kan Payconiq (nu Bancontact Pay | Wero) niet langer combineren met Bancontact. Bancontact is nu voldoende.
-            <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" target="_blank" class="button text">
-                Meer info
-            </a>
-        </p>
-
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(showPrices && getPaymentMethod(method) && getDescription(method))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
                 <Checkbox slot="left" :checked="getPaymentMethod(method)" :disabled="!canEnablePaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
@@ -145,7 +124,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, Dropdown, ErrorBox, IBANInput,LoadingView,PermyriadInput,PriceInput,Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, Validator } from "@stamhoofd/components";
+import { Checkbox, Dropdown, ErrorBox, IBANInput, LoadingView, PermyriadInput, PriceInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { SessionManager } from "@stamhoofd/networking";
 import { AdministrationFeeSettings, Country, isBancontactPay, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings, Webshop } from "@stamhoofd/structures";
@@ -362,13 +341,8 @@ export default class EditPaymentMethodsBox extends Mixins(NavigationMixin) {
         r.push(PaymentMethod.Bancontact)
 
         // Force a given ordering
-        if ((this.country == Country.Belgium && this.canEnablePaymentMethod(PaymentMethod.Payconiq)) || this.getPaymentMethod(PaymentMethod.Payconiq)) {
-
-            // Disable Payconiq if Bancontact is enabled
-            if (!this.canEnablePaymentMethod(PaymentMethod.Bancontact) || this.getPaymentMethod(PaymentMethod.Payconiq) || !isBancontactPay()) {
-                // Only allowed as legacy fallover
-                r.push(PaymentMethod.Payconiq)
-            }
+        if (this.canEnablePaymentMethod(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
         }
 
         r.push(PaymentMethod.CreditCard)
@@ -513,7 +487,7 @@ export default class EditPaymentMethodsBox extends Mixins(NavigationMixin) {
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: {
                 if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
-                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalaccounts)."
+                    return "Je moet eerst Bancontact Pay | Wero activeren via de betaalinstellingen (Instellingen > Betaalaccounts)."
                 }
                 break
             }

@@ -6,7 +6,7 @@
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod == 'Bancontact' && hasNonBancontact" class="style-tag inline-first">Meest gebruikt</span>
+                    <span v-if="paymentMethod == 'Bancontact' && bancontactInfoMessage" class="style-tag inline-first">{{ bancontactInfoMessage }}</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}
@@ -87,16 +87,13 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Bancontact) && this.organization.address.country != Country.Netherlands) {
-            r.push(PaymentMethod.Bancontact)
+        if (methods.includes(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Payconiq)) {
-            if (!isBancontactPay() || !methods.includes(PaymentMethod.Bancontact)) {
-                // Don't add it
-                r.push(PaymentMethod.Payconiq)
-            }
+        if (methods.includes(PaymentMethod.Bancontact) && this.organization.address.country != Country.Netherlands) {
+            r.push(PaymentMethod.Bancontact)
         }
 
         // Force a given ordering
@@ -118,7 +115,6 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         if (methods.includes(PaymentMethod.Transfer)) {
             r.push(PaymentMethod.Transfer)
         }
-        
 
         // Others
         r.push(...methods.filter(p => p != PaymentMethod.Payconiq && p != PaymentMethod.Bancontact && p != PaymentMethod.iDEAL && p != PaymentMethod.CreditCard && p != PaymentMethod.Transfer))
@@ -126,10 +122,23 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         return r
     }
 
-    get hasNonBancontact() {
+    get hasOtherOnlinePaymentMethodBesidesBancontact() {
         const hasTransfer = this.paymentMethods.includes(PaymentMethod.Transfer) ? 1 : 0
         const hasPOS = this.paymentMethods.includes(PaymentMethod.PointOfSale) ? 1 : 0
-        return this.paymentMethods.length > 1 || !!hasTransfer || !!hasPOS
+
+        return this.paymentMethods.length > (hasTransfer + hasPOS + 1);
+    }
+
+    get bancontactInfoMessage() {
+        if(this.hasOtherOnlinePaymentMethodBesidesBancontact) {
+            if(this.paymentMethods.includes(PaymentMethod.Payconiq)) {
+                return 'Alternatief';
+            }
+
+            return 'Meest gebruikt';
+        }
+
+        return null;
     }
 
     getName(paymentMethod: PaymentMethod): string {
