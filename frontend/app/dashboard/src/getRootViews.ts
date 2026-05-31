@@ -1,5 +1,5 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import AccountSwitcher from '@stamhoofd/components/context/AccountSwitcher.vue';
@@ -116,8 +116,7 @@ export async function loadSessionFromUrl() {
 
     if (STAMHOOFD.singleOrganization) {
         session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
-    }
-    else if (parts[1] && !ignoreUris.includes(parts[1])) {
+    } else if (parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
 
         // Load organization
@@ -133,8 +132,7 @@ export async function loadSessionFromUrl() {
             });
             const organization = response.data;
             session = await sessionFromOrganization({ organization });
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to load organization from uri', uri);
             session = null;
         }
@@ -251,8 +249,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
                             // Replace itself again after a successful login
                             const root = await getScopedAutoRoot(reactiveSession, options);
                             await ReplaceRootEventBus.sendEvent('replace', root);
-                        }
-                        else {
+                        } else {
                             throw new SimpleError({
                                 code: 'infinite_redirect',
                                 message: $t('%Jb'),
@@ -348,8 +345,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
             if (!isNaN(c) && WhatsNewCount - c > 0) {
                 whatsNewBadge.value = (WhatsNewCount - c).toString();
             }
-        }
-        else {
+        } else {
             localStorage.setItem('what-is-new', WhatsNewCount.toString());
         }
     };
@@ -443,8 +439,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                 },
             }),
         );
-    }
-    else if (STAMHOOFD.FEEDBACK_URL) {
+    } else if (STAMHOOFD.FEEDBACK_URL) {
         sharedMoreItems.push(
             new TabBarItem({
                 id: 'feedback',
@@ -507,15 +502,15 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                                 // In Stamhoofd we show settings in the top bar
                                 tabs.push(settingsTab);
                             } else {
-                            moreTab.items.unshift(settingsTab);
-                        }
+                                moreTab.items.unshift(settingsTab);
+                            }
                         } else {
                             if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
                                 moreTab.items.unshift(financesTab);
                             }
 
                             if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)
-                             || reactiveSession.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages)) {
+                                || reactiveSession.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages)) {
                                 moreTab.items.unshift(communicationTab);
                             }
                         }
