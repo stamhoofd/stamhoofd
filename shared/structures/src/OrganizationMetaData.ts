@@ -123,6 +123,9 @@ export class OrganizationPackages extends AutoEncoder {
         console.warn('Deprected set on useWebshops');
     }
 
+    /**
+     * @deprecated
+     */
     get webshopLimit() {
         if (this.isActive(STPackageType.Webshops)) {
             return 10;
@@ -139,10 +142,16 @@ export class OrganizationPackages extends AutoEncoder {
         return 0;
     }
 
+    /**
+     * @deprecated
+     */
     get disableActivities() {
         return !this.useActivities;
     }
 
+    /**
+     * @deprecated
+     */
     get useActivities(): boolean {
         return this.isActive(STPackageType.Members) || this.isActive(STPackageType.TrialMembers);
     }
