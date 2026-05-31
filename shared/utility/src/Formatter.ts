@@ -27,8 +27,7 @@ export class Formatter {
     static iban(ibanRaw: string) {
         try {
             return friendlyFormatIBAN(ibanRaw) ?? ibanRaw; // 'NL91ABNA0517164300'
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Invalid IBAN', ibanRaw, e);
             return ibanRaw; // Return the raw IBAN if it cannot be formatted
         }
@@ -292,6 +291,14 @@ export class Formatter {
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         const year = datetime.year;
         return year + '-' + (datetime.month + '').padStart(2, '0') + '-' + (datetime.day + '').padStart(2, '0');
+    }
+
+    /**
+     * unwrapLeadingParentheses("(Hello world) (test test)"); // "Hello world (test test)"
+     * unwrapLeadingParentheses("Something else (test)");      // "Something else (test)"
+     */
+    static unwrapLeadingParentheses(value: string): string {
+        return value.replace(/^\(([^)]*)\)/, '$1');
     }
 
     /**
