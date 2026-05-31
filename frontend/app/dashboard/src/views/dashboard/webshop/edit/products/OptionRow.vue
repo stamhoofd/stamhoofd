@@ -31,7 +31,7 @@ import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import type { Option} from '@stamhoofd/structures';
+import type { Option } from '@stamhoofd/structures';
 import { OptionMenu } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
@@ -95,6 +95,7 @@ function showContextMenu(event: MouseEvent) {
         [
             new ContextMenuItem({
                 name: 'Verwijderen',
+                destructive: true,
                 icon: 'trash',
                 disabled: props.optionMenu.options.length <= 1,
                 action: () => {

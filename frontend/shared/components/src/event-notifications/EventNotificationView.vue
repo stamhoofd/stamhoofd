@@ -230,7 +230,7 @@ import ViewRecordCategoryAnswersBox from '#records/components/ViewRecordCategory
 import IconContainer from '#icons/IconContainer.vue';
 import ProgressIcon from '#icons/ProgressIcon.vue';
 import { ObjectDiffer } from '@stamhoofd/object-differ';
-import type { Event} from '@stamhoofd/structures';
+import type { Event } from '@stamhoofd/structures';
 import { AccessRight, EventNotification, EventNotificationStatus, EventNotificationStatusHelper, RecordCategory } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -365,8 +365,7 @@ async function doSubmit() {
         await save(EventNotification.patch({
             status: EventNotificationStatus.Pending,
         }));
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
@@ -406,8 +405,7 @@ async function doAccept() {
         await save(EventNotification.patch({
             status: EventNotificationStatus.Accepted,
         }));
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
@@ -479,8 +477,7 @@ async function doDelete() {
     try {
         await deleteModel();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
@@ -493,8 +490,7 @@ async function doDraft() {
         await save(EventNotification.patch({
             status: EventNotificationStatus.Draft,
         }));
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
@@ -546,6 +542,7 @@ async function showContextMenu(event: MouseEvent) {
             new ContextMenuItem({
                 name: $t(`%CJ`),
                 icon: 'trash',
+                destructive: true,
                 action: async () => {
                     await doDelete();
                 },

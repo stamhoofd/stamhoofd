@@ -22,7 +22,7 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import type { Organization} from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/structures';
 import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { computed } from 'vue';
@@ -135,8 +135,7 @@ function duplicate() {
 
     if (maxNumber > 0) {
         duplicated.settings.name = TranslatedString.create(duplicated.settings.name + ' (kopie ' + (maxNumber + 1) + ')');
-    }
-    else {
+    } else {
         duplicated.settings.name = TranslatedString.create(duplicated.settings.name + suffix);
     }
 
@@ -221,6 +220,7 @@ function showContextMenu(event: MouseEvent) {
 
             new ContextMenuItem({
                 name: 'Verwijderen',
+                destructive: true,
                 icon: 'trash',
                 action: () => {
                     const settings = OrganizationRegistrationPeriodSettings.patch({});

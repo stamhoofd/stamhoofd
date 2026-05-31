@@ -90,7 +90,7 @@
 <script setup lang="ts">
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import type { GroupOptionMenu} from '@stamhoofd/structures';
+import type { GroupOptionMenu } from '@stamhoofd/structures';
 import { Group, GroupOption, GroupSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import type { useErrors } from '../../errors/useErrors';
@@ -213,6 +213,7 @@ async function showContextMenu(event: MouseEvent) {
             new ContextMenuItem({
                 name: $t(`%CJ`),
                 icon: 'trash',
+                destructive: true,
                 action: async () => {
                     if (!await CenteredMessage.confirm($t('%66'), $t('%55'), $t('%67'))) {
                         return;

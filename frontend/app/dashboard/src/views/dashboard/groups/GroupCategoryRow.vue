@@ -23,7 +23,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { usePatchMoveUpDownIds } from '@stamhoofd/components/hooks/usePatchMoveUpDown.ts';
-import type { Organization} from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/structures';
 import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditCategoryGroupsView from './EditCategoryGroupsView.vue';
@@ -196,8 +196,10 @@ function createMergeContextMenuItem(category: GroupCategory, hasGrandParent = tr
     const name = hasGrandParent ? category.settings.name : 'Hoofdcategorie';
 
     return new ContextMenuItem({
+        icon: 'unbox',
         name,
         disabled: mergeDisabledWith(category),
+        destructive: true,
         action: async () => {
             const isConfirm = await CenteredMessage.confirm(`Ben je zeker dat je deze categorie wilt verwijderen en de inhoud verplaatsen naar ${name}?`, 'Verwijderen');
             if (!isConfirm) return;
@@ -230,11 +232,14 @@ async function showContextMenu(event: MouseEvent) {
 
         [
             new ContextMenuItem({
+                icon: 'folder',
                 name: 'Verplaats naar',
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
+                            icon: 'folder',
                             name: 'Bovenliggende categorie',
+                            description: grandParentCategory.value?.settings.name,
                             disabled: !grandParentCategory.value,
                             action: () => {
                                 moveTo(grandParentCategory.value!);
@@ -244,6 +249,7 @@ async function showContextMenu(event: MouseEvent) {
                     ],
                     subCategories.value.map(cat =>
                         new ContextMenuItem({
+                            icon: 'folder',
                             name: cat.settings.name,
                             disabled: cat.groupIds.length > 0,
                             action: () => {
@@ -255,7 +261,9 @@ async function showContextMenu(event: MouseEvent) {
                 ]),
             }),
             new ContextMenuItem({
+                icon: 'unbox',
                 name: 'Verwijder en verplaats inhoud naar',
+                destructive: true,
                 disabled: !canDeleteOrRename.value || (props.category.groupIds.length === 0 && props.category.categoryIds.length === 0),
                 childMenu: new ContextMenu([
                     [
@@ -266,6 +274,7 @@ async function showContextMenu(event: MouseEvent) {
             }),
             new ContextMenuItem({
                 name: 'Verwijderen',
+                destructive: true,
                 icon: 'trash',
                 disabled: !canDeleteOrRename.value,
                 action: async () => {

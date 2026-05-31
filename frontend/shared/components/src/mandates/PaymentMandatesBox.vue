@@ -28,15 +28,15 @@ import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu';
 import { Toast } from '#overlays/Toast';
 
 const props = withDefaults(defineProps<{
-    payingOrganizationId?: string | null,
-    sellingOrganizationId: string, 
+    payingOrganizationId?: string | null;
+    sellingOrganizationId: string;
 }>(), {
-    payingOrganizationId: null, 
+    payingOrganizationId: null,
 });
 
 const errors = useErrors();
 
-const {mandates, deleteMandate: doDeleteMandate, updatingMandates, setDefaultMandate} = useOrganizationPaymentMandates({
+const { mandates, deleteMandate: doDeleteMandate, updatingMandates, setDefaultMandate } = useOrganizationPaymentMandates({
     payingOrganizationId: props.payingOrganizationId,
     sellingOrganizationId: props.sellingOrganizationId,
     errors,
@@ -54,20 +54,21 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
                 icon: 'success',
                 disabled: isDefault,
                 action: async () => {
-                    await setDefaultMandate(mandateId)
+                    await setDefaultMandate(mandateId);
                 },
             }),
 
             new ContextMenuItem({
                 name: $t(`%CJ`),
                 icon: 'trash',
+                destructive: true,
                 action: async () => {
-                    await deleteMandate(mandateId)
+                    await deleteMandate(mandateId);
                 },
             }),
         ],
     ]);
-    await menu.show({ clickEvent: event })
+    await menu.show({ clickEvent: event });
 }
 
 async function deleteMandate(mandateId: string) {
@@ -78,13 +79,13 @@ async function deleteMandate(mandateId: string) {
 
     if (!await CenteredMessage.confirm({
         title: $t('%1UA'),
-        requireCheckbox: $t('%1T7', {cardNumber: mandate?.name ?? $t('de bankkaart')}),
+        requireCheckbox: $t('%1T7', { cardNumber: mandate?.name ?? $t('de bankkaart') }),
         confirmText: $t('%CJ'),
-        destructive: true
+        destructive: true,
     })) {
         return;
     }
-    await doDeleteMandate(mandateId)
+    await doDeleteMandate(mandateId);
 }
 
 </script>

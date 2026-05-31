@@ -82,6 +82,7 @@ function showContextMenu(event: MouseEvent) {
             new ContextMenuItem({
                 name: $t(`%11e`),
                 icon: 'trash',
+                destructive: true,
                 action: () => deleteCategory(),
             }),
         ],

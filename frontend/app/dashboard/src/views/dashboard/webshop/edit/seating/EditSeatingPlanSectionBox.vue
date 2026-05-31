@@ -111,8 +111,7 @@ useValidation(errors.validator, () => {
 function storeSeatEl(el: HTMLInputElement | null, uuid: string) {
     if (el === null) {
         seatElementsMap.delete(uuid);
-    }
-    else {
+    } else {
         seatElementsMap.set(uuid, el);
     }
 }
@@ -281,8 +280,7 @@ function validate() {
                 code: 'invalid_row',
                 message: `De ${index + 1}${index >= 1 ? 'de' : 'ste'} rij (van boven) is ongeldig. Kijk of de rij een letter/cijfer heeft gekregen en of die uniek is.`,
             }));
-        }
-        else {
+        } else {
             for (const [seatIndex, seat] of row.seats.entries()) {
                 if (isSeatInvalid(row, seat)) {
                     se.addError(new SimpleError({
@@ -415,8 +413,7 @@ const onKey = (event: KeyboardEvent) => {
 
             // Prevent default: don't delete input text
             event.preventDefault();
-        }
-        else {
+        } else {
             // First delete contents, and only then the seat
             const seat = selectedSeats.value[0];
             backspaceSeat(seat, event);
@@ -449,8 +446,7 @@ const onKey = (event: KeyboardEvent) => {
             const newSeat = getSeatAt(seat.x + seat.width / 2, seat.y + seat.height + seat.height / 2);
             if (newSeat) {
                 newSeats.push(newSeat);
-            }
-            else {
+            } else {
                 // Not possible
                 return;
             }
@@ -462,8 +458,7 @@ const onKey = (event: KeyboardEvent) => {
         if (newSeats.length === selectedSeats.value.length) {
             if (newSeats.length === 1) {
                 selectSingleSeat(newSeats[0]);
-            }
-            else {
+            } else {
                 selectedSeats.value = newSeats;
                 blurAll();
             }
@@ -480,8 +475,7 @@ const onKey = (event: KeyboardEvent) => {
             const newSeat = getSeatAt(seat.x + seat.width / 2, seat.y - seat.height / 2);
             if (newSeat) {
                 newSeats.push(newSeat);
-            }
-            else {
+            } else {
                 // Not possible
                 newSeats.push(seat);
             }
@@ -493,8 +487,7 @@ const onKey = (event: KeyboardEvent) => {
         if (newSeats.length === selectedSeats.value.length) {
             if (newSeats.length === 1) {
                 selectSingleSeat(newSeats[0]);
-            }
-            else {
+            } else {
                 selectedSeats.value = newSeats;
                 blurAll();
             }
@@ -515,8 +508,7 @@ const onKey = (event: KeyboardEvent) => {
             const index = row.seats.indexOf(seat);
             if (index > 0) {
                 newSeats.push(row.seats[index - 1]);
-            }
-            else {
+            } else {
                 // Not possible
                 newSeats.push(seat);
             }
@@ -528,8 +520,7 @@ const onKey = (event: KeyboardEvent) => {
         if (newSeats.length === selectedSeats.value.length) {
             if (newSeats.length === 1) {
                 selectSingleSeat(newSeats[0]);
-            }
-            else {
+            } else {
                 selectedSeats.value = newSeats;
                 blurAll();
             }
@@ -550,8 +541,7 @@ const onKey = (event: KeyboardEvent) => {
             const index = row.seats.indexOf(seat);
             if (index >= 0 && index < row.seats.length - 1) {
                 newSeats.push(row.seats[index + 1]);
-            }
-            else {
+            } else {
                 // Not possible
                 newSeats.push(seat);
             }
@@ -563,8 +553,7 @@ const onKey = (event: KeyboardEvent) => {
         if (newSeats.length === selectedSeats.value.length) {
             if (newSeats.length === 1) {
                 selectSingleSeat(newSeats[0]);
-            }
-            else {
+            } else {
                 selectedSeats.value = newSeats;
                 blurAll();
             }
@@ -775,8 +764,7 @@ function selectSeat(seat: SeatingPlanSeat, event: Event) {
     if (shiftPressed) {
         if (selectedSeats.value.length === 0) {
             // Select first behaviour
-        }
-        else {
+        } else {
             const lastSelectedSeat = selectedSeats.value[selectedSeats.value.length - 1];
             const lastSelectedRowIndex = rows.value.findIndex(r => r.seats.includes(lastSelectedSeat));
             const currentRowIndex = rows.value.findIndex(r => r.seats.includes(seat));
@@ -816,8 +804,7 @@ function selectSeat(seat: SeatingPlanSeat, event: Event) {
                 if (seatIndex >= row.seats.length - 1) {
                     rowIndex++;
                     seatIndex = 0;
-                }
-                else {
+                } else {
                     seatIndex++;
                 }
             }
@@ -836,8 +823,7 @@ function selectSeat(seat: SeatingPlanSeat, event: Event) {
             if (selectedSeats.value.includes(oneSeat)) {
                 // Only remove on click event (not focus)
                 selectedSeats.value = selectedSeats.value.filter(s => s !== oneSeat);
-            }
-            else {
+            } else {
                 selectedSeats.value.push(oneSeat);
             }
         }
@@ -849,8 +835,7 @@ function selectSeat(seat: SeatingPlanSeat, event: Event) {
             // Make sure we keep 'seat' at the end of the selectedSeats.value (for next shift action)
             selectedSeats.value = selectedSeats.value.filter(s => s !== seat);
             selectedSeats.value.push(seat);
-        }
-        else {
+        } else {
             blurInput(event);
         }
 
@@ -947,8 +932,7 @@ function selectSingleSeat(seat: SeatingPlanSeat) {
     if (ref) {
         selectedSeats.value = [seat];
         ref.select();
-    }
-    else {
+    } else {
         console.warn('Could not find input ' + seat.uuid);
     }
 }
@@ -1194,6 +1178,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                         }),
                         new ContextMenuItem({
                             name: 'Verwijderen',
+                            destructive: true,
                             icon: 'trash',
                             action: () => {
                                 const index = clonedSeatingPlanSection.value.rows.indexOf(row);
@@ -1384,8 +1369,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                                     if (!selected) {
                                         seat.markings.push(SeatMarkings.DisabledPerson);
                                     }
-                                }
-                                else {
+                                } else {
                                     if (selected) {
                                         seat.markings = seat.markings.filter(m => m !== SeatMarkings.DisabledPerson);
                                     }
@@ -1409,8 +1393,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                             for (const seat of selectedSeats.value) {
                                 if (seat.category !== category.id) {
                                     allMatching = false;
-                                }
-                                else {
+                                } else {
                                     oneMatching = true;
                                 }
                             }
@@ -1433,6 +1416,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
         new ContextMenuItem({
             name: 'Zetel verwijderen',
             icon: 'trash',
+            destructive: true,
             action: () => {
                 for (const seat of selectedSeats.value) {
                     const rowIndex = clonedSeatingPlanSection.value.rows.findIndex(r => r.seats.includes(seat));

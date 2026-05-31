@@ -88,6 +88,7 @@ function showContextMenu(event: MouseEvent) {
         [
             new ContextMenuItem({
                 name: 'Verwijderen',
+                destructive: true,
                 icon: 'trash',
                 action: () => {
                     doDelete().catch(console.error);

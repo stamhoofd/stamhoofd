@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
@@ -49,8 +49,7 @@ watch(root, (value) => {
                 (event as any).clipboardData.setData('text/plain', props.optionMenu.name || 'Naamloos');
                 (event as any).clipboardData.setData('web stamhoofd/webshop-option-menu', JSON.stringify(new VersionBox(props.optionMenu).encode({ version: Version })));
                 event.preventDefault();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error(e);
             }
         });
@@ -84,6 +83,7 @@ function showContextMenu(event: MouseEvent) {
                 : []),
             new ContextMenuItem({
                 name: 'Verwijderen',
+                destructive: true,
                 icon: 'trash',
                 action: () => {
                     doDelete();
