@@ -14,7 +14,8 @@ import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import type {
     MemberResponsibility,
     Platform as PlatformStruct,
-    SetupSteps } from '@stamhoofd/structures';
+    SetupSteps,
+} from '@stamhoofd/structures';
 import {
     AuditLogSource,
     GroupType,
@@ -24,7 +25,6 @@ import {
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService.js';
 import { GroupedThrottledQueue } from './GroupedThrottledQueue.js';
-import { AuthenticatedStructures } from './AuthenticatedStructures.js';
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
@@ -71,6 +71,10 @@ export class SetupStepUpdater {
     static isListening = false;
 
     static listen() {
+        if (STAMHOOFD.userMode === 'organization') {
+            return;
+        }
+
         if (this.isListening) {
             return;
         }
@@ -191,6 +195,10 @@ export class SetupStepUpdater {
     }
 
     static async updateForOrganizationId(id: string, options?: { types?: SetupStepType[] }) {
+        if (STAMHOOFD.userMode === 'organization') {
+            return;
+        }
+
         const organization = await Organization.getByID(id);
         if (!organization) {
             throw new SimpleError({
@@ -215,6 +223,10 @@ export class SetupStepUpdater {
             types?: SetupStepType[];
         } = {},
     ) {
+        if (STAMHOOFD.userMode === 'organization') {
+            return;
+        }
+
         if (!platform) {
             platform = await Platform.getSharedPrivateStruct();
             if (!platform) {
