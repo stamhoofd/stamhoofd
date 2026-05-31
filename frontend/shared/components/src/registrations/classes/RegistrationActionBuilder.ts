@@ -528,7 +528,7 @@ export class RegistrationActionBuilder {
     private getEmailAction() {
         return new AsyncTableAction({
             name: $t(`%1GW`),
-            icon: 'email',
+            icon: 'send',
             priority: 12,
             groupIndex: 3,
             handler: async (selection: TableActionSelection<PlatformRegistration>) => {
