@@ -8,6 +8,13 @@
     --rgb-shadow: 0; // Dark in white mode
     --rgb-background: 255; 
     --is-dark-mode: 0;
+    --color-saturation-factor: 1;
+    --color-primary-hue: 220deg;
+    --button-icon-size: 34px;
+    --st-popup-width: 750px;
+    --st-hr-margin: 20px;
+
+    --st-list-padding: 12px;
 
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};
@@ -16,8 +23,8 @@
     --st-horizontal-padding: 20px;
     --st-vertical-padding: 40px;
 
-    --popup-horizontal-padding: 40px;
-    --split-view-detail-horizontal-padding: 40px;
+    --popup-horizontal-padding: 30px;
+    --split-view-detail-horizontal-padding: 30px;
     --st-view-max-width: 700px; 
 
     --st-safe-area-top: 0px;
@@ -58,7 +65,7 @@
     --color-tertiary: #{$color-tertiary-original};
     --color-warning: #{$color-warning};
 
-    --block-width: 40px;
+    --block-width: 36px;
 
     @media (max-width: 400px) {
         --block-width: 35px;
@@ -122,7 +129,7 @@ body, :host {
     color: $color-dark;
 
     // Fix clarity city spacing
-    letter-spacing: -0.01em;
+    //letter-spacing: -0.01em;
 }
 
 body {
@@ -133,11 +140,12 @@ body,
 html, :host {
     margin: 0;
     padding: 0;
-    font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: "Metropolis", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
 
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    
+    //-moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizelegibility;
+
     -webkit-overflow-scrolling: auto;
     
     /* Disabel text resize as this doesn't work across animations */

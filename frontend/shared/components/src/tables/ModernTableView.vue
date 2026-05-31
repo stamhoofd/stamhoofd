@@ -387,8 +387,7 @@ const isAllSelected = computed({
     get: () => {
         if (markedRowsAreSelected.value) {
             return markedRows.value.size > 0 && markedRows.value.size === (props.tableObjectFetcher.totalFilteredCount ?? values.value.length);
-        }
-        else {
+        } else {
             return markedRows.value.size === 0;
         }
     },
@@ -607,8 +606,7 @@ async function showActions(isOnTop: boolean, event: MouseEvent) {
                 isAllSelected.value = true;
             },
         }));
-    }
-    else {
+    } else {
         actions.push(new AsyncTableAction({
             name: $t(`%126`),
             groupIndex: -1,
@@ -661,11 +659,9 @@ const errorMessage = computed(() => {
         let simpleErrors!: SimpleErrors;
         if (isSimpleError(errors)) {
             simpleErrors = new SimpleErrors(errors);
-        }
-        else if (isSimpleErrors(errors)) {
+        } else if (isSimpleErrors(errors)) {
             simpleErrors = errors;
-        }
-        else {
+        } else {
             simpleErrors = new SimpleErrors(new SimpleError({
                 code: 'unknown_error',
                 message: errors.message,
@@ -751,12 +747,10 @@ function toggleSort(column: Column<any, any>) {
     if (sortBy.value === column) {
         if (sortDirection.value === SortItemDirection.ASC) {
             sortDirection.value = SortItemDirection.DESC;
-        }
-        else {
+        } else {
             sortDirection.value = SortItemDirection.ASC;
         }
-    }
-    else {
+    } else {
         sortBy.value = column;
     }
     saveColumnConfiguration();
@@ -789,8 +783,7 @@ function getEventX(event: any) {
         for (const touch of touches) {
             x = touch.pageX;
         }
-    }
-    else {
+    } else {
         x = event.pageX;
     }
     return x;
@@ -843,8 +836,7 @@ async function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
             const r = visibleRows.value.find(r => r.currentIndex === index);
             if (r) {
                 setSelectionValue(r, !shiftMode);
-            }
-            else {
+            } else {
                 const v = values.value[index] ?? null;
                 if (v) {
                     setInvisibleSelectionValue(v, !shiftMode);
@@ -859,8 +851,7 @@ async function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
             if (r) {
                 setSelectionValue(r, shiftMode);
                 shiftStack.push(i);
-            }
-            else {
+            } else {
                 const v = values.value[i] ?? null;
                 if (v) {
                     setInvisibleSelectionValue(v, shiftMode);
@@ -920,8 +911,7 @@ async function onRightClickRow(row: VisibleRow<Value>, event: MouseEvent | Touch
         }));
 
         customFocusedRows.value = null;
-    }
-    else {
+    } else {
         selection = buildSelectionObject([row.value!], true);
 
         // Only focus this row
@@ -1069,8 +1059,7 @@ function mouseMove(event: MouseEvent | TouchEvent) {
             if (tableElement.value) {
                 tableElement.value.style.cursor = dragType.value === 'width' ? 'col-resize' : 'grabbing';
             }
-        }
-        else {
+        } else {
             return;
         }
     }
@@ -1083,8 +1072,7 @@ function mouseMove(event: MouseEvent | TouchEvent) {
         isDraggingColumn.value.renderWidth = Math.floor(isDraggingColumn.value.width);
 
         updateColumnWidth(isDraggingColumn.value, 'move', currentWidth);
-    }
-    else {
+    } else {
         // We swap columns if the startX of the column moves over the middle of a different column
         // Calculate how many columns we have moved in the X direction
         const startIndex = draggingInitialColumns.findIndex(c => c.id === isDraggingColumn.value?.id);
@@ -1101,8 +1089,7 @@ function mouseMove(event: MouseEvent | TouchEvent) {
             if (Math.abs(remainingDifference) > neededMove) {
                 remainingDifference -= column.width * shouldMove;
                 columnMoveIndex += shouldMove;
-            }
-            else {
+            } else {
                 break;
             }
         }
@@ -1249,8 +1236,7 @@ async function loadColumnConfiguration() {
                     const i = decoded.columns.findIndex(c => c.id === col.id);
                     if (i === -1) {
                         col.enabled = false;
-                    }
-                    else {
+                    } else {
                         const config = decoded.columns[i];
                         col.enabled = true;
                         col.width = config.width;
@@ -1284,8 +1270,7 @@ async function loadColumnConfiguration() {
         updateVisibleRows();
         updateRecommendedWidths();
         updateColumnWidth();
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
     }
 }
@@ -1302,8 +1287,7 @@ watch(columns, () => {
             // Redistribute
             updateColumnWidth();
         }
-    }
-    else {
+    } else {
         updateColumnWidth();
     }
     saveColumnConfiguration();
@@ -1528,8 +1512,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
                     // we hit the minimum width, so we need to distribute the width that we couldn't absorb
                     col.width = min;
                     // console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
-                }
-                else if (max !== undefined && col.width >= max) {
+                } else if (max !== undefined && col.width >= max) {
                     // we hit the minimum width, so we need to distribute the width that we couldn't absorb
                     col.width = max;
                     //
@@ -1546,8 +1529,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
         }
 
         // console.log("Done distributing with distributeWidth left: ", distributeWidth)
-    }
-    else {
+    } else {
         // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
         for (const column of affectedColumns) {
@@ -1566,8 +1548,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
                         break;
                     }
                 }
-            }
-            else {
+            } else {
                 column.width += distributeWidth;
                 column.renderWidth = Math.floor(column.width);
                 distributeWidth = 0;
@@ -1592,8 +1573,7 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
                         break;
                     }
                 }
-            }
-            else {
+            } else {
                 column.width += distributeWidth;
                 column.renderWidth = Math.floor(column.width);
                 distributeWidth = 0;
@@ -1683,8 +1663,7 @@ function isValueSelected(value: Value) {
 
     if (markedRowsAreSelected.value) {
         return found;
-    }
-    else {
+    } else {
         return !found;
     }
 }
@@ -1726,16 +1705,13 @@ function setInvisibleSelectionValue(value: Value, selected: boolean) {
     if (selected) {
         if (markedRowsAreSelected.value) {
             markedRows.set(value.id, value);
-        }
-        else {
+        } else {
             markedRows.delete(value.id);
         }
-    }
-    else {
+    } else {
         if (!markedRowsAreSelected.value) {
             markedRows.set(value.id, value);
-        }
-        else {
+        } else {
             markedRows.delete(value.id);
         }
     }
@@ -1777,8 +1753,7 @@ function getExpectedSelectionLength(): number {
 
     if (markedRowsAreSelected.value) {
         return markedRows.value.size;
-    }
-    else {
+    } else {
         return (props.tableObjectFetcher.totalFilteredCount ?? values.value.length ?? 0) - markedRows.value.size;
     }
 }
@@ -1841,8 +1816,7 @@ function getScrollElement(element: HTMLElement): HTMLElement {
         || style.overflowY === 'overlay'
     ) {
         return element;
-    }
-    else {
+    } else {
         if (!element.parentElement) {
             return document.documentElement;
         }
@@ -1883,12 +1857,10 @@ function updateVisibleRows() {
     if (props.tableObjectFetcher.totalFilteredCount !== null) {
         totalItems = props.tableObjectFetcher.totalFilteredCount;
         cachedProvisionalTotalItems = null;
-    }
-    else if (lastFilteredCount.value !== null) {
+    } else if (lastFilteredCount.value !== null) {
         totalItems = lastFilteredCount.value;
         cachedProvisionalTotalItems = totalItems;
-    }
-    else {
+    } else {
         totalItems = totalFilteredCount.value;
         cachedProvisionalTotalItems = null;
     }
@@ -2018,10 +1990,12 @@ defineExpose({
 }
 
 .table-column-content-style {
-    font-size: 16px;
+    font-size: 13px;
 }
 
 .column-style {
+    font-size: 14px;
+
     &[data-style="gray"] {
         color: $color-gray-5;
     }
@@ -2033,10 +2007,10 @@ defineExpose({
     &[data-style="success"], &[data-style="error"], &[data-style="info"], &[data-style="warn"], &[data-style="secundary"], &[data-style="tertiary"], &[data-style="tag-gray"] {
         > span {
             display: inline-block;
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: $font-weight-bold;
-            padding: 7px 8px;
+            letter-spacing: normal;
+            font-size: 13px;
+            font-weight: $font-weight-semibold;
+            padding: 6px 8px;
             border-radius: $border-radius;
 
             white-space: nowrap;

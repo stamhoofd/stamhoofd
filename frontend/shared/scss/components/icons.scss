@@ -39,7 +39,7 @@
         }
     }
 
-    &.small {
+    &.small, .button.text &, .button.primary &, .button.secundary & {
         width: 20px;
         height: 20px;
         font-size: 20px;
@@ -173,9 +173,10 @@
         font-family: st-icons !important;
         font-style: normal;
         font-weight: normal !important;
-
         vertical-align: middle !important;
+
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizelegibility;
     }
 }

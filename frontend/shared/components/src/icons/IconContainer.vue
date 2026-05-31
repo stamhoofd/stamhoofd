@@ -3,7 +3,7 @@
         <slot>
             <!-- fallback content -->
             <figure v-if="icon" :class="{pad: false && !!$slots.aside}">
-                <span class="icon" :class="icon" />
+                <span class="icon small" :class="icon" />
             </figure>
         </slot>
 
@@ -11,7 +11,7 @@
             <slot name="aside" />
         </aside>
         <aside v-else-if="asideIcon">
-            <span :class="'icon small ' + asideIcon" />
+            <span :class="'icon tiny ' + asideIcon" />
         </aside>
     </figure>
 </template>

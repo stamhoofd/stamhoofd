@@ -1,6 +1,6 @@
 @use "sass:color";
 
-$input-height-original: 43px;
+$input-height-original: 40px;
 $input-height: var(--input-height, $input-height-original);
 
 @media (max-width: 550px) {
@@ -85,13 +85,16 @@ $dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-
 // -------- Dark (black) -------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-dark-original: #1e1e1e; // #000716;
-$color-dark: var(--color-dark, $color-dark-original);
+$color-dark-original: #303032; 
+$color-dark: var(--color-dark, #{changeHue($color-dark-original, $color-primary-hue)});
 $dark-theme-color-dark: invertColor($color-dark-original, -8); // hsl(0deg, 0%, 90%);
 
-$color-dark-light-original: #4d4d4d;
+$color-darkest-original: black; 
+$color-darkest: var(--color-darkest, #{$color-darkest-original});
+$dark-theme-color-darkest: white;
 
-$color-dark-light: var(--color-dark-light, $color-dark-light-original);
+$color-dark-light-original: #5e5959;
+$color-dark-light: var(--color-dark-light, #{changeHue($color-dark-light-original, $color-primary-hue)});
 $dark-theme-color-dark-light: invertColor($color-dark-light-original, -8); // hsl(0deg, 0%, 80%);
 
 // -----------------------------------------------------------------------------
@@ -215,8 +218,8 @@ $color-gray-3: var(--color-gray-3, $color-gray-3-original);
 $dark-theme-color-gray-3: invertColor($color-gray-3-original, -8); //hsl(color.hue($color-gray-3-original), color.saturation($color-gray-3-original), calc(100% - #{color.lightness($color-gray-3-original)}));
 
 // Usage: descriptive text
-$color-gray-4-original: #5e5e5e;
-$color-gray-4: var(--color-gray-4, $color-gray-4-original);
+$color-gray-4-original: #5b5757;
+$color-gray-4: var(--color-gray-4, #{changeHue($color-gray-4-original, $color-primary-hue)});
 $dark-theme-color-gray-4: invertColor($color-gray-4-original, -8); //hsl(color.hue($color-gray-4-original), color.saturation($color-gray-4-original), calc(100% - #{color.lightness($color-gray-4-original)}));
 
 $color-gray-text: $color-gray-4;
@@ -382,6 +385,7 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     --color-background-shade: #{$dark-theme-color-background-shade};
     --color-background-shade-darker: #{$dark-theme-color-background-shade-darker};
 
+    --color-darkest: #{$dark-theme-color-darkest};
     --color-dark: #{$dark-theme-color-dark};
     --color-dark-light: #{$dark-theme-color-dark-light};
     --color-gray-1: #{$dark-theme-color-gray-1};

@@ -39,11 +39,11 @@ export default class STInputBox extends VueComponent {
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .st-input-box {
-    padding: 12px 0;
+    padding: 10px 0;
     display: block;
 
     > div {
-        max-width: 340px;
+        max-width: 315px;
 
         @media (max-width: 500px) {
             max-width: none;
@@ -51,7 +51,7 @@ export default class STInputBox extends VueComponent {
     }
 
     > h4:has(.button) {
-        max-width: 340px;
+        max-width: 315px;
 
         @media (max-width: 500px) {
             max-width: none;
@@ -128,7 +128,7 @@ export default class STInputBox extends VueComponent {
 
     > h4 + div {
         > * {
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         > *:first-child {

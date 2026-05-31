@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { injectHooks, usePop } from '@simonbackx/vue-app-navigation';
 
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
@@ -162,19 +162,16 @@ export default class ContextMenuView extends VueComponent {
                     if (this.right < viewPadding) {
                         this.right = viewPadding;
                     }
-                }
-                else {
+                } else {
                     this.right = viewPadding;
                 }
-            }
-            else {
+            } else {
                 if (this.left < viewPadding) {
                     this.left = viewPadding;
                 }
             }
             // - Math.max(0, width - (clientWidth - viewPadding - usedX);
-        }
-        else {
+        } else {
             this.right = Math.min(clientWidth - usedX, clientWidth - viewPadding - width);
 
             if (this.right < viewPadding) {
@@ -200,18 +197,15 @@ export default class ContextMenuView extends VueComponent {
                     if (this.bottom < viewPaddingBottom) {
                         this.bottom = viewPaddingBottom;
                     }
-                }
-                else {
+                } else {
                     this.bottom = viewPaddingBottom;
                 }
-            }
-            else {
+            } else {
                 if (this.top < viewPaddingTop) {
                     this.top = viewPaddingTop;
                 }
             }
-        }
-        else {
+        } else {
             this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height); // remove border
 
             if (this.bottom < viewPaddingBottom) {
@@ -260,8 +254,7 @@ export default class ContextMenuView extends VueComponent {
             if (instance) {
                 console.log('Pop child menu');
                 instance.pop(false);
-            }
-            else (
+            } else (
                 console.warn('Missing instance for childMenu')
             );
         }
@@ -373,8 +366,7 @@ export default class ContextMenuView extends VueComponent {
                     }
                 }, 150);
             }
-        }
-        else {
+        } else {
             this.setChildMenu(null);
         }
     }
@@ -485,8 +477,7 @@ export default class ContextMenuView extends VueComponent {
                 p2: { x: contextX2, y: contextY },
                 p3: { x: contextX2, y: contextY2 },
             };
-        }
-        else {
+        } else {
             return {
                 p1: { x: mouseX - 5, y: mouseY },
                 p2: { x: contextX, y: contextY },
@@ -789,14 +780,14 @@ export default class ContextMenuView extends VueComponent {
     position: fixed;
     z-index: 10000;
 
-    background: $color-background-shade-darker;
+    background: $color-background;
 
-    --color-current-background: #{$color-background-shade-darker};
-    --color-current-background-shade: #{$color-background-shade-darker-darker};
-    --color-current-background-shade-darker: #{$color-border};
+    --color-current-background: #{$color-background};
+    --color-current-background-shade: #{$color-background-shade};
+    --color-current-background-shade-darker: #{$color-background-shade-darker};
 
-    border: $border-width-thin solid $color-border-shade;
-    padding: 6px 15px;
+    border: $border-width-thin solid $color-border;
+    padding: 8px 20px;
 
     @extend .style-overlay-shadow;
     border-radius: $border-radius-modals;
@@ -807,8 +798,8 @@ export default class ContextMenuView extends VueComponent {
         min-width: 70vw;
     }
 
-    max-width: min(600px, 100vw);
-    max-width: min(600px, calc(100vw - 30px));
+    max-width: min(350px, 100vw);
+    max-width: min(350px, calc(100vw - 30px));
     overflow: hidden;
     overflow-y: auto;
 
@@ -824,10 +815,15 @@ export default class ContextMenuView extends VueComponent {
         flex-direction: row;
         align-items: center;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        min-height: 24px;
-        margin: 0 -9px;
-        padding: 4px 9px;
+        color: $color-dark;
+        min-height: 26px;
+        margin: 0 -15px;
+        padding: 4px 15px;
         border-radius: $border-radius;
+
+        .icon {
+            //color: $color-gray-text;
+        }
 
         // Fix for button width
         width: 100%;
@@ -844,7 +840,7 @@ export default class ContextMenuView extends VueComponent {
 
         .description {
             @extend .style-context-menu-item-description;
-            padding-top: 3px;
+            padding-top: 6px;
         }
 
         > .left {
@@ -910,15 +906,15 @@ export default class ContextMenuView extends VueComponent {
     }
 
     .context-menu-line {
-        background: $color-border-shade;
+        background: $color-border-lighter;
         border: 0;
         outline: 0;
         border-radius: $border-width-thin;
         height: $border-width-thin;
-        margin: 6px 0;
+        margin: 6px -20px;
 
         @media (max-width: 450px) {
-            margin: 6px 0;
+            margin: 6px -20px;
         }
     }
 }

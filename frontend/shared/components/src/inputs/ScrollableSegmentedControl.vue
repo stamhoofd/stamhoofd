@@ -94,7 +94,7 @@ watch(modelValue, (n, old) => {
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
-$segmented-control-height: var(--segmented-control-height, 60px);
+$segmented-control-height: var(--segmented-control-height, 50px);
 
 .st-navigation-bar {
     --segmented-control-height: 50px;
@@ -107,6 +107,10 @@ $segmented-control-height: var(--segmented-control-height, 60px);
 .scrollable-segmented-control {
     margin: var(--st-hr-margin, 30px) calc(-1 * var(--st-horizontal-padding, 40px));
     padding: 0 var(--st-horizontal-padding, 40px);
+
+    .input-with-buttons + & {
+        margin-top: 15px;
+    }
 
     h1 + & {
         margin-top: 0px;

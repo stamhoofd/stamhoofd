@@ -93,8 +93,7 @@ async function onClickButton(button: CenteredMessageButton) {
         button.loading = true;
         try {
             await button.action();
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
             button.loading = false;
             return;
@@ -160,8 +159,7 @@ function focusNextButton() {
     if (focusedButton !== -1) {
         if (focusedButton < buttons.length - 1) {
             button = buttons[focusedButton + 1];
-        }
-        else {
+        } else {
             button = buttons[0];
         }
     }
@@ -263,7 +261,7 @@ function onKey(event: KeyboardEvent) {
             .buttons {
                 display: flex;
                 flex-direction: column;
-                gap: 10px;
+                gap: 7px;
                 padding-top: 20px;
             }
         }
@@ -280,7 +278,7 @@ function onKey(event: KeyboardEvent) {
                 flex-wrap: wrap;
                 justify-content: flex-start;
                 flex-direction: row-reverse;
-                gap: 10px;
+                gap: 7px;
             }
 
         }
@@ -292,7 +290,7 @@ function onKey(event: KeyboardEvent) {
         .buttons {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 7px;
             padding-top: 20px;
 
             > * {
@@ -304,7 +302,9 @@ function onKey(event: KeyboardEvent) {
     .buttons.multiple-buttons {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        justify-items: stretch;
+        align-items: stretch;
+        gap: 7px;
         padding-top: 20px;
     }
 
@@ -327,7 +327,7 @@ function onKey(event: KeyboardEvent) {
         @extend .style-title-2;
 
         + p {
-            @extend .style-description;
+            @extend .style-description-small;
             white-space: pre-wrap;
         }
     }

@@ -64,7 +64,7 @@ export default class SegmentedControl extends VueComponent {
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 $segmented-control-border-width: 1px;
-$segmented-control-height: 42px;
+$segmented-control-height: 38px;
 $segmented-control-inner-height: $segmented-control-height - $segmented-control-border-width * 2;
 
 $border-radius: 11px;

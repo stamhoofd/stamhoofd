@@ -266,7 +266,7 @@ button.st-list-item {
             outline: 0;
             height: $border-width-thin;
             width: 100%;
-            background: $color-border;
+            background: $color-border-lighter;
             border-radius: $border-width-thin/2;
             margin: 0;
             margin-right: calc(-1 * var(--custom-st-horizontal-padding, 15px));

@@ -64,7 +64,7 @@
         
         transition: transform 0.2s, opacity 0.2s;
 
-        height: 42px;
+        height: 40px;
         padding: 0 27px;
 
         white-space: nowrap;
@@ -581,6 +581,14 @@
             color: $color-primary;
         }
 
+        &.small {
+            --button-icon-size: 30px;
+        }
+
+        &.tiny {
+            --button-icon-size: 26px;
+        }
+
         body.native-iOS .st-navigation-bar &, body.web-iOS .st-navigation-bar & {
             background: $color-background-shade;
             color: $color-dark;
@@ -634,8 +642,8 @@
                 }
             }
 
-            width: 44px;
-            height: 44px;
+            width: calc(var(--button-icon-size, 34px) + 10px);
+            height: calc(var(--button-icon-size, 34px) + 10px);
             border-radius: 22px;
             text-align: center;
 
@@ -686,8 +694,8 @@
                 background: $color-primary;
             }
 
-            width: 36px;
-            height: 36px;
+            width: calc(var(--button-icon-size, 34px) + 2px);
+            height: calc(var(--button-icon-size, 34px) + 2px);
             border-radius: 20px;
             text-align: center;
 
@@ -711,8 +719,8 @@
                 position: absolute;
                 left: 50% !important;
                 right: auto !important;
-                width: 34px;
-                height: 34px;
+                width: var(--button-icon-size, 34px);
+                height: var(--button-icon-size, 34px);
                 top: 50% !important;
                 bottom: auto !important;
                 background-color: var(--color-current-background-shade, #{$color-background-shade});
@@ -776,8 +784,8 @@
                     position: absolute;
                     left: 50% !important;
                     right: auto !important;
-                    width: 34px;
-                    height: 34px;
+                    width: var(--button-icon-size, 34px);
+                    height: var(--button-icon-size, 34px);
                     top: 50% !important;
                     bottom: auto !important;
                     background-color: var(--color-current-background-shade, #{$color-background-shade});
@@ -790,7 +798,7 @@
                 }
 
                 &:before {
-                    transition: color 0.2s ease-out;
+                    transition: color 0.2s ease-out, transform 0.2s;
                 }
 
                 &:active {
@@ -882,7 +890,7 @@
 }
 
 .button.navigation {
-    font-size: 17px;
+    font-size: 14px;
     font-weight: $font-weight-semibold;
     color: $color-gray-4;
 
