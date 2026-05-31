@@ -51,7 +51,7 @@
                     </div>
                 </STInputBox>
 
-                <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox" data-testid="name-box">
+                <STInputBox :title="$t('%8B')" error-fields="name" :error-box="errors.errorBox" data-testid="name-box" class="max">
                     <input
                         id="organization-name"
                         ref="firstInput"
@@ -135,7 +135,7 @@ import { useRequestOwner } from '@stamhoofd/networking';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, RecordConfigurationFactory, RegisterCode } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import SignupAccountView from './SignupAccountView.vue';
@@ -230,8 +230,7 @@ async function checkName() {
             return;
         }
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         if (checkCount !== c || name.value !== nameCopy) {
             // Discard
             return;
@@ -273,8 +272,7 @@ function onPop() {
     // Go back using the history API
     else if (window.history.length > 1) {
         window.history.back();
-    }
-    else {
+    } else {
         // Go to marketing site
         window.location.href = 'https://' + LocalizedDomains.marketing;
     }
@@ -287,8 +285,7 @@ async function loadRegisterCode() {
         try {
             await Storage.keyValue.setItem('savedRegisterCode', JSON.stringify(props.initialRegisterCode));
             await Storage.keyValue.setItem('savedRegisterCodeDate', new Date().getTime() + '');
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -304,35 +301,30 @@ async function loadRegisterCode() {
                 if (parsed.code && parsed.organization) {
                     if (currentCount === null) {
                         registerCode = JSON.parse(saved);
-                    }
-                    else {
+                    } else {
                         reuseRegisterCode.value = true;
                         registerCode = null;
                     }
                 }
-            }
-            else {
+            } else {
                 // Expired or invalid
                 await Storage.keyValue.removeItem('savedRegisterCode');
                 await Storage.keyValue.removeItem('savedRegisterCodeDate');
                 registerCode = null;
             }
-        }
-        else {
+        } else {
             await Storage.keyValue.removeItem('savedRegisterCode');
             await Storage.keyValue.removeItem('savedRegisterCodeDate');
             registerCode = null;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 
     if (registerCode) {
         try {
             await validateCode();
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
             registerCode = null;
             await Storage.keyValue.removeItem('savedRegisterCode');
@@ -353,8 +345,7 @@ async function validateCode() {
             });
             validatedRegisterCode.value = response.data;
             acquisitionTypes.value = [AcquisitionType.Recommended];
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 if (e.hasCode('invalid_code')) {
                     throw new SimpleError({
@@ -421,8 +412,7 @@ async function goNext() {
         // Check register code
         try {
             await validateCode();
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
             loading.value = false;
             return;
@@ -454,8 +444,7 @@ async function goNext() {
         errors.errorBox = null;
         show(new ComponentWithProperties(SignupAccountView, { organization, registerCode: registerCode })).catch(console.error);
         plausible('signupGeneral');
-    }
-    catch (e) {
+    } catch (e) {
         loading.value = false;
         console.error(e);
         errors.errorBox = new ErrorBox(e);
@@ -537,8 +526,7 @@ function setBooleanType(type: AcquisitionType, enabled: boolean) {
 
     if (enabled) {
         acquisitionTypes.value.push(type);
-    }
-    else {
+    } else {
         acquisitionTypes.value.splice(index, 1);
     }
 }
