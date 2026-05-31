@@ -489,7 +489,7 @@ export class RegistrationActionBuilder {
         return new MenuTableAction({
             name: $t('%17e'),
             icon: 'download',
-            priority: 8,
+            priority: 13,
             groupIndex: 3,
             childActions: [
                 this.getExportToExcelAction(),
