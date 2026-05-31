@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { Storage } from '@stamhoofd/networking/Storage';
 
-export function useCollapsed(globalIdentifier: string) {
+export function useCollapsed(globalIdentifier: string, defaultCollapsed = false) {
     const collapsedSections = reactive(new Set<string>());
 
     const load = async () => {
@@ -13,8 +13,7 @@ export function useCollapsed(globalIdentifier: string) {
                     collapsedSections.add(value);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     };
@@ -23,8 +22,7 @@ export function useCollapsed(globalIdentifier: string) {
         try {
             const values = [...collapsedSections.values()];
             await Storage.keyValue.setItem('collapsed-' + globalIdentifier, JSON.stringify(values));
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     };
@@ -36,14 +34,16 @@ export function useCollapsed(globalIdentifier: string) {
             if (collapsedSections.has(id)) {
                 collapsedSections.delete(id);
                 save().catch(console.error);
-            }
-            else {
+            } else {
                 collapsedSections.add(id);
                 save().catch(console.error);
             }
         },
         isCollapsed(id: string) {
-            return collapsedSections.has(id);
+            if (defaultCollapsed === false) {
+                return collapsedSections.has(id);
+            }
+            return !collapsedSections.has(id);
         },
     };
 }

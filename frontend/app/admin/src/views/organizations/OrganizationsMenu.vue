@@ -46,17 +46,17 @@
 </template>
 
 <script setup lang="ts">
-import type { Route} from '@simonbackx/vue-app-navigation';
+import type { Route } from '@simonbackx/vue-app-navigation';
 import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { useCollapsed } from '@stamhoofd/dashboard/src/hooks/useCollapsed';
 import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 import OrganizationTagView from './OrganizationTagView.vue';
 import EditOrganizationTagsView from './tags/EditOrganizationTagsView.vue';
+import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
 
 enum Routes {
     All = 'all',

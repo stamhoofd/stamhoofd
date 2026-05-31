@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Formatter } from '@stamhoofd/utility';
 import type { Event } from './Event.js';
 import type { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { getActivePeriodIds } from './getActivePeriods.js';
@@ -162,6 +163,15 @@ export class Group extends AutoEncoder {
         }
 
         return false;
+    }
+
+    trimmedName(categoryName: string) {
+        let name = this.settings.name.toString();
+        if (name.toLocaleLowerCase().startsWith(categoryName.toLocaleLowerCase())) {
+            name = Formatter.capitalizeFirstLetter(Formatter.unwrapLeadingParentheses(name.slice(categoryName.length).trim()));
+        }
+
+        return name;
     }
 
     /**

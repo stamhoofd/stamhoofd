@@ -90,9 +90,9 @@ import type { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationP
 import { Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import { useCollapsed } from '../../hooks/useCollapsed';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import { useSwitchablePeriod } from './useSwitchablePeriod';
+import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
 
 const $organization = useOrganization();
 const $context = useContext();
@@ -183,7 +183,7 @@ const isCategoryDeactivated = (category: GroupCategoryTree) => {
 };
 
 const showAll = computed(() => {
-    return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1
+    return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1;
 });
 
 enum Routes {
@@ -300,8 +300,7 @@ async function setDefaultPeriod() {
 
         // The period
         Toast.success($t('%17o', { name: period.value.period.name })).show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }

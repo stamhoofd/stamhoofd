@@ -318,6 +318,15 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         }),
     });
 
+    const membersTabNew = new TabBarItem({
+        id: 'members',
+        icon: 'group',
+        name: $t(`%1EH`),
+        component: new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./views/members/MembersMenuModern.vue'), {}),
+        }),
+    });
+
     const calendarTab = new TabBarItem({
         id: 'events',
         icon: 'calendar',
@@ -466,8 +475,12 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             tabs.push(startTab);
                         }
 
-                        if (organization?.meta.packages.useMembers || STAMHOOFD.environment === 'development') {
-                            tabs.push(membersTab);
+                        if (organization?.meta.packages.useMembers) {
+                            if (manualFeatureFlag('new-members-tab', reactiveSession)) {
+                                tabs.push(membersTabNew);
+                            } else {
+                                tabs.push(membersTab);
+                            }
                         }
 
                         if (platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', reactiveSession)) {
