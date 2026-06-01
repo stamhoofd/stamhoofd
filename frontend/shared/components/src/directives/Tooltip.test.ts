@@ -5,8 +5,8 @@ import { mount } from '@vue/test-utils';
 import { page } from '@vitest/browser/context';
 import { defineComponent, h, withDirectives } from 'vue';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { TooltipDirective } from '@stamhoofd/components';
-import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
+import TooltipDirective from './Tooltip';
+import TestAppWithModalStackComponent from '../test/TestAppWithModalStackComponent.vue';
 
 // DO NOT COPY THIS PATTERN!
 // DO NOT COPY THIS PATTERN!

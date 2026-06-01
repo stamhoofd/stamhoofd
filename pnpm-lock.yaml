@@ -959,6 +959,9 @@ importers:
       '@simonbackx/vue-app-navigation':
         specifier: 2.18.1
         version: 2.18.1(tslib@2.8.1)(vue@3.5.17(typescript@5.9.3))
+      '@stamhoofd/assets':
+        specifier: '*'
+        version: link:../assets
       '@stamhoofd/frontend-excel-export':
         specifier: '*'
         version: link:../excel-export
@@ -977,6 +980,9 @@ importers:
       '@stamhoofd/object-differ':
         specifier: '*'
         version: link:../../../shared/object-differ
+      '@stamhoofd/scss':
+        specifier: '*'
+        version: link:../scss
       '@stamhoofd/structures':
         specifier: '*'
         version: link:../../../shared/structures
