@@ -95,7 +95,7 @@ export class DocumentTemplate extends QueryableModel {
             throw new SimpleError({
                 code: 'locked',
                 message: 'Document template is locked',
-                human: $t(`Dit document kan niet meer aangepast worden.`),
+                human: $t(`Dit document is vergrendeld en kan niet meer gewijzigd worden.`),
             });
         }
 
@@ -474,7 +474,7 @@ export class DocumentTemplate extends QueryableModel {
             throw new SimpleError({
                 code: 'locked',
                 message: 'Document template is locked',
-                human: $t(`Dit document kan niet meer aangepast worden.`),
+                human: $t(`Dit document is vergrendeld en kan niet meer gewijzigd worden.`),
             });
         }
 

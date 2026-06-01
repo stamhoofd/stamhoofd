@@ -16,6 +16,10 @@
                 </I18nComponent>
             </p>
 
+            <p v-if="isLocked" class="info-box">
+                {{ $t('Dit document is vergrendeld en kan niet meer gewijzigd worden.') }}
+            </p>
+
             <p v-if="isDraft" class="warning-box">
                 {{ $t('%KX') }}
             </p>
@@ -43,7 +47,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="isDraft || template.updatesEnabled" :selectable="true" class="left-center" @click="$navigate(Routes.Settings)">
+                <STListItem v-if="(isDraft || template.updatesEnabled) && !isLocked" :selectable="true" class="left-center" @click="$navigate(Routes.Settings)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
@@ -59,7 +63,7 @@
                 </STListItem>
             </STList>
 
-            <template v-if="canAlterUpdates">
+            <template v-if="canAlterUpdates && !isLocked">
                 <hr>
                 <h2>{{ $t('%Kc') }}</h2>
                 <p>{{ $t('%4C') }}</p>
@@ -92,7 +96,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="isDraft" :selectable="true" @click="publishTemplate()">
+                <STListItem v-if="isDraft && !isLocked" :selectable="true" @click="publishTemplate()">
                     <template #left>
                         <IconContainer icon="file-pdf" class="success">
                             <template #aside>
@@ -112,7 +116,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="!isDraft" :selectable="true" @click="draftTemplate()">
+                <STListItem v-if="!isDraft && !isLocked" :selectable="true" @click="draftTemplate()">
                     <template #left>
                         <IconContainer icon="file-pdf" class="">
                             <template #aside>
@@ -132,7 +136,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="isDraft" :selectable="true" @click="deleteTemplate()">
+                <STListItem v-if="isDraft || isLocked" :selectable="true" @click="deleteTemplate()">
                     <template #left>
                         <IconContainer icon="file-pdf" class="error">
                             <template #aside>
@@ -161,30 +165,29 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
-import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus.ts';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
-import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
+import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import FillRecordCategoryView from '@stamhoofd/components/records/FillRecordCategoryView.vue';
+import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
-import type { ComponentOptions} from 'vue';
 import { computed, ref } from 'vue';
 
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import DocumentsView from './DocumentsView.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 import { fiscal } from './definitions/fiscal';
-import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 
 const props = defineProps<{
     template: DocumentTemplatePrivate;
@@ -227,6 +230,7 @@ defineRoutes([
 ]);
 
 const isDraft = computed(() => props.template.status === DocumentStatus.Draft);
+const isLocked = computed(() => props.template.isLocked);
 
 async function publishTemplate() {
     if (publishing.value) {
@@ -266,8 +270,7 @@ const canAlterUpdates = computed(() => {
             // Still possible to make changes before publishing to belcotax
             return true;
         }
-    }
-    else {
+    } else {
         return true;
     }
     return false;
@@ -293,8 +296,7 @@ async function patchTemplate(patch: AutoEncoderPatchType<DocumentTemplatePrivate
         if (template) {
             props.template.deepSet(template);
         }
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -310,7 +312,7 @@ async function toggleUpdatesEnabled() {
             Toast.error($t('%1LX')).show();
         }
     }
-    
+
     if (!(await CenteredMessage.confirm(
         updatesEnabled ? $t('%1LY') : $t('%1LZ'),
         updatesEnabled ? $t('%1La') : $t('%1Lb'),
@@ -367,8 +369,7 @@ async function deleteTemplate() {
         Toast.success($t('%1IW')).show();
 
         pop({ force: true })?.catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     deleting.value = false;
@@ -397,13 +398,13 @@ async function exportXml() {
                         text: $t('%1Lg'),
                         value: false,
                         type: 'destructive',
-                        availabilityDelay: 2_000
+                        availabilityDelay: 2_000,
                     }, {
                         text: $t('%1Lh'),
                         value: true,
                         type: 'secundary',
-                    }
-                ]
+                    },
+                ],
             });
             if (stop) {
                 return;
@@ -442,12 +443,10 @@ async function downloadXml() {
     try {
         const blob = await generateXML();
         await AppManager.shared.downloadFile(blob, Formatter.fileSlug(props.template.settings.name) + '.xml');
-    }
-    catch (e: any) {
+    } catch (e: any) {
         if (!Request.isAbortError(e as Error)) {
             Toast.fromError(e).show();
-        }
-        else {
+        } else {
             new Toast('Downloaden geannuleerd', 'info').show();
         }
     }
