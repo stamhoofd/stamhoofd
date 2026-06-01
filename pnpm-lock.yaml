@@ -379,6 +379,9 @@ importers:
       '@simonbackx/simple-logging':
         specifier: ^1.0.1
         version: 1.0.1
+      '@stamhoofd/backend-middleware':
+        specifier: 2.121.0
+        version: link:../../shared/middleware
       formidable:
         specifier: 3.5.4
         version: 3.5.4
@@ -413,6 +416,9 @@ importers:
       '@simonbackx/simple-logging':
         specifier: ^1.0.1
         version: 1.0.1
+      '@stamhoofd/backend-middleware':
+        specifier: 2.121.0
+        version: link:../../shared/middleware
     devDependencies:
       '@types/node':
         specifier: ^22
@@ -426,6 +432,9 @@ importers:
       '@simonbackx/simple-logging':
         specifier: ^1.0.1
         version: 1.0.1
+      '@stamhoofd/backend-middleware':
+        specifier: 2.121.0
+        version: link:../../shared/middleware
       formidable:
         specifier: 3.5.4
         version: 3.5.4
@@ -670,6 +679,9 @@ importers:
 
   frontend/app/admin:
     dependencies:
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.18.1
+        version: 2.18.1(tslib@2.8.1)(vue@3.5.17(typescript@5.9.3))
       '@stamhoofd/assets':
         specifier: '*'
         version: link:../../shared/assets
@@ -739,6 +751,18 @@ importers:
 
   frontend/app/dashboard:
     dependencies:
+      '@simonbackx/simple-encoding':
+        specifier: 2.26.6
+        version: 2.26.6(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
+      '@simonbackx/simple-errors':
+        specifier: ^1.5.0
+        version: 1.5.0(@simonbackx/simple-encoding@2.26.6)(uuid@11.0.3)
+      '@simonbackx/simple-networking':
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.6)(@simonbackx/simple-errors@1.5.0)
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.18.1
+        version: 2.18.1(tslib@2.8.1)(vue@3.5.17(typescript@5.9.3))
       '@stamhoofd/assets':
         specifier: '*'
         version: link:../../shared/assets
@@ -769,6 +793,9 @@ importers:
       '@stamhoofd/ticket-builder':
         specifier: '*'
         version: link:../../shared/ticket-builder
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../../../shared/types
       '@stamhoofd/utility':
         specifier: '*'
         version: link:../../../shared/utility
@@ -870,6 +897,12 @@ importers:
 
   frontend/app/registration:
     dependencies:
+      '@simonbackx/simple-encoding':
+        specifier: 2.26.6
+        version: 2.26.6(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.18.1
+        version: 2.18.1(tslib@2.8.1)(vue@3.5.17(typescript@5.9.3))
       '@stamhoofd/assets':
         specifier: 1.0.0
         version: link:../../shared/assets
@@ -882,6 +915,9 @@ importers:
       '@stamhoofd/structures':
         specifier: '*'
         version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../../../shared/types
       '@stamhoofd/utility':
         specifier: '*'
         version: link:../../../shared/utility
@@ -908,6 +944,18 @@ importers:
 
   frontend/shared/components:
     dependencies:
+      '@simonbackx/simple-encoding':
+        specifier: 2.26.6
+        version: 2.26.6(@simonbackx/simple-errors@1.5.0)(tslib@2.8.1)
+      '@simonbackx/simple-errors':
+        specifier: ^1.5.0
+        version: 1.5.0(@simonbackx/simple-encoding@2.26.6)(uuid@11.0.3)
+      '@simonbackx/simple-networking':
+        specifier: 1.23.0
+        version: 1.23.0(@simonbackx/simple-encoding@2.26.6)(@simonbackx/simple-errors@1.5.0)
+      '@simonbackx/vue-app-navigation':
+        specifier: 2.18.1
+        version: 2.18.1(tslib@2.8.1)(vue@3.5.17(typescript@5.9.3))
       '@stamhoofd/frontend-excel-export':
         specifier: '*'
         version: link:../excel-export
@@ -932,6 +980,9 @@ importers:
       '@stamhoofd/ticket-builder':
         specifier: '*'
         version: link:../ticket-builder
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../../../shared/types
       '@stamhoofd/utility':
         specifier: '*'
         version: link:../../../shared/utility
@@ -1288,6 +1339,21 @@ importers:
       '@stamhoofd/backend':
         specifier: '*'
         version: link:../../backend/app/api
+      '@stamhoofd/build-development-env':
+        specifier: '*'
+        version: link:../../shared/build-development-env
+      '@stamhoofd/models':
+        specifier: '*'
+        version: link:../../backend/shared/models
+      '@stamhoofd/structures':
+        specifier: '*'
+        version: link:../../shared/structures
+      '@stamhoofd/test-utils':
+        specifier: '*'
+        version: link:../../shared/test-utils
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../../shared/utility
       pino:
         specifier: ^10.1.1
         version: 10.3.1
@@ -10449,6 +10515,12 @@ snapshots:
       '@vue/shared': 3.5.34
       tslib: 2.8.1
       vue: 3.5.17(typescript@5.8.3)
+
+  '@simonbackx/vue-app-navigation@2.18.1(tslib@2.8.1)(vue@3.5.17(typescript@5.9.3))':
+    dependencies:
+      '@vue/shared': 3.5.34
+      tslib: 2.8.1
+      vue: 3.5.17(typescript@5.9.3)
 
   '@sinclair/typebox@0.34.49': {}
 

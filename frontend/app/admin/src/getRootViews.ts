@@ -201,7 +201,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                 }),
             ),
             loginRoot: wrapWithModalStack(
-                getScopedAutoRootComponent(reactiveSession, options),
+                getScopedAutoRootComponent(reactiveSession, options) as ComponentWithProperties,
             ),
             noPermissionsRoot: getNoPermissionsView(),
         }),

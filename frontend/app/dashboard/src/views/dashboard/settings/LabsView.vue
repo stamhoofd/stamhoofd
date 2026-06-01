@@ -193,8 +193,8 @@ export default class LabsView extends Mixins(NavigationMixin) {
         this.organizationPatch.id = this.$organization.id;
     }
 
-    get organization() {
-        return this.$organization.patch(this.organizationPatch);
+    get organization(): Organization {
+        return (this.$organization as Organization).patch(this.organizationPatch);
     }
 
     async openApiUsers(animated = true) {
@@ -328,7 +328,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
         const organization = Organization.create({
             ...this.$organization,
             webshops: [],
-        });
+        } as Partial<Organization>);
 
         // Delete private tokens
         organization.privateMeta!.payconiqAccounts = [];

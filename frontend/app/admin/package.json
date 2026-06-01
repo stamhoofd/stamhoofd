@@ -12,6 +12,7 @@
         "dist"
     ],
     "dependencies": {
+        "@simonbackx/vue-app-navigation": "2.18.1",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/document-helper": "*",

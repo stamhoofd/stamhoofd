@@ -113,7 +113,7 @@ export default class ImageComponent extends VueComponent {
             const resizeObserver = new ResizeObserver(() => {
                 this.updateSize();
             });
-            resizeObserver.observe(this.$el);
+            resizeObserver.observe(this.$el as Element);
         }
         catch (e) {
             // Not supported

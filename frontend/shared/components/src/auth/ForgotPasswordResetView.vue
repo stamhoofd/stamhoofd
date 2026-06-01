@@ -71,6 +71,7 @@ import { Validator } from '#errors/Validator.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import type { Organization } from '@stamhoofd/structures';
 import { NewUser, Token } from '@stamhoofd/structures';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 
@@ -156,7 +157,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                 decoder: Token,
             }).then(async (response: { data: Token }) => {
                 // Create new session to prevent signing in
-                this.session = new SessionContext(this.$context.organization);
+                this.session = new SessionContext(this.$context.organization as Organization | null);
                 // We don't want to save this session or reuse it on the next loads (yet)
                 this.session.disableStorage();
                 await this.session.setToken(response.data);
@@ -292,7 +293,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
                 initialPresents,
             });
 
-            await ReplaceRootEventBus.sendEvent('replace', root);
+            await ReplaceRootEventBus.sendEvent('replace', root as ComponentWithProperties);
 
             await this.dismiss({ force: true });
             this.loading = false;
