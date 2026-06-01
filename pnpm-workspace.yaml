@@ -8,9 +8,11 @@ allowBuilds:
   puppeteer: true
   sharp: true
   unrs-resolver: true
-
+# Wait 1 week before updating to latest version
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+- '@simonbackx/*'
 linkWorkspacePackages: true
-
 packages:
   - 'frontend/app/*'
   - 'frontend/shared/*'
