@@ -3,6 +3,7 @@ import { DocumentData, DocumentStatus, Document as DocumentStruct, Platform, Ver
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars.js';
 import type { Member, MemberWithRegistrations, RegistrationWithMember } from './Member.js';
@@ -38,6 +39,9 @@ export class Document extends QueryableModel {
     @column({ type: 'string' })
     status = DocumentStatus.Draft;
 
+    @column({ type: 'boolean' })
+    isLocked = false;
+
     /**
      * Assigned when exporting the document
      */
@@ -62,6 +66,18 @@ export class Document extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    override save(forceSave = false): Promise<boolean> {
+        if (!forceSave && this.isLocked) {
+            throw new SimpleError({
+                code: 'locked',
+                message: 'Document is locked',
+                human: $t(`Dit document kan niet meer aangepast worden.`),
+            });
+        }
+
+        return super.save();
+    }
 
     getStructure() {
         return DocumentStruct.create(this);
@@ -121,6 +137,11 @@ export class Document extends QueryableModel {
     }
 
     async updateData(): Promise<void> {
+        if (this.isLocked) {
+            console.log('Document is locked, skipping update');
+            return;
+        }
+
         const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
         const template = await DocumentTemplate.getByID(this.templateId);
         if (!template) {
@@ -165,8 +186,7 @@ export class Document extends QueryableModel {
                     await this.updateForRegistrations(loadedMember.registrations.filter(r => r.registeredAt && r.deactivatedAt === null && r.organizationId === organizationId).map(r => r.id), organizationId);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -181,8 +201,7 @@ export class Document extends QueryableModel {
             for (const template of templates) {
                 await template.updateForRegistration(registration);
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -219,8 +238,7 @@ export class Document extends QueryableModel {
                     await template.updateForRegistrations(loadedRegistrations);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -240,8 +258,7 @@ export class Document extends QueryableModel {
                     await template.updateForRegistrations(registrations);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -263,8 +280,7 @@ export class Document extends QueryableModel {
             const context = this.buildContext(organization);
             const renderedHtml = await render(htmlTemplate, context);
             return renderedHtml;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to render document html', e);
             return null;
         }

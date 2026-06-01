@@ -1,7 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Parent, RecordAnswer} from '@stamhoofd/structures';
+import type { Parent, RecordAnswer } from '@stamhoofd/structures';
 import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, RecordAddressAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,6 +36,9 @@ export class DocumentTemplate extends QueryableModel {
 
     @column({ type: 'string' })
     status = DocumentStatus.Draft;
+
+    @column({ type: 'boolean' })
+    isLocked = false;
 
     @column({ type: 'boolean' })
     updatesEnabled = true;
@@ -87,6 +90,18 @@ export class DocumentTemplate extends QueryableModel {
     })
     updatedAt: Date;
 
+    override save(forceSave = false): Promise<boolean> {
+        if (!forceSave && this.isLocked) {
+            throw new SimpleError({
+                code: 'locked',
+                message: 'Document template is locked',
+                human: $t(`Dit document kan niet meer aangepast worden.`),
+            });
+        }
+
+        return super.save();
+    }
+
     getPrivateStructure() {
         return DocumentTemplatePrivate.create(this);
     }
@@ -95,6 +110,10 @@ export class DocumentTemplate extends QueryableModel {
      * Still do an update when answers are locked
      */
     async updateAnswers(document: Document) {
+        if (document.isLocked || this.isLocked) {
+            return;
+        }
+
         // Add global answers (same for each document)
         for (const answer of this.settings.fieldAnswers.values()) {
             // todo: check duplicate
@@ -363,8 +382,7 @@ export class DocumentTemplate extends QueryableModel {
                                 found = true;
                                 fieldAnswers.set(field.id, clone);
                                 break;
-                            }
-                            else {
+                            } else {
                                 console.warn('Found type mismatch for default data: ' + linkedToMemberAnswerSettingsId + ' - ' + field.id);
                             }
                         }
@@ -412,8 +430,7 @@ export class DocumentTemplate extends QueryableModel {
             for (const answer of fieldAnswers.values()) {
                 try {
                     answer.validate();
-                }
-                catch (e) {
+                } catch (e) {
                     missingData = true;
 
                     console.log('Missing data because of validation error', e, answer, answer.settings);
@@ -453,6 +470,14 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     async updateForRegistration(registration: RegistrationWithMember, existingDocuments?: Document[]): Promise<Document[]> {
+        if (this.isLocked) {
+            throw new SimpleError({
+                code: 'locked',
+                message: 'Document template is locked',
+                human: $t(`Dit document kan niet meer aangepast worden.`),
+            });
+        }
+
         existingDocuments = existingDocuments !== undefined ? existingDocuments : await Document.where({ templateId: this.id, registrationId: registration.id }, { limit: 5 });
 
         if (!this.checkRegistrationIncluded(registration)) {
@@ -549,8 +574,7 @@ export class DocumentTemplate extends QueryableModel {
                 if (age > this.settings.maxAge) {
                     return false;
                 }
-            }
-            else {
+            } else {
                 console.warn('Missing registration.startDate in fieldAnswers when checking maxAge');
             }
         }
@@ -581,11 +605,20 @@ export class DocumentTemplate extends QueryableModel {
     async buildAll({ generateNumbers = false } = {}) {
         QueueHandler.abort('documents-build-all/' + this.id);
         return await QueueHandler.schedule('documents-build-all/' + this.id, async ({ abort }) => {
+            if (this.isLocked) {
+                return await Document.where({ templateId: this.id });
+            }
+
             if (!this.updatesEnabled) {
                 // Check status
                 const documents = await Document.where({ templateId: this.id });
                 for (const document of documents) {
                     abort.throwIfAborted();
+
+                    if (document.isLocked) {
+                        continue;
+                    }
+
                     await this.updateAnswers(document); // Only update global data
                     if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
                         document.status = this.status;
@@ -597,6 +630,11 @@ export class DocumentTemplate extends QueryableModel {
                 if (generateNumbers) {
                     for (const document of documents) {
                         abort.throwIfAborted();
+
+                        if (document.isLocked) {
+                            continue;
+                        }
+
                         if (document.number === null && document.status === DocumentStatus.Published) {
                             document.number = this.nextNumberForDocuments(documents);
                             await document.save();
@@ -627,11 +665,15 @@ export class DocumentTemplate extends QueryableModel {
             const documents = await Document.where({ templateId: this.id });
             for (const document of documents) {
                 abort.throwIfAborted();
+
+                if (document.isLocked) {
+                    continue;
+                }
+
                 if (!documentSet.has(document.id)) {
                     if (document.number === null) {
                         await document.delete();
-                    }
-                    else {
+                    } else {
                         document.status = DocumentStatus.Deleted;
                         await document.save();
                     }
@@ -644,6 +686,11 @@ export class DocumentTemplate extends QueryableModel {
             if (generateNumbers) {
                 for (const document of allDocuments) {
                     abort.throwIfAborted();
+
+                    if (document.isLocked) {
+                        continue;
+                    }
+
                     if (document.number === null && document.status === DocumentStatus.Published) {
                         document.number = this.nextNumberForDocuments(allDocuments);
                         await document.save();
@@ -733,8 +780,7 @@ export class DocumentTemplate extends QueryableModel {
             const context = await this.buildContext(organization);
             const renderedHtml = await render(this.privateSettings.templateDefinition.xmlExport, context);
             return renderedHtml;
-        }
-        catch (e) {
+        } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 throw e;
             }
@@ -753,8 +799,7 @@ export class DocumentTemplate extends QueryableModel {
             answer.settings = field;
             try {
                 answer.validate();
-            }
-            catch (e) {
+            } catch (e) {
                 // Invalid
                 return false;
             }
@@ -774,8 +819,7 @@ export class DocumentTemplate extends QueryableModel {
                 if (!existing.isReviewedAfter(addAnswer)) {
                     newAnswers.set(addAnswer.settings.id, addAnswer);
                 }
-            }
-            else {
+            } else {
                 newAnswers.set(addAnswer.settings.id, addAnswer);
             }
         }
@@ -786,8 +830,7 @@ export class DocumentTemplate extends QueryableModel {
         if (document.status !== DocumentStatus.Deleted) {
             if (!complete) {
                 document.status = DocumentStatus.MissingData;
-            }
-            else {
+            } else {
                 if (document.status === DocumentStatus.MissingData) {
                     document.status = this.status;
                 }

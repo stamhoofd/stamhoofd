@@ -205,6 +205,9 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
     @field({ decoder: new EnumDecoder(DocumentStatus) })
     status: DocumentStatus = DocumentStatus.Draft;
 
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    isLocked = false;
+
     @field({ decoder: BooleanDecoder })
     updatesEnabled = true;
 
@@ -301,6 +304,9 @@ export class Document extends AutoEncoder implements ObjectWithRecords {
 
     @field({ decoder: new EnumDecoder(DocumentStatus) })
     status: DocumentStatus = DocumentStatus.Draft;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    isLocked = false;
 
     @field({ decoder: DocumentData })
     data = DocumentData.create({});

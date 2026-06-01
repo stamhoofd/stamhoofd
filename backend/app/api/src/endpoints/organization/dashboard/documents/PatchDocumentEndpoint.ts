@@ -45,6 +45,14 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw Context.auth.notFoundOrNoAccess($t(`%EK`));
             }
 
+            if (document.isLocked) {
+                throw new SimpleError({
+                    code: 'locked',
+                    message: 'Document is locked',
+                    human: $t(`Dit document kan niet meer aangepast worden.`),
+                });
+            }
+
             if (patch.data) {
                 document.data.patchOrPut(patch.data);
             }
