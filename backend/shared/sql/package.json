@@ -15,10 +15,13 @@
         "lint": "eslint"
     },
     "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.6",
+        "@simonbackx/simple-errors": "^1.5",
         "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
-        "@stamhoofd/utility": "*"
+        "@stamhoofd/utility": "*",
+        "lru-cache": "^11.2.6"
     },
     "peerDependencies": {
         "@simonbackx/simple-database": "1.36.12"

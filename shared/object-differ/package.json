@@ -24,6 +24,7 @@
         "lint": "eslint"
     },
     "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.6",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*"

@@ -26,6 +26,7 @@
         "lint": "eslint"
     },
     "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.6",
         "@stamhoofd/excel-writer": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*"
