@@ -91,6 +91,7 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
+    "@stamhoofd/types": "*",
     "@testing-library/dom": "^10.4.0",
     "@types/eslint__js": "^8.42.3",
     "@types/file-saver": "^2.0.5",

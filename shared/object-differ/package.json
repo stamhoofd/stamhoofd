@@ -23,6 +23,11 @@
         "test": "vitest",
         "lint": "eslint"
     },
+    "dependencies": {
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
+    },
     "devDependencies": {
         "@types/uuid": "^8.3.0",
         "uuid": "11.0.3"

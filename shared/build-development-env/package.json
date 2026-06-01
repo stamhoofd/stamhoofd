@@ -23,6 +23,12 @@
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint ."
     },
+    "dependencies": {
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "chalk": "4",
+        "concurrently": "^9.2.0"
+    },
     "publishConfig": {
         "access": "public"
     }
