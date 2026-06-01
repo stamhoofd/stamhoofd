@@ -37,7 +37,7 @@
     "test:playwright": "pnpm -s build:shared && pnpm --dir backend/app/api -s build:playwright:pre && pnpm --dir tests/playwright -s test",
     "test:playwright:ui": "pnpm -s build:shared && pnpm --dir backend/app/api -s build:playwright:pre && pnpm --dir tests/playwright -s test --ui",
     "lint": "lerna run lint --no-bail --parallel -- --quiet",
-    "typecheck": "lerna run typecheck --",
+    "typecheck": "lerna run typecheck --parallel --no-bail --",
     "vitest": "NODE_ENV=test vitest",
     "clear:shared": "pnpm -s clear:global:shared && pnpm clear:backend:shared",
     "build:shared": "pnpm -s build:global:shared && pnpm -s build:backend:shared",
