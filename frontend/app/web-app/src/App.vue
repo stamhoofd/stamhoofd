@@ -30,7 +30,7 @@ import { Language } from '@stamhoofd/types/Language';
 import type { Ref } from 'vue';
 import { onMounted, ref } from 'vue';
 import { getScopedSwitcherComponent, getUnscopedSwitcherComponent } from './getSwitcherComponents';
-import { getAdminComponent } from '../../admin/src/getAdminComponent';
+import { getAdminComponent } from '@stamhoofd/admin-frontend/src/getAdminComponent';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();

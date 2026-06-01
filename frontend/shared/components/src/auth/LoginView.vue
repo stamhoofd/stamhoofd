@@ -83,6 +83,9 @@
                             </button>
                         </div>
                     </template>
+                    <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
+                        {{ 'TO DO: Hier staat een héél beknopt stappenplan + een oplijsting van alle inschrijvingsgroepen van ' + $context.organization.name + ' waarvoor je kan inschrijven' }}
+                    </h1>
                 </div>
             </div>
 
@@ -181,8 +184,7 @@ onCheckRoutes(() => {
             sessionStorage.setItem('triedLogin', 'true');
             startSSO(LoginProviderType.SSO, true).catch(console.error);
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 });
@@ -269,12 +271,10 @@ async function submit() {
                 ],
                 modalDisplayStyle: 'sheet',
             });
-        }
-        else {
+        } else {
             await dismiss({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -297,8 +297,7 @@ onMounted(() => {
                 emailInput.value.focus();
             }
         }, 300);
-    }
-    else {
+    } else {
         setTimeout(() => {
             // Needed the any here because typescript is getting mad only in production mode
             animating.value = false;

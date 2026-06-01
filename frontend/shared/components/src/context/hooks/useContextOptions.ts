@@ -191,8 +191,11 @@ export function useContextOptions() {
         await SessionManager.prepareSessionForUsage(option.context);
 
         if (option.app === 'auto') {
-            const admin = await import('@stamhoofd/dashboard');
-            return await admin.getScopedAutoRoot(option.context);
+            const webApp = await import('../../../../../app/web-app/src/exports');
+            if (option.organization) {
+                return await webApp.getScopedSwitcherComponent(option.organization);
+            }
+            return await webApp.getUnscopedSwitcherComponent();
         }
 
         if (option.app === 'admin') {
@@ -218,15 +221,13 @@ export function useContextOptions() {
         let oldPrefix = '';
         if ($organization.value && !STAMHOOFD.singleOrganization) {
             oldPrefix = '/' + appToUri(app) + '/' + $organization.value.uri;
-        }
-        else {
+        } else {
             oldPrefix = '/' + appToUri(app);
         }
         let newPrefix = '';
         if (option.organization && !STAMHOOFD.singleOrganization) {
             newPrefix = '/' + appToUri(option.app) + '/' + option.organization.uri;
-        }
-        else {
+        } else {
             newPrefix = '/' + appToUri(option.app);
         }
 
