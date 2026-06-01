@@ -7,7 +7,16 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@stamhoofd/assets": "1.0.0"
+        "@stamhoofd/assets": "1.0.0",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "pdfkit": "^0.18.0"
+    },
+    "devDependencies": {
+        "@types/pdfkit": "^0.17.5"
     },
     "type": "module"
 }

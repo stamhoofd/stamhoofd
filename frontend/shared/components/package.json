@@ -21,12 +21,31 @@
         "#*.ts": "./src/*.ts"
     },
     "dependencies": {
+        "@stamhoofd/frontend-excel-export": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/frontend-pdf-builder": "*",
+        "@stamhoofd/locales": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/object-differ": "*",
         "@stamhoofd/structures": "*",
+        "@stamhoofd/ticket-builder": "*",
+        "@stamhoofd/utility": "*",
+        "@tiptap/core": "^3.4.2",
+        "@tiptap/extensions": "^3.4.2",
         "@tiptap/extension-image": "^3.4.2",
         "@tiptap/extension-placeholder": "^3.4.2",
         "@tiptap/extension-typography": "^3.4.2",
         "@tiptap/pm": "^3.4.2",
         "@tiptap/starter-kit": "^3.4.2",
-        "@tiptap/vue-3": "^3.4.2"
+        "@tiptap/vue-3": "^3.4.2",
+        "luxon": "3.4.4"
+    },
+    "devDependencies": {
+        "@stamhoofd/build-development-env": "*",
+        "@stamhoofd/test-utils": "*",
+        "@types/luxon": "3.4.2",
+        "@types/pdfkit": "^0.17.5",
+        "@vue/test-utils": "^2.4.6",
+        "vitest": "^3.2.4"
     }
 }

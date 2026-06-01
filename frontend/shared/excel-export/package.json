@@ -7,7 +7,9 @@
     "sideEffects": false,
     "dependencies": {
         "@stamhoofd/structures": "*",
-        "@stamhoofd/components": "*"
+        "@stamhoofd/components": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/utility": "*"
     },
     "exports": {
         ".": "./index.ts",

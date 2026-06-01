@@ -150,7 +150,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         }),
     });
 
-    return wrapContext(reactiveSession, 'admin', ({ platformManager }) => wrapWithModalStack(
+    return wrapContext(reactiveSession, 'admin', ({ platformManager }: any) => wrapWithModalStack(
         new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
                 new ComponentWithProperties(TabBarController, {

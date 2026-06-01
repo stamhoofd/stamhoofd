@@ -54,7 +54,9 @@
         "uuid": "11.0.3"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.36.12"
+        "@simonbackx/simple-database": "1.36.12",
+        "@simonbackx/simple-endpoints": "1.21.1",
+        "@stamhoofd/test-utils": "*"
     },
     "publishConfig": {
         "access": "public"

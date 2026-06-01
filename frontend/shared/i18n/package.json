@@ -19,5 +19,12 @@
     "scripts": {
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@stamhoofd/locales": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
     }
 }

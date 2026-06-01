@@ -49,6 +49,36 @@
             ],
             "@stamhoofd/components/*.vue": [
                 "./shared/components/src/*.vue"
+            ],
+            "@stamhoofd/build-development-env": [
+                "../shared/build-development-env/dist/index.d.ts"
+            ],
+            "@stamhoofd/document-helper": [
+                "./shared/document-helper/index.ts"
+            ],
+            "@stamhoofd/frontend-i18n/*": [
+                "./shared/i18n/*"
+            ],
+            "@stamhoofd/frontend-pdf-builder": [
+                "./shared/pdf-builder/index.ts"
+            ],
+            "@stamhoofd/networking": [
+                "./shared/networking/index.ts"
+            ],
+            "@stamhoofd/networking/*": [
+                "./shared/networking/src/*"
+            ],
+            "@stamhoofd/structures": [
+                "../shared/structures/dist/index.d.ts"
+            ],
+            "@stamhoofd/test-utils": [
+                "../shared/test-utils/dist/index.d.ts"
+            ],
+            "@stamhoofd/ticket-builder": [
+                "./shared/ticket-builder/index.ts"
+            ],
+            "@stamhoofd/utility": [
+                "../shared/utility/dist/index.d.ts"
             ]
         },
         "resolveJsonModule": true,

@@ -85,9 +85,9 @@ jobs:
       - name: Build shared packages
         run: pnpm build:shared
       - name: Linting
-        run: pnpm --dir backend/app/api lint --quiet
+        run: pnpm -C backend/app/api lint --quiet
       - name: Run tests
-        run: pnpm --dir backend/app/api build && pnpm --dir backend/app/api test --bail=1
+        run: pnpm -C backend/app/api build && pnpm -C backend/app/api test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -146,9 +146,9 @@ jobs:
       - name: Build shared packages
         run: pnpm build:shared
       - name: Linting
-        run: pnpm --dir backend/shared/models lint --quiet
+        run: pnpm -C backend/shared/models lint --quiet
       - name: Run tests
-        run: pnpm --dir backend/shared/models build && pnpm --dir backend/shared/models test --bail=1
+        run: pnpm -C backend/shared/models build && pnpm -C backend/shared/models test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -207,9 +207,9 @@ jobs:
       - name: Build shared packages
         run: pnpm build:shared
       - name: Linting
-        run: pnpm --dir backend/shared/sql lint --quiet
+        run: pnpm -C backend/shared/sql lint --quiet
       - name: Run tests
-        run: pnpm --dir backend/shared/sql test --bail=1
+        run: pnpm -C backend/shared/sql test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -255,9 +255,9 @@ jobs:
       - name: Build shared packages
         run: pnpm build:global:shared
       - name: Linting
-        run: pnpm --dir shared/structures lint --quiet
+        run: pnpm -C shared/structures lint --quiet
       - name: Run tests
-        run: pnpm --dir shared/structures test --bail=1
+        run: pnpm -C shared/structures test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -315,7 +315,7 @@ jobs:
       - name: Build shared packages
         run: pnpm build:shared
       - name: Build API
-        run: pnpm --dir backend/app/api build
+        run: pnpm -C backend/app/api build
       - name: Remove all installed dependencies
         run: pnpm clear-dependencies
       - name: Install production dependencies only
@@ -414,11 +414,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
-        run: pnpm --dir tests/playwright exec playwright install --with-deps chromium
+        run: pnpm -C tests/playwright exec playwright install --with-deps chromium
       - name: Build shared packages
         run: pnpm build:shared
       - name: Run components browser tests
-        run: pnpm --dir frontend/shared/components vitest run
+        run: pnpm -C frontend/shared/components exec vitest run
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -535,7 +535,7 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
     - name: Install Playwright Browsers
-      run: pnpm --dir tests/playwright exec playwright install --with-deps --no-shell
+      run: pnpm -C tests/playwright exec playwright install --with-deps --no-shell
     - name: Cache Caddy
       id: caddy-cache
       uses: actions/cache@v4
@@ -567,9 +567,9 @@ jobs:
     - name: Build shared packages
       run: pnpm build:shared
     - name: Build API
-      run: pnpm --dir backend/app/api build:playwright:pre
+      run: pnpm -C backend/app/api build:playwright:pre
     - name: Run Playwright tests
-      run: pnpm --dir tests/playwright -s test
+      run: pnpm -C tests/playwright -s test
     - name: Upload Playwright artifacts
       if: failure()
       uses: actions/upload-artifact@v4

@@ -15,6 +15,13 @@
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
     },
+    "dependencies": {
+        "@stamhoofd/components": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
+    },
     "imports": {
         "#*.vue": "./src/*.vue",
         "#*.ts": "./src/*.ts",

@@ -108,7 +108,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         }),
     });
 
-    return wrapContext(session, 'registration', ({ platformManager }) => new ComponentWithProperties(AuthenticatedView, {
+    return wrapContext(session, 'registration', ({ platformManager }: any) => new ComponentWithProperties(AuthenticatedView, {
         root: wrapWithModalStack(
             new ComponentWithProperties(PromiseView, {
                 promise: async function (this: PromiseView) {
