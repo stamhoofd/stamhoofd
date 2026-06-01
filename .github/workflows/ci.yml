@@ -414,7 +414,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --dir tests/playwright exec playwright install --with-deps chromium
       - name: Build shared packages
         run: pnpm build:shared
       - name: Run components browser tests
@@ -535,7 +535,7 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
     - name: Install Playwright Browsers
-      run: pnpm exec playwright install --with-deps --no-shell
+      run: pnpm --dir tests/playwright exec playwright install --with-deps --no-shell
     - name: Cache Caddy
       id: caddy-cache
       uses: actions/cache@v4

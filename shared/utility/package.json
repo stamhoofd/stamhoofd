@@ -24,7 +24,9 @@
         "lint": "eslint ."
     },
     "dependencies": {
-        "@stamhoofd/types": "*"
+        "@stamhoofd/types": "*",
+        "@types/luxon": "3.4.2",
+        "luxon": "3.4.4"
     },
     "publishConfig": {
         "access": "public"
