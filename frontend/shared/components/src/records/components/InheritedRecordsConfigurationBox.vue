@@ -24,10 +24,10 @@
                 <Checkbox v-model="property.value.enabled" v-tooltip="property.value.locked ? $t('%jE') : ''" :disabled="property.value.locked" />
             </template>
 
-            <p v-if="property.value.configuration" class="style-title-prefix-list">
-                {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
+            <p v-if="property.value.configuration.value" class="style-title-prefix-list">
+                {{ propertyFilterToString(property.value.configuration.value, filterBuilder) }}
 
-                <template v-if="property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)">
+                <template v-if="property.value.parentConfiguration.value && propertyFilterToString(property.value.parentConfiguration.value, filterBuilder) !== propertyFilterToString(property.value.configuration.value, filterBuilder)">
                     (aangepast vanaf standaardinstelling)
                 </template>
             </p>
@@ -36,7 +36,7 @@
                 {{ property.value.title }}
 
                 <span
-                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('%1It')"
+                    v-if="property.value.configuration.value && property.value.parentConfiguration.value && propertyFilterToString(property.value.parentConfiguration.value, filterBuilder) !== propertyFilterToString(property.value.configuration.value, filterBuilder)" v-tooltip="$t('%1It')"
                     class="icon dot primary small"
                 />
             </p>
@@ -44,7 +44,7 @@
                 {{ property.value.description }}
             </p>
 
-            <p v-if="!groupLevel && property.value.configuration && property.value.configuration.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
+            <p v-if="!groupLevel && property.value.configuration.value && property.value.configuration.value.isAlwaysEnabledAndRequired && property.value.options?.preventAlways" class="error-box">
                 {{ property.value.options?.warning ?? $t('%jG') }}
             </p>
 
@@ -58,8 +58,8 @@
                 <Checkbox v-model="getRefForInheritedCategory(category.id).value.enabled" v-tooltip="getRefForInheritedCategory(category.id).value.locked ? $t('%jE') : ''" :disabled="getRefForInheritedCategory(category.id).value.locked" />
             </template>
 
-            <p v-if="getRefForInheritedCategory(category.id).value.configuration" class="style-title-prefix-list">
-                {{ propertyFilterToString(getRefForInheritedCategory(category.id).value.configuration!, filterBuilder) }}
+            <p v-if="getRefForInheritedCategory(category.id).value.configuration.value" class="style-title-prefix-list">
+                {{ propertyFilterToString(getRefForInheritedCategory(category.id).value.configuration.value!, filterBuilder) }}
             </p>
             <p class="style-title-list">
                 {{ getRefForInheritedCategory(category.id).value.title }}

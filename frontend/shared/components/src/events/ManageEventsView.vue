@@ -429,13 +429,13 @@ function getDefaultStamhoofdFilter(): StamhoofdFilter {
     const filter: StamhoofdFilter = {};
 
     if (groupIds) {
-        filter.groupIds = {
+        (filter as any).groupIds = {
             $in: groupIds,
         };
     }
 
     if (organizationTagIds) {
-        filter.organizationTagIds = {
+        (filter as any).organizationTagIds = {
             $in: organizationTagIds,
         };
     }

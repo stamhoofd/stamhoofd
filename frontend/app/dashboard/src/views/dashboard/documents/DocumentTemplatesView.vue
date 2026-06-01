@@ -276,19 +276,19 @@ function getRequiredFilter(): StamhoofdFilter | null {
         if (typeof selectedTab.value === 'number') {
             if (selectedTab.value === firstYearToShow) {
                 // Also include documents for higher years to prevent documents for future years from not showing up.
-                filters['year'] = {
+                (filters as any)['year'] = {
                     $gte: selectedTab.value,
                 };
             }
             else {
-                filters['year'] = { $eq: selectedTab.value };
+                (filters as any)['year'] = { $eq: selectedTab.value };
             }
         }
         else {
             switch (selectedTab.value) {
                 case TabItem.Archive:
                     // archive documents are documents older than 2 years
-                    filters['year'] = {
+                    (filters as any)['year'] = {
                         $lt: firstYearToShow - 1,
                     };
             }
