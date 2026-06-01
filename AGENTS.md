@@ -1,91 +1,8 @@
 # AGENTS.md
 
-## Quick Start Loop
-
-For every task, follow this canonical iteration cycle:
-
-1. Read relevant docs in [Notion](https://www.notion.so/Getting-started-20cc403f36798075b190c84c2c21d1ec) before writing any code
-2. Make your changes
-3. Run a scoped build and `yarn typecheck` and `yarn lint` to catch errors early
-4. When done, run the full validation flow (see Validation)
-
----
-
-## Commands
-
-### Installing
-
-```bash
-yarn install        # Install all dependencies
-```
-
-### Building
-
-```bash
-yarn build:shared         # Build all shared packages (run after modifying any shared package)
-yarn build:global:shared  # Build global shared packages only (excludes backend shared packages)
-```
-
-Prefer the yarn dev:build command to make sure shared packages are also built when building a backend or frontend app.
-
-```bash
-yarn dev:build --scope @stamhoofd/backend      # Builds shared + API backend only
-yarn dev:build --scope @stamhoofd/dashboard    # Builds shared + Dashboard frontend only
-```
-
-> **Rule of thumb**: when changing a shared package, always run `yarn build:shared` first,
-> then your scoped app build. Running only the app build on a stale shared package causes
-> confusing errors.
-
-### Type checking & linting
-
-```bash
-yarn typecheck      # Run all TypeScript typechecks in the frontend
-yarn lint           # Run all linters (fix errors before committing)
-```
-
-### Testing
-
-```bash
-yarn test                    # All unit/integration tests (vitest), project-wide
-yarn test:playwright         # E2E tests — run only after all other tests pass
-```
-
-Run a single test file or filter by name:
-
-```bash
-cd backend/app/api
-yarn test GetGroupsEndpoint.test.ts
-yarn test --testNamePattern="test name"
-yarn test GetGroupsEndpoint.test.ts --testNamePattern="test name"
-```
-
-To simulate environment conditions in tests, use `TestUtils.setEnvironment(...)`.
----
-
-## Validation Flow
-
-Run this sequence in order when your changes are complete. Start over if you make further changes.
-
-| Step | Command | Notes |
-|------|---------|-------|
-| 1. Full build | `yarn dev:build` | Fix all build errors before proceeding |
-| 2. Lint | `yarn lint` | Linting errors on broken code are misleading — always build first |
-| 3. Unit tests | `yarn test` | Fix failures before running E2E |
-| 4. E2E tests | `yarn test:playwright` | Only once everything above is green |
-
-If tests fail in module internals or during loading, **assume a stale build** before assuming
-a code bug. Re-run `yarn build:shared` or the relevant scoped build and retry. If needed,
-undo your changes and run tests again to confirm whether the failure is pre-existing.
-
-If a test failure seems random, retry until it passes at least once. **Newly written tests
-must never fail randomly.**
-
----
-
 ## Project Structure
 
-Stamhoofd is a yarn monorepo:
+Stamhoofd is a pnpm monorepo:
 
 ```
 stamhoofd/
@@ -136,7 +53,6 @@ Capacitor frontend.
 
 ### 🚫 Don't
 
-- **Never modify `package.json` files.** If you think this is necessary, you are likely on the wrong track — stop and reconsider.
 - **Never modify `@stamhoofd/structures` without first reading the versioning documentation in Notion.** This package has strict versioning rules.
 - **Never change files unrelated to your current task.**
 
@@ -201,8 +117,8 @@ import MyView from '@stamhoofd/package-name/views/MyView.vue';
 
 | Symptom | Likely cause | Fix |
 |---------|-------------|-----|
-| Tests fail on module load or internals | Stale build | Run `yarn build:shared` then your scoped build |
-| Type errors after changing shared package | Shared package not rebuilt | `yarn build:shared` |
-| Confusing errors after `yarn dev:build` | Shared dependency out of date | `yarn build:shared` first, then `yarn dev:build` |
+| Tests fail on module load or internals | Stale build | Run `pnpm build:shared` then your scoped build |
+| Type errors after changing shared package | Shared package not rebuilt | `pnpm build:shared` |
+| Confusing errors after `pnpm dev:build` | Shared dependency out of date | `pnpm build:shared` first, then `pnpm dev:build` |
 | Lint errors on code that doesn't compile | Built with errors | Fix build errors before running lint |
-| Cached code or files keep running | Cache issue | run `yarn clear && yarn clear-vite-cache && yarn && yarn build:shared` again |
+| Cached code or files keep running | Cache issue | run `pnpm clear && pnpm clear-vite-cache && pnpm install && pnpm build:shared` again |

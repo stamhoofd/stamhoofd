@@ -25,7 +25,7 @@ export class TranslationManager {
 
     async buildDist() {
         await new Promise((resolve) => {
-            exec(`cd ${globals.I18NUUID_LOCALES_ROOT} && yarn -s build`, resolve);
+            exec(`cd ${globals.I18NUUID_LOCALES_ROOT} && pnpm -s build`, resolve);
         });
     }
 
@@ -223,7 +223,7 @@ export class TranslationManager {
     async buildTranslations() {
         console.log('Building translations...');
         const root = globals.I18NUUID_LOCALES_ROOT;
-        const command = `cd ${root} && yarn build`;
+        const command = `cd ${root} && pnpm build`;
 
         await new Promise((resolve) => {
             console.log('Finished building translations.');

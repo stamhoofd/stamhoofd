@@ -1,0 +1,13 @@
+allowBuilds:
+  ttf2woff2: true
+
+linkWorkspacePackages: true
+
+packages:
+  - 'frontend/app/*'
+  - 'frontend/shared/*'
+  - 'backend/app/*'
+  - 'backend/shared/*'
+  - 'shared/*'
+  - 'tests/*'
+  - '.development/*'

@@ -4,7 +4,7 @@ export function init(): ConcurrentlyCommandInput[] {
     return [
         {
             name: 'CoreDNS',
-            command: 'yarn -s dns',
+            command: 'pnpm -s dns',
             prefixColor: 'red',
         },
     ];
