@@ -23,18 +23,18 @@ SMTP_PORT=xxxx
 Install dependencies and run the migrations to setup the database.
 
 ```
-yarn install
-yarn migrations
+pnpm install
+pnpm migrations
 ```
 
 ## Running
 
 ```
-yarn start
+pnpm start
 ```
 
 ## Testing
 
 ```
-yarn test
+pnpm test
 ```

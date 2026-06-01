@@ -4,11 +4,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "yarn -s build && NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* playwright test -c dist",
-        "test:trace": "yarn -s test --trace on",
-        "test:extra": "PLAYWRIGHT_INCLUDE_EXTRA=1 yarn -s test --grep @extra",
+        "test": "pnpm -s build && NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* playwright test -c dist",
+        "test:trace": "pnpm -s test --trace on",
+        "test:extra": "PLAYWRIGHT_INCLUDE_EXTRA=1 pnpm -s test --grep @extra",
         "lint": "eslint",
-        "build": "tsc --build"
+        "build": "pnpm --dir ../../backend/app/api -s build:playwright:pre && tsc --build"
     },
     "dependencies": {
         "@simonbackx/simple-database": "1.36.12",
