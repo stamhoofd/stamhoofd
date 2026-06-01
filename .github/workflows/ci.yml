@@ -14,6 +14,7 @@ on:
 
 env:
   NODE_VERSION: 22
+  PNPM_VERSION: 11.5.0
 
 jobs:
   job_setup:
@@ -69,15 +70,16 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build shared packages
@@ -129,15 +131,16 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build shared packages
@@ -189,15 +192,16 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build shared packages
@@ -236,15 +240,16 @@ jobs:
     if: needs.job_setup.outputs.changed_structures == 'true'
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build shared packages
@@ -295,15 +300,16 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: For building, we need development dependencies - install them
         run: pnpm install --frozen-lockfile
       - name: Build shared packages
@@ -347,15 +353,16 @@ jobs:
     needs: [job_setup]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build shared packages
@@ -394,15 +401,16 @@ jobs:
     if: needs.job_setup.outputs.changed_frontend == 'true'
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.5.0
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
@@ -455,16 +463,16 @@ jobs:
           --health-retries=3
     steps:
     - uses: actions/checkout@v4
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ env.PNPM_VERSION }}
     - name: Use Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'pnpm'
         cache-dependency-path: 'pnpm-lock.yaml'
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 11.5.0
     - name: Restore CoreDNS cache
       id: cache-coredns
       uses: actions/cache@v3
