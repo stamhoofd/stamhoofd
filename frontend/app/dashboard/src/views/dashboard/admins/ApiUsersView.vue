@@ -116,7 +116,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
                 decoder: new ArrayDecoder(ApiUser as Decoder<ApiUser>),
                 owner: this,
             });
-            response.data.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
+            response.data.sort((a: ApiUser, b: ApiUser) => Sorter.byDateValue(a.createdAt, b.createdAt));
             this.apiUsers = response.data;
         }
         catch (e) {

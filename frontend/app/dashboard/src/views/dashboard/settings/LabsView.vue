@@ -243,7 +243,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
     }
 
     setFeatureFlag(flag: string, value: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== flag) ?? [];
+        const featureFlags = this.organization.privateMeta?.featureFlags.filter((f: string) => f !== flag) ?? [];
         if (value) {
             featureFlags.push(flag);
         }
@@ -411,7 +411,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
         // Add emails
         for (const email of organization.privateMeta?.emails ?? []) {
-            if (!existing.privateMeta?.emails.find(e => e.email === email.email)) {
+            if (!existing.privateMeta?.emails.find((e: { email: string }) => e.email === email.email)) {
                 // Only add if it doesn't exist yet
                 privatePatch.emails.addPut(email);
             }
@@ -419,7 +419,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
         // Add roles
         for (const role of organization.privateMeta?.roles ?? []) {
-            if (!existing.privateMeta?.roles.find(r => r.id === role.id)) {
+            if (!existing.privateMeta?.roles.find((r: { id: string }) => r.id === role.id)) {
                 // Only add if it doesn't exist yet
                 privatePatch.roles.addPut(role);
             }
@@ -451,7 +451,7 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
         // Copy over groups
         for (const group of organization.groups) {
-            if (!existing.groups.find(g => g.id === group.id)) {
+            if (!existing.groups.find((g: { id: string }) => g.id === group.id)) {
                 // Only add if it doesn't exist yet
                 organizationPatch.groups.addPut(group);
             }

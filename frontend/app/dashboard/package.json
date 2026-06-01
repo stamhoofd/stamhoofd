@@ -29,6 +29,10 @@
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
         "@stamhoofd/structures": "*",
+        "luxon": "3.4.4",
         "qr-scanner": "^1.3.0"
+    },
+    "devDependencies": {
+        "@types/luxon": "3.4.2"
     }
 }

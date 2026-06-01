@@ -141,10 +141,10 @@ export default class ImageInput extends Mixins(NavigationMixin) {
                     private: this.isPrivate ? true : undefined,
                 },
             })
-            .then((response) => {
+            .then((response: { data: Image }) => {
                 this.$emit('update:modelValue', response.data);
             })
-            .catch((e) => {
+            .catch((e: unknown) => {
                 console.error(e);
                 this.errorBox = new ErrorBox(e);
             })

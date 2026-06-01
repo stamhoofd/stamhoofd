@@ -27,7 +27,8 @@
         "@simonbackx/simple-database": "1.36.12"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.36.12"
+        "@simonbackx/simple-database": "1.36.12",
+        "@stamhoofd/test-utils": "*"
     },
     "publishConfig": {
         "access": "public"

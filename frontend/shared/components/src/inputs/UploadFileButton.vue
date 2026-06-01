@@ -95,10 +95,10 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
                     private: this.isPrivate ? true : undefined,
                 },
             })
-            .then((response) => {
+            .then((response: { data: File }) => {
                 this.$emit('change', response.data);
             })
-            .catch((e) => {
+            .catch((e: unknown) => {
                 console.error(e);
                 Toast.fromError(e).setHide(null).show();
             })

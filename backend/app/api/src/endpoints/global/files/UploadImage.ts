@@ -123,8 +123,17 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                 }
 
                 try {
-                    const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
-                    resolve([files.file[0], resolutions]);
+                    const rawResolutions: unknown = fields.resolutions[0];
+                    if (typeof rawResolutions !== 'string') {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Invalid resolutions',
+                            field: 'resolutions',
+                        });
+                    }
+                    const file: unknown = files.file[0];
+                    const resolutions = new ObjectData(JSON.parse(rawResolutions), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
+                    resolve([file as FormidableFile, resolutions]);
                 } catch (e) {
                     reject(e);
                 }

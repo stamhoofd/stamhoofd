@@ -115,8 +115,8 @@ Handlebars.registerHelper('days', (a, b) => {
     const start = Formatter.luxon(a).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
     const end = Formatter.luxon(b).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
     const diff = Interval.fromDateTimes(start, end);
-    const days = diff.length('days');
-    if (isNaN(days)) {
+    const days = Number(diff.length('days'));
+    if (Number.isNaN(days)) {
         return 0;
     }
     return days + 1;

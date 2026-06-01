@@ -95,10 +95,10 @@ export default class UploadButton extends Mixins(NavigationMixin) {
                 shouldRetry: false,
                 owner: this,
             })
-            .then((response) => {
+            .then((response: { data: Image }) => {
                 this.$emit('update:modelValue', response.data);
             })
-            .catch((e) => {
+            .catch((e: unknown) => {
                 console.error(e);
                 Toast.fromError(e).setHide(null).show();
                 // this.errorBox = new ErrorBox(e)
