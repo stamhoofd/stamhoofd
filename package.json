@@ -57,7 +57,7 @@
     "translate:compress": "pnpm --dir shared/locales -s build && pnpm --dir .development/i18n-uuid merge-duplicates && pnpm --dir .development/i18n-uuid unused-keys",
     "translate": "pnpm translate:keys && pnpm translate:compress && pnpm translate:machine",
     "frontend:types": "wait-on shared/locales/dist/index.d.ts && pnpm --dir frontend/app/dashboard -s typecheck",
-    "prepare": "husky",
+    "prepare": "node .husky/install.mjs",
     "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
     "install-vscode-extensions": "code --install-extension ./.vscode/extensions/vue.volar-2.2.10.vsix --force"
   },
