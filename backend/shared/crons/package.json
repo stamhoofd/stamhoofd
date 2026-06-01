@@ -14,7 +14,9 @@
         "lint": "eslint"
     },
     "dependencies": {
-        "@simonbackx/simple-logging": "^1.0.1"
+        "@simonbackx/simple-database": "1.36.12",
+        "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/utility": "*"
     },
     "publishConfig": {
         "access": "public"

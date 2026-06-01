@@ -433,9 +433,15 @@ importers:
 
   backend/shared/crons:
     dependencies:
+      '@simonbackx/simple-database':
+        specifier: 1.36.12
+        version: 1.36.12(@simonbackx/simple-encoding@2.26.6)(mysql2@3.22.3(@types/node@22.19.19))
       '@simonbackx/simple-logging':
         specifier: ^1.0.1
         version: 1.0.1
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../../../shared/utility
 
   backend/shared/email:
     dependencies:
