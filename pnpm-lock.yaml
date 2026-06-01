@@ -291,6 +291,9 @@ importers:
       '@stamhoofd/structures':
         specifier: 2.121.0
         version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: 2.121.0
+        version: link:../../../shared/types
       '@stamhoofd/utility':
         specifier: 2.121.0
         version: link:../../../shared/utility
