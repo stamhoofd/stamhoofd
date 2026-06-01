@@ -15,6 +15,7 @@
         "lint": "eslint"
     },
     "dependencies": {
+        "@simonbackx/simple-logging": "^1.0.1",
         "@stamhoofd/structures": "*",
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*"
