@@ -9,28 +9,29 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
-import { LoadingView } from '@stamhoofd/components';
+import { AccountSwitcher, AuthenticatedView, ContextNavigationBar, ContextProvider, CustomHooksContainer, OrganizationLogo, OrganizationSwitcher, RedirectView } from '@stamhoofd/components';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
 import { ModalStackEventBus, ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
-import { getDashboardComponent } from '@stamhoofd/dashboard/src/getDashboardComponent';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { Storage } from '@stamhoofd/networking/Storage';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import getRegistrationComponent from '@stamhoofd/registration/src/getRegistrationComponent';
+import type { AppType, Webshop } from '@stamhoofd/structures';
 import { Organization, uriToApp } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import type { Ref } from 'vue';
-import { onMounted, ref } from 'vue';
-import { getScopedSwitcherComponent, getUnscopedSwitcherComponent } from './getSwitcherComponents';
-import { getAdminComponent } from '@stamhoofd/admin-frontend/src/getAdminComponent';
+import { onMounted, onUnmounted, reactive, ref, markRaw } from 'vue';
+import { MemberManager, OrganizationManager, PlatformManager, SessionManager } from '@stamhoofd/networking';
+import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
+import { CheckoutManager } from '../../webshop/src/classes/CheckoutManager';
+import { useGlobalRoutes } from './useGlobalRoutes';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
@@ -42,28 +43,149 @@ if (STAMHOOFD.environment === 'development') {
 
 const onOurDomain = window.location.hostname === STAMHOOFD.domains.dashboard || Object.values(STAMHOOFD.domains.registration ?? {}).includes(window.location.hostname);
 
-function getRootComponent(app: string | undefined, org: Organization, isAdminPossible: boolean = false) {
-    switch (app ? uriToApp(app) : undefined) {
-        case 'dashboard':
-            return getDashboardComponent(org);
-        case 'registration':
-            return getRegistrationComponent(org);
-        case 'admin':
-            if (isAdminPossible) {
-                return getAdminComponent();
-            }
+async function sessionFromOrganization(data: ({ organization: Organization } | { organizationId: string })) {
+    const session = await SessionContext.createFrom(data);
+    await session.loadFromStorage();
+    await session.checkSSO();
+    if ('organization' in data) {
+        // Up to date organization
+        session.updateOrganization(data.organization);
+        session._lastFetchedOrganization = new Date();
     }
-    return getScopedSwitcherComponent(org);
+    await SessionManager.prepareSessionForUsage(session, false);
+    return session;
 }
 
-function redirectIfNeeded(org: Organization) {
-    // Do we need to redirect?
-    if (org.resolvedRegisterDomain && window.location.hostname.toLowerCase() !== org.resolvedRegisterDomain.toLowerCase()) {
-        // Redirect
-        window.location.href = UrlHelper.initial.getFullHref({ host: org.resolvedRegisterDomain });
-        return new ComponentWithProperties(LoadingView, {});
-    }
+async function sessionGlobal() {
+    return await SessionManager.getLastGlobalSession();
 }
+
+function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
+    return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
+}
+
+async function wrapContext(context: SessionContext, app: AppType, buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager }) => ComponentWithProperties | Promise<ComponentWithProperties>), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
+    const platformManager = await PlatformManager.createFromCache(context, app, true);
+    const $memberManager = new MemberManager(context, platformManager.$platform);
+
+    if (app === 'webshop' && !options?.webshop) {
+        throw new Error('Webshop is required for webshop app');
+    }
+
+    const $webshopManager = options?.webshop ? reactive(new WebshopManager(context, platformManager.$platform, options.webshop) as any) as WebshopManager : null;
+    const $checkoutManager = $webshopManager ? reactive(new CheckoutManager($webshopManager)) : null;
+
+    const component = typeof buildComponent === 'function' ? await buildComponent({ platformManager }) : buildComponent;
+
+    // BENJAMIN's TODO
+    // const OrganizationSelector = import('@stamhoofd/organization-selector/OrganizationSelector');
+    // const AccountSwitcher = import('@stamhoofd/auth/AccountSelector');
+
+    return new ComponentWithProperties(ContextProvider, {
+        context: markRaw({
+            $context: context,
+            $platformManager: platformManager,
+            $memberManager,
+            $organizationManager: new OrganizationManager(context),
+            $webshopManager,
+            $checkoutManager,
+            reactive_components: {
+                'tabbar-left': options?.ownDomain && context.organization
+                    ? new ComponentWithProperties(OrganizationLogo, {
+                        organization: context.organization,
+                    })
+                    : new ComponentWithProperties(OrganizationSwitcher, {}),
+                'tabbar-right': new ComponentWithProperties(AccountSwitcher, {}),
+                'tabbar-replacement': new ComponentWithProperties(ContextNavigationBar, {}),
+            },
+            stamhoofd_app: app,
+            // apps, BENJAMIN's TODO
+            // reactive_navigation_url: url, BENJAMIN's TODO
+        }),
+        root: wrapWithModalStack(new ComponentWithProperties(CustomHooksContainer, {
+            root: component,
+            hooks: () => {
+                useGlobalRoutes();
+                // Since we mounted, clear the inititial presents
+                onUnmounted(() => {
+                    // Clear the initial presents again, so that we don't keep them in memory
+                    if (options?.initialPresents) {
+                        console.log('Clearing initial presents', options.initialPresents);
+                        options?.initialPresents?.splice(0);
+                    }
+                });
+            },
+        }), options?.initialPresents),
+    });
+}
+
+async function start(app: AppType, root: ComponentWithProperties, organization: Organization | null) {
+    if (organization && organization.resolvedRegisterDomain && window.location.hostname.toLowerCase() !== organization.resolvedRegisterDomain.toLowerCase()) {
+        // Redirect
+        return new ComponentWithProperties(RedirectView, {
+            location: UrlHelper.initial.getFullHref({ host: organization.resolvedRegisterDomain }),
+        });
+    }
+
+    if (!organization && !onOurDomain) {
+        // Redirect
+        return new ComponentWithProperties(RedirectView, {
+            location: UrlHelper.initial.getFullHref({ host: STAMHOOFD.domains.dashboard }), // BENJAMIN's TODO this is faulty
+        });
+    }
+
+    const session = organization ? await sessionFromOrganization({ organization }) : await sessionGlobal();
+
+    return await wrapContext(session, app, root/* BENJAMIN's TODO options.ownDomain etc... */);
+}
+
+async function auth(root: ComponentWithProperties, organization: Organization | null) {
+    const loginRoot = !organization && STAMHOOFD.userMode === 'organization'
+        ? await import('@stamhoofd/organization-selector/root')
+        : await import('@stamhoofd/auth/root');
+
+    return new ComponentWithProperties(AuthenticatedView, {
+        root: wrapWithModalStack(root),
+        loginRoot: wrapWithModalStack(loginRoot),
+    });
+}
+
+const apps: Record<AppType, any> = {
+    'dashboard': async (organization: Organization | null) => {
+        if (!organization) {
+            throw new Error('Organization is required for dashboard app');
+        }
+        const dashboard = await import('@stamhoofd/dashboard');
+        return start('dashboard', await auth(await dashboard.getApp(organization), organization), organization);
+    },
+    'registration': async (organization: Organization | null) => {
+        const registration = await import('@stamhoofd/registration');
+        return start('registration', await auth(await registration.getApp(organization), organization), organization);
+    },
+    'admin': async (organization: Organization | null) => {
+        // organization might be not null, in case of single organization mode
+        const admin = await import('@stamhoofd/admin');
+        return start('admin', await auth(await admin.getApp(organization), organization), organization);
+    },
+    'auto-switcher': async (organization: Organization | null) => {
+        const autoSwitcher = await import('@stamhoofd/auto-switcher');
+        return start('auto-switcher', await auth(await autoSwitcher.getApp(organization), organization), organization);
+    },
+    'organization-selector': async (organization: Organization | null) => {
+        if (organization) {
+            throw new Error('Organization should not be set for organization selector app');
+        }
+        const organizationSelector = await import('@stamhoofd/organization-selector');
+        return start('organization-selector', await auth(await organizationSelector.getApp(), null), null);
+    },
+    'auth': async (organization: Organization | null) => {
+
+    },
+    'webshop': async (organization: Organization | null) => {
+        // BENJAMIN's TODO: what should we do here?
+    },
+};
+
 async function fetchOrganization({ path, query, orgId }: { path: string; query?: Record<string, string>; orgId?: string }): Promise<Organization | null> {
     // If we have the token, we better do an authenticated request
     const server = orgId ? SessionContext.serverForOrganization(orgId) : NetworkManager.server;
@@ -80,6 +202,18 @@ async function fetchOrganization({ path, query, orgId }: { path: string; query?:
         console.error('Failed to fetch organization', e);
         return null;
     }
+}
+
+async function idToOrganization(orgId: string) {
+    return await fetchOrganization({ path: '/organization', orgId });
+}
+
+async function uriToOrganization(uri: string) {
+    return await fetchOrganization({ path: '/organization-from-uri', query: { uri } });
+}
+
+async function domainToOrganization(domain: string) {
+    return await fetchOrganization({ path: '/organization-from-domain', query: { domain } });
 }
 
 const root = new ComponentWithProperties(PromiseView, {
@@ -108,41 +242,48 @@ const root = new ComponentWithProperties(PromiseView, {
                 }
             }
 
-            if (STAMHOOFD.singleOrganization) {
-                const org = await fetchOrganization({ path: '/organization', orgId: STAMHOOFD.singleOrganization });
-                if (org) {
-                    return getRootComponent(parts[1], org, true);
+            /**
+             * onOurDomain && not single org:
+             * - / → auto-switcher, unscoped
+             * - /{app} → {app}, unscoped
+             * - /{org} → auto-switcher, scoped
+             * - /{org}/{app} → {app}, scoped
+
+             * not onOurDomain || single org
+             * - / → auto-switcher, scoped
+             * - /{app} → {app}, scoped
+             */
+
+            let org: Organization | null;
+            let appType: AppType;
+
+            if (!onOurDomain || STAMHOOFD.singleOrganization) {
+                appType = parts[0] ? uriToApp(parts[0]) ?? 'auto-switcher' : 'auto-switcher';
+                org = STAMHOOFD.singleOrganization ? await idToOrganization(STAMHOOFD.singleOrganization) : await domainToOrganization(window.location.hostname);
+                if (!org) {
+                    throw new Error(STAMHOOFD.singleOrganization ? 'Failed to load organization for single organization mode' : 'No organization found for the given domain');
                 }
-                throw new Error('Failed to load organization for single organization mode');
-            }
-
-            if (onOurDomain) {
-                // avoid unnecessary org fetching
-                if (parts[0] && ['auto', 'registration', 'dashboard'].includes(uriToApp(parts[0]))) {
-                    const org = await fetchOrganization({ path: '/organization-from-uri', query: { uri: parts[1] } });
-
-                    if (org) {
-                        redirectIfNeeded(org);
-
-                        return getRootComponent(parts[0], org);
+            } else {
+                const possibleApp = parts[0] ? uriToApp(parts[0]) : null;
+                if (possibleApp) {
+                    appType = possibleApp;
+                    org = null;
+                } else {
+                    const possibleOrg = parts[0] ? await uriToOrganization(parts[0]) : null;
+                    if (possibleOrg) {
+                        appType = parts[1] ? uriToApp(parts[1]) ?? 'auto-switcher' : 'auto-switcher';
+                        org = possibleOrg;
+                    } else {
+                        appType = 'auto-switcher';
+                        org = null;
                     }
                 }
-                return getUnscopedSwitcherComponent();
             }
 
-            if (STAMHOOFD.userMode === 'organization') {
-                const org = await fetchOrganization({ path: '/organization-from-domain', query: { domain: window.location.hostname } });
-
-                if (org) {
-                    redirectIfNeeded(org);
-
-                    return getRootComponent(parts[0], org);
-                }
-                throw new Error('No organization found for the given domain');
-            }
-            throw new Error('Custom organization domains are not supported in platform mode');
+            console.log('Determined app type', appType, 'and organization', org);
+            return (apps[appType] ?? apps['auto-switcher'])(org);
         } catch (e) {
-            console.error('Error in Switcher.App promise', e);
+            console.error('Error in App promise', e);
             Toast.fromError(e).setHide(null).show();
             throw e;
         }

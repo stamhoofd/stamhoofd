@@ -2,12 +2,13 @@ import type { Language } from '@stamhoofd/types/Language';
 import type { Organization } from './Organization.js';
 import { TranslatedString } from './TranslatedString.js';
 
-export type AppType = 'registration' | 'dashboard' | 'admin' | 'webshop';
+const ALL_APPS = ['registration', 'dashboard', 'admin', 'webshop', 'auto-switcher', 'organization-selector', 'auth'] as const;
+export type AppType = typeof ALL_APPS[number];
 
 /**
  * urls are hardcoded because they need to work without a current language
  */
-export function appToTranslatableUri(app: AppType | 'auto'): TranslatedString {
+export function appToTranslatableUri(app: AppType): TranslatedString {
     switch (app) {
         case 'admin':
             return new TranslatedString({
@@ -17,7 +18,7 @@ export function appToTranslatableUri(app: AppType | 'auto'): TranslatedString {
             });
         case 'dashboard':
             return new TranslatedString({
-                nl: 'dashboard',
+                nl: 'dashboard', // in toekomst is 'beheerders' mss beter
                 en: 'dashboard',
                 fr: 'dashboard',
             });
@@ -33,22 +34,34 @@ export function appToTranslatableUri(app: AppType | 'auto'): TranslatedString {
                 en: 'shop',
                 fr: 'shop',
             });
-        case 'auto':
+        case 'auto-switcher':
             return new TranslatedString({
                 nl: 'auto',
                 en: 'auto',
                 fr: 'auto',
             });
+        case 'organization-selector':
+            return new TranslatedString({
+                nl: 'verenigingen',
+                en: 'organizations',
+                fr: 'organisations',
+            });
+        case 'auth':
+            return new TranslatedString({
+                nl: 'login',
+                en: 'login',
+                fr: 'login',
+            });
     }
 }
 
-export function appToUri(app: AppType | 'auto') {
+export function appToUri(app: AppType) {
     return appToTranslatableUri(app).toString();
 }
 
-export function uriToApp(uri: string) {
+export function uriToApp(uri: string): AppType | null {
     // Loop all answers of appToTranslatableUri in all languages and return the first match
-    for (const app of ['admin', 'dashboard', 'registration', 'auto'] as const) {
+    for (const app of ALL_APPS) {
         const l = appToTranslatableUri(app);
 
         if (typeof l.translations === 'string') {
@@ -65,7 +78,7 @@ export function uriToApp(uri: string) {
             }
         }
     }
-    return 'auto';
+    return null;
 }
 
 export const getAppName = (app: AppType) => {
@@ -74,11 +87,14 @@ export const getAppName = (app: AppType) => {
         case 'registration': return $t('%2g');
         case 'admin': return $t(`%IW`);
         case 'webshop': return $t(`%2N`);
+        case 'auto-switcher': return $t(`%Gr`);
+        case 'organization-selector': return $t(`%Gr`);
+        case 'auth': return $t(`Login`);
     }
 };
 
-export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null) => {
-    if (app === 'auto' || app === 'dashboard') {
+export const getAppTitle = (app: AppType, organization: Organization | undefined | null) => {
+    if (app === 'auto-switcher' || app === 'dashboard') {
         if (!organization) {
             return $t(`%Gr`);
         }
@@ -87,8 +103,8 @@ export const getAppTitle = (app: AppType | 'auto', organization: Organization | 
     return getAppName(app);
 };
 
-export const getAppDescription = (app: AppType | 'auto', organization: Organization | undefined | null) => {
-    if (app === 'auto') {
+export const getAppDescription = (app: AppType, organization: Organization | undefined | null) => {
+    if (app === 'auto-switcher') {
         if (organization) {
             return organization.address.anonymousString();
         }
