@@ -3,7 +3,7 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { describe, expect, test } from 'vitest';
-import TestAppWithModalStackComponent from '../../../../tests/helpers/TestAppWithModalStackComponent.vue';
+import TestAppWithModalStackComponent from '../test/TestAppWithModalStackComponent.vue';
 import TimeInput from './TimeInput.vue';
 
 // DO NOT COPY THIS PATTERN!

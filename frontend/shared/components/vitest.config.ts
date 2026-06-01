@@ -10,7 +10,7 @@ export default defineConfig({
         watch: false,
         globals: true,
         include: ['src/**/*.test.ts'],
-        setupFiles: ['vitest-browser-vue', '../../tests/vitest.setup.ts'],
+        setupFiles: ['vitest-browser-vue', './vitest.setup.ts'],
         browser: {
             provider: 'playwright',
             enabled: true,
