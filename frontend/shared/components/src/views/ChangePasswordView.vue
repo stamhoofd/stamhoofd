@@ -36,6 +36,7 @@ import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { Validator } from '#errors/Validator.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 
 @Component({
     components: {
@@ -86,7 +87,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin) {
         this.loading = true;
 
         try {
-            await LoginHelper.changePassword(this.$context, this.password);
+            await LoginHelper.changePassword(this.$context as SessionContext, this.password);
             await this.dismiss({ force: true });
             new Toast($t(`%12U`), 'success').show();
         }

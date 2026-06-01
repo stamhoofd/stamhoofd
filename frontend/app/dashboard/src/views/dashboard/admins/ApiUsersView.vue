@@ -78,7 +78,7 @@ import STToolbar from '@stamhoofd/components/navigation/STToolbar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import TooltipDirective from '@stamhoofd/components/directives/Tooltip.ts';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { ApiUser, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
+import { ApiUser, Organization, PermissionLevel, Permissions, User, UserPermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import ApiUserView from './ApiUserView.vue';
@@ -127,8 +127,8 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         this.loading = false;
     }
 
-    get organization() {
-        return this.$organization;
+    get organization(): Organization {
+        return this.$organization as Organization;
     }
 
     permissionList(user: ApiUser) {

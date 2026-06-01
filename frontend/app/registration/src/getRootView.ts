@@ -142,7 +142,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
             }),
         ),
         loginRoot: wrapWithModalStack(
-            getScopedAutoRootComponent(session),
+            getScopedAutoRootComponent(session) as ComponentWithProperties,
         ),
     }), { ownDomain });
 }

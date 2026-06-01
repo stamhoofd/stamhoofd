@@ -170,12 +170,12 @@ export function getLoginRoot() {
 
 export function getScopedAutoRootComponent(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     return new ComponentWithProperties(PromiseView, {
-        promise: async () => {
-            // Replace itself again after a successful login
-            const root = await getScopedAutoRoot(reactiveSession, options);
-            await ReplaceRootEventBus.sendEvent('replace', root);
-            return new ComponentWithProperties({}, {});
-        },
+            promise: async () => {
+                // Replace itself again after a successful login
+                const root = await getScopedAutoRoot(reactiveSession, options);
+                await ReplaceRootEventBus.sendEvent('replace', root as ComponentWithProperties);
+                return new ComponentWithProperties({}, {});
+            },
     });
 }
 
@@ -248,7 +248,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
                         if (reactiveSession.user) {
                             // Replace itself again after a successful login
                             const root = await getScopedAutoRoot(reactiveSession, options);
-                            await ReplaceRootEventBus.sendEvent('replace', root);
+                            await ReplaceRootEventBus.sendEvent('replace', root as ComponentWithProperties);
                         } else {
                             throw new SimpleError({
                                 code: 'infinite_redirect',

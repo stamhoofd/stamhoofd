@@ -17,10 +17,13 @@
         "dist"
     ],
     "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.6",
+        "@simonbackx/vue-app-navigation": "2.18.1",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
         "@stamhoofd/scss": "1.0.0",
         "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*"
     }
 }

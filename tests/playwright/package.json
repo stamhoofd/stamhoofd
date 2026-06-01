@@ -13,6 +13,11 @@
     "dependencies": {
         "@simonbackx/simple-database": "1.36.12",
         "@stamhoofd/backend": "*",
+        "@stamhoofd/build-development-env": "*",
+        "@stamhoofd/models": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/test-utils": "*",
+        "@stamhoofd/utility": "*",
         "pino": "^10.1.1"
     },
     "devDependencies": {
