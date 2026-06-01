@@ -17,11 +17,11 @@ export function useGroupsRelationFetcher() {
         const filter: StamhoofdFilter = {};
 
         if (type) {
-            filter.type = type;
+            (filter as any).type = type;
         }
 
         if (periodId) {
-            filter.periodId = periodId;
+            (filter as any).periodId = periodId;
         }
 
         let getName: (object: ObjectType) => string;
