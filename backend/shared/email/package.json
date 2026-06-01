@@ -22,6 +22,12 @@
         "@types/nodemailer": "^7"
     },
     "dependencies": {
+        "@stamhoofd/backend-i18n": "*",
+        "@stamhoofd/queues": "*",
+        "@stamhoofd/sql": "*",
+        "@stamhoofd/test-utils": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
         "html-to-text": "^8.1.0",
         "nodemailer": "^7"
     },

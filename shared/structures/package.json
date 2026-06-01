@@ -25,6 +25,11 @@
         "test": "vitest",
         "lint": "eslint"
     },
+    "dependencies": {
+        "@stamhoofd/excel-writer": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
+    },
     "devDependencies": {
         "@simonbackx/simple-errors": "^1.5",
         "@types/uuid": "^8.3.0",

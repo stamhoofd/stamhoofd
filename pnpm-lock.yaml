@@ -90,6 +90,9 @@ importers:
         specifier: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz
         version: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz
     devDependencies:
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:shared/types
       '@testing-library/dom':
         specifier: ^10.4.0
         version: 10.4.1
@@ -429,6 +432,24 @@ importers:
       '@simonbackx/simple-errors':
         specifier: ^1.5
         version: 1.5.0(@simonbackx/simple-encoding@2.26.6)(uuid@11.0.3)
+      '@stamhoofd/backend-i18n':
+        specifier: '*'
+        version: link:../i18n
+      '@stamhoofd/queues':
+        specifier: '*'
+        version: link:../queues
+      '@stamhoofd/sql':
+        specifier: '*'
+        version: link:../sql
+      '@stamhoofd/test-utils':
+        specifier: '*'
+        version: link:../../../shared/test-utils
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../../../shared/utility
       html-to-text:
         specifier: ^8.1.0
         version: 8.2.1
@@ -440,13 +461,32 @@ importers:
         specifier: ^7
         version: 7.0.11
 
-  backend/shared/env: {}
+  backend/shared/env:
+    dependencies:
+      '@stamhoofd/build-development-env':
+        specifier: '*'
+        version: link:../../../shared/build-development-env
+      '@stamhoofd/test-utils':
+        specifier: '*'
+        version: link:../../../shared/test-utils
+      chalk:
+        specifier: '4'
+        version: 4.1.2
 
   backend/shared/i18n:
     dependencies:
       '@simonbackx/simple-endpoints':
         specifier: 1.21.1
         version: 1.21.1(@simonbackx/simple-encoding@2.26.6)(@simonbackx/simple-errors@1.5.0)
+      '@stamhoofd/locales':
+        specifier: '*'
+        version: link:../../../shared/locales
+      '@stamhoofd/structures':
+        specifier: '*'
+        version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../../../shared/types
 
   backend/shared/logging:
     dependencies:
@@ -471,15 +511,42 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.839.0
         version: 3.1053.0
+      '@aws-sdk/client-sesv2':
+        specifier: ^3.839.0
+        version: 3.1053.0
+      '@bwip-js/node':
+        specifier: ^4.5.1
+        version: 4.10.1
+      '@mollie/api-client':
+        specifier: 4.5.0
+        version: 4.5.0(encoding@0.1.13)
+      '@stamhoofd/backend-i18n':
+        specifier: '*'
+        version: link:../i18n
       '@stamhoofd/email':
         specifier: '*'
         version: link:../email
       '@stamhoofd/queues':
         specifier: '*'
         version: link:../queues
+      '@stamhoofd/sql':
+        specifier: '*'
+        version: link:../sql
+      '@stamhoofd/structures':
+        specifier: '*'
+        version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../../../shared/utility
       base-x:
         specifier: ^3.0.11
         version: 3.0.11
+      handlebars:
+        specifier: ^4.7.7
+        version: 4.7.9
     devDependencies:
       '@simonbackx/simple-database':
         specifier: 1.36.12
@@ -488,6 +555,16 @@ importers:
   backend/shared/queues: {}
 
   backend/shared/sql:
+    dependencies:
+      '@stamhoofd/structures':
+        specifier: '*'
+        version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../../../shared/utility
     devDependencies:
       '@simonbackx/simple-database':
         specifier: 1.36.12
@@ -788,7 +865,20 @@ importers:
         specifier: 1.0.0
         version: link:../assets
 
-  shared/build-development-env: {}
+  shared/build-development-env:
+    dependencies:
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../types
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../utility
+      chalk:
+        specifier: '4'
+        version: 4.1.2
+      concurrently:
+        specifier: ^9.2.0
+        version: 9.2.1
 
   shared/eslint:
     dependencies:
@@ -828,6 +918,9 @@ importers:
 
   shared/excel-writer:
     dependencies:
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../types
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
@@ -836,9 +929,23 @@ importers:
         specifier: ^6.0.2
         version: 6.0.4
 
-  shared/locales: {}
+  shared/locales:
+    dependencies:
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../types
 
   shared/object-differ:
+    dependencies:
+      '@stamhoofd/structures':
+        specifier: '*'
+        version: link:../structures
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../types
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../utility
     devDependencies:
       '@types/uuid':
         specifier: ^8.3.0
@@ -854,6 +961,16 @@ importers:
         version: 0.17.4
 
   shared/structures:
+    dependencies:
+      '@stamhoofd/excel-writer':
+        specifier: '*'
+        version: link:../excel-writer
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../types
+      '@stamhoofd/utility':
+        specifier: '*'
+        version: link:../utility
     devDependencies:
       '@simonbackx/simple-errors':
         specifier: ^1.5
@@ -865,11 +982,19 @@ importers:
         specifier: 11.0.3
         version: 11.0.3
 
-  shared/test-utils: {}
+  shared/test-utils:
+    dependencies:
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../types
 
   shared/types: {}
 
-  shared/utility: {}
+  shared/utility:
+    dependencies:
+      '@stamhoofd/types':
+        specifier: '*'
+        version: link:../types
 
   tests/playwright:
     dependencies:

@@ -23,6 +23,9 @@
         "test": "vitest",
         "lint": "eslint ."
     },
+    "dependencies": {
+        "@stamhoofd/types": "*"
+    },
     "publishConfig": {
         "access": "public"
     }
