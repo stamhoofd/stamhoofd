@@ -23,7 +23,10 @@
         "lint": "eslint"
     },
     "dependencies": {
-        "@stamhoofd/types": "*"
+        "@simonbackx/simple-errors": "^1.5",
+        "@stamhoofd/types": "*",
+        "luxon": "3.4.4",
+        "uuid": "11.0.3"
     },
     "devDependencies": {
         "@types/archiver": "^6.0.2"

@@ -17,7 +17,8 @@
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.21.1",
         "@simonbackx/simple-errors": "^1.5",
-        "@simonbackx/simple-logging": "^1.0.1"
+        "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/structures": "*"
     },
     "publishConfig": {
         "access": "public"

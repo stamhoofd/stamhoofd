@@ -14,6 +14,9 @@
         "test": "vitest",
         "lint": "eslint"
     },
+    "dependencies": {
+        "@simonbackx/simple-errors": "^1.5"
+    },
     "publishConfig": {
         "access": "public"
     }

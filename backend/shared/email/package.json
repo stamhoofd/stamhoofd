@@ -31,7 +31,8 @@
         "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*",
         "html-to-text": "^8.1.0",
-        "nodemailer": "^7"
+        "nodemailer": "^7",
+        "uuid": "11.0.3"
     },
     "publishConfig": {
         "access": "public"
