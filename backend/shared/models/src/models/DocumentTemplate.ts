@@ -110,10 +110,6 @@ export class DocumentTemplate extends QueryableModel {
      * Still do an update when answers are locked
      */
     async updateAnswers(document: Document) {
-        if (document.isLocked || this.isLocked) {
-            return;
-        }
-
         // Add global answers (same for each document)
         for (const answer of this.settings.fieldAnswers.values()) {
             // todo: check duplicate

@@ -196,7 +196,7 @@ export class Document extends QueryableModel {
             console.log('Updating documents for registration', registration.id);
 
             const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-            const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId: registration.organizationId });
+            const templates = await DocumentTemplate.where({ updatesEnabled: 1, isLocked: 0, organizationId: registration.organizationId });
 
             for (const template of templates) {
                 await template.updateForRegistration(registration);
@@ -227,7 +227,7 @@ export class Document extends QueryableModel {
             console.log('Updating documents for updateForRegistrations', registrationIds, organizationId);
 
             const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-            const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });
+            const templates = await DocumentTemplate.where({ updatesEnabled: 1, isLocked: 0, organizationId });
 
             if (templates.length) {
                 const Member = (await import('./Member.js')).Member;
@@ -248,7 +248,7 @@ export class Document extends QueryableModel {
             console.log('Updating documents for group', groupId);
 
             const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
-            const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });
+            const templates = await DocumentTemplate.where({ updatesEnabled: 1, isLocked: 0, organizationId });
 
             if (templates.length) {
                 const Member = (await import('./Member.js')).Member;
