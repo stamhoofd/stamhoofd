@@ -25,13 +25,18 @@
             <div v-if="$slots.default && isValidVnodes($slots.default())" class="footer" :class="{ scrolled }">
                 <slot />
             </div>
+
+            <div v-if="STAMHOOFD.environment === 'development' && (ComponentWithProperties.debug || HistoryManager.debug)" class="debug-overlay">
+                {{ url.getUrl() }} @ {{ historyIndex }}
+            </div>
         </div>
     </header>
 </template>
 
 <script setup lang="ts">
-import { useCanDismiss, useCanPop, useDismiss, usePop, usePopup, useUrl } from '@simonbackx/vue-app-navigation';
-import { Comment, computed, Fragment, getCurrentInstance, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots } from 'vue';
+import { ComponentWithProperties, HistoryManager, useCanDismiss, useCanPop, useDismiss, usePop, usePopup, useUrl } from '@simonbackx/vue-app-navigation';
+import type { Ref } from 'vue';
+import { Comment, computed, Fragment, getCurrentInstance, inject, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots } from 'vue';
 
 import InheritComponent from '../containers/InheritComponent.vue';
 import { useIsAndroid, useIsIOS } from '../hooks';
@@ -39,6 +44,8 @@ import BackButton from './BackButton.vue';
 
 const slots = useSlots();
 const popup = usePopup();
+const url = useUrl();
+const historyIndex = inject('navigation_historyIndex', null) as Ref<number | undefined> | null;
 
 const props = withDefaults(defineProps<{
     title?: string;
@@ -65,7 +72,6 @@ const canDismiss = useCanDismiss();
 const canPop = useCanPop();
 const dismiss = useDismiss();
 const pop = usePop();
-const $url = useUrl();
 const $isAndroid = useIsAndroid();
 const $isIOS = useIsIOS();
 
@@ -149,7 +155,7 @@ function onScroll() {
 
 onMounted(() => {
     if (props.title) {
-        $url.setTitle(props.title);
+        url.setTitle(props.title);
     }
 
     // fix for element not yet in dom
@@ -159,7 +165,7 @@ onMounted(() => {
 
 onActivated(() => {
     if (props.title) {
-        $url.setTitle(props.title);
+        url.setTitle(props.title);
     }
 
     // fix for element not yet in dom
@@ -302,6 +308,13 @@ onDeactivated(() => {
     z-index: 200;
     position: relative;
     margin-top: -1px;
+
+    .debug-overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 11px;;
+    }
 
     &::before {
         position: absolute;
