@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "dist",
         "rootDir": ".",
-        "types": ["node", "playwright/test"],
+        "types": ["node", "@playwright/test"],
         "customConditions": ["@stamhoofd/source"]
     },
     "extends": "../../tsconfig.base.json",
