@@ -1920,7 +1920,7 @@ const rowHeight = computed(() => {
         const margin = 6;
         return padding * 2 + firstColumnHeight + ((otherColumnsHeight + margin) * Math.max(columns.value.length - 1, 0)) + borderHeight;
     }
-    return 60;
+    return 50;
 });
 
 watchEffect(() => {
@@ -2432,10 +2432,10 @@ defineExpose({
         position: absolute;
 
         will-change: transform;
-        height: var(--table-row-height, 60px);
+        height: var(--table-row-height, 50px);
 
         .columns {
-            border-top: $border-width-thin solid $color-border;
+            border-top: $border-width-thin solid $color-border-lighter;
 
             > div {
                 white-space: nowrap;
@@ -2462,7 +2462,7 @@ defineExpose({
 
         @media (hover: hover) {
             &:hover {
-                background-color: $color-primary-lighter;
+                background-color: var(--color-current-background-shade, #{$color-background-shade});
 
                 &.focused {
                     background-color: $color-primary-light;
@@ -2471,7 +2471,7 @@ defineExpose({
         }
 
         &:active {
-            background-color: $color-primary-light;
+            background-color: var(--color-current-background-shade-darker, #{$color-background-shade-darker});
         }
 
         &.focused {

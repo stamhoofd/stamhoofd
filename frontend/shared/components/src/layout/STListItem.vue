@@ -345,7 +345,7 @@ button.st-list-item {
             left: calc(-1 * var(--added-st-horizontal-padding, 0px));
             right: calc(-1 * var(--added-st-horizontal-padding, 0px));
             bottom: 1px;
-            background: $color-primary-lighter;
+            background: var(--color-current-background-shade, #{$color-background-shade});
             z-index: -3;
             opacity: 0;
             pointer-events: none;
@@ -362,7 +362,7 @@ button.st-list-item {
             left: calc(-1 * var(--added-st-horizontal-padding, 0px));
             right: calc(-1 * var(--added-st-horizontal-padding, 0px));
             bottom: -2px;
-            background: $color-primary-light;
+            background: var(--color-current-background-shade-darker, #{$color-background-shade-darker});
             z-index: -1;
             opacity: 0;
             pointer-events: none;
@@ -402,22 +402,10 @@ button.st-list-item {
         }
     }
 
-    &.no-color-highlight.selectable:not(.is-dragging) {
-        &:after {
-            background: $color-background-shade;
-            background: var(--color-current-background-shade, $color-background-shade);
-        }
-
-        &:before {
-            background: $color-background-shade-darker;
-            background: var(--color-current-background-shade-darker, $color-background-shade-darker);
-        }
-    }
-
     &.sortable-chosen {
         transition: none;
-        background: $color-background-shade;
-        background: var(--color-current-background-shade, $color-background-shade);
+        background: $color-background-shade-darker;
+        background: var(--color-current-background-shade-darker, $color-background-shade-darker);
     }
 
     &.sortable-chosen.is-dragging {
