@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import type { Route } from '@simonbackx/vue-app-navigation';
-import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, defineRoutes, typeRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
@@ -76,36 +76,6 @@ defineRoutes([
         component: OrganizationsTableView,
         isDefault: {
             properties: {},
-        },
-    },
-    {
-        url: 'tag/@slug/groepen',
-        name: Routes.Organizations,
-        show: 'detail',
-        component: OrganizationsTableView,
-        params: {
-            slug: String,
-        },
-        paramsToProps(params: { slug: string }) {
-            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
-            if (!tag) {
-                throw new Error('Tag not found');
-            }
-
-            return {
-                tag,
-            };
-        },
-        propsToParams(props) {
-            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
-                throw new Error('Missing tag');
-            }
-
-            return {
-                params: {
-                    slug: Formatter.slug(props.tag.name),
-                },
-            };
         },
     },
     {
@@ -147,6 +117,33 @@ defineRoutes([
             } as Route<any>]
         : []),
 ]);
+
+defineRoute({
+    url: 'tag/@slug/groepen',
+    name: Routes.Organizations,
+    show: 'detail',
+    component: OrganizationsTableView,
+    params: {
+        slug: String,
+    },
+    paramsToProps(params) {
+        const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+        if (!tag) {
+            throw new Error('Tag not found');
+        }
+
+        return {
+            tag,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug(props.tag.name),
+            },
+        };
+    },
+});
 
 const checkRoute = useCheckRoute();
 const navigate = useNavigate();
