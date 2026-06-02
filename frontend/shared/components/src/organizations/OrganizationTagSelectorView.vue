@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="title" :disabled="!hasChanges" :save-text="$saveText" @save="save">
         <h1>{{ title }}<span v-show="$selectedTags.size > 0" class="selection-count">{{ " (" + $selectedTags.size + ")" }}</span></h1>
-        <form class="search-box input-icon-container icon search gray" @submit.prevent>
+        <form class="search-box input-icon-container icon search small gray" @submit.prevent>
             <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%gH`)">
         </form>
         <hr><STList>

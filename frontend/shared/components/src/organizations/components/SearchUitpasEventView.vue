@@ -18,7 +18,7 @@
             </p>
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <form class="search-box input-icon-container icon search gray" @submit.prevent>
+            <form class="search-box input-icon-container icon search small gray" @submit.prevent>
                 <input ref="input" v-model="text" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('%1CX')">
             </form>
 

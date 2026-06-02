@@ -9,7 +9,7 @@
 
             <div v-if="selectedTab === Tab.Activities" class="input-with-buttons">
                 <div>
-                    <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
+                    <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
                         <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
                     </form>
                 </div>
@@ -115,7 +115,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Event, Group, StamhoofdFilter } from '@stamhoofd/structures';
 import { DocumentTemplateGroup, GroupType, isEmptyFilter, NamedObject, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref, watchEffect } from 'vue';
 import { useSwitchablePeriod } from '../../members/useSwitchablePeriod';
 import { fiscal } from './definitions/fiscal';
@@ -216,8 +216,7 @@ async function selectGroup(group: Group) {
                 description: group.type === GroupType.Membership ? period.value.period.name : (Formatter.dateRange(group.settings.startDate, group.settings.endDate)),
             }),
         }), navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -229,8 +228,7 @@ onMounted(() => {
 async function load() {
     try {
         archivedGroups.value = await organizationManager.value.loadArchivedGroups({ owner: requestOwner });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     loadingGroups.value = false;

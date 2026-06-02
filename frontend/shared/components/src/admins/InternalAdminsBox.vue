@@ -5,7 +5,7 @@
 
     <div v-if="shouldShowSearch" class="input-with-buttons">
         <div>
-            <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
+            <form class="input-icon-container icon search small gray" @submit.prevent="blurFocus">
                 <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%KC`)">
             </form>
         </div>

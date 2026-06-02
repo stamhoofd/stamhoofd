@@ -4,7 +4,7 @@
         <p>{{ $t('%Sz') }}</p>
 
         <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
-            <div class="input-icon-container icon search gray">
+            <div class="input-icon-container icon search small gray">
                 <input v-model="searchQuery" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" class="input" :placeholder="$t(`%SN`)">
             </div>
         </LoadingButton>

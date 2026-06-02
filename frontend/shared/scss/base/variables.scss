@@ -1,6 +1,6 @@
 @use "sass:color";
 
-$input-height-original: 40px;
+$input-height-original: 38px;
 $input-height: var(--input-height, $input-height-original);
 
 @media (max-width: 550px) {

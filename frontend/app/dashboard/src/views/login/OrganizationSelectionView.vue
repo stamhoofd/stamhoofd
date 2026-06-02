@@ -28,7 +28,7 @@
                     {{ $t('%6') }}
                 </p>
 
-                <form class="input-icon-container icon search gray" @submit.prevent>
+                <form class="input-icon-container icon search small gray" @submit.prevent>
                     <input
                         ref="input" v-model="query" autofocus class="input" :placeholder="$t('%3u')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="organization-search-input"
                         @keydown.down.prevent="focusResult(0)"
