@@ -110,6 +110,7 @@ declare global {
         readonly DB_USER: string;
         readonly DB_PASS: string;
         readonly DB_DATABASE: string;
+        readonly DB_PORT: number;
         readonly DB_CONNECTION_LIMIT?: number;
 
         // E-mail

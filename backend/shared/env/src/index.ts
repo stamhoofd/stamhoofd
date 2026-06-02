@@ -22,8 +22,8 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
         env = STAMHOOFD;
     }
     else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
-        const builder = await import('@stamhoofd/build-development-env');
-        env = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
+        const builder = await import('@stamhoofd/cli');
+        env = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
             backend: settings?.service ?? 'api',
         });
 
@@ -70,6 +70,7 @@ export async function load(settings?: { path?: string; service?: 'redirecter' | 
     // Database
     process.env.DB_DATABASE = STAMHOOFD.DB_DATABASE + '';
     process.env.DB_HOST = STAMHOOFD.DB_HOST + '';
+    process.env.DB_PORT = STAMHOOFD.DB_PORT + '';
     process.env.DB_PASS = STAMHOOFD.DB_PASS + '';
     process.env.DB_USER = STAMHOOFD.DB_USER + '';
     process.env.DB_CHARSET = 'utf8mb4_0900_ai_ci';
