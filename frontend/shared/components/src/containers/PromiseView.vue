@@ -7,83 +7,85 @@
     </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { ComponentWithPropertiesInstance, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { ComponentWithPropertiesInstance, onCheckRoutes, useCanDismiss, useDismiss } from '@simonbackx/vue-app-navigation';
+import { onMounted, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { Toast } from '../overlays/Toast';
 import LoadingViewTransition from './LoadingViewTransition.vue';
 
-@Component({
-    components: {
-        ComponentWithPropertiesInstance,
-        LoadingViewTransition,
-    },
-})
-export default class PromiseView extends Mixins(NavigationMixin) {
-    @Prop({ required: true })
-    promise!: (this: PromiseView) => Promise<ComponentWithProperties>;
+const props = defineProps<{
+    promise: () => Promise<ComponentWithProperties>;
+}>();
 
-    root: ComponentWithProperties | null = null;
-    passRoutes = false;
-    errorBox: ErrorBox | null = null;
+const root = ref<ComponentWithProperties | null>(null);
+const errorBox = ref<ErrorBox | null>(null);
+let passRoutes = false;
 
-    mounted() {
-        this.run();
-    }
+const dismiss = useDismiss();
+const canDismiss = useCanDismiss();
 
-    customRoutes() {
-        this.passRoutes = true;
-    }
+onCheckRoutes(() => {
+    passRoutes = true;
+});
 
-    run() {
-        this.errorBox = null;
-        this.promise.call(this).then((value) => {
-            if (!value) {
-                console.error('Promise view did not return a component.');
-                throw new Error('Missing component in promise');
-            }
-
-            const c = value;
-            if (this.passRoutes) {
-                this.passRoutes = false;
-                c.setCheckRoutes();
-            }
-            this.root = c;
-        }).catch((e) => {
-            console.error(e);
-            console.error('Promise error not caught, defaulting to dismiss behaviour in PromiseView');
-
-            if (this.canDismiss) {
-                Toast.fromError(e).show();
-                this.dismiss({ force: true }).catch(console.error);
-            } else {
-                this.errorBox = new ErrorBox(e);
-            }
-        });
-    }
-
-    reload() {
-        this.root = null;
-        this.run();
-    }
-
-    returnToHistoryIndex() {
-        if (this.root) {
-            return this.root.returnToHistoryIndex();
+function run() {
+    errorBox.value = null;
+    props.promise().then((value) => {
+        if (!value) {
+            console.error('Promise view did not return a component.');
+            throw new Error('Missing component in promise');
         }
-        return false;
-    }
 
-    async shouldNavigateAway(): Promise<boolean> {
-        if (!this.root) {
-            return true;
+        const c = value;
+        if (passRoutes) {
+            passRoutes = false;
+            c.setCheckRoutes();
         }
-        return await (this.root.shouldNavigateAway());
-    }
+        root.value = c;
+    }).catch((e) => {
+        console.error(e);
+        console.error('Promise error not caught, defaulting to dismiss behaviour in PromiseView');
+
+        if (canDismiss.value) {
+            Toast.fromError(e).show();
+            dismiss({ force: true }).catch(console.error);
+        } else {
+            errorBox.value = new ErrorBox(e);
+        }
+    });
 }
+
+function reload() {
+    root.value = null;
+    run();
+}
+
+function returnToHistoryIndex() {
+    if (root.value) {
+        return root.value.returnToHistoryIndex();
+    }
+    return false;
+}
+
+async function shouldNavigateAway(): Promise<boolean> {
+    if (!root.value) {
+        return true;
+    }
+    return await root.value.shouldNavigateAway();
+}
+
+onMounted(() => {
+    run();
+});
+
+defineExpose({
+    returnToHistoryIndex,
+    reload,
+    shouldNavigateAway,
+});
 </script>
 
 <style lang="scss">
