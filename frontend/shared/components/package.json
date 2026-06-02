@@ -52,6 +52,7 @@
         "@stamhoofd/test-utils": "*",
         "@types/luxon": "3.4.2",
         "@types/pdfkit": "^0.17.5",
+        "@vitest/browser": "^3.2.4",
         "@vue/test-utils": "^2.4.6",
         "vitest": "^3.2.4"
     }
