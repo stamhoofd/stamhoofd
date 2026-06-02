@@ -18,7 +18,16 @@
         </h3>
         <p v-if="defaultAgeGroup && group.settings.name.toString() !== defaultAgeGroup && app === 'admin'" class="style-description-small" v-text="defaultAgeGroup" />
 
-        <p v-if="registration.description" class="style-description-small pre-wrap" v-text="registration.description" />
+        <template v-for="description of descriptions" :key="description.key">
+            <p v-if="description.type === 'text'" class="style-description-small pre-wrap" v-text="description.text" />
+            <p v-else class="style-description-small pre-wrap">
+                <span>{{ description.label }}: </span>
+                <a :href="description.url" target="_blank" class="inline-link" @click.stop>
+                    <span :class="'icon text-size ' + description.icon" />
+                    <span>{{ description.name }}</span>
+                </a>
+            </p>
+        </template>
 
         <p v-if="registration.startDate" class="style-description-small">
             {{ $t('%fp') }} {{ formatDate(registration.startDate) }}
@@ -58,7 +67,7 @@
 
 <script lang="ts" setup>
 import type { PlatformMember, Registration } from '@stamhoofd/structures';
-import { GroupType } from '@stamhoofd/structures';
+import { GroupType, RecordFileAnswer, RecordImageAnswer } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -99,6 +108,82 @@ const defaultAgeGroup = computed(() => {
         return $t(`%10I`);
     }
     return platform.value.config.defaultAgeGroups.find(ag => ag.id === group.value.defaultAgeGroupId)?.name;
+});
+
+type Description = {
+    type: 'text';
+    key: string;
+    text: string;
+} | {
+    type: 'link';
+    key: string;
+    label: string;
+    url: string;
+    icon: string;
+    name: string;
+};
+
+const descriptions = computed<Description[]>(() => {
+    const descriptions: Description[] = [];
+
+    if (props.registration.group.settings.getFilteredPrices().length > 1) {
+        const text = props.registration.groupPrice.name.toString();
+        if (text) {
+            descriptions.push({
+                type: 'text',
+                key: 'group-price',
+                text,
+            });
+        }
+    }
+
+    for (const option of props.registration.options) {
+        const text = option.optionMenu.name + ': ' + option.option.name + (option.option.allowAmount ? ` x ${option.amount}` : '');
+        if (text) {
+            descriptions.push({
+                type: 'text',
+                key: 'option-' + option.optionMenu.id + '-' + option.option.id,
+                text,
+            });
+        }
+    }
+
+    for (const answer of props.registration.recordAnswers.values()) {
+        if (answer instanceof RecordFileAnswer && answer.file) {
+            descriptions.push({
+                type: 'link',
+                key: 'record-answer-' + answer.id,
+                label: answer.settings.name.toString(),
+                url: answer.file.getPublicPath(),
+                icon: answer.file.icon,
+                name: answer.file.name ?? answer.file.getPublicPath(),
+            });
+            continue;
+        }
+
+        if (answer instanceof RecordImageAnswer && answer.image) {
+            descriptions.push({
+                type: 'link',
+                key: 'record-answer-' + answer.id,
+                label: answer.settings.name.toString(),
+                url: answer.image.getPublicPath(),
+                icon: answer.image.source.icon,
+                name: answer.image.source.name ?? answer.image.getPublicPath(),
+            });
+            continue;
+        }
+
+        const text = answer.descriptionValue;
+        if (text) {
+            descriptions.push({
+                type: 'text',
+                key: 'record-answer-' + answer.id,
+                text,
+            });
+        }
+    }
+
+    return descriptions;
 });
 
 function editRegistration(event: any) {
