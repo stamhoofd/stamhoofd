@@ -1,6 +1,7 @@
 import type { XlsxTransformerSheet, XlsxWorkbookFilter, XlsxWriterAdapter } from './interfaces.js';
 import { XlsxColumnFilterer } from './XlsxColumnFilterer.js';
 import { XlsxTransformer } from './XlsxTransformer.js';
+import { sleep } from '@stamhoofd/utility';
 
 export async function exportToExcel<T>({ definitions, writer, dataGenerator, filter }: {
     filter: XlsxWorkbookFilter;
@@ -19,6 +20,9 @@ export async function exportToExcel<T>({ definitions, writer, dataGenerator, fil
         // Start looping over the data
         for await (const data of dataGenerator) {
             await transformer.process(data);
+            // Sleep for a short duration to reduce load on the server.
+            // There's no rush to do things quickly for an export.
+            await sleep(100);
         }
 
         await writer.close();

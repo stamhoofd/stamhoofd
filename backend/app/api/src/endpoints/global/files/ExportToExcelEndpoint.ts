@@ -89,7 +89,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         await Platform.getSharedStruct();
 
         const result = await Promise.race([
-            this.job(loader, request.body, request.params.type).then(async (url: string) => {
+            this.job(loader, request.body, request.params.type, user.id).then(async (url: string) => {
                 if (sendEmail) {
                     await sendEmailTemplate(null, {
                         template: {
@@ -138,10 +138,10 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         }));
     }
 
-    async job(loader: ExcelExporter<unknown>, request: ExcelExportRequest, type: string): Promise<string> {
+    async job(loader: ExcelExporter<unknown>, request: ExcelExportRequest, type: string, userId: string): Promise<string> {
         // Only run 1 export per user at the same time
-        return await QueueHandler.schedule('user-export-to-excel-' + Context.user!.id, async () => {
-            // Allow maximum 2 running Excel jobs at the same time for all users
+        return await QueueHandler.schedule('user-export-to-excel-' + userId, async () => {
+            // Allow maximum 5 running Excel jobs at the same time for all users; queue the rest.
             return await QueueHandler.schedule('export-to-excel', async () => {
                 // Estimate how long it will take.
                 // If too long, we'll schedule it and write it to Digitalocean Spaces
@@ -165,7 +165,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
 
                 const url = 'https://' + STAMHOOFD.domains.api + '/v' + Version + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(request.title ?? type);
                 return url;
-            }, 2);
+            }, 5);
         });
     }
 }
