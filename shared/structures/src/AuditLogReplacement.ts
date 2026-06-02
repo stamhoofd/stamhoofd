@@ -26,6 +26,10 @@ export function getAuditLogEnumType(enumObject: object): string | undefined {
     return AuditLogReplacementDependencies.enumTypes.get(enumObject);
 }
 
+export function getRegisteredAuditLogEnums(): { type: string; enumObject: object }[] {
+    return Array.from(AuditLogReplacementDependencies.enumTypes.entries()).map(([enumObject, type]) => ({ type, enumObject }));
+}
+
 export enum AuditLogReplacementType {
     // Base
     Key = 'Key', // translatable key
@@ -55,6 +59,7 @@ export enum AuditLogReplacementType {
     Email = 'Email',
     EmailAddress = 'EmailAddress',
     EmailTemplate = 'EmailTemplate',
+    EventNotification = 'EventNotification',
 }
 
 export class AuditLogReplacement extends AutoEncoder {
