@@ -44,9 +44,9 @@ export function wrapWithModalStack(component: ComponentWithProperties, initialPr
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
 }
 
-export async function wrapContext(context: SessionContext, app: AppType | 'auto', buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager }) => ComponentWithProperties), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
+export async function wrapContext(context: SessionContext, app: AppType | 'auto', buildComponent: ComponentWithProperties | ((data: { platformManager: PlatformManager; memberManager: MemberManager }) => ComponentWithProperties), options?: { ownDomain?: boolean; initialPresents?: PushOptions[]; webshop?: Webshop }) {
     const platformManager = await PlatformManager.createFromCache(context, app, true);
-    const $memberManager = new MemberManager(context, platformManager.$platform);
+    const memberManager = new MemberManager(context, platformManager.$platform);
 
     if (app === 'webshop' && !options?.webshop) {
         throw new Error('Webshop is required for webshop app');
@@ -55,13 +55,13 @@ export async function wrapContext(context: SessionContext, app: AppType | 'auto'
     const $webshopManager = options?.webshop ? reactive(new WebshopManager(context, platformManager.$platform, options.webshop) as any) as WebshopManager : null;
     const $checkoutManager = $webshopManager ? reactive(new CheckoutManager($webshopManager)) : null;
 
-    const component = typeof buildComponent === 'function' ? buildComponent({ platformManager }) : buildComponent;
+    const component = typeof buildComponent === 'function' ? buildComponent({ platformManager, memberManager }) : buildComponent;
 
     return new ComponentWithProperties(ContextProvider, {
         context: markRaw({
             $context: context,
             $platformManager: platformManager,
-            $memberManager,
+            $memberManager: memberManager,
             $organizationManager: new OrganizationManager(context),
             $webshopManager,
             $checkoutManager,

@@ -33,8 +33,7 @@ export async function getScopedRegistrationRootFromUrl() {
 
     if (STAMHOOFD.singleOrganization) {
         session = await sessionFromOrganization({ organizationId: STAMHOOFD.singleOrganization });
-    }
-    else if (uriToApp(parts[0]) === 'registration' && parts[1] && !ignoreUris.includes(parts[1])) {
+    } else if (uriToApp(parts[0]) === 'registration' && parts[1] && !ignoreUris.includes(parts[1])) {
         const uri = parts[1];
 
         // Load organization
@@ -50,8 +49,7 @@ export async function getScopedRegistrationRootFromUrl() {
             });
             const organization = response.data;
             session = await sessionFromOrganization({ organization });
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to load organization from uri', uri);
         }
     }
@@ -108,14 +106,13 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         }),
     });
 
-    return wrapContext(session, 'registration', ({ platformManager }) => new ComponentWithProperties(AuthenticatedView, {
+    return wrapContext(session, 'registration', ({ platformManager, memberManager }) => new ComponentWithProperties(AuthenticatedView, {
         root: wrapWithModalStack(
             new ComponentWithProperties(PromiseView, {
-                promise: async function (this: PromiseView) {
-                    const $memberManager = this.$memberManager;
-                    await $memberManager.loadMembers();
-                    await $memberManager.loadCheckout();
-                    await $memberManager.loadDocuments();
+                promise: async function () {
+                    await memberManager.loadMembers();
+                    await memberManager.loadCheckout();
+                    await memberManager.loadDocuments();
 
                     const enableEvents = platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', session);
 
@@ -134,7 +131,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                                 icon: 'basket',
                                 name: $t(`%X5`),
                                 component: cartRoot,
-                                badge: computed(() => $memberManager.family.checkout.cart.count === 0 ? '' : $memberManager.family.checkout.cart.count.toFixed(0)),
+                                badge: computed(() => memberManager.family.checkout.cart.count === 0 ? '' : memberManager.family.checkout.cart.count.toFixed(0)),
                             }),
                         ],
                     });
