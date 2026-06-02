@@ -21,4 +21,19 @@ export class EventNotificationStatusHelper {
                 return $t('%B2');
         }
     }
+
+    public static getColor(status: EventNotificationStatus): string {
+        switch (status) {
+            case EventNotificationStatus.Draft:
+                return 'gray';
+            case EventNotificationStatus.Pending:
+                return 'gray';
+            case EventNotificationStatus.Accepted:
+                return 'success';
+            case EventNotificationStatus.PartiallyAccepted:
+                return 'secundary';
+            case EventNotificationStatus.Rejected:
+                return 'error';
+        }
+    }
 }
