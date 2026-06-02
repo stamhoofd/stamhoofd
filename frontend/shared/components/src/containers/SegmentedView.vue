@@ -7,11 +7,11 @@
 </template>
 
 <script setup lang="ts">
-import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { defineRoutes, FramedComponent, HistoryManager, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
-import { computed, onBeforeUnmount, ref, unref } from 'vue';
+import type { Ref } from 'vue';
+import { computed, markRaw, onBeforeUnmount, ref, toRaw, unref } from 'vue';
 import { SegmentedControl } from '../inputs';
 
 type Item = { name: string; component: ComponentWithProperties };
@@ -37,7 +37,7 @@ const urlHelpers = useUrl();
 const currentComponent = useCurrentComponent();
 
 const segmentedControlItems = computed(() => {
-    return props.tabs.map(t => t.component);
+    return props.tabs.map((_, i) => i);
 });
 
 const segmentedControlLabels = computed(() => {
@@ -46,10 +46,10 @@ const segmentedControlLabels = computed(() => {
 
 const segmentedControlItem = computed({
     get: () => {
-        return selectedItem.value?.component ?? segmentedControlItems.value[0];
+        return props.tabs.findIndex(t => toRaw(t) === toRaw(selectedItem.value));
     },
-    set: (v: ComponentWithProperties) => {
-        const item = props.tabs.find(t => t.component === v);
+    set: (index: number) => {
+        const item = props.tabs[index];
         if (!item) {
             return;
         }
@@ -95,6 +95,9 @@ async function selectItem(item: Item, appendHistory: boolean = true) {
     }
 
     const old = selectedItem.value;
+
+    // Reset component
+    item.component = new ComponentWithProperties(item.component.component, item.component.properties);
 
     if (currentComponent) {
         item.component.inheritFromDisplayer(currentComponent);
