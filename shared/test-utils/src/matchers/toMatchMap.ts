@@ -1,4 +1,11 @@
-export function toMatchMap(actual, map: Map<any, any>) {
+type MatcherStateLike = {
+    equals: any;
+    utils: any;
+};
+
+export function toMatchMap(this: MatcherStateLike, actual: unknown, map: Map<any, any>) {
+    const matcherState = this;
+
     if (
         !(map instanceof Map)
     ) {
@@ -10,7 +17,7 @@ export function toMatchMap(actual, map: Map<any, any>) {
     ) {
         return {
             message: () =>
-                `expected ${this.utils.printReceived(
+                `expected ${matcherState.utils.printReceived(
                     actual,
                 )} to be a Map`,
             pass: false,
@@ -22,9 +29,9 @@ export function toMatchMap(actual, map: Map<any, any>) {
         if (!actual.has(key)) {
             return {
                 message: () =>
-                    `expected ${this.utils.printReceived(
+                    `expected ${matcherState.utils.printReceived(
                         actual,
-                    )} to have key ${this.utils.printExpected(key)}`,
+                    )} to have key ${matcherState.utils.printExpected(key)}`,
                 pass: false,
             };
         }
@@ -33,10 +40,10 @@ export function toMatchMap(actual, map: Map<any, any>) {
         const expectedValue = map.get(key);
         const actualValue = actual.get(key);
 
-        if (!this.equals(expectedValue, actualValue)) {
+        if (!matcherState.equals(expectedValue, actualValue)) {
             return {
                 message: () =>
-                    `expected ${this.utils.diff(actualValue, expectedValue)} at key ${this.utils.printExpected(key)}`,
+                    `expected ${matcherState.utils.diff(actualValue, expectedValue)} at key ${matcherState.utils.printExpected(key)}`,
                 pass: false,
             };
         }
@@ -47,7 +54,7 @@ export function toMatchMap(actual, map: Map<any, any>) {
         if (!map.has(key)) {
             return {
                 message: () =>
-                    `unexpected key ${this.utils.printExpected(key)} in Map`,
+                    `unexpected key ${matcherState.utils.printExpected(key)} in Map`,
                 pass: false,
             };
         }

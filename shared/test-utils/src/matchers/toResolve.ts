@@ -1,12 +1,17 @@
-/*!
+type MatcherStateLike = {
+    utils: any;
+};
+
+/*! 
  * Copyright (c) 2017-present Matt Phillips <matt@mattphillips.io> (mattphillips.io)
  * Licensed under the MIT License
  * https://opensource.org/licenses/MIT
  * Original code from: https://github.com/jest-community/jest-extended
 */
 
-export async function toResolve(actual: Promise<unknown>) {
-    const { matcherHint } = this.utils;
+export async function toResolve(this: MatcherStateLike, actual: Promise<unknown>) {
+    const matcherState = this;
+    const { matcherHint } = matcherState.utils;
 
     const pass = await actual.then(
         () => true,
