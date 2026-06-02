@@ -78,11 +78,11 @@ export function useHideTabBar() {
 </script>
 
 <script setup lang="ts">
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, defineRoutes, FramedComponent, HistoryManager, NavigationController, usePresent, useUrl } from '@simonbackx/vue-app-navigation';
 import { Formatter } from '@stamhoofd/utility';
-import type { ComponentPublicInstance, Ref} from 'vue';
-import { computed, getCurrentInstance, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, ref, unref } from 'vue';
+import type { ComponentPublicInstance, Ref } from 'vue';
+import { computed, getCurrentInstance, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, ref, toRaw, unref } from 'vue';
 
 import InheritComponent from './InheritComponent.vue';
 import { TabBarItem, TabBarItemGroup } from './TabBarItem';
@@ -216,7 +216,7 @@ const shouldNavigateAway = async () => {
 };
 
 async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
-    if (item === selectedItem.value) {
+    if (toRaw(item) === toRaw(selectedItem.value)) {
         // Try to scroll this item to the top
         if (mainElement.value) {
             const scrollElement = mainElement.value.querySelector('.st-view > main');
@@ -227,8 +227,7 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
                         top: 0,
                         behavior: 'smooth',
                     });
-                }
-                else {
+                } else {
                     // todo: try to pop
                 }
             }
@@ -246,7 +245,6 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
         }
         return;
     }
-
     saveCurrentItemState();
     const old = selectedItem.value;
 
@@ -256,8 +254,7 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
 
     if (item.component.hasHistoryIndex()) {
         item.component.returnToHistoryIndex();
-    }
-    else {
+    } else {
         item.component.deleteHistoryIndex();
         HistoryManager.pushState(undefined, old
             ? async () => {
@@ -344,8 +341,7 @@ const selectTabById = async (id: string) => {
     const item = flatTabs.value.find(tab => tab.id === id);
     if (item) {
         await selectItem(item);
-    }
-    else {
+    } else {
         console.error('No tab item found with id:', id);
     }
 };
