@@ -4,6 +4,7 @@ import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditL
 import { STPackageTypeHelper } from '../billing/STPackage.js';
 import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate } from '../email/EmailTemplate.js';
+import { EventNotificationStatus, EventNotificationStatusHelper } from '../EventNotificationStatus.js';
 import { getGroupStatusName } from '../Group.js';
 import { uuidToName } from '../helpers/uuidToName.js';
 import { getGenderName } from '../members/Gender.js';
@@ -40,6 +41,7 @@ AuditLogReplacementDependencies.enumHelpers.push(
     EmailTemplate.getTypeTitle,
 );
 
+registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
 registerAuditLogEnum('OrderStatus', OrderStatus, OrderStatusHelper.getName);
 registerAuditLogEnum('DocumentStatus', DocumentStatus, DocumentStatusHelper.getName);
 registerAuditLogEnum('PaymentStatus', PaymentStatus, PaymentStatusHelper.getName.bind(PaymentStatusHelper));

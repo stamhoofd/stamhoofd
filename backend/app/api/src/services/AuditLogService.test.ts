@@ -32,7 +32,7 @@ describe('AuditLogService', () => {
         }
     });
 
-    test('It throws only for audited enum columns without a registered translation helper', () => {
+    test('It throws when an audited enum column has no registered translation helper', () => {
         modelLogDefinitions.clear();
         modelLogDefinitions.set(UnregisteredAuditLogModel, {
             async logEvent() {

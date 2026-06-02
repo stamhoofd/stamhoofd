@@ -1,14 +1,20 @@
 import { useShowHtml } from '#audit-logs/hooks/useShowHtml.ts';
+import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { useAppContext } from '#context/appContext.ts';
+import { EventNotificationViewModel } from '#event-notifications/classes/EventNotificationViewModel.ts';
 import { useShowEvent } from '#events/hooks/useShowEvent.ts';
+import { useEventNotificationsObjectFetcher } from '#fetchers/useEventNotificationsObjectFetcher.ts';
 import type { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import type { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import type { useOrganizationsObjectFetcher } from '#fetchers/useOrganizationsObjectFetcher.ts';
 import type { usePaymentsObjectFetcher } from '#fetchers/usePaymentsObjectFetcher.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
+import { Toast } from '#overlays/Toast.ts';
 import { useShowPayment } from '#payments/hooks/useShowPayment.ts';
-import type { usePresent } from '@simonbackx/vue-app-navigation';
-import { AuditLogReplacement, AuditLogReplacementType } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
+import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { h, withDirectives } from 'vue';
 import CopyableDirective from '../../directives/Copyable';
@@ -95,6 +101,48 @@ export function renderAny(obj: unknown, customRenderers?: AuditLogCustomRenderer
             return () => h('button', {
                 class: 'style-inline-resource button simple',
                 onClick: () => showEvent(obj.id!),
+                type: 'button',
+            }, obj.value);
+        }
+
+        if (obj.type === AuditLogReplacementType.EventNotification && obj.id) {
+            const present = usePresent();
+            const platform = usePlatform();
+            const fetcher = useEventNotificationsObjectFetcher();
+
+            return () => h('button', {
+                class: 'style-inline-resource button simple',
+                onClick: async () => {
+                    await present({
+                        components: [
+                            new ComponentWithProperties(NavigationController, {
+                                root: new ComponentWithProperties(PromiseView, {
+                                    promise: async () => {
+                                        const notifications = await fetcher.fetch(new LimitedFilteredRequest({
+                                            filter: {
+                                                id: obj.id!,
+                                            },
+                                            limit: 1,
+                                        }));
+
+                                        if (notifications.results.length === 0) {
+                                            Toast.error($t('%AN')).show();
+                                            throw new Error('Event notification not found');
+                                        }
+
+                                        return AsyncComponent(() => import('../../event-notifications/EventNotificationView.vue'), {
+                                            viewModel: EventNotificationViewModel.edit({
+                                                eventNotification: notifications.results[0],
+                                                platform: platform.value,
+                                            }),
+                                        });
+                                    },
+                                }),
+                            }),
+                        ],
+                        modalDisplayStyle: 'popup',
+                    });
+                },
                 type: 'button',
             }, obj.value);
         }

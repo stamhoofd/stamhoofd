@@ -3,10 +3,12 @@ import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { User } from '@stamhoofd/models';
-import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import { AuditLog, EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AccessRight, AuditLogReplacementType, AuditLogType, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import '../../../audit-logs/init.js';
+import { AuditLogService } from '../../../services/AuditLogService.js';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint.js';
 
 const baseUrl = `/event-notifications`;
@@ -47,6 +49,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
     });
 
     beforeAll(async () => {
+        AuditLogService.listen();
         TestUtils.setEnvironment('userMode', 'platform');
         await new EmailTemplateFactory({
             type: EmailTemplateType.EventNotificationAccepted,
@@ -134,6 +137,19 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             status: EventNotificationStatus.Draft,
             createdBy: expect.objectContaining({ id: user.id }),
             submittedBy: null,
+        });
+
+        const log = await AuditLog.select()
+            .where('type', AuditLogType.EventNotificationAdded)
+            .where('objectId', result.body[0].id)
+            .first(true);
+
+        expect(log.organizationId).toBe(organization.id);
+        expect(log.userId).toBe(user.id);
+        expect(log.replacements.get('n')).toMatchObject({
+            id: result.body[0].id,
+            value: notificationType.title,
+            type: AuditLogReplacementType.EventNotification,
         });
     });
 
@@ -295,6 +311,26 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
                 text: expect.stringContaining(event.name),
             }),
         ]);
+
+        const log = await AuditLog.select()
+            .where('type', AuditLogType.EventNotificationEdited)
+            .where('objectId', eventNotification.id)
+            .first(true);
+
+        expect(log.organizationId).toBe(organization.id);
+        expect(log.userId).toBe(user.id);
+        expect(log.replacements.get('n')?.type).toBe(AuditLogReplacementType.EventNotification);
+        const statusPatch = log.patchList.find(item => item.key.toKey() === 'status');
+        expect(statusPatch?.oldValue).toMatchObject({
+            id: 'EventNotificationStatus',
+            value: EventNotificationStatus.Draft,
+            type: AuditLogReplacementType.Enum,
+        });
+        expect(statusPatch?.value).toMatchObject({
+            id: 'EventNotificationStatus',
+            value: EventNotificationStatus.Pending,
+            type: AuditLogReplacementType.Enum,
+        });
     });
 
     test('A normal user can move the event notification to pending state from rejected', async () => {
@@ -947,6 +983,15 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         // Check not exists
         const model = await EventNotification.getByID(eventNotification.id);
         expect(model).toBeUndefined();
+
+        const log = await AuditLog.select()
+            .where('type', AuditLogType.EventNotificationDeleted)
+            .where('objectId', eventNotification.id)
+            .first(true);
+
+        expect(log.organizationId).toBe(organization.id);
+        expect(log.userId).toBe(admin.id);
+        expect(log.replacements.get('n')?.type).toBe(AuditLogReplacementType.EventNotification);
     });
 
     test('An user cannot delete an event notification', async () => {
