@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import type { ComponentWithProperties} from '@simonbackx/vue-app-navigation';
+import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentWithPropertiesInstance, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
@@ -59,8 +59,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
             if (this.canDismiss) {
                 Toast.fromError(e).show();
                 this.dismiss({ force: true }).catch(console.error);
-            }
-            else {
+            } else {
                 this.errorBox = new ErrorBox(e);
             }
         });
