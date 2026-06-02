@@ -177,10 +177,12 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                                 type: AuditLogPatchItemType.Changed,
                             }));
                         } else {
+                            const column = event.model.static.columns?.get(key);
                             log.patchList.push(...ObjectDiffer.diff(
                                 key in oldModel ? oldModel[key] : undefined,
                                 key in event.model ? event.model[key] : undefined,
                                 AuditLogReplacement.key(renamedKey),
+                                column?.decoder,
                             ));
                         }
                     }
