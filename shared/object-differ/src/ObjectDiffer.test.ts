@@ -1,5 +1,11 @@
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, MemberDetails, Parent } from '@stamhoofd/structures';
+import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, MemberDetails, Parent, PaymentStatus } from '@stamhoofd/structures';
 import { ObjectDiffer } from './ObjectDiffer.js';
+
+class TestPaymentStatusContainer extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(PaymentStatus) })
+    status = PaymentStatus.Created;
+}
 
 describe('ObjectDiffer', () => {
     test('Changing a string field', () => {
@@ -104,6 +110,32 @@ describe('ObjectDiffer', () => {
                 key: AuditLogReplacement.array([AuditLogReplacement.key('parents'), AuditLogReplacement.string('Ouder (%2Z)'), AuditLogReplacement.key('firstName')]),
                 oldValue: AuditLogReplacement.string('Ouder'),
                 value: AuditLogReplacement.string('Oudertje'),
+            }),
+        ]);
+    });
+
+    test('Changing an enum field uses a typed enum replacement', () => {
+        const a = TestPaymentStatusContainer.create({
+            status: PaymentStatus.Created,
+        });
+        const b = a.patch({
+            status: PaymentStatus.Pending,
+        });
+
+        expect(ObjectDiffer.diff(a, b)).toEqual([
+            AuditLogPatchItem.create({
+                type: AuditLogPatchItemType.Changed,
+                key: AuditLogReplacement.key('status'),
+                oldValue: AuditLogReplacement.create({
+                    id: 'PaymentStatus',
+                    value: PaymentStatus.Created,
+                    type: AuditLogReplacementType.Enum,
+                }),
+                value: AuditLogReplacement.create({
+                    id: 'PaymentStatus',
+                    value: PaymentStatus.Pending,
+                    type: AuditLogReplacementType.Enum,
+                }),
             }),
         ]);
     });
