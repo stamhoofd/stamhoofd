@@ -568,8 +568,18 @@ jobs:
       run: pnpm build:shared
     - name: Build API
       run: pnpm -C backend/app/api build:playwright:pre
+    - name: Build Playwright frontends
+      run: |
+        pnpm -C frontend/app/dashboard -s build:playwright
+        pnpm -C frontend/app/registration -s build:playwright
+        pnpm -C frontend/app/webshop -s build:playwright
+    - name: Verify Playwright frontend builds
+      run: |
+        test -f frontend/app/dashboard/dist-playwright/index.html
+        test -f frontend/app/registration/dist-playwright/index.html
+        test -f frontend/app/webshop/dist-playwright/index.html
     - name: Run Playwright tests
-      run: pnpm -C tests/playwright -s test
+      run: STAMHOOFD_SKIP_FRONTEND_BUILD=true pnpm -C tests/playwright -s test
     - name: Upload Playwright artifacts
       if: failure()
       uses: actions/upload-artifact@v4
