@@ -166,6 +166,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         const newOrganizationPeriod = OrganizationRegistrationPeriod.create({
             period: newPeriod,
         });
+        newOrganizationPeriod.settings.bundleDiscounts = this.settings.bundleDiscounts.map(discount => discount.clone());
 
         const yearDifference = newPeriod.startDate.getFullYear() - this.period.startDate.getFullYear();
 
