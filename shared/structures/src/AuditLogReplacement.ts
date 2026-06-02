@@ -16,7 +16,8 @@ type AuditLogEnumRegistration<T extends string = string> = {
 export const AuditLogReplacementDependencies = {
     /**
      * @deprecated Only used for old audit log data that stored enum values as Key replacements.
-     * It can be removed once old audit log data has been migrated to typed Enum replacements.
+     * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+     * has been rolled out everywhere.
      */
     enumHelpers: [] as ((key: string) => string)[],
     enumHelpersByType: new Map<string, (key: string) => string>(),
@@ -73,8 +74,51 @@ export function getRegisteredAuditLogEnums(): { type: string; enumObject: object
 }
 
 /**
+ * @deprecated Only used to migrate old audit log data that stored enum values as Key replacements.
+ * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+ * has been rolled out everywhere.
+ */
+export function getLegacyAuditLogEnumRegistrations(): { type: string; enumObject: AuditLogEnumObject; getName: (key: string) => string }[] {
+    return AuditLogReplacementDependencies.legacyEnums.slice();
+}
+
+/**
+ * @deprecated Only used to migrate old audit log data that stored enum values as Key replacements.
+ * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+ * has been rolled out everywhere.
+ */
+export function getLegacyAuditLogEnumReplacement(key: string): AuditLogReplacement | null {
+    if (wordDictionary[key]) {
+        return null;
+    }
+
+    const legacyName = getLegacyAuditLogEnumName(key);
+    if (!legacyName) {
+        return null;
+    }
+
+    for (const { type, enumObject, getName } of AuditLogReplacementDependencies.legacyEnums) {
+        if (!Object.values(enumObject).includes(key)) {
+            continue;
+        }
+
+        try {
+            const result = getName(key);
+            if (result === legacyName) {
+                return AuditLogReplacement.enum(type, key) ?? null;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    return null;
+}
+
+/**
  * @deprecated Only used for old audit log data that stored enum values as Key replacements.
- * It can be removed once old audit log data has been migrated to typed Enum replacements.
+ * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
+ * has been rolled out everywhere.
  */
 function getLegacyAuditLogEnumName(key: string): string | null {
     for (const helper of AuditLogReplacementDependencies.enumHelpers) {
