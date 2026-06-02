@@ -147,6 +147,12 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     timeSlotTime: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
     location: createInMemoryFilterCompiler('data.locationName'),
 
+    /**
+     * @deprecated: only supported in the frontend for now for sorting, not for filtering!
+     * If used for real filters, the filter might touch the backend, which is unsupported
+     */
+    openBalance: createInMemoryFilterCompiler('openBalance'),
+
     // Other (no sorters)
     items: createInMemoryFilterCompiler('data.cart.items', {
         ...baseInMemoryFilterCompilers,
