@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
-import type { PushOptions} from '@simonbackx/vue-app-navigation';
+import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
@@ -27,13 +27,14 @@ import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { EmailAddressSettings, Platform, uriToApp } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { nextTick, onMounted, ref } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFromUrl } from './getRootViews';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
-HistoryManager.debug = STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development';
+// HistoryManager.debug = STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development';
+// ComponentWithProperties.debug = true;
 
 if (STAMHOOFD.environment === 'development') {
     Error.stackTraceLimit = Infinity; // unlimited stack trace to debug infinite loops
@@ -44,8 +45,7 @@ const root = new ComponentWithProperties(PromiseView, {
         // Load locales first
         try {
             await I18nController.loadDefault(null, Country.Belgium, Language.Dutch);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to load default locale', e);
         }
 
@@ -63,37 +63,31 @@ const root = new ComponentWithProperties(PromiseView, {
                     UrlHelper.shared.url.pathname = savedRedirectUrl;
                     console.log('Redirecting to saved mollie redirect url', savedRedirectUrl);
                     parts = UrlHelper.shared.getParts();
-                }
-                else {
+                } else {
                     console.warn('No saved mollie redirect url found');
                 }
             }
 
             if (parts.length >= 1) {
                 app = uriToApp(parts[0]);
-            }
-            else {
+            } else {
                 app = 'auto';
             }
 
             let component: ComponentWithProperties;
             if (app === 'auto') {
                 component = (await getScopedAutoRootFromUrl());
-            }
-            else if (app === 'dashboard') {
+            } else if (app === 'dashboard') {
                 component = (await getScopedDashboardRootFromUrl());
-            }
-            else if (app === 'admin') {
+            } else if (app === 'admin') {
                 component = (await getScopedAdminRootFromUrl({ $t }));
-            }
-            else {
+            } else {
                 component = (await getScopedRegistrationRootFromUrl());
             }
 
             console.log('Resolved root component');
             return component;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error in dashboard.App promise', e);
             Toast.fromError(e).setHide(null).show();
             throw e;
@@ -138,8 +132,7 @@ async function checkGlobalRoutes() {
 
                 const dashboardContext = await getScopedAutoRoot(session);
                 await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
-            }
-            catch (e) {
+            } catch (e) {
                 toast.hide();
                 CenteredMessage.fromError(e).addCloseButton().show();
             }
@@ -158,8 +151,7 @@ onMounted(async () => {
     ModalStackEventBus.addListener(this, 'present', async (options: PushOptions | ComponentWithProperties) => {
         if (!(options as any).components) {
             await manualPresent(stack.present, { components: [options as ComponentWithProperties] });
-        }
-        else {
+        } else {
             await manualPresent(stack.present, options);
         }
     });
@@ -190,8 +182,7 @@ onMounted(async () => {
             visibleDownload: true,
             installAutomatically: true,
         });
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 
@@ -225,8 +216,7 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
             }
 
             unsubscribe = false;
-        }
-        else {
+        } else {
             if (!await CenteredMessage.confirm($t(`%If`), $t(`%Ig`), $t(`%Ih`, { name: details.organization?.name ?? Platform.shared.config.name, email: details.email }))) {
                 return;
             }
@@ -246,12 +236,10 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing')
 
         if (unsubscribe) {
             new Toast($t(`%Ii`), 'success').setHide(15 * 1000).show();
-        }
-        else {
+        } else {
             new Toast($t(`%Ij`), 'success').setHide(15 * 1000).show();
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         toast.hide();
         Toast.fromError(e).show();
