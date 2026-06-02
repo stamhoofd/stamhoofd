@@ -639,6 +639,11 @@ export function useEventNotificationBackendFilterBuilders() {
                         $in: FilterWrapperMarker,
                     },
                 },
+                additionalUnwrappers: [
+                    {
+                        periodId: FilterWrapperMarker,
+                    },
+                ],
             }),
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),

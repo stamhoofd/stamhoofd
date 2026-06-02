@@ -147,7 +147,7 @@ export class MultipleChoiceFilterBuilder implements UIFilterBuilder<MultipleChoi
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
-        const match = unwrapFilterForBuilder(this, filter);
+        const match = unwrapFilterForBuilder(this, filter, true);
         if (!match.match || match.markerValue === undefined) {
             return null;
         }
