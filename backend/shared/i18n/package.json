@@ -25,6 +25,12 @@
         "build": "tsc --build tsconfig.build.json",
         "lint": "eslint"
     },
+    "dependencies": {
+        "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/locales": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*"
+    },
     "peerDependencies": {
         "@simonbackx/simple-endpoints": "1.21.1"
     },

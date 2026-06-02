@@ -1,0 +1,23 @@
+allowBuilds:
+  ttf2woff2: true
+  '@parcel/watcher': true
+  argon2: true
+  core-js: true
+  esbuild: true
+  nx: true
+  puppeteer: true
+  sharp: true
+  unrs-resolver: true
+# Wait 1 week before updating to latest version
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+- '@simonbackx/*'
+linkWorkspacePackages: true
+packages:
+  - 'frontend/app/*'
+  - 'frontend/shared/*'
+  - 'backend/app/*'
+  - 'backend/shared/*'
+  - 'shared/*'
+  - 'tests/*'
+  - '.development/*'

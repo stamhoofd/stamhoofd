@@ -92,7 +92,7 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
     }
 
     get allCategories() {
-        return this.organization.getCategoryTree({ admin: true, permissions: this.$context.organizationPermissions }).getAllCategories().filter(c => c.categories.length === 0);
+        return this.organization.getCategoryTree({ admin: true, permissions: this.$context.organizationPermissions }).getAllCategories().filter((c: { categories: unknown[] }) => c.categories.length === 0);
     }
 
     async openGroup(group: Group) {

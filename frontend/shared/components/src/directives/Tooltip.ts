@@ -1,7 +1,7 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
-import { ModalStackEventBus } from '../..';
 import Tooltip from '../overlays/Tooltip.vue';
+import { ModalStackEventBus } from '../overlays/ModalStackEventBus';
 import type { ObjectDirective } from 'vue';
 
 const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedComponent: null | ComponentWithProperties } & { $tooltipBindingValue: string | undefined }, string> = {

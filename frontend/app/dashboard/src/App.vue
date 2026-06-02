@@ -137,7 +137,7 @@ async function checkGlobalRoutes() {
                 new Toast($t(`%Ia`), 'success green').show();
 
                 const dashboardContext = await getScopedAutoRoot(session);
-                await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
+                await ReplaceRootEventBus.sendEvent('replace', dashboardContext as ComponentWithProperties);
             }
             catch (e) {
                 toast.hide();

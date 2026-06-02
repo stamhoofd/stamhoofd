@@ -25,8 +25,15 @@
         "test": "vitest",
         "lint": "eslint"
     },
+    "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.6",
+        "@stamhoofd/excel-writer": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*"
+    },
     "devDependencies": {
         "@simonbackx/simple-errors": "^1.5",
+        "@stamhoofd/test-utils": "*",
         "@types/uuid": "^8.3.0",
         "uuid": "11.0.3"
     },

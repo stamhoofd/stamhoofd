@@ -86,16 +86,15 @@ export class Formatter {
      * 1 = january
      */
     static month(index: number | Date): string {
-        if (typeof index === 'object') {
-            const datetime = DateTime.fromJSDate(index).setZone(this.timezone);
-            index = datetime.month;
-        }
+        const monthIndex = typeof index === 'object'
+            ? DateTime.fromJSDate(index).setZone(this.timezone).month
+            : index;
 
         // todo translation
         const monthNames = [$t(`%tO`), $t(`%tP`), $t(`%tQ`), $t(`%tR`), $t(`%tS`), $t(`%tT`),
             $t(`%tU`), $t(`%tV`), $t(`%tW`), $t(`%tX`), $t(`%tY`), $t(`%tZ`),
         ];
-        return monthNames[index - 1];
+        return monthNames[monthIndex - 1];
     }
 
     /**

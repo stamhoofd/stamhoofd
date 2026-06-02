@@ -12,8 +12,10 @@
         "dist"
     ],
     "dependencies": {
+        "@simonbackx/vue-app-navigation": "2.18.1",
         "@stamhoofd/assets": "*",
         "@stamhoofd/components": "*",
+        "@stamhoofd/dashboard": "*",
         "@stamhoofd/document-helper": "*",
         "@stamhoofd/frontend-excel-export": "*",
         "@stamhoofd/frontend-i18n": "*",

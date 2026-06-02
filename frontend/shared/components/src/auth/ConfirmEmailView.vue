@@ -55,6 +55,7 @@ import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { Toast } from '#overlays/Toast.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
+import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
 @Component({
@@ -126,7 +127,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
         this.retrying = true;
 
         try {
-            const stop = await LoginHelper.retryEmail(this.$context, this.token);
+            const stop = await LoginHelper.retryEmail(this.$context as SessionContext, this.token);
             this.startTime = new Date();
             if (stop) {
                 await this.dismiss({ force: true });
@@ -158,7 +159,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
                 return;
             }
             console.error('playwright debug - poll email');
-            const stop = await LoginHelper.pollEmail(this.$context, this.token);
+            const stop = await LoginHelper.pollEmail(this.$context as SessionContext, this.token);
             if (stop) {
                 await this.dismiss({ force: true });
                 return;
@@ -187,7 +188,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
         this.loading = true;
 
         try {
-            await LoginHelper.verifyEmail(this.$context, this.code, this.token);
+            await LoginHelper.verifyEmail(this.$context as SessionContext, this.code, this.token);
             new Toast($t(`%uo`), 'success green').setHide(3000).show();
 
             // Yay!

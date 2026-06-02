@@ -5,11 +5,11 @@
     "main": "index.ts",
     "license": "UNLICENCED",
     "scripts": {
-        "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/src/data/belgium.csv && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "build": "tsc --build tsconfig.build.json && yarn -s copy-assets",
+        "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm -s build --watch --preserveWatchOutput' \"wait-on ./dist/src/data/belgium.csv && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "build": "tsc --build tsconfig.build.json && pnpm -s copy-assets",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
-        "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && yarn -s build",
-        "start": "yarn build && node ./dist/index.js",
+        "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo && pnpm -s build",
+        "start": "pnpm build && node ./dist/index.js",
         "lint": "eslint",
         "test": "vitest"
     },
@@ -18,7 +18,8 @@
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.21.1",
-        "@simonbackx/simple-logging": "^1.0.1"
+        "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/backend-middleware": "2.121.0"
     },
     "publishConfig": {
         "access": "public"

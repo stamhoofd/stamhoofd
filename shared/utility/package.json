@@ -23,6 +23,12 @@
         "test": "vitest",
         "lint": "eslint ."
     },
+    "dependencies": {
+        "@stamhoofd/types": "*",
+        "@types/luxon": "3.4.2",
+        "ibantools": "^3.1.0",
+        "luxon": "3.4.4"
+    },
     "publishConfig": {
         "access": "public"
     }

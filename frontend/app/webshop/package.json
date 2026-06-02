@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
-        "dev:build": "yarn -s build",
+        "dev:build": "pnpm -s build",
         "build": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
         "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
@@ -18,8 +18,14 @@
     "dependencies": {
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
+        "@stamhoofd/dashboard": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "1.0.0",
-        "blob-stream": "^0.1.3",
-        "@stamhoofd/structures": "*"
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/ticket-builder": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "blob-stream": "^0.1.3"
     }
 }

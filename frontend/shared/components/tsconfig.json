@@ -1,5 +1,13 @@
 {
     "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "types": [
+            "node",
+            "pdfkit",
+            "vitest/globals",
+            "@vitest/browser/matchers"
+        ]
+    },
     "include": [
         "../../*.d.ts",
         "*.ts",

@@ -10,13 +10,13 @@
     },
     "license": "UNLICENCED",
     "scripts": {
-        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
-        "dev:build": "yarn -s build",
-        "dev:full": "yarn -s dev",
+        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "dev:build": "pnpm -s build",
+        "dev:full": "pnpm -s dev",
         "build": "tsc --build tsconfig.build.json",
-        "build:full": "yarn -s clear && yarn -s build",
+        "build:full": "pnpm -s clear && pnpm -s build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo",
-        "start": "yarn -s build && node --enable-source-maps ./dist/index.js",
+        "start": "pnpm -s build && node --enable-source-maps ./dist/index.js",
         "lint": "eslint",
         "test": "vitest"
     },
@@ -29,6 +29,7 @@
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.21.1",
         "@simonbackx/simple-logging": "^1.0.1",
+        "@stamhoofd/backend-middleware": "2.121.0",
         "formidable": "3.5.4",
         "luxon": "3.4.4",
         "mockdate": "^3.0.2",

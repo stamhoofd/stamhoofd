@@ -92,6 +92,9 @@ tests/cases/user/axios-src/axios-src
 tests/cases/user/prettier/prettier
 .eslintcache
 
+# Development
+.development/**/generated
+
 # Logs
 logs
 *.log

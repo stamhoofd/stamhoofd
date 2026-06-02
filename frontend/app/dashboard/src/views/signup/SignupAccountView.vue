@@ -191,7 +191,7 @@ async function goNext() {
             ],
         });
         await dismiss({ force: true });
-        await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
+        await ReplaceRootEventBus.sendEvent('replace', dashboardContext as ComponentWithProperties);
 
         // Show popup to confirm e-mail
     }

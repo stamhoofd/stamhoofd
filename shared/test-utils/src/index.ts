@@ -1,3 +1,4 @@
+import './vitest.js';
 import { JestHooks } from './JestHooks.js';
 import { getGlobalObject, loadEnvironment, updateLinkedEnvs } from './loadEnvironment.js';
 import { toIncludeAllMembers } from './matchers/toIncludeAllMembers.js';

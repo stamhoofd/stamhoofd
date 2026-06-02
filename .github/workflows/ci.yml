@@ -14,6 +14,7 @@ on:
 
 env:
   NODE_VERSION: 22
+  PNPM_VERSION: 11.5.0
 
 jobs:
   job_setup:
@@ -69,21 +70,24 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build shared packages
-        run: yarn build:shared
+        run: pnpm build:shared
       - name: Linting
-        run: cd backend/app/api && yarn lint --quiet
+        run: pnpm -C backend/app/api lint --quiet
       - name: Run tests
-        run: cd backend/app/api && yarn build && yarn test --bail=1
+        run: pnpm -C backend/app/api build && pnpm -C backend/app/api test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -127,21 +131,24 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build shared packages
-        run: yarn build:shared
+        run: pnpm build:shared
       - name: Linting
-        run: cd backend/shared/models && yarn lint --quiet
+        run: pnpm -C backend/shared/models lint --quiet
       - name: Run tests
-        run: cd backend/shared/models && yarn build && yarn test --bail=1
+        run: pnpm -C backend/shared/models build && pnpm -C backend/shared/models test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -185,21 +192,24 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build shared packages
-        run: yarn build:shared
+        run: pnpm build:shared
       - name: Linting
-        run: cd backend/shared/sql && yarn lint --quiet
+        run: pnpm -C backend/shared/sql lint --quiet
       - name: Run tests
-        run: cd backend/shared/sql && yarn test --bail=1
+        run: pnpm -C backend/shared/sql test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -230,21 +240,24 @@ jobs:
     if: needs.job_setup.outputs.changed_structures == 'true'
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build shared packages
-        run: yarn build:global:shared
+        run: pnpm build:global:shared
       - name: Linting
-        run: cd shared/structures && yarn lint --quiet
+        run: pnpm -C shared/structures lint --quiet
       - name: Run tests
-        run: cd shared/structures && yarn test --bail=1
+        run: pnpm -C shared/structures test --bail=1
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -287,23 +300,26 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: For building, we need development dependencies - install them
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build shared packages
-        run: yarn build:shared
+        run: pnpm build:shared
       - name: Build API
-        run: cd backend/app/api && yarn build
+        run: pnpm -C backend/app/api build
       - name: Remove all installed dependencies
-        run: yarn clear-dependencies
+        run: pnpm clear-dependencies
       - name: Install production dependencies only
-        run: yarn install --prefer-offline --frozen-lockfile --production
+        run: pnpm install --frozen-lockfile --prod
       - name: Running migrations
         run: cd backend/app/api && NODE_ENV=test node ./dist/migrations.js
       - name: Run boot test
@@ -337,21 +353,24 @@ jobs:
     needs: [job_setup]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build shared packages
-        run: yarn build:shared
+        run: pnpm build:shared
       - name: Run type checking
-        run: yarn -s typecheck
+        run: pnpm -s typecheck
       - name: Run type linting
-        run: yarn -s lint
+        run: pnpm -s lint
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -382,21 +401,24 @@ jobs:
     if: needs.job_setup.outputs.changed_frontend == 'true'
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
       - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
-        run: yarn playwright install --with-deps chromium
+        run: pnpm -C tests/playwright exec playwright install --with-deps chromium
       - name: Build shared packages
-        run: yarn build:shared
+        run: pnpm build:shared
       - name: Run components browser tests
-        run: cd frontend/shared/components && yarn vitest run
+        run: pnpm -C frontend/shared/components exec vitest run
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: failure() && github.event_name != 'pull_request'
@@ -441,14 +463,16 @@ jobs:
           --health-retries=3
     steps:
     - uses: actions/checkout@v4
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ env.PNPM_VERSION }}
     - name: Use Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'yarn'
-        cache-dependency-path: 'yarn.lock'
-    - name: Use correct yarn version
-      run: yarn policies set-version 1.22.19
+        cache: 'pnpm'
+        cache-dependency-path: 'pnpm-lock.yaml'
     - name: Restore CoreDNS cache
       id: cache-coredns
       uses: actions/cache@v3
@@ -509,9 +533,9 @@ jobs:
     - name: Install libnss3-tools
       run: sudo apt-get update && sudo apt-get install -y libnss3-tools
     - name: Install dependencies
-      run: yarn install --prefer-offline --frozen-lockfile
+      run: pnpm install --frozen-lockfile
     - name: Install Playwright Browsers
-      run: yarn playwright install --with-deps --no-shell
+      run: pnpm -C tests/playwright exec playwright install --with-deps --no-shell
     - name: Cache Caddy
       id: caddy-cache
       uses: actions/cache@v4
@@ -541,11 +565,21 @@ jobs:
     - name: Add trusted CA certificate to NSS
       run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
     - name: Build shared packages
-      run: yarn build:shared
+      run: pnpm build:shared
     - name: Build API
-      run: cd backend/app/api && yarn build:playwright:pre
+      run: pnpm -C backend/app/api build:playwright:pre
+    - name: Build Playwright frontends
+      run: |
+        pnpm -C frontend/app/dashboard -s build:playwright
+        pnpm -C frontend/app/registration -s build:playwright
+        pnpm -C frontend/app/webshop -s build:playwright
+    - name: Verify Playwright frontend builds
+      run: |
+        test -f frontend/app/dashboard/dist-playwright/index.html
+        test -f frontend/app/registration/dist-playwright/index.html
+        test -f frontend/app/webshop/dist-playwright/index.html
     - name: Run Playwright tests
-      run: cd tests/playwright && yarn -s test
+      run: STAMHOOFD_SKIP_FRONTEND_BUILD=true pnpm -C tests/playwright -s test
     - name: Upload Playwright artifacts
       if: failure()
       uses: actions/upload-artifact@v4

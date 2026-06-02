@@ -9,7 +9,15 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/structures": "*",
-        "@stamhoofd/components": "*"
+        "@stamhoofd/components": "*",
+        "@stamhoofd/networking": "*",
+        "@stamhoofd/utility": "*",
+        "buffer": "^6.0.3",
+        "pdfkit": "^0.18.0"
+    },
+    "devDependencies": {
+        "@types/pdfkit": "^0.17.5"
     }
 }

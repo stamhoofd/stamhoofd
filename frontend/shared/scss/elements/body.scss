@@ -1,5 +1,5 @@
-@use "@stamhoofd/scss/base/fonts.scss";
-@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "../base/fonts.scss";
+@use "../base/variables.scss" as *;
 
 :root, :host {
     // Always force scroll availability on mobile browsers, this is to fix glitches when

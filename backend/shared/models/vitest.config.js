@@ -8,6 +8,7 @@ export default defineConfig({
         globals: true,
         root: import.meta.dirname,
         isolate: true,
+        passWithNoTests: true,
         maxWorkers: 1, // For now we can't run parallel because all test files use the same database
     },
 });

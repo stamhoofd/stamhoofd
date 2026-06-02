@@ -33,11 +33,30 @@
         "@stamhoofd/queues": "*"
     },
     "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.6",
+        "@simonbackx/simple-errors": "^1.5",
         "@aws-sdk/client-s3": "^3.839.0",
-        "base-x": "^3.0.11"
+        "@aws-sdk/client-sesv2": "^3.839.0",
+        "@bwip-js/node": "^4.5.1",
+        "@mollie/api-client": "4.5.0",
+        "@stamhoofd/backend-i18n": "*",
+        "@stamhoofd/email": "*",
+        "@stamhoofd/queues": "*",
+        "@stamhoofd/sql": "*",
+        "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
+        "@stamhoofd/utility": "*",
+        "argon2": "^0.40.1",
+        "base-x": "^3.0.11",
+        "handlebars": "^4.7.7",
+        "luxon": "3.4.4",
+        "sharp": "^0.34.2",
+        "uuid": "11.0.3"
     },
     "devDependencies": {
-        "@simonbackx/simple-database": "1.36.12"
+        "@simonbackx/simple-database": "1.36.12",
+        "@simonbackx/simple-endpoints": "1.21.1",
+        "@stamhoofd/test-utils": "*"
     },
     "publishConfig": {
         "access": "public"

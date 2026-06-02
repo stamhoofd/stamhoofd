@@ -6,7 +6,7 @@
     "main": "src/exports.ts",
     "scripts": {
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
-        "dev:build": "yarn -s build",
+        "dev:build": "pnpm -s build",
         "build": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
         "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
@@ -17,10 +17,17 @@
         "dist"
     ],
     "dependencies": {
+        "@simonbackx/simple-encoding": "2.26.6",
+        "@simonbackx/vue-app-navigation": "2.18.1",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
+        "@stamhoofd/dashboard": "*",
+        "@stamhoofd/document-helper": "*",
+        "@stamhoofd/frontend-i18n": "*",
+        "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "1.0.0",
         "@stamhoofd/structures": "*",
+        "@stamhoofd/types": "*",
         "@stamhoofd/utility": "*"
     }
 }

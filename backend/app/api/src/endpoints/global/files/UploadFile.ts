@@ -104,7 +104,8 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
                     return;
                 }
 
-                resolve(files.file[0]);
+                const file: unknown = files.file[0];
+                resolve(file as FormidableFile);
             });
         });
 

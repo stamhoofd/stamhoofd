@@ -6,7 +6,7 @@
         {
             "type": "shell",
             "label": "Development",
-            "command": "yarn dev",
+            "command": "pnpm dev",
         }
     ]
 }
