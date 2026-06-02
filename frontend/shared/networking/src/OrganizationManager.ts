@@ -1,12 +1,12 @@
-import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components/EventBus';
 import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { inject, toRef } from 'vue';
-import type {SessionContext} from './SessionContext';
+import type { SessionContext } from './SessionContext';
 import { SessionManager } from './SessionManager';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -93,6 +93,10 @@ export class OrganizationManager {
         await GlobalEventBus.sendEvent('organization-updated', this.$context.organization);
     }
 
+    /**
+     * @deprecated
+     * useFetchRegistrationPeriods
+     */
     async loadPeriods(force = false, shouldRetry?: boolean, owner?: any) {
         if (!force && this.organization.periods) {
             return this.organization.periods;
@@ -177,8 +181,7 @@ export class OrganizationManager {
 
         if (this.organization.periods) {
             this.organization.periods?.deepSet(list);
-        }
-        else {
+        } else {
             this.organization.periods = list;
         }
 
