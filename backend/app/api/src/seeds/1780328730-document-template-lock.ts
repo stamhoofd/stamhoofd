@@ -1,22 +1,34 @@
 import { Migration } from '@simonbackx/simple-database';
-import { DocumentTemplate } from '@stamhoofd/models';
+import { Document, DocumentTemplate } from '@stamhoofd/models';
+import { DocumentStatus } from '@stamhoofd/structures';
 
 export async function lockAllTemplates() {
     let c = 0;
     const totalDocuments = await DocumentTemplate.select().count();
 
-    for await (const document of DocumentTemplate.select().all()) {
+    for await (const template of DocumentTemplate.select().all()) {
         c++;
         if (c % 1000 === 0) {
             console.log('Processed', c, 'of', totalDocuments);
         }
 
-        // check
-        if (!document.isLocked) {
-            document.isLocked = true;
+        // only lock if already published
+        if (template.status === DocumentStatus.Published && !template.isLocked) {
+            template.isLocked = true;
+
+            // lock docs
+            for await (const document of Document.select().where('templateId', template.id).all()) {
+                // check
+                if (document.status === DocumentStatus.Published && !document.isLocked) {
+                    document.isLocked = true;
+
+                    // set force save to true (else an error will be thrown)
+                    await document.save(true);
+                }
+            }
 
             // set force save to true (else an error will be thrown)
-            await document.save(true);
+            await template.save(true);
         }
     }
 };
