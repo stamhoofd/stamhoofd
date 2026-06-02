@@ -1,22 +1,24 @@
+import { useContext } from '#hooks/useContext.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
+import { useOrganization } from '#hooks/useOrganization.ts';
+import { usePlatform } from '#hooks/usePlatform.ts';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform } from '@stamhoofd/structures';
 import { AuditLogType, BalanceItemStatus, BalanceItemType, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
-import { useContext } from '#hooks/useContext.ts';
-import { useOrganization } from '#hooks/useOrganization.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
+import { computed, reactive } from 'vue';
 import { DateFilterBuilder } from './DateUIFilter';
+import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
+import { NumberFilterFormat } from './NumberFilterFormat';
 import { NumberFilterBuilder } from './NumberUIFilter';
+import { useGroupsRelationFetcher } from './relation-fetchers/groups';
 import { RelationFilterBuilder } from './RelationUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import type { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
-import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
-import { useGroupsRelationFetcher } from './relation-fetchers/groups';
-import { NumberFilterFormat } from './NumberFilterFormat';
 
 export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
@@ -636,6 +638,19 @@ export function getDocumentsUIFilterBuilders() {
 export function useEventNotificationBackendFilterBuilders() {
     const platform = usePlatform();
     const eventTypes = useEventTypes();
+    const platformManager = usePlatformManager();
+    const owner = useRequestOwner();
+    const periodOptions = reactive<MultipleChoiceUIFilterOption[]>([
+        new MultipleChoiceUIFilterOption(platform.value.period.name, platform.value.period.id),
+    ]);
+
+    platformManager.value.loadPeriods(false, true, owner).then((loadedPeriods) => {
+        periodOptions.splice(0, periodOptions.length, ...loadedPeriods.map((period) => {
+            return new MultipleChoiceUIFilterOption(period.name, period.id);
+        }));
+    }).catch((e) => {
+        console.error('Failed to load periods in useEventNotificationBackendFilterBuilders', e);
+    });
 
     return () => {
         const all: UIFilterBuilders = [
@@ -646,6 +661,20 @@ export function useEventNotificationBackendFilterBuilders() {
             new DateFilterBuilder({
                 name: $t('%1P8'),
                 key: 'endDate',
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t('%7Z'),
+                options: periodOptions,
+                wrapper: {
+                    periodId: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+                additionalUnwrappers: [
+                    {
+                        periodId: FilterWrapperMarker,
+                    },
+                ],
             }),
             new MultipleChoiceFilterBuilder({
                 name: $t('%Ay'),
