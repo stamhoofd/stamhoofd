@@ -96,7 +96,7 @@ defineRoutes([
                 tag,
             };
         },
-        propsToParams(props) {
+        propsToParams(props: Record<string, unknown>) {
             if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
                 throw new Error('Missing tag');
             }
