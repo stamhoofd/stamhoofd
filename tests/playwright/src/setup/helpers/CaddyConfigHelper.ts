@@ -1,13 +1,13 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { FrontendProjectName} from './FrontendService.js';
+import type { FrontendProjectName } from './FrontendService.js';
 import { FrontendService } from './FrontendService.js';
 
 /**
  * Old domains and ports will get reused
- * 
- * E.g. worker 102 will use same domains and ports as worker 2
+ *
+ * E.g. worker 32 will use same domains and ports as worker 2
  */
-const maximumRunners = 100;
+const maximumRunners = 30;
 
 /**
  * Helper to create caddy configuration for playwright
@@ -32,9 +32,9 @@ export class CaddyConfigHelper {
         return `playwright-${service}-${this.cycledWorkerId(workerId)}.stamhoofd`;
     }
 
-    static cycledWorkerId( workerId: string) {
+    static cycledWorkerId(workerId: string) {
         const asNumber = parseInt(workerId);
-        return asNumber % maximumRunners
+        return asNumber % maximumRunners;
     }
 
     /**
