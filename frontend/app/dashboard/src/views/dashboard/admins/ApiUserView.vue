@@ -272,7 +272,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Validator } from '@stamhoofd/components/errors/Validator.ts';
 import EditUserPermissionsBox from '@stamhoofd/components/admins/components/EditUserPermissionsBox.vue';
-import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
+import { TooltipDirective as Tooltip } from '@stamhoofd/components';
 import { ApiUser, ApiUserWithToken, PermissionLevel, Permissions, User, UserPermissions, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

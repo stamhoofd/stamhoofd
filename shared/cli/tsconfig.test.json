@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.test.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "dist"
+    },
+    "include": [
+        "./src/**/*.test.ts",
+        "./vitest.config.ts",
+        "../stamhoofd.d.ts"
+    ],
+    "references": [
+        { "path": "./tsconfig.build.json" }
+    ]
+}
