@@ -9,40 +9,21 @@
 
             <div class="block">
                 <div class="items">
-                    <button v-if="true" class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                        <span class="icon success small" />
-                        <span>{{ $t('Stel alles op punt') }}</span>
-                        <span class="right">2 / 8</span>
-                    </button>
+                    <button
+                        v-for="(action, index) of visibleActions"
+                        :key="action.icon + '-' + index"
+                        class="menu-button button hover-box"
+                        type="button"
+                        :class="{ selected: 'route' in action ? checkRoute(action.route) : false }"
+                        @click="'route' in action ? $navigate(action.route) : action.action($event)"
+                    >
+                        <span :class="'icon small ' + action.icon" />
+                        <span>{{ action.title }}</span>
 
-                    <button v-if="auth.hasFullAccess()" class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
-                        <span class="icon team small" />
-                        <span>{{ $t('Alle leden') }}</span>
-                    </button>
-
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Settings) }" @click="$navigate(Routes.Settings)">
-                        <span class="icon calendar small" />
-                        <span>{{ $t('Kalender') }}</span>
-                    </button>
-
-                    <button v-if="false" class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Settings) }" @click="$navigate(Routes.Settings)">
-                        <span class="icon file-pdf small" />
-                        <span>{{ $t('Documenten en attesten') }}</span>
-                    </button>
-
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Communication) }" @click="$navigate(Routes.Communication)">
-                        <span class="icon email small" />
-                        <span>{{ $t('Berichten') }}</span>
-                    </button>
-
-                    <button v-if="false" class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Settings) }" @click="$navigate(Routes.Settings)">
-                        <span class="icon external small" />
-                        <span>{{ $t('Toon ledenportaal') }}</span>
-                    </button>
-
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Settings) }" @click="$navigate(Routes.Settings)">
-                        <span class="icon more-in-circle small" />
-                        <span>{{ $t('Meer') }}</span>
+                        <div class="right">
+                            <span v-for="(button, btnIndex) of action.buttons" :key="btnIndex" v-tooltip="button.title" :class="'button icon gray tiny hover-show ' + button.icon" :disabled="button.loading" @click.stop="button.action($event)" />
+                            <span v-if="action.rightText ">{{ action.rightText }}</span>
+                        </div>
                     </button>
                 </div>
             </div>
@@ -67,7 +48,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, typeRoute, useCheckRoute, useNavigate, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, ContextMenu, ContextMenuItem, Toast } from '@stamhoofd/components';
+import { AsyncComponent, ContextMenu, ContextMenuItem, Toast, useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -80,6 +61,7 @@ import { computed } from 'vue';
 import MembersChecklistView from '../dashboard/settings/MembersChecklistView.vue';
 import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
 import GroupCategoryMenuBox from './GroupCategoryMenuBox.vue';
+import { Request } from '@simonbackx/simple-networking';
 
 const context = useContext();
 const $navigate = useNavigate();
@@ -253,4 +235,168 @@ async function switchPeriod(event: MouseEvent) {
     ]);
     menu.show({ clickEvent: event }).catch(console.error);
 }
+
+class ActionButton {
+    icon: string;
+    title: string;
+    loading = false;
+    #action: (event: MouseEvent) => Promise<void> | void;
+
+    constructor(options: {
+        icon: string;
+        title: string;
+        action: (event: MouseEvent) => Promise<void> | void;
+    }) {
+        this.icon = options.icon;
+        this.title = options.title;
+        this.#action = options.action;
+    }
+
+    async action(event: MouseEvent) {
+        this.loading = true;
+        try {
+            await this.#action(event);
+        } catch (e) {
+            if (Request.isAbortError(e)) {
+                return;
+            }
+            Toast.fromError(e).show();
+        } finally {
+            this.loading = false;
+        }
+    }
+};
+
+type Action = {
+    icon: string;
+    title: string;
+    rightText?: string;
+
+    /**
+     * Prefer to keep under 'More'
+     */
+    hidden?: boolean;
+    buttons?: ActionButton[];
+} & (
+    {
+        route: Routes;
+    } | {
+        action: (event: MouseEvent) => Promise<void> | void;
+    }
+);
+
+const hasFeature = useFeatureFlag();
+const setFeature = useSetFeatureFlag();
+
+const allActions = computed(() => {
+    const list: Action[] = [];
+
+    // Checklist
+    if (STAMHOOFD.userMode === 'organization') {
+        list.push({
+            icon: 'settings',
+            title: $t('Instellen'),
+            route: Routes.Settings,
+            rightText: '1 / 5',
+            hidden: hasFeature('disabled-members-onboarding'),
+            buttons: !hasFeature('disabled-members-onboarding')
+                ? [
+                        new ActionButton({
+                            icon: 'close',
+                            title: $t('Verbergen'),
+                            action: async () => {
+                                await setFeature('disabled-members-onboarding', true);
+                            },
+                        }),
+                    ]
+                : [],
+        });
+    }
+
+    if (auth.hasFullAccess()) {
+        list.push({
+            icon: 'team',
+            title: $t('Alle leden'),
+            route: Routes.All,
+        });
+    }
+
+    list.push({
+        icon: 'email-filled',
+        title: $t('Berichten'),
+        route: Routes.Communication,
+        hidden: true,
+    });
+
+    list.push({
+        icon: 'file-pdf',
+        title: $t('Documenten en attesten'),
+        route: Routes.Settings,
+        hidden: true,
+    });
+
+    list.push({
+        icon: 'history',
+        title: $t('Leden logboek'),
+        route: Routes.Settings,
+        hidden: true,
+    });
+
+    list.push({
+        icon: 'upload',
+        title: $t('Leden importeren'),
+        route: Routes.Settings,
+        hidden: true,
+    });
+
+    list.push({
+        icon: 'reverse',
+        title: $t('Synchroniseren met groepsadmin'),
+        route: Routes.Settings,
+        hidden: true,
+    });
+
+    return list;
+});
+
+const hiddenActions = computed(() => {
+    return allActions.value.filter(a => !!a.hidden);
+});
+
+const visibleActions = computed(() => {
+    const base = allActions.value.filter(a => !a.hidden);
+
+    if (hiddenActions.value.length > 0) {
+        // Add to more
+        base.push({
+            icon: 'more',
+            title: $t('Meer'),
+            action: async (event) => {
+                const menu = new ContextMenu([
+                    hiddenActions.value.map((a) => {
+                        return new ContextMenuItem({
+                            icon: a.icon,
+                            name: a.title,
+                            rightText: a.rightText,
+                            action: async () => {
+                                if ('route' in a) {
+                                    await $navigate(a.route);
+                                } else {
+                                    await a.action(event);
+                                }
+                            },
+                        });
+                    }),
+                ]);
+
+                await menu.show({
+                    button: event.currentTarget as HTMLElement,
+                });
+            },
+        });
+    }
+
+    return base;
+});
+
 </script>

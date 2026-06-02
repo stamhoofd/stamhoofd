@@ -43,6 +43,10 @@ $border-radius-modals: 16px;
     ;
 }
 
+@function shade($color, $times) {
+    @return color.adjust($color, $lightness: -$times * 3%)
+}
+
 // -----------------------------------------------------------------------------
 // -------- Colors -------------------------------------------------------------
 // -----------------------------------------------------------------------------
@@ -93,6 +97,10 @@ $color-darkest-original: black;
 $color-darkest: var(--color-darkest, #{$color-darkest-original});
 $dark-theme-color-darkest: white;
 
+$color-dark-lighter-original: shade($color-dark-original, -2);
+$color-dark-lighter: var(--color-dark-lighter, #{changeHue($color-dark-lighter-original, $color-primary-hue)});
+$dark-theme-color-dark-lighter: invertColor($color-dark-lighter-original, -8); 
+
 $color-dark-light-original: #5e5959;
 $color-dark-light: var(--color-dark-light, #{changeHue($color-dark-light-original, $color-primary-hue)});
 $dark-theme-color-dark-light: invertColor($color-dark-light-original, -8); // hsl(0deg, 0%, 80%);
@@ -105,17 +113,25 @@ $color-background-original: #ffffff;
 $color-background: var(--color-background, #ffffff);
 $dark-theme-color-background: invertColor($color-background-original, -7);
 
-$color-background-shade-original: #f5f5f5;
+$color-background-shade-original: shade($color-background-original, 1);
 $color-background-shade: var(--color-background-shade, $color-background-shade-original);
 $dark-theme-color-background-shade: invertColor($color-background-shade-original, -8);
 
-$color-background-shade-darker-original: #EBEBEB;
+$color-background-shade-darker-original: shade($color-background-original, 2);
 $color-background-shade-darker: var(--color-background-shade-darker, $color-background-shade-darker-original);
-$dark-theme-color-background-shade-darker: invertColor($color-background-shade-darker-original, -8); //hsl(#{$color-primary-hue}, 0%, 14%);
+$dark-theme-color-background-shade-darker: invertColor($color-background-shade-darker-original, -8); 
 
-$color-background-shade-darker-darker-original: #E0E0E0;
+$color-background-shade-darker-darker-original: shade($color-background-original, 3);
 $color-background-shade-darker-darker: var(--color-background-shade-darker-darker, $color-background-shade-darker-darker-original);
-$dark-theme-color-background-shade-darker-darker: invertColor($color-background-shade-darker-darker-original, -8); //hsl(#{$color-primary-hue}, 0%, 14%);
+$dark-theme-color-background-shade-darker-darker: invertColor($color-background-shade-darker-darker-original, -8); 
+
+$color-background-shade-4-original: shade($color-background-original, 4);
+$color-background-shade-4: var(--color-background-shade-4, $color-background-shade-4-original);
+$dark-theme-color-background-shade-4: invertColor($color-background-shade-4-original, -8);
+
+$color-background-shade-5-original: shade($color-background-original, 5);
+$color-background-shade-5: var(--color-background-shade-5, $color-background-shade-5-original);
+$dark-theme-color-background-shade-5: invertColor($color-background-shade-5-original, -8);
 
 
 // Used for segmented control in dark mode: instead of darker, it should become lighter
@@ -127,8 +143,8 @@ $color-background-interactive: var(--color-background-interactive, #ffffff);
 $dark-theme-color-background-interactive: invertColor(#ffffff, 0);
 
 $color-background-lighter: var(--color-background-lighter, #ffffff);
-$color-background-lighter-shade: var(--color-background-lighter-shade, #f5f5f5);
-$color-background-lighter-shade-darker: var(--color-background-lighter-shade-darker, #EBEBEB);
+$color-background-lighter-shade: var(--color-background-lighter-shade, #{shade(#ffffff, 1)});
+$color-background-lighter-shade-darker: var(--color-background-lighter-shade-darker, #{shade(#ffffff, 2)});
 $dark-theme-color-background-lighter: invertColor(#ffffff, 0);
 $dark-theme-color-background-lighter-shade: invertColor(#ffffff, -8);
 $dark-theme-color-background-lighter-shade-darker: invertColor(#ffffff, -16);
@@ -384,10 +400,15 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     --color-background: #{$dark-theme-color-background};
     --color-background-shade: #{$dark-theme-color-background-shade};
     --color-background-shade-darker: #{$dark-theme-color-background-shade-darker};
+    --color-background-shade-darker-darker: #{$dark-theme-color-background-shade-darker-darker};
+    --color-background-shade-4: #{$dark-theme-color-background-shade-4};
+    --color-background-shade-5: #{$dark-theme-color-background-shade-5};
 
     --color-darkest: #{$dark-theme-color-darkest};
     --color-dark: #{$dark-theme-color-dark};
+    --color-dark-lighter: #{$dark-theme-color-dark-lighter};
     --color-dark-light: #{$dark-theme-color-dark-light};
+
     --color-gray-1: #{$dark-theme-color-gray-1};
     --color-gray-2: #{$dark-theme-color-gray-2};
     --color-gray-3: #{$dark-theme-color-gray-3};

@@ -761,7 +761,7 @@
 
         position: relative;
 
-        &:is(a), &:is(button), label & {
+        &:is(a), &:is(button), label &, button & {
             @media (pointer: coarse) {
                 &:before {
                     transition: opacity 0.2s ease-out;
@@ -831,7 +831,7 @@
 
                 &:active {
                     &:after {
-                        background-color: $color-gray-3;
+                        background-color: var(--color-current-background-shade-darker, #{$color-background-shade-darker});
                     }
                 }
                 
