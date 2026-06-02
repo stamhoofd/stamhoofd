@@ -89,20 +89,20 @@ export class DocumentActionBuilder {
             );
         }
 
-        actions.push(new InMemoryTableAction({
-            name: $t(`%CJ`),
-            icon: 'trash',
-            destructive: true,
-            priority: 1,
-            groupIndex: 3,
-            needsSelection: true,
-            allowAutoSelectAll: false,
-            handler: async (documents: DocumentStruct[]) => {
-                await this.deleteDocuments(documents);
-            },
-        }));
-
         if (!this.template.isLocked) {
+            actions.push(new InMemoryTableAction({
+                name: $t(`%CJ`),
+                icon: 'trash',
+                destructive: true,
+                priority: 1,
+                groupIndex: 3,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (documents: DocumentStruct[]) => {
+                    await this.deleteDocuments(documents);
+                },
+            }));
+
             actions.push(new InMemoryTableAction({
                 name: $t(`%KL`),
                 icon: 'undo',
