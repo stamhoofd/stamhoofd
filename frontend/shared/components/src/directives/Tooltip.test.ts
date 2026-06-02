@@ -1,4 +1,5 @@
 /// <reference types="@vitest/browser/providers/playwright" />
+/// <reference types="@vitest/browser/matchers" />
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { VueWrapper } from '@vue/test-utils';
 import { mount } from '@vue/test-utils';
