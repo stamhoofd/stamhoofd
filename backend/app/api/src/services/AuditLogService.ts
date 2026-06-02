@@ -1,7 +1,7 @@
 import type { ModelEvent } from '@simonbackx/simple-database';
 import { Model } from '@simonbackx/simple-database';
 import { ArrayDecoder, EnumDecoder, MapDecoder, SymbolDecoder } from '@simonbackx/simple-encoding';
-import { getAuditLogEnumType } from '@stamhoofd/structures';
+import { getAuditLogEnumDecoderObject, getAuditLogEnumType } from '@stamhoofd/structures';
 import type { AuditLogSource } from '@stamhoofd/structures';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
@@ -35,15 +35,6 @@ function getEnumDecoders(decoder: unknown): EnumDecoder<any>[] {
     }
 
     return [];
-}
-
-function getEnumDecoderObject(decoder: EnumDecoder<any>): object {
-    const enumObject: unknown = decoder.enum;
-    if (typeof enumObject === 'object' && enumObject !== null) {
-        return enumObject;
-    }
-
-    throw new Error('Expected enum decoder to contain an enum object');
 }
 
 export class AuditLogService {
@@ -89,7 +80,7 @@ export class AuditLogService {
 
             for (const [key, column] of columns) {
                 for (const enumDecoder of getEnumDecoders(column.decoder)) {
-                    if (!getAuditLogEnumType(getEnumDecoderObject(enumDecoder))) {
+                    if (!getAuditLogEnumType(getAuditLogEnumDecoderObject(enumDecoder))) {
                         missing.push(`${model.name}.${key}`);
                     }
                 }

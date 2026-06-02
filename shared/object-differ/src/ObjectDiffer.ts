@@ -1,6 +1,6 @@
 import type { Decoder, Field } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, EnumDecoder, getOptionalId, isPatchMap, SymbolDecoder } from '@simonbackx/simple-encoding';
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, getAuditLogEnumType, TranslatedString, Version } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, getAuditLogEnumDecoderObject, getAuditLogEnumType, TranslatedString, Version } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 export type PatchExplainer = {
@@ -449,19 +449,19 @@ function diffUnknown(oldValue: unknown, value: unknown, key?: AuditLogReplacemen
  */
 function diffDecoder(decoder: Decoder<any>, oldValue: unknown, value: unknown, key?: AuditLogReplacement): AuditLogPatchItem[] | null {
     if (decoder instanceof EnumDecoder) {
-        return diffEnum(oldValue, value, key, getEnumDecoderObject(decoder));
+        return diffEnum(oldValue, value, key, getAuditLogEnumDecoderObject(decoder));
     }
 
     if (decoder instanceof SymbolDecoder) {
         if (decoder.decoder instanceof EnumDecoder) {
-            return diffEnum(oldValue, value, key, getEnumDecoderObject(decoder.decoder));
+            return diffEnum(oldValue, value, key, getAuditLogEnumDecoderObject(decoder.decoder));
         }
     }
 
     if (decoder instanceof ArrayDecoder) {
         if (decoder.decoder instanceof EnumDecoder) {
             // Map values to keys
-            const enumType = getAuditLogEnumType(getEnumDecoderObject(decoder.decoder));
+            const enumType = getAuditLogEnumType(getAuditLogEnumDecoderObject(decoder.decoder));
             const items = diffArray(oldValue, value, key);
 
             for (const item of items) {
@@ -487,12 +487,20 @@ function diffDecoder(decoder: Decoder<any>, oldValue: unknown, value: unknown, k
                 // If item.key is an array that ends with a 'value', also change it
                 if (item.key.type === AuditLogReplacementType.Array) {
                     const lastKeyItem = item.key.values[item.key.values.length - 1];
-                    if (!lastKeyItem.type) {
+                    if (enumType) {
+                        lastKeyItem.type = AuditLogReplacementType.Enum;
+                        lastKeyItem.id = enumType;
+                    }
+                    else if (!lastKeyItem.type) {
                         lastKeyItem.type = AuditLogReplacementType.Key;
                     }
                 }
                 else {
-                    if (!item.key.type) {
+                    if (enumType && (!key || item.key.toKey() !== key.toKey())) {
+                        item.key.type = AuditLogReplacementType.Enum;
+                        item.key.id = enumType;
+                    }
+                    else if (!item.key.type) {
                         item.key.type = AuditLogReplacementType.Key;
                     }
                 }
