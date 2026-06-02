@@ -1,6 +1,6 @@
 <template>
     <div id="webshop-overview" class="st-view background">
-        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
+        <STNavigationBar :title="title">
             <template #right>
                 <button type="button" class="button text selected" @click="openWebshopUrl()">
                     <span>{{ $t('%1OZ') }}</span>
@@ -481,7 +481,7 @@ import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { WebshopPreview } from '@stamhoofd/structures';
 import { AccessRight, EmailTemplate, EmailTemplateType, PaymentMethod, PermissionLevel, PermissionsResourceType, PrivateWebshop, WebshopMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import PackageSettingsView from '../settings/packages/PackageSettingsView.vue';
@@ -513,7 +513,7 @@ const canPop = useCanPop();
 const canDismiss = useCanDismiss();
 const splitViewController = useSplitViewController();
 const owner = useRequestOwner();
-const platform = usePlatform()
+const platform = usePlatform();
 
 const loading = ref(false);
 const openTodoList = ref(true);
@@ -579,12 +579,10 @@ function toggleTodoList() {
     try {
         if (!openTodoList.value) {
             localStorage.setItem('hideWebshopOnboarding', 'true');
-        }
-        else {
+        } else {
             localStorage.removeItem('hideWebshopOnboarding');
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Could not write to localStorage', e);
     }
 }
@@ -730,8 +728,7 @@ function displayEditComponent(component: any, animated = true) {
                     return new ComponentWithProperties(component, {
                         webshopManager: webshopManager.value,
                     });
-                }
-                catch (e) {
+                } catch (e) {
                     Toast.fromError(e).show();
                     throw e;
                 }
@@ -815,15 +812,13 @@ function duplicateWebshop() {
                                         owner,
                                     });
                                 }
-                            }
-                            catch (e) {
+                            } catch (e) {
                                 console.error(e);
                                 new Toast('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop', 'warning').show();
                             }
                         },
                     });
-                }
-                catch (e) {
+                } catch (e) {
                     Toast.fromError(e).show();
                     throw e;
                 }
@@ -846,8 +841,7 @@ async function closeWebshop() {
         if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop wilt terugzetten?', 'Ja, terugzetten', 'Je kan daarna de webshop eventueel terug openen.')) {
             return;
         }
-    }
-    else {
+    } else {
         if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '" + webshopManager.value.preview.meta.name + "' wilt sluiten?", 'Ja, sluiten', 'Er kunnen daarna geen nieuwe bestellingen worden gemaakt. Je kan de webshop later terug openen.')) {
             return;
         }
@@ -862,8 +856,7 @@ async function closeWebshop() {
             }),
         );
         new Toast('De webshop is gesloten', 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -883,8 +876,7 @@ async function openWebshop() {
             }),
         );
         new Toast('De webshop is terug open', 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -903,8 +895,7 @@ async function archiveWebshop() {
             }),
         );
         new Toast('De webshop is gearchiveerd', 'success green').show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -931,8 +922,7 @@ async function deleteWebshop() {
 
         if (canPop.value) {
             await pop({ force: true });
-        }
-        else {
+        } else {
             await splitViewController.value.showDetail({
                 components: [
                     new ComponentWithProperties(NavigationController, {
@@ -942,8 +932,7 @@ async function deleteWebshop() {
                 animated: false,
             });
         }
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -1062,8 +1051,7 @@ onMounted(() => {
         if (localStorage.getItem('hideWebshopOnboarding') === 'true') {
             openTodoList.value = false;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Could not read from localStorage', e);
     }
 });
