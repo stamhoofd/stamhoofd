@@ -1,3 +1,4 @@
+import { ArrayDecoder, EnumDecoder } from '@simonbackx/simple-encoding';
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, BaseOrganization, EventNotification, EventNotificationStatus, MemberDetails, Parent } from '@stamhoofd/structures';
 import { ObjectDiffer } from './ObjectDiffer.js';
 
@@ -134,5 +135,40 @@ describe('ObjectDiffer', () => {
                 }),
             }),
         ]);
+    });
+
+    test('Changing an enum array uses typed enum keys and values', () => {
+        const diff = ObjectDiffer.diff(
+            [EventNotificationStatus.Draft],
+            [EventNotificationStatus.Pending],
+            AuditLogReplacement.key('statuses'),
+            new ArrayDecoder(new EnumDecoder(EventNotificationStatus)),
+        );
+
+        expect(diff).toHaveLength(2);
+        expect(diff[0].key).toMatchObject({
+            type: AuditLogReplacementType.Array,
+            values: [
+                { value: 'statuses', type: AuditLogReplacementType.Key },
+                { id: 'EventNotificationStatus', value: EventNotificationStatus.Pending, type: AuditLogReplacementType.Enum },
+            ],
+        });
+        expect(diff[0].value).toMatchObject({
+            id: 'EventNotificationStatus',
+            value: EventNotificationStatus.Pending,
+            type: AuditLogReplacementType.Enum,
+        });
+        expect(diff[1].key).toMatchObject({
+            type: AuditLogReplacementType.Array,
+            values: [
+                { value: 'statuses', type: AuditLogReplacementType.Key },
+                { id: 'EventNotificationStatus', value: EventNotificationStatus.Draft, type: AuditLogReplacementType.Enum },
+            ],
+        });
+        expect(diff[1].oldValue).toMatchObject({
+            id: 'EventNotificationStatus',
+            value: EventNotificationStatus.Draft,
+            type: AuditLogReplacementType.Enum,
+        });
     });
 });
