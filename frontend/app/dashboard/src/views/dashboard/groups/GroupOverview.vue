@@ -13,6 +13,9 @@
                         {{ title }}
                     </span>
 
+                    <component :is="(hasFullPermissions ? 'button' : 'span')" v-if="!isArchive && !isOpen" v-tooltip="$t('Inschrijvingen zijn gesloten in het ledenportaal')" type="button" :class="'icon lock tiny gray ' + (hasFullPermissions ? 'button' : '')" @click="hasFullPermissions ? openGroup() : null" />
+                    <span v-if="!isPublic" v-tooltip="$t('%LU')" :class="'icon eye-off tiny gray'" />
+
                     <span v-if="group.settings.period" class="title-suffix">
                         {{ group.settings.period.nameShort }}
                     </span>
@@ -28,14 +31,6 @@
                 </p>
                 <p v-if="isLocked" class="warning-box">
                     {{ $t('%8Q') }}
-                </p>
-                <p v-if="!isPublic" class="info-box">
-                    {{ $t('%LU') }}
-                </p>
-                <p v-if="!isArchive && !isOpen" class="info-box">
-                    {{ $t('%LV') }} <template v-if="hasFullPermissions">
-                        {{ $t('%LW') }}
-                    </template>
                 </p>
 
                 <STList class="illustration-list">
