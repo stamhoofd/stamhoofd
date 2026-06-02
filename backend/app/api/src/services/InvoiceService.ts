@@ -1,16 +1,14 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { Organization } from '@stamhoofd/models';
-import { BalanceItem, Invoice, InvoicedBalanceItem, Payment, sendEmailTemplate } from '@stamhoofd/models';
+import { BalanceItem, Invoice, InvoicedBalanceItem, Organization, Payment, sendEmailTemplate } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
-import { EmailTemplateType, PaymentStatus, Recipient, Replacement } from '@stamhoofd/structures';
 import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
+import { EmailTemplateType, PaymentStatus, Recipient, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ViesHelper } from '../helpers/ViesHelper.js';
 import { BalanceItemService } from './BalanceItemService.js';
 import { InvoicePdfService } from './InvoicePdfService.js';
 import { InvoiceXMlService } from './InvoiceXMLService.js';
-import { Context } from '../helpers/Context.js';
 
 export class InvoiceService {
     static async createFrom(organization: Organization, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[] }) {
