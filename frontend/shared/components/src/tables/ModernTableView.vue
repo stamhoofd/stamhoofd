@@ -158,7 +158,7 @@ import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, defineRoutes, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { Storage } from '@stamhoofd/networking/Storage';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, Version } from '@stamhoofd/structures';
@@ -273,7 +273,7 @@ function getPropertiesForRoute(object: Value) {
 }
 
 if (props.Route) {
-    defineRoutes([{
+    defineRoute({
         name: Routes.Object,
         url: '@id',
         component: () => props.Route!.Component as Component,
@@ -281,7 +281,7 @@ if (props.Route) {
             id: String,
         },
         present: 'popup',
-        paramsToProps: async (params: { id: string }) => {
+        paramsToProps: async (params) => {
             // Fetch event
             const objects = await props.tableObjectFetcher.objectFetcher.fetch(
                 new LimitedFilteredRequest({
@@ -300,7 +300,7 @@ if (props.Route) {
             throw new Error('Not found');
         },
 
-        propsToParams(routeProps: any) {
+        propsToParams(routeProps) {
             if (!(props.Route!.objectKey in routeProps) || typeof routeProps[props.Route!.objectKey] !== 'object' || routeProps[props.Route!.objectKey] === null) {
                 throw new Error('Missing object');
             }
@@ -312,7 +312,7 @@ if (props.Route) {
                 },
             };
         },
-    }]);
+    });
 }
 
 const $navigate = useNavigate();

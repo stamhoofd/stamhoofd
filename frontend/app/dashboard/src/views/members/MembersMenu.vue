@@ -74,25 +74,25 @@
 
 <script setup lang="ts">
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import { ComponentWithProperties, defineRoute, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
+import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
+import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import type { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import { useSwitchablePeriod } from './useSwitchablePeriod';
-import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
 
 const $organization = useOrganization();
 const $context = useContext();
@@ -120,7 +120,7 @@ const { period, switchPeriod, openPeriod } = useSwitchablePeriod({
             if (showAll.value) {
                 await $navigate(Routes.All, {
                     properties: {
-                        periodId: period.value.period.id,
+                        period: period.value.period,
                     },
                 });
             } else if (tree.value.getAllGroups().length) {
@@ -193,99 +193,82 @@ enum Routes {
     GroupWithPeriod = 'groupWithPeriod',
 }
 
-defineRoutes([
-    {
-        url: 'allemaal',
-        name: Routes.All,
-        show: 'detail',
-        component: MembersTableView,
-        paramsToProps: () => {
-            return {
-                periodId: period.value.period.id,
-            };
-        },
-        propsToParams() {
-            return {
-                params: {
-                    slug: Formatter.slug(tree.value.settings.name),
-                },
-            };
-        },
-        isDefault: showAll.value
-            ? {
-                    properties: {
-                        periodId: period.value.period.id,
-                    },
-                }
-            : undefined,
+defineRoute({
+    url: 'allemaal',
+    name: Routes.All,
+    show: 'detail',
+    component: MembersTableView,
+    defaultProperties: () => {
+        return {
+            periodId: period.value.period.id,
+        };
     },
-    {
-        url: 'categorie/@slug',
-        name: Routes.Category,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default),
-        paramsToProps: (params: { slug: string }) => {
-            const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
-            if (!category) {
-                throw new Error('Category not found');
-            }
-            return {
-                category,
-                period: period.value,
-            };
-        },
-        propsToParams(props) {
-            if (!('category' in props)) {
-                throw new Error('Missing category');
-            }
-            return {
-                params: {
-                    slug: Formatter.slug((props.category as GroupCategory).settings.name),
-                },
-            };
-        },
+    isDefault: showAll.value
+        ? {}
+        : undefined,
+});
+
+defineRoute({
+    url: 'categorie/@slug',
+    name: Routes.Category,
+    params: {
+        slug: String,
     },
-    {
-        url: '@slug',
-        name: Routes.Group,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
-        paramsToProps: (params: { slug: string }) => {
-            const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
-            if (!group) {
-                throw new Error('Group not found');
-            }
-            return {
-                group,
-                period: period.value,
-            };
-        },
-        propsToParams(props) {
-            if (!('group' in props)) {
-                throw new Error('Missing group');
-            }
-            return {
-                params: {
-                    slug: Formatter.slug((props.group as Group).settings.name),
-                },
-            };
-        },
-        isDefault: tree.value.getAllGroups().length
-            ? {
-                    properties: {
-                        group: tree.value.getAllGroups()[0],
-                        period: period.value,
-                    },
-                }
-            : undefined,
+    show: 'detail',
+    component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default),
+    paramsToProps: (params) => {
+        const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
+        if (!category) {
+            throw new Error('Category not found');
+        }
+        return {
+            category,
+            period: period.value,
+        };
     },
-]);
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug((props.category as GroupCategory).settings.name),
+            },
+        };
+    },
+});
+
+defineRoute({
+    url: '@slug',
+    name: Routes.Group,
+    params: {
+        slug: String,
+    },
+    show: 'detail',
+    component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
+    paramsToProps: (params) => {
+        const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
+        if (!group) {
+            throw new Error('Group not found');
+        }
+        return {
+            group,
+            period: period.value,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug((props.group as Group).settings.name),
+            },
+        };
+    },
+    isDefault: tree.value.getAllGroups().length
+        ? {
+                properties: {
+                    group: tree.value.getAllGroups()[0],
+                    period: period.value,
+                },
+            }
+        : undefined,
+});
 
 const checkRoute = useCheckRoute();
 

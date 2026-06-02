@@ -161,13 +161,8 @@ defineRoutes([
     {
         url: Routes.RegistrationGroups,
         present: 'popup',
-        handler: async (options) => {
-            const component = await buildEditGroupsView();
-
-            await present({
-                ...options,
-                components: [component],
-            });
+        component: async () => {
+            return await buildEditGroupsView();
         },
     },
     {

@@ -390,18 +390,18 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
-import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
+import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
 import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
-import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
-import EditResponsibilitiesView from '@stamhoofd/components/responsibilities/EditResponsibilitiesView.vue';
 import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
+import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
 import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
 import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
-import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import EditResponsibilitiesView from '@stamhoofd/components/responsibilities/EditResponsibilitiesView.vue';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, Platform, PlatformConfig } from '@stamhoofd/structures';
@@ -582,38 +582,36 @@ defineRoutes([
             };
         },
     },
-    {
-        name: Routes.SingleSignOn,
-        url: 'sso/@provider',
-        present: 'popup',
-        params: {
-            provider: String,
-        },
-        component: SSOSettingsView,
-
-        async paramsToProps(params: { provider: string }) {
-            const provider = Object.values(LoginProviderType).includes(params.provider as LoginProviderType) ? params.provider as LoginProviderType : null;
-
-            if (!provider) {
-                throw new Error('provider not found');
-            }
-
-            return {
-                provider,
-            };
-        },
-        propsToParams(props) {
-            if (!('provider' in props) || typeof props.provider !== 'string') {
-                throw new Error('Missing provider');
-            }
-
-            return {
-                params: {
-                    provider: props.provider,
-                },
-            };
-        },
-    },
 ]);
+
+defineRoute({
+    name: Routes.SingleSignOn,
+    url: 'sso/@provider',
+    present: 'popup',
+    params: {
+        provider: String,
+    },
+    component: SSOSettingsView,
+
+    async paramsToProps(params) {
+        const provider = Object.values(LoginProviderType).includes(params.provider as LoginProviderType) ? params.provider as LoginProviderType : null;
+
+        if (!provider) {
+            throw new Error('provider not found');
+        }
+
+        return {
+            provider,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                provider: props.provider,
+            },
+        };
+    },
+});
+
 const $navigate = useNavigate();
 </script>

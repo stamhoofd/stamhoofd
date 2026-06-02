@@ -267,7 +267,7 @@
 import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup } from '@stamhoofd/networking/hooks/useFetchOrganizationPeriodForGroup';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -449,10 +449,10 @@ function getCountFilter(g: Group) {
     ]);
 }
 
-defineRoutes([{
+defineRoute({
     url: Routes.Registrations,
     component: RegistrationsTableView,
-    paramsToProps: () => {
+    defaultProperties: () => {
         if (!props.event.group) {
             throw new Error('No group found');
         }
@@ -466,12 +466,13 @@ defineRoutes([{
             },
         };
     },
-},
-{
+});
+
+defineRoute({
     url: 'uitnodigingen',
     name: Routes.Invitations,
     component: RegistrationInvitationsTableView,
-    paramsToProps: () => {
+    defaultProperties: () => {
         if (!props.event.group) {
             throw new Error('No group found');
         }
@@ -486,11 +487,12 @@ defineRoutes([{
             },
         };
     },
-},
-{
+});
+
+defineRoute({
     url: Routes.WaitingList,
     component: MembersTableView,
-    paramsToProps: () => {
+    defaultProperties: () => {
         if (!props.event.group || !props.event.group.waitingList) {
             throw new Error('No waiting list found');
         }
@@ -498,23 +500,25 @@ defineRoutes([{
             group: props.event.group.waitingList,
         };
     },
-},
-{
+});
+
+defineRoute({
     url: Routes.Edit,
     component: EditEventView,
     present: 'popup',
-    paramsToProps: () => {
+    defaultProperties: () => {
         return {
             event: props.event,
             isNew: false,
         };
     },
-},
-{
+});
+
+defineRoute({
     url: Routes.EditGroup,
     component: EditGroupView,
     present: 'popup',
-    paramsToProps: async () => {
+    defaultProperties: async () => {
         if (!props.event.group) {
             throw new Error('Missing group');
         }
@@ -548,12 +552,13 @@ defineRoutes([{
             },
         };
     },
-},
-{
+});
+
+defineRoute({
     url: Routes.EditEmails,
     component: EditEmailTemplatesView,
     present: 'popup',
-    paramsToProps: () => {
+    defaultProperties: () => {
         if (!props.event.group) {
             throw new Error('Missing group');
         }
@@ -566,13 +571,14 @@ defineRoutes([{
             ],
         };
     },
-},
-{
+});
+
+defineRoute({
     url: Routes.Webshop,
     component: async () => {
         return (await import('@stamhoofd/dashboard/src/views/dashboard/webshop/WebshopOverview.vue')).default;
     },
-    paramsToProps: ({ slug }: { slug: string }) => {
+    defaultProperties: () => {
         if (!webshop.value) {
             throw new Error('Webshop not found');
         }
@@ -581,8 +587,7 @@ defineRoutes([{
             preview: webshop.value,
         };
     },
-},
-]);
+});
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 const prepareOrganizationPeriod = useFetchOrganizationPeriodForGroup();

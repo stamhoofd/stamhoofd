@@ -41,14 +41,14 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { Toast } from '#overlays/Toast.ts';
-import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { usePatch } from '#hooks/usePatch.ts';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { defineRoute, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { BundleDiscount, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { ref } from 'vue';
 
@@ -85,70 +85,63 @@ enum Routes {
     BundleDiscount = 'BundleDiscount',
 }
 
-defineRoutes([
-    {
-        name: Routes.CreateBundleDiscount,
-        url: 'new',
-        component: async () => (await import('./EditBundleDiscountView.vue')).default as any,
-        present: 'popup',
-        params: {
-            id: String,
-        },
-        paramsToProps: async () => {
-            const bundleDiscount = BundleDiscount.create({});
-            const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
-            settingsPatch.bundleDiscounts.addPut(bundleDiscount);
+defineRoute({
+    name: Routes.CreateBundleDiscount,
+    url: 'new',
+    component: async () => (await import('./EditBundleDiscountView.vue')).default as any,
+    present: 'popup',
+    defaultProperties: async () => {
+        const bundleDiscount = BundleDiscount.create({});
+        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
+        settingsPatch.bundleDiscounts.addPut(bundleDiscount);
 
-            const basePatch = OrganizationRegistrationPeriod.patch({
-                settings: settingsPatch,
-            });
+        const basePatch = OrganizationRegistrationPeriod.patch({
+            settings: settingsPatch,
+        });
 
+        return {
+            id: bundleDiscount.id,
+            isNew: true,
+            period: patchedPeriod.value.patch(basePatch),
+            saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                addPatch(basePatch.patch(period));
+            },
+        };
+    },
+});
+
+defineRoute({
+    name: Routes.BundleDiscount,
+    url: '@id',
+    component: async () => (await import('./EditBundleDiscountView.vue')).default as any,
+    present: 'popup',
+    params: {
+        id: String,
+    },
+    paramsToProps: async (params) => {
+        const bundleDiscount = patchedPeriod.value.settings.bundleDiscounts.find(b => b.id === params.id);
+        if (bundleDiscount) {
             return {
                 id: bundleDiscount.id,
-                isNew: true,
-                period: patchedPeriod.value.patch(basePatch),
+                isNew: false,
+                period: patchedPeriod.value,
                 saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(basePatch.patch(period));
+                    addPatch(period);
                 },
             };
-        },
+        }
+        Toast.error($t(`%15y`)).show();
+        throw new Error('Discount not found');
     },
-    {
-        name: Routes.BundleDiscount,
-        url: '@id',
-        component: async () => (await import('./EditBundleDiscountView.vue')).default as any,
-        present: 'popup',
-        params: {
-            id: String,
-        },
-        paramsToProps: async (params: { id: string }) => {
-            const bundleDiscount = patchedPeriod.value.settings.bundleDiscounts.find(b => b.id === params.id);
-            if (bundleDiscount) {
-                return {
-                    id: bundleDiscount.id,
-                    isNew: false,
-                    period: patchedPeriod.value,
-                    saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                        addPatch(period);
-                    },
-                };
-            }
-            Toast.error($t(`%15y`)).show();
-            throw new Error('Discount not found');
-        },
 
-        propsToParams(props) {
-            if (!('id' in props) || typeof props.id !== 'string') {
-                throw new Error('Missing id');
-            }
-            return {
-                params: {
-                    id: props.id,
-                },
-            };
-        },
+    propsToParams(props) {
+        return {
+            params: {
+                id: props.id,
+            },
+        };
     },
-]);
+});
 
 async function save() {
     if (saving.value) {
@@ -161,8 +154,7 @@ async function save() {
             await props.saveHandler(patch.value);
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

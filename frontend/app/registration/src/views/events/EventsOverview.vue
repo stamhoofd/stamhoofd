@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';
 import EventView from '@stamhoofd/components/events/EventView.vue';
@@ -96,53 +96,48 @@ enum Routes {
     Event = 'activiteit',
 }
 
-defineRoutes([
-    {
-        name: Routes.Event,
-        url: '@year/@slug/@id',
-        component: EventView,
-        params: {
-            year: Number,
-            slug: String,
-            id: String,
-        },
-        paramsToProps: async (params: { year: number; slug: string; id: string }) => {
-            // Fetch event
-            const events = await fetcher.objectFetcher.fetch(
-                new LimitedFilteredRequest({
-                    filter: {
-                        id: params.id,
-                    },
-                    limit: 1,
-                    sort: [],
-                }),
-            );
-
-            if (events.results.length === 1) {
-                return {
-                    event: events.results[0],
-                };
-            }
-            Toast.error($t(`%yc`)).show();
-            throw new Error('Event not found');
-        },
-
-        propsToParams(props) {
-            if (!('event' in props) || typeof props.event !== 'object' || props.event === null || !(props.event instanceof Event)) {
-                throw new Error('Missing event');
-            }
-            const event = props.event;
-
-            return {
-                params: {
-                    year: event.startDate.getFullYear(),
-                    slug: Formatter.slug(event.name),
-                    id: event.id,
-                },
-            };
-        },
+defineRoute({
+    name: Routes.Event,
+    url: '@year/@slug/@id',
+    component: EventView,
+    params: {
+        year: Number,
+        slug: String,
+        id: String,
     },
-]);
+    paramsToProps: async (params) => {
+        // Fetch event
+        const events = await fetcher.objectFetcher.fetch(
+            new LimitedFilteredRequest({
+                filter: {
+                    id: params.id,
+                },
+                limit: 1,
+                sort: [],
+            }),
+        );
+
+        if (events.results.length === 1) {
+            return {
+                event: events.results[0],
+            };
+        }
+        Toast.error($t(`%yc`)).show();
+        throw new Error('Event not found');
+    },
+
+    propsToParams(props) {
+        const event = props.event;
+
+        return {
+            params: {
+                year: event.startDate.getFullYear(),
+                slug: Formatter.slug(event.name),
+                id: event.id,
+            },
+        };
+    },
+});
 
 const objectFetcher = useEventsObjectFetcher({
     get requiredFilter() {

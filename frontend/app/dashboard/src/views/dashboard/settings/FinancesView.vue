@@ -181,12 +181,13 @@
 
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
@@ -199,10 +200,9 @@ import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import BillingSettingsView from './BillingSettingsView.vue';
+import BillingWarningBox from './packages/BillingWarningBox.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PayableBalanceItemsView from './PayableBalanceItemsView.vue';
-import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';
-import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 enum Routes {
     Transfers = 'Transfers',
@@ -218,158 +218,151 @@ enum Routes {
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
 
-defineRoutes([
-    {
-        name: Routes.Transfers,
-        url: 'overschrijvingen',
-        component: PaymentsTableView,
-        paramsToProps() {
-            return {
-                methods: [PaymentMethod.Transfer],
-                defaultFilter: {
+defineRoute({
+    name: Routes.Transfers,
+    url: 'overschrijvingen',
+    component: PaymentsTableView,
+    defaultProperties() {
+        return {
+            methods: [PaymentMethod.Transfer],
+            defaultFilter: {
+                status: {
+                    $in: [
+                        PaymentStatus.Pending,
+                        PaymentStatus.Created,
+                    ],
+                },
+            },
+        };
+    },
+});
+
+defineRoute({
+    name: Routes.ReceivableBalance,
+    url: 'openstaande-bedragen',
+    component: ReceivableBalancesTableView,
+});
+
+defineRoute({
+    name: Routes.Payments,
+    url: 'betalingen',
+    component: PaymentsTableView,
+    defaultProperties() {
+        return {
+            defaultFilter: [
+                {
                     status: {
                         $in: [
-                            PaymentStatus.Pending,
-                            PaymentStatus.Created,
+                            PaymentStatus.Succeeded,
                         ],
                     },
                 },
-            };
-        },
+                { price: { $neq: 0 } },
+            ],
+        };
     },
-    {
-        name: Routes.ReceivableBalance,
-        url: 'openstaande-bedragen',
-        component: ReceivableBalancesTableView,
-    },
-    {
-        name: Routes.Payments,
-        url: 'betalingen',
-        component: PaymentsTableView,
-        paramsToProps() {
-            return {
-                defaultFilter: [
-                    {
-                        status: {
-                            $in: [
-                                PaymentStatus.Succeeded,
-                            ],
-                        },
-                    },
-                    { price: { $neq: 0 } },
-                ],
-            };
-        },
-    },
-    {
-        name: Routes.BalanceItems,
-        url: 'balance-items',
-        component: BalanceItemsTableView,
-    },
-    {
-        name: Routes.Invoices,
-        url: 'facturen',
-        component: InvoicesTableView,
-        paramsToProps() {
-            return {};
-        },
-    },
-    {
-        name: Routes.Export,
-        url: 'exporteren',
-        present: 'popup',
-        component: () => ConfigurePaymentExportView,
-    },
-    {
-        name: Routes.PayableBalanceItems,
-        url: 'openstaand/@uri/items',
-        present: 'popup',
-        params: {
-            uri: String,
-        },
-        component: PayableBalanceItemsView,
-        async paramsToProps(params: { uri: string }) {
-            await balancePromise;
-            const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+});
 
-            if (!item) {
-                throw new Error('Organization not found');
-            }
+defineRoute({
+    name: Routes.BalanceItems,
+    url: 'balance-items',
+    component: BalanceItemsTableView,
+});
 
-            return {
-                item,
-                reload: async () => {
-                    await updateBalance();
-                    const newItem = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
-                    if (!newItem) {
-                        return DetailedPayableBalance.create({ organization: item.organization });
-                    }
-                    return newItem;
-                },
-            };
-        },
-        propsToParams(props) {
-            if (!('item' in props) || !(props.item instanceof DetailedPayableBalance)) {
-                throw new Error('Missing item');
-            }
+defineRoute({
+    name: Routes.Invoices,
+    url: 'facturen',
+    component: InvoicesTableView,
+});
 
-            return {
-                params: {
-                    uri: props.item.organization.uri,
-                },
-            };
-        },
+defineRoute({
+    name: Routes.Export,
+    url: 'exporteren',
+    present: 'popup',
+    component: () => ConfigurePaymentExportView,
+});
+
+defineRoute({
+    name: Routes.PayableBalanceItems,
+    url: 'openstaand/@uri/items',
+    present: 'popup',
+    params: {
+        uri: String,
     },
-    {
-        name: Routes.PayableBalance,
-        url: 'openstaand/@uri',
-        present: 'popup',
-        params: {
-            uri: String,
-        },
-        component: BillingSettingsView,
-        async paramsToProps(params: { uri: string }) {
-            await balancePromise;
-            const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+    component: PayableBalanceItemsView,
+    async paramsToProps(params) {
+        await balancePromise;
+        const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
 
-            if (!item) {
-                throw new Error('Organization not found');
-            }
+        if (!item) {
+            throw new Error('Organization not found');
+        }
 
-            return {
-                item,
-                reload: async () => {
-                    await updateBalance();
-                    const newItem = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
-                    if (!newItem) {
-                        return DetailedPayableBalance.create({ organization: item.organization });
-                    }
-                    return newItem;
-                },
-            };
-        },
-        propsToParams(props) {
-            if (!('item' in props) || !(props.item instanceof DetailedPayableBalance)) {
-                throw new Error('Missing item');
-            }
-
-            return {
-                params: {
-                    uri: props.item.organization.uri,
-                },
-            };
-        },
+        return {
+            item,
+            reload: async () => {
+                await updateBalance();
+                const newItem = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+                if (!newItem) {
+                    return DetailedPayableBalance.create({ organization: item.organization });
+                }
+                return newItem;
+            },
+        };
     },
-    ...(!isPlatform
-        ? [
-                {
-                    url: Routes.Packages,
-                    present: 'popup' as const,
-                    component: PackageSettingsView,
-                },
-            ]
-        : []),
-]);
+    propsToParams(props) {
+        return {
+            params: {
+                uri: props.item.organization.uri,
+            },
+        };
+    },
+});
+
+defineRoute({
+    name: Routes.PayableBalance,
+    url: 'openstaand/@uri',
+    present: 'popup',
+    params: {
+        uri: String,
+    },
+    component: BillingSettingsView,
+    async paramsToProps(params) {
+        await balancePromise;
+        const item = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+
+        if (!item) {
+            throw new Error('Organization not found');
+        }
+
+        return {
+            item,
+            reload: async () => {
+                await updateBalance();
+                const newItem = outstandingBalance.value?.organizations.find(item => item.organization.uri === params.uri);
+                if (!newItem) {
+                    return DetailedPayableBalance.create({ organization: item.organization });
+                }
+                return newItem;
+            },
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                uri: props.item.organization.uri,
+            },
+        };
+    },
+});
+
+if (!isPlatform) {
+    defineRoute({
+        url: Routes.Packages,
+        present: 'popup' as const,
+        component: PackageSettingsView,
+    });
+}
 
 const auth = useAuth();
 const $navigate = useNavigate();

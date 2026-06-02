@@ -46,17 +46,16 @@
 </template>
 
 <script setup lang="ts">
-import type { Route } from '@simonbackx/vue-app-navigation';
-import { defineRoute, defineRoutes, typeRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
+import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
 import { OrganizationTag, OrganizationTagType, PermissionLevel, TagHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
 import OrganizationTagView from './OrganizationTagView.vue';
 import EditOrganizationTagsView from './tags/EditOrganizationTagsView.vue';
-import { useCollapsed } from '@stamhoofd/components/menu/useCollapsed';
 
 enum Routes {
     All = 'all',
@@ -67,56 +66,6 @@ enum Routes {
 
 const auth = useAuth();
 const hasFullAccess = auth.hasFullPlatformAccess();
-
-defineRoutes([
-    {
-        url: 'allemaal',
-        name: Routes.All,
-        show: 'detail',
-        component: OrganizationsTableView,
-        isDefault: {
-            properties: {},
-        },
-    },
-    {
-        url: 'tag/@slug',
-        name: Routes.Tag,
-        show: 'detail',
-        component: OrganizationTagView,
-        params: {
-            slug: String,
-        },
-        paramsToProps(params: { slug: string }) {
-            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
-            if (!tag) {
-                throw new Error('Tag not found');
-            }
-
-            return {
-                tag,
-            };
-        },
-        propsToParams(props: Record<string, unknown>) {
-            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
-                throw new Error('Missing tag');
-            }
-
-            return {
-                params: {
-                    slug: Formatter.slug(props.tag.name),
-                },
-            };
-        },
-    },
-    ...(hasFullAccess
-        ? [{
-                url: 'tags',
-                name: Routes.Tags,
-                present: 'popup',
-                component: EditOrganizationTagsView,
-            } as Route<any>]
-        : []),
-]);
 
 defineRoute({
     url: 'tag/@slug/groepen',
@@ -144,6 +93,50 @@ defineRoute({
         };
     },
 });
+
+defineRoute({
+    url: 'tag/@slug',
+    name: Routes.Tag,
+    show: 'detail',
+    component: OrganizationTagView,
+    params: {
+        slug: String,
+    },
+    paramsToProps(params) {
+        const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+        if (!tag) {
+            throw new Error('Tag not found');
+        }
+
+        return {
+            tag,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug(props.tag.name),
+            },
+        };
+    },
+});
+
+defineRoute({
+    url: 'allemaal',
+    name: Routes.All,
+    show: 'detail',
+    component: OrganizationsTableView,
+    isDefault: {},
+});
+
+if (hasFullAccess) {
+    defineRoute({
+        url: 'tags',
+        name: Routes.Tags,
+        present: 'popup',
+        component: EditOrganizationTagsView,
+    });
+}
 
 const checkRoute = useCheckRoute();
 const navigate = useNavigate();

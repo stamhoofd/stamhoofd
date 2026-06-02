@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -74,74 +74,68 @@ enum Routes {
     Communication = 'berichten',
 }
 
-defineRoutes([
-    {
-        url: 'categorie/@slug',
-        name: Routes.Category,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default),
-        paramsToProps: (params: { slug: string }) => {
-            const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
-            if (!category) {
-                throw new Error('Category not found');
-            }
-            return {
-                category,
-                period: props.period,
-            };
-        },
-        propsToParams(props) {
-            if (!('category' in props)) {
-                throw new Error('Missing category');
-            }
-            return {
-                params: {
-                    slug: Formatter.slug((props.category as GroupCategory).settings.name),
-                },
-            };
-        },
+defineRoute({
+    url: 'categorie/@slug',
+    name: Routes.Category,
+    params: {
+        slug: String,
     },
-    {
-        url: '@slug',
-        name: Routes.Group,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
-        paramsToProps: (params: { slug: string }) => {
-            const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
-            if (!group) {
-                throw new Error('Group not found');
-            }
-            return {
-                group,
-                period: props.period,
-            };
-        },
-        propsToParams(props) {
-            if (!('group' in props)) {
-                throw new Error('Missing group');
-            }
-            return {
-                params: {
-                    slug: Formatter.slug((props.group as Group).settings.name),
-                },
-            };
-        },
-        isDefault: tree.value.getAllGroups().length
-            ? {
-                    properties: {
-                        group: tree.value.getAllGroups()[0],
-                        period: props.period,
-                    },
-                }
-            : undefined,
+    show: 'detail',
+    component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default),
+    paramsToProps: (params) => {
+        const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
+        if (!category) {
+            throw new Error('Category not found');
+        }
+        return {
+            category,
+            period: props.period,
+        };
     },
-]);
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug((props.category as GroupCategory).settings.name),
+            },
+        };
+    },
+});
+
+defineRoute({
+    url: '@slug',
+    name: Routes.Group,
+    params: {
+        slug: String,
+    },
+    show: 'detail',
+    component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
+    paramsToProps: (params) => {
+        const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
+        if (!group) {
+            throw new Error('Group not found');
+        }
+        return {
+            group,
+            period: props.period,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug((props.group as Group).settings.name),
+            },
+        };
+    },
+    isDefault: tree.value.getAllGroups().length
+        ? {
+                properties: {
+                    group: tree.value.getAllGroups()[0],
+                    period: props.period,
+                },
+            }
+        : undefined,
+},
+);
 
 const checkRoute = useCheckRoute();
 </script>

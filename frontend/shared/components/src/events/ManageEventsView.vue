@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -109,48 +109,43 @@ enum Routes {
     Event = 'activiteit',
 }
 
-defineRoutes([
-    {
-        name: Routes.Event,
-        url: '@id',
-        component: EventOverview,
-        params: {
-            id: String,
-        },
-        paramsToProps: async (params: { id: string }) => {
-            // Fetch event
-            const events = await fetcher.objectFetcher.fetch(
-                new LimitedFilteredRequest({
-                    filter: {
-                        id: params.id,
-                    },
-                    limit: 1,
-                    sort: [],
-                }),
-            );
-
-            if (events.results.length === 1) {
-                return {
-                    event: events.results[0],
-                    onSaveDuplicate: onSaveDuplicateEvent,
-                };
-            }
-            Toast.error($t(`%yc`)).show();
-            throw new Error('Event not found');
-        },
-
-        propsToParams(props) {
-            if (!('event' in props) || typeof props.event !== 'object' || props.event === null || !('id' in props.event)) {
-                throw new Error('Missing event');
-            }
-            return {
-                params: {
-                    id: props.event.id,
-                },
-            };
-        },
+defineRoute({
+    name: Routes.Event,
+    url: '@id',
+    component: EventOverview,
+    params: {
+        id: String,
     },
-]);
+    paramsToProps: async (params) => {
+        // Fetch event
+        const events = await fetcher.objectFetcher.fetch(
+            new LimitedFilteredRequest({
+                filter: {
+                    id: params.id,
+                },
+                limit: 1,
+                sort: [],
+            }),
+        );
+
+        if (events.results.length === 1) {
+            return {
+                event: events.results[0],
+                onSaveDuplicate: onSaveDuplicateEvent,
+            };
+        }
+        Toast.error($t(`%yc`)).show();
+        throw new Error('Event not found');
+    },
+
+    propsToParams(props) {
+        return {
+            params: {
+                id: props.event.id,
+            },
+        };
+    },
+});
 
 const objectFetcher = useEventsObjectFetcher({
     get requiredFilter() {
@@ -252,8 +247,7 @@ async function addEvent(template?: Event) {
     if (platform.value.config.eventTypes.length === 0) {
         if (auth.hasFullPlatformAccess()) {
             Toast.error($t('Configureer eerst minstens één soort activiteit. Ga naar \'Instellingen\' → \'Soorten activiteiten\' in het Administratieportaal.')).show();
-        }
-        else {
+        } else {
             Toast.error($t(`%ye`)).show();
         }
         return;
@@ -333,8 +327,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
                 $gt: d,
             },
         });
-    }
-    else {
+    } else {
         andFilters.push(
             {
                 startDate: {

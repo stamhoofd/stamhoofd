@@ -245,30 +245,16 @@ import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 enum Routes {
-    Privacy = 'privacy',
-    PaymentAccounts = 'betaal-accounts',
-    Admins = 'beheerders',
-    EmailTemplates = 'email-templates',
-    EmailSettings = 'emailadressen',
-    RegistrationPaymentMethods = 'inschrijvingen/betaalmethodes',
-    RegistrationPage = 'inschrijvingen/pagina',
-    RegistrationGroups = 'inschrijvingen/groepen',
-    BundleDiscounts = 'inschrijvingen/kortingen',
-    RegistrationRecords = 'inschrijvingen/persoonsgegevens',
-    RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
-    SingleSignOn = 'sso',
-    Packages = 'functionaliteiten',
-    PaymentSettings = 'betalingen',
-    Referrals = 'referrals',
-    Labs = 'experimenten',
-    Premises = 'lokalen',
-    BalanceNotifications = 'openstaande-bedragen-notificaties',
+    RegistrationPaymentMethods = 'betaalmethodes',
+    RegistrationPage = 'pagina',
+    RegistrationGroups = 'groepen',
+    BundleDiscounts = 'kortingen',
+    RegistrationRecords = 'persoonsgegevens',
+    RegistrationFreeContributions = 'vrije-bijdrage',
     MembersImport = 'leden-importeren',
-    Uitpas = 'uitpas',
     OrganizationRegistrationPeriods = 'werkjaren',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
-    Invoices = 'uitgaande-facturen',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -293,13 +279,8 @@ defineRoutes([
     {
         url: Routes.RegistrationGroups,
         present: 'popup',
-        handler: async (options) => {
-            const component = await buildEditGroupsView();
-
-            await present({
-                ...options,
-                components: [component],
-            });
+        component: async () => {
+            return await buildEditGroupsView();
         },
     },
     {

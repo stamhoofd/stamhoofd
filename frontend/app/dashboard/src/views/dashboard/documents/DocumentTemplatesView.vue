@@ -62,26 +62,26 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
+import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
+import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
+import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import ScrollableSegmentedControl from '@stamhoofd/components/inputs/ScrollableSegmentedControl.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';
-import UIFilterEditor from '@stamhoofd/components/filters/UIFilterEditor.vue';
-import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
-import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener.ts';
 import { useInfiniteObjectFetcher } from '@stamhoofd/components/tables/classes/InfiniteObjectFetcher.ts';
+import InfiniteObjectFetcherEnd from '@stamhoofd/components/tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '@stamhoofd/components/tables/usePositionableSheet.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { DocumentTemplatePrivate, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 
 import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/document-templates.ts';
-import type { ComponentOptions, Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
@@ -104,56 +104,50 @@ const present = usePresent();
 const navigate = useNavigate();
 const { presentPositionableSheet } = usePositionableSheet();
 
-defineRoutes([
-    {
-        name: Routes.DocumentTemplate,
-        url: '@id',
-        component: DocumentTemplateOverview,
-        params: {
-            id: String,
-        },
-        paramsToProps: async (params: { id: string }) => {
-            let template = templates.value.find(t => t.id === params.id);
-            if (!template) {
-                // Fetch template
-                const templates = await fetcher.objectFetcher.fetch(
-                    new LimitedFilteredRequest({
-                        filter: {
-                            id: params.id,
-                        },
-                        limit: 1,
-                        sort: [],
-                    }),
-                );
-
-                if (templates.results.length === 1) {
-                    template = templates.results[0];
-                }
-                else {
-                    Toast.error('Document niet gevonden').show();
-                    throw new Error('Document not found');
-                }
-            }
-
-            return {
-                template,
-            };
-        },
-
-        propsToParams(props) {
-            if (!('template' in props) || typeof props.template !== 'object' || props.template === null || !(props.template instanceof DocumentTemplatePrivate)) {
-                throw new Error('Missing document');
-            }
-            const template = props.template;
-
-            return {
-                params: {
-                    id: template.id,
-                },
-            };
-        },
+defineRoute({
+    name: Routes.DocumentTemplate,
+    url: '@id',
+    component: DocumentTemplateOverview,
+    params: {
+        id: String,
     },
-]);
+    paramsToProps: async (params) => {
+        let template = templates.value.find(t => t.id === params.id);
+        if (!template) {
+            // Fetch template
+            const templates = await fetcher.objectFetcher.fetch(
+                new LimitedFilteredRequest({
+                    filter: {
+                        id: params.id,
+                    },
+                    limit: 1,
+                    sort: [],
+                }),
+            );
+
+            if (templates.results.length === 1) {
+                template = templates.results[0];
+            } else {
+                Toast.error('Document niet gevonden').show();
+                throw new Error('Document not found');
+            }
+        }
+
+        return {
+            template,
+        };
+    },
+
+    propsToParams(props) {
+        const template = props.template;
+
+        return {
+            params: {
+                id: template.id,
+            },
+        };
+    },
+});
 
 const searchQuery = ref('');
 const selectedTab = ref(firstYearToShow) as Ref<number | null | TabItem>;
@@ -223,8 +217,7 @@ function addDocument() {
 
     if (typeof selectedTab.value === 'number') {
         year = selectedTab.value;
-    }
-    else {
+    } else {
         year = firstYearToShow;
     }
 
@@ -279,12 +272,10 @@ function getRequiredFilter(): StamhoofdFilter | null {
                 filters['year'] = {
                     $gte: selectedTab.value,
                 };
-            }
-            else {
+            } else {
                 filters['year'] = { $eq: selectedTab.value };
             }
-        }
-        else {
+        } else {
             switch (selectedTab.value) {
                 case TabItem.Archive:
                     // archive documents are documents older than 2 years

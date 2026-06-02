@@ -170,9 +170,7 @@ defineRoutes(flatTabs.value.map((tab) => {
     return {
         name,
         url: Formatter.slug(name),
-        isDefault: {
-            properties: {},
-        },
+        isDefault: {},
         handler: async (options) => {
             if (options.checkRoutes) {
                 tab.component.setCheckRoutes();

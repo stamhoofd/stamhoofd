@@ -226,7 +226,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditResourceRolesView from '@stamhoofd/components/admins/EditResourceRolesView.vue';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
@@ -338,14 +338,16 @@ defineRoutes([{
         };
     },
 },
-{
+]);
+
+defineRoute({
     url: '/r/@slug',
     name: Routes.Responsibility,
     params: {
         slug: String,
     },
     component: MembersTableView,
-    paramsToProps(params: { slug: string }) {
+    paramsToProps(params) {
         const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug);
 
         if (!responsibility) {
@@ -359,18 +361,13 @@ defineRoutes([{
         };
     },
     propsToParams(props) {
-        if (!('responsibility' in props)) {
-            throw new Error('Missing responsibility');
-        }
-
         return {
             params: {
                 slug: Formatter.slug((props.responsibility as MemberResponsibility).name as string),
             },
         };
     },
-},
-]);
+});
 
 const navigate = useNavigate();
 const linkedResponsibilities = computed(() => {

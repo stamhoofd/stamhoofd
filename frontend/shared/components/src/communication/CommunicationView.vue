@@ -61,7 +61,7 @@ import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import type { EmailPreview, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -91,47 +91,41 @@ enum Routes {
     Email = 'bericht',
 }
 
-defineRoutes([
-    {
-        name: Routes.Email,
-        url: '@id',
-        component: EmailOverview,
-        params: {
-            id: String,
-        },
-        paramsToProps: async (params: { id: string }) => {
-            // Fetch event
-            const events = await fetcher.objectFetcher.fetch(
-                new LimitedFilteredRequest({
-                    filter: {
-                        id: params.id,
-                    },
-                    limit: 1,
-                    sort: [],
-                }),
-            );
-
-            if (events.results.length === 1) {
-                return {
-                    email: events.results[0],
-                };
-            }
-            Toast.error($t(`%1D0`)).show();
-            throw new Error('Email not found');
-        },
-
-        propsToParams(props) {
-            if (!('email' in props) || typeof props.email !== 'object' || props.email === null || !('id' in props.email)) {
-                throw new Error('Missing email');
-            }
-            return {
-                params: {
-                    id: props.email.id,
-                },
-            };
-        },
+defineRoute({
+    name: Routes.Email,
+    url: '@id',
+    component: EmailOverview,
+    params: {
+        id: String,
     },
-]);
+    paramsToProps: async (params) => {
+        // Fetch event
+        const events = await fetcher.objectFetcher.fetch(
+            new LimitedFilteredRequest({
+                filter: {
+                    id: params.id,
+                },
+                limit: 1,
+                sort: [],
+            }),
+        );
+
+        if (events.results.length === 1) {
+            return {
+                email: events.results[0],
+            };
+        }
+        Toast.error($t(`%1D0`)).show();
+        throw new Error('Email not found');
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                id: props.email.id,
+            },
+        };
+    },
+});
 
 const objectFetcher = useEmailsObjectFetcher({
     get requiredFilter() {

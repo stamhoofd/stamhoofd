@@ -41,12 +41,13 @@
 </template>
 
 <script lang="ts" setup>
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
-import { OrganizationTag, OrganizationTagType } from '@stamhoofd/structures';
+import type { OrganizationTag } from '@stamhoofd/structures';
+import { OrganizationTagType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import OrganizationsTableView from './OrganizationsTableView.vue';
@@ -65,80 +66,68 @@ enum Routes {
     Organizations = 'organizations',
 }
 
-defineRoutes([
-    {
-        url: 'groepen',
-        name: Routes.All,
-        component: OrganizationsTableView,
-        params: {
-            slug: String,
-        },
-        paramsToProps() {
-            return {
-                tag: props.tag,
-            };
-        },
+defineRoute({
+    url: 'groepen',
+    name: Routes.All,
+    component: OrganizationsTableView,
+    defaultProperties() {
+        return {
+            tag: props.tag,
+        };
     },
-    {
-        url: 'tag/@slug/groepen',
-        name: Routes.Organizations,
-        component: OrganizationsTableView,
-        params: {
-            slug: String,
-        },
-        paramsToProps(params: { slug: string }) {
-            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
-            if (!tag) {
-                throw new Error('Tag not found');
-            }
+});
 
-            return {
-                tag,
-            };
-        },
-        propsToParams(props) {
-            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
-                throw new Error('Missing tag');
-            }
-
-            return {
-                params: {
-                    slug: Formatter.slug(props.tag.name),
-                },
-            };
-        },
+defineRoute({
+    url: 'tag/@slug/groepen',
+    name: Routes.Organizations,
+    component: OrganizationsTableView,
+    params: {
+        slug: String,
     },
-    {
-        url: 'tag/@slug',
-        name: Routes.Tag,
-        component: OrganizationTagView,
-        params: {
-            slug: String,
-        },
-        paramsToProps(params: { slug: string }) {
-            const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
-            if (!tag) {
-                throw new Error('Tag not found');
-            }
+    paramsToProps(params) {
+        const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+        if (!tag) {
+            throw new Error('Tag not found');
+        }
 
-            return {
-                tag,
-            };
-        },
-        propsToParams(props) {
-            if (!('tag' in props) || !(props.tag instanceof OrganizationTag)) {
-                throw new Error('Missing tag');
-            }
-
-            return {
-                params: {
-                    slug: Formatter.slug(props.tag.name),
-                },
-            };
-        },
+        return {
+            tag,
+        };
     },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug(props.tag.name),
+            },
+        };
+    },
+});
 
-]);
+defineRoute({
+    url: 'tag/@slug',
+    name: Routes.Tag,
+    component: OrganizationTagView,
+    params: {
+        slug: String,
+    },
+    paramsToProps(params) {
+        const tag = platform.value.config.tags.find(t => Formatter.slug(t.name) === params.slug);
+        if (!tag) {
+            throw new Error('Tag not found');
+        }
+
+        return {
+            tag,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug(props.tag.name),
+            },
+        };
+    },
+});
 
 const title = computed(() => props.tag.name);
 

@@ -44,12 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import type {
     PrivateWebshop,
-    WebshopPreview} from '@stamhoofd/structures';
+    WebshopPreview,
+} from '@stamhoofd/structures';
 import {
     AccessRight,
     WebshopStatus,
@@ -118,79 +119,78 @@ enum Routes {
     Archive = 'archive',
 }
 
-defineRoutes([
-    // webshop detail
-    {
-        url: '@slug',
-        name: Routes.Webshop,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () =>
-            (await import('../dashboard/webshop/WebshopOverview.vue'))
-                .default,
-        paramsToProps: ({ slug }: { slug: string }) => {
-            const webshop = visibleWebshops.value.find(
-                shop => Formatter.slug(shop.id) === slug,
-            );
+defineRoute({
+    url: '@slug',
+    name: Routes.Webshop,
+    params: {
+        slug: String,
+    },
+    show: 'detail',
+    component: async () =>
+        (await import('../dashboard/webshop/WebshopOverview.vue'))
+            .default,
+    paramsToProps: ({ slug }) => {
+        const webshop = visibleWebshops.value.find(
+            shop => Formatter.slug(shop.id) === slug,
+        );
 
-            if (!webshop) {
-                throw new Error('Webshop not found');
-            }
+        if (!webshop) {
+            throw new Error('Webshop not found');
+        }
 
-            return {
-                preview: webshop,
-            };
-        },
-        propsToParams(props) {
-            const webshop = props.preview as WebshopPreview | undefined;
+        return {
+            preview: webshop,
+        };
+    },
+    propsToParams(props) {
+        const webshop = props.preview as WebshopPreview | undefined;
 
-            if (!webshop) {
-                throw new Error('Missing preview (webshop)');
-            }
+        if (!webshop) {
+            throw new Error('Missing preview (webshop)');
+        }
 
-            const slug = Formatter.slug(webshop.id);
+        const slug = Formatter.slug(webshop.id);
 
-            return {
-                params: {
-                    slug,
-                },
-            };
-        },
-        isDefault: {
-            properties: {
-                preview: visibleWebshops.value[0],
+        return {
+            params: {
+                slug,
             },
+        };
+    },
+    isDefault: {
+        properties: {
+            preview: visibleWebshops.value[0],
         },
     },
-    {
-        url: 'nieuw',
-        name: Routes.AddWebshop,
-        show: 'detail',
-        present: 'popup',
-        component: async () =>
-            (await import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'))
-                .default,
-        paramsToProps: () => {
-            return {
-                savedHandler: async (webshop: PrivateWebshop) => {
-                    await $navigate(Routes.Webshop, {
-                        properties: {
-                            preview: webshop,
-                        },
-                    });
-                },
-            };
-        },
+});
+
+defineRoute({
+    url: 'nieuw',
+    name: Routes.AddWebshop,
+    show: 'detail',
+    present: 'popup',
+    component: async () =>
+        (await import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'))
+            .default,
+    defaultProperties: () => {
+        return {
+            savedHandler: async (webshop: PrivateWebshop) => {
+                await $navigate(Routes.Webshop, {
+                    properties: {
+                        preview: webshop,
+                    },
+                });
+            },
+        };
     },
-    {
-        url: 'archief',
-        name: Routes.Archive,
-        show: 'detail',
-        component: async () =>
-            (await import('../dashboard/webshop/WebshopArchiveView.vue'))
-                .default,
-    },
-]);
+});
+
+defineRoute({
+    url: 'archief',
+    name: Routes.Archive,
+    show: 'detail',
+    component: async () =>
+        (await import('../dashboard/webshop/WebshopArchiveView.vue'))
+            .default,
+});
 </script>

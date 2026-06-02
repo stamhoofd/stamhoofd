@@ -63,9 +63,7 @@ defineRoutes(props.tabs.map((tab, index) => {
         name,
         url: Formatter.slug(name),
         isDefault: index === props.initialTab || props.initialTab === null
-            ? {
-                    properties: {},
-                }
+            ? {}
             : undefined,
         handler: async (options) => {
             if (options.checkRoutes) {

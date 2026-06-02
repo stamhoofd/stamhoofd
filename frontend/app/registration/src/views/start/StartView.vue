@@ -161,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useContext } from '@stamhoofd/components/hooks/useContext';
 import { useUser } from '@stamhoofd/components/hooks/useUser';
 import { useChooseGroupForMember } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
@@ -186,56 +186,56 @@ enum Routes {
     ViewMember = 'viewMember',
     Payments = 'payments',
 }
-defineRoutes([
-    {
-        name: Routes.RegisterMembers,
-        url: 'registreren',
-        component: async () => (await import('../members/RegisterMembersView.vue')).default as any,
-        present: 'popup',
-    },
-    {
-        name: Routes.CheckData,
-        url: 'gegevens',
-        component: async () => (await import('../members/CheckDataView.vue')).default as any,
-        present: 'popup',
-    },
-    {
-        name: Routes.Payments,
-        url: 'betalingen',
-        component: async () => (await import('./payments/MemberPayableBalanceView.vue')).default as any,
-        present: 'popup',
-    },
-    {
-        name: Routes.ViewMember,
-        url: 'leden/@id',
-        component: async () => (await import('../members/MemberView.vue')).default as any,
-        present: 'popup',
-        params: {
-            id: String,
-        },
-        paramsToProps: async (params: { id: string }) => {
-            const member = members.value.find(m => m.id === params.id);
-            if (member) {
-                return {
-                    member,
-                };
-            }
-            Toast.error($t(`%EO`)).show();
-            throw new Error('member not found');
-        },
 
-        propsToParams(props) {
-            if (!('member' in props) || typeof props.member !== 'object' || props.member === null || !('id' in props.member)) {
-                throw new Error('Missing member');
-            }
-            return {
-                params: {
-                    id: props.member.id,
-                },
-            };
-        },
+defineRoute({
+    name: Routes.RegisterMembers,
+    url: 'registreren',
+    component: async () => (await import('../members/RegisterMembersView.vue')).default as any,
+    present: 'popup',
+});
+
+defineRoute({
+    name: Routes.CheckData,
+    url: 'gegevens',
+    component: async () => (await import('../members/CheckDataView.vue')).default as any,
+    present: 'popup',
+});
+
+defineRoute({
+    name: Routes.Payments,
+    url: 'betalingen',
+    component: async () => (await import('./payments/MemberPayableBalanceView.vue')).default as any,
+    present: 'popup',
+});
+
+defineRoute({
+    name: Routes.ViewMember,
+    url: 'leden/@id',
+    component: async () => (await import('../members/MemberView.vue')).default as any,
+    present: 'popup',
+    params: {
+        id: String,
     },
-]);
+    paramsToProps: async (params) => {
+        const member = members.value.find(m => m.id === params.id);
+        if (member) {
+            return {
+                member,
+            };
+        }
+        Toast.error($t(`%EO`)).show();
+        throw new Error('member not found');
+    },
+
+    propsToParams(props) {
+        return {
+            params: {
+                id: props.member.id,
+            },
+        };
+    },
+});
+
 const $navigate = useNavigate();
 const memberManager = useMemberManager();
 const user = useUser();
@@ -293,8 +293,7 @@ async function onDownloadDocument(document: Document) {
     downloadingDocuments.value.push(document);
     try {
         await downloadDocument(context.value, document, requestOwner);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
     downloadingDocuments.value = downloadingDocuments.value.filter(d => d.id !== document.id);

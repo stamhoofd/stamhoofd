@@ -72,10 +72,10 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useUser } from '#hooks/useUser.ts';
-import type { User} from '@stamhoofd/structures';
+import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import type { User } from '@stamhoofd/structures';
 import { PermissionLevel, Permissions, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditAdminView from './EditAdminView.vue';
@@ -126,64 +126,59 @@ enum Routes {
     EditAdmin = 'editAdmin',
 }
 
-defineRoutes([
-    {
-        url: 'nieuw',
-        name: Routes.CreateAdmin,
-        component: EditAdminView,
-        present: 'popup',
-        paramsToProps: () => {
-            const p = UserPermissions.create({});
-            if (!organization.value) {
-                p.globalPermissions = Permissions.create({ level: PermissionLevel.None });
-            }
-            else {
-                p.organizationPermissions.set(organization.value.id, Permissions.create({ level: PermissionLevel.None }));
-            }
+defineRoute({
+    url: 'nieuw',
+    name: Routes.CreateAdmin,
+    component: EditAdminView,
+    present: 'popup',
+    defaultProperties: () => {
+        const p = UserPermissions.create({});
+        if (!organization.value) {
+            p.globalPermissions = Permissions.create({ level: PermissionLevel.None });
+        } else {
+            p.organizationPermissions.set(organization.value.id, Permissions.create({ level: PermissionLevel.None }));
+        }
 
-            const user = UserWithMembers.create({
-                email: '',
-                organizationId: organization.value?.id ?? null,
-                permissions: p,
-            });
+        const user = UserWithMembers.create({
+            email: '',
+            organizationId: organization.value?.id ?? null,
+            permissions: p,
+        });
 
-            return {
-                user,
-                isNew: true,
-            };
-        },
+        return {
+            user,
+            isNew: true,
+        };
     },
-    {
-        url: '@userId',
-        name: Routes.EditAdmin,
-        component: EditAdminView,
-        present: 'popup',
-        params: {
-            userId: String,
-        },
-        paramsToProps: async (params: { userId: string }) => {
-            await loadPromise();
-            const user = sortedAdmins.value.find(u => u.id === params.userId);
-            if (!user) {
-                throw new Error('User not found');
-            }
-            return {
-                user,
-                isNew: false,
-            };
-        },
-        propsToParams(props) {
-            if (!('user' in props)) {
-                throw new Error('Missing user');
-            }
-            return {
-                params: {
-                    userId: (props.user as User).id,
-                },
-            };
-        },
+});
+
+defineRoute({
+    url: '@userId',
+    name: Routes.EditAdmin,
+    component: EditAdminView,
+    present: 'popup',
+    params: {
+        userId: String,
     },
-]);
+    paramsToProps: async (params) => {
+        await loadPromise();
+        const user = sortedAdmins.value.find(u => u.id === params.userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return {
+            user,
+            isNew: false,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                userId: (props.user as User).id,
+            },
+        };
+    },
+});
 
 const $navigate = useNavigate();
 

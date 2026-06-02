@@ -68,12 +68,12 @@
 </template>
 
 <script lang="ts" setup>
-import type {AutoEncoderPatchType} from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { Toast } from '#overlays/Toast.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import SaveView from '#navigation/SaveView.vue';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { Toast } from '#overlays/Toast.ts';
+import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { defineRoute, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import type { PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 import STList from '../layout/STList.vue';
@@ -81,70 +81,66 @@ import EditRoleView from './EditRoleView.vue';
 import { useAdmins } from './hooks/useAdmins';
 import { usePatchRoles } from './hooks/useRoles';
 
-defineRoutes([
-    {
-        url: 'nieuw',
-        name: 'createRole',
-        component: EditRoleView,
-        present: 'popup',
-        paramsToProps: () => {
-            const role = PermissionRoleDetailed.create({});
+defineRoute({
+    url: 'nieuw',
+    name: 'createRole',
+    component: EditRoleView,
+    present: 'popup',
+    defaultProperties: () => {
+        const role = PermissionRoleDetailed.create({});
 
-            return {
-                role,
-                isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
-                    const patched = role.patch(patch);
-                    const arr = createRolePatchArray();
-                    arr.addPut(patched);
-                    patchRoles(arr);
-                },
-                deleteHandler: null,
-            };
-        },
+        return {
+            role,
+            isNew: true,
+            saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
+                const patched = role.patch(patch);
+                const arr = createRolePatchArray();
+                arr.addPut(patched);
+                patchRoles(arr);
+            },
+            deleteHandler: null,
+        };
     },
-    {
-        url: '@roleId',
-        name: 'editRole',
-        component: EditRoleView,
-        present: 'popup',
-        params: {
-            roleId: String,
-        },
-        paramsToProps: async (params: { roleId: string }) => {
-            const role = roles.value.find(u => u.id === params.roleId);
-            if (!role) {
-                throw new Error('Role not found');
-            }
+});
 
-            return {
-                role,
-                isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
-                    patch.id = role.id;
-                    const arr = createRolePatchArray();
-                    arr.addPatch(patch);
-                    patchRoles(arr);
-                },
-                deleteHandler: () => {
-                    const arr = createRolePatchArray();
-                    arr.addDelete(role.id);
-                    patchRoles(arr);
-                },
-            };
-        },
-        propsToParams(props) {
-            if (!('role' in props)) {
-                throw new Error('Missing role');
-            }
-            return {
-                params: {
-                    roleId: (props.role as PermissionRoleDetailed).id,
-                },
-            };
-        },
+defineRoute({
+    url: '@roleId',
+    name: 'editRole',
+    component: EditRoleView,
+    present: 'popup',
+    params: {
+        roleId: String,
     },
-]);
+    paramsToProps: async (params) => {
+        const role = roles.value.find(u => u.id === params.roleId);
+        if (!role) {
+            throw new Error('Role not found');
+        }
+
+        return {
+            role,
+            isNew: false,
+            saveHandler: (patch: AutoEncoderPatchType<PermissionRoleDetailed>) => {
+                patch.id = role.id;
+                const arr = createRolePatchArray();
+                arr.addPatch(patch);
+                patchRoles(arr);
+            },
+            deleteHandler: () => {
+                const arr = createRolePatchArray();
+                arr.addDelete(role.id);
+                patchRoles(arr);
+            },
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                roleId: (props.role as PermissionRoleDetailed).id,
+            },
+        };
+    },
+});
 
 const $navigate = useNavigate();
 

@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts" setup>
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import type { WebshopPreview } from '@stamhoofd/structures';
 import { WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -47,47 +47,34 @@ async function openWebshop(webshop: WebshopPreview) {
     await $navigate(Routes.Webshop, { properties: { preview: webshop } });
 }
 
-defineRoutes([
-    {
-        url: '@slug',
-        name: Routes.Webshop,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () =>
-            (await import(/* webpackChunkName: "WebshopOverview" */ './WebshopOverview.vue')).default,
-        paramsToProps: ({ slug }: { slug: string }) => {
-            const webshop = webshops.value.find(
-                shop => Formatter.slug(shop.id) === slug,
-            );
-
-            if (!webshop) {
-                throw new Error('Webshop not found');
-            }
-
-            return {
-                preview: webshop,
-            };
-        },
-        propsToParams(props) {
-            const webshop = props.preview as WebshopPreview | undefined;
-
-            if (!webshop) {
-                throw new Error('Missing preview (webshop)');
-            }
-
-            return {
-                params: {
-                    slug: Formatter.slug(webshop.id),
-                },
-            };
-        },
-        isDefault: {
-            properties: {
-                preview: webshops.value[0],
-            },
-        },
+defineRoute({
+    url: '@slug',
+    name: Routes.Webshop,
+    params: {
+        slug: String,
     },
-]);
+    component: async () =>
+        (await import(/* webpackChunkName: "WebshopOverview" */ './WebshopOverview.vue')).default,
+    paramsToProps: ({ slug }) => {
+        const webshop = webshops.value.find(
+            shop => Formatter.slug(shop.id) === slug,
+        );
+
+        if (!webshop) {
+            throw new Error('Webshop not found');
+        }
+
+        return {
+            preview: webshop,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug(props.preview.id),
+            },
+        };
+    },
+},
+);
 </script>
