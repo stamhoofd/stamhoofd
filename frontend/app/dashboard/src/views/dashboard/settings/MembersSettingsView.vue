@@ -230,22 +230,19 @@ import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegis
 import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, PaymentMethod } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
-import { computed, onMounted, ref } from 'vue';
-import PackageSettingsView from './packages/PackageSettingsView.vue';
-import { Country } from '@stamhoofd/types/Country';
 
 enum Routes {
     Privacy = 'privacy',
@@ -291,7 +288,7 @@ defineRoutes([
     {
         url: Routes.RegistrationPage,
         present: 'popup',
-        component: RegistrationPageSettingsView,
+        component: () => RegistrationPageSettingsView,
     },
     {
         url: Routes.RegistrationGroups,
@@ -342,7 +339,7 @@ defineRoutes([
     {
         url: Routes.RegistrationFreeContributions,
         present: 'popup',
-        component: FreeContributionSettingsView,
+        component: () => FreeContributionSettingsView,
     },
     {
         url: Routes.MembersImport,
@@ -401,170 +398,5 @@ defineRoutes([
 ]);
 
 const $navigate = useNavigate();
-
-function openPackages() {
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(PackageSettingsView),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
-}
-
-const openTodoList = ref(true);
-
-onMounted(() => {
-    try {
-        if (localStorage.getItem('hideMembersOnboarding') === 'true') {
-            openTodoList.value = false;
-        }
-    } catch (e) {
-        console.error('Could not read from localStorage', e);
-    }
-});
-
-function toggleTodoList() {
-    openTodoList.value = !openTodoList.value;
-    try {
-        if (!openTodoList.value) {
-            localStorage.setItem('hideMembersOnboarding', 'true');
-        } else {
-            localStorage.removeItem('hideMembersOnboarding');
-        }
-    } catch (e) {
-        console.error('Could not write to localStorage', e);
-    }
-}
-const todoList = computed(() => {
-    const list: {
-        icon: string;
-        subIcon?: string;
-        title: string;
-        description: string;
-        action: () => Promise<void> | void;
-        done: boolean;
-    }[] = [];
-
-    list.push({
-        icon: 'bank',
-        title: 'Stel online betalingen in',
-        description: organization.value.address?.country === Country.Netherlands ? 'Zorg dat bestellers via iDEAL of creditcard kunnen betalen.' : 'Zorg dat bestellers via Bancontact, Payconiq of creditcard kunnen betalen.',
-        action: () => $navigate(Routes.RegistrationPaymentMethods),
-        done: organization.value.meta.registrationPaymentConfiguration.paymentMethods.includes(PaymentMethod.CreditCard)
-            || organization.value.meta.registrationPaymentConfiguration.paymentMethods.includes(PaymentMethod.iDEAL)
-            || organization.value.meta.registrationPaymentConfiguration.paymentMethods.includes(PaymentMethod.Bancontact)
-            || organization.value.meta.registrationPaymentConfiguration.paymentMethods.includes(PaymentMethod.Payconiq)
-            || organization.value.meta.registrationPaymentConfiguration.paymentMethods.includes(PaymentMethod.Transfer),
-    });
-
-    list.push({
-        icon: 'calendar',
-        title: 'Stel je werkjaren in',
-        description: 'Stel de start en einddatum van je werkjaar, semester of kwartaal in ',
-        action: () => $navigate(Routes.OrganizationRegistrationPeriods),
-        done: organization.value.period.adminCategoryTree.getAllGroups().length > 0,
-    });
-
-    list.push({
-        icon: 'group',
-        title: 'Stel je inschrijvingsgroepen in',
-        description: 'Deel je leden op in groepen en categorieën',
-        action: () => $navigate(Routes.RegistrationGroups),
-        done: organization.value.period.adminCategoryTree.getAllGroups().length > 0,
-    });
-
-    /* list.push({
-        icon: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'ticket' : 'box',
-        subIcon: 'add',
-        title: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Voeg tickets toe aan je webshop' : 'Voeg artikels toe aan je webshop',
-        description: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.' : 'Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.',
-        action: () => editProducts(),
-        done: !!webshop.value?.products && webshop.value.products.length > 0,
-    });
-
-    if (webshopManager.value.preview.meta.type === WebshopType.Performance) {
-        list.push({
-            icon: 'seat',
-            title: 'Koppel een zaalplan',
-            description: 'Lees de gids door hoe je een zaalplan instelt.',
-            action: () => openSeatDocs(),
-            done: !!webshop.value?.products && webshop.value.products.some(p => p.seatingPlanId !== null),
-        });
-    }
-
-    if (webshopManager.value.preview.meta.type === WebshopType.TakeawayAndDelivery) {
-        list.push({
-            icon: 'location',
-            subIcon: 'add',
-            title: 'Stel afhaal of leveringsmethodes in',
-            description: 'Stel in hoe, waar en wanneer bestellers hun bestelling kunnen afhalen of geleverd krijgen.',
-            action: () => editCheckoutMethods(),
-            done: webshopManager.value.preview.meta.checkoutMethods.length > 0,
-        });
-    }
-
-    if (webshopManager.value.preview.meta.type === WebshopType.TakeawayAndDelivery) {
-        list.push({
-            icon: 'image',
-            title: 'Stel een omslagfoto, logo, kleur en beschrijving in',
-            description: 'Maak je webshop helemaal professioneel door deze in te stellen.',
-            action: () => editPage(),
-            done: webshopManager.value.preview.meta.description.text.length > 0
-                || !!webshopManager.value.preview.meta.useLogo
-                || !!webshopManager.value.preview.meta.color
-                || !!webshopManager.value.preview.meta.title,
-        });
-    }
-
-    if (webshopManager.value.preview.meta.status !== WebshopStatus.Open) {
-        list.push({
-            icon: 'clock',
-            title: 'Open je webshop als je er klaar voor bent',
-            description: 'Je kan je webshop openen op een bepaald tijdstip, of manueel via de knop onderaan.',
-            action: () => editGeneral(),
-            done: false,
-        });
-    }
-
-    if (organization.value.meta.packages.isWebshopsTrial) {
-        list.push({
-            icon: 'power',
-            title: 'Activeer Stamhoofd als je wilt beginnen verkopen',
-            description: 'Beëindig je proefperiode en ga van start',
-            action: () => openPackages(),
-            done: false,
-        });
-    } */
-
-    if (organization.value.meta.packages.isMembersTrial) {
-        list.push({
-            icon: 'power',
-            title: 'Activeer Stamhoofd om leden in het echt te laten inschrijven',
-            description: 'Tijdens de proefperiode kan je zelf fictieve test leden naar hartelust inschrijven en daarna weer verwijderen',
-            action: () => openPackages(),
-            done: false,
-        });
-    }
-
-    // If all done, return empty list
-    if (list.every(i => i.done)) {
-        return [];
-    }
-
-    // Sort by moving all done items to the end
-    list.sort((a, b) => {
-        if (a.done && !b.done) {
-            return 1;
-        }
-        if (!a.done && b.done) {
-            return -1;
-        }
-        return 0;
-    });
-
-    return list;
-});
 
 </script>

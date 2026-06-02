@@ -278,7 +278,7 @@ defineRoutes([
         name: Routes.Export,
         url: 'exporteren',
         present: 'popup',
-        component: ConfigurePaymentExportView,
+        component: () => ConfigurePaymentExportView,
     },
     {
         name: Routes.PayableBalanceItems,

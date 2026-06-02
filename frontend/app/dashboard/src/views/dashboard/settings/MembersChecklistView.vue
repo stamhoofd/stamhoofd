@@ -25,15 +25,6 @@
                     </div>
                 </div>
             </STInputBox>
-            <p v-if="false" class="style-description-small">
-                <I18nComponent :t="$t('Plaats een knop naar deze link op je website en deel het op je sociale media. Je kan het <button>hier</button> personaliseren.')">
-                    <template #button="{content}">
-                        <button type="button" class="inline-link" @click="$navigate(Routes.RegistrationPage)">
-                            {{ content }}
-                        </button>
-                    </template>
-                </I18nComponent>
-            </p>
 
             <hr>
             <h2>Stel alles op punt</h2>
@@ -125,47 +116,32 @@ import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfi
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
+import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, PaymentMethod } from '@stamhoofd/structures';
-import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
+import { Country } from '@stamhoofd/types/Country';
+import { computed, onMounted, ref } from 'vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
-import { computed, onMounted, ref } from 'vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
-import { Country } from '@stamhoofd/types/Country';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 
 enum Routes {
-    Privacy = 'privacy',
-    PaymentAccounts = 'betaal-accounts',
     Admins = 'beheerders',
-    EmailTemplates = 'email-templates',
-    EmailSettings = 'emailadressen',
-    RegistrationPaymentMethods = 'inschrijvingen/betaalmethodes',
-    RegistrationPage = 'inschrijvingen/pagina',
-    RegistrationGroups = 'inschrijvingen/groepen',
-    BundleDiscounts = 'inschrijvingen/kortingen',
-    RegistrationRecords = 'inschrijvingen/persoonsgegevens',
-    RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
-    SingleSignOn = 'sso',
-    Packages = 'functionaliteiten',
-    PaymentSettings = 'betalingen',
-    Referrals = 'referrals',
-    Labs = 'experimenten',
-    Premises = 'lokalen',
-    BalanceNotifications = 'openstaande-bedragen-notificaties',
+    RegistrationPaymentMethods = 'betaalmethodes',
+    RegistrationGroups = 'groepen',
+    BundleDiscounts = 'kortingen',
+    RegistrationRecords = 'persoonsgegevens',
+    RegistrationFreeContributions = 'vrije-bijdrage',
     MembersImport = 'leden-importeren',
-    Uitpas = 'uitpas',
     OrganizationRegistrationPeriods = 'werkjaren',
     FinancialSupport = 'financiele-ondersteuning',
     DataPermissions = 'toestemming-gegevensverzameling',
-    Invoices = 'uitgaande-facturen',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -181,11 +157,6 @@ defineRoutes([
         url: Routes.RegistrationPaymentMethods,
         present: 'popup',
         component: RegistrationPaymentSettingsView,
-    },
-    {
-        url: Routes.RegistrationPage,
-        present: 'popup',
-        component: RegistrationPageSettingsView,
     },
     {
         url: Routes.RegistrationGroups,
@@ -236,7 +207,7 @@ defineRoutes([
     {
         url: Routes.RegistrationFreeContributions,
         present: 'popup',
-        component: FreeContributionSettingsView,
+        component: () => FreeContributionSettingsView,
     },
     {
         url: Routes.MembersImport,

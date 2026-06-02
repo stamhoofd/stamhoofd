@@ -276,7 +276,7 @@ if (props.Route) {
     defineRoutes([{
         name: Routes.Object,
         url: '@id',
-        component: props.Route.Component as Component,
+        component: () => props.Route!.Component as Component,
         params: {
             id: String,
         },

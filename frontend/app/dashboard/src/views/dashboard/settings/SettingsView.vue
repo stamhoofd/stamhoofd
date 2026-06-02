@@ -294,7 +294,6 @@
 <script lang="ts" setup>
 import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
 import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
-import BundleDiscountSettingsView from '@stamhoofd/components/bundle-discounts/BundleDiscountSettingsView.vue';
 import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
 import EmailSettingsView from '@stamhoofd/components/email/EmailSettingsView.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -309,37 +308,29 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import GeneralSettingsView from '@stamhoofd/components/organizations/GeneralSettingsView.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
-import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
 
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, StripeAccount } from '@stamhoofd/structures';
+import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, StripeAccount } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import BalanceNotificationSettingsView from './BalanceNotificationSettingsView.vue';
 import BillingSettingsView from './BillingSettingsView.vue';
 import InvoiceSettingsView from './InvoiceSettingsView.vue';
 import LabsView from './LabsView.vue';
+import MembersSettingsView from './MembersSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PremisesView from './PremisesView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
 import ReferralView from './ReferralView.vue';
-import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
-import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 import UitpasSettingsView from './UitpasSettingsView.vue';
-import { useEditGroupsView } from './hooks/useEditGroupsView';
-import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
-import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
-import MembersSettingsView from './MembersSettingsView.vue';
 
 enum Routes {
     General = 'algemeen',
@@ -349,12 +340,6 @@ enum Routes {
     Admins = 'beheerders',
     EmailTemplates = 'email-templates',
     EmailSettings = 'emailadressen',
-    RegistrationPaymentMethods = 'inschrijvingen/betaalmethodes',
-    RegistrationPage = 'inschrijvingen/pagina',
-    RegistrationGroups = 'inschrijvingen/groepen',
-    BundleDiscounts = 'inschrijvingen/kortingen',
-    RegistrationRecords = 'inschrijvingen/persoonsgegevens',
-    RegistrationFreeContributions = 'inschrijvingen/vrije-bijdrage',
     SingleSignOn = 'sso',
     Packages = 'functionaliteiten',
     PaymentSettings = 'betalingen',
@@ -363,7 +348,6 @@ enum Routes {
     Premises = 'lokalen',
     BalanceNotifications = 'openstaande-bedragen-notificaties',
     Members = 'ledenadministratie',
-    MembersImport = 'leden-importeren',
     Uitpas = 'uitpas',
     OrganizationRegistrationPeriods = 'werkjaren',
     FinancialSupport = 'financiele-ondersteuning',
@@ -374,10 +358,7 @@ enum Routes {
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
-const present = usePresent();
-const buildEditGroupsView = useEditGroupsView();
 const organization = useRequiredOrganization();
-const patchOrganizationPeriod = usePatchOrganizationPeriod();
 const uitpasFeature = useFeatureFlag()('uitpas');
 
 defineRoutes([
@@ -392,12 +373,12 @@ defineRoutes([
     },
     {
         url: Routes.Personalization,
-        component: PersonalizeSettingsView,
+        component: () => PersonalizeSettingsView,
         present: 'popup',
     },
     {
         url: Routes.Privacy,
-        component: PrivacySettingsView,
+        component: () => PrivacySettingsView,
         present: 'popup',
     },
     {
@@ -432,67 +413,6 @@ defineRoutes([
         component: EmailSettingsView,
     },
     {
-        url: Routes.RegistrationPaymentMethods,
-        present: 'popup',
-        component: RegistrationPaymentSettingsView,
-    },
-    {
-        url: Routes.RegistrationPage,
-        present: 'popup',
-        component: RegistrationPageSettingsView,
-    },
-    {
-        url: Routes.RegistrationGroups,
-        present: 'popup',
-        handler: async (options) => {
-            const component = await buildEditGroupsView();
-
-            await present({
-                ...options,
-                components: [component],
-            });
-        },
-    },
-    {
-        url: Routes.BundleDiscounts,
-        present: 'popup',
-        component: BundleDiscountSettingsView,
-        paramsToProps() {
-            return {
-                period: organization.value!.period,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    patch.id = organization.value!.period.id;
-                    await patchOrganizationPeriod(patch);
-                },
-            };
-        },
-    },
-    {
-        url: Routes.RegistrationRecords,
-        present: 'popup',
-        component: RecordsConfigurationView,
-        paramsToProps() {
-            return {
-                inheritedRecordsConfiguration: OrganizationRecordsConfiguration.build({ platform: platform.value }),
-                recordsConfiguration: $organizationManager.value.organization.meta.recordsConfiguration,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) => {
-                    await $organizationManager.value.patch(Organization.patch({
-                        id: $organizationManager.value.organization.id,
-                        meta: OrganizationMetaData.patch({
-                            recordsConfiguration: patch,
-                        }),
-                    }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
-                },
-            };
-        },
-    },
-    {
-        url: Routes.RegistrationFreeContributions,
-        present: 'popup',
-        component: FreeContributionSettingsView,
-    },
-    {
         url: Routes.SingleSignOn,
         present: 'popup',
         component: SSOSettingsView,
@@ -500,7 +420,7 @@ defineRoutes([
     {
         url: Routes.Labs,
         present: 'popup',
-        component: LabsView,
+        component: () => LabsView,
     },
     {
         url: Routes.Premises,
@@ -511,11 +431,6 @@ defineRoutes([
         url: Routes.BalanceNotifications,
         present: 'popup',
         component: BalanceNotificationSettingsView,
-    },
-    {
-        url: Routes.MembersImport,
-        present: 'popup',
-        component: ImportMembersView,
     },
     {
         url: Routes.Uitpas,

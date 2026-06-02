@@ -17,7 +17,7 @@ export function useGlobalRoutes() {
     defineRoutes([
         {
             url: 'reset-password',
-            component: ForgotPasswordResetView,
+            component: () => ForgotPasswordResetView,
             paramsToProps(_params, query?: URLSearchParams) {
                 return {
                     token: query?.get('token') || '',
@@ -74,7 +74,7 @@ export function useGlobalRoutes() {
 
             if (paymentId) {
                 await present(new ComponentWithProperties(PaymentPendingView, {
-                    server: organizationId ? context.value.getOptionalAuthenticatedServerForOrganization(organizationId) :context.value.optionalAuthenticatedServer,
+                    server: organizationId ? context.value.getOptionalAuthenticatedServerForOrganization(organizationId) : context.value.optionalAuthenticatedServer,
                     paymentId,
                     cancel,
                     errorHandler: async function (navigationActions: NavigationActions, error: unknown) {
@@ -94,8 +94,7 @@ export function useGlobalRoutes() {
                                 replace: 100, // autocorrects to all
                                 force: true,
                             });
-                        }
-                        else {
+                        } else {
                             await navigationActions.dismiss({ force: true });
                             new CenteredMessage($t(`%Je`), $t(`%Jf`)).addCloseButton().show();
                         }
