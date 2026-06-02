@@ -12,18 +12,18 @@
             <STList>
                 <STListItem v-for="email in emails" :key="email.id" :selectable="true" class="right-stack" @click="editEmail(email)">
                     <template #left>
-                        <IconContainer icon="email-filled" class="" />
+                        <IconContainer icon="email-filled" :class="email.default ? 'success' : ''" :aside-icon="email.default ? 'success' : ''" />
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ email.name ? email.name : email.email }}
+                        <span>{{ email.name ? email.name : email.email }}</span>
+                        <span v-if="email.default" class="style-tag success">{{ $t('%v6') }}</span>
                     </h3>
                     <p v-if="email.name" class="style-description-small">
                         {{ email.email }}
                     </p>
 
                     <template #right>
-                        <span v-if="email.default" class="style-tag">{{ $t('%v6') }}</span>
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
