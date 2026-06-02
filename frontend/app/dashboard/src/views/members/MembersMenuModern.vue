@@ -1,10 +1,10 @@
 <template>
     <div class="st-menu-modern st-view members-menu">
-        <STNavigationBar :title="$t(`%1EH`)" class="collapsed" />
+        <STNavigationBar :title="$t(`%1EH`)" />
 
         <main>
             <h1 v-if="true" class="adjusted">
-                Leden
+                <span>Leden</span>
             </h1>
 
             <div class="block">
@@ -15,7 +15,7 @@
                         <span class="right">2 / 8</span>
                     </button>
 
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
+                    <button v-if="auth.hasFullAccess()" class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
                         <span class="icon team small" />
                         <span>{{ $t('Alle leden') }}</span>
                     </button>
@@ -47,89 +47,18 @@
                 </div>
             </div>
 
-            <STMenuCategory
-                v-for="category in tree.categories"
-                :id="category.id"
-                :key="category.id"
-                :title="category.settings.name"
-                type="members"
-                :selected="checkRoute(Routes.Category, {properties: {category, period}})"
-                @open="$navigate(Routes.Category, {properties: {category, period}})"
-            >
-                <GroupCategoryBox
-                    :category="category"
-                    :period="period"
-                    :check-route="checkRoute"
-                    :navigate="$navigate"
-                />
-            </STMenuCategory>
+            <GroupCategoryMenuBox :period="period" />
 
-            <STMenuCategory
-                v-if="period.waitingLists.length"
-                id="waiting-lists"
-                :title="$t('Wachtlijsten')"
-                type="members"
-            >
-                <STMenuItem
-                    v-for="group in period.waitingLists"
-                    :id="group.id"
-                    :key="group.id"
-                    :title="group.settings.name.toString()"
-                    :selected="checkRoute(Routes.Group, {properties: {group, period}})"
-                    :right-text="group.settings.registeredMembers !== null ? formatInteger(group.settings.registeredMembers) : null"
-                    @click="$navigate(Routes.Group, {properties: {group, period}})"
-                >
-                    <template #icon>
-                        <GroupAvatar :group="group" :allow-empty="false" />
-                    </template>
-                </STMenuItem>
-            </STMenuCategory>
+            <div v-if="auth.hasFullAccess()" class="container footer">
+                <hr>
 
-            <div v-if="false" class="block cta">
-                <button class="menu-button title button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                    <span>{{ $t('Checklist') }}</span>
-                    <span class="icon triangle-down small" />
-
-                    <span class="right">1 / 4</span>
-                </button>
-
-                <div class="items">
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                        <span class="icon share small" />
-                        <span>{{ $t('Deel je ledenportaal') }}</span>
-                    </button>
-
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                        <span class="icon bank small" />
-                        <span>{{ $t('Betaalmethodes instellen') }}</span>
-                        <span class="right icon circle small" />
-                    </button>
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                        <span class="icon calendar small" />
-                        <span>{{ $t('Werkjaren instellen') }}</span>
-                        <span class="right icon success small primary" />
-                    </button>
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                        <span class="icon group small" />
-                        <span>{{ $t('Onderverdeling instellen') }}</span>
-                        <span class="right icon success small primary" />
-                    </button>
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                        <span class="icon calendar small" />
-                        <span>{{ $t('Werkjaren instellen') }}</span>
-                        <span class="right icon success small primary" />
-                    </button>
-                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Checklist) }" @click="$navigate(Routes.Checklist)">
-                        <span class="icon more-in-circle small" />
-                        <span>{{ $t('Meer') }}</span>
-                    </button>
-                </div>
-            </div>
-
-            <div v-if="auth.hasFullAccess()" class="grouped footer">
-                <hr><button class="menu-button button" type="button" @click="switchPeriod">
-                    <span>{{ period.period.name }}</span>
-                    <span class="icon gray arrow-swap right-icon" />
+                <button class="st-menu-item" type="button" @click="switchPeriod">
+                    <span class="icon date-range" />
+                    <div>
+                        <h3>{{ period.period.prefix }}</h3>
+                        <p>{{ period.period.nameShort }}</p>
+                    </div>
+                    <span class="icon right gray arrow-swap" />
                 </button>
             </div>
         </main>
@@ -137,42 +66,24 @@
 </template>
 
 <script setup lang="ts">
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, typeRoute, useCheckRoute, useNavigate, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent, ContextMenu, ContextMenuItem, Toast } from '@stamhoofd/components';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
-import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
-import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
-import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import { useLoadRecentPeriods } from '@stamhoofd/networking/hooks/useLoadRecentPeriods';
-import { usePatchOrganizationPeriods } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriods';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { Group, GroupCategory, GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { Organization } from '@stamhoofd/structures';
+import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
+import type { OrganizationRegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
 import MembersChecklistView from '../dashboard/settings/MembersChecklistView.vue';
 import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
-import GroupCategoryBox from './GroupCategoryBox.vue';
-import { useSwitchablePeriod } from './useSwitchablePeriod';
+import GroupCategoryMenuBox from './GroupCategoryMenuBox.vue';
 
-const organization = useRequiredOrganization();
 const context = useContext();
 const $navigate = useNavigate();
-const platform = usePlatform();
-const organizationManager = useOrganizationManager();
-const present = usePresent();
 const auth = useAuth();
-const splitViewController = useSplitViewController();
-const patchOrganizationPeriods = usePatchOrganizationPeriods();
-const getPeriods = useLoadRecentPeriods();
 
 const hasFullAccess = computed(() => auth.hasFullAccess());
 
@@ -183,72 +94,9 @@ const tree = computed(() => {
     });
 });
 
-const { period, switchPeriod, openPeriod } = useSwitchablePeriod({
-    onSwitch: async () => {
-        // Make sure we open the first group again
-        if (!splitViewController.value?.shouldCollapse()) {
-            if (showAll.value) {
-                await $navigate(Routes.All, {
-                    properties: {
-                        periodId: period.value.period.id,
-                    },
-                });
-            } else if (tree.value.getAllGroups().length) {
-                await $navigate(Routes.Group, {
-                    properties: {
-                        group: tree.value.getAllGroups()[0],
-                        period: period.value,
-                    },
-                });
-            }
-        }
-    },
-});
-
-const newestPeriod = computed(() => {
-    return platform.value.period;
-});
-
-const canUpgradePeriod = computed(() => {
-    if (STAMHOOFD.userMode === 'organization') {
-        return false;
-    }
-    return organization.value?.period.period.id !== platform.value.period.id && organization.value!.period.period.startDate < platform.value.period.startDate && !platform.value.period.locked;
-});
-
-const canSetDefaultPeriod = computed(() => {
-    if (period.value.id === organization.value!.period.id) {
-        return false;
-    }
-    return (period.value.period.id === platform.value.period.id && organization.value!.period.period.id !== platform.value.period.id && !platform.value.period.locked)
-        || (period.value.period.startDate > organization.value!.period.period.startDate && !period.value.period.locked && (period.value.period.startDate.getTime() < new Date().getTime() + 1000 * 60 * 60 * 24 * 62));
-});
-
-const rootCategory = computed(() => period.value.rootCategory);
-
-const getCategoryIcon = (category: GroupCategoryTree) => {
-    if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {
-        return 'education';
-    }
-
-    if (category.settings.name.toLocaleLowerCase().includes('activiteiten') || category.settings.name.toLocaleLowerCase().includes('kamp') || category.settings.name.toLocaleLowerCase().includes('weekend')) {
-        return 'flag';
-    }
-
-    if (category.settings.name.toLocaleLowerCase().includes('betaling')) {
-        return 'card';
-    }
-
-    if (category.categories.length) {
-        return 'category';
-    }
-
-    return 'group';
-};
-
-const isCategoryDeactivated = (category: GroupCategoryTree) => {
-    return period.value.isCategoryDeactivated(organization.value!, category);
-};
+const organization = useRequiredOrganization();
+const period = computed(() => organization.value.period);
+const navigationController = useNavigationController();
 
 const showAll = computed(() => {
     return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1;
@@ -260,9 +108,57 @@ enum Routes {
     All = 'all',
     Category = 'category',
     Group = 'group',
+    Period = 'Period',
     GroupWithPeriod = 'groupWithPeriod',
     Communication = 'berichten',
 }
+
+defineRoute({
+    url: 'p/@slug',
+    name: Routes.Period,
+    params: {
+        slug: String,
+    },
+    component: (props) => {
+        return new ComponentWithProperties(SplitViewController, {
+            root: AsyncComponent(() => import('./MembersPeriodMenu.vue'), props),
+        });
+    },
+    show: {
+        getCustomShow() {
+            if (!navigationController.value.navigationController) {
+                console.error('Mssing navigationController parent navigation controller');
+                return navigationController.value.push;
+            }
+            return navigationController.value.navigationController.push;
+        },
+    },
+    paramsToProps: async (params) => {
+        let periods: RegistrationPeriodList;
+        try {
+            periods = await fetchPeriods({ shouldRetry: false });
+        } catch (e) {
+            Toast.fromError(e).show();
+            throw e;
+        }
+
+        const period = periods.organizationPeriods.find(p => Formatter.slug(p.period.name) === params.slug);
+
+        if (!period) {
+            throw new Error('Group not found');
+        }
+        return {
+            period,
+        };
+    },
+    propsToParams(props) {
+        return {
+            params: {
+                slug: Formatter.slug(props.period.period.name),
+            },
+        };
+    },
+});
 
 defineRoutes([
     {
@@ -316,109 +212,45 @@ defineRoutes([
                 }
             : undefined,
     },
-    {
-        url: 'categorie/@slug',
-        name: Routes.Category,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default),
-        paramsToProps: (params: { slug: string }) => {
-            const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
-            if (!category) {
-                throw new Error('Category not found');
-            }
-            return {
-                category,
-                period: period.value,
-            };
-        },
-        propsToParams(props) {
-            if (!('category' in props)) {
-                throw new Error('Missing category');
-            }
-            return {
-                params: {
-                    slug: Formatter.slug((props.category as GroupCategory).settings.name),
-                },
-            };
-        },
-    },
-    {
-        url: '@slug',
-        name: Routes.Group,
-        params: {
-            slug: String,
-        },
-        show: 'detail',
-        component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
-        paramsToProps: (params: { slug: string }) => {
-            const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
-            if (!group) {
-                throw new Error('Group not found');
-            }
-            return {
-                group,
-                period: period.value,
-            };
-        },
-        propsToParams(props) {
-            if (!('group' in props)) {
-                throw new Error('Missing group');
-            }
-            return {
-                params: {
-                    slug: Formatter.slug((props.group as Group).settings.name),
-                },
-            };
-        },
-        isDefault: tree.value.getAllGroups().length
-            ? {
-                    properties: {
-                        group: tree.value.getAllGroups()[0],
-                        period: period.value,
-                    },
-                }
-            : undefined,
-    },
 ]);
 
 const checkRoute = useCheckRoute();
+const fetchPeriods = useFetchOrganizationRegistrationPeriods();
 
-async function setDefaultPeriod() {
-    // Patch organization period id
+async function switchPeriod(event: MouseEvent) {
+    let periods: RegistrationPeriodList;
     try {
-        await organizationManager.value.patch(
-            Organization.patch({
-                period: period.value,
-            }),
-        );
-
-        // The period
-        Toast.success($t('%17o', { name: period.value.period.name })).show();
+        periods = await fetchPeriods({ shouldRetry: false });
     } catch (e) {
         Toast.fromError(e).show();
+        return;
     }
-}
 
-async function upgradePeriod() {
-    await openPeriod(platform.value.period);
-}
-
-async function editMe() {
-    if (!rootCategory.value) return;
-
-    await present(PromiseComponent(async () => new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(EditCategoryGroupsView, {
-            category: rootCategory.value,
-            periodId: period.value.id,
-            periods: await getPeriods(),
-            organization: organization.value,
-            saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
-                await patchOrganizationPeriods(patch);
-            },
+    const menu = new ContextMenu([
+        periods.organizationPeriods.map((p) => {
+            return new ContextMenuItem({
+                name: p.period.name,
+                action: async () => {
+                    await $navigate(Routes.Period, {
+                        properties: {
+                            period: p,
+                        },
+                    });
+                    return true;
+                },
+            });
         }),
-    })).setDisplayStyle('popup'));
+        [
+            new ContextMenuItem({
+                name: 'Instellingen',
+                icon: 'settings',
+                action: () => {
+                    // todo
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>

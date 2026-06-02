@@ -1,0 +1,147 @@
+<template>
+    <STMenuCategory
+        v-for="category in tree.categories"
+        :id="category.id"
+        :key="category.id"
+        :title="category.settings.name"
+        type="members"
+        :selected="checkRoute(Routes.Category, {properties: {category, period}})"
+        @open="$navigate(Routes.Category, {properties: {category, period}})"
+    >
+        <GroupCategoryBox
+            :category="category"
+            :period="period"
+            :check-route="checkRoute"
+            :navigate="$navigate"
+        />
+    </STMenuCategory>
+
+    <STMenuCategory
+        v-if="period.waitingLists.length"
+        id="waiting-lists"
+        :title="$t('Wachtlijsten')"
+        type="members"
+    >
+        <STMenuItem
+            v-for="group in period.waitingLists"
+            :id="group.id"
+            :key="group.id"
+            :title="group.settings.name.toString()"
+            :selected="checkRoute(Routes.Group, {properties: {group, period}})"
+            :right-text="group.settings.registeredMembers !== null ? formatInteger(group.settings.registeredMembers) : null"
+            @click="$navigate(Routes.Group, {properties: {group, period}})"
+        >
+            <template #icon>
+                <GroupAvatar :group="group" :allow-empty="false" />
+            </template>
+        </STMenuItem>
+    </STMenuCategory>
+</template>
+
+<script setup lang="ts">
+import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
+import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
+import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { computed } from 'vue';
+import GroupCategoryBox from './GroupCategoryBox.vue';
+
+const props = defineProps<{
+    period: OrganizationRegistrationPeriod;
+}>();
+
+const organization = useRequiredOrganization();
+const context = useContext();
+const $navigate = useNavigate();
+const tree = computed(() => {
+    return props.period.getCategoryTree({
+        permissions: context.value?.organizationPermissions,
+        organization: organization.value!,
+    });
+});
+
+enum Routes {
+    Checklist = 'checklist',
+    Settings = 'settings',
+    All = 'all',
+    Category = 'category',
+    Group = 'group',
+    GroupWithPeriod = 'groupWithPeriod',
+    Communication = 'berichten',
+}
+
+defineRoutes([
+    {
+        url: 'categorie/@slug',
+        name: Routes.Category,
+        params: {
+            slug: String,
+        },
+        show: 'detail',
+        component: async () => ((await import('../dashboard/groups/CategoryView.vue')).default),
+        paramsToProps: (params: { slug: string }) => {
+            const category = tree.value.getAllCategories().find(g => Formatter.slug(g.settings.name) === params.slug);
+            if (!category) {
+                throw new Error('Category not found');
+            }
+            return {
+                category,
+                period: props.period,
+            };
+        },
+        propsToParams(props) {
+            if (!('category' in props)) {
+                throw new Error('Missing category');
+            }
+            return {
+                params: {
+                    slug: Formatter.slug((props.category as GroupCategory).settings.name),
+                },
+            };
+        },
+    },
+    {
+        url: '@slug',
+        name: Routes.Group,
+        params: {
+            slug: String,
+        },
+        show: 'detail',
+        component: async () => ((await import('../dashboard/groups/GroupOverview.vue')).default),
+        paramsToProps: (params: { slug: string }) => {
+            const group = tree.value.getAllGroups().find(g => Formatter.slug(g.settings.name) === params.slug);
+            if (!group) {
+                throw new Error('Group not found');
+            }
+            return {
+                group,
+                period: props.period,
+            };
+        },
+        propsToParams(props) {
+            if (!('group' in props)) {
+                throw new Error('Missing group');
+            }
+            return {
+                params: {
+                    slug: Formatter.slug((props.group as Group).settings.name),
+                },
+            };
+        },
+        isDefault: tree.value.getAllGroups().length
+            ? {
+                    properties: {
+                        group: tree.value.getAllGroups()[0],
+                        period: props.period,
+                    },
+                }
+            : undefined,
+    },
+]);
+
+const checkRoute = useCheckRoute();
+</script>

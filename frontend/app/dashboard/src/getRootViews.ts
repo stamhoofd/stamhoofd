@@ -322,8 +322,10 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         id: 'members',
         icon: 'group',
         name: $t(`%1EH`),
-        component: new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./views/members/MembersMenuModern.vue'), {}),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(SplitViewController, {
+                root: AsyncComponent(() => import('./views/members/MembersMenuModern.vue'), {}),
+            }),
         }),
     });
 

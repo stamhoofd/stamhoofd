@@ -24,6 +24,17 @@ export class RegistrationPeriodBase extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 382 })
     nextPeriodId: string | null = null;
 
+    get prefix() {
+        if (this.customName) {
+            const c = this.customName.split(' ');
+            if (c.length >= 2 && c[0].length > 2 && c[0].match(/^[a-z]+$/i)) {
+                return c[0].trim();
+            }
+        }
+
+        return $t(`%7Z`);
+    }
+
     get name() {
         if (this.customName) {
             return this.customName;
@@ -34,6 +45,11 @@ export class RegistrationPeriodBase extends AutoEncoder {
 
     get nameShort() {
         if (this.customName) {
+            const c = this.customName.split(' ');
+            if (c.length >= 2 && c[0].length > 2 && c[0].match(/^[a-z]+$/i)) {
+                // Remove prefix from prefix getter
+                return c.slice(1).join(' ');
+            }
             return this.customName;
         }
 
