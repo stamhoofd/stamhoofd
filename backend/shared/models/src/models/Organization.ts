@@ -496,6 +496,10 @@ export class Organization extends QueryableModel {
                     token: 'mailDomain',
                     value: this.privateMeta.mailDomain ?? this.privateMeta.pendingMailDomain ?? '',
                 }),
+                Replacement.create({
+                    token: 'organizationName',
+                    value: this.name,
+                }),
             ],
             unsubscribeType: 'marketing',
             fromStamhoofd: true,

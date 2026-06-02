@@ -824,6 +824,14 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
+        if (type.toString().startsWith('OrganizationDrip')) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.organizationName,
+                ExampleReplacements.all.mailDomain,
+            ];
+        }
+
         const sharedReplacements = [
             ...ExampleReplacements.default,
             ExampleReplacements.all.orderPrice,

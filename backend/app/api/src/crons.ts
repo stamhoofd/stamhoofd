@@ -1,9 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
-import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
-import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { SQL } from '@stamhoofd/sql';
 import { registerCron } from '@stamhoofd/crons';
+import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
+import { SQL } from '@stamhoofd/sql';
+import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { checkSettlements } from './helpers/CheckSettlements.js';
 import { PaymentService } from './services/PaymentService.js';
 import { RegistrationService } from './services/RegistrationService.js';
@@ -356,55 +355,6 @@ async function checkReservedUntil() {
     }
 }
 
-let lastDripCheck: Date | null = null;
-let lastDripId = '';
-async function checkDrips() {
-    if (STAMHOOFD.environment === 'development') {
-        return;
-    }
-
-    if (STAMHOOFD.userMode === 'platform') {
-        return;
-    }
-
-    if (lastDripCheck && lastDripCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
-        console.log('Skip Drip check');
-        return;
-    }
-
-    // Only send emails between 8:00 - 18:00 CET
-    const CETTime = Formatter.timeIso(new Date());
-    if ((CETTime < '08:00' || CETTime > '18:00') && STAMHOOFD.environment === 'production') {
-        console.log('Skip Drip check: outside hours');
-        return;
-    }
-
-    const organizations = await Organization.where({ id: { sign: '>', value: lastDripId } }, {
-        limit: STAMHOOFD.environment === 'production' ? 30 : 100,
-        sort: ['id'],
-    });
-
-    if (organizations.length == 0) {
-        // Wait before starting again
-        lastDripId = '';
-        lastDripCheck = new Date();
-        return;
-    }
-
-    console.log('Checking drips...');
-
-    for (const organization of organizations) {
-        console.log(organization.name);
-        try {
-            await organization.checkDrips();
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    lastDripId = organizations[organizations.length - 1].id;
-}
-
 registerCron('checkSettlements', checkSettlements);
 registerCron('checkExpirationEmails', checkExpirationEmails);
 registerCron('checkReservedUntil', checkReservedUntil);
@@ -413,7 +363,6 @@ registerCron('checkWebshopDNS', checkWebshopDNS);
 registerCron('checkPayments', checkPayments);
 registerCron('checkOldPayments', checkOldPayments);
 registerCron('checkOldDirectDebitPayments', checkOldDirectDebitPayments);
-registerCron('checkDrips', checkDrips);
 
 // Register other crons
 import './crons/index.js';

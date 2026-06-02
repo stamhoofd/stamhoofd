@@ -7,6 +7,7 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
+import { isOutside } from './helpers/isOutside.js';
 
 registerCron('invoices', invoices);
 
@@ -22,11 +23,11 @@ async function invoices() {
         return;
     }
 
-    if (!isHoursAgo(12)) {
+    if (isOutside('03:00', '10:00')) {
         return;
     }
 
-    if ((new Date().getHours() > 10 || new Date().getHours() < 3) && STAMHOOFD.environment !== 'development') {
+    if (!isHoursAgo(12)) {
         return;
     }
 
