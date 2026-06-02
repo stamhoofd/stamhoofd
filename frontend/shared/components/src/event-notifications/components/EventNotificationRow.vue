@@ -6,18 +6,20 @@
         <h2 class="style-title-list">
             {{ type.title }}
         </h2>
-        <p class="style-description style-limit-lines pre-wrap">
+        <p class="style-description-small style-limit-lines pre-wrap">
             {{ type.description }}
         </p>
         <template #right>
-            <span v-if="notification" class="hide-smartphone">{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
+            <span v-if="notification" :class="'style-tag ' + EventNotificationStatusHelper.getColor(notification.status)">
+                <span v-if="notification.status === EventNotificationStatus.Pending" class="icon clock tiny " />
+                <span v-if="notification.status === EventNotificationStatus.Rejected" class="icon tiny canceled" />
+                <span v-if="notification.status === EventNotificationStatus.Accepted" class="icon tiny success" />
+                <span v-if="notification.status === EventNotificationStatus.PartiallyAccepted" class="icon tiny partially" />
+
+                <span class="hide-smartphone">{{ capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)) }}</span>
+            </span>
             <span v-else-if="loading" class="style-placeholder-skeleton" />
             <span v-else-if="errors.errorBox" class="icon error" />
-
-            <span v-if="notification && notification.status === EventNotificationStatus.Pending" class="icon clock gray" />
-            <span v-if="notification && notification.status === EventNotificationStatus.Rejected" class="icon error" />
-            <span v-if="notification && notification.status === EventNotificationStatus.Accepted" class="icon success green" />
-            <span v-if="notification && notification.status === EventNotificationStatus.PartiallyAccepted" class="icon partially green" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
