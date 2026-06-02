@@ -76,7 +76,11 @@ const title = computed(() => {
         return props.group.settings.name.toString();
     }
 
-    return $t(`%1EH`);
+    if (props.category) {
+        return props.category.settings.name;
+    }
+
+    return $t(`Alle leden`);
 });
 
 const estimatedRows = computed(() => {
