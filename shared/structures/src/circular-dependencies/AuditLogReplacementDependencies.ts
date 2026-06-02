@@ -1,8 +1,8 @@
 import { AccessRightHelper } from '../AccessRight.js';
 import { CountryHelper } from '../addresses/CountryDecoder.js';
-import { AuditLogReplacementDependencies } from '../AuditLogReplacement.js';
+import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditLogReplacement.js';
 import { STPackageTypeHelper } from '../billing/STPackage.js';
-import { DocumentStatusHelper } from '../Document.js';
+import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate } from '../email/EmailTemplate.js';
 import { getGroupStatusName } from '../Group.js';
 import { uuidToName } from '../helpers/uuidToName.js';
@@ -10,10 +10,10 @@ import { getGenderName } from '../members/Gender.js';
 import { ParentTypeHelper } from '../members/ParentType.js';
 import { OrganizationTypeHelper } from '../OrganizationType.js';
 import { PaymentMethodHelper } from '../PaymentMethod.js';
-import { PaymentStatusHelper } from '../PaymentStatus.js';
+import { PaymentStatus, PaymentStatusHelper } from '../PaymentStatus.js';
 import { getSetupStepName } from '../SetupStepType.js';
 import { UmbrellaOrganizationHelper } from '../UmbrellaOrganization.js';
-import { OrderStatusHelper } from '../webshops/Order.js';
+import { OrderStatus, OrderStatusHelper } from '../webshops/Order.js';
 import { CheckoutMethodTypeHelper } from '../webshops/WebshopMetaData.js';
 
 AuditLogReplacementDependencies.enumHelpers.push(
@@ -39,5 +39,9 @@ AuditLogReplacementDependencies.enumHelpers.push(
     getSetupStepName,
     EmailTemplate.getTypeTitle,
 );
+
+registerAuditLogEnum('OrderStatus', OrderStatus, OrderStatusHelper.getName);
+registerAuditLogEnum('DocumentStatus', DocumentStatus, DocumentStatusHelper.getName);
+registerAuditLogEnum('PaymentStatus', PaymentStatus, PaymentStatusHelper.getName.bind(PaymentStatusHelper));
 
 AuditLogReplacementDependencies.uuidToName = uuidToName;

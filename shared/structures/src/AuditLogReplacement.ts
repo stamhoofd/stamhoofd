@@ -8,8 +8,23 @@ import wordDictionary from './data/audit-log-words.js';
  */
 export const AuditLogReplacementDependencies = {
     enumHelpers: [] as ((key: string) => string)[],
+    enumHelpersByType: new Map<string, (key: string) => string>(),
+    enumTypes: new Map<object, string>(),
     uuidToName: (() => null) as (uuid: string) => string | null,
 };
+
+export function registerAuditLogEnum(type: string, enumObject: object, getName: (key: string) => string) {
+    AuditLogReplacementDependencies.enumHelpersByType.set(type, getName);
+    AuditLogReplacementDependencies.enumTypes.set(enumObject, type);
+}
+
+function isAuditLogEnumValue<T extends string>(enumObject: AuditLogEnumObject<T>, key: string): key is T {
+    return Object.values(enumObject).some(value => value === key);
+}
+
+export function getAuditLogEnumType(enumObject: object): string | undefined {
+    return AuditLogReplacementDependencies.enumTypes.get(enumObject);
+}
 
 export enum AuditLogReplacementType {
     // Base
