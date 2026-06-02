@@ -39,18 +39,26 @@ const logoSrcSet = computed(() => {
 @use '@stamhoofd/scss/base/variables' as *;
 
 .group-avatar {
+    user-select: none;
+
     .letter-logo {
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
-        border-radius: 4px;
+        border-radius: min($border-radius, var(--block-width, 40px) / 4);
         text-align: center;
         background: $color-primary-light;
         color: $color-primary-dark;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);
-        font-size: 10px;
         font-weight: $font-weight-bold;
         position: relative;
+        text-box-trim: trim-both;
+
+        font-size: min(calc(var(--block-width, 40px) / 2.5), 14px);
+
+        &[data-length="1"] {
+            font-size: min(calc(var(--block-width, 40px) / 2), 14px);
+        }
     }
 
     .logo {
@@ -62,7 +70,7 @@ const logoSrcSet = computed(() => {
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
         //margin: -5px 0;
-        border-radius: 4px;
+        border-radius: min($border-radius, var(--block-width, 40px) / 4);
         overflow: hidden;
         //background: $color-background;
         //box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05), 0px 2px 15px rgba(0, 0, 0, 0.05);

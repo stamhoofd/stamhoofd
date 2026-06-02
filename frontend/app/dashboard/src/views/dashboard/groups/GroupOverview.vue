@@ -4,8 +4,14 @@
             <STNavigationBar :title="title" />
 
             <main class="center">
-                <h1 class="style-navigation-title">
-                    {{ title }}
+                <h1 class="style-navigation-title with-icons">
+                    <span class="block-icon">
+                        <GroupAvatar :group="group" class="inline" />
+                    </span>
+
+                    <span>
+                        {{ title }}
+                    </span>
 
                     <span v-if="group.settings.period" class="title-suffix">
                         {{ group.settings.period.nameShort }}
@@ -261,6 +267,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 
 const props = defineProps<{
     group: Group;

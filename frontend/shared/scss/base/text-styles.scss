@@ -175,10 +175,15 @@
 
     padding-bottom: 10px;
 
-    &.with-icons {
+    &.with-icons, &:has(.icon) {
         display: flex;
         align-items: center;
         gap: 5px;
+
+        .block-icon {
+            margin-right: 8px;
+            display: block;
+        }
 
         > *:first-child {
             overflow: hidden;
@@ -244,6 +249,15 @@
         // Increase title size a bit
         font-size: 19px;
         letter-spacing: -0.015em;
+    }
+}
+
+.style-icon-prefix {
+    --block-width: 30px;
+    margin-bottom: 10px;
+
+    @media (max-width: 400px) {
+        margin-bottom: 6px;
     }
 }
 
