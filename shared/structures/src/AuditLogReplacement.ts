@@ -36,6 +36,7 @@ export enum AuditLogReplacementType {
     File = 'File', // id is the source url
     Html = 'Html',
     LongText = 'LongText', // Expandable text
+    Enum = 'Enum', // id is the enum type, value is the enum value
 
     // Objects
     Member = 'Member',
@@ -138,6 +139,14 @@ export class AuditLogReplacement extends AutoEncoder {
         return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.Key });
     }
 
+    static enum(type: string, value: string | number | undefined | null) {
+        if (value === undefined || value === null) {
+            return undefined;
+        }
+
+        return AuditLogReplacement.create({ id: type, value: String(value), type: AuditLogReplacementType.Enum });
+    }
+
     static empty() {
         return AuditLogReplacement.array([]);
     }
@@ -164,6 +173,18 @@ export class AuditLogReplacement extends AutoEncoder {
 
     toString(): string {
         if (this.type === AuditLogReplacementType.Key || this.type === AuditLogReplacementType.EmailTemplate) {
+            return getAuditLogPatchKeyName(this.value);
+        }
+
+        if (this.type === AuditLogReplacementType.Enum) {
+            const helper = this.id ? AuditLogReplacementDependencies.enumHelpersByType.get(this.id) : undefined;
+            if (helper) {
+                const result = helper(this.value);
+                if (result && result !== this.value) {
+                    return result;
+                }
+            }
+
             return getAuditLogPatchKeyName(this.value);
         }
 
