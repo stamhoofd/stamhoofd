@@ -304,7 +304,7 @@ async function createActions(): Promise<void> {
             selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
             includeMove: true,
             includeEdit: !excludeEdit,
-            includeOnlyIfRelevantForWaitingList: true
+            includeOnlyIfRelevantForWaitingList: true,
         }),
     ];
 
@@ -329,6 +329,6 @@ if (waitingList.value) {
         if (groupsLinkedToWaitingList.some(group => value.groupIds.has(group.id))) {
             tableObjectFetcher.reset(true, true);
         }
-    })
+    });
 }
 </script>
