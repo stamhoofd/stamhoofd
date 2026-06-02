@@ -154,8 +154,7 @@ function onClicked() {
     if (oldItem) {
         try {
             cartItem.refresh(props.webshop);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
 
             // Not recoverable
@@ -173,8 +172,7 @@ function onClicked() {
             checkout: props.checkout,
             saveHandler: props.saveHandler,
         })).catch(console.error);
-    }
-    else {
+    } else {
         present({
             components: [
                 new ComponentWithProperties(NavigationController, {
@@ -279,8 +277,7 @@ function formatDateRange(dateRange: ProductDateRange) {
 
             > h3 {
                 padding-top: 5px;
-                @extend .style-title-3;
-                line-height: 1.3;
+                @extend .style-title-2;
                 padding-right: 30px;
                 position: relative;
                 transition: transform 0.2s;

@@ -317,11 +317,13 @@ defineExpose({
             flex-direction: row;
 
             flex-grow: 1;
-            @extend .style-title-3;
+            @extend .style-title-2;
+            line-height: 1;
         }
 
         .input-icon-container {
-            @extend .style-title-3;
+            @extend .style-title-2;
+            line-height: 1;
 
             select {
                 color: $color-dark;

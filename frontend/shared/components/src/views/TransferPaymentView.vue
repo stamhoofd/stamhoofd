@@ -331,7 +331,7 @@ function shouldNavigateAway() {
     return false;
 }
 
-const transferSettings  = computed(() => props.payment.transferSettings ?? props.settings);
+const transferSettings = computed(() => props.payment.transferSettings ?? props.settings);
 const isBelgium = computed(() => props.organization.address.country === Country.Belgium);
 const isStructured = computed(() => transferSettings.value?.type === TransferDescriptionType.Structured);
 const iban = computed(() => transferSettings.value?.iban ?? '');
@@ -359,8 +359,7 @@ async function generateQRCode() {
     try {
         const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default;
         QRCodeUrl.value = await QRCode.toDataURL(qrMessage.value);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         return;
     }
@@ -369,11 +368,9 @@ async function generateQRCode() {
 function helpMe() {
     if (props.type === 'packages') {
         new CenteredMessage($t(`%kI`), $t(`%1UH`)).addCloseButton().show();
-    }
-    else if (props.type === 'order') {
+    } else if (props.type === 'order') {
         new CenteredMessage($t(`%kI`), $t(`%12v`)).addCloseButton().show();
-    }
-    else {
+    } else {
         new CenteredMessage($t(`%kI`), $t(`%12w`)).addCloseButton().show();
     }
 }
@@ -500,7 +497,7 @@ defineExpose({
         }
     }
     td:first-child {
-        @extend .style-title-small;
+        @extend .style-title-3;
         padding: 7px 15px 7px 0;
         white-space: nowrap;
 

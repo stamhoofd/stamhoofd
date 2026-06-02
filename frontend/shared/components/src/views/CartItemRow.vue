@@ -125,7 +125,7 @@ export default class CartItemRow extends VueComponent {
 .cart-item-row {
     h3 {
         padding-top: 5px;
-        @extend .style-title-3;
+        @extend .style-title-2;
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
