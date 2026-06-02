@@ -1,11 +1,5 @@
-import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, MemberDetails, Parent, PaymentStatus } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, BaseOrganization, EventNotification, EventNotificationStatus, MemberDetails, Parent } from '@stamhoofd/structures';
 import { ObjectDiffer } from './ObjectDiffer.js';
-
-class TestPaymentStatusContainer extends AutoEncoder {
-    @field({ decoder: new EnumDecoder(PaymentStatus) })
-    status = PaymentStatus.Created;
-}
 
 describe('ObjectDiffer', () => {
     test('Changing a string field', () => {
@@ -115,11 +109,13 @@ describe('ObjectDiffer', () => {
     });
 
     test('Changing an enum field uses a typed enum replacement', () => {
-        const a = TestPaymentStatusContainer.create({
-            status: PaymentStatus.Created,
+        const a = EventNotification.create({
+            typeId: 'type-id',
+            organization: BaseOrganization.create({ id: 'organization-id' }),
+            status: EventNotificationStatus.Draft,
         });
         const b = a.patch({
-            status: PaymentStatus.Pending,
+            status: EventNotificationStatus.Pending,
         });
 
         expect(ObjectDiffer.diff(a, b)).toEqual([
@@ -127,13 +123,13 @@ describe('ObjectDiffer', () => {
                 type: AuditLogPatchItemType.Changed,
                 key: AuditLogReplacement.key('status'),
                 oldValue: AuditLogReplacement.create({
-                    id: 'PaymentStatus',
-                    value: PaymentStatus.Created,
+                    id: 'EventNotificationStatus',
+                    value: EventNotificationStatus.Draft,
                     type: AuditLogReplacementType.Enum,
                 }),
                 value: AuditLogReplacement.create({
-                    id: 'PaymentStatus',
-                    value: PaymentStatus.Pending,
+                    id: 'EventNotificationStatus',
+                    value: EventNotificationStatus.Pending,
                     type: AuditLogReplacementType.Enum,
                 }),
             }),
