@@ -29,7 +29,7 @@
                                     <h2 class="style-title-list">
                                         {{ $t('%LX') }}
                                     </h2>
-                                    <p class="style-description">
+                                    <p class="style-description-small">
                                         {{ $t('%LY') }}
                                     </p>
                                     <template #right>
@@ -47,7 +47,7 @@
                                     <h2 class="style-title-list">
                                         {{ event.group.waitingList.settings.name }}
                                     </h2>
-                                    <p class="style-description">
+                                    <p class="style-description-small">
                                         {{ $t('%au') }}
                                     </p>
                                     <template #right>
@@ -64,7 +64,7 @@
                                     <h2 class="style-title-list">
                                         {{ $t('%1TY') }}
                                     </h2>
-                                    <p class="style-description">
+                                    <p class="style-description-small">
                                         {{ $t('%1QH', {group: event.group.settings.name.toString()}) }}
                                     </p>
                                     <template #right>
@@ -88,7 +88,7 @@
                                     <h2 class="style-title-list">
                                         {{ $t('%Lb') }}
                                     </h2>
-                                    <p class="style-description">
+                                    <p class="style-description-small">
                                         {{ $t('%av') }}
                                     </p>
                                     <template #right>
@@ -103,7 +103,7 @@
                                     <h2 class="style-title-list">
                                         {{ $t('%aw') }}
                                     </h2>
-                                    <p class="style-description">
+                                    <p class="style-description-small">
                                         {{ $t('%ax') }}
                                     </p>
                                     <template #right>
@@ -118,7 +118,7 @@
                                     <h2 class="style-title-list">
                                         {{ $t('%1DD') }}
                                     </h2>
-                                    <p class="style-description">
+                                    <p class="style-description-small">
                                         {{ $t('%ay') }}
                                     </p>
                                     <template #right>
@@ -230,7 +230,7 @@
                                 <h2 class="style-title-list">
                                     {{ $t('%1Ka') }}
                                 </h2>
-                                <p class="style-description">
+                                <p class="style-description-small">
                                     {{ $t('%1Kb') }}
                                 </p>
                                 <template #right>
