@@ -1,19 +1,23 @@
 <template>
-    <figure class="group-avatar">
-        <div v-if="logoSrc" class="logo">
-            <img :src="logoSrc" :srcset="logoSrcSet">
-        </div>
-        <span v-else-if="allowEmpty" class="icon gray" />
-        <div v-else v-color="group.id" class="letter-logo" :data-length="letters.length">
-            {{ letters }}
-        </div>
-    </figure>
+    <IconContainer v-color="group.id" v-tooltip="group.closed ? $t('Inschrijvingen zijn gesloten via het ledenprotaal') : null" :aside-icon="group.type === GroupType.WaitingList ? 'clock tiny' : (group.closed ? 'dot red stroke' : 'dot green stroke')">
+        <figure class="group-avatar">
+            <div v-if="logoSrc" class="logo">
+                <img :src="logoSrc" :srcset="logoSrcSet">
+            </div>
+            <span v-else-if="allowEmpty" class="icon gray" />
+            <div v-else v-color="group.id" class="letter-logo" :data-length="letters.length">
+                {{ letters }}
+            </div>
+        </figure>
+    </IconContainer>
 </template>
 
 <script lang="ts" setup>
+import { GroupType } from '@stamhoofd/structures';
 import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import IconContainer from './icons/IconContainer.vue';
 
 const props = withDefaults(defineProps<{
     group: Group;
@@ -23,6 +27,11 @@ const props = withDefaults(defineProps<{
 });
 
 const letters = computed(() => Formatter.firstLetters(props.group.settings.name, 2));
+const t = ref(0);
+
+setInterval(() => {
+    t.value += 1;
+}, 1000);
 
 const logoSrc = computed(() => props.group.settings.squarePhoto?.getPathForSize(24, 24));
 

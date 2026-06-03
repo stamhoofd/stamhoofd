@@ -184,9 +184,10 @@
         .block-icon {
             margin-right: 8px;
             display: block;
+            overflow: visible;
         }
 
-        > *:first-child {
+        > span:not([class]) {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
