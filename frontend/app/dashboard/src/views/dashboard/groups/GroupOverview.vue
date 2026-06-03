@@ -170,51 +170,51 @@
                     <hr><h2>{{ $t('%16X') }}</h2>
 
                     <STList>
-                        <STListItem v-if="!isArchive && !isOpen" :selectable="true" @click="openGroup()">
+                        <STListItem v-if="!isArchive && !isOpen" :selectable="true" class="left-center" @click="openGroup()">
+                            <template #left>
+                                <IconContainer icon="power" class="success" />
+                            </template>
                             <h2 class="style-title-list">
                                 {{ $t('%Lh') }}
                             </h2>
-                            <p class="style-description">
+                            <p class="style-description-small">
                                 {{ $t('%Li') }}
                             </p>
+
                             <template #right>
-                                <button type="button" class="button secundary green hide-smartphone">
-                                    <span class="icon power" />
-                                    <span>{{ $t('%28') }}</span>
-                                </button>
-                                <button type="button" class="button icon power only-smartphone" />
+                                <span class="icon arrow-right-small gray" />
                             </template>
                         </STListItem>
 
-                        <STListItem v-if="!isArchive && isOpen" :selectable="true" @click="closeGroup()">
+                        <STListItem v-if="!isArchive && isOpen" class="left-center" :selectable="true" @click="closeGroup()">
+                            <template #left>
+                                <IconContainer icon="power" class="error" />
+                            </template>
+
                             <h2 class="style-title-list">
                                 {{ $t('%Lj') }}
                             </h2>
-                            <p class="style-description">
+                            <p class="style-description-small">
                                 {{ $t('%1QD') }}
                             </p>
                             <template #right>
-                                <button type="button" class="button secundary danger hide-smartphone">
-                                    <span class="icon power" />
-                                    <span>{{ $t('%9b') }}</span>
-                                </button>
-                                <button type="button" class="button icon power only-smartphone" />
+                                <span class="icon arrow-right-small gray" />
                             </template>
                         </STListItem>
 
-                        <STListItem :selectable="true" @click="deleteGroup()">
+                        <STListItem :selectable="true" class="left-center" @click="deleteGroup()">
+                            <template #left>
+                                <IconContainer icon="trash" class="error" />
+                            </template>
+
                             <h2 class="style-title-list">
                                 {{ $t('%Ll') }}
                             </h2>
-                            <p class="style-description">
+                            <p class="style-description-small">
                                 {{ $t('%Lm') }}
                             </p>
                             <template #right>
-                                <button type="button" class="button secundary danger hide-smartphone">
-                                    <span class="icon trash" />
-                                    <span>{{ $t('%CJ') }}</span>
-                                </button>
-                                <button type="button" class="button icon trash only-smartphone" />
+                                <span class="icon arrow-right-small gray" />
                             </template>
                         </STListItem>
                     </STList>
@@ -263,6 +263,7 @@ import { computed, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
+import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 
 const props = defineProps<{
     group: Group;
