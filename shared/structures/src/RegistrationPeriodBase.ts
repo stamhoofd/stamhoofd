@@ -40,6 +40,10 @@ export class RegistrationPeriodBase extends AutoEncoder {
             return this.customName;
         }
 
+        if (Formatter.year(this.endDate) === Formatter.year(this.startDate)) {
+            return $t(`%7Z`) + ' ' + Formatter.year(this.startDate);
+        }
+
         return $t(`%7Z`) + ' ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
 
@@ -51,6 +55,10 @@ export class RegistrationPeriodBase extends AutoEncoder {
                 return c.slice(1).join(' ');
             }
             return this.customName;
+        }
+
+        if (Formatter.year(this.endDate) === Formatter.year(this.startDate)) {
+            return Formatter.year(this.startDate) + '';
         }
 
         return Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
