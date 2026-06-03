@@ -3,7 +3,6 @@ import { SQL } from '@stamhoofd/sql';
 import type { Company } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPricingTypeName, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
-import { GroupBuilder } from '../helpers/GroupBuilder.js';
 import { VATService } from './VATService.js';
 
 export class STPackageService {
@@ -243,15 +242,8 @@ export class STPackageService {
 
         const organization = await Organization.getByID(organizationId);
         if (organization) {
-            const didUseMembers = organization.meta.packages.useMembers && organization.meta.packages.useActivities;
             organization.meta.packages.packages = map;
             await organization.save();
-
-            if (!didUseMembers && organization.meta.packages.useMembers && organization.meta.packages.useActivities) {
-                console.log('Building groups and categories for ' + organization.id);
-                const builder = new GroupBuilder(organization);
-                await builder.build();
-            }
         } else {
             console.error("Couldn't find organization when updating packages " + organizationId);
         }
