@@ -580,11 +580,13 @@ async function archiveGroup() {
 }
 
 async function deleteGroup() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze groep wilt verwijderen?', 'Ja, verwijderen')) {
-        return;
-    }
-
-    if (!await CenteredMessage.confirm('Je kan dit niet ongedaan maken en verliest gegevens van alle bijhorende leden?', 'Ja, verwijderen')) {
+    if (!await CenteredMessage.confirm({
+        title: $t('Ben je zeker dat je de groep ‘{groupName}’ en bijhorende gegevens wilt verwijderen?', { groupName: props.group.settings.name.toString() }),
+        confirmText: $t('Ja, verwijderen'),
+        destructive: true,
+        requireCheckbox: $t('Alle inschrijvingen mee verwijderen'),
+        availabilityDelay: 1_000,
+    })) {
         return;
     }
 
@@ -606,7 +608,7 @@ async function deleteGroup() {
         patch.groups.addDelete(props.group.id);
 
         await patchOrganizationPeriod(patch);
-        new Toast('De groep is verwijderd', 'success green').show();
+        new Toast($t('{groupName} is verwijderd', { groupName: props.group.settings.name.toString() }), 'success green').show();
         await navigationController.value?.pop({ force: true });
     } catch (e) {
         Toast.fromError(e).show();
