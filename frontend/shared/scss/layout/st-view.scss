@@ -117,7 +117,7 @@ body.modern.web-iOS {
                 }
             }
 
-            .popup &, .sheet & {
+            .popup &, .sheet &, .boxed-controller & {
                 --st-view-center-padding: 0px;
                 --st-horizontal-padding: var(--st-view-horizontal-padding);
             }

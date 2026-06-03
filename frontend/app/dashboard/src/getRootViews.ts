@@ -31,7 +31,6 @@ import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { AppType, Webshop } from '@stamhoofd/structures';
 import { AccessRight, Organization, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed, markRaw, onUnmounted, reactive, ref } from 'vue';
-
 import { SimpleError } from '@simonbackx/simple-errors';
 import RedirectView from '@stamhoofd/components/auth/RedirectView.vue';
 import { CheckoutManager } from '../../webshop/src/classes/CheckoutManager';
@@ -309,6 +308,15 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         component: startView,
     });
 
+    const onboardingTab = new TabBarItem({
+        id: 'onboarding',
+        icon: 'home',
+        name: $t(`Start`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: AsyncComponent(() => import('./views/onboarding/OnboardingStartView.vue'), {}),
+        }),
+    });
+
     const membersTab = new TabBarItem({
         id: 'members',
         icon: 'group',
@@ -470,7 +478,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                     tabs: computed(() => {
                         const organization = reactiveSession.organization;
 
-                        const tabs: (TabBarItem | TabBarItemGroup)[] = [
+                        let tabs: (TabBarItem | TabBarItemGroup)[] = [
                         ];
 
                         if (STAMHOOFD.userMode === 'platform') {
@@ -532,6 +540,11 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
                         if (moreTab.items.length > 0) {
                             tabs.push(moreTab);
+                        }
+
+                        if (STAMHOOFD.userMode === 'organization' && !organization!.meta.packages.useMembers && !organization!.meta.packages.useWebshops && !organization!.meta.packages.wasPaid) {
+                            // Override to onboarding
+                            tabs = [onboardingTab];
                         }
 
                         return tabs;
