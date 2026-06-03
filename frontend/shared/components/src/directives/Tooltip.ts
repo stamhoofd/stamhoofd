@@ -1,16 +1,19 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
+import type { ObjectDirective, Ref } from 'vue';
+import { ref } from 'vue';
 import { ModalStackEventBus } from '../..';
 import Tooltip from '../overlays/Tooltip.vue';
-import type { ObjectDirective } from 'vue';
 
-const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedComponent: null | ComponentWithProperties } & { $tooltipBindingValue: string | undefined }, string> = {
+const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedComponent: null | ComponentWithProperties } & { $tooltipBindingValue: Ref<string> | undefined }, string> = {
     beforeMount(el, binding) {
         let isMouseHover = false;
         const displayedComponent: ComponentWithProperties | null = el.$tooltipDisplayedComponent ?? null;
         el.$tooltipDisplayedComponent = displayedComponent;
 
         if (!binding.value || typeof binding.value !== 'string') {
+            // Don't set the ref here, for any visible tooltips to remain visible
+            el.$tooltipBindingValue = undefined;
             return;
         }
 
@@ -19,7 +22,7 @@ const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedCompone
             return;
         }
 
-        el.$tooltipBindingValue = binding.value;
+        el.$tooltipBindingValue = ref(binding.value);
 
         // Add a hover listener
         el.addEventListener(
@@ -30,11 +33,16 @@ const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedCompone
 
                     setTimeout(() => {
                         if (isMouseHover && !el.$tooltipDisplayedComponent) {
+                            if (!el.$tooltipBindingValue || !el.$tooltipBindingValue.value || typeof el.$tooltipBindingValue.value !== 'string') {
+                                // No tooltip set any longer
+                                return;
+                            }
+
                             const rect = el.getBoundingClientRect();
 
                             // Present
                             el.$tooltipDisplayedComponent = new ComponentWithProperties(Tooltip, {
-                                text: el.$tooltipBindingValue ?? binding.value,
+                                text: el.$tooltipBindingValue,
                                 x: rect.left,
                                 y: rect.bottom,
                                 xPlacement: 'right',
@@ -61,9 +69,8 @@ const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedCompone
 
                 if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
                     try {
-                        (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({ force: true });
-                    }
-                    catch (e) {
+                        (el.$tooltipDisplayedComponent.componentInstance() as any)?.hide();
+                    } catch (e) {
                         // Ignore
                         console.error(e);
                     }
@@ -75,15 +82,28 @@ const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedCompone
     },
 
     updated(el, binding) {
-        el.$tooltipBindingValue = binding.value;
+        if (el.$tooltipBindingValue) {
+            el.$tooltipBindingValue.value = binding.value;
+
+            if (!binding.value) {
+                if (el.$tooltipDisplayedComponent) {
+                    try {
+                        (el.$tooltipDisplayedComponent.componentInstance() as any)?.hide();
+                    } catch (e) {
+                        // Ignore
+                        console.error(e);
+                    }
+                }
+                el.$tooltipDisplayedComponent = null;
+            }
+        }
     },
 
     unmounted(el, binding, vnode) {
-        if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
+        if (el.$tooltipDisplayedComponent) {
             try {
-                (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({ force: true });
-            }
-            catch (e) {
+                (el.$tooltipDisplayedComponent.componentInstance() as any)?.hide();
+            } catch (e) {
                 // Ignore
                 console.error(e);
             }
