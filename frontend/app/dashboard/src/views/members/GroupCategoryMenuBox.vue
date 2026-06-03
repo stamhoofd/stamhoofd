@@ -22,33 +22,27 @@
         :title="$t('Wachtlijsten')"
         type="members"
     >
-        <STMenuItem
+        <GroupMenuItem
             v-for="group in period.waitingLists"
-            :id="group.id"
             :key="group.id"
-            :title="group.settings.name.toString()"
-            :selected="checkRoute(Routes.Group, {properties: {group, period}})"
-            :right-text="group.settings.registeredMembers !== null ? formatInteger(group.settings.registeredMembers) : null"
-            @click="$navigate(Routes.Group, {properties: {group, period}})"
-        >
-            <template #icon>
-                <GroupAvatar :group="group" :allow-empty="false" />
-            </template>
-        </STMenuItem>
+            :group="group"
+            :period="period"
+            :check-route="checkRoute"
+            :navigate="$navigate"
+        />
     </STMenuCategory>
 </template>
 
 <script setup lang="ts">
 import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
-import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
-import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import GroupCategoryBox from './GroupCategoryBox.vue';
+import GroupMenuItem from './GroupMenuItem.vue';
 
 const props = defineProps<{
     period: OrganizationRegistrationPeriod;

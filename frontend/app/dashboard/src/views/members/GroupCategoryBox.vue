@@ -20,19 +20,15 @@
         </template>
     </STMenuFolder>
 
-    <STMenuItem
+    <GroupMenuItem
         v-for="group in category.groups"
-        :id="group.id"
         :key="group.id"
-        :title="group.trimmedName(category.settings.name)"
-        :selected="checkRoute(Routes.Group, {properties: {group, period}})"
-        :right-text="group.settings.registeredMembers !== null ? formatInteger(group.settings.registeredMembers) : null"
-        @click="navigate(Routes.Group, {properties: {group, period}})"
-    >
-        <template #icon>
-            <GroupAvatar :group="group" :allow-empty="false" />
-        </template>
-    </STMenuItem>
+        :group="group"
+        :category="category"
+        :period="period"
+        :check-route="checkRoute"
+        :navigate="navigate"
+    />
 
     <STMenuText v-if="category.groups.length == 0 && category.categories.length === 0">
         {{ $t('Deze categorie is leeg') }}
@@ -41,11 +37,10 @@
 
 <script setup lang="ts">
 import type { useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
-import type { GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
 import STMenuFolder from '@stamhoofd/components/menu/STMenuFolder.vue';
 import STMenuText from '@stamhoofd/components/menu/STMenuText.vue';
-import { GroupAvatar } from '@stamhoofd/components';
+import type { GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import GroupMenuItem from './GroupMenuItem.vue';
 
 defineOptions({
     inheritAttrs: false,
