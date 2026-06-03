@@ -144,7 +144,7 @@ import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatch
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, PermissionsResourceType, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
@@ -209,8 +209,7 @@ const isDefault = computed({
                     addAPatch(OrganizationEmail.patch({ id: email.id, default: false }));
                 }
             }
-        }
-        else {
+        } else {
             // Remove changes to default
             for (const email of patchedArray.value) {
                 if (email.id !== props.email.id && email.default === false) {
@@ -287,8 +286,7 @@ async function deleteMe() {
             });
 
             await organizationManager.value.patch(organizationPatch, { owner, shouldRetry: false });
-        }
-        else {
+        } else {
             await platformManager.value.patch(Platform.patch({
                 privateConfig: PlatformPrivateConfig.patch({
                     emails: arr,
@@ -298,8 +296,7 @@ async function deleteMe() {
 
         await pop({ force: true });
         saving.value = false;
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
         saving.value = false;
@@ -362,10 +359,9 @@ async function save() {
             }
 
             if (shouldSavePeriod) {
-                await patchOrganizationPeriod(organizationPeriodPatch);
+                await patchOrganizationPeriod(organization.value.period, organizationPeriodPatch);
             }
-        }
-        else {
+        } else {
             await platformManager.value.patch(Platform.patch({
                 privateConfig: PlatformPrivateConfig.patch({
                     emails: patch.value,
@@ -375,8 +371,7 @@ async function save() {
 
         await pop({ force: true });
         saving.value = false;
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
         saving.value = false;

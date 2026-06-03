@@ -28,7 +28,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import type { Group, OrganizationRegistrationPeriod} from '@stamhoofd/structures';
+import type { Group, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { GroupStatus, SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import GroupReview from './GroupReview.vue';
@@ -64,11 +64,10 @@ async function editGroup(group: Group) {
                         groupId: group.id,
                         iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                            await patchOrganizationPeriod(patch);
+                            await patchOrganizationPeriod(period.value, patch);
                         },
                     });
-                }
-                catch (e) {
+                } catch (e) {
                     Toast.fromError(e).show();
                     throw e;
                 }

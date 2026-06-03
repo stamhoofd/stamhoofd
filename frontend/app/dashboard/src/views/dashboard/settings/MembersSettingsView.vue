@@ -292,7 +292,7 @@ defineRoutes([
                 period: organization.value!.period,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                     patch.id = organization.value!.period.id;
-                    await patchOrganizationPeriod(patch);
+                    await patchOrganizationPeriod(organization.value!.period, patch);
                 },
             };
         },

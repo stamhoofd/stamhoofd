@@ -22,7 +22,7 @@ import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatch
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import type { Organization, RegisterCheckout } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType, Group, GroupPrivateSettings, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { onMounted, ref } from 'vue';
 import { useContext } from '../hooks';
 import CheckboxListItem from '../inputs/CheckboxListItem.vue';
@@ -72,12 +72,10 @@ function toggleShouldRememberConfirmationEmail() {
     if (shouldRememberConfirmationEmail.value) {
         if (props.checkout.sendConfirmationEmail) {
             Toast.success($t('%1Az')).show();
-        }
-        else {
+        } else {
             Toast.success($t('%1B0')).show();
         }
-    }
-    else {
+    } else {
         if (getDefaultConfirmationEnabled() === props.checkout.sendConfirmationEmail) {
             // Cannot really disable
             return;
@@ -85,8 +83,7 @@ function toggleShouldRememberConfirmationEmail() {
 
         if (getDefaultConfirmationEnabled()) {
             Toast.info($t('%1B1')).show();
-        }
-        else {
+        } else {
             Toast.info($t('%1B2')).show();
         }
     }
@@ -104,11 +101,10 @@ async function patchGroup(patch: AutoEncoderPatchType<Group>) {
             id: period.id,
         });
         ppatch.groups.addPatch(patch);
-        await patchOrganizationPeriod(ppatch, {
+        await patchOrganizationPeriod(period, ppatch, {
             organizationId: props.group.organizationId,
         });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }
@@ -139,8 +135,7 @@ async function loadTemplates() {
             decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
         });
         templates.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         // ignore for now
         console.error(e);
     }

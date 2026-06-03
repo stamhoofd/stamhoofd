@@ -237,9 +237,6 @@ export class VueGlobalHelper {
                     $platform: usePlatform(),
                     $app: useAppContext(),
                     $feature: useFeatureFlag(),
-
-                    // Temporary for legacy code
-                    $patchOrganizationPeriod: usePatchOrganizationPeriod(),
                 };
 
                 injectHooks(this as unknown as ComponentPublicInstance, directives);

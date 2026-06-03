@@ -71,8 +71,7 @@ async function start() {
             $t('%17u', { 'werkjaar-2025-2026': newOrganizationPeriod.period.name }),
         ).show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;

@@ -1,10 +1,10 @@
 <template>
     <div class="st-menu-modern st-view members-menu">
-        <STNavigationBar :title="$t(`%1EH`)" />
+        <STNavigationBar :title="props.period ? period.period.name : $t('Leden')" />
 
         <main>
-            <h1 v-if="true" class="adjusted">
-                <span>Leden</span>
+            <h1 class="adjusted">
+                <span>{{ props.period ? period.period.name : $t('Leden') }}</span>
             </h1>
 
             <div class="block">
@@ -30,7 +30,7 @@
 
             <GroupCategoryMenuBox :period="period" />
 
-            <div v-if="auth.hasFullAccess()" class="container footer">
+            <div v-if="!props.period && auth.hasFullAccess()" class="container footer">
                 <hr>
 
                 <button class="st-menu-item" type="button" @click="switchPeriod">
@@ -47,7 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, typeRoute, useCheckRoute, useNavigate, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent, ContextMenu, ContextMenuItem, Toast, useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
@@ -58,10 +59,16 @@ import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/h
 import type { OrganizationRegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
+import GroupTrashView from '../dashboard/groups/GroupTrashView.vue';
 import MembersChecklistView from '../dashboard/settings/MembersChecklistView.vue';
 import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
 import GroupCategoryMenuBox from './GroupCategoryMenuBox.vue';
-import { Request } from '@simonbackx/simple-networking';
+
+const props = withDefaults(defineProps<{
+    period?: OrganizationRegistrationPeriod | null;
+}>(), {
+    period: null,
+});
 
 const context = useContext();
 const $navigate = useNavigate();
@@ -77,7 +84,7 @@ const tree = computed(() => {
 });
 
 const organization = useRequiredOrganization();
-const period = computed(() => organization.value.period);
+const period = computed(() => props.period ?? organization.value.period);
 const navigationController = useNavigationController();
 
 const showAll = computed(() => {
@@ -93,6 +100,7 @@ enum Routes {
     Period = 'Period',
     GroupWithPeriod = 'groupWithPeriod',
     Communication = 'berichten',
+    Trash = 'prullenmand',
 }
 
 defineRoute({
@@ -103,7 +111,7 @@ defineRoute({
     },
     component: (props) => {
         return new ComponentWithProperties(SplitViewController, {
-            root: AsyncComponent(() => import('./MembersPeriodMenu.vue'), props),
+            root: AsyncComponent(() => import('./MembersMenuModern.vue'), props),
         });
     },
     show: {
@@ -169,6 +177,18 @@ defineRoutes([
             ? { }
             : undefined,
     },
+
+    {
+        url: Routes.Trash,
+        show: 'detail',
+        component: GroupTrashView,
+        defaultProperties: () => {
+            return {
+                period: period.value,
+            };
+        },
+    },
+
     {
         url: 'allemaal',
         name: Routes.All,
@@ -291,26 +311,30 @@ const setFeature = useSetFeatureFlag();
 const allActions = computed(() => {
     const list: Action[] = [];
 
-    // Checklist
-    if (STAMHOOFD.userMode === 'organization') {
-        list.push({
-            icon: 'settings',
-            title: $t('Instellen'),
-            route: Routes.Settings,
-            rightText: '1 / 5',
-            hidden: hasFeature('disabled-members-onboarding'),
-            buttons: !hasFeature('disabled-members-onboarding')
-                ? [
-                        new ActionButton({
-                            icon: 'close',
-                            title: $t('Verbergen'),
-                            action: async () => {
-                                await setFeature('disabled-members-onboarding', true);
-                            },
-                        }),
-                    ]
-                : [],
-        });
+    if (!props.period) {
+        // Default period
+
+        // Checklist
+        if (STAMHOOFD.userMode === 'organization') {
+            list.push({
+                icon: 'settings',
+                title: $t('Instellen'),
+                route: Routes.Settings,
+                rightText: '1 / 5',
+                hidden: hasFeature('disabled-members-onboarding'),
+                buttons: !hasFeature('disabled-members-onboarding')
+                    ? [
+                            new ActionButton({
+                                icon: 'close',
+                                title: $t('Verbergen'),
+                                action: async () => {
+                                    await setFeature('disabled-members-onboarding', true);
+                                },
+                            }),
+                        ]
+                    : [],
+            });
+        }
     }
 
     if (auth.hasFullAccess()) {
@@ -321,38 +345,47 @@ const allActions = computed(() => {
         });
     }
 
-    list.push({
-        icon: 'email-filled',
-        title: $t('Berichten'),
-        route: Routes.Communication,
-        hidden: true,
-    });
+    if (!props.period) {
+        list.push({
+            icon: 'email-filled',
+            title: $t('Berichten'),
+            route: Routes.Communication,
+            hidden: true,
+        });
+
+        list.push({
+            icon: 'file-pdf',
+            title: $t('Documenten en attesten'),
+            route: Routes.Settings,
+            hidden: true,
+        });
+
+        list.push({
+            icon: 'history',
+            title: $t('Leden logboek'),
+            route: Routes.Settings,
+            hidden: true,
+        });
+
+        list.push({
+            icon: 'upload',
+            title: $t('Leden importeren'),
+            route: Routes.Settings,
+            hidden: true,
+        });
+
+        list.push({
+            icon: 'reverse',
+            title: $t('Synchroniseren met groepsadmin'),
+            route: Routes.Settings,
+            hidden: true,
+        });
+    }
 
     list.push({
-        icon: 'file-pdf',
-        title: $t('Documenten en attesten'),
-        route: Routes.Settings,
-        hidden: true,
-    });
-
-    list.push({
-        icon: 'history',
-        title: $t('Leden logboek'),
-        route: Routes.Settings,
-        hidden: true,
-    });
-
-    list.push({
-        icon: 'upload',
-        title: $t('Leden importeren'),
-        route: Routes.Settings,
-        hidden: true,
-    });
-
-    list.push({
-        icon: 'reverse',
-        title: $t('Synchroniseren met groepsadmin'),
-        route: Routes.Settings,
+        icon: 'trash',
+        title: $t('Prullenmand'),
+        route: Routes.Trash,
         hidden: true,
     });
 

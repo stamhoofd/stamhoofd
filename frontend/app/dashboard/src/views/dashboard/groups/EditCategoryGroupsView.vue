@@ -76,7 +76,7 @@
             </button>
         </p>
 
-        <div v-if="isRoot && auth.hasFullAccess()" class="container">
+        <div v-if="!$feature('new-members-tab') && isRoot && auth.hasFullAccess()" class="container">
             <hr><h2>{{ $t('%LP') }}</h2>
             <p>{{ $t('%LQ') }}</p>
             <button type="button" class="button text" @click="openGroupTrash">
@@ -102,7 +102,7 @@ import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useDraggableArrayIds } from '@stamhoofd/components/hooks/useDraggableArray.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatchArray } from '@stamhoofd/components/hooks/usePatchArray.ts';
-import type { Organization} from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/structures';
 import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
 import { computed, getCurrentInstance, ref } from 'vue';
@@ -250,8 +250,7 @@ async function save() {
         await props.saveHandler(periodsPatch.value);
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

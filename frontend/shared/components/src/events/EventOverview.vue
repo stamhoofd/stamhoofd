@@ -534,7 +534,7 @@ defineRoute({
             isNew: false,
             showToasts: true,
             saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                const updatedPeriod = await patchOrganizationPeriod(patch, {
+                const updatedPeriod = await patchOrganizationPeriod(period, patch, {
                     organizationId: group.organizationId,
                 });
 

@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { useFetchRegistrationPeriods } from './useFetchRegistrationPeriods';

@@ -10,7 +10,7 @@ export function usePatchOrganizationPeriods() {
     const organization = useOrganization();
     const owner = useRequestOwner();
 
-    return async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>, options: { shouldRetry?: boolean; owner?: any; organizationId?: string | null } = {}) => {
+    return async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>, options: { periods?: OrganizationRegistrationPeriod[]; shouldRetry?: boolean; owner?: any; organizationId?: string | null } = {}) => {
         const response = await (options.organizationId !== undefined && (options.organizationId !== (context.value.organization?.id ?? null)) ? context.value.getAuthenticatedServerForOrganization(options.organizationId) : context.value.authenticatedServer).request({
             method: 'PATCH',
             path: '/organization/registration-periods',
@@ -27,6 +27,16 @@ export function usePatchOrganizationPeriods() {
             // We need to clear because there could be new periods
             organization.value.periods = undefined;
         }
+
+        if (options.periods) {
+            for (const period of options.periods ?? []) {
+                const updated = response.data.find(p => p.id === period.id);
+                if (updated) {
+                    period.deepSet(updated);
+                }
+            }
+        }
+
         return response.data;
     };
 }

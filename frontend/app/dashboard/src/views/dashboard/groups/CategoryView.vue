@@ -286,7 +286,7 @@ function createGroup() {
         groupId: group.id,
         isNew: true,
         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-            await patchOrganizationPeriod(basePatch.patch(patch));
+            await patchOrganizationPeriod(props.period, basePatch.patch(patch));
         },
     });
 

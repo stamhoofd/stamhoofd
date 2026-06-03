@@ -295,16 +295,24 @@ async function upgradePeriod() {
 async function editMe() {
     if (!$rootCategory.value) return;
 
-    await present(PromiseComponent(async () => new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(EditCategoryGroupsView, {
-            category: $rootCategory.value,
-            periodId: period.value.id,
-            periods: await getPeriods(),
-            organization: $organization.value,
-            saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
-                await patchOrganizationPeriods(patch);
-            },
-        }),
-    })).setDisplayStyle('popup'));
+    await present({
+        components: [
+            PromiseComponent(async () => {
+                const periods = await getPeriods();
+                return new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(EditCategoryGroupsView, {
+                        category: $rootCategory.value,
+                        periodId: period.value.id,
+                        periods,
+                        organization: $organization.value,
+                        saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                            await patchOrganizationPeriods(patch, { periods });
+                        },
+                    }),
+                });
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 </script>

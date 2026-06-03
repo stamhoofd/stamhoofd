@@ -40,22 +40,22 @@
 <script lang="ts" setup>
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { GroupCategoryTree} from '@stamhoofd/structures';
+import type { GroupCategoryTree } from '@stamhoofd/structures';
 import { Group, GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
@@ -93,8 +93,7 @@ async function load() {
         });
 
         groups.value = response.data.filter(g => g.periodId === periodId);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     loadingGroups.value = false;
@@ -140,8 +139,7 @@ async function restoreTo(group: Group, cat: GroupCategoryTree) {
         const cleaned = cat.groupIds.filter(id => id !== group.id);
         cleaned.push(group.id);
         catPatch.groupIds = cleaned as any;
-    }
-    else {
+    } else {
         // We need to delete it to fix issues if it is still there
         catPatch.groupIds.addDelete(group.id);
         catPatch.groupIds.addPut(group.id);
@@ -160,9 +158,8 @@ async function restoreTo(group: Group, cat: GroupCategoryTree) {
     }));
 
     try {
-        await patchOrganizationPeriod(patch);
-    }
-    catch (e) {
+        await patchOrganizationPeriod(props.period, patch);
+    } catch (e) {
         Toast.fromError(e).show();
     }
 

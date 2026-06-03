@@ -421,7 +421,7 @@ async function displayEditComponent(component: any, animated = true) {
                         iswNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                             patch.id = props.period.id;
-                            await patchOrganizationPeriod(patch);
+                            await patchOrganizationPeriod(props.period, patch);
                         },
                     });
                 } catch (e) {
@@ -454,7 +454,7 @@ async function editGeneral(animated = true) {
                         groupId: props.group.id,
                         isNew: false,
                         saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                            await patchOrganizationPeriod(patch);
+                            await patchOrganizationPeriod(props.period, patch);
                         },
                     });
                 } catch (e) {
@@ -540,7 +540,7 @@ async function openGroup() {
             id: props.period.id,
         });
         patch.groups.addPatch(p);
-        await patchOrganizationPeriod(patch);
+        await patchOrganizationPeriod(props.period, patch);
         new Toast('De inschrijvingen zijn terug open', 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();
@@ -572,7 +572,7 @@ async function archiveGroup() {
             status: GroupStatus.Archived,
         }));
 
-        await patchOrganizationPeriod(patch);
+        await patchOrganizationPeriod(props.period, patch);
         new Toast('De groep is gearchiveerd', 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();
@@ -607,7 +607,7 @@ async function deleteGroup() {
         });
         patch.groups.addDelete(props.group.id);
 
-        await patchOrganizationPeriod(patch);
+        await patchOrganizationPeriod(props.period, patch);
         new Toast($t('{groupName} is verwijderd', { groupName: props.group.settings.name.toString() }), 'success green').show();
         await navigationController.value?.pop({ force: true });
     } catch (e) {
@@ -673,7 +673,7 @@ async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
         }));
 
         try {
-            await patchOrganizationPeriod(patch);
+            await patchOrganizationPeriod(props.period, patch);
 
             // Manually update this group
             const foundGroup = props.period.groups.find(g => g.id === group.id);
@@ -704,7 +704,7 @@ async function closeGroup() {
             status: GroupStatus.Closed,
         }));
 
-        await patchOrganizationPeriod(patch);
+        await patchOrganizationPeriod(props.period, patch);
         new Toast('De inschrijvingen zijn gesloten', 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();

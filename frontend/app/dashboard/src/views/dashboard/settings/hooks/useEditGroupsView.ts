@@ -19,7 +19,6 @@ export function useEditGroupsView() {
         if (!organization) {
             throw new Error('Organization is not defined');
         }
-        const enableActivities = organization.meta.modules.useActivities;
         const period = organization.period;
 
         if (!period.settings.rootCategory) {
@@ -35,73 +34,51 @@ export function useEditGroupsView() {
                 settings,
             });
 
-            return PromiseComponent(async () => new ComponentWithProperties(EditCategoryGroupsView, {
-                periodId: period.id,
-                periods: (await getPeriods()).map((x) => {
+            return PromiseComponent(async () => {
+                const periods = (await getPeriods()).map((x) => {
                     if (x.id === period.id) {
                         return x.patch(p);
                     }
                     return x;
-                }),
-                category: category,
-                organization,
-                isNew: false,
-                saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
-                    await patchOrganizationPeriods(patch);
-                },
-            }));
+                });
+                return new ComponentWithProperties(EditCategoryGroupsView, {
+                    periodId: period.id,
+                    periods,
+                    category: category,
+                    organization,
+                    isNew: false,
+                    saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                        await patchOrganizationPeriods(patch, { periods });
+                    },
+                });
+            });
         }
 
-        let cat = period.settings.rootCategory;
+        const cat = period.settings.rootCategory;
 
-        let p = OrganizationRegistrationPeriod.patch({
+        const p = OrganizationRegistrationPeriod.patch({
             id: period.id,
         });
 
-        if (!enableActivities) {
-            const full = GroupCategoryTree.build(cat, period);
-            if (full.categories.length === 0) {
-            // Create a new one and open that one instead
-                const defaultCategories = OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(organization.meta.type, organization.meta.umbrellaOrganization ?? undefined);
-                const category = defaultCategories[0] ?? GroupCategory.create({
-                    settings: GroupCategorySettings.create({
-                        name: $t(`%P4`),
-
-                    }),
+        return PromiseComponent(
+            async () => {
+                const periods = (await getPeriods()).map((x) => {
+                    if (x.id === period.id) {
+                        return x.patch(p);
+                    }
+                    return x;
                 });
-                category.groupIds = period.groups.map(g => g.id);
-
-                const settings = OrganizationRegistrationPeriodSettings.patch({});
-                settings.categories.addPut(category);
-
-                const me = GroupCategory.patch({ id: cat.id });
-                me.categoryIds.addPut(category.id);
-                settings.categories.addPatch(me);
-
-                p = p.patch({
-                    settings,
+                return new ComponentWithProperties(EditCategoryGroupsView, {
+                    periodId: period.id,
+                    periods,
+                    category: cat,
+                    organization,
+                    isNew: false,
+                    saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                        await patchOrganizationPeriods(patch, { periods });
+                    },
                 });
-
-                cat = category;
-            }
-            else {
-                cat = full.categories[0];
-            }
-        }
-        return PromiseComponent(async () => new ComponentWithProperties(EditCategoryGroupsView, {
-            periodId: period.id,
-            periods: (await getPeriods()).map((x) => {
-                if (x.id === period.id) {
-                    return x.patch(p);
-                }
-                return x;
-            }),
-            category: cat,
-            organization,
-            isNew: false,
-            saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
-                await patchOrganizationPeriods(patch);
             },
-        }));
+        );
     };
 }

@@ -6,12 +6,12 @@ import type { Formatter } from '@stamhoofd/utility';
 
 export { };
 
-/*declare module 'vue' {
+/* declare module 'vue' {
     import type { CompatVue } from 'vue';
     const Vue: CompatVue;
     export default Vue;
     export * from '@vue/runtime-dom';
-}*/
+} */
 
 declare module 'vue' {
     interface ComponentCustomProperties {
@@ -26,12 +26,6 @@ declare module 'vue' {
         $isPlatform: boolean;
         $t: typeof import('@stamhoofd/frontend-i18n/I18n').I18n.prototype.$t;
         $feature: ReturnType<typeof import('@stamhoofd/components/hooks/useFeatureFlag').useFeatureFlag>;
-
-        /**
-         * @deprecated
-         * Only used for legacy code
-         */
-        $patchOrganizationPeriod: ReturnType<typeof import('@stamhoofd/networking/hooks/usePatchOrganizationPeriod').usePatchOrganizationPeriod>;
 
         $context: SessionContext;
         $organization: Organization;
