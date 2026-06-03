@@ -46,21 +46,6 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         }
         const checkout = request.body;
 
-        // Validate company
-        if (checkout.customer && checkout.customer.company) {
-            // Search company id
-            // this avoids needing to check the VAT number every time
-            const id = checkout.customer.company.id;
-            const foundCompany = organization.meta.companies.find(c => c.id === id);
-
-            if (!foundCompany) {
-                throw new SimpleError({
-                    code: 'invalid_data',
-                    message: $t(`%w1`),
-                });
-            }
-        }
-
         const id = request.params.sellingOrganizationId;
         if (!id) {
             throw new SimpleError({

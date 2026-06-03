@@ -627,13 +627,17 @@ export class PaymentService {
             // Search company id
             // this avoids needing to check the VAT number every time
             const id = checkout.customer.company.id;
-            const foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
+            let foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
 
             if (!foundCompany) {
-                throw new SimpleError({
-                    code: 'invalid_data',
-                    message: $t(`%w1`),
-                });
+                if (payingOrganization.meta.companies.length) {
+                    console.log('existing expected', payingOrganization.meta.companies);
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: $t(`%w1`),
+                    });
+                }
+                foundCompany = payingOrganization.defaultCompanies[0];
             }
 
             if (!checkout.customer.company.equals(foundCompany)) {
