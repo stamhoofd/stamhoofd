@@ -4,7 +4,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel, PermissionsResourceType, PrivateWebshop, ResourcePermissions, Version, WebshopPrivateMetaData } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Context } from '../../../../helpers/Context.js';
@@ -119,7 +119,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         let tried = 0;
-        while (webshop.uri.length > 100 || await Webshop.getByURI(webshop.uri) !== undefined) {
+        while (webshop.uri.length > 100 || isReservedWebshopPathSegment(webshop.uri) || await Webshop.getByURI(webshop.uri) !== undefined) {
             console.log('Webshop already exists', webshop.uri);
 
             let suffix = '';
@@ -189,7 +189,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const original = webshop.domainUri ? webshop.domainUri + '-' : '';
         const possibleSuffixes = [new Date().getFullYear().toString()];
         let tried = 0;
-        while (await Webshop.getByDomain(webshop.domain, webshop.domainUri) !== undefined) {
+        while ((webshop.domainUri && isReservedWebshopPathSegment(webshop.domainUri)) || await Webshop.getByDomain(webshop.domain, webshop.domainUri) !== undefined) {
             console.log('Webshop already exists', webshop.domainUri);
 
             if (tried < possibleSuffixes.length) {

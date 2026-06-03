@@ -4,6 +4,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
+import { isReservedWebshopPathSegment } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';
 
@@ -47,6 +48,14 @@ export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, B
         const webshop = await Webshop.getByID(request.params.id);
         if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
             throw Context.auth.notFoundOrNoAccess();
+        }
+
+        if (isReservedWebshopPathSegment(request.query.uri)) {
+            return new Response(
+                WebshopUriAvailabilityResponse.create({
+                    available: false,
+                }),
+            );
         }
 
         const q = await Webshop.where({

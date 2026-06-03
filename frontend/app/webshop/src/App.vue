@@ -27,7 +27,7 @@ import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import { GetWebshopFromDomainResult } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
-import { GoogleTranslateHelper } from '@stamhoofd/utility';
+import { GoogleTranslateHelper, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 import { ref, watch } from 'vue';
 import { getWebshopRootView } from './getRootView';
 import ChooseWebshopView from './views/ChooseWebshopView.vue';
@@ -45,9 +45,8 @@ const root = new ComponentWithProperties(PromiseView, {
             // Ignore this fixed prefix in our next lookup
             UrlHelper.fixedPrefix = null;
 
-            const ignorePath = ['checkout', 'order', 'cart', 'payment', 'tickets', 'code'];
             const path = UrlHelper.shared.getParts();
-            const usedUri = path[0] && !ignorePath.includes(path[0]) ? path[0] : '';
+            const usedUri = path[0] && !isReservedWebshopPathSegment(path[0]) ? path[0] : '';
             const response = await NetworkManager.server.request({
                 method: 'GET',
                 path: '/webshop-from-domain',
