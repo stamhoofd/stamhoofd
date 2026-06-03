@@ -53,90 +53,15 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="platform.config.defaultAgeGroups.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
+                <STListItem v-for="item in usedSettingItems" :key="item.route" :selectable="true" class="left-center" @click="$navigate(item.route)">
                     <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
+                        <img :src="item.image">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('%3M') }}
+                        {{ item.title }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('%3L') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.membershipTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.PlatformMembershipTypes)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/membership.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%3a') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%3P') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="!$feature('disable-events') && platform.config.eventTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventTypes)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/tent.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%8h') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%5f') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="!$feature('disable-events') && $feature('event-notifications') && platform.config.eventNotificationTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventNotificationTypes)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%CV') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%8c') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.premiseTypes.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/house.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%5g') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%5h') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.organizationLevelRecordsConfiguration.recordCategories.length > 0" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/list.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%89') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%8A') }}
+                        {{ item.description }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -242,99 +167,26 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('%HP') }}</h2>
+            <template v-if="unusedSettingItems.length > 0">
+                <hr><h2>{{ $t('%HP') }}</h2>
 
-            <STList class="illustration-list">
-                <STListItem v-if="platform.config.defaultAgeGroups.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.DefaultAgeGroups)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/group.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%3M') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%3L') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.membershipTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.PlatformMembershipTypes)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/membership.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%3a') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%3P') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="!$feature('disable-events') && platform.config.eventTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventTypes)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/tent.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%8h') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%5f') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="!$feature('disable-events') && $feature('event-notifications') && platform.config.eventNotificationTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.EventNotificationTypes)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/event-notifications.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%CV') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%8c') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.premiseTypes.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/house.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%5g') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%5h') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="platform.config.organizationLevelRecordsConfiguration.recordCategories.length === 0" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRecordConfiguration)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/list.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%89') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%8A') }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                <STList class="illustration-list">
+                    <STListItem v-for="item in unusedSettingItems" :key="item.route" :selectable="true" class="left-center" @click="$navigate(item.route)">
+                        <template #left>
+                            <img :src="item.image">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ item.title }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ item.description }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
 
             <hr><h2>{{ $t('%HQ') }}</h2>
 
@@ -391,6 +243,12 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoute, defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import eventNotificationsIllustration from '@stamhoofd/assets/images/illustrations/event-notifications.svg';
+import groupIllustration from '@stamhoofd/assets/images/illustrations/group.svg';
+import houseIllustration from '@stamhoofd/assets/images/illustrations/house.svg';
+import listIllustration from '@stamhoofd/assets/images/illustrations/list.svg';
+import membershipIllustration from '@stamhoofd/assets/images/illustrations/membership.svg';
+import tentIllustration from '@stamhoofd/assets/images/illustrations/tent.svg';
 import AdminsView from '@stamhoofd/components/admins/AdminsView.vue';
 import SSOSettingsView from '@stamhoofd/components/auth/SSOSettingsView.vue';
 import EditEmailTemplatesView from '@stamhoofd/components/email/EditEmailTemplatesView.vue';
@@ -400,11 +258,13 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegistrationPeriodsView.vue';
 import DataPermissionSettingsView from '@stamhoofd/components/records/DataPermissionSettingsView.vue';
 import FinancialSupportSettingsView from '@stamhoofd/components/records/FinancialSupportSettingsView.vue';
+import { useFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag';
 import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
 import EditResponsibilitiesView from '@stamhoofd/components/responsibilities/EditResponsibilitiesView.vue';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
 import type { OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, Platform, PlatformConfig } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import EditCorporateIdView from './corporate-identity/EditCorporateIdView.vue';
 import EditDefaultAgeGroupsView from './default-age-groups/EditDefaultAgeGroupsView.vue';
 import EditEventNotificationTypesView from './event-notification-types/EditEventNotificationTypesView.vue';
@@ -439,6 +299,60 @@ enum Routes {
 
 const platform = usePlatform();
 const platformManager = usePlatformManager();
+const $feature = useFeatureFlag();
+
+const settingItems = computed(() => [
+    {
+        route: Routes.DefaultAgeGroups,
+        image: groupIllustration,
+        title: $t('%3M'),
+        description: $t('%3L'),
+        visible: true,
+        used: platform.value.config.defaultAgeGroups.length > 0,
+    },
+    {
+        route: Routes.PlatformMembershipTypes,
+        image: membershipIllustration,
+        title: $t('%3a'),
+        description: $t('%3P'),
+        visible: true,
+        used: platform.value.config.membershipTypes.length > 0,
+    },
+    {
+        route: Routes.EventTypes,
+        image: tentIllustration,
+        title: $t('%8h'),
+        description: $t('%5f'),
+        visible: !$feature('disable-events'),
+        used: platform.value.config.eventTypes.length > 0,
+    },
+    {
+        route: Routes.EventNotificationTypes,
+        image: eventNotificationsIllustration,
+        title: $t('%CV'),
+        description: $t('%8c'),
+        visible: !$feature('disable-events') && $feature('event-notifications'),
+        used: platform.value.config.eventNotificationTypes.length > 0,
+    },
+    {
+        route: Routes.Premises,
+        image: houseIllustration,
+        title: $t('%5g'),
+        description: $t('%5h'),
+        visible: true,
+        used: platform.value.config.premiseTypes.length > 0,
+    },
+    {
+        route: Routes.OrganizationRecordConfiguration,
+        image: listIllustration,
+        title: $t('%89'),
+        description: $t('%8A'),
+        visible: true,
+        used: platform.value.config.organizationLevelRecordsConfiguration.recordCategories.length > 0,
+    },
+]);
+const usedSettingItems = computed(() => settingItems.value.filter(item => item.visible && item.used));
+const unusedSettingItems = computed(() => settingItems.value.filter(item => item.visible && !item.used));
 
 defineRoutes([
     {
