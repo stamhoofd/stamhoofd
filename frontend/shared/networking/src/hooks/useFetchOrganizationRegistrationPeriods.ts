@@ -6,6 +6,7 @@ import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedRespon
 import { Sorter } from '@stamhoofd/utility';
 import { useFetchRegistrationPeriods } from './useFetchRegistrationPeriods';
 import { useRequestOwner } from './useRequestOwner';
+import { reactive } from 'vue';
 
 const periodsCache = new Map<string, RegistrationPeriodList>();
 
@@ -62,7 +63,9 @@ export function useFetchOrganizationRegistrationPeriods() {
         });
 
         if (!cache) {
-            periodsCache.set(organization.value.id, list);
+            // Using 'reactive' is required when the periods are not immediately used in vue and not made reactive automatically
+            // it prevents issues where computed properties won't update because they are not using the reactive version of an organization period
+            periodsCache.set(organization.value.id, reactive(list) as unknown as RegistrationPeriodList);
         } else {
             cache.deepSet(list);
         }
