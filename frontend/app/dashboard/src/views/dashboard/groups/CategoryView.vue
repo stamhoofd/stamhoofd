@@ -30,10 +30,9 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-for="subCategory in subCategories" :key="subCategory.id" :selectable="true" @click="openCategory(subCategory)">
+                    <STListItem v-for="subCategory in subCategories" :key="subCategory.id" :selectable="true" @click="openCategory(subCategory)" @contextmenu.prevent="getCategoryActions({period, category: subCategory}).showMenu($event)">
                         <template #left>
-                            <span v-if="subCategory.categories.length" class="icon category" />
-                            <span v-else class="icon category" />
+                            <span class="icon folder" />
                         </template>
 
                         {{ subCategory.settings.name }}
@@ -62,7 +61,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
+                    <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)" @contextmenu.prevent="getGroupActions({group, period}).showMenu($event)">
                         <template #left>
                             <GroupAvatar :group="group" />
                         </template>
@@ -102,25 +101,25 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
-import EditGroupView from '@stamhoofd/components/groups/EditGroupView.vue';
-import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
-import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
-import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
+import { ComponentWithProperties, useNavigationController, useShow } from '@simonbackx/vue-app-navigation';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+import STList from '@stamhoofd/components/layout/STList.vue';
+import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
+import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
+import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
 
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
-import { Group, GroupCategory, GroupCategoryTree, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
+import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { GroupCategoryTree } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { useGroupActions } from '../../members/useGroupActions';
+import { useGroupCategoryActions } from '../../members/useGroupCategoryActions';
+import { useCreateGroupView } from '../settings/hooks/useCreateGroupView';
 import CategoryView from './CategoryView.vue';
 import GroupOverview from './GroupOverview.vue';
 
@@ -132,11 +131,9 @@ const props = defineProps<{
 const errors = useErrors();
 const organization = useRequiredOrganization();
 
-const present = usePresent();
 const show = useShow();
 const navigationController = useNavigationController();
 const context = useContext();
-const patchOrganizationPeriod = usePatchOrganizationPeriod();
 
 // show registrations if maximum registrations in category is 1
 const shouldShowRegistrations = computed(() => props.category.settings.maximumRegistrations === 1);
@@ -261,38 +258,13 @@ function openAll(animated = true) {
     }).catch(console.error);
 }
 
-function createGroup() {
-    const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+const createGroupView = useCreateGroupView();
 
-    const group = Group.create({
-        organizationId: organization.value.id,
-        periodId: props.period.period.id,
-        settings: GroupSettings.create({}),
-        privateSettings: GroupPrivateSettings.create({}),
-        status: GroupStatus.Closed,
-    });
-    const settings = OrganizationRegistrationPeriodSettings.patch({});
-
-    const me = GroupCategory.patch({ id: props.category.id });
-    me.groupIds.addPut(group.id);
-    settings.categories.addPatch(me);
-
-    groups.addPut(group);
-
-    const basePatch = OrganizationRegistrationPeriod.patch({ groups, settings, id: props.period.id });
-
-    const displayedComponent = new ComponentWithProperties(EditGroupView, {
-        period: props.period.patch(basePatch),
-        groupId: group.id,
-        isNew: true,
-        saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-            await patchOrganizationPeriod(props.period, basePatch.patch(patch));
-        },
-    });
-
-    present({
-        components: [displayedComponent],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
+async function createGroup() {
+    return await createGroupView(props.period, props.category);
 }
+
+// Right-click actions on the rows (saved straight to the API)
+const getGroupActions = useGroupActions();
+const getCategoryActions = useGroupCategoryActions();
 </script>

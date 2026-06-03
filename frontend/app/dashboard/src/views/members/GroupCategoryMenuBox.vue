@@ -1,12 +1,13 @@
 <template>
     <STMenuCategory
         v-for="category in tree.categories"
-        :id="category.id"
+        :id="category.isRoot ? null : category.id"
         :key="category.id"
-        :title="category.settings.name"
+        :title="category.isRoot ? null : category.settings.name"
         type="members"
         :selected="checkRoute(Routes.Category, {properties: {category, period}})"
         @open="$navigate(Routes.Category, {properties: {category, period}})"
+        @contextmenu.prevent="getCategoryActions({period, category}).showMenu($event)"
     >
         <GroupCategoryBox
             :category="category"
@@ -14,6 +15,10 @@
             :check-route="checkRoute"
             :navigate="$navigate"
         />
+
+        <template #right>
+            <GroupCategoryMoreButton :category="category" :period="period" />
+        </template>
     </STMenuCategory>
 
     <STMenuCategory
@@ -36,13 +41,14 @@
 <script setup lang="ts">
 import { defineRoute, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
-import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import STMenuCategory from '@stamhoofd/components/menu/STMenuCategory.vue';
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import GroupCategoryBox from './GroupCategoryBox.vue';
+import GroupCategoryMoreButton from './GroupCategoryMoreButton.vue';
 import GroupMenuItem from './GroupMenuItem.vue';
+import { useGroupCategoryActions } from './useGroupCategoryActions';
 
 const props = defineProps<{
     period: OrganizationRegistrationPeriod;
@@ -55,6 +61,7 @@ const tree = computed(() => {
         permissions: context.value?.organizationPermissions,
     });
 });
+const getCategoryActions = useGroupCategoryActions();
 
 enum Routes {
     Checklist = 'checklist',

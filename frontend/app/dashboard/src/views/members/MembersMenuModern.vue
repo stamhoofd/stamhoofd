@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, ContextMenu, ContextMenuItem, Toast, useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components';
+import { AsyncComponent, ContextMenu, ContextMenuItem, EditRegistrationPeriodsView, Toast, useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components';
 import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
@@ -62,6 +62,8 @@ import { computed } from 'vue';
 import GroupTrashView from '../dashboard/groups/GroupTrashView.vue';
 import MembersChecklistView from '../dashboard/settings/MembersChecklistView.vue';
 import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
+import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
+import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
 import GroupCategoryMenuBox from './GroupCategoryMenuBox.vue';
 
 const props = withDefaults(defineProps<{
@@ -93,7 +95,7 @@ const showAll = computed(() => {
 
 enum Routes {
     Checklist = 'checklist',
-    Settings = 'settings',
+    Settings = 'instellingen',
     All = 'all',
     Category = 'category',
     Group = 'group',
@@ -101,6 +103,7 @@ enum Routes {
     GroupWithPeriod = 'groupWithPeriod',
     Communication = 'berichten',
     Trash = 'prullenmand',
+    OrganizationRegistrationPeriods = 'instellingen/werkjaren',
 }
 
 defineRoute({
@@ -169,8 +172,7 @@ defineRoutes([
     },
 
     {
-        url: 'instellingen',
-        name: Routes.Settings,
+        url: Routes.Settings,
         show: 'detail',
         component: MembersSettingsView,
         defaultProperties: () => {
@@ -181,6 +183,18 @@ defineRoutes([
         isDefault: hasFullAccess.value
             ? { }
             : undefined,
+    },
+
+    {
+        // should match after settings
+        url: Routes.OrganizationRegistrationPeriods,
+        present: 'popup',
+        component: EditRegistrationPeriodsView,
+        defaultProperties: () => {
+            return {
+                period: props.period, // don't pass period.value here
+            };
+        },
     },
 
     {
@@ -237,6 +251,7 @@ async function switchPeriod(event: MouseEvent) {
         periods.organizationPeriods.map((p) => {
             return new ContextMenuItem({
                 name: p.period.name,
+                disabled: p.period.id === period.value.id,
                 action: async () => {
                     await $navigate(Routes.Period, {
                         properties: {
@@ -249,10 +264,10 @@ async function switchPeriod(event: MouseEvent) {
         }),
         [
             new ContextMenuItem({
-                name: 'Instellingen',
+                name: 'Werkjaren beheren',
                 icon: 'settings',
-                action: () => {
-                    // todo
+                action: async () => {
+                    await $navigate(Routes.OrganizationRegistrationPeriods);
                     return true;
                 },
             }),
@@ -313,6 +328,10 @@ type Action = {
 const hasFeature = useFeatureFlag();
 const setFeature = useSetFeatureFlag();
 
+const createCategoryView = useCreateCategoryView();
+const createGroupView = useCreateGroupView();
+const rootCategory = computed(() => period.value.settings.rootCategory);
+
 const allActions = computed(() => {
     const list: Action[] = [];
 
@@ -321,8 +340,8 @@ const allActions = computed(() => {
     // Checklist
     if (STAMHOOFD.userMode === 'organization') {
         list.push({
-            icon: 'settings',
-            title: $t('Instellen'),
+            icon: 'success',
+            title: $t('Aan de slag'),
             route: Routes.Settings,
             rightText: '1 / 5',
             hidden: !!props.period || hasFeature('disabled-members-onboarding'),
@@ -339,6 +358,13 @@ const allActions = computed(() => {
                 : [],
         });
     }
+
+    list.push({
+        icon: 'settings',
+        title: $t('Ledenadministratie instellingen'),
+        route: Routes.Settings,
+        hidden: true,
+    });
 
     if (auth.hasFullAccess()) {
         list.push({
@@ -383,6 +409,29 @@ const allActions = computed(() => {
             route: Routes.Settings,
             hidden: true,
         });
+    }
+
+    if (rootCategory.value && auth.canCreateGroupInCategory(rootCategory.value)) {
+        // A root category either holds subcategories or groups directly, never both
+        list.push({
+            icon: 'folder-add',
+            title: $t('Nieuwe categorie'),
+            hidden: true,
+            action: async () => {
+                await createCategoryView(period.value, rootCategory.value!);
+            },
+        });
+
+        if (rootCategory.value.categoryIds.length === 0) {
+            list.push({
+                icon: 'add',
+                title: $t('Nieuwe groep'),
+                hidden: true,
+                action: async () => {
+                    await createGroupView(period.value, rootCategory.value!);
+                },
+            });
+        }
     }
 
     list.push({

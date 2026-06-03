@@ -1,5 +1,5 @@
 <template>
-    <button class="st-menu-item button" type="button" :class="{ selected }" @click="$emit('click', $event)">
+    <button class="st-menu-item button" type="button" :class="{ selected }" v-bind="$attrs" @click="$emit('click', $event)">
         <span class="left">
             <slot name="icon">
                 <span :class="'icon small ' + icon" />

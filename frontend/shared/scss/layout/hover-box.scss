@@ -6,7 +6,7 @@
         }
     }
 
-    .hover-box:hover {
+    .hover-box:hover, .hover-box.focused {
         .hover-show {
             opacity: 1;
         }
@@ -18,4 +18,7 @@
         }
     }
 
+    .hover-show.focused, .focused .hover-show, .hover-show:has(.focused) {
+        opacity: 1;
+    }
 }

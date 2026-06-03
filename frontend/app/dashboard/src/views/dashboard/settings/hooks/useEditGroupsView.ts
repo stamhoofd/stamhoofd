@@ -14,13 +14,13 @@ export function useEditGroupsView() {
     const patchOrganizationPeriods = usePatchOrganizationPeriods();
     const getPeriods = useLoadRecentPeriods();
 
-    return async function (period: OrganizationRegistrationPeriod) {
+    return function (period: OrganizationRegistrationPeriod, category?: GroupCategory) {
         const organization = o.value;
         if (!organization) {
             throw new Error('Organization is not defined');
         }
 
-        if (!period.settings.rootCategory) {
+        if (!category && !period.settings.rootCategory) {
             // Auto restore missing root category
             const category = GroupCategory.create({});
             const settings = OrganizationRegistrationPeriodSettings.patch({
@@ -41,7 +41,7 @@ export function useEditGroupsView() {
                     return x;
                 });
                 return new ComponentWithProperties(EditCategoryGroupsView, {
-                    periodId: period.id,
+                    period: period,
                     periods,
                     category: category,
                     organization,
@@ -53,7 +53,7 @@ export function useEditGroupsView() {
             });
         }
 
-        const cat = period.settings.rootCategory;
+        const cat = category ?? period.settings.rootCategory;
 
         const p = OrganizationRegistrationPeriod.patch({
             id: period.id,
@@ -68,9 +68,12 @@ export function useEditGroupsView() {
                     return x;
                 });
 
-                //
+                if (!periods.find(p => p.id === period.id)) {
+                    throw new Error('Uneexpected missing period in periods list');
+                }
+
                 return new ComponentWithProperties(EditCategoryGroupsView, {
-                    periodId: period.id,
+                    period,
                     periods,
                     category: cat,
                     organization,

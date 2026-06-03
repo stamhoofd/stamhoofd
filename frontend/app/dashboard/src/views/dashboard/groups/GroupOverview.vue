@@ -171,7 +171,7 @@
                     <STList>
                         <STListItem v-if="!isArchive && !isOpen" :selectable="true" class="left-center" @click="openGroup()">
                             <template #left>
-                                <IconContainer icon="power" class="success" />
+                                <IconContainer icon="unlock" class="success" />
                             </template>
                             <h2 class="style-title-list">
                                 {{ $t('%Lh') }}
@@ -187,7 +187,7 @@
 
                         <STListItem v-if="!isArchive && isOpen" class="left-center" :selectable="true" @click="closeGroup()">
                             <template #left>
-                                <IconContainer icon="power" class="error" />
+                                <IconContainer icon="lock" class="error" />
                             </template>
 
                             <h2 class="style-title-list">
@@ -243,15 +243,14 @@ import MemberCountSpan from '@stamhoofd/components/members/components/MemberCoun
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import RegistrationsTableView from '@stamhoofd/components/registrations/RegistrationsTableView.vue';
 import { useGetGroupsById } from '@stamhoofd/networking/hooks/useGetGroups';
 import { useGetPeriods } from '@stamhoofd/networking/hooks/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
-import type { GroupCategoryTree, MemberResponsibility, Organization, PlatformEventType, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
-import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupSettings, GroupStatus, NamedObject, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, PlatformEventType, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, EventMeta, GroupStatus, NamedObject, PermissionLevel, PermissionsResourceType, RichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { countAll, RegistrationInvitationsTableView, useRegistrationInvitationEventListener } from '@stamhoofd/components';
@@ -259,6 +258,7 @@ import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewT
 import { useRegistrationInvitationsObjectFetcher } from '@stamhoofd/components/fetchers/useRegistrationInvitationsObjectFetcher';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
+import { useGroupActions } from '../../members/useGroupActions';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
@@ -514,198 +514,29 @@ async function editEmails(animated = true) {
     });
 }
 
+const groupActions = useGroupActions()(props);
+
 async function openGroup() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je de inschrijvingen wilt openen?', 'Ja, openen')) {
-        return;
-    }
-
     try {
-        const p = Group.patch({
-            id: props.group.id,
-            status: GroupStatus.Open,
-        });
-
-        if (props.group.settings.registrationStartDate && props.group.settings.registrationStartDate.getTime() > Date.now()) {
-            p.settings = GroupSettings.patch({
-                registrationStartDate: null,
-            });
-        }
-
-        if (props.group.settings.registrationEndDate && props.group.settings.registrationEndDate.getTime() <= Date.now()) {
-            p.settings = GroupSettings.patch({
-                registrationEndDate: null,
-            });
-        }
-        const patch = OrganizationRegistrationPeriod.patch({
-            id: props.period.id,
-        });
-        patch.groups.addPatch(p);
-        await patchOrganizationPeriod(props.period, patch);
-        new Toast('De inschrijvingen zijn terug open', 'success green').show();
-    } catch (e) {
-        Toast.fromError(e).show();
-    }
-}
-
-async function archiveGroup() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze groep wilt archiveren?', 'Ja, archiveren')) {
-        return;
-    }
-
-    try {
-        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
-
-        for (const category of props.period.settings.categories) {
-            if (category.groupIds.includes(props.group.id)) {
-                const catPatch = GroupCategory.patch({ id: category.id });
-                catPatch.groupIds.addDelete(props.group.id);
-                settingsPatch.categories.addPatch(catPatch);
-            }
-        }
-
-        const patch = OrganizationRegistrationPeriod.patch({
-            id: props.period.id,
-            settings: settingsPatch,
-        });
-        patch.groups.addPatch(Group.patch({
-            id: props.group.id,
-            status: GroupStatus.Archived,
-        }));
-
-        await patchOrganizationPeriod(props.period, patch);
-        new Toast('De groep is gearchiveerd', 'success green').show();
-    } catch (e) {
-        Toast.fromError(e).show();
-    }
-}
-
-async function deleteGroup() {
-    if (!await CenteredMessage.confirm({
-        title: $t('Ben je zeker dat je de groep ‘{groupName}’ en bijhorende gegevens wilt verwijderen?', { groupName: props.group.settings.name.toString() }),
-        confirmText: $t('Ja, verwijderen'),
-        destructive: true,
-        requireCheckbox: $t('Alle inschrijvingen mee verwijderen'),
-        availabilityDelay: 1_000,
-    })) {
-        return;
-    }
-
-    try {
-        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
-
-        for (const category of props.period.settings.categories) {
-            if (category.groupIds.includes(props.group.id)) {
-                const catPatch = GroupCategory.patch({ id: category.id });
-                catPatch.groupIds.addDelete(props.group.id);
-                settingsPatch.categories.addPatch(catPatch);
-            }
-        }
-
-        const patch = OrganizationRegistrationPeriod.patch({
-            id: props.period.id,
-            settings: settingsPatch,
-        });
-        patch.groups.addDelete(props.group.id);
-
-        await patchOrganizationPeriod(props.period, patch);
-        new Toast($t('{groupName} is verwijderd', { groupName: props.group.settings.name.toString() }), 'success green').show();
-        await navigationController.value?.pop({ force: true });
-    } catch (e) {
-        Toast.fromError(e).show();
-    }
-}
-
-const allCategories = computed(() => organization.value ? organization.value.getCategoryTree({ admin: true, permissions: auth.permissions }).getAllCategories().filter(c => c.categories.length === 0) : []);
-
-async function restoreGroup(event: MouseEvent) {
-    if (allCategories.value.length === 1) {
-        await unarchiveGroupTo(props.group, allCategories.value[0]);
-        return;
-    }
-
-    const menu = new ContextMenu([
-        allCategories.value.map(cat =>
-            new ContextMenuItem({
-                name: cat.settings.name,
-                rightText: cat.groupIds.length + '',
-                action: () => {
-                    unarchiveGroupTo(props.group, cat).catch(console.error);
-                    return true;
-                },
-            }),
-        ),
-    ]);
-    await menu.show({ clickEvent: event });
-}
-
-async function unarchiveGroupTo(group: Group, cat: GroupCategoryTree) {
-    if (!await CenteredMessage.confirm(`${group.settings.name.toString()} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten')) {
-        return;
-    }
-
-    const wasArchive = isArchive.value;
-
-    try {
-        const settingsPatch = OrganizationRegistrationPeriodSettings.patch({});
-        const catPatch = GroupCategory.patch({ id: cat.id });
-
-        if (cat.groupIds.filter(id => id === group.id).length > 1) {
-            // Not fixable, we need to set the ids manually
-            const cleaned = cat.groupIds.filter(id => id !== group.id);
-            cleaned.push(group.id);
-            catPatch.groupIds = cleaned as any;
-        } else {
-            // We need to delete it to fix issues if it is still there
-            catPatch.groupIds.addDelete(group.id);
-            catPatch.groupIds.addPut(group.id);
-        }
-
-        settingsPatch.categories.addPatch(catPatch);
-
-        const patch = OrganizationRegistrationPeriod.patch({
-            id: props.period.id,
-            settings: settingsPatch,
-        });
-
-        patch.groups.addPatch(Group.patch({
-            id: group.id,
-            status: GroupStatus.Closed,
-        }));
-
-        try {
-            await patchOrganizationPeriod(props.period, patch);
-
-            // Manually update this group
-            const foundGroup = props.period.groups.find(g => g.id === group.id);
-            if (foundGroup) {
-                // Bit ugly, but only reliable way
-                props.group.set(foundGroup);
-            }
-        } catch (e) {
-            Toast.fromError(e).show();
-        }
-        new Toast(wasArchive ? 'De inschrijvingsgroep is teruggezet' : 'De inschrijvingen zijn gesloten', 'success green').show();
+        await groupActions.openGroup();
     } catch (e) {
         Toast.fromError(e).show();
     }
 }
 
 async function closeGroup() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je de inschrijvingen wilt sluiten?', 'Ja, sluiten')) {
-        return;
-    }
-
     try {
-        const patch = OrganizationRegistrationPeriod.patch({
-            id: props.period.id,
-        });
-        patch.groups.addPatch(Group.patch({
-            id: props.group.id,
-            status: GroupStatus.Closed,
-        }));
+        await groupActions.closeGroup();
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+}
 
-        await patchOrganizationPeriod(props.period, patch);
-        new Toast('De inschrijvingen zijn gesloten', 'success green').show();
+async function deleteGroup() {
+    try {
+        if (await groupActions.deleteGroup()) {
+            await navigationController.value?.pop({ force: true });
+        }
     } catch (e) {
         Toast.fromError(e).show();
     }

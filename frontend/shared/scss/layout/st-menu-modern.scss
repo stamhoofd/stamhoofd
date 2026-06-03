@@ -82,7 +82,7 @@
                 --saved-color-current-background-shade-darker: #{$color-background-shade-4};
             }
 
-            .split-view-controller[data-has-detail="true"] > .master &.selected  {
+            .split-view-controller[data-has-detail="true"] > .master &.selected, &.active, &.focused, &:active  {
                 background-color: $color-background-shade-darker-darker;
                 color: $color-darkest;
 
@@ -177,7 +177,7 @@
 
 
         > .block {
-            margin: 15px 0;
+            margin: 5px 0;
         }
 
         .block {

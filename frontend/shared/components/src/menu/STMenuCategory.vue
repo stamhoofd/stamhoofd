@@ -1,8 +1,12 @@
 <template>
     <div class="block">
-        <button v-if="id ?? title" class="hover-box st-menu-item title button" type="button" :class="{ selected }" @click="$emit('open', $event)">
+        <button v-if="id ?? title" class="hover-box st-menu-item title button" type="button" :class="{ selected }" v-bind="$attrs" @click="$emit('open', $event)">
             <span>{{ title }}</span>
             <button v-if="id" type="button" class="icon button triangle-down rot tiny" :class="{rot90: collapsed.isCollapsed(id)}" @click.stop="collapsed.toggle(id)" />
+
+            <span class="right hover-show">
+                <slot name="right" />
+            </span>
         </button>
 
         <div v-if="!id || !collapsed.isCollapsed(id)" class="items">

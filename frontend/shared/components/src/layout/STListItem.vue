@@ -388,7 +388,7 @@ button.st-list-item {
             }
         }
 
-        &:active, &.hoverable:active {
+        &:active, &.hoverable:active, &.active, &.focused {
             &:before {
                 opacity: 1;
                 transition: none;

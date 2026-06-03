@@ -161,8 +161,8 @@ defineRoutes([
     {
         url: Routes.RegistrationGroups,
         present: 'popup',
-        component: async () => {
-            return await buildEditGroupsView();
+        component: () => {
+            return buildEditGroupsView(organization.value!.period);
         },
     },
     {

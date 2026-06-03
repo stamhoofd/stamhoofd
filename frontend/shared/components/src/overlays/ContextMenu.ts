@@ -42,6 +42,8 @@ export class ContextMenu {
      */
     preventDefault = false;
 
+    focusElement: HTMLElement | null = null;
+
     items: ContextMenuItem[][];
 
     constructor(items: ContextMenuItem[][]) {
@@ -89,6 +91,14 @@ export class ContextMenu {
 
         const component = position.component;
         delete position.component;
+
+        if (position.button) {
+            this.focusElement = position.button;
+        } else {
+            if (position.clickEvent?.currentTarget) {
+                this.focusElement = (position.clickEvent?.currentTarget as HTMLElement) ?? null;
+            }
+        }
 
         const menuComponent = new ComponentWithProperties(GeneralContextMenuView, {
             menu: this,

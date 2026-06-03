@@ -5,6 +5,7 @@
         :selected="checkRoute(Routes.Group, {properties: {group, period}})"
         :right-text="group.settings.registeredMembers !== null ? formatInteger(group.settings.registeredMembers) : null"
         @click="navigate(Routes.Group, {properties: {group, period}})"
+        @contextmenu.prevent="showMenu($event)"
     >
         <template #icon>
             <GroupAvatar :group="group" :allow-empty="false" />
@@ -17,6 +18,7 @@ import type { useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation'
 import { GroupAvatar } from '@stamhoofd/components';
 import STMenuItem from '@stamhoofd/components/menu/STMenuItem.vue';
 import type { Group, GroupCategory, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { useGroupActions } from './useGroupActions';
 
 enum Routes {
     Category = 'category',
@@ -40,4 +42,7 @@ const props = withDefaults(
 defineEmits<{
     open: [value: MouseEvent];
 }>();
+
+const { showMenu } = useGroupActions()(props);
+
 </script>

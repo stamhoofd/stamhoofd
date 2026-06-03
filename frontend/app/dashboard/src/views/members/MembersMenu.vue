@@ -301,7 +301,7 @@ async function editMe() {
                 return new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(EditCategoryGroupsView, {
                         category: $rootCategory.value,
-                        periodId: period.value.id,
+                        period: period.value,
                         periods,
                         organization: $organization.value,
                         saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {

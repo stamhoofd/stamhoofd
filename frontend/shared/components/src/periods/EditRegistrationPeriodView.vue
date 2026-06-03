@@ -103,8 +103,7 @@ const save = async () => {
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -127,8 +126,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -140,8 +138,7 @@ const customName = computed({
     set: (value: string) => {
         if (!value || value.trim().length === 0) {
             addPatch({ customName: null });
-        }
-        else {
+        } else {
             addPatch({ customName: value });
         }
     },

@@ -140,6 +140,21 @@ export class GroupCategory extends AutoEncoder {
     getDiffName() {
         return this.settings.name;
     }
+
+    get isRoot() {
+        return this.id === 'root';
+    }
+
+    /**
+     * Returns the display name of this category. The root category has no name of its own,
+     * so we return a sensible default based on whether it holds subcategories or only groups.
+     */
+    getName(): string {
+        if (this.isRoot && !this.settings.name) {
+            return this.categoryIds.length > 0 ? $t('Hoofdcategorie') : $t('Leeftijdsgroepen');
+        }
+        return this.settings.name || $t('Naamloos');
+    }
 }
 
 export class GroupCategoryTree extends GroupCategory {

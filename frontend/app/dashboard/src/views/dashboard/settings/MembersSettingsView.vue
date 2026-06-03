@@ -174,18 +174,6 @@
                 <h2>{{ $t('Acties') }}</h2>
 
                 <STList>
-                    <STListItem v-if="!$isPlatform" v-copyable="organization.registerUrl" :selectable="true" class="left-center">
-                        <template #left>
-                            <IconContainer icon="link" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%az') }}
-                        </h2>
-                        <div class="option">
-                            <input class="input" :value="organization.registerUrl" readonly>
-                        </div>
-                    </STListItem>
-
                     <STListItem v-copyable="organization.registerUrl" :selectable="true" class="left-center" @click="$navigate(Routes.MembersImport)">
                         <template #left>
                             <IconContainer icon="upload" />
@@ -274,8 +262,8 @@ defineRoutes([
     {
         url: Routes.RegistrationGroups,
         present: 'popup',
-        component: async () => {
-            return await buildEditGroupsView(period.value);
+        component: () => {
+            return buildEditGroupsView(period.value);
         },
     },
     {

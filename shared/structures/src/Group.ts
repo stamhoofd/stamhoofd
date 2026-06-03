@@ -166,9 +166,12 @@ export class Group extends AutoEncoder {
     }
 
     trimmedName(categoryName: string) {
-        let name = this.settings.name.toString();
+        const name = this.settings.name.toString();
         if (name.toLocaleLowerCase().startsWith(categoryName.toLocaleLowerCase())) {
-            name = Formatter.capitalizeFirstLetter(Formatter.unwrapLeadingParentheses(name.slice(categoryName.length).trim()));
+            const cname = Formatter.capitalizeFirstLetter(Formatter.unwrapLeadingParentheses(name.slice(categoryName.length).trim()));
+            if (cname.length) {
+                return cname;
+            }
         }
 
         return name;

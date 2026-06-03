@@ -25,8 +25,8 @@
     </ContextMenuView>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script setup lang="ts">
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue';
 
 import Checkbox from '../inputs/Checkbox.vue';
 import type { ContextMenu, ContextMenuItem } from './ContextMenu';
@@ -34,27 +34,49 @@ import ContextMenuItemView from './ContextMenuItemView.vue';
 import ContextMenuLine from './ContextMenuLine.vue';
 import ContextMenuView from './ContextMenuView.vue';
 
-@Component({
-    components: {
-        ContextMenuView,
-        ContextMenuItemView,
-        ContextMenuLine,
-        Checkbox,
-    },
-})
-export default class GeneralContextMenuView extends VueComponent {
-    @Prop({ required: false })
+const props = defineProps<{
     menu: ContextMenu;
+}>();
 
-    handleAction(item: ContextMenuItem) {
-        if (!item.action || item.disabled) {
-            return;
-        }
-        item.action.call(item);
+const contextMenuView = ref<InstanceType<typeof ContextMenuView> | null>(null);
+
+function handleAction(item: ContextMenuItem) {
+    if (!item.action || item.disabled) {
+        return;
     }
+    item.action.call(item);
+}
 
-    pop(popParents = false) {
-        this.$refs.contextMenuView.pop(popParents);
+function pop(popParents = false) {
+    contextMenuView.value?.pop(popParents);
+}
+
+function addFocusClass() {
+    const target = props.menu.focusElement;
+    if (target) {
+        target.classList.add('focused');
     }
 }
+
+function removeFocusClass() {
+    const target = props.menu.focusElement;
+    if (target) {
+        target.classList.remove('focused');
+    }
+}
+
+onMounted(() => {
+    addFocusClass();
+});
+onActivated(() => {
+    addFocusClass();
+});
+onDeactivated(() => {
+    removeFocusClass();
+});
+onBeforeUnmount(() => {
+    removeFocusClass();
+});
+
+defineExpose({ pop });
 </script>

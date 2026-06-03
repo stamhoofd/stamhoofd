@@ -7,6 +7,7 @@
         :title="subcategory.settings.name"
         :selected="checkRoute(Routes.Category, {properties: {category: subcategory, period}})"
         @open="navigate(Routes.Category, {properties: {category: subcategory, period}})"
+        @contextmenu.prevent="getCategoryActions({period, category: subcategory}).showMenu($event)"
     >
         <GroupCategoryBox
             :category="subcategory"
@@ -16,7 +17,7 @@
         />
 
         <template #right>
-            <button type="button" class="icon button small right more-in-circle" />
+            <GroupCategoryMoreButton :category="subcategory" :period="period" />
         </template>
     </STMenuFolder>
 
@@ -41,6 +42,8 @@ import STMenuFolder from '@stamhoofd/components/menu/STMenuFolder.vue';
 import STMenuText from '@stamhoofd/components/menu/STMenuText.vue';
 import type { GroupCategoryTree, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import GroupMenuItem from './GroupMenuItem.vue';
+import GroupCategoryMoreButton from './GroupCategoryMoreButton.vue';
+import { useGroupCategoryActions } from './useGroupCategoryActions';
 
 defineOptions({
     inheritAttrs: false,
@@ -66,6 +69,8 @@ const props = withDefaults(
 defineEmits<{
     open: [value: MouseEvent];
 }>();
+
+const getCategoryActions = useGroupCategoryActions();
 
 function getCategoryIcon(category: GroupCategoryTree) {
     if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {
