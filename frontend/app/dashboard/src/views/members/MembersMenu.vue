@@ -109,7 +109,6 @@ const getPeriods = useLoadRecentPeriods();
 const tree = computed(() => {
     return period.value.getCategoryTree({
         permissions: $context.value?.organizationPermissions,
-        organization: $organization.value!,
     });
 });
 

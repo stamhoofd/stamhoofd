@@ -44,7 +44,6 @@ const period = computed(() => $organization.value!.period);
 
 const tree = computed(() => period.value?.getCategoryTree({
     permissions: auth.permissions,
-    organization: $organization.value!,
     maxDepth: 1,
     smartCombine: true,
 }));

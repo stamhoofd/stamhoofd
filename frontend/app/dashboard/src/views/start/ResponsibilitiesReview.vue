@@ -38,9 +38,9 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useVisibilityChange } from '@stamhoofd/components/hooks/useVisibilityChange.ts';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
-import type { Group, MemberResponsibility, Organization, PlatformMember} from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, Organization, PlatformMember } from '@stamhoofd/structures';
 import { GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponseDecoder, PlatformFamily, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
 import ResponsibilityReview from './ResponsibilityReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
@@ -71,7 +71,6 @@ const groups = computed(() => {
     if (!organization) return [];
     return organization.period.getCategoryTree({
         permissions: auth.permissions,
-        organization,
         maxDepth: 1,
         smartCombine: true,
     }).getAllGroups();
@@ -105,8 +104,7 @@ const rowCategories = computed(() => {
 
         if (isRequired) {
             requiredRows.push(row);
-        }
-        else {
+        } else {
             optionalRows.push(row);
         }
     }
@@ -224,8 +222,7 @@ function filterValidMembers(members: PlatformMember[], responsibility: MemberRes
     for (const member of members) {
         if (isValidResponsibility(member, responsibility, organization)) {
             validMembers.push(member);
-        }
-        else {
+        } else {
             invalidMembers.push(member);
         }
     }
@@ -306,8 +303,7 @@ function getProgress(row: RowData): { count?: number; progress?: number; total?:
     else if (maximumMembers !== null && count + (invalidMembers?.length ?? 0) > maximumMembers) {
         count = count + (invalidMembers?.length ?? 0);
         total = maximumMembers;
-    }
-    else {
+    } else {
         // other cases: show only count
         return { count };
     }

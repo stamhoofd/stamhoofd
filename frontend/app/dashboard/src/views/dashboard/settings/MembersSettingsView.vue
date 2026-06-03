@@ -1,6 +1,6 @@
 <template>
     <div id="members-settings-view" class="st-view background">
-        <STNavigationBar :title="$t(`Leden`)">
+        <STNavigationBar :title="props.period ? props.period.period.name : $t('Ledenadministratie')">
             <template #right>
                 <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
                     <span class="icon external" />
@@ -11,12 +11,12 @@
 
         <main class="center force">
             <h1>
-                {{ $t('Ledenadministratie instellingen') }}
+                {{ props.period ? props.period.period.name : $t('Ledenadministratie instellingen') }}
             </h1>
 
             <BillingWarningBox filter-types="members" />
 
-            <template v-if="!$isPlatform">
+            <template v-if="!props.period && !$isPlatform">
                 <STInputBox class="max" :title="$t('Link naar ledenportaal')">
                     <div v-copyable="organization.registerUrl" v-tooltip="$t('Kopiëren')" class="input-with-buttons">
                         <div>
@@ -45,23 +45,7 @@
             </template>
 
             <STList class="illustration-list">
-                <STListItem v-if="!isPlatform && false" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationPage)">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/laptop.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%On') }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ $t('%Oo') }}
-                    </p>
-
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.RegistrationPaymentMethods)">
+                <STListItem v-if="!props.period" :selectable="true" class="left-center" @click="$navigate(Routes.RegistrationPaymentMethods)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                     </template>
@@ -75,7 +59,7 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
-                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRegistrationPeriods)">
+                <STListItem v-if="!props.period && !isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRegistrationPeriods)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
                     </template>
@@ -122,7 +106,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationRecords)">
+                <STListItem v-if="!props.period" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationRecords)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/health-data.svg">
                     </template>
@@ -138,7 +122,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.FinancialSupport)">
+                <STListItem v-if="!props.period && !isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.FinancialSupport)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                     </template>
@@ -153,7 +137,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
+                <STListItem v-if="!props.period && !isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
@@ -168,7 +152,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationFreeContributions)">
+                <STListItem v-if="!props.period" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.RegistrationFreeContributions)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                     </template>
@@ -185,35 +169,37 @@
                 </STListItem>
             </STList>
 
-            <hr>
-            <h2>{{ $t('Acties') }}</h2>
+            <template v-if="!props.period">
+                <hr>
+                <h2>{{ $t('Acties') }}</h2>
 
-            <STList>
-                <STListItem v-if="!$isPlatform" v-copyable="organization.registerUrl" :selectable="true" class="left-center">
-                    <template #left>
-                        <IconContainer icon="link" />
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('%az') }}
-                    </h2>
-                    <div class="option">
-                        <input class="input" :value="organization.registerUrl" readonly>
-                    </div>
-                </STListItem>
+                <STList>
+                    <STListItem v-if="!$isPlatform" v-copyable="organization.registerUrl" :selectable="true" class="left-center">
+                        <template #left>
+                            <IconContainer icon="link" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('%az') }}
+                        </h2>
+                        <div class="option">
+                            <input class="input" :value="organization.registerUrl" readonly>
+                        </div>
+                    </STListItem>
 
-                <STListItem v-copyable="organization.registerUrl" :selectable="true" class="left-center" @click="$navigate(Routes.MembersImport)">
-                    <template #left>
-                        <IconContainer icon="upload" />
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('Leden importeren') }}
-                    </h2>
+                    <STListItem v-copyable="organization.registerUrl" :selectable="true" class="left-center" @click="$navigate(Routes.MembersImport)">
+                        <template #left>
+                            <IconContainer icon="upload" />
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Leden importeren') }}
+                        </h2>
 
-                    <p class="style-description-small">
-                        {{ $t('%18d') }}
-                    </p>
-                </STListItem>
-            </STList>
+                        <p class="style-description-small">
+                            {{ $t('%18d') }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
         </main>
     </div>
 </template>
@@ -230,7 +216,7 @@ import EditRegistrationPeriodsView from '@stamhoofd/components/periods/EditRegis
 import RecordsConfigurationView from '@stamhoofd/components/records/RecordsConfigurationView.vue';
 
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { DataPermissionSettingsView, FinancialSupportSettingsView } from '@stamhoofd/components';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
@@ -243,6 +229,7 @@ import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
+import { computed } from 'vue';
 
 enum Routes {
     RegistrationPaymentMethods = 'betaalmethodes',
@@ -260,10 +247,18 @@ enum Routes {
 const isPlatform = STAMHOOFD.userMode === 'platform';
 const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
-const present = usePresent();
 const buildEditGroupsView = useEditGroupsView();
 const organization = useRequiredOrganization();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+
+const props = withDefaults(
+    defineProps<{
+        period?: OrganizationRegistrationPeriod | null;
+    }>(), {
+        period: null,
+    });
+
+const period = computed(() => props.period ?? organization.value!.period);
 
 defineRoutes([
     {
@@ -280,7 +275,7 @@ defineRoutes([
         url: Routes.RegistrationGroups,
         present: 'popup',
         component: async () => {
-            return await buildEditGroupsView();
+            return await buildEditGroupsView(period.value);
         },
     },
     {
@@ -289,10 +284,10 @@ defineRoutes([
         component: BundleDiscountSettingsView,
         paramsToProps() {
             return {
-                period: organization.value!.period,
+                period: period.value,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    patch.id = organization.value!.period.id;
-                    await patchOrganizationPeriod(organization.value!.period, patch);
+                    patch.id = period.value.id;
+                    await patchOrganizationPeriod(period.value, patch);
                 },
             };
         },
@@ -312,7 +307,7 @@ defineRoutes([
                             recordsConfiguration: patch,
                         }),
                     }));
-                    Toast.success('De aanpassingen zijn opgeslagen').show();
+                    Toast.success($t('De aanpassingen zijn opgeslagen')).show();
                 },
             };
         },

@@ -1,6 +1,6 @@
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { GroupCategory, GroupCategorySettings, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, OrganizationTypeHelper } from '@stamhoofd/structures';
+import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -14,12 +14,11 @@ export function useEditGroupsView() {
     const patchOrganizationPeriods = usePatchOrganizationPeriods();
     const getPeriods = useLoadRecentPeriods();
 
-    return async function () {
+    return async function (period: OrganizationRegistrationPeriod) {
         const organization = o.value;
         if (!organization) {
             throw new Error('Organization is not defined');
         }
-        const period = organization.period;
 
         if (!period.settings.rootCategory) {
             // Auto restore missing root category
@@ -35,7 +34,7 @@ export function useEditGroupsView() {
             });
 
             return PromiseComponent(async () => {
-                const periods = (await getPeriods()).map((x) => {
+                const periods = (await getPeriods(period)).map((x) => {
                     if (x.id === period.id) {
                         return x.patch(p);
                     }
@@ -62,12 +61,14 @@ export function useEditGroupsView() {
 
         return PromiseComponent(
             async () => {
-                const periods = (await getPeriods()).map((x) => {
+                const periods = (await getPeriods(period)).map((x) => {
                     if (x.id === period.id) {
                         return x.patch(p);
                     }
                     return x;
                 });
+
+                //
                 return new ComponentWithProperties(EditCategoryGroupsView, {
                     periodId: period.id,
                     periods,

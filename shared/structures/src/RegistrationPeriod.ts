@@ -99,7 +99,6 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
     getCategoryTree(options?: {
-        organization?: Organization;
         maxDepth?: number;
         filterGroups?: (group: Group) => boolean;
         permissions?: import('./LoadedPermissions.js').LoadedPermissions | null;
@@ -117,7 +116,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
             if (!options?.permissions) {
                 // Hide non public items
-                tree = tree.filterForDisplay(options?.admin ?? false, (options?.organization?.meta.packages.useActivities ?? true) || options?.admin, options?.smartCombine);
+                tree = tree.filterForDisplay(options?.admin ?? false, true, options?.smartCombine);
             }
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {

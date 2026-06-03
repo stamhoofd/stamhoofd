@@ -227,7 +227,7 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
     getCategoryTree(options?: { maxDepth?: number; filterGroups?: (group: Group) => boolean; permissions?: import('./LoadedPermissions.js').LoadedPermissions | null; smartCombine?: boolean; admin?: boolean }): GroupCategoryTree {
-        return this.period.getCategoryTree(options ? { ...options, organization: this } : { organization: this });
+        return this.period.getCategoryTree(options ? { ...options } : {});
     }
 
     /**

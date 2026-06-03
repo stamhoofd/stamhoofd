@@ -75,16 +75,16 @@ const $navigate = useNavigate();
 const auth = useAuth();
 
 const hasFullAccess = computed(() => auth.hasFullAccess());
+const period = computed(() => props.period ?? organization.value.period);
 
 const tree = computed(() => {
+    console.log('Recalculated tree');
     return period.value.getCategoryTree({
         permissions: context.value?.organizationPermissions,
-        organization: organization.value!,
     });
 });
 
 const organization = useRequiredOrganization();
-const period = computed(() => props.period ?? organization.value.period);
 const navigationController = useNavigationController();
 
 const showAll = computed(() => {
@@ -173,6 +173,11 @@ defineRoutes([
         name: Routes.Settings,
         show: 'detail',
         component: MembersSettingsView,
+        defaultProperties: () => {
+            return {
+                period: props.period, // don't pass period.value here
+            };
+        },
         isDefault: hasFullAccess.value
             ? { }
             : undefined,
@@ -311,30 +316,28 @@ const setFeature = useSetFeatureFlag();
 const allActions = computed(() => {
     const list: Action[] = [];
 
-    if (!props.period) {
-        // Default period
+    // Default period
 
-        // Checklist
-        if (STAMHOOFD.userMode === 'organization') {
-            list.push({
-                icon: 'settings',
-                title: $t('Instellen'),
-                route: Routes.Settings,
-                rightText: '1 / 5',
-                hidden: hasFeature('disabled-members-onboarding'),
-                buttons: !hasFeature('disabled-members-onboarding')
-                    ? [
-                            new ActionButton({
-                                icon: 'close',
-                                title: $t('Verbergen'),
-                                action: async () => {
-                                    await setFeature('disabled-members-onboarding', true);
-                                },
-                            }),
-                        ]
-                    : [],
-            });
-        }
+    // Checklist
+    if (STAMHOOFD.userMode === 'organization') {
+        list.push({
+            icon: 'settings',
+            title: $t('Instellen'),
+            route: Routes.Settings,
+            rightText: '1 / 5',
+            hidden: !!props.period || hasFeature('disabled-members-onboarding'),
+            buttons: props.period && !hasFeature('disabled-members-onboarding')
+                ? [
+                        new ActionButton({
+                            icon: 'close',
+                            title: $t('Verbergen'),
+                            action: async () => {
+                                await setFeature('disabled-members-onboarding', true);
+                            },
+                        }),
+                    ]
+                : [],
+        });
     }
 
     if (auth.hasFullAccess()) {

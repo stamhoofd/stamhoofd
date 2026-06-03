@@ -48,13 +48,11 @@ const props = defineProps<{
     period: OrganizationRegistrationPeriod;
 }>();
 
-const organization = useRequiredOrganization();
 const context = useContext();
 const $navigate = useNavigate();
 const tree = computed(() => {
     return props.period.getCategoryTree({
         permissions: context.value?.organizationPermissions,
-        organization: organization.value!,
     });
 });
 
