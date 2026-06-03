@@ -61,6 +61,7 @@ import EmailInput from '../inputs/EmailInput.vue';
 import PasswordStrength from '../inputs/PasswordStrength.vue';
 import ConfirmEmailView from './ConfirmEmailView.vue';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
+import BoxedController from '../containers/BoxedController.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -119,15 +120,16 @@ async function submit() {
         loading.value = false;
         await show({
             components: [
-                new ComponentWithProperties(ConfirmEmailView, {
-                    token,
-                    email: email.value,
+                new ComponentWithProperties(BoxedController, {
+                    root: new ComponentWithProperties(ConfirmEmailView, {
+                        token,
+                        email: email.value,
+                    }),
                 }),
             ],
         });
         return;
-    }
-    catch (e) {
+    } catch (e) {
         loading.value = false;
         errors.errorBox = new ErrorBox(e);
     }

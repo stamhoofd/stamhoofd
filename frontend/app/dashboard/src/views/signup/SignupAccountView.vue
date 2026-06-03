@@ -77,6 +77,7 @@ import { SessionManager } from '@stamhoofd/networking/SessionManager';
 import type { Organization } from '@stamhoofd/structures';
 import { ref } from 'vue';
 import { getScopedAutoRoot } from '../../getRootViews';
+import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
 
 const props = defineProps<{
     organization: Organization;
@@ -174,8 +175,7 @@ async function goNext() {
 
         try {
             await SessionManager.addOrganizationToStorage(props.organization);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to add organization to storage', e);
         }
 
@@ -185,7 +185,9 @@ async function goNext() {
             initialPresents: [
                 {
                     components: [
-                        new ComponentWithProperties(ConfirmEmailView, { token, email: email.value }),
+                        new ComponentWithProperties(BoxedController, {
+                            root: new ComponentWithProperties(ConfirmEmailView, { token, email: email.value }),
+                        }),
                     ],
                 },
             ],
@@ -194,8 +196,7 @@ async function goNext() {
         await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
 
         // Show popup to confirm e-mail
-    }
-    catch (e) {
+    } catch (e) {
         loading.value = false;
         console.error(e);
         errors.errorBox = new ErrorBox(e);
