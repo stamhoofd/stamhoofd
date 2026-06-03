@@ -3,7 +3,7 @@
         <button class="hover-box menu-button button" type="button" :class="{ selected }" v-bind="$attrs" @click="$emit('open', $event)">
             <span :class="'icon small ' + (icon ? icon : (collapsed.isCollapsed(id) ? 'folder' : 'folder-open'))" />
             <span>{{ title }}</span>
-            <button type="button" class="icon triangle-down rot tiny button" :class="{rot90: collapsed.isCollapsed(id)}" @click.stop="collapsed.toggle(id)" />
+            <span type="button" class="icon triangle-down rot tiny button" :class="{rot90: collapsed.isCollapsed(id)}" @click.stop="collapsed.toggle(id)" />
 
             <span class="right hover-show">
                 <slot name="right" />
