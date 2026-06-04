@@ -75,6 +75,7 @@ export class STInvoiceMeta extends AutoEncoder {
 
     /**
      * @deprecated
+     * this is still in legacy cent format
      * Depending on areItemsIncludingVAT, this can either be including or excluding VAT
      */
     private get itemPrice() {
@@ -106,6 +107,9 @@ export class STInvoiceMeta extends AutoEncoder {
         return this.date && this.date < new Date('2025-12-01');
     }
 
+    /**
+     * this is still in legacy cent format
+     */
     get priceWithoutVAT(): number {
         if (this.useLegacyRounding) {
             const itemPrice = this.itemPrice;
@@ -123,6 +127,9 @@ export class STInvoiceMeta extends AutoEncoder {
         return this.items.reduce((price, item) => price + item.price, 0);
     }
 
+    /**
+     * this is still in legacy cent format
+     */
     get VAT(): number {
         if (this.useLegacyRounding && this.areItemsIncludingVAT) {
             // Subtract VAT and round
@@ -133,6 +140,9 @@ export class STInvoiceMeta extends AutoEncoder {
         return this.getVATOnExcludingVATAmount(this.priceWithoutVAT);
     }
 
+    /**
+     * this is still in legacy cent format
+     */
     get priceWithVAT(): number {
         return this.priceWithoutVAT + this.VAT;
     }
@@ -142,11 +152,16 @@ export class STInvoiceMeta extends AutoEncoder {
      *
      * 1 cent if we need to add 1 cent
      * -1 cent if we need to remove 1 cent from the priceWithVAT to get to the payable amount
+     *
+     * this is still in legacy cent format
      */
     get payableRoundingAmount() {
         return this.totalPrice - this.priceWithVAT;
     }
 
+    /**
+     * this is still in legacy cent format
+     */
     get totalPrice() {
         const itemPrice = this.itemPrice;
         if (this.areItemsIncludingVAT) {

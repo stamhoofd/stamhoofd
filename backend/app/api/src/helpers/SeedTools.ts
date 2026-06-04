@@ -1,8 +1,37 @@
+import type { SQLSelect } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 import type { ProgressLogger } from '@stamhoofd/utility';
+import { LoggingTools } from '@stamhoofd/utility';
+
+/**
+ * If an error is thrown, first await all pending items before throwing, otherwise we risk quiting mid running actions
+ */
+function allSettledButThrowFirst<T>(promises: Promise<T>[]): Promise<T[]> {
+    return Promise.allSettled(promises).then((results) => {
+        return results.map((r) => {
+            if (r.status === 'fulfilled') {
+                return r.value;
+            }
+            throw r.reason;
+        });
+    });
+}
 
 export class SeedTools {
     static createBatchProcessor<T>(options: BatchProcessorArgs<T>) {
         return new BatchProcessor(options);
+    }
+
+    static async loop<T extends { id: string }>(options: BatchProcessorArgs<T> & { query: SQLSelect<T> }) {
+        const batchProcessor = SeedTools.createBatchProcessor(options);
+
+        const progressLogger = await LoggingTools.createProgressLoggerFromQuery(options.query.clone());
+        batchProcessor.setProgressLogger(progressLogger);
+
+        for await (const item of options.query.limit(options.batchSize).all()) {
+            await batchProcessor.execute(item as T);
+        }
+        await batchProcessor.finish();
     }
 }
 
@@ -41,7 +70,7 @@ class BatchProcessor<T> {
     }
 
     private async finishCurrentBatch() {
-        await Promise.all(this.currentBatch);
+        await allSettledButThrowFirst(this.currentBatch);
         this.currentBatch = [];
     }
 

@@ -12,6 +12,12 @@ export class QueryableModel extends Model {
     rawSelectedRow: SQLResultNamespacedRow | null = null;
     static cache: ModelCache<QueryableModel> | null = null;
 
+    /**
+     * In case shutdown signal is received during migrations, this is set.
+     * Migrations can gracefully stop if they catch this and support retrying
+     */
+    static shutdownMigrations = false;
+
     static select<T extends typeof Model & typeof QueryableModel>(this: T, ...columns: (SQLExpression | string)[]): SQLSelect<InstanceType<T>> {
         const transformer = (row: SQLResultNamespacedRow): InstanceType<T> => {
             const d = (this as T).fromRow(row[this.table]) as InstanceType<T> | undefined;
@@ -117,8 +123,7 @@ export class QueryableModel extends Model {
                 if (hit) {
                     console.log('Cache hit, get by id', this.name, id);
                     hits.push(hit as InstanceType<T>);
-                }
-                else {
+                } else {
                     remaining.push(id);
                 }
             }
@@ -140,9 +145,9 @@ export class QueryableModel extends Model {
     #disableSave = false;
     override save() {
         if (this.#disableSave) {
-            throw new Error('Saving is not allowed for this payment')
+            throw new Error('Saving is not allowed for this payment');
         }
 
-        return super.save()
+        return super.save();
     }
 }

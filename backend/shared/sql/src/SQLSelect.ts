@@ -15,8 +15,7 @@ class EmptyClass {}
 export function parseTable(tableOrExpression: SQLNamedExpression | string, asNamespace?: string): SQLNamedExpression {
     if (typeof tableOrExpression === 'string') {
         return new SQLTableExpression(tableOrExpression, asNamespace);
-    }
-    else {
+    } else {
         return tableOrExpression;
     }
 }
@@ -31,7 +30,7 @@ export type IterableSQLSelectOptions = {
      * The loop will cancel after this amount of queries - but you can continue to loop over the results when starting a new for loop.
      */
     maxQueries?: number;
-    nextEachHook?: () => void
+    nextEachHook?: () => void;
 };
 
 export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & { getName(): string };
@@ -107,8 +106,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     having(where: SQLWhere): this {
         if (this._having) {
             this._having = this._having.and(where);
-        }
-        else {
+        } else {
             this._having = where;
         }
 
@@ -165,8 +163,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             const always = this._where.isAlways;
             if (always === false) {
                 throw new Error('Cannot use SQLSelect with a where that is not always true');
-            }
-            else if (always === null) {
+            } else if (always === null) {
                 query.push('WHERE');
                 query.push(this._where.getSQL(options));
             }
@@ -186,8 +183,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             const always = this._having.isAlways;
             if (always === false) {
                 throw new Error('Cannot use SQLSelect with a having that is not always true');
-            }
-            else if (always === null) {
+            } else if (always === null) {
                 query.push('HAVING');
                 query.push(this._having.getSQL(options));
             }
@@ -225,7 +221,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     async fetch(): Promise<T[]> {
         if (this._where && this._where.isAlways === false) {
             if (this._log) {
-                console.log('query is always false')
+                console.log('query is always false');
             }
             return [];
         }
@@ -233,7 +229,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
         if (this._log) {
-            console.log(query, params)
+            console.log(query, params);
         }
 
         // when debugging: log all queries
@@ -242,8 +238,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         try {
             const [_rows] = await SQLLogger.log(Database.select(query, params, { nestTables: true }), query, params);
             rows = _rows;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error executing SQL query', query, params, e);
             throw e;
         }
@@ -356,8 +351,8 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return 0;
     }
 
-    all<PrimaryKey extends 'id' = 'id'>(options?: IterableSQLSelectOptions): T extends {id: string} ? IterableSQLSelect<T> : never 
-    all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions, primaryKey: PrimaryKey): T extends Record<PrimaryKey, string> ? IterableSQLSelect<T> : never 
+    all<PrimaryKey extends 'id' = 'id'>(options?: IterableSQLSelectOptions): T extends { id: string } ? IterableSQLSelect<T> : never;
+    all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions, primaryKey: PrimaryKey): T extends Record<PrimaryKey, string> ? IterableSQLSelect<T> : never;
     all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions = {}, preferredPrimaryKey?: PrimaryKey) {
         if (this._orderBy) {
             throw new Error('Cannot use async iterator with custom order by. Results should be ordered by ID');
@@ -372,7 +367,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         }
 
         const limit = this._limit;
-        const primaryKey = preferredPrimaryKey ?? 'id'
+        const primaryKey = preferredPrimaryKey ?? 'id';
         this.orderBy(primaryKey);
 
         let next: this | null = this.clone();
@@ -393,14 +388,13 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                 };
             },
             get isDone() {
-                console.log('is done', !!next, 'stack index', stackIndex, 'stack length', stack.length)
                 return !next && (stackIndex + 1) >= stack.length;
             },
             async next(): Promise<IteratorResult<T, undefined>> {
                 stackIndex++;
 
                 if (stackIndex < stack.length) {
-                    options?.nextEachHook?.()
+                    options?.nextEachHook?.();
                     return {
                         done: false,
                         value: stack[stackIndex],
@@ -439,18 +433,18 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                     next = base.clone();
                     const lastResult = stack[stack.length - 1]!;
                     if (!(primaryKey in lastResult)) {
-                        throw new Error('Cannot use async iterator without '+primaryKey+' column');
+                        throw new Error('Cannot use async iterator without ' + primaryKey + ' column');
                     }
 
                     const lastId = lastResult[primaryKey as keyof T];
                     if (typeof lastId !== 'string') {
-                        throw new Error('Cannot use async iterator without string '+primaryKey+' column');
+                        throw new Error('Cannot use async iterator without string ' + primaryKey + ' column');
                     }
 
                     next.andWhere(primaryKey, '>', lastId);
                 }
-                
-                options?.nextEachHook?.()
+
+                options?.nextEachHook?.();
                 return {
                     done: false,
                     value: stack[stackIndex],

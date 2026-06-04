@@ -15,7 +15,7 @@ export class GlobalHelper {
         BalanceItemService.listen();
     }
 
-    private static loadGlobalTranslateFunction() {
+    static loadGlobalTranslateFunction() {
         function getI18n() {
             return ContextInstance.optional?.i18n ?? new I18n(I18n.defaultLanguage, STAMHOOFD.fixedCountry ?? I18n.defaultCountry);
         }

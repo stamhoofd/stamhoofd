@@ -27,6 +27,7 @@ import { PlatformMembershipService } from './services/PlatformMembershipService.
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueMemberNumberService } from './services/UniqueMemberNumberService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
+import { QueryableModel } from '@stamhoofd/sql';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -191,6 +192,7 @@ export const boot = async (options: { killProcess: boolean }) => {
             return;
         }
         shuttingDown = true;
+        QueryableModel.shutdownMigrations = true;
         productionLog('Shutting down...');
         // Disable keep alive
         routerServer.defaultHeaders = Object.assign(routerServer.defaultHeaders, { Connection: 'close' });

@@ -56,6 +56,12 @@ export class STInvoice extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     paidAt: Date | null = null;
 
+    /**
+     * If a invoice was refunded because of a cancellation, we store the negative invoice id here
+     */
+    @column({ type: 'string', nullable: true })
+    negativeInvoiceId: string | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
@@ -117,14 +123,12 @@ export class STInvoice extends QueryableModel {
                                 cardLabel: ('cardLabel' in details ? details.cardLabel : null),
                             }),
                         }));
-                    }
-                    catch (e) {
+                    } catch (e) {
                         console.error(e);
                     }
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
         return mandates;
