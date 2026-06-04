@@ -42,20 +42,66 @@
 </template>
 
 <script setup lang="ts">
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { GlobalEventBus, Toast, useRequiredOrganization, useUser } from '@stamhoofd/components';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { OrganizationCheckout, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';
+import { useActivatePackages } from '../dashboard/settings/packages/hooks/useActivatePackages';
+import EditWebshopGeneralView from '../dashboard/webshop/edit/EditWebshopGeneralView.vue';
 import { useMemberAdministrationOnboarding } from './useMemberAdministrationOnboarding';
-import { Toast } from '@stamhoofd/components';
+import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
 
 const startMemberAdministrationOnboarding = useMemberAdministrationOnboarding();
+const show = useShow();
+const activatePackages = useActivatePackages();
+const user = useUser();
+const organization = useRequiredOrganization();
 
 async function startMemberAdministration() {
     await startMemberAdministrationOnboarding();
 }
 
-function startSelling() {
-    // TODO: implement the "selling or collecting" onboarding flow.
-    Toast.warning('WIP. Not implemented yet.').show();
+async function activateWebshopsTrial() {
+    try {
+        await activatePackages(
+            OrganizationCheckout.create({
+                purchases: PackagePurchases.create({
+                    packageBundles: [STPackageBundle.TrialWebshops],
+                }),
+                paymentMethod: PaymentMethod.Unknown,
+                customer: PaymentCustomer.create({
+                    firstName: user.value?.firstName,
+                    lastName: user.value?.lastName,
+                    email: user.value?.email,
+                    company: organization.value.defaultCompanies[0],
+                }),
+            }),
+        );
+    } catch (e) {
+        Toast.fromError(e).show();
+        return;
+    }
+
+    // go to the webshop tab
+    await GlobalEventBus.sendEvent('selectTabById', 'webshops');
+}
+
+async function startSelling() {
+    if (organization.value.webshops.length > 0) {
+        return await activateWebshopsTrial();
+    }
+    await show({
+        components: [
+            new ComponentWithProperties(BoxedController, {
+                root: new ComponentWithProperties(EditWebshopGeneralView, {
+                    savedHandler: async () => {
+                        return await activateWebshopsTrial();
+                    },
+                }),
+            }),
+        ],
+    });
 }
 </script>
 
@@ -64,61 +110,8 @@ function startSelling() {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .onboarding-start-view {
-    .onboarding-options {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-top: 20px;
-
-        @media (max-width: 550px) {
-            grid-template-columns: 1fr;
-        }
-    }
-
     h1, main > p {
         text-align: center;
-    }
-
-    .onboarding-option {
-        --block-width: 40px;
-
-        display: block;
-        text-align: left;
-        padding: 20px;
-        border-radius: $border-radius;
-        background: $color-background;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        border: $border-width solid $color-border;
-        @extend .style-input-shadow;
-
-        &:hover {
-            background: $color-background-shade;
-        }
-
-        &:active, &.active {
-            background: $color-background-shade-darker;
-        }
-
-        figure {
-            margin-bottom: 10px;
-
-            img {
-                width: 60px;
-                height: 60px;
-            }
-        }
-
-        h2 {
-            @extend .style-title-2;
-            padding-bottom: 5px;
-        }
-
-        p:last-child {
-            padding-top: 10px;
-            margin-top: auto;
-            font-style: italic;
-        }
     }
 }
 </style>

@@ -496,3 +496,60 @@ select.input {
         transform: scale(0.96);
     }
 }
+
+.onboarding-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+
+    @media (max-width: 550px) {
+        grid-template-columns: 1fr;
+    }
+
+    @container st-view (max-width: 550px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.onboarding-option {
+    --block-width: 40px;
+
+    display: block;
+    text-align: left;
+    padding: 20px;
+    border-radius: $border-radius;
+    background: $color-background;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: $border-width solid $color-border;
+    @extend .style-input-shadow;
+
+    &:hover {
+        background: $color-background-shade;
+    }
+
+    &:active, &.active {
+        background: $color-background-shade-darker;
+    }
+
+    figure {
+        margin-bottom: 10px;
+
+        img {
+            width: 60px;
+            height: 60px;
+        }
+    }
+
+    h2 {
+        @extend .style-title-2;
+        padding-bottom: 5px;
+    }
+
+    p:last-child {
+        padding-top: 10px;
+        margin-top: auto;
+        font-style: italic;
+    }
+}
