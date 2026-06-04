@@ -2,12 +2,12 @@ import type { Language } from '@stamhoofd/types/Language';
 import type { Organization } from './Organization.js';
 import { TranslatedString } from './TranslatedString.js';
 
-export type AppType = 'registration' | 'dashboard' | 'admin' | 'webshop';
+export type AppType = 'registration' | 'dashboard' | 'admin' | 'webshop' | 'auto' | 'verify-email';
 
 /**
  * urls are hardcoded because they need to work without a current language
  */
-export function appToTranslatableUri(app: AppType | 'auto'): TranslatedString {
+export function appToTranslatableUri(app: AppType): TranslatedString {
     switch (app) {
         case 'admin':
             return new TranslatedString({
@@ -17,7 +17,7 @@ export function appToTranslatableUri(app: AppType | 'auto'): TranslatedString {
             });
         case 'dashboard':
             return new TranslatedString({
-                nl: 'dashboard',
+                nl: 'beheerders',
                 en: 'dashboard',
                 fr: 'dashboard',
             });
@@ -39,16 +39,22 @@ export function appToTranslatableUri(app: AppType | 'auto'): TranslatedString {
                 en: 'auto',
                 fr: 'auto',
             });
+        case 'verify-email':
+            return new TranslatedString({
+                nl: 'verify-email',
+                en: 'verify-email',
+                fr: 'verify-email',
+            });
     }
 }
 
-export function appToUri(app: AppType | 'auto') {
+export function appToUri(app: AppType) {
     return appToTranslatableUri(app).toString();
 }
 
 export function uriToApp(uri: string) {
     // Loop all answers of appToTranslatableUri in all languages and return the first match
-    for (const app of ['admin', 'dashboard', 'registration', 'auto'] as const) {
+    for (const app of ['admin', 'dashboard', 'registration', 'verify-email', 'auto'] as const) {
         const l = appToTranslatableUri(app);
 
         if (typeof l.translations === 'string') {
@@ -78,7 +84,7 @@ export const getAppName = (app: AppType) => {
 };
 
 export const getAppTitle = (app: AppType | 'auto', organization: Organization | undefined | null) => {
-    if (app === 'auto' || app === 'dashboard') {
+    if (app === 'auto' || app === 'dashboard' || app === 'verify-email') {
         if (!organization) {
             return $t(`%Gr`);
         }

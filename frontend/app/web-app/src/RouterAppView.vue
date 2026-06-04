@@ -1,0 +1,217 @@
+<template>
+    <LoadingView />
+</template>
+
+<script lang="ts" setup>
+import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
+import type { Organization } from '@stamhoofd/structures';
+import { AppRoute } from '@stamhoofd/structures';
+import { wrapAndReplace } from './wrapAndReplace';
+import { domainToOrganization, idToOrganization, uriToOrganization } from './organizationLoaders';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
+import { provideAppNavigate } from '@stamhoofd/components';
+
+provideAppNavigate(useNavigate());
+
+const isDashboardDomain = UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard;
+
+// false OR function to fetch the org from domain
+const orgInDomain = !isDashboardDomain || STAMHOOFD.singleOrganization
+    ? async () => {
+        const org = STAMHOOFD.singleOrganization ? await idToOrganization(STAMHOOFD.singleOrganization) : await domainToOrganization(UrlHelper.shared.url.host);
+        if (!org) {
+            throw new Error(STAMHOOFD.singleOrganization ? 'Failed to load organization for single organization mode' : 'No organization found for the given domain');
+        }
+        return org;
+    }
+    : false;
+
+// false OR params to aquire org from URI
+const orgInUriParams = !orgInDomain
+    ? {
+            params: { organizationUri: String },
+            paramsToProps: async (params: { organizationUri: string }) => {
+                const org = await uriToOrganization(params.organizationUri);
+                if (!org) {
+                    Toast.error($t('Er bestaat geen #organisatie op link "{uri}"', { uri: params.organizationUri })).show();
+                    throw new Error('No organization found for the given URI, but required for this route');
+                }
+                return { organization: org };
+            },
+            propsToParams: (props: { organization: Organization }) => ({
+                params: { organizationUri: props.organization.uri },
+            }),
+        }
+    : false;
+
+async function loadAdmin(uri: string) {
+    const admin = await import('@stamhoofd/admin-frontend');
+    await wrapAndReplace(null, 'admin', new ComponentWithProperties(admin.App, {}), uri);
+}
+
+async function loadDashboard(organization: Organization, uri: string) {
+    const dashboard = await import('@stamhoofd/dashboard');
+    await wrapAndReplace(organization, 'dashboard', new ComponentWithProperties(dashboard.App, {}), uri);
+}
+
+async function loadRegistration(organization: Organization | null, uri: string) {
+    const registration = await import('@stamhoofd/registration');
+    await wrapAndReplace(organization, 'registration', new ComponentWithProperties(registration.App, {}), uri);
+}
+
+async function loadAuto(organization: Organization | null, uri: string) {
+    const auto = await import('@stamhoofd/auto');
+    await wrapAndReplace(organization, 'auto', new ComponentWithProperties(auto.App, {}), uri);
+}
+
+async function loadVerifyEmail(organization: Organization | null, uri: string) {
+    const auth = await import('@stamhoofd/verify-email');
+    await wrapAndReplace(organization, 'verify-email', new ComponentWithProperties(auth.App, {}), uri);
+}
+
+// ADMIN
+if (UrlHelper.shared.url.host === STAMHOOFD.domains.dashboard) {
+    defineRoute({
+        name: AppRoute.Admin,
+        url: $t('platform'),
+        handler: async () => {
+            await loadAdmin($t('platform'));
+        },
+    });
+}
+
+// DASHBOARD
+if (orgInDomain) {
+    defineRoute({
+        name: AppRoute.Dashboard,
+        url: $t('beheerders'),
+        handler: async () => {
+            await loadDashboard(await orgInDomain(), $t('beheerders'));
+        },
+    });
+} else {
+    defineRoute({
+        name: AppRoute.Dashboard,
+        url: $t('beheerders') + '/@organizationUri',
+        handler: async ({ componentProperties }: { componentProperties: { organization: Organization } }) => {
+            await loadDashboard(componentProperties.organization, $t('beheerders') + '/' + componentProperties.organization.uri);
+        },
+        ...orgInUriParams,
+    });
+}
+
+// REGISTRATION
+if (orgInDomain) {
+    defineRoute({
+        name: AppRoute.OrgScopedRegistration,
+        url: $t('leden'),
+        handler: async () => {
+            await loadRegistration(await orgInDomain(), $t('leden'));
+        },
+    });
+} else {
+    if (STAMHOOFD.userMode === 'platform') {
+        const ignoreUris = [$t('berichten'), $t('start'), $t('mandje'), $t('activiteiten')];
+        for (const uri of ignoreUris) {
+            defineRoute({
+                name: AppRoute.UnscopedRegistration,
+                url: $t('leden') + '/' + uri,
+                handler: async () => {
+                    await loadRegistration(null, $t('leden'));
+                },
+            });
+        }
+    }
+    defineRoute({
+        name: AppRoute.OrgScopedRegistration,
+        url: $t('leden') + '/@organizationUri',
+        handler: async ({ componentProperties }: { componentProperties: { organization: Organization } }) => {
+            await loadRegistration(componentProperties.organization, $t('leden') + '/' + componentProperties.organization.uri);
+        },
+        ...orgInUriParams,
+    });
+    if (STAMHOOFD.userMode === 'platform') {
+        defineRoute({
+            name: AppRoute.UnscopedRegistration,
+            url: $t('leden'),
+            handler: async () => {
+                await loadRegistration(null, $t('leden'));
+            },
+        });
+    }
+}
+
+// VERIFY-EMAIL
+if (orgInDomain) {
+    defineRoute({
+        name: AppRoute.OrgScopedVerifyEmail,
+        url: $t('verify-email'),
+        handler: async () => {
+            await loadVerifyEmail(await orgInDomain(), $t('verify-email'));
+        },
+    });
+} else {
+    if (STAMHOOFD.userMode === 'platform') {
+        defineRoute({
+            name: AppRoute.UnscopedVerifyEmail,
+            url: $t('verify-email'),
+            handler: async () => {
+                await loadVerifyEmail(null, $t('verify-email'));
+            },
+        });
+    } else {
+        defineRoute({
+            name: AppRoute.OrgScopedVerifyEmail,
+            url: 'verify-email/@organizationUri',
+            handler: async ({ componentProperties }: { componentProperties: { organization: Organization } }) => {
+                await loadVerifyEmail(componentProperties.organization, $t('verify-email') + '/' + componentProperties.organization.uri);
+            },
+            ...orgInUriParams,
+        });
+    }
+}
+
+// AUTO (DEFAULT)
+if (orgInDomain) {
+    defineRoute({
+        name: AppRoute.OrgScopedAuto,
+        url: '',
+        isDefault: {},
+        handler: async () => {
+            await loadAuto(await orgInDomain(), '');
+        },
+    });
+} else {
+    defineRoute({
+        name: AppRoute.OrgScopedAuto,
+        url: 'auto/@organizationUri',
+        handler: async ({ componentProperties }: { componentProperties: { organization: Organization } }) => {
+            await loadAuto(componentProperties.organization, $t('auto') + '/' + componentProperties.organization.uri);
+        },
+        ...orgInUriParams,
+    });
+    defineRoute({
+        name: AppRoute.UnscopedAuto,
+        url: '',
+        isDefault: {},
+        handler: async () => {
+            await loadAuto(null, '');
+        },
+    });
+}
+
+</script>
+
+<style lang="scss">
+// We need to include the component styling of vue-app-navigation first
+@use "@stamhoofd/scss/main";
+@use "@stamhoofd/scss/base/dark-modus";
+@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
+
+html {
+    -webkit-touch-callout:none;
+    //user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: transparent;
+}
+</style>

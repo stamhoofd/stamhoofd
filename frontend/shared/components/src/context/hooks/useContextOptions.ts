@@ -1,12 +1,10 @@
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { AppType, Organization, User, UserWithMembers } from '@stamhoofd/structures';
-import { appToUri } from '@stamhoofd/structures';
+import { AppRoute } from '@stamhoofd/structures';
 
-import { PromiseComponent } from '../../containers/AsyncComponent';
 import { useOrganization, usePlatform, useUser } from '../../hooks';
-import { ReplaceRootEventBus } from '../../overlays/ModalStackEventBus';
+import { useAppNavigate } from '../../hooks/useAppNavigate';
 import { useAppContext } from '../appContext';
 
 export type Option = {
@@ -186,58 +184,34 @@ export function useContextOptions() {
         };
     };
 
-    const buildRootForOption = async (option: Option) => {
-        await option.context.loadFromStorage();
-        await SessionManager.prepareSessionForUsage(option.context);
-
-        if (option.app === 'auto') {
-            const admin = await import('@stamhoofd/dashboard');
-            return await admin.getScopedAutoRoot(option.context);
-        }
-
-        if (option.app === 'admin') {
-            const admin = await import('@stamhoofd/admin-frontend');
-            return await admin.getScopedAdminRoot(option.context, $t);
-        }
-
-        if (option.app === 'dashboard') {
-            const dashboard = await import('@stamhoofd/dashboard');
-            return await dashboard.getScopedDashboardRoot(option.context);
-        }
-
-        if (option.app === 'registration') {
-            const registration = await import('@stamhoofd/registration');
-            return await registration.getRootView(option.context);
-        }
-        throw new Error('This app is not yet supported');
-    };
-
     const selectOption = (option: Option) => {
-        // Try to maintain the same URL for the new scope, to improve switching behaviour per tab
-        let href = window.location.href;
-        let oldPrefix = '';
-        if ($organization.value && !STAMHOOFD.singleOrganization) {
-            oldPrefix = '/' + appToUri(app) + '/' + $organization.value.uri;
-        }
-        else {
-            oldPrefix = '/' + appToUri(app);
-        }
-        let newPrefix = '';
-        if (option.organization && !STAMHOOFD.singleOrganization) {
-            newPrefix = '/' + appToUri(option.app) + '/' + option.organization.uri;
-        }
-        else {
-            newPrefix = '/' + appToUri(option.app);
-        }
+        const appNavigate = useAppNavigate();
+        const org = option.organization;
 
-        if (oldPrefix) {
-            href = href.replace(oldPrefix, newPrefix);
+        switch (option.app) {
+            case 'admin':
+                appNavigate(AppRoute.Admin).catch(console.error);
+                break;
+            case 'dashboard':
+                if (org) {
+                    appNavigate(AppRoute.Dashboard, { properties: { organization: org } }).catch(console.error);
+                }
+                break;
+            case 'registration':
+                if (org) {
+                    appNavigate(AppRoute.OrgScopedRegistration, { properties: { organization: org } }).catch(console.error);
+                } else {
+                    appNavigate(AppRoute.UnscopedRegistration).catch(console.error);
+                }
+                break;
+            default: // 'auto'
+                if (org) {
+                    appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org } }).catch(console.error);
+                } else {
+                    appNavigate(AppRoute.UnscopedAuto).catch(console.error);
+                }
+                break;
         }
-        UrlHelper.shared = new UrlHelper(href);
-
-        ReplaceRootEventBus.sendEvent('replace', PromiseComponent(async () => {
-            return await buildRootForOption(option);
-        })).catch(console.error);
     };
 
     const isCurrent = (option: Option) => {
@@ -250,7 +224,6 @@ export function useContextOptions() {
         getAllOptions,
         getRegistrationOption,
         getOptionForOrganization,
-        buildRootForOption,
         selectOption,
         isCurrent,
     };

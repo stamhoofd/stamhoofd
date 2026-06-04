@@ -84,16 +84,16 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import PlatformFooter from '@stamhoofd/components/auth/PlatformFooter.vue';
-import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
 import ContextLogo from '@stamhoofd/components/context/ContextLogo.vue';
 import PlatformLogo from '@stamhoofd/components/context/PlatformLogo.vue';
 import VersionFooter from '@stamhoofd/components/context/VersionFooter.vue';
 import { useAppData } from '@stamhoofd/components/context/appContext.ts';
 import type { Option } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
 import { useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
@@ -271,11 +271,7 @@ defineRoutes([
     {
         url: 'aansluiten',
         name: Routes.Join,
-        component: async (props) => {
-            return new ComponentWithProperties(BoxedController, {
-                root: new ComponentWithProperties((await import('../signup/SignupGeneralView.vue')).default as any, props),
-            });
-        },
+        component: async () => (await import('./SignupGeneralView.vue')).default as any,
         paramsToProps(_, query) {
             const code = query?.get('code');
             const organization = query?.get('org');
