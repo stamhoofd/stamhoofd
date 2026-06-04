@@ -1,8 +1,12 @@
+import os from 'node:os';
+import path from 'node:path';
+
 export const successSymbol = '✓';
 
 export const localIpv4Host = '127.0.0.1';
 export const localIpv6Host = '::1';
 export const defaultDomain = 'stamhoofd';
+export const dockerHostGateway = 'host.docker.internal';
 
 export const mysqlContainer = 'stamhoofd-mysql';
 export const maildevContainer = 'stamhoofd-maildev';
@@ -32,7 +36,7 @@ export const rustfsInternalConsolePort = 9001;
 export const ssoInternalPort = 8080;
 
 export const corednsPort = 53;
-export const corednsHostPort = 1053;
+export const corednsHostPort = 53;
 export const caddyHttpPort = 80;
 export const caddyHttpsPort = 443;
 export const caddyPodmanHttpPort = 8080;
@@ -46,6 +50,19 @@ export const mysqlDataVolume = 'stamhoofd-mysql-data';
 export const rustfsDataVolume = 'stamhoofd-rustfs-data';
 export const caddyConfigPath = '/etc/caddy/caddy.json';
 export const caddyDataDirInContainer = '/data/caddy';
+
+export function caddyDataDir(): string {
+    // The Caddy Docker image sets XDG_DATA_HOME=/data, so it reads PKI data from
+    // /data/caddy (= caddyDataDirInContainer). We mount the host Caddy data dir
+    // there so the container shares the same CA as the local `caddy` binary.
+    // On macOS the local binary uses ~/Library/Application Support/Caddy;
+    // on Linux it follows XDG (~/.local/share/caddy).
+    if (process.platform === 'darwin') {
+        return path.join(os.homedir(), 'Library/Application Support/Caddy');
+    }
+    const dataHome = process.env.XDG_DATA_HOME ?? path.join(os.homedir(), '.local/share');
+    return path.join(dataHome, 'caddy');
+}
 
 export function localhostPort(port: number): string {
     return `${localIpv4Host}:${port}`;

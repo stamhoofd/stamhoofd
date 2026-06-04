@@ -2,13 +2,12 @@ import fs from 'node:fs/promises';
 import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
-import { caddyContainer, caddyHttpPort, caddyHttpsPort, caddyPodmanHttpPort, caddyPodmanHttpsPort, caddySetupAdminPort, corednsHostPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
-import { sharedDir } from '../runtime/manifest-store.js';
-import { run } from '../runtime/command-runner.js';
 import { writeSetupCaddyConfig } from '../config/caddy-config.js';
-import { command, confirm, statusCell, success, table, warning } from '../runtime/ux.js';
+import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddyPodmanHttpPort, caddyPodmanHttpsPort, caddySetupAdminPort, corednsHostPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
-import { caddySetupHttpPort, caddySetupHttpsPort } from '../config/shared-service-config.js';
+import { run } from '../runtime/command-runner.js';
+import { sharedDir } from '../runtime/manifest-store.js';
+import { command, confirm, statusCell, success, table, warning } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import { runServices } from './start-services.js';
@@ -74,14 +73,11 @@ export async function runSetup(context: CliContext): Promise<void> {
     for (const fix of fixes) {
         if (fix.key === 'dns') {
             await setupDns({ yes: true, dryRun: false, verbose: context.verbose });
-        }
-        else if (fix.key === 'podman-ports') {
+        } else if (fix.key === 'podman-ports') {
             await setupPodmanPortRedirects({ yes: true, dryRun: false, verbose: context.verbose });
-        }
-        else if (fix.key === 'services') {
+        } else if (fix.key === 'services') {
             await runServices(context);
-        }
-        else {
+        } else {
             await setupCert(context, { yes: true, dryRun: false });
         }
     }
@@ -204,8 +200,7 @@ export async function setupCert(context: CliContext, options: { yes: boolean; dr
     await run('caddy', ['start', '--config', configPath, '--pidfile', pidPath], { verbose: context.verbose });
     try {
         await run('caddy', ['trust', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { verbose: context.verbose });
-    }
-    finally {
+    } finally {
         await run('caddy', ['stop', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { allowFailure: true, quiet: true, verbose: context.verbose });
         await fs.rm(pidPath, { force: true });
     }
@@ -213,6 +208,10 @@ export async function setupCert(context: CliContext, options: { yes: boolean; dr
 }
 
 async function dnsCheck(context: CliContext): Promise<CheckResult> {
+    if (process.platform !== 'linux') {
+        return { ok: true, details: 'temporary mac os', manualFix: 'todo' };
+    }
+
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
 
     if (!(await dnsConfigurationCheck(domain))) {
@@ -245,13 +244,11 @@ async function dnsConfigurationCheck(domain: string): Promise<boolean> {
 }
 
 async function certCheck(): Promise<CheckResult> {
-    const home = process.env.XDG_DATA_HOME ?? `${process.env.HOME}/.local/share`;
-    const certPath = path.join(home, 'caddy/pki/authorities/local/root.crt');
+    const certPath = path.join(caddyDataDir(), 'pki/authorities/local/root.crt');
     try {
         await fs.access(certPath);
         return { ok: true, details: certPath };
-    }
-    catch {
+    } catch {
         return { ok: false, details: 'Caddy local CA not found', manualFix: 'stam setup cert', automaticFix: { key: 'cert', label: 'Trust local HTTPS certificates' } };
     }
 }
@@ -260,8 +257,7 @@ async function podmanPortRedirectCheck(): Promise<CheckResult> {
     let runtime: docker.ContainerRuntime;
     try {
         runtime = await docker.getContainerRuntime();
-    }
-    catch {
+    } catch {
         return { ok: true, details: 'container runtime unavailable' };
     }
 
@@ -350,8 +346,7 @@ async function dockerCheck(): Promise<CheckResult> {
     try {
         const runtime = await docker.getContainerRuntime();
         return { ok: true, details: runtime === 'podman' ? 'podman ready' : 'docker daemon reachable' };
-    }
-    catch (error) {
+    } catch (error) {
         return { ok: false, details: error instanceof Error ? error.message : 'container runtime not reachable', manualFix: 'Start Podman or Docker, then run stam setup' };
     }
 }

@@ -1,8 +1,6 @@
 import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
 import type { CliContext } from '../../context/create-context.js';
-import { caddyAdminPort, caddyConfigPath, caddyContainer, caddyDataDirInContainer, caddyHttpPort, caddyHttpsPort, caddyImage, caddyPodmanHttpPort, caddyPodmanHttpsPort, localhostPort } from '../../config/shared-service-config.js';
+import { caddyAdminPort, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyHttpPort, caddyHttpsPort, caddyImage, caddyPodmanHttpPort, caddyPodmanHttpsPort, dockerHostGateway, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
 import * as docker from '../docker.js';
 import { writeCaddyConfig } from '../../config/caddy-config.js';
 import { SharedDockerService } from '../docker-service.js';
@@ -39,17 +37,26 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     }
 
     async canReuse(_context: CliContext, _options: void, _prepared: CaddyPrepared, status: ServiceStatus): Promise<boolean> {
-        return status.running && await CaddyService.runsInHostNetwork();
+        if (!status.running) {
+            return false;
+        }
+        if (process.platform !== 'linux' && await docker.getContainerRuntime() !== 'podman') {
+            // Bridge mode on macOS: reuse if NOT in host network mode.
+            return !await CaddyService.runsInHostNetwork();
+        }
+        return await CaddyService.runsInHostNetwork();
     }
 
     async getDockerArgs(_context: CliContext, _options: void, prepared: CaddyPrepared): Promise<string[]> {
-        return CaddyService.dockerArgs(prepared.config, prepared.dataDir, { disableLabel: await docker.getContainerRuntime() === 'podman' });
+        const runtime = await docker.getContainerRuntime();
+        const bridgeMode = process.platform !== 'linux' && runtime !== 'podman';
+        return CaddyService.dockerArgs(prepared.config, prepared.dataDir, { disableLabel: runtime === 'podman', bridgeMode });
     }
 
     static async reload(context: CliContext): Promise<void> {
         const config = await CaddyService.writeRuntimeConfig(context);
         await CaddyService.validateConfig(config, context);
-        if (await CaddyService.runsInHostNetwork()) {
+        if (await docker.containerIsRunning(CaddyService.container)) {
             await docker.run(['exec', CaddyService.container, 'caddy', 'reload', '--config', caddyConfigPath, '--address', localhostPort(caddyAdminPort), '--force'], { quiet: true, verbose: context.verbose });
             return;
         }
@@ -60,10 +67,19 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         if (await docker.getContainerRuntime() === 'podman') {
             return await writeCaddyConfig(context, { httpPort: caddyPodmanHttpPort, httpsPort: caddyPodmanHttpsPort, disableRedirects: true });
         }
+        if (process.platform !== 'linux') {
+            // Docker Desktop on macOS uses a VM — --network host binds inside the VM,
+            // not on the Mac. Use bridge mode with port mappings and route to the Mac
+            // host via host.docker.internal.
+            return await writeCaddyConfig(context, { proxyHost: dockerHostGateway, listenHost: '0.0.0.0' });
+        }
         return await writeCaddyConfig(context);
     }
 
-    static dockerArgs(config: string, dataDir: string, options: { disableLabel?: boolean } = {}): string[] {
+    static dockerArgs(config: string, dataDir: string, options: { disableLabel?: boolean; bridgeMode?: boolean } = {}): string[] {
+        if (options.bridgeMode) {
+            return ['run', '-d', '--name', CaddyService.container, '-p', localhostPortMapping(caddyHttpPort, caddyHttpPort), '-p', localhostPortMapping(caddyHttpsPort, caddyHttpsPort), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
+        }
         return ['run', '-d', '--name', CaddyService.container, '--network', 'host', ...(options.disableLabel ? ['--security-opt', 'label=disable'] : []), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
     }
 
@@ -73,8 +89,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     }
 
     static dataDir(): string {
-        const dataHome = process.env.XDG_DATA_HOME ?? path.join(os.homedir(), '.local/share');
-        return path.join(dataHome, 'caddy');
+        return caddyDataDir();
     }
 
     private static async runsInHostNetwork(): Promise<boolean> {
