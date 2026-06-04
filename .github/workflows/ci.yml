@@ -8,18 +8,24 @@ permissions:
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, ci-test ]
   pull_request:
     branches: [ main ]
+
+# Cancel superseded runs on the same ref. We only cancel on pull_request events so
+# that pushes to main always run to completion (and keep their full check history).
+# concurrency:
+#   group: ci-${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   NODE_VERSION: 22
 
 jobs:
   job_setup:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Determine changed packages
         uses: AurorNZ/paths-filter@v3.0.1
@@ -49,10 +55,34 @@ jobs:
       changed_sql: ${{ steps.changed.outputs.sql }}
       changed_frontend: ${{ steps.changed.outputs.frontend }}
 
+  # Build all shared TypeScript packages exactly once and share the compiled output
+  # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
+  # duplicated `yarn build:shared` step from each consumer job.
+  job_build_shared:
+    name: 'Build shared packages'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Build shared packages
+        run: yarn build:shared
+      - name: Upload shared build output
+        uses: actions/upload-artifact@v6
+        with:
+          name: shared-dist
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            shared/*/dist
+            shared/*/*.tsbuildinfo
+            backend/shared/*/dist
+            backend/shared/*/*.tsbuildinfo
+
   job_test_backend:
     name: 'Backend API Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_backend == 'true'
     services:
       mysql:
@@ -68,49 +98,21 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Linting
         run: cd backend/app/api && yarn lint --quiet
       - name: Run tests
         run: cd backend/app/api && yarn build && yarn test --bail=1
-      - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
-        if: failure() && github.event_name != 'pull_request'
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "Backend tests failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Backend tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
-  
+
   job_test_models:
     name: 'Backend Models Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_models == 'true'
     services:
       mysql:
@@ -126,49 +128,21 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Linting
         run: cd backend/shared/models && yarn lint --quiet
       - name: Run tests
         run: cd backend/shared/models && yarn build && yarn test --bail=1
-      - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
-        if: failure() && github.event_name != 'pull_request'
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "Models tests failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Models tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
 
   job_test_sql:
     name: 'Backend SQL Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_sql == 'true'
     services:
       mysql:
@@ -184,94 +158,38 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Linting
         run: cd backend/shared/sql && yarn lint --quiet
       - name: Run tests
         run: cd backend/shared/sql && yarn test --bail=1
-      - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
-        if: failure() && github.event_name != 'pull_request'
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "SQL tests failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *SQL tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
 
   job_test_structures:
     name: 'Structures Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_structures == 'true'
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:global:shared
+          name: shared-dist
       - name: Linting
         run: cd shared/structures && yarn lint --quiet
       - name: Run tests
         run: cd shared/structures && yarn test --bail=1
-      - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
-        if: failure() && github.event_name != 'pull_request'
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "Structures tests failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Structures tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
-  
+
   job_boot:
     name: 'API boot and shutdown'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     services:
       mysql:
         image: mysql:8.4
@@ -286,18 +204,12 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: For building, we need development dependencies - install them
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Build API
         run: cd backend/app/api && yarn build
       - name: Remove all installed dependencies
@@ -308,124 +220,57 @@ jobs:
         run: cd backend/app/api && NODE_ENV=test node ./dist/migrations.js
       - name: Run boot test
         run: NODE_ENV=test bash tests/boot/boot-test.sh
-      - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
-        if: failure() && github.event_name != 'pull_request'
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "Boot test failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Boot test failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
-  
+
   job_test_lint_typecheck_checking:
     name: 'Lint and Typecheck'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Run type checking
         run: yarn -s typecheck
       - name: Run type linting
         run: yarn -s lint
-      - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
-        if: failure() && github.event_name != 'pull_request'
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "Frontend type checking failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Linting/Typecheck failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
 
   job_test_components_vitest:
     name: 'Components Browser Tests'
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_frontend == 'true'
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Install Playwright Browsers
         run: yarn playwright install --with-deps chromium
-      - name: Build shared packages
-        run: yarn build:shared
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
+        with:
+          name: shared-dist
       - name: Run components browser tests
         run: cd frontend/shared/components && yarn vitest run
-      - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
-        if: failure() && github.event_name != 'pull_request'
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "Components browser tests failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Components browser tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
 
   job_test_playwright:
     name: 'Playwright Tests'
     timeout-minutes: 60
-    runs-on: ubuntu-latest
-    needs: [job_setup]
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_backend == 'true' || needs.job_setup.outputs.changed_frontend == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      SPACES_CI_BUCKET: stamhoofd-ci-traces
+      SPACES_CI_REGION: ams3
     services:
       mysql:
         image: mysql:8.4
@@ -440,18 +285,11 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ env.NODE_VERSION }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'yarn'
-        cache-dependency-path: 'yarn.lock'
-    - name: Use correct yarn version
-      run: yarn policies set-version 1.22.19
+    - uses: actions/checkout@v5
+    - uses: ./.github/actions/setup
     - name: Restore CoreDNS cache
       id: cache-coredns
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: .coredns
         key: coredns-v1.13.1
@@ -508,13 +346,16 @@ jobs:
     # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
     - name: Install libnss3-tools
       run: sudo apt-get update && sudo apt-get install -y libnss3-tools
-    - name: Install dependencies
-      run: yarn install --prefer-offline --frozen-lockfile
+    - name: Cache Playwright browsers
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Install Playwright Browsers
-      run: yarn playwright install --with-deps --no-shell
+      run: yarn playwright install --with-deps --no-shell chromium
     - name: Cache Caddy
       id: caddy-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: /usr/local/bin/caddy
         key: caddy-${{ runner.os }}-v2.10.2
@@ -535,45 +376,315 @@ jobs:
 
     # Add chrome certificates to nss
     - name: Create initial NSS database for Chromium
-      run: | 
+      run: |
         mkdir -p $HOME/.pki/nssdb
         certutil -N -d sql:$HOME/.pki/nssdb --empty-password
     - name: Add trusted CA certificate to NSS
       run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
-    - name: Build shared packages
-      run: yarn build:shared
+    - name: Download shared build output
+      uses: actions/download-artifact@v7
+      with:
+        name: shared-dist
     - name: Build API
       run: cd backend/app/api && yarn build:playwright:pre
     - name: Run Playwright tests
       run: cd tests/playwright && yarn -s test
     - name: Upload Playwright artifacts
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: playwright-traces
         path: |
             tests/playwright/playwright-report
             tests/playwright/test-results
         retention-days: 1
-    - name: Notify Slack of failure
-      uses: slackapi/slack-github-action@v2.0.0
-      if: failure() && github.event_name != 'pull_request'
-      with:
-        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-        webhook-type: incoming-webhook
-        payload: |
-            text: "Playwright tests failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Playwright tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
+    - name: Publish traces to Spaces & build notifications
+      id: publish_traces
+      if: failure()
+      working-directory: tests/playwright
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_CI_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_CI_SECRET }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: bash scripts/publish-traces.sh
+    - name: Comment trace links on PR
+      if: failure() && github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" --edit-last \
+          || gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" \
+          || echo "Could not post PR comment (read-only token on fork PR?)"
+
+  # ---------------------------------------------------------------------------
+  # Slack incident notifications (pushes to main only).
+  #
+  # One "incident" thread at a time, stored in Spaces. The first failing job in
+  # the chain posts a root message and opens the incident; every later failure
+  # (this run or a later commit while still red) replies in that thread. When a
+  # later commit is fully green, job_notify_recovery posts a ✅ reply + reaction
+  # and closes the incident, so the next failure starts a fresh thread.
+  #
+  # The jobs are chained via `needs` so exactly one runs at a time — this
+  # serializes the read-modify-write of the incident state and guarantees a
+  # single root even when many jobs fail at once. Passing jobs skip instantly
+  # (no runner), so green runs cost nothing here.
+  # ---------------------------------------------------------------------------
+  notify_setup:
+    name: 'Notify · Setup'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_setup]
+    if: ${{ !cancelled() && needs.job_setup.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Setup'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_build_shared:
+    name: 'Notify · Build shared packages'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_build_shared, notify_setup]
+    if: ${{ !cancelled() && needs.job_build_shared.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Build shared packages'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_structures:
+    name: 'Notify · Structures Tests'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_test_structures, notify_build_shared]
+    if: ${{ !cancelled() && needs.job_test_structures.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Structures Tests'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_sql:
+    name: 'Notify · Backend SQL Tests'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_test_sql, notify_structures]
+    if: ${{ !cancelled() && needs.job_test_sql.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Backend SQL Tests'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_lint:
+    name: 'Notify · Lint and Typecheck'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_test_lint_typecheck_checking, notify_sql]
+    if: ${{ !cancelled() && needs.job_test_lint_typecheck_checking.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Lint and Typecheck'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_models:
+    name: 'Notify · Backend Models Tests'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_test_models, notify_lint]
+    if: ${{ !cancelled() && needs.job_test_models.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Backend Models Tests'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_backend:
+    name: 'Notify · Backend API Tests'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_test_backend, notify_models]
+    if: ${{ !cancelled() && needs.job_test_backend.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Backend API Tests'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_components:
+    name: 'Notify · Components Browser Tests'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_test_components_vitest, notify_backend]
+    if: ${{ !cancelled() && needs.job_test_components_vitest.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Components Browser Tests'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_boot:
+    name: 'Notify · API boot and shutdown'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_boot, notify_components]
+    if: ${{ !cancelled() && needs.job_boot.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'API boot and shutdown'
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  notify_playwright:
+    name: 'Notify · Playwright Tests'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [job_test_playwright, notify_boot]
+    if: ${{ !cancelled() && needs.job_test_playwright.result == 'failure' && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/slack-notify
+        with:
+          mode: report-failure
+          job-label: 'Playwright Tests'
+          trace-links-key: traces/${{ github.run_id }}/${{ github.run_attempt }}/slack-links.txt
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
+
+  # Recovery: runs after every job. When the run is fully green (no failures and
+  # at least one job actually ran) and an incident is open, post ✅ and close it.
+  job_notify_recovery:
+    name: 'Notify · recovery'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs:
+      - job_setup
+      - job_build_shared
+      - job_test_structures
+      - job_test_sql
+      - job_test_lint_typecheck_checking
+      - job_test_models
+      - job_test_backend
+      - job_test_components_vitest
+      - job_boot
+      - job_test_playwright
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Determine overall result
+        id: status
+        env:
+          RESULTS: ${{ join(needs.*.result, ',') }}
+        run: |
+          echo "needs results: $RESULTS"
+          if printf '%s' "$RESULTS" | tr ',' '\n' | grep -qx 'failure'; then
+            echo "green=false" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "$RESULTS" | tr ',' '\n' | grep -qx 'success'; then
+            echo "green=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "green=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v5
+        if: steps.status.outputs.green == 'true'
+      - uses: ./.github/actions/slack-notify
+        if: steps.status.outputs.green == 'true'
+        with:
+          mode: report-recovery
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
+          spaces-key: ${{ secrets.SPACES_CI_KEY }}
+          spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
+          spaces-bucket: stamhoofd-ci-traces
+          spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
