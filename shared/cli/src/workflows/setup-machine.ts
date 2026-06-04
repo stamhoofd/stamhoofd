@@ -15,6 +15,8 @@ import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import { runServices } from './start-services.js';
 
+const directDnsQueryTimeoutMs = 1000;
+
 export type SetupReport = {
     docker: CheckResult;
     privilegedPorts: CheckResult;
@@ -335,21 +337,27 @@ async function macosDnsCheck(context: CliContext, domain: string): Promise<Check
         return { ok: false, details: `${resolverPath} exists with unexpected contents`, manualFix: 'stam setup dns' };
     }
 
-    try {
-        const result = await dns.lookup(`dashboard.${domain}`);
-        if (result.address === localIpv4Host) {
-            return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
-        }
-    } catch {
-        // Fall through to the shared CoreDNS status check below.
-    }
-
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
         return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
     }
 
+    if (await directCorednsCheck(domain)) {
+        return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
+    }
+
     return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
+}
+
+async function directCorednsCheck(domain: string): Promise<boolean> {
+    const resolver = new dns.Resolver({ timeout: directDnsQueryTimeoutMs, tries: 1 });
+    resolver.setServers([localIpv4Host]);
+    try {
+        const addresses = await resolver.resolve4(`dashboard.${domain}`);
+        return addresses.includes(localIpv4Host);
+    } catch {
+        return false;
+    }
 }
 
 async function dnsConfigurationCheck(domain: string, profile: SharedServiceProfile): Promise<boolean> {

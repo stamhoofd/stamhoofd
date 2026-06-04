@@ -8,8 +8,16 @@ import * as docker from '../services/docker.js';
 import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, setupCaddy, setupDns, SetupAutomaticFixKey } from './setup-machine.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
 
+const dnsResolver = vi.hoisted(() => ({
+    resolve4: vi.fn(),
+    setServers: vi.fn(),
+}));
+
 vi.mock('node:dns/promises', () => ({
-    default: { lookup: vi.fn() },
+    default: {
+        lookup: vi.fn(),
+        Resolver: vi.fn(() => dnsResolver),
+    },
 }));
 
 vi.mock('../runtime/command-runner.js', () => ({
@@ -39,7 +47,9 @@ describe('setup machine workflow', () => {
         setPlatform(platform);
         vi.mocked(docker.getContainerRuntime).mockResolvedValue(docker.ContainerRuntime.Docker);
         vi.mocked(docker.containerIsRunning).mockResolvedValue(false);
-        vi.mocked(dns.lookup).mockResolvedValue({ address: '127.0.0.1', family: 4 });
+        vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:53' });
+        dnsResolver.resolve4.mockResolvedValue(['127.0.0.1']);
+        dnsResolver.setServers.mockImplementation(() => undefined);
     });
 
     it('recommends automatic fixes while prerequisites are available', () => {
@@ -202,11 +212,49 @@ describe('setup machine workflow', () => {
         mockSetupCommands({
             resolver: 'nameserver 127.0.0.1\n',
         });
+        vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:53' });
 
         const report = await checkSetup({ verbose: false } as any);
 
         expect(report.dns).toMatchObject({ ok: true });
         expect(fs.readFile).toHaveBeenCalledWith('/etc/resolver/stamhoofd', 'utf8');
+        expect(dnsResolver.setServers).toHaveBeenCalledWith(['127.0.0.1']);
+        expect(dnsResolver.resolve4).toHaveBeenCalledWith('dashboard.stamhoofd');
+    });
+
+    it('does not wait for macOS resolver lookup when CoreDNS is stopped', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({
+            resolver: 'nameserver 127.0.0.1\n',
+        });
+        vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: false, detail: '127.0.0.1:53' });
+
+        const report = await checkSetup({ verbose: false } as any);
+
+        expect(report.dns).toMatchObject({
+            ok: false,
+            manualFix: 'stam services up',
+            automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' },
+        });
+        expect(dns.lookup).not.toHaveBeenCalled();
+        expect(dnsResolver.resolve4).not.toHaveBeenCalled();
+    });
+
+    it('reports macOS direct CoreDNS query failures without OS resolver lookup', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({
+            resolver: 'nameserver 127.0.0.1\n',
+        });
+        vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:53' });
+        dnsResolver.resolve4.mockResolvedValue([]);
+
+        const report = await checkSetup({ verbose: false } as any);
+
+        expect(report.dns).toMatchObject({
+            ok: false,
+            manualFix: 'stam setup dns',
+        });
+        expect(dns.lookup).not.toHaveBeenCalled();
     });
 
     it('reports mismatching macOS resolver contents as manual DNS problem', async () => {
