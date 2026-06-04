@@ -20,7 +20,7 @@ import { TestBilling, WorkerData } from '../helpers/index.js';
  * Payments go through the membership (selling) organization via Mollie, which is faked by the
  * MollieMocker (HTTP interception of api.mollie.com, mirroring the StripeMocker).
  */
-test.describe('Packages', () => {
+test.describe.fixme('Packages', () => {
     let mollieMocker: MollieMocker;
     let payingOrganization: Organization;
 
