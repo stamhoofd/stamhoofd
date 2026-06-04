@@ -506,10 +506,6 @@ select.input {
     @media (max-width: 550px) {
         grid-template-columns: 1fr;
     }
-
-    @container st-view (max-width: 550px) {
-        grid-template-columns: 1fr;
-    }
 }
 
 .onboarding-option {
