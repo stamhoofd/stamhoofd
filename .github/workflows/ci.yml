@@ -14,9 +14,9 @@ on:
 
 # Cancel superseded runs on the same ref. We only cancel on pull_request events so
 # that pushes to main always run to completion (and keep their full check history).
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# concurrency:
+#   group: ci-${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   NODE_VERSION: 22
