@@ -1,0 +1,17 @@
+{
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["https://trace.playwright.dev"],
+      "AllowedMethods": ["GET", "HEAD"],
+      "AllowedHeaders": ["*"],
+      "ExposeHeaders": [
+        "Content-Length",
+        "Content-Range",
+        "Accept-Ranges",
+        "ETag",
+        "Content-Type"
+      ],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}

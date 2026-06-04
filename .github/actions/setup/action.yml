@@ -1,0 +1,28 @@
+name: 'Setup Node & Yarn'
+description: 'Set up Node.js with the yarn download cache, pin the yarn version and install dependencies.'
+
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+  production:
+    description: 'Install production dependencies only (--production)'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Use Node.js ${{ inputs.node-version }}
+      uses: actions/setup-node@v5
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'yarn'
+        cache-dependency-path: 'yarn.lock'
+    - name: Use correct yarn version
+      shell: bash
+      run: yarn policies set-version 1.22.19
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --prefer-offline --frozen-lockfile ${{ inputs.production == 'true' && '--production' || '' }}

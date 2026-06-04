@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ main ]
 
+# Cancel superseded runs on the same ref. We only cancel on pull_request events so
+# that pushes to main always run to completion (and keep their full check history).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   NODE_VERSION: 22
 
@@ -19,7 +25,7 @@ jobs:
   job_setup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Determine changed packages
         uses: AurorNZ/paths-filter@v3.0.1
@@ -49,10 +55,34 @@ jobs:
       changed_sql: ${{ steps.changed.outputs.sql }}
       changed_frontend: ${{ steps.changed.outputs.frontend }}
 
+  # Build all shared TypeScript packages exactly once and share the compiled output
+  # (dist + tsbuildinfo) with every downstream job via an artifact. This removes the
+  # duplicated `yarn build:shared` step from each consumer job.
+  job_build_shared:
+    name: 'Build shared packages'
+    runs-on: ubuntu-latest
+    needs: [job_setup]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Build shared packages
+        run: yarn build:shared
+      - name: Upload shared build output
+        uses: actions/upload-artifact@v6
+        with:
+          name: shared-dist
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            shared/*/dist
+            shared/*/*.tsbuildinfo
+            backend/shared/*/dist
+            backend/shared/*/*.tsbuildinfo
+
   job_test_backend:
     name: 'Backend API Tests'
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_backend == 'true'
     services:
       mysql:
@@ -68,24 +98,18 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Linting
         run: cd backend/app/api && yarn lint --quiet
       - name: Run tests
         run: cd backend/app/api && yarn build && yarn test --bail=1
       - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v3
         if: failure() && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -106,11 +130,11 @@ jobs:
                   value: "click_me"
                   url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
                   action_id: "button-action"
-  
+
   job_test_models:
     name: 'Backend Models Tests'
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_models == 'true'
     services:
       mysql:
@@ -126,24 +150,18 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Linting
         run: cd backend/shared/models && yarn lint --quiet
       - name: Run tests
         run: cd backend/shared/models && yarn build && yarn test --bail=1
       - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v3
         if: failure() && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -168,7 +186,7 @@ jobs:
   job_test_sql:
     name: 'Backend SQL Tests'
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_sql == 'true'
     services:
       mysql:
@@ -184,24 +202,18 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Linting
         run: cd backend/shared/sql && yarn lint --quiet
       - name: Run tests
         run: cd backend/shared/sql && yarn test --bail=1
       - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v3
         if: failure() && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -226,27 +238,21 @@ jobs:
   job_test_structures:
     name: 'Structures Tests'
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_structures == 'true'
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:global:shared
+          name: shared-dist
       - name: Linting
         run: cd shared/structures && yarn lint --quiet
       - name: Run tests
         run: cd shared/structures && yarn test --bail=1
       - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v3
         if: failure() && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -267,11 +273,11 @@ jobs:
                   value: "click_me"
                   url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
                   action_id: "button-action"
-  
+
   job_boot:
     name: 'API boot and shutdown'
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     services:
       mysql:
         image: mysql:8.4
@@ -286,18 +292,12 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: For building, we need development dependencies - install them
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Build API
         run: cd backend/app/api && yarn build
       - name: Remove all installed dependencies
@@ -309,7 +309,7 @@ jobs:
       - name: Run boot test
         run: NODE_ENV=test bash tests/boot/boot-test.sh
       - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v3
         if: failure() && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -330,30 +330,24 @@ jobs:
                   value: "click_me"
                   url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
                   action_id: "button-action"
-  
+
   job_test_lint_typecheck_checking:
     name: 'Lint and Typecheck'
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Build shared packages
-        run: yarn build:shared
+          name: shared-dist
       - name: Run type checking
         run: yarn -s typecheck
       - name: Run type linting
         run: yarn -s lint
       - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v3
         if: failure() && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -378,27 +372,26 @@ jobs:
   job_test_components_vitest:
     name: 'Components Browser Tests'
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_frontend == 'true'
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-      - name: Use correct yarn version
-        run: yarn policies set-version 1.22.19
-      - name: Install dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Install Playwright Browsers
         run: yarn playwright install --with-deps chromium
-      - name: Build shared packages
-        run: yarn build:shared
+      - name: Download shared build output
+        uses: actions/download-artifact@v7
+        with:
+          name: shared-dist
       - name: Run components browser tests
         run: cd frontend/shared/components && yarn vitest run
       - name: Notify Slack of failure
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v3
         if: failure() && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -424,8 +417,14 @@ jobs:
     name: 'Playwright Tests'
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    needs: [job_setup]
+    needs: [job_setup, job_build_shared]
     if: needs.job_setup.outputs.changed_backend == 'true' || needs.job_setup.outputs.changed_frontend == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      SPACES_CI_BUCKET: stamhoofd-ci-traces
+      SPACES_CI_REGION: ams3
     services:
       mysql:
         image: mysql:8.4
@@ -440,18 +439,11 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ env.NODE_VERSION }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'yarn'
-        cache-dependency-path: 'yarn.lock'
-    - name: Use correct yarn version
-      run: yarn policies set-version 1.22.19
+    - uses: actions/checkout@v5
+    - uses: ./.github/actions/setup
     - name: Restore CoreDNS cache
       id: cache-coredns
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: .coredns
         key: coredns-v1.13.1
@@ -508,13 +500,16 @@ jobs:
     # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
     - name: Install libnss3-tools
       run: sudo apt-get update && sudo apt-get install -y libnss3-tools
-    - name: Install dependencies
-      run: yarn install --prefer-offline --frozen-lockfile
+    - name: Cache Playwright browsers
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps --no-shell
     - name: Cache Caddy
       id: caddy-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: /usr/local/bin/caddy
         key: caddy-${{ runner.os }}-v2.10.2
@@ -535,45 +530,52 @@ jobs:
 
     # Add chrome certificates to nss
     - name: Create initial NSS database for Chromium
-      run: | 
+      run: |
         mkdir -p $HOME/.pki/nssdb
         certutil -N -d sql:$HOME/.pki/nssdb --empty-password
     - name: Add trusted CA certificate to NSS
       run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
-    - name: Build shared packages
-      run: yarn build:shared
+    - name: Download shared build output
+      uses: actions/download-artifact@v7
+      with:
+        name: shared-dist
     - name: Build API
       run: cd backend/app/api && yarn build:playwright:pre
     - name: Run Playwright tests
       run: cd tests/playwright && yarn -s test
     - name: Upload Playwright artifacts
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: playwright-traces
         path: |
             tests/playwright/playwright-report
             tests/playwright/test-results
         retention-days: 1
+    - name: Publish traces to Spaces & build notifications
+      if: failure()
+      working-directory: tests/playwright
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_CI_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_CI_SECRET }}
+        HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        AUTHOR: ${{ github.event.head_commit.author.name }}
+        COMMIT_URL: ${{ github.event.head_commit.url }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: bash scripts/publish-traces.sh
     - name: Notify Slack of failure
-      uses: slackapi/slack-github-action@v2.0.0
+      uses: slackapi/slack-github-action@v3
       if: failure() && github.event_name != 'pull_request'
       with:
         webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
         webhook-type: incoming-webhook
-        payload: |
-            text: "Playwright tests failed"
-            blocks:
-              - type: "section"
-                text:
-                  type: "mrkdwn"
-                  text: "@channel *Playwright tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
-                accessory:
-                  type: "button"
-                  text:
-                    type: "plain_text"
-                    text: "Open commit"
-                    emoji: false
-                  value: "click_me"
-                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
-                  action_id: "button-action"
+        payload-file-path: ${{ runner.temp }}/slack-payload.json
+    - name: Comment trace links on PR
+      if: failure() && github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" --edit-last \
+          || gh pr comment "$PR_NUMBER" --body-file "${RUNNER_TEMP}/pr-comment.md" \
+          || echo "Could not post PR comment (read-only token on fork PR?)"

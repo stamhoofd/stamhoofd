@@ -37,7 +37,7 @@ process.on('unhandledRejection', (error: Error) => {
 // Set version of saved structures
 Column.setJSONVersion(Version);
 
-// Set timezone
+// Set timezone to UTC
 process.env.TZ = 'UTC';
 
 if (STAMHOOFD.environment === 'development') {
