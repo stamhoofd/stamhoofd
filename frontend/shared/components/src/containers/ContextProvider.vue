@@ -9,8 +9,6 @@
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { appToUri  } from '@stamhoofd/structures';
-import type { AppType} from '@stamhoofd/structures';
 import { isReactive } from 'vue';
 
 @Component({
@@ -26,18 +24,8 @@ import { isReactive } from 'vue';
 
         if (!this.context.stamhoofd_app) {
             console.error('Missing stamhoofd_app in ContextProvider.context');
-        }
-        else if (!this.context.$context) {
+        } else if (!this.context.$context) {
             console.error('Missing $context in ContextProvider.context');
-        }
-        else {
-            if (this.context.stamhoofd_app === 'webshop') {
-                this.context.reactive_navigation_url = '/';
-            }
-            else {
-                // Build reactive url
-                this.context.reactive_navigation_url = appToUri(this.context.stamhoofd_app as unknown as AppType) + (this.context.$context.organization && !STAMHOOFD.singleOrganization ? '/' + this.context.$context.organization!.uri : '');
-            }
         }
 
         return this.context;

@@ -3,14 +3,9 @@ import type { Service } from '../Service.js';
 export function build(service: Service): any {
     if ('frontend' in service) {
         switch (service.frontend) {
-            case 'dashboard': {
+            case 'web-app': {
                 return {
                     PORT: 8080,
-                };
-            }
-            case 'registration': {
-                return {
-                    PORT: 8081,
                 };
             }
             case 'webshop': {

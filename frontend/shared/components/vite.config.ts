@@ -9,7 +9,7 @@ process.env.TZ = 'UTC';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 export default defineConfig({
     ...await buildConfig({
-        name: 'dashboard',
+        name: 'web-app',
         port: 0,
     }),
 } as any);

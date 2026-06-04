@@ -50,17 +50,15 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import Checkbox from '#inputs/Checkbox.vue';
-import ConfirmEmailView from '#auth/ConfirmEmailView.vue';
 import EmailInput from '#inputs/EmailInput.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';
+import { useAppNavigate } from '#hooks/useAppNavigate.ts';
 import LoadingButton from '#navigation/LoadingButton.vue';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import PasswordStrength from '#inputs/PasswordStrength.vue';
-import { ReplaceRootEventBus } from '#overlays/ModalStackEventBus.ts';
 import Spinner from '#Spinner.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STFloatingFooter from '#navigation/STFloatingFooter.vue';
@@ -71,7 +69,7 @@ import { Validator } from '#errors/Validator.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
 import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { NewUser, Token } from '@stamhoofd/structures';
+import { AppRoute, NewUser, Token } from '@stamhoofd/structures';
 import SignupPoliciesBox from './components/SignupPoliciesBox.vue';
 
 // The header component detects if the user scrolled past the header position and adds a background gradient in an animation
@@ -264,35 +262,29 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
 
             // todo: switch current $context to session
 
-            // If email has been changed or needs verification
-            let initialPresents: PushOptions[] = [];
-            if (verificationToken) {
-                // Present instead of show, because the confirm is only needed to change the email address
-                initialPresents = [
-                    {
-                        components: [
-                            new ComponentWithProperties(ConfirmEmailView, { token: verificationToken, email: this.email }),
-                        ],
-                        modalDisplayStyle: 'sheet',
-                    },
-                ];
-            }
-
             if (this.hasAccount) {
-                const toast = new Toast($t(`%12U`), 'success green');
-                toast.show();
-            }
-            else {
-                const toast = new Toast($t(`%uy`), 'success green');
-                toast.show();
+                new Toast($t(`%12U`), 'success green').show();
+            } else {
+                new Toast($t(`%uy`), 'success green').show();
             }
 
-            const dashboard = await import('@stamhoofd/dashboard');
-            const root = await dashboard.getScopedAutoRoot(this.session, {
-                initialPresents,
-            });
+            const appNavigate = useAppNavigate();
+            const org = this.session.organization;
 
-            await ReplaceRootEventBus.sendEvent('replace', root);
+            if (verificationToken) {
+                const query = new URLSearchParams({ token: verificationToken, email: this.email });
+                if (org) {
+                    await appNavigate(AppRoute.OrgScopedVerifyEmail, { properties: { organization: org }, query });
+                } else {
+                    await appNavigate(AppRoute.UnscopedVerifyEmail, { query });
+                }
+            } else {
+                if (org) {
+                    await appNavigate(AppRoute.OrgScopedAuto, { properties: { organization: org } });
+                } else {
+                    await appNavigate(AppRoute.UnscopedAuto);
+                }
+            }
 
             await this.dismiss({ force: true });
             this.loading = false;

@@ -1,0 +1,48 @@
+// import 'core-js/stable'; // only needed for entry or 'false' useBuiltIns
+// import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
+
+// Load icon font
+import 'virtual:vite-svg-2-webfont.css';
+
+// Continue
+import { ViewportHelper } from '@stamhoofd/components/ViewportHelper.ts';
+import { VueGlobalHelper } from '@stamhoofd/components/VueGlobalHelper.ts';
+import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { AppManager } from '@stamhoofd/networking/AppManager';
+import { createApp } from 'vue';
+
+import App from './src/App.vue';
+
+const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
+
+document.body.classList.add((AppManager.shared.isNative ? 'native-' : 'web-') + AppManager.shared.getOS());
+
+const app = createApp(App);
+VueGlobalHelper.setup(app);
+
+const i18n = I18nController.getI18n();
+app.use(i18n);
+
+if (!isPrerender) {
+    ViewportHelper.setup(true);
+}
+
+if (!isPrerender && STAMHOOFD.PLAUSIBLE_DOMAIN && STAMHOOFD.environment === 'production') {
+    const script = document.createElement('script');
+    script.onload = function () {
+        // do stuff with the script
+        console.log('Plausible loaded');
+    };
+    script.setAttribute('data-domain', STAMHOOFD.PLAUSIBLE_DOMAIN);
+    script.src = 'https://plausible.io/js/plausible.js';
+    document.head.appendChild(script); // or something of the likes
+    const w = window as any;
+    w.plausible = w.plausible || function (...args: unknown[]) { (w.plausible.q = w.plausible.q || []).push(args); };
+}
+else {
+    (window as any).plausible = function (...args: unknown[]) {
+        console.log('Debug plausible with args ', args);
+    };
+}
+
+app.mount('#app');

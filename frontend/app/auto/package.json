@@ -1,15 +1,10 @@
 {
-    "name": "@stamhoofd/dashboard",
+    "name": "@stamhoofd/auto",
     "version": "1.0.0",
     "private": true,
     "type": "module",
     "main": "./src/exports.ts",
     "scripts": {
-        "dev:build": "yarn -s build",
-        "build": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=development ENV_FILE=../../.env.json vite build",
-        "build:playwright": "NODE_OPTIONS=\"--max-old-space-size=4096 --max-semi-space-size=128\" NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
-        "build:production": "yarn -s typecheck && NODE_OPTIONS=\"--max-old-space-size=8192 --max-semi-space-size=128\" NODE_ENV=production vite build",
-        "test": "yarn -s typecheck",
         "lint": "eslint",
         "typecheck": "vue-tsc --noEmit"
     },
@@ -18,7 +13,6 @@
     ],
     "dependencies": {
         "@stamhoofd/assets": "*",
-        "@stamhoofd/utility": "*",
         "@stamhoofd/components": "*",
         "@stamhoofd/document-helper": "*",
         "@stamhoofd/frontend-excel-export": "*",
@@ -28,6 +22,6 @@
         "@stamhoofd/networking": "*",
         "@stamhoofd/scss": "*",
         "@stamhoofd/structures": "*",
-        "qr-scanner": "^1.3.0"
+        "@stamhoofd/utility": "*"
     }
 }

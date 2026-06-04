@@ -23,6 +23,7 @@ export * from './PriceBreakdown.js';
 
 // General
 export * from './AppType.js';
+export * from './AppRoute.js';
 export * from './Language.js';
 export * from './TranslatedString.js';
 export * from './AccessRight.js';

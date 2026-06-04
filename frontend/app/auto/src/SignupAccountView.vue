@@ -59,25 +59,22 @@
 
 <script lang="ts" setup>
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, useDismiss } from '@simonbackx/vue-app-navigation';
-import ConfirmEmailView from '@stamhoofd/components/auth/ConfirmEmailView.vue';
+import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';
+import { useAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import PasswordInput from '@stamhoofd/components/inputs/PasswordInput.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
-import { ReplaceRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
 import { SessionManager } from '@stamhoofd/networking/SessionManager';
+import { AppRoute } from '@stamhoofd/structures';
 import type { Organization } from '@stamhoofd/structures';
 import { ref } from 'vue';
-import { getScopedAutoRoot } from '../../getRootViews';
-import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
 
 const props = defineProps<{
     organization: Organization;
@@ -179,22 +176,11 @@ async function goNext() {
             console.error('Failed to add organization to storage', e);
         }
 
-        const session = new SessionContext(props.organization);
-
-        await SessionManager.prepareSessionForUsage(session, true);
-        const dashboardContext = await getScopedAutoRoot(session, {
-            initialPresents: [
-                {
-                    components: [
-                        new ComponentWithProperties(BoxedController, {
-                            root: new ComponentWithProperties(ConfirmEmailView, { token, email: email.value }),
-                        }),
-                    ],
-                },
-            ],
-        });
         await dismiss({ force: true });
-        await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
+        const appNavigate = useAppNavigate();
+        await appNavigate(AppRoute.OrgScopedVerifyEmail, {
+            properties: { organization: props.organization, token, email: email.value },
+        });
 
         // Show popup to confirm e-mail
     } catch (e) {

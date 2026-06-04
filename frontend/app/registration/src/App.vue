@@ -1,179 +1,90 @@
 <template>
-    <div id="app">
-        <ModalStackComponent ref="modalStack" :root="root" />
-        <ToastBox />
-    </div>
+    <ComponentWithPropertiesInstance :component="root" />
 </template>
 
-<script lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import type { PushOptions } from '@simonbackx/vue-app-navigation';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent } from '@simonbackx/vue-app-navigation';
-import { Component, VueComponent } from '@simonbackx/vue-app-navigation/classes';
-import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
-import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, ComponentWithPropertiesInstance, ModalStackComponent } from '@simonbackx/vue-app-navigation';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
-import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import CenteredMessageView from '@stamhoofd/components/overlays/CenteredMessageView.vue';
-import { ModalStackEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast';
-import ToastBox from '@stamhoofd/components/overlays/ToastBox.vue';
-import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
-import { SessionContext } from '@stamhoofd/networking/SessionContext';
-import { SessionManager } from '@stamhoofd/networking/SessionManager';
-import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
-import { Organization } from '@stamhoofd/structures';
-import { Language } from '@stamhoofd/types/Language';
-import { GoogleTranslateHelper } from '@stamhoofd/utility';
+import TabBarController from '@stamhoofd/components/containers/TabBarController.vue';
+import { TabBarItem } from '@stamhoofd/components/containers/TabBarItem.ts';
+import { manualFeatureFlag } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { computed } from 'vue';
 
-import { getRootView } from './getRootView';
-import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
+import CartView from './views/cart/CartView.vue';
+import MemberCommunicationView from './views/communication/MemberCommunicationView.vue';
+import EventsOverview from './views/events/EventsOverview.vue';
+import StartView from './views/start/StartView.vue';
+import { usePlatformManager, useMemberManager } from '@stamhoofd/networking';
+import { AuthenticatedView, getLoginRoot, useContext } from '@stamhoofd/components';
 
-@Component({
-    components: {
-        ToastBox,
-        ModalStackComponent,
-    },
-})
-export default class App extends VueComponent {
-    promise = async () => {
-        console.log('Fetching organization from domain...');
+const context = useContext();
+const platformManager = usePlatformManager();
+const memberManager = useMemberManager();
 
-        // get organization
-        try {
-            const response = await NetworkManager.server.request({
-                method: 'GET',
-                path: '/organization-from-domain',
-                query: {
-                    domain: window.location.hostname,
-                },
-                decoder: Organization as Decoder<Organization>,
-            });
+function wrapWithModalStack(component: ComponentWithProperties) {
+    return new ComponentWithProperties(ModalStackComponent, { root: component });
+}
 
-            // Do we need to redirect?
-            if (response.data.resolvedRegisterDomain && window.location.hostname.toLowerCase() !== response.data.resolvedRegisterDomain.toLowerCase()) {
-                // Redirect
-                window.location.href = UrlHelper.initial.getFullHref({ host: response.data.resolvedRegisterDomain });
-                return new ComponentWithProperties(LoadingView, {});
-            }
-            I18nController.skipUrlPrefixForLocale = 'nl-' + response.data.address.country;
+const root = new ComponentWithProperties(AuthenticatedView, {
+    loginRoot: wrapWithModalStack(getLoginRoot()),
+    root: wrapWithModalStack(getRoot()),
+});
 
-            if (!response.data.meta.modules.useMembers) {
-                throw new Error('Member module disabled');
-            }
-
-            // Set organization and session
-            const session = new SessionContext(response.data);
-            await session.loadFromStorage();
-
-            // Set color
-            if (response.data.meta.color) {
-                ColorHelper.setColor(response.data.meta.color);
-            }
-
-            await SessionManager.prepareSessionForUsage(session);
-
-            const parts = UrlHelper.shared.getParts();
-            const queryString = UrlHelper.shared.getSearchParams();
-
-            if (parts.length === 1 && parts[0] === 'verify-email') {
-                const token = queryString.get('token');
-                const code = queryString.get('code');
-
-                if (token && code) {
-                    UrlHelper.shared.clear();
-                    const toast = new Toast($t(`%IZ`), 'spinner').setHide(null).show();
-                    LoginHelper.verifyEmail(session, code, token).then(() => {
-                        toast.hide();
-                        new Toast($t(`%Ia`), 'success green').show();
-                    }).catch((e) => {
-                        toast.hide();
-                        CenteredMessage.fromError(e).addCloseButton().show();
-                    });
-                }
-            }
-
-            return getRootView(session, true);
-        }
-        catch (e) {
-            if (!I18nController.shared) {
-                try {
-                    await I18nController.loadDefault(null, undefined, Language.Dutch);
-                }
-                catch (e) {
-                    console.error(e);
-                }
-            }
-            if (isSimpleError(e) || isSimpleErrors(e)) {
-                if (!(e.hasCode('invalid_domain') || e.hasCode('unknown_organization'))) {
-                    Toast.fromError(e).show();
-
-                    return new ComponentWithProperties(InvalidOrganizationView, {
-                        errorBox: new ErrorBox(e),
-                    });
-                }
-            }
-            console.error(e);
-            return new ComponentWithProperties(InvalidOrganizationView, {});
-        }
-    };
-
-    root = new ComponentWithProperties(PromiseView, {
-        promise: this.promise,
+function getRoot() {
+    const startView = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(StartView, {}),
     });
 
-    created() {
-        if (GoogleTranslateHelper.isGoogleTranslateDomain(window.location.hostname)) {
-            // Enable translations
-            document.documentElement.translate = true;
-        }
+    const cartRoot = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(CartView, {}),
+    });
 
-        if (STAMHOOFD.environment === 'development') {
-            ComponentWithProperties.debug = true;
-        }
-        HistoryManager.activate();
-    }
+    const calendarTab = new TabBarItem({
+        id: 'events',
+        icon: 'calendar',
+        name: $t(`%uB`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EventsOverview, {}),
+        }),
+    });
 
-    mounted() {
-        ModalStackEventBus.addListener(this, 'present', async (options: PushOptions | ComponentWithProperties) => {
-            if (this.$refs.modalStack === undefined) {
-                // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                await this.$nextTick();
-            }
-            if (!(options as any).components) {
-                (this.$refs.modalStack as any).present({ components: [options] });
-            }
-            else {
-                (this.$refs.modalStack as any).present(options);
-            }
-        });
+    const communicationTab = new TabBarItem({
+        id: 'communication',
+        icon: 'email-filled',
+        name: $t(`%1DK`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberCommunicationView, {}),
+        }),
+    });
 
-        CenteredMessage.addListener(this, async (centeredMessage) => {
-            if (this.$refs.modalStack === undefined) {
-                // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                await this.$nextTick();
-            }
-            (this.$refs.modalStack as any).present({
-                components: [
-                    new ComponentWithProperties(CenteredMessageView, {
-                        centeredMessage,
-                    }, {
-                        forceCanHaveFocus: true,
+    return new ComponentWithProperties(PromiseView, {
+        promise: async function () {
+            await memberManager.loadMembers();
+            await memberManager.loadCheckout();
+            await memberManager.loadDocuments();
+
+            const enableEvents = platformManager.value.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', context.value);
+
+            return new ComponentWithProperties(TabBarController, {
+                tabs: [
+                    new TabBarItem({
+                        id: 'start',
+                        icon: 'home',
+                        name: $t(`%I`),
+                        component: startView,
+                    }),
+                    ...(enableEvents ? [calendarTab] : []),
+                    communicationTab,
+                    new TabBarItem({
+                        id: 'cart',
+                        icon: 'basket',
+                        name: $t(`%X5`),
+                        component: cartRoot,
+                        badge: computed(() => memberManager.family.checkout.cart.count === 0 ? '' : memberManager.family.checkout.cart.count.toFixed(0)),
                     }),
                 ],
-                modalDisplayStyle: 'overlay',
             });
-        });
-    }
+        },
+    });
 }
 </script>
-
-<style lang="scss">
-// We need to include the component styling of vue-app-navigation first
-@use "@stamhoofd/scss/main";
-@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
-</style>
