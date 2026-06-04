@@ -38,25 +38,26 @@ defineExpose({
         overflow: hidden;
         overflow: clip; // More modern + disables scrolling
         --saved-vh: var(--vh, 1vh);
-        background: $color-background-shade !important;
+        //background: $color-background-shade !important;
         padding: 20px 0;
         box-sizing: border-box;
 
         > .boxed-main {
             background: $color-background;
-            width: min(100vw, var(--st-sheet-width, 600px));
+            //width: min(100vw, var(--st-sheet-width, 500px));
             margin: 0 auto;
             border-radius: $border-radius-modals;
             overflow: hidden;
             --vh: calc((var(--saved-vh, 1vh) * 100 - 40px) / 100);
-            border: 1px solid $color-border-lighter;
+            //border: 1px solid $color-border-lighter;
             --st-horizontal-padding: var(--sheet-horizontal-padding, 30px);
             --st-vertical-padding: var(--sheet-vertical-padding, 30px);
 
             .st-view {
                 contain: content;
                 // We set explicit widths on all views inside a sheet, so we can animate width changes
-                width: min(100vw, var(--st-sheet-width, 600px));
+                width: min(100vw, var(--st-sheet-width, 500px));
+            margin: 0 auto;
 
                 // Automatic height
                 height: auto;

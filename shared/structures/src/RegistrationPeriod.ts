@@ -116,7 +116,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
             if (!options?.permissions) {
                 // Hide non public items
-                tree = tree.filterForDisplay(options?.admin ?? false, true, options?.smartCombine);
+                tree = tree.filterForDisplay(options?.admin ?? false, options?.smartCombine);
             }
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {
@@ -141,20 +141,6 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         // Broken setup here
         console.warn('Root category ID is missing in categories. Migration might be needed');
         return GroupCategoryTree.create({ });
-    }
-
-    /**
-     * @deprecated
-     */
-    isCategoryDeactivated(organization: Organization, category: GroupCategoryTree) {
-        if (organization.meta.packages.useActivities) {
-            return false;
-        }
-        const cleanedTree = this.getCategoryTree({ maxDepth: 1 });
-        if (cleanedTree.categories.find(c => c.id === category.id)) {
-            return false;
-        }
-        return true;
     }
 
     duplicate(newPeriod: RegistrationPeriod) {

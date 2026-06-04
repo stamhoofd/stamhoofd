@@ -56,7 +56,7 @@
                 </STList>
             </template>
 
-            <template v-if="enableActivities && categories.length">
+            <template v-if="categories.length">
                 <hr><h2>
                     {{ $t('%Z5') }}
                 </h2>
@@ -219,7 +219,7 @@ import SaveView from '#navigation/SaveView.vue';
 import Spinner from '#Spinner.vue';
 import type { Group, GroupCategory, PermissionRoleDetailed, User, WebshopPreview } from '@stamhoofd/structures';
 import { AccessRight, getUnlistedResources, maximumPermissionlevel, PermissionLevel, PermissionRoleForResponsibility, PermissionsResourceType } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
@@ -248,7 +248,6 @@ const props = withDefaults(
 const app = useAppContext();
 const enableWebshopModule = computed(() => (organization.value?.meta?.packages.useWebshops ?? false));
 const enableMemberModule = computed(() => organization.value?.meta?.packages.useMembers ?? false);
-const enableActivities = computed(() => organization.value?.meta?.packages.useActivities ?? false);
 const pop = usePop();
 const isForResponsibility = props.role instanceof PermissionRoleForResponsibility;
 const responsibility = computed(() => {
@@ -316,8 +315,7 @@ const save = async () => {
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -340,8 +338,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

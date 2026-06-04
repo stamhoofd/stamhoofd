@@ -84,14 +84,15 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import PlatformFooter from '@stamhoofd/components/auth/PlatformFooter.vue';
+import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
 import ContextLogo from '@stamhoofd/components/context/ContextLogo.vue';
 import PlatformLogo from '@stamhoofd/components/context/PlatformLogo.vue';
 import VersionFooter from '@stamhoofd/components/context/VersionFooter.vue';
 import { useAppData } from '@stamhoofd/components/context/appContext.ts';
-import type { Option} from '@stamhoofd/components/context/hooks/useContextOptions.ts';
+import type { Option } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
 import { useContextOptions } from '@stamhoofd/components/context/hooks/useContextOptions.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STGradientBackground from '@stamhoofd/components/icons/STGradientBackground.vue';
@@ -102,7 +103,7 @@ import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 
 const isNative = ref(AppManager.shared.isNative);
@@ -127,8 +128,7 @@ onMounted(async () => {
     // Update options when the default options change
     try {
         defaultOptions.value = await getAllOptions();
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load organization options:', e);
     }
 });
@@ -144,8 +144,7 @@ const help = () => {
         )
             .addCloseButton()
             .show();
-    }
-    else {
+    } else {
         new CenteredMessage(
             $t('%1AR'),
             $t('%1AT'),
@@ -224,8 +223,7 @@ const updateResults = async () => {
             return;
         }
         await setResults(cachedCount, response.data);
-    }
-    catch (e) {
+    } catch (e) {
         if (cachedCount !== counter) {
             // A new request have started already
             return;
@@ -275,7 +273,11 @@ defineRoutes([
     {
         url: 'aansluiten',
         name: Routes.Join,
-        component: async () => (await import('../signup/SignupGeneralView.vue')).default as any,
+        component: async (props) => {
+            return new ComponentWithProperties(BoxedController, {
+                root: new ComponentWithProperties((await import('../signup/SignupGeneralView.vue')).default as any, props),
+            });
+        },
         paramsToProps(_, query) {
             const code = query?.get('code');
             const organization = query?.get('org');

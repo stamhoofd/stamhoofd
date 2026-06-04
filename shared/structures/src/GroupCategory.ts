@@ -286,12 +286,12 @@ export class GroupCategoryTree extends GroupCategory {
      * Remove empty categories and non-public categories
      * @param admin Whether not-public categories should be visible
      */
-    filterForDisplay(admin = false, useActivities = true, smartCombine = false): GroupCategoryTree {
+    filterForDisplay(admin = false, smartCombine = false): GroupCategoryTree {
         const categories = this.categories.flatMap((category) => {
             if (!admin && !category.settings.public) {
                 return [];
             }
-            const filtered = category.filterForDisplay(admin, useActivities);
+            const filtered = category.filterForDisplay(admin);
             if (smartCombine && filtered.groups.length == 0 && filtered.categories.length == 0) {
                 return [];
             }
@@ -300,7 +300,7 @@ export class GroupCategoryTree extends GroupCategory {
 
         return GroupCategoryTree.create(
             Object.assign({}, this, {
-                categories: (useActivities || categories.length == 0) ? categories : [categories[0]],
+                categories,
             }),
         );
     }

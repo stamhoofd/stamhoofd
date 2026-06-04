@@ -41,11 +41,10 @@
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
                         <span :class="'icon ' + getCategoryIcon(category)" />
                         <span>{{ category.settings.name }}</span>
-                        <span v-if="isCategoryDeactivated(category)" class="icon error red right-icon" :v-tooltip="$t('%WL')" />
-                        <span v-else-if="category.groups.length || category.categories.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(category.id)}" @click.stop="collapsed.toggle(category.id)" />
+                        <span v-if="category.groups.length || category.categories.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: collapsed.isCollapsed(category.id)}" @click.stop="collapsed.toggle(category.id)" />
                     </button>
 
-                    <div :class="{collapsable: true, hide: collapsed.isCollapsed(category.id) || isCategoryDeactivated(category)}">
+                    <div :class="{collapsable: true, hide: collapsed.isCollapsed(category.id)}">
                         <button v-for="c in category.categories" :key="c.id" class="menu-button button sub-button" :class="{ selected: checkRoute(Routes.Category, {properties: {category: c, period}}) }" type="button" @click="$navigate(Routes.Category, {properties: {category: c, period}})">
                             <span class="icon" />
                             <span>{{ c.settings.name }}</span>
@@ -175,10 +174,6 @@ const getCategoryIcon = (category: GroupCategoryTree) => {
     }
 
     return 'group';
-};
-
-const isCategoryDeactivated = (category: GroupCategoryTree) => {
-    return period.value.isCategoryDeactivated($organization.value!, category);
 };
 
 const showAll = computed(() => {

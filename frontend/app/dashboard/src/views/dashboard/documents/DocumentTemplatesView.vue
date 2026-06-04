@@ -14,10 +14,6 @@
                 {{ $t(`%tw`) }}
             </h1>
 
-            <p v-if="disableActivities" class="error-box">
-                {{ $t('%Kl') }}
-            </p>
-
             <p class="style-description">
                 {{ $t('%Km') }}
             </p>
@@ -205,14 +201,7 @@ function blurFocus() {
     (document.activeElement as HTMLElement)?.blur();
 }
 
-const disableActivities = computed(() => organization.value.meta.packages.disableActivities);
-
 function addDocument() {
-    if (organization.value.meta.packages.disableActivities) {
-        new Toast($t('%5a'), 'error red').show();
-        return;
-    }
-
     let year: number;
 
     if (typeof selectedTab.value === 'number') {

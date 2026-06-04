@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save" v-on="canDeleteOrRename && !isNew && !isRoot && enableActivities ? {delete: deleteMe} : {}">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save" v-on="canDeleteOrRename && !isNew && !isRoot ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
 
@@ -8,7 +8,7 @@
             </span>
         </h1>
 
-        <p v-if="isRoot && enableActivities">
+        <p v-if="isRoot">
             {{ $t('%LE') }} {{ patchedPeriod.period.name }}{{ $t('%LF') }}
         </p>
 
@@ -26,19 +26,17 @@
             </Checkbox>
         </template>
 
-        <template v-if="enableActivities">
-            <Checkbox v-if="categories.length === 0" v-model="limitRegistrations">
-                {{ $t('%LI') }}
-            </Checkbox>
+        <Checkbox v-if="categories.length === 0" v-model="limitRegistrations">
+            {{ $t('%LI') }}
+        </Checkbox>
 
-            <Checkbox v-if="!isRoot" v-model="isHidden">
-                {{ $t('%LJ') }}
-            </Checkbox>
+        <Checkbox v-if="!isRoot" v-model="isHidden">
+            {{ $t('%LJ') }}
+        </Checkbox>
 
-            <p v-if="!isRoot && !isHidden && !isPublic" class="warning-box">
-                {{ $t('%LK') }}
-            </p>
-        </template>
+        <p v-if="!isRoot && !isHidden && !isPublic" class="warning-box">
+            {{ $t('%LK') }}
+        </p>
 
         <template v-if="categories.length > 0">
             <hr><h2>{{ $t('%LL') }}</h2>
@@ -68,7 +66,7 @@
                 <span>{{ $t('%LD') }}</span>
             </button>
         </p>
-        <p v-if="enableActivities">
+        <p>
             <button class="button text" type="button" @click="createCategory">
                 <span class="icon add" />
                 <span v-if="groups.length === 0">{{ $t('%LN') }}</span>
@@ -124,7 +122,6 @@ if (!props.periods.find(p => p.id !== props.period.id)) {
     throw new Error('Cannot use EditCategoryGroupsView with a periods array not including period');
 }
 
-const enableActivities = computed(() => props.organization.meta.modules.useActivities);
 const saving = ref(false);
 const pop = usePop();
 const errors = useErrors();

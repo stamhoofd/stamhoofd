@@ -142,20 +142,6 @@ export class OrganizationPackages extends AutoEncoder {
         return 0;
     }
 
-    /**
-     * @deprecated
-     */
-    get disableActivities() {
-        return !this.useActivities;
-    }
-
-    /**
-     * @deprecated
-     */
-    get useActivities(): boolean {
-        return this.isActive(STPackageType.Members) || this.isActive(STPackageType.TrialMembers);
-    }
-
     get isPaid() {
         return this.isActive(STPackageType.Members) || this.isActive(STPackageType.LegacyMembers) || this.isActive(STPackageType.Webshops) || this.isActive(STPackageType.SingleWebshop);
     }
