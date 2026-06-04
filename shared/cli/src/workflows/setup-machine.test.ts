@@ -370,7 +370,14 @@ function mockSetupCommands(options: { dns?: string; domains?: string; query?: st
             }
             return options.resolver;
         }
-        throw new Error(`Unexpected readFile: ${String(filePath)}`);
+        const unexpectedPath = typeof filePath === 'string'
+            ? filePath
+            : Buffer.isBuffer(filePath)
+                ? filePath.toString('utf8')
+                : filePath instanceof URL
+                    ? filePath.href
+                    : '<file handle>';
+        throw new Error(`Unexpected readFile: ${unexpectedPath}`);
     });
     vi.spyOn(fs, 'writeFile').mockResolvedValue(undefined as any);
     vi.spyOn(fs, 'rm').mockResolvedValue(undefined as any);
