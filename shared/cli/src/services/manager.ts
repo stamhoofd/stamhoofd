@@ -4,12 +4,21 @@ import { stripVTControlCharacters } from 'node:util';
 import type { CliContext } from '../context/create-context.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { liveTable, spinnerCell, statusCell, step, table } from '../runtime/ux.js';
+import { CliStatus } from '../runtime/status.js';
 import { ContainerStoppedError } from './docker-service.js';
 import type { ServiceDefinition, ServiceStartResult, ServiceStatus } from './service.js';
 
+enum ServiceTableRowStatus {
+    Starting = 'starting',
+    Stopping = 'stopping',
+    Running = 'running',
+    Stopped = 'stopped',
+    Failed = 'failed',
+}
+
 type ServiceTableRow = {
     name: string;
-    status: 'starting' | 'stopping' | 'running' | 'stopped' | 'failed';
+    status: ServiceTableRowStatus;
     detail: string;
     login?: string;
 };
@@ -51,7 +60,7 @@ export async function startServices<TOptions>(context: CliContext, services: Rea
 }
 
 export async function startServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = {}): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
-    const results = await runServicesInteractive(services, 'starting', async (service) => {
+    const results = await runServicesInteractive(services, ServiceTableRowStatus.Starting, async (service) => {
         const before = await service.status(context);
         const result = await service.start(context, optionsByKey[service.key] as TOptions);
         const after = await service.status(context);
@@ -69,9 +78,9 @@ export async function startServicesInteractive<TOptions>(context: CliContext, se
 }
 
 export async function restartServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = {}): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
-    const results = await runServicesInteractive(services, 'stopping', async (service, row) => {
+    const results = await runServicesInteractive(services, ServiceTableRowStatus.Stopping, async (service, row) => {
         await service.stop(context);
-        row.setRow({ name: service.name, status: 'starting', detail: 'starting' });
+        row.setRow({ name: service.name, status: ServiceTableRowStatus.Starting, detail: ServiceTableRowStatus.Starting });
         const result = await service.start(context, optionsByKey[service.key] as TOptions);
         const after = await service.status(context);
 
@@ -94,7 +103,7 @@ export async function stopServices<TOptions>(context: CliContext, services: Read
 }
 
 export async function stopServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>): Promise<void> {
-    await runServicesInteractive(services, 'stopping', async (service) => {
+    await runServicesInteractive(services, ServiceTableRowStatus.Stopping, async (service) => {
         const message = await service.stop(context);
         const after = await service.status(context);
 
@@ -107,15 +116,15 @@ export async function stopServicesInteractive<TOptions>(context: CliContext, ser
 
 export async function printServicesStatus<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>): Promise<void> {
     const rows = await getServicesStatus(context, services);
-    table(['Service', 'Status', 'Access', 'Login'], rows.map(row => [row.name, statusCell(row.running ? 'running' : 'stopped'), row.running ? row.detail : 'Run stam services up', row.login ?? '-']), { title: 'Shared services' });
+    table(['Service', 'Status', 'Access', 'Login'], rows.map(row => [row.name, statusCell(row.running ? CliStatus.Running : CliStatus.Stopped), row.running ? row.detail : 'Run stam services up', row.login ?? '-']), { title: 'Shared services' });
 }
 
 function formatServiceTableRow(row: ServiceTableRow, frame: number): string[] {
-    if (row.status === 'starting' || row.status === 'stopping') {
+    if (row.status === ServiceTableRowStatus.Starting || row.status === ServiceTableRowStatus.Stopping) {
         return [row.name, spinnerCell(row.status, frame), spinnerCell(row.detail, frame), row.login ?? '-'];
     }
 
-    return [row.name, statusCell(row.status === 'running' ? 'running' : row.status === 'stopped' ? 'stopped' : 'failed'), row.detail, row.login ?? '-'];
+    return [row.name, statusCell(row.status === ServiceTableRowStatus.Running ? CliStatus.Running : row.status === ServiceTableRowStatus.Stopped ? CliStatus.Stopped : CliStatus.Failed), row.detail, row.login ?? '-'];
 }
 
 async function runServicesInteractive<T, TOptions>(services: ReadonlyArray<ServiceDefinition<TOptions>>, initialStatus: ServiceTableRow['status'], task: (service: ServiceDefinition<TOptions>, context: ServiceTaskContext) => Promise<ServiceTaskResult<T>>): Promise<T[]> {
@@ -143,7 +152,7 @@ async function runServicesInteractive<T, TOptions>(services: ReadonlyArray<Servi
             catch (error) {
                 rows[index] = {
                     name: service.name,
-                    status: 'failed',
+                    status: ServiceTableRowStatus.Failed,
                     detail: formatFailureDetail(error),
                 };
                 throw error;
@@ -213,7 +222,7 @@ function visibleLength(value: string): number {
 function serviceStatusToTableRow(status: ServiceStatus, fallbackDetail: string): ServiceTableRow {
     return {
         name: status.name,
-        status: status.running ? 'running' : 'stopped',
+        status: status.running ? ServiceTableRowStatus.Running : ServiceTableRowStatus.Stopped,
         detail: status.running ? status.detail : fallbackDetail,
         login: status.login,
     };

@@ -1,10 +1,16 @@
+import fs from 'node:fs/promises';
+import dns from 'node:dns/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run } from '../runtime/command-runner.js';
 import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
-import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup } from './setup-machine.js';
+import { checkSetup, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, setupCaddy, setupDns, SetupAutomaticFixKey } from './setup-machine.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
+
+vi.mock('node:dns/promises', () => ({
+    default: { lookup: vi.fn() },
+}));
 
 vi.mock('../runtime/command-runner.js', () => ({
     run: vi.fn(),
@@ -14,7 +20,8 @@ vi.mock('../services/definitions/coredns-service.js', () => ({
     corednsService: { status: vi.fn() },
 }));
 
-vi.mock('../services/docker.js', () => ({
+vi.mock('../services/docker.js', async (importOriginal) => ({
+    ...await importOriginal<typeof import('../services/docker.js')>(),
     getContainerRuntime: vi.fn(),
     containerIsRunning: vi.fn(),
 }));
@@ -25,29 +32,33 @@ vi.mock('../runtime/ux.js', async (importOriginal) => ({
 }));
 
 describe('setup machine workflow', () => {
+    const platform = process.platform;
+
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(docker.getContainerRuntime).mockResolvedValue('docker');
+        setPlatform(platform);
+        vi.mocked(docker.getContainerRuntime).mockResolvedValue(docker.ContainerRuntime.Docker);
         vi.mocked(docker.containerIsRunning).mockResolvedValue(false);
+        vi.mocked(dns.lookup).mockResolvedValue({ address: '127.0.0.1', family: 4 });
     });
 
     it('recommends automatic fixes while prerequisites are available', () => {
         const report = setupReport({
-            dns: missingAutomatic('dns', 'Configure local DNS'),
-            cert: missingAutomatic('cert', 'Trust local HTTPS certificates'),
+            dns: missingAutomatic(SetupAutomaticFixKey.Dns, 'Configure local DNS'),
+            cert: missingAutomatic(SetupAutomaticFixKey.Cert, 'Trust local HTTPS certificates'),
         });
 
         expect(getRecommendedSetupFixes(report)).toEqual([
-            { key: 'dns', label: 'Configure local DNS' },
-            { key: 'cert', label: 'Trust local HTTPS certificates' },
+            { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' },
+            { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' },
         ]);
     });
 
     it('does not recommend automatic fixes after a missing manual prerequisite', () => {
         const report = setupReport({
             caddy: missingManual('caddy not found'),
-            dns: missingAutomatic('dns', 'Configure local DNS'),
-            cert: missingAutomatic('cert', 'Trust local HTTPS certificates'),
+            dns: missingAutomatic(SetupAutomaticFixKey.Dns, 'Configure local DNS'),
+            cert: missingAutomatic(SetupAutomaticFixKey.Cert, 'Trust local HTTPS certificates'),
         });
 
         expect(getRecommendedSetupFixes(report)).toEqual([]);
@@ -55,12 +66,12 @@ describe('setup machine workflow', () => {
 
     it('keeps earlier automatic fixes but stops at the first manual blocker', () => {
         const report = setupReport({
-            dns: missingAutomatic('dns', 'Configure local DNS'),
+            dns: missingAutomatic(SetupAutomaticFixKey.Dns, 'Configure local DNS'),
             cert: missingManual('Caddy local CA not found'),
         });
 
         expect(getRecommendedSetupFixes(report)).toEqual([
-            { key: 'dns', label: 'Configure local DNS' },
+            { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' },
         ]);
     });
 
@@ -80,7 +91,7 @@ describe('setup machine workflow', () => {
         expect(report.dns).toMatchObject({
             ok: false,
             manualFix: 'stam setup dns',
-            automaticFix: { key: 'dns', label: 'Configure local DNS' },
+            automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' },
         });
         expect(corednsService.status).not.toHaveBeenCalled();
     });
@@ -98,7 +109,7 @@ describe('setup machine workflow', () => {
         expect(report.dns).toMatchObject({
             ok: false,
             manualFix: 'stam services up',
-            automaticFix: { key: 'services', label: 'Start shared services' },
+            automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' },
         });
     });
 
@@ -144,30 +155,116 @@ describe('setup machine workflow', () => {
         expect(messages).not.toContain('?');
     });
 
-    it('skips Podman port redirect checks for Docker', async () => {
+    it('requires privileged port redirects on Linux for Docker', async () => {
         mockSetupCommands({
             dns: 'Global: 127.0.0.1:1053\n',
             domains: 'Global: ~stamhoofd\n',
+            missingRedirects: true,
         });
 
         const report = await checkSetup({ verbose: false } as any);
 
-        expect(report.podmanPorts).toEqual({ ok: true, details: 'not needed for docker' });
+        expect(report.privilegedPorts).toMatchObject({
+            ok: false,
+            automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' },
+        });
     });
 
-    it('recommends Podman port redirects when iptables rules are missing', async () => {
-        vi.mocked(docker.getContainerRuntime).mockResolvedValue('podman');
+    it('requires privileged port redirects on Linux for Podman', async () => {
+        vi.mocked(docker.getContainerRuntime).mockResolvedValue(docker.ContainerRuntime.Podman);
         mockSetupCommands({
             dns: 'Global: 127.0.0.1:1053\n',
             domains: 'Global: ~stamhoofd\n',
+            missingRedirects: true,
         });
 
         const report = await checkSetup({ verbose: false } as any);
 
-        expect(report.podmanPorts).toMatchObject({
+        expect(report.privilegedPorts).toMatchObject({
             ok: false,
-            automaticFix: { key: 'podman-ports', label: 'Configure Podman port redirects' },
+            automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' },
         });
+    });
+
+    it('skips privileged port redirects on macOS', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({
+            resolver: 'nameserver 127.0.0.1\n',
+        });
+
+        const report = await checkSetup({ verbose: false } as any);
+
+        expect(report.privilegedPorts).toEqual({ ok: true, details: 'not needed for docker' });
+    });
+
+    it('checks macOS resolver contents', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({
+            resolver: 'nameserver 127.0.0.1\n',
+        });
+
+        const report = await checkSetup({ verbose: false } as any);
+
+        expect(report.dns).toMatchObject({ ok: true });
+        expect(fs.readFile).toHaveBeenCalledWith('/etc/resolver/stamhoofd', 'utf8');
+    });
+
+    it('reports mismatching macOS resolver contents as manual DNS problem', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({
+            resolver: 'nameserver 10.0.0.1\n',
+        });
+
+        const report = await checkSetup({ verbose: false } as any);
+
+        expect(report.dns).toMatchObject({
+            ok: false,
+            manualFix: 'stam setup dns',
+        });
+        expect(report.dns.automaticFix).toBeUndefined();
+    });
+
+    it('asks before overwriting mismatching macOS resolver contents', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({
+            resolver: 'nameserver 10.0.0.1\n',
+        });
+        vi.mocked(confirm).mockResolvedValue(false);
+
+        await setupDns({ yes: false, dryRun: false, verbose: false });
+
+        expect(confirm).toHaveBeenCalledWith('Overwrite /etc/resolver/stamhoofd?', { default: false });
+        expect(run).not.toHaveBeenCalledWith('sudo', ['cp', expect.any(String), '/etc/resolver/stamhoofd'], expect.anything());
+    });
+
+    it('offers Homebrew Caddy installation on macOS only', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({
+            resolver: 'nameserver 127.0.0.1\n',
+            caddyMissing: true,
+        });
+
+        const macReport = await checkSetup({ verbose: false } as any);
+        expect(macReport.caddy).toMatchObject({ automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } });
+
+        setPlatform('linux');
+        mockSetupCommands({
+            dns: 'Global: 127.0.0.1:1053\n',
+            domains: 'Global: ~stamhoofd\n',
+            caddyMissing: true,
+        });
+
+        const linuxReport = await checkSetup({ verbose: false } as any);
+        expect(linuxReport.caddy.automaticFix).toBeUndefined();
+    });
+
+    it('installs Caddy through Homebrew on macOS', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({ resolver: 'nameserver 127.0.0.1\n' });
+
+        await setupCaddy({ yes: true, dryRun: false, verbose: true });
+
+        expect(run).toHaveBeenCalledWith('brew', ['install', 'caddy'], { verbose: true });
     });
 
     it('prints the setup report with standardized status labels', () => {
@@ -195,7 +292,7 @@ describe('setup machine workflow', () => {
 function setupReport(overrides: Partial<SetupReport>): SetupReport {
     return {
         docker: ok(),
-        podmanPorts: ok(),
+        privilegedPorts: ok(),
         caddy: ok(),
         dns: ok(),
         cert: ok(),
@@ -211,28 +308,56 @@ function missingManual(details: string): CheckResult {
     return { ok: false, details, manualFix: 'manual fix' };
 }
 
-function missingAutomatic(key: 'dns' | 'podman-ports' | 'services' | 'cert', label: string): CheckResult {
+function missingAutomatic(key: SetupAutomaticFixKey, label: string): CheckResult {
     return { ok: false, details: 'missing', manualFix: `stam setup ${key}`, automaticFix: { key, label } };
 }
 
-function mockSetupCommands(options: { dns: string; domains: string; query?: string }): void {
+function mockSetupCommands(options: { dns?: string; domains?: string; query?: string; resolver?: string; missingRedirects?: boolean; caddyMissing?: boolean }): void {
+    vi.spyOn(fs, 'readFile').mockImplementation(async (filePath) => {
+        if (filePath === '/etc/resolver/stamhoofd') {
+            if (options.resolver === undefined) {
+                const error = new Error('missing') as NodeJS.ErrnoException;
+                error.code = 'ENOENT';
+                throw error;
+            }
+            return options.resolver;
+        }
+        throw new Error(`Unexpected readFile: ${String(filePath)}`);
+    });
+    vi.spyOn(fs, 'writeFile').mockResolvedValue(undefined as any);
+    vi.spyOn(fs, 'rm').mockResolvedValue(undefined as any);
+
     vi.mocked(run).mockImplementation(async (command, args) => {
         if (command === 'caddy' && args[0] === 'version') {
-            return { stdout: 'v2.10.2\n', stderr: '', status: 0 };
+            return options.caddyMissing
+                ? { stdout: '', stderr: 'missing', status: 1 }
+                : { stdout: 'v2.10.2\n', stderr: '', status: 0 };
         }
         if (command === 'resolvectl' && args[0] === 'dns') {
-            return { stdout: options.dns, stderr: '', status: 0 };
+            return { stdout: options.dns ?? '', stderr: '', status: 0 };
         }
         if (command === 'resolvectl' && args[0] === 'domain') {
-            return { stdout: options.domains, stderr: '', status: 0 };
+            return { stdout: options.domains ?? '', stderr: '', status: 0 };
         }
         if (command === 'resolvectl' && args[0] === 'query') {
             return { stdout: options.query ?? 'dashboard.stamhoofd: 127.0.0.1\n', stderr: '', status: 0 };
         }
         if (command === 'sudo' && args.includes('iptables') && args.includes('-C')) {
-            return { stdout: '', stderr: 'missing', status: 1 };
+            return options.missingRedirects
+                ? { stdout: '', stderr: 'missing', status: 1 }
+                : { stdout: '', stderr: '', status: 0 };
+        }
+        if (command === 'sudo' || command === 'brew') {
+            return { stdout: '', stderr: '', status: 0 };
         }
 
         throw new Error(`Unexpected command: ${command} ${args.join(' ')}`);
+    });
+}
+
+function setPlatform(platform: NodeJS.Platform): void {
+    Object.defineProperty(process, 'platform', {
+        value: platform,
+        configurable: true,
     });
 }

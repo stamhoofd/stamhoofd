@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import logUpdate from 'log-update';
+import { OutputStream } from './output-target.js';
 import { link } from './ux.js';
 
 export enum StatusItemKind {
@@ -20,7 +21,7 @@ export type LiveOutput = {
     setLiveStatus(getItems: (frame: number) => StatusItem[], options?: { intervalMs?: number }): void;
     stopLiveStatus(): void;
     log(message: string): void;
-    write(chunk: string | Buffer, stream?: 'stdout' | 'stderr'): void;
+    write(chunk: string | Buffer, stream?: OutputStream): void;
     clearStatus(): void;
     stop(options?: { persistStatus?: boolean }): void;
 };
@@ -111,8 +112,8 @@ export function createLiveOutput(options: {
             stdout.write(`${message}\n`);
             renderStatus();
         },
-        write(chunk, stream = 'stdout') {
-            const target = stream === 'stderr' ? stderr : stdout;
+        write(chunk, stream = OutputStream.Stdout) {
+            const target = stream === OutputStream.Stderr ? stderr : stdout;
             if (interactive) {
                 logUpdate.clear();
             }

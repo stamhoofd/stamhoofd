@@ -6,7 +6,7 @@ import { successSymbol } from '../config/shared-service-config.js';
 import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
 import { sharedBuildReadyCommand, sharedBuildWatchCommand } from '../runtime/monorepo-runner.js';
 import { createLiveOutput, StatusItemKind, type StatusItem } from '../runtime/live-output.js';
-import { setActiveOutputTarget } from '../runtime/output-target.js';
+import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import { sharedServicesRunning } from '../services/shared-services.js';
 import { startServices, stopServices } from '../services/manager.js';
@@ -24,12 +24,24 @@ class ForcedShutdownError extends Error {
     }
 }
 
+export enum DevTarget {
+    All = 'all',
+    Instance = 'instance',
+    Backend = 'backend',
+    Frontend = 'frontend',
+}
+
 enum PrerequisiteState {
     Ready = 'ready',
     Missing = 'missing',
 }
 
-export async function runDev(context: CliContext, target: 'all' | 'instance' | 'backend' | 'frontend', options: { services: boolean; stripe: boolean; open?: boolean }): Promise<void> {
+enum MissingPrerequisite {
+    Setup = 'setup',
+    Services = 'services',
+}
+
+export async function runDev(context: CliContext, target: DevTarget, options: { services: boolean; stripe: boolean; open?: boolean }): Promise<void> {
     let startedServices = false;
     let startedStripe = false;
     const output = createLiveOutput();
@@ -130,7 +142,7 @@ export async function runDev(context: CliContext, target: 'all' | 'instance' | '
             }, serviceCheckIntervalMs);
         }
 
-        const stripeEnv = options.stripe && target !== 'frontend'
+        const stripeEnv = options.stripe && target !== DevTarget.Frontend
             ? await startStripe(context)
             : {};
         startedStripe = Object.keys(stripeEnv).length > 0;
@@ -157,8 +169,8 @@ export async function runDev(context: CliContext, target: 'all' | 'instance' | '
             shell: false,
         });
 
-        child.stdout?.on('data', (chunk: string | Buffer) => output.write(chunk, 'stdout'));
-        child.stderr?.on('data', (chunk: string | Buffer) => output.write(chunk, 'stderr'));
+        child.stdout?.on('data', (chunk: string | Buffer) => output.write(chunk, OutputStream.Stdout));
+        child.stderr?.on('data', (chunk: string | Buffer) => output.write(chunk, OutputStream.Stderr));
 
         await new Promise<void>((resolve, reject) => {
             let stopping = false;
@@ -275,12 +287,12 @@ function buildStatusItems(domains: ReturnType<typeof buildDomains>, env: string,
     return [
         buildDomainStatusItem(domains.dashboard, env),
         buildDomainStatusItem(domains.api, env),
-        buildMissingPrerequisiteItem('setup', setupState),
-        buildMissingPrerequisiteItem('services', servicesState),
+        buildMissingPrerequisiteItem(MissingPrerequisite.Setup, setupState),
+        buildMissingPrerequisiteItem(MissingPrerequisite.Services, servicesState),
     ].filter((item): item is StatusItem => item !== undefined);
 }
 
-function buildMissingPrerequisiteItem(label: 'setup' | 'services', state: PrerequisiteState): StatusItem | undefined {
+function buildMissingPrerequisiteItem(label: MissingPrerequisite, state: PrerequisiteState): StatusItem | undefined {
     if (state !== PrerequisiteState.Missing) {
         return undefined;
     }
@@ -335,11 +347,11 @@ function formatDomainLabel(domain: string, env: string): string {
     return parts.join('');
 }
 
-function commandForTarget(target: 'all' | 'instance' | 'backend' | 'frontend'): string {
-    if (target === 'backend') {
+function commandForTarget(target: DevTarget): string {
+    if (target === DevTarget.Backend) {
         return 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --parallel --stream';
     }
-    if (target === 'frontend') {
+    if (target === DevTarget.Frontend) {
         return 'yarn -s lerna run dev --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/webshop --parallel --stream';
     }
     return 'yarn -s lerna run dev --scope @stamhoofd/backend --scope @stamhoofd/backend-renderer --scope @stamhoofd/dashboard --scope @stamhoofd/registration --scope @stamhoofd/webshop --parallel --stream';

@@ -2,11 +2,9 @@ import { Args } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { openFlag, servicesOptionFlag, stripeFlag } from '../../command-flags.js';
 import { showHelp } from '../../runtime/show-help.js';
-import { runDev } from '../../workflows/start-dev.js';
+import { DevTarget, runDev } from '../../workflows/start-dev.js';
 
-const devTargets = ['all', 'backend', 'frontend', 'instance'] as const;
-
-type DevTarget = typeof devTargets[number];
+const devTargets = Object.values(DevTarget);
 
 export default class Dev extends BaseCommand {
     static summary = 'Run local development targets';
@@ -50,7 +48,7 @@ export default class Dev extends BaseCommand {
 }
 
 function defaultServicesForTarget(target: DevTarget): boolean {
-    return target !== 'frontend';
+    return target !== DevTarget.Frontend;
 }
 
 function parseDevTarget(target: string): DevTarget {

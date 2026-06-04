@@ -36,11 +36,12 @@ export const rustfsInternalConsolePort = 9001;
 export const ssoInternalPort = 8080;
 
 export const corednsPort = 53;
-export const corednsHostPort = 53;
+export const corednsUnprivilegedHostPort = 1053;
+export const corednsPrivilegedHostPort = 53;
 export const caddyHttpPort = 80;
 export const caddyHttpsPort = 443;
-export const caddyPodmanHttpPort = 8080;
-export const caddyPodmanHttpsPort = 8443;
+export const caddyUnprivilegedHttpPort = 8080;
+export const caddyUnprivilegedHttpsPort = 8443;
 export const caddyAdminPort = 2020;
 export const caddySetupAdminPort = 2021;
 export const caddySetupHttpPort = 4080;

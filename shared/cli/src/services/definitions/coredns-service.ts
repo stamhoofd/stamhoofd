@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { CliContext } from '../../context/create-context.js';
-import { corednsContainer, corednsHostPort, corednsImage, corednsPort, defaultDomain, localIpv4Host, localIpv6Host, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
+import { corednsContainer, corednsImage, corednsPort, defaultDomain, localIpv4Host, localIpv6Host, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
+import { buildSharedServiceProfile } from '../../config/shared-service-profile.js';
 import { sharedDir } from '../../runtime/manifest-store.js';
 import * as docker from '../docker.js';
 import { SharedDockerService } from '../docker-service.js';
@@ -20,8 +21,9 @@ export class CorednsService extends SharedDockerService<CorednsPrepared> {
         return CorednsService.container;
     }
 
-    getDetail(): string {
-        return localhostPort(corednsHostPort);
+    async getDetail(): Promise<string> {
+        const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
+        return localhostPort(profile.corednsHostPort);
     }
 
     async prepare(context: CliContext): Promise<CorednsPrepared> {
@@ -35,11 +37,13 @@ export class CorednsService extends SharedDockerService<CorednsPrepared> {
     }
 
     async getDockerArgs(_context: CliContext, _options: void, prepared: CorednsPrepared): Promise<string[]> {
-        return CorednsService.dockerArgs(prepared.corefile, { disableLabel: await docker.getContainerRuntime() === 'podman' });
+        const runtime = await docker.getContainerRuntime();
+        const profile = buildSharedServiceProfile(runtime);
+        return CorednsService.dockerArgs(prepared.corefile, profile.corednsHostPort, { disableLabel: runtime === docker.ContainerRuntime.Podman });
     }
 
-    static dockerArgs(corefile: string, options: { disableLabel?: boolean } = {}): string[] {
-        return ['run', '-d', '--name', CorednsService.container, ...(options.disableLabel ? ['--security-opt', 'label=disable'] : []), '-p', `${localhostPortMapping(corednsHostPort, corednsPort)}/udp`, '-p', `${localhostPortMapping(corednsHostPort, corednsPort)}/tcp`, '-v', `${corefile}:/Corefile:ro`, corednsImage, '-conf', '/Corefile'];
+    static dockerArgs(corefile: string, hostPort: number, options: { disableLabel?: boolean } = {}): string[] {
+        return ['run', '-d', '--name', CorednsService.container, ...(options.disableLabel ? ['--security-opt', 'label=disable'] : []), '-p', `${localhostPortMapping(hostPort, corednsPort)}/udp`, '-p', `${localhostPortMapping(hostPort, corednsPort)}/tcp`, '-v', `${corefile}:/Corefile:ro`, corednsImage, '-conf', '/Corefile'];
     }
 }
 

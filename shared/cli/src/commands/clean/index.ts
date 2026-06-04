@@ -10,7 +10,7 @@ import { ssoService } from '../../services/definitions/sso-service.js';
 import * as docker from '../../services/docker.js';
 import { deleteSharedServicesData, stopSharedServices } from '../../services/shared-services.js';
 
-enum CleanTarget {
+export enum CleanTarget {
     All = 'all',
     Build = 'build',
     Db = 'db',

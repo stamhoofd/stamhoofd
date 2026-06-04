@@ -5,12 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
 import { createLiveOutput } from '../runtime/live-output.js';
-import { setActiveOutputTarget } from '../runtime/output-target.js';
+import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import { startServices, stopServices } from '../services/manager.js';
 import { sharedServicesRunning } from '../services/shared-services.js';
 import { checkSetup, isSetupReady, printSetupReport } from './setup-machine.js';
-import { runDev } from './start-dev.js';
+import { DevTarget, runDev } from './start-dev.js';
 
 vi.mock('node:child_process', () => ({
     spawn: vi.fn(),
@@ -126,7 +126,7 @@ describe('runDev', () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as any);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
         signalHandlers.SIGINT?.('SIGINT');
@@ -140,7 +140,7 @@ describe('runDev', () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as any);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
         expect(spawn).toHaveBeenCalledWith('yarn', [
@@ -216,7 +216,7 @@ describe('runDev', () => {
         vi.mocked(spawn).mockReturnValue(child as any);
         vi.mocked(sharedServicesRunning).mockImplementation(async () => await servicesDeferred.promise);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
 
         await waitFor(() => liveOutput.setStatus.mock.calls.length > 0);
         expect(liveOutput.setLiveStatus).not.toHaveBeenCalled();
@@ -230,7 +230,7 @@ describe('runDev', () => {
     it('blocks startup and shows setup warning when setup is not ready', async () => {
         vi.mocked(isSetupReady).mockReturnValue(false);
 
-        await expect(runDev(context, 'instance', { services: true, stripe: false })).resolves.toBeUndefined();
+        await expect(runDev(context, DevTarget.Instance, { services: true, stripe: false })).resolves.toBeUndefined();
 
         expect(printSetupReport).toHaveBeenCalledTimes(1);
         expect(spawn).not.toHaveBeenCalled();
@@ -245,7 +245,7 @@ describe('runDev', () => {
     it('blocks startup and shows services warning when services remain unavailable', async () => {
         vi.mocked(sharedServicesRunning).mockResolvedValue(false);
 
-        await expect(runDev(context, 'instance', { services: true, stripe: false })).resolves.toBeUndefined();
+        await expect(runDev(context, DevTarget.Instance, { services: true, stripe: false })).resolves.toBeUndefined();
 
         expect(spawn).not.toHaveBeenCalled();
         expect(startServices).toHaveBeenCalledTimes(1);
@@ -260,7 +260,7 @@ describe('runDev', () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as any);
 
-        const promise = runDev(context, 'instance', { services: false, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: false, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
         expect(checkSetup).toHaveBeenCalledTimes(1);
@@ -275,7 +275,7 @@ describe('runDev', () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as any);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
         child.stdout.emit('data', 'hello\n');
@@ -283,8 +283,8 @@ describe('runDev', () => {
         child.emit('exit', 0);
 
         await expect(promise).resolves.toBeUndefined();
-        expect(liveOutput.write).toHaveBeenNthCalledWith(1, 'hello\n', 'stdout');
-        expect(liveOutput.write).toHaveBeenNthCalledWith(2, 'boom\n', 'stderr');
+        expect(liveOutput.write).toHaveBeenNthCalledWith(1, 'hello\n', OutputStream.Stdout);
+        expect(liveOutput.write).toHaveBeenNthCalledWith(2, 'boom\n', OutputStream.Stderr);
     });
 
     it('removes the instance manifest before reloading Caddy during shutdown', async () => {
@@ -298,7 +298,7 @@ describe('runDev', () => {
             calls.push('reload-caddy');
         });
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
         calls.length = 0;
 
@@ -318,7 +318,7 @@ describe('runDev', () => {
             .mockResolvedValueOnce(undefined)
             .mockImplementation(async () => await reload.promise);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false }).then(() => {
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false }).then(() => {
             resolved = true;
         });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
@@ -344,7 +344,7 @@ describe('runDev', () => {
             .mockResolvedValueOnce(undefined)
             .mockImplementation(async () => await reload.promise);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
         vi.useFakeTimers();
 
@@ -366,7 +366,7 @@ describe('runDev', () => {
             .mockResolvedValueOnce(undefined)
             .mockImplementation(async () => await reload.promise);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
         vi.useFakeTimers();
 
@@ -386,7 +386,7 @@ describe('runDev', () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as any);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
         child.emit('exit', 1);
@@ -398,7 +398,7 @@ describe('runDev', () => {
         const child = createChild();
         vi.mocked(spawn).mockReturnValue(child as any);
 
-        const promise = runDev(context, 'instance', { services: true, stripe: false });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
         child.emit('exit', 0);

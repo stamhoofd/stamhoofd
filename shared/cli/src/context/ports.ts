@@ -9,7 +9,7 @@ export function buildPorts(context: CliContext) {
         webshop: 8082 + offset,
         api: 9091 + offset,
         renderer: 9093 + offset,
-        mysql: Number.parseInt(process.env.MYSQL_PORT ?? String(mysqlInternalPort), 10),
+        mysql: Number.parseInt(process.env.MYSQL_PORT ?? String(mysqlInternalPort + 1), 10),
         maildevSmtp: Number.parseInt(process.env.MAILDEV_SMTP_PORT ?? String(maildevInternalSmtpPort), 10),
         maildevHttp: Number.parseInt(process.env.MAILDEV_HTTP_PORT ?? String(maildevInternalHttpPort), 10),
         rustfs: Number.parseInt(process.env.RUSTFS_PORT ?? String(rustfsInternalApiPort), 10),

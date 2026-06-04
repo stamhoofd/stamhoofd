@@ -1,21 +1,28 @@
 import chalk from 'chalk';
 import { successSymbol } from '../config/shared-service-config.js';
 
-export type CliStatus = 'checking' | 'ready' | 'running' | 'stopped' | 'missing' | 'failed';
+export enum CliStatus {
+    Checking = 'checking',
+    Ready = 'ready',
+    Running = 'running',
+    Stopped = 'stopped',
+    Missing = 'missing',
+    Failed = 'failed',
+}
 
 export function formatStatusLabel(status: CliStatus): string {
     switch (status) {
-        case 'checking':
+        case CliStatus.Checking:
             return chalk.cyan('checking');
-        case 'ready':
+        case CliStatus.Ready:
             return `${chalk.green(successSymbol)} ${chalk.green('ready')}`;
-        case 'running':
+        case CliStatus.Running:
             return `${chalk.green(successSymbol)} ${chalk.green('running')}`;
-        case 'stopped':
+        case CliStatus.Stopped:
             return `${chalk.yellow('!')} ${chalk.yellow('stopped')}`;
-        case 'missing':
+        case CliStatus.Missing:
             return `${chalk.yellow('!')} ${chalk.yellow('missing')}`;
-        case 'failed':
+        case CliStatus.Failed:
             return `${chalk.red('✖')} ${chalk.red('failed')}`;
     }
 }

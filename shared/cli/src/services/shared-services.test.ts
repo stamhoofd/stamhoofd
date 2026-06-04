@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { localFilesAccessKey, localFilesSecretKey, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
+import { buildSharedServiceProfile } from '../config/shared-service-profile.js';
 import { run } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
 import { CorednsService } from './definitions/coredns-service.js';
 import { MaildevService } from './definitions/maildev-service.js';
 import { MysqlService } from './definitions/mysql-service.js';
 import { RustfsService } from './definitions/rustfs-service.js';
+import { ContainerRuntime } from './docker.js';
 import { tailSharedLogs } from './shared-services.js';
 
 vi.mock('../runtime/command-runner.js', () => ({
@@ -14,7 +16,7 @@ vi.mock('../runtime/command-runner.js', () => ({
 
 vi.mock('./docker.js', async (importOriginal) => ({
     ...await importOriginal<typeof import('./docker.js')>(),
-    getContainerRuntime: vi.fn(async () => 'podman'),
+    getContainerRuntime: vi.fn(async () => ContainerRuntime.Podman),
 }));
 
 describe('shared service Docker args', () => {
@@ -45,11 +47,27 @@ describe('shared service Docker args', () => {
     });
 
     it('builds CoreDNS and Caddy args from generated paths', () => {
-        expect(CorednsService.dockerArgs('/tmp/Corefile', { disableLabel: true })).toContain('--security-opt');
-        expect(CorednsService.dockerArgs('/tmp/Corefile')).toContain('127.0.0.1:1053:53/udp');
-        expect(CorednsService.dockerArgs('/tmp/Corefile')).toContain('127.0.0.1:1053:53/tcp');
-        expect(CorednsService.dockerArgs('/tmp/Corefile')).toContain('/tmp/Corefile:/Corefile:ro');
-        expect(CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data')).toContain('/tmp/caddy.json:/etc/caddy/caddy.json:ro');
+        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053, { disableLabel: true })).toContain('--security-opt');
+        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('127.0.0.1:1053:53/udp');
+        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('127.0.0.1:1053:53/tcp');
+        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('/tmp/Corefile:/Corefile:ro');
+        expect(CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'linux'))).toContain('/tmp/caddy.json:/etc/caddy/caddy.json:ro');
+    });
+
+    it('builds macOS Docker bridge args for Caddy', () => {
+        const args = CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'darwin'));
+
+        expect(args).toContain(localhostPortMapping(80, 80));
+        expect(args).toContain(localhostPortMapping(443, 443));
+        expect(args).not.toContain('--network');
+    });
+
+    it('builds Linux rootless Caddy args with host networking on high ports', () => {
+        const args = CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'linux'));
+
+        expect(args).toContain('--network');
+        expect(args).toContain('host');
+        expect(args).not.toContain(localhostPortMapping(80, 80));
     });
 
     it('tails all shared service logs through concurrently', async () => {

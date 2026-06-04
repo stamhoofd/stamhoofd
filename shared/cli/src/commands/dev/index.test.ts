@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Dev from './index.js';
-import { runDev } from '../../workflows/start-dev.js';
+import { DevTarget, runDev } from '../../workflows/start-dev.js';
 import { showHelp } from '../../runtime/show-help.js';
 
-vi.mock('../../workflows/start-dev.js', () => ({
+vi.mock('../../workflows/start-dev.js', async (importOriginal) => ({
+    ...await importOriginal<typeof import('../../workflows/start-dev.js')>(),
     runDev: vi.fn(),
 }));
 
@@ -30,13 +31,13 @@ describe('Dev command', () => {
 
     it('defaults services to false for the frontend target', async () => {
         const command = createCommand({
-            args: { target: 'frontend' },
+            args: { target: DevTarget.Frontend },
             flags: { services: undefined, stripe: false, open: false },
         });
 
         await command.run();
 
-        expect(runDev).toHaveBeenCalledWith({ context: 'dev' }, 'frontend', {
+        expect(runDev).toHaveBeenCalledWith({ context: 'dev' }, DevTarget.Frontend, {
             services: false,
             stripe: false,
             open: false,
@@ -45,13 +46,13 @@ describe('Dev command', () => {
 
     it('passes explicit flags through to backend runs', async () => {
         const command = createCommand({
-            args: { target: 'backend' },
+            args: { target: DevTarget.Backend },
             flags: { services: false, stripe: true, open: true },
         });
 
         await command.run();
 
-        expect(runDev).toHaveBeenCalledWith({ context: 'dev' }, 'backend', {
+        expect(runDev).toHaveBeenCalledWith({ context: 'dev' }, DevTarget.Backend, {
             services: false,
             stripe: true,
             open: true,
@@ -59,7 +60,7 @@ describe('Dev command', () => {
     });
 });
 
-function createCommand(parseResult: { args: { target: 'all' | 'backend' | 'frontend' | 'instance' | undefined }; flags: { services: boolean | undefined; stripe: boolean; open: boolean } }): Dev {
+function createCommand(parseResult: { args: { target: DevTarget | undefined }; flags: { services: boolean | undefined; stripe: boolean; open: boolean } }): Dev {
     const command = new Dev([], {} as any);
     (command as any).config = {};
     (command as any).parse = vi.fn(async () => parseResult);

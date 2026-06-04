@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { spawn } from 'node:child_process';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { formatStatusLabel } from './status.js';
+import { CliStatus, formatStatusLabel } from './status.js';
 import { formatTable, openUrl } from './ux.js';
 
 vi.mock('node:child_process', () => ({
@@ -24,12 +24,12 @@ describe('ux helpers', () => {
     });
 
     it('formats standard status labels', () => {
-        expect(formatStatusLabel('ready')).toContain('ready');
-        expect(formatStatusLabel('running')).toContain('running');
-        expect(formatStatusLabel('stopped')).toContain('stopped');
-        expect(formatStatusLabel('missing')).toContain('missing');
-        expect(formatStatusLabel('failed')).toContain('failed');
-        expect(formatStatusLabel('checking')).toContain('checking');
+        expect(formatStatusLabel(CliStatus.Ready)).toContain('ready');
+        expect(formatStatusLabel(CliStatus.Running)).toContain('running');
+        expect(formatStatusLabel(CliStatus.Stopped)).toContain('stopped');
+        expect(formatStatusLabel(CliStatus.Missing)).toContain('missing');
+        expect(formatStatusLabel(CliStatus.Failed)).toContain('failed');
+        expect(formatStatusLabel(CliStatus.Checking)).toContain('checking');
     });
 
     it('treats browser opening as best effort', () => {

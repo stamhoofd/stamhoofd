@@ -1,12 +1,15 @@
 import fs from 'node:fs/promises';
+import dns from 'node:dns/promises';
 import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { writeSetupCaddyConfig } from '../config/caddy-config.js';
-import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddyPodmanHttpPort, caddyPodmanHttpsPort, caddySetupAdminPort, corednsHostPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
+import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
+import { buildSharedServiceProfile, SharedServiceDnsSetupKind, type SharedServiceProfile } from '../config/shared-service-profile.js';
 import type { CliContext } from '../context/create-context.js';
 import { run } from '../runtime/command-runner.js';
 import { sharedDir } from '../runtime/manifest-store.js';
+import { CliStatus } from '../runtime/status.js';
 import { command, confirm, statusCell, success, table, warning } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
@@ -14,14 +17,22 @@ import { runServices } from './start-services.js';
 
 export type SetupReport = {
     docker: CheckResult;
-    podmanPorts: CheckResult;
+    privilegedPorts: CheckResult;
     caddy: CheckResult;
     dns: CheckResult;
     cert: CheckResult;
 };
 
+export enum SetupAutomaticFixKey {
+    Dns = 'dns',
+    PrivilegedPorts = 'privileged-ports',
+    Services = 'services',
+    Caddy = 'caddy',
+    Cert = 'cert',
+}
+
 export type AutomaticFix = {
-    key: 'dns' | 'podman-ports' | 'services' | 'cert';
+    key: SetupAutomaticFixKey;
     label: string;
 };
 
@@ -33,11 +44,12 @@ export type CheckResult = {
 };
 
 export async function checkSetup(context: CliContext): Promise<SetupReport> {
+    const profile = await currentSharedServiceProfile();
     return {
         docker: await dockerCheck(),
-        podmanPorts: await podmanPortRedirectCheck(),
+        privilegedPorts: await privilegedPortRedirectCheck(profile),
         caddy: await caddyCheck(),
-        dns: await dnsCheck(context),
+        dns: await dnsCheck(context, profile),
         cert: await certCheck(),
     };
 }
@@ -45,7 +57,7 @@ export async function checkSetup(context: CliContext): Promise<SetupReport> {
 export function printSetupReport(report: SetupReport): void {
     table(['Check', 'Status', 'Details'], [
         row('Podman / Docker', report.docker),
-        row('Podman port redirects', report.podmanPorts),
+        row('Privileged port redirects', report.privilegedPorts),
         row('Caddy', report.caddy),
         row(`DNS .${process.env.STAMHOOFD_DOMAIN ?? defaultDomain}`, report.dns),
         row('Caddy local CA', report.cert),
@@ -71,12 +83,14 @@ export async function runSetup(context: CliContext): Promise<void> {
         return;
     }
     for (const fix of fixes) {
-        if (fix.key === 'dns') {
+        if (fix.key === SetupAutomaticFixKey.Dns) {
             await setupDns({ yes: true, dryRun: false, verbose: context.verbose });
-        } else if (fix.key === 'podman-ports') {
-            await setupPodmanPortRedirects({ yes: true, dryRun: false, verbose: context.verbose });
-        } else if (fix.key === 'services') {
+        } else if (fix.key === SetupAutomaticFixKey.PrivilegedPorts) {
+            await setupPrivilegedPortRedirects({ yes: true, dryRun: false, verbose: context.verbose });
+        } else if (fix.key === SetupAutomaticFixKey.Services) {
             await runServices(context);
+        } else if (fix.key === SetupAutomaticFixKey.Caddy) {
+            await setupCaddy({ yes: true, dryRun: false, verbose: context.verbose });
         } else {
             await setupCert(context, { yes: true, dryRun: false });
         }
@@ -104,29 +118,46 @@ export function isSetupReady(report: SetupReport): boolean {
 }
 
 function setupChecks(report: SetupReport): CheckResult[] {
-    return [report.docker, report.podmanPorts, report.caddy, report.dns, report.cert];
+    return [report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert];
+}
+
+enum IptablesChain {
+    Prerouting = 'PREROUTING',
+    Output = 'OUTPUT',
+}
+
+enum IptablesAction {
+    Append = '-A',
+    Check = '-C',
 }
 
 type IptablesRedirectRule = {
-    chain: 'PREROUTING' | 'OUTPUT';
+    chain: IptablesChain;
     fromPort: number;
     toPort: number;
     destination?: string;
 };
 
-const podmanRedirectRules: IptablesRedirectRule[] = [
-    { chain: 'PREROUTING', fromPort: caddyHttpPort, toPort: caddyPodmanHttpPort },
-    { chain: 'PREROUTING', fromPort: caddyHttpsPort, toPort: caddyPodmanHttpsPort },
-    { chain: 'OUTPUT', destination: localIpv4Host, fromPort: caddyHttpPort, toPort: caddyPodmanHttpPort },
-    { chain: 'OUTPUT', destination: localIpv4Host, fromPort: caddyHttpsPort, toPort: caddyPodmanHttpsPort },
-];
+function privilegedRedirectRules(profile: SharedServiceProfile): IptablesRedirectRule[] {
+    return [
+        { chain: IptablesChain.Prerouting, fromPort: caddyHttpPort, toPort: profile.caddyHttpHostPort },
+        { chain: IptablesChain.Prerouting, fromPort: caddyHttpsPort, toPort: profile.caddyHttpsHostPort },
+        { chain: IptablesChain.Output, destination: localIpv4Host, fromPort: caddyHttpPort, toPort: profile.caddyHttpHostPort },
+        { chain: IptablesChain.Output, destination: localIpv4Host, fromPort: caddyHttpsPort, toPort: profile.caddyHttpsHostPort },
+    ];
+}
 
 export async function setupDns(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
-    if (process.platform !== 'linux') {
-        throw new Error('Automatic DNS setup currently supports Linux with systemd-resolved only.');
+    const profile = await currentSharedServiceProfile();
+    if (profile.dnsSetupKind === SharedServiceDnsSetupKind.MacosResolver) {
+        await setupMacosDns(options);
+        return;
+    }
+    if (profile.dnsSetupKind !== SharedServiceDnsSetupKind.SystemdResolved) {
+        throw new Error('Automatic DNS setup is not supported on this platform.');
     }
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
-    const content = `[Resolve]\nDNS=${localIpv4Host}:${corednsHostPort}\nDomains=~${domain}\n`;
+    const content = `[Resolve]\nDNS=${localIpv4Host}:${profile.corednsHostPort}\nDomains=~${domain}\n`;
     const tempPath = path.join(os.tmpdir(), `stamhoofd-resolved-${process.pid}.conf`);
 
     console.log(`This will configure temporary split DNS for .${domain}.`);
@@ -154,33 +185,96 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean; verbose
     success('DNS configured.');
 }
 
-export async function setupPodmanPortRedirects(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
-    if (process.platform !== 'linux') {
-        throw new Error('Automatic Podman port redirect setup currently supports Linux with iptables only.');
-    }
+async function setupMacosDns(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
+    const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
+    const resolverPath = macosResolverPath(domain);
+    const content = macosResolverContent();
+    const tempPath = path.join(os.tmpdir(), `stamhoofd-resolver-${process.pid}.conf`);
+    const existing = await readFileIfExists(resolverPath);
 
-    console.log('This will redirect local HTTP/HTTPS traffic to the unprivileged ports used by rootless Podman.');
+    console.log(`This will configure .${domain} DNS through the macOS resolver.`);
+    console.log(`\nFile: ${resolverPath}`);
+    console.log(content.trim());
     console.log('\nCommands:');
-    for (const rule of podmanRedirectRules) {
-        console.log(command(`  ${formatIptablesCommand('-A', rule)}`));
+    console.log(command('  sudo mkdir -p /etc/resolver'));
+    console.log(command(`  sudo cp <tempfile> ${resolverPath}`));
+
+    if (existing !== undefined && existing !== content) {
+        warning(`${resolverPath} already exists with different contents.`);
+    }
+    if (existing === content) {
+        success('DNS already configured.');
+        return;
     }
 
     if (options.dryRun) {
-        warning('Dry run: Podman port redirects were not changed.');
+        warning('Dry run: DNS configuration was not changed.');
         return;
     }
-    if (!options.yes && !(await confirm('Apply these Podman port redirects?', { default: true }))) {
-        warning('Podman port redirect setup skipped.');
+    if (existing !== undefined && existing !== content && !options.yes && !(await confirm(`Overwrite ${resolverPath}?`, { default: false }))) {
+        warning('DNS setup skipped.');
+        return;
+    }
+    if (existing === undefined && !options.yes && !(await confirm('Apply this DNS configuration?', { default: true }))) {
+        warning('DNS setup skipped.');
         return;
     }
 
-    for (const rule of podmanRedirectRules) {
+    await fs.writeFile(tempPath, content);
+    await run('sudo', ['mkdir', '-p', '/etc/resolver'], { verbose: options.verbose });
+    await run('sudo', ['cp', tempPath, resolverPath], { verbose: options.verbose });
+    await fs.rm(tempPath, { force: true });
+    success('DNS configured.');
+}
+
+export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
+    if (process.platform !== 'linux') {
+        throw new Error('Automatic privileged port redirect setup currently supports Linux with iptables only.');
+    }
+    const profile = await currentSharedServiceProfile();
+    const rules = privilegedRedirectRules(profile);
+
+    console.log('This will redirect local HTTP/HTTPS traffic to the unprivileged ports used by local containers.');
+    console.log('\nCommands:');
+    for (const rule of rules) {
+        console.log(command(`  ${formatIptablesCommand(IptablesAction.Append, rule)}`));
+    }
+
+    if (options.dryRun) {
+        warning('Dry run: privileged port redirects were not changed.');
+        return;
+    }
+    if (!options.yes && !(await confirm('Apply these privileged port redirects?', { default: true }))) {
+        warning('Privileged port redirect setup skipped.');
+        return;
+    }
+
+    for (const rule of rules) {
         if (!(await iptablesRuleExists(rule))) {
-            await run('sudo', iptablesArgs('-A', rule), { verbose: options.verbose });
+            await run('sudo', iptablesArgs(IptablesAction.Append, rule), { verbose: options.verbose });
         }
     }
 
-    success('Podman port redirects configured.');
+    success('Privileged port redirects configured.');
+}
+
+export async function setupCaddy(options: { yes: boolean; dryRun: boolean; verbose: boolean }): Promise<void> {
+    if (process.platform !== 'darwin') {
+        throw new Error('Automatic Caddy installation currently supports macOS with Homebrew only.');
+    }
+    console.log('This will install Caddy using Homebrew.');
+    console.log('\nCommands:');
+    console.log(command('  brew install caddy'));
+    if (options.dryRun) {
+        warning('Dry run: Caddy was not installed.');
+        return;
+    }
+    if (!options.yes && !(await confirm('Install Caddy with Homebrew?', { default: true }))) {
+        warning('Caddy installation skipped.');
+        return;
+    }
+    await run('brew', ['install', 'caddy'], { verbose: options.verbose });
+    success('Caddy installed.');
 }
 
 export async function setupCert(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
@@ -207,15 +301,15 @@ export async function setupCert(context: CliContext, options: { yes: boolean; dr
     success('Caddy local CA trusted.');
 }
 
-async function dnsCheck(context: CliContext): Promise<CheckResult> {
-    if (process.platform !== 'linux') {
-        return { ok: true, details: 'temporary mac os', manualFix: 'todo' };
-    }
-
+async function dnsCheck(context: CliContext, profile: SharedServiceProfile): Promise<CheckResult> {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
 
-    if (!(await dnsConfigurationCheck(domain))) {
-        return { ok: false, details: `Local DNS is not configured for .${domain}`, manualFix: 'stam setup dns', automaticFix: { key: 'dns', label: 'Configure local DNS' } };
+    if (profile.dnsSetupKind === SharedServiceDnsSetupKind.MacosResolver) {
+        return await macosDnsCheck(context, domain);
+    }
+
+    if (!(await dnsConfigurationCheck(domain, profile))) {
+        return { ok: false, details: `Local DNS is not configured for .${domain}`, manualFix: 'stam setup dns', automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } };
     }
 
     const result = await run('resolvectl', ['query', `dashboard.${domain}`], { capture: true, allowFailure: true });
@@ -225,13 +319,40 @@ async function dnsCheck(context: CliContext): Promise<CheckResult> {
 
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
-        return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: 'services', label: 'Start shared services' } };
+        return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
     }
 
     return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
 }
 
-async function dnsConfigurationCheck(domain: string): Promise<boolean> {
+async function macosDnsCheck(context: CliContext, domain: string): Promise<CheckResult> {
+    const resolverPath = macosResolverPath(domain);
+    const content = await readFileIfExists(resolverPath);
+    if (content === undefined) {
+        return { ok: false, details: `${resolverPath} does not exist`, manualFix: 'stam setup dns', automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } };
+    }
+    if (content !== macosResolverContent()) {
+        return { ok: false, details: `${resolverPath} exists with unexpected contents`, manualFix: 'stam setup dns' };
+    }
+
+    try {
+        const result = await dns.lookup(`dashboard.${domain}`);
+        if (result.address === localIpv4Host) {
+            return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
+        }
+    } catch {
+        // Fall through to the shared CoreDNS status check below.
+    }
+
+    const corednsStatus = await corednsService.status(context);
+    if (!corednsStatus.running) {
+        return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
+    }
+
+    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
+}
+
+async function dnsConfigurationCheck(domain: string, profile: SharedServiceProfile): Promise<boolean> {
     const [dns, domains] = await Promise.all([
         run('resolvectl', ['dns'], { capture: true, allowFailure: true }),
         run('resolvectl', ['domain'], { capture: true, allowFailure: true }),
@@ -239,7 +360,7 @@ async function dnsConfigurationCheck(domain: string): Promise<boolean> {
 
     return dns.status === 0
         && domains.status === 0
-        && dns.stdout.includes(`${localIpv4Host}:${corednsHostPort}`)
+        && dns.stdout.includes(`${localIpv4Host}:${profile.corednsHostPort}`)
         && domains.stdout.includes(`~${domain}`);
 }
 
@@ -249,59 +370,91 @@ async function certCheck(): Promise<CheckResult> {
         await fs.access(certPath);
         return { ok: true, details: certPath };
     } catch {
-        return { ok: false, details: 'Caddy local CA not found', manualFix: 'stam setup cert', automaticFix: { key: 'cert', label: 'Trust local HTTPS certificates' } };
+        return { ok: false, details: 'Caddy local CA not found', manualFix: 'stam setup cert', automaticFix: { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' } };
     }
 }
 
-async function podmanPortRedirectCheck(): Promise<CheckResult> {
-    let runtime: docker.ContainerRuntime;
-    try {
-        runtime = await docker.getContainerRuntime();
-    } catch {
-        return { ok: true, details: 'container runtime unavailable' };
-    }
-
-    if (runtime !== 'podman') {
+async function privilegedPortRedirectCheck(profile: SharedServiceProfile): Promise<CheckResult> {
+    if (!profile.needsPrivilegedRedirects) {
         return { ok: true, details: 'not needed for docker' };
     }
 
     if (process.platform !== 'linux') {
-        return { ok: false, details: 'Podman port redirects require Linux with iptables', manualFix: 'Configure privileged port redirects for Podman' };
+        return { ok: false, details: 'Privileged port redirects require Linux with iptables', manualFix: 'Configure privileged port redirects' };
     }
 
-    if (await docker.containerIsRunning(caddyContainer)) {
-        const podmanPortsReady = await portAcceptsConnection(caddyPodmanHttpPort) && await portAcceptsConnection(caddyPodmanHttpsPort);
-        if (!podmanPortsReady) {
-            return { ok: false, details: `Caddy is running, but ${localhostPort(caddyPodmanHttpPort)} or ${localhostPort(caddyPodmanHttpsPort)} is not reachable`, manualFix: 'stam services restart' };
+    let caddyRunning = false;
+    try {
+        caddyRunning = await docker.containerIsRunning(caddyContainer);
+    } catch {
+        return { ok: true, details: 'container runtime unavailable' };
+    }
+
+    if (caddyRunning) {
+        const highPortsReady = await portAcceptsConnection(profile.caddyHttpHostPort) && await portAcceptsConnection(profile.caddyHttpsHostPort);
+        if (!highPortsReady) {
+            return { ok: false, details: `Caddy is running, but ${localhostPort(profile.caddyHttpHostPort)} or ${localhostPort(profile.caddyHttpsHostPort)} is not reachable`, manualFix: 'stam services restart' };
         }
 
         if (await portAcceptsConnection(caddyHttpPort) && await portAcceptsConnection(caddyHttpsPort)) {
-            return { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyPodmanHttpPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyPodmanHttpsPort)}` };
+            return { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}` };
         }
     }
 
     const missingRules: IptablesRedirectRule[] = [];
-    for (const rule of podmanRedirectRules) {
+    for (const rule of privilegedRedirectRules(profile)) {
         if (!(await iptablesRuleExists(rule))) {
             missingRules.push(rule);
         }
     }
 
     return missingRules.length === 0
-        ? { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyPodmanHttpPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyPodmanHttpsPort)}` }
-        : { ok: false, details: `${missingRules.length} Podman port redirect${missingRules.length === 1 ? '' : 's'} missing`, manualFix: 'stam setup', automaticFix: { key: 'podman-ports', label: 'Configure Podman port redirects' } };
+        ? { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}` }
+        : { ok: false, details: `${missingRules.length} privileged port redirect${missingRules.length === 1 ? '' : 's'} missing`, manualFix: 'stam setup', automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' } };
 }
 
 async function caddyCheck(): Promise<CheckResult> {
     const result = await run('caddy', ['version'], { capture: true, allowFailure: true });
     if (result.status !== 0) {
+        if (process.platform === 'darwin') {
+            return { ok: false, details: 'caddy not found', manualFix: 'stam setup', automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } };
+        }
         return { ok: false, details: 'caddy not found', manualFix: 'Install Caddy, then run stam setup cert' };
     }
     return { ok: true, details: result.stdout.trim() };
 }
 
+async function currentSharedServiceProfile(): Promise<SharedServiceProfile> {
+    let runtime = docker.ContainerRuntime.Docker;
+    try {
+        runtime = await docker.getContainerRuntime();
+    } catch {
+        // Setup can still report DNS and Caddy issues before Docker is running.
+    }
+    return buildSharedServiceProfile(runtime);
+}
+
+function macosResolverPath(domain: string): string {
+    return path.join('/etc/resolver', domain);
+}
+
+function macosResolverContent(): string {
+    return `nameserver ${localIpv4Host}\n`;
+}
+
+async function readFileIfExists(filePath: string): Promise<string | undefined> {
+    try {
+        return await fs.readFile(filePath, 'utf8');
+    } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
 async function iptablesRuleExists(rule: IptablesRedirectRule): Promise<boolean> {
-    const result = await run('sudo', ['-n', ...iptablesArgs('-C', rule)], { capture: true, quiet: true, allowFailure: true });
+    const result = await run('sudo', ['-n', ...iptablesArgs(IptablesAction.Check, rule)], { capture: true, quiet: true, allowFailure: true });
     return result.status === 0;
 }
 
@@ -319,7 +472,7 @@ async function portAcceptsConnection(port: number): Promise<boolean> {
     });
 }
 
-function iptablesArgs(action: '-A' | '-C', rule: IptablesRedirectRule): string[] {
+function iptablesArgs(action: IptablesAction, rule: IptablesRedirectRule): string[] {
     return [
         'iptables',
         '-t',
@@ -338,19 +491,19 @@ function iptablesArgs(action: '-A' | '-C', rule: IptablesRedirectRule): string[]
     ];
 }
 
-function formatIptablesCommand(action: '-A' | '-C', rule: IptablesRedirectRule): string {
+function formatIptablesCommand(action: IptablesAction, rule: IptablesRedirectRule): string {
     return ['sudo', ...iptablesArgs(action, rule)].join(' ');
 }
 
 async function dockerCheck(): Promise<CheckResult> {
     try {
         const runtime = await docker.getContainerRuntime();
-        return { ok: true, details: runtime === 'podman' ? 'podman ready' : 'docker daemon reachable' };
+        return { ok: true, details: runtime === docker.ContainerRuntime.Podman ? 'podman ready' : 'docker daemon reachable' };
     } catch (error) {
         return { ok: false, details: error instanceof Error ? error.message : 'container runtime not reachable', manualFix: 'Start Podman or Docker, then run stam setup' };
     }
 }
 
 function row(label: string, result: CheckResult): string[] {
-    return [label, statusCell(result.ok ? 'ready' : 'missing'), result.manualFix ? `${result.details} (${result.manualFix})` : result.details];
+    return [label, statusCell(result.ok ? CliStatus.Ready : CliStatus.Missing), result.manualFix ? `${result.details} (${result.manualFix})` : result.details];
 }

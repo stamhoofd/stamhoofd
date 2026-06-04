@@ -2,7 +2,10 @@ import * as commandRunner from '../runtime/command-runner.js';
 import type { RunCaptureResult, RunOptions } from '../runtime/command-runner.js';
 import { localIpv4Host, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
 
-export type ContainerRuntime = 'podman' | 'docker';
+export enum ContainerRuntime {
+    Podman = 'podman',
+    Docker = 'docker',
+}
 
 let containerRuntimePromise: Promise<ContainerRuntime> | undefined;
 
@@ -72,14 +75,14 @@ async function resolveContainerRuntime(): Promise<ContainerRuntime> {
     const podmanVersion = await commandRunner.run('podman', ['--version'], { capture: true, allowFailure: true });
     if (podmanVersion.status === 0) {
         await commandRunner.run('podman', ['info'], { quiet: true });
-        return 'podman';
+        return ContainerRuntime.Podman;
     }
     if (!isCommandNotFound(podmanVersion.stderr)) {
         throw new Error(`podman is available but not usable: ${podmanVersion.stderr.trim() || `exited with status ${podmanVersion.status}`}`);
     }
 
     await commandRunner.run('docker', ['info'], { quiet: true });
-    return 'docker';
+    return ContainerRuntime.Docker;
 }
 
 function isCommandNotFound(stderr: string): boolean {

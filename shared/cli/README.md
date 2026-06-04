@@ -86,6 +86,7 @@ Useful environment variables:
 - `STAMHOOFD_INSTANCE_PREFIX` overrides the domain prefix.
 - `STAMHOOFD_PORT_OFFSET` overrides the deterministic port offset.
 - `STAMHOOFD_DOMAIN` overrides the shared local domain, defaulting to `stamhoofd`.
+- `MYSQL_PORT` overrides the local MySQL host port, defaulting to `3307`.
 
 The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the first workspace in `jj workspace list`. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
 
@@ -98,6 +99,14 @@ Shared services run as Docker containers:
 - RustFS: `stamhoofd-rustfs`
 - CoreDNS: `stamhoofd-coredns`
 - Caddy: `stamhoofd-caddy`
+
+The setup is intentionally different where Docker behaves differently:
+
+- Linux runs Caddy on unprivileged ports `8080/8443` and uses `sudo iptables` redirects from `80/443`.
+- Linux configures split DNS through `systemd-resolved`, pointing `.stamhoofd` to CoreDNS on `127.0.0.1:1053`.
+- macOS uses Docker Desktop bridge networking for Caddy, publishes `80/443` directly, and proxies back to host app ports through `host.docker.internal`.
+- macOS configures `/etc/resolver/stamhoofd` with `nameserver 127.0.0.1`, so only the `stamhoofd` resolver domain and its subdomains use local CoreDNS on port `53`.
+- MySQL listens on host port `3307` by default and still uses container port `3306`.
 
 Start and inspect them with:
 
@@ -305,6 +314,8 @@ If that does not tell you enough, use the first matching case below.
 
 - DNS names like `dashboard.stamhoofd` do not resolve:
   Run `yarn stam setup dns`, then retry `yarn stam setup check`.
+- `yarn stam setup` reports missing privileged port redirects on Linux:
+  Let the setup command apply the recommended `sudo iptables` rules, then retry.
 - HTTPS works badly or the browser does not trust local certificates:
   Run `yarn stam setup cert`, then retry `yarn stam setup check`.
 - Docker commands fail or services do not start:

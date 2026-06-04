@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import type { CliContext } from '../../context/create-context.js';
-import { caddyAdminPort, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyHttpPort, caddyHttpsPort, caddyImage, caddyPodmanHttpPort, caddyPodmanHttpsPort, dockerHostGateway, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
+import { caddyAdminPort, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyImage, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
+import { buildSharedServiceProfile, SharedServiceCaddyRunMode, type SharedServiceProfile } from '../../config/shared-service-profile.js';
 import * as docker from '../docker.js';
 import { writeCaddyConfig } from '../../config/caddy-config.js';
 import { SharedDockerService } from '../docker-service.js';
@@ -22,10 +23,11 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     }
 
     async getDetail(): Promise<string> {
-        if (await docker.getContainerRuntime() === 'podman') {
-            return `${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyPodmanHttpPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyPodmanHttpsPort)}`;
+        const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
+        if (profile.needsPrivilegedRedirects) {
+            return `${localhostPort(80)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(443)} -> ${localhostPort(profile.caddyHttpsHostPort)}`;
         }
-        return `${localhostPort(caddyHttpPort)}, ${localhostPort(caddyHttpsPort)}`;
+        return `${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(profile.caddyHttpsHostPort)}`;
     }
 
     async prepare(context: CliContext): Promise<CaddyPrepared> {
@@ -40,8 +42,8 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         if (!status.running) {
             return false;
         }
-        if (process.platform !== 'linux' && await docker.getContainerRuntime() !== 'podman') {
-            // Bridge mode on macOS: reuse if NOT in host network mode.
+        const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
+        if (profile.caddyRunMode === SharedServiceCaddyRunMode.Bridge) {
             return !await CaddyService.runsInHostNetwork();
         }
         return await CaddyService.runsInHostNetwork();
@@ -49,8 +51,8 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
 
     async getDockerArgs(_context: CliContext, _options: void, prepared: CaddyPrepared): Promise<string[]> {
         const runtime = await docker.getContainerRuntime();
-        const bridgeMode = process.platform !== 'linux' && runtime !== 'podman';
-        return CaddyService.dockerArgs(prepared.config, prepared.dataDir, { disableLabel: runtime === 'podman', bridgeMode });
+        const profile = buildSharedServiceProfile(runtime);
+        return CaddyService.dockerArgs(prepared.config, prepared.dataDir, profile, { disableLabel: runtime === docker.ContainerRuntime.Podman });
     }
 
     static async reload(context: CliContext): Promise<void> {
@@ -64,27 +66,25 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     }
 
     private static async writeRuntimeConfig(context: CliContext): Promise<string> {
-        if (await docker.getContainerRuntime() === 'podman') {
-            return await writeCaddyConfig(context, { httpPort: caddyPodmanHttpPort, httpsPort: caddyPodmanHttpsPort, disableRedirects: true });
-        }
-        if (process.platform !== 'linux') {
-            // Docker Desktop on macOS uses a VM — --network host binds inside the VM,
-            // not on the Mac. Use bridge mode with port mappings and route to the Mac
-            // host via host.docker.internal.
-            return await writeCaddyConfig(context, { proxyHost: dockerHostGateway, listenHost: '0.0.0.0' });
-        }
-        return await writeCaddyConfig(context);
+        const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
+        return await writeCaddyConfig(context, {
+            httpPort: profile.caddyHttpListenPort,
+            httpsPort: profile.caddyHttpsListenPort,
+            disableRedirects: profile.needsPrivilegedRedirects,
+            proxyHost: profile.caddyProxyHost,
+            listenHost: profile.caddyListenHost,
+        });
     }
 
-    static dockerArgs(config: string, dataDir: string, options: { disableLabel?: boolean; bridgeMode?: boolean } = {}): string[] {
-        if (options.bridgeMode) {
-            return ['run', '-d', '--name', CaddyService.container, '-p', localhostPortMapping(caddyHttpPort, caddyHttpPort), '-p', localhostPortMapping(caddyHttpsPort, caddyHttpsPort), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
+    static dockerArgs(config: string, dataDir: string, profile: SharedServiceProfile, options: { disableLabel?: boolean } = {}): string[] {
+        if (profile.caddyRunMode === SharedServiceCaddyRunMode.Bridge) {
+            return ['run', '-d', '--name', CaddyService.container, '-p', localhostPortMapping(profile.caddyHttpHostPort, profile.caddyHttpListenPort), '-p', localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
         }
         return ['run', '-d', '--name', CaddyService.container, '--network', 'host', ...(options.disableLabel ? ['--security-opt', 'label=disable'] : []), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
     }
 
     private static async validateConfig(config: string, context: CliContext): Promise<void> {
-        const labelArgs = await docker.getContainerRuntime() === 'podman' ? ['--security-opt', 'label=disable'] : [];
+        const labelArgs = await docker.getContainerRuntime() === docker.ContainerRuntime.Podman ? ['--security-opt', 'label=disable'] : [];
         await docker.run(['run', '--rm', ...labelArgs, '-v', `${config}:${caddyConfigPath}:ro`, caddyImage, 'caddy', 'validate', '--config', caddyConfigPath], { quiet: true, verbose: context.verbose });
     }
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import Setup from './index.js';
+import Setup, { SetupAction } from './index.js';
 import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js';
 
 vi.mock('../../workflows/setup-machine.js', () => ({
@@ -28,7 +28,7 @@ describe('Setup command', () => {
 
     it('runs dns setup directly', async () => {
         const command = createCommand({
-            args: { action: 'dns' },
+            args: { action: SetupAction.Dns },
             flags: { yes: true, 'dry-run': true, verbose: true },
         });
 
@@ -40,7 +40,7 @@ describe('Setup command', () => {
 
     it('runs cert setup directly', async () => {
         const command = createCommand({
-            args: { action: 'cert' },
+            args: { action: SetupAction.Cert },
             flags: { yes: true, 'dry-run': true, verbose: false },
         });
 
@@ -51,7 +51,7 @@ describe('Setup command', () => {
     });
 });
 
-function createCommand(parseResult: { args: { action: 'cert' | 'dns' | undefined }; flags: { yes: boolean; 'dry-run': boolean; verbose: boolean } }): Setup {
+function createCommand(parseResult: { args: { action: SetupAction | undefined }; flags: { yes: boolean; 'dry-run': boolean; verbose: boolean } }): Setup {
     const command = new Setup([], {} as any);
     (command as any).config = {};
     (command as any).parse = vi.fn(async () => parseResult);

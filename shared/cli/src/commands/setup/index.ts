@@ -3,7 +3,12 @@ import { BaseCommand } from '../../base-command.js';
 import { dryRunFlag, yesFlag } from '../../command-flags.js';
 import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js';
 
-const setupActions = ['cert', 'dns'] as const;
+export enum SetupAction {
+    Cert = 'cert',
+    Dns = 'dns',
+}
+
+const setupActions = Object.values(SetupAction);
 
 export default class Setup extends BaseCommand {
     static summary = 'Prepare this machine for local development';
@@ -28,12 +33,12 @@ export default class Setup extends BaseCommand {
         const { args, flags } = await this.parse(Setup);
         const context = await this.createContext(flags);
 
-        if (args.action === 'dns') {
+        if (args.action === SetupAction.Dns) {
             await setupDns({ yes: flags.yes, dryRun: flags['dry-run'], verbose: flags.verbose });
             return;
         }
 
-        if (args.action === 'cert') {
+        if (args.action === SetupAction.Cert) {
             await setupCert(context, { yes: flags.yes, dryRun: flags['dry-run'] });
             return;
         }

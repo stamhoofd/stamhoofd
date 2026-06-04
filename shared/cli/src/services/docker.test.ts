@@ -38,7 +38,7 @@ describe('container runtime selection', () => {
     it('falls back to docker when podman is not installed', async () => {
         vi.mocked(runCommand).mockResolvedValueOnce({ stdout: '', stderr: 'Error: spawn podman ENOENT', status: 1 } as any);
 
-        await expect(docker.getContainerRuntime()).resolves.toBe('docker');
+        await expect(docker.getContainerRuntime()).resolves.toBe(docker.ContainerRuntime.Docker);
 
         expect(runCommand).toHaveBeenCalledWith('docker', ['info'], { quiet: true });
     });

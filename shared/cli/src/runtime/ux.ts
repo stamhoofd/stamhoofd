@@ -6,8 +6,8 @@ import ora from 'ora';
 import terminalLink from 'terminal-link';
 import { stripVTControlCharacters } from 'node:util';
 import { successSymbol } from '../config/shared-service-config.js';
-import { writeOutputLine } from './output-target.js';
-import { formatStatusLabel, type CliStatus } from './status.js';
+import { OutputStream, writeOutputLine } from './output-target.js';
+import { CliStatus, formatStatusLabel } from './status.js';
 
 const spinnerFrames = ['-', '\\', '|', '/'];
 
@@ -24,7 +24,7 @@ export function warning(message: string): void {
 }
 
 export function failure(message: string): void {
-    writeOutputLine(`${chalk.red('✖')} ${message}`, 'stderr');
+    writeOutputLine(`${chalk.red('✖')} ${message}`, OutputStream.Stderr);
 }
 
 export async function step<T>(message: string, fn: () => Promise<T>, options: { successMessage?: (result: T) => string } = {}): Promise<T> {
@@ -69,14 +69,14 @@ export function table(headers: string[], rows: string[][], options: { title?: st
 export function formatTable(headers: string[], rows: string[][], options: { title?: string } = {}): string {
     const widths = headers.map((header, index) => Math.max(header.length, ...rows.map(row => stripVTControlCharacters(row[index] ?? '').length)));
     const lines = [
-        formatTableBorder(widths, 'top'),
+        formatTableBorder(widths, TableBorderPosition.Top),
         formatTableRow(headers.map(header => chalk.bold(header)), widths),
-        formatTableBorder(widths, 'middle'),
+        formatTableBorder(widths, TableBorderPosition.Middle),
     ];
     for (const row of rows) {
         lines.push(formatTableRow(row, widths));
     }
-    lines.push(formatTableBorder(widths, 'bottom'));
+    lines.push(formatTableBorder(widths, TableBorderPosition.Bottom));
 
     return options.title ? `${chalk.bold(options.title)}\n${lines.join('\n')}` : lines.join('\n');
 }
@@ -129,10 +129,16 @@ function formatTableRow(row: string[], widths: number[]): string {
     return `│ ${row.map((cell, index) => cell.padEnd(widths[index] + ansiLength(cell))).join(' │ ')} │`;
 }
 
-function formatTableBorder(widths: number[], position: 'top' | 'middle' | 'bottom'): string {
-    const [left, join, right] = position === 'top'
+enum TableBorderPosition {
+    Top = 'top',
+    Middle = 'middle',
+    Bottom = 'bottom',
+}
+
+function formatTableBorder(widths: number[], position: TableBorderPosition): string {
+    const [left, join, right] = position === TableBorderPosition.Top
         ? ['┌', '┬', '┐']
-        : position === 'middle'
+        : position === TableBorderPosition.Middle
             ? ['├', '┼', '┤']
             : ['└', '┴', '┘'];
     return `${left}${widths.map(width => ''.padEnd(width + 2, '─')).join(join)}${right}`;

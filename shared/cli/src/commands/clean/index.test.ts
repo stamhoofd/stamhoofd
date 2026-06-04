@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import Clean from './index.js';
+import Clean, { CleanTarget } from './index.js';
 import { cleanBuild } from '../../runtime/monorepo-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
 import { confirm, warning } from '../../runtime/ux.js';
@@ -55,7 +55,7 @@ describe('Clean command', () => {
 
     it('runs build cleanup directly', async () => {
         const command = createCommand({
-            args: { target: 'build' },
+            args: { target: CleanTarget.Build },
             flags: { yes: false, 'dry-run': true, verbose: false },
         });
 
@@ -66,7 +66,7 @@ describe('Clean command', () => {
 
     it('stops services and deletes service data', async () => {
         const command = createCommand({
-            args: { target: 'services' },
+            args: { target: CleanTarget.Services },
             flags: { yes: true, 'dry-run': false, verbose: false },
         });
 
@@ -79,7 +79,7 @@ describe('Clean command', () => {
     it('prints dry-run actions for all without running destructive work', async () => {
         const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
         const command = createCommand({
-            args: { target: 'all' },
+            args: { target: CleanTarget.All },
             flags: { yes: false, 'dry-run': true, verbose: false },
         });
 
@@ -97,7 +97,7 @@ describe('Clean command', () => {
     it('skips destructive services clean when confirmation is denied', async () => {
         vi.mocked(confirm).mockResolvedValue(false);
         const command = createCommand({
-            args: { target: 'services' },
+            args: { target: CleanTarget.Services },
             flags: { yes: false, 'dry-run': false, verbose: false },
         });
 
@@ -110,7 +110,7 @@ describe('Clean command', () => {
 
     it('rejects env for targets that do not use it', async () => {
         const command = createCommand({
-            args: { target: 'build' },
+            args: { target: CleanTarget.Build },
             flags: { yes: false, 'dry-run': false, verbose: false, env: 'keeo' },
         });
         (command as any).error = vi.fn((message: string) => {
@@ -122,7 +122,7 @@ describe('Clean command', () => {
 
     it('rejects name for targets that do not use it', async () => {
         const command = createCommand({
-            args: { target: 'services' },
+            args: { target: CleanTarget.Services },
             flags: { yes: false, 'dry-run': false, verbose: false, name: 'feature-payments' },
         });
         (command as any).error = vi.fn((message: string) => {
@@ -133,7 +133,7 @@ describe('Clean command', () => {
     });
 });
 
-function createCommand(parseResult: { args: { target: 'all' | 'build' | 'db' | 'services' | 'sso' | undefined }; flags: { yes: boolean; 'dry-run': boolean; verbose: boolean; env?: string; name?: string } }): Clean {
+function createCommand(parseResult: { args: { target: CleanTarget | undefined }; flags: { yes: boolean; 'dry-run': boolean; verbose: boolean; env?: string; name?: string } }): Clean {
     const command = new Clean([], {} as any);
     (command as any).config = {};
     (command as any).parse = vi.fn(async () => parseResult);

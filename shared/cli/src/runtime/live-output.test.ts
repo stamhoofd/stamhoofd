@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { OutputStream } from './output-target.js';
 import { createLiveOutput, StatusItemKind } from './live-output.js';
 
 const logUpdateMock = vi.hoisted(() => {
@@ -36,7 +37,7 @@ describe('createLiveOutput', () => {
             { label: 'dashboard https://example.com', href: 'https://example.com' },
         ]);
         output.write('hello\n');
-        output.write('boom\n', 'stderr');
+        output.write('boom\n', OutputStream.Stderr);
 
         expect(logUpdateMock).toHaveBeenCalledWith(expect.stringContaining('instance main'));
         expect(logUpdateMock.clear).toHaveBeenCalledTimes(2);
