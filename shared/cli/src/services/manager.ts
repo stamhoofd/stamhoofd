@@ -3,12 +3,13 @@ import path from 'node:path';
 import { stripVTControlCharacters } from 'node:util';
 import type { CliContext } from '../context/create-context.js';
 import { sharedDir } from '../runtime/manifest-store.js';
-import { liveTable, spinnerCell, statusCell, step, table } from '../runtime/ux.js';
+import { statusCell, step, table, Table, type TableCellInput, type TableRow } from '../runtime/ux.js';
 import { CliStatus } from '../runtime/status.js';
 import { ContainerStoppedError } from './docker-service.js';
 import type { ServiceDefinition, ServiceStartResult, ServiceStatus } from './service.js';
 
 enum ServiceTableRowStatus {
+    Checking = 'checking',
     Starting = 'starting',
     Stopping = 'stopping',
     Running = 'running',
@@ -29,7 +30,7 @@ type ServiceTaskResult<T> = {
 };
 
 type ServiceTaskContext = {
-    setRow(row: ServiceTableRow): void;
+    updateRow(row: ServiceTableRow): void;
 };
 
 type ServiceOptionsByKey<TOptions> = Partial<Record<string, TOptions>>;
@@ -80,7 +81,7 @@ export async function startServicesInteractive<TOptions>(context: CliContext, se
 export async function restartServicesInteractive<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>, optionsByKey: ServiceOptionsByKey<TOptions> = {}): Promise<{ env: NodeJS.ProcessEnv; started: string[] }> {
     const results = await runServicesInteractive(services, ServiceTableRowStatus.Stopping, async (service, row) => {
         await service.stop(context);
-        row.setRow({ name: service.name, status: ServiceTableRowStatus.Starting, detail: ServiceTableRowStatus.Starting });
+        row.updateRow({ name: service.name, status: ServiceTableRowStatus.Starting, detail: ServiceTableRowStatus.Starting });
         const result = await service.start(context, optionsByKey[service.key] as TOptions);
         const after = await service.status(context);
 
@@ -115,26 +116,61 @@ export async function stopServicesInteractive<TOptions>(context: CliContext, ser
 }
 
 export async function printServicesStatus<TOptions>(context: CliContext, services: ReadonlyArray<ServiceDefinition<TOptions>>): Promise<void> {
-    const rows = await getServicesStatus(context, services);
-    table(['Service', 'Status', 'Access', 'Login'], rows.map(row => [row.name, statusCell(row.running ? CliStatus.Running : CliStatus.Stopped), row.running ? row.detail : 'Run stam services up', row.login ?? '-']), { title: 'Shared services' });
+    const rows = services.map(service => Table.row(formatServiceTableRow({
+        name: service.name,
+        status: ServiceTableRowStatus.Checking,
+        detail: 'checking status',
+    })));
+    const table = Table.create({
+        title: 'Shared services',
+        headers: ['Service', 'Status', 'Access', 'Login'],
+        rows,
+        live: true,
+    });
+
+    const results = await Promise.allSettled(services.map(async (service, index) => {
+        try {
+            const status = await service.status(context);
+            rows[index].update(formatServiceTableRow(serviceStatusToTableRow(status, 'Run stam services up')));
+        }
+        catch (error) {
+            rows[index].update(formatServiceTableRow({
+                name: service.name,
+                status: ServiceTableRowStatus.Failed,
+                detail: formatFailureDetail(error),
+            }));
+            throw error;
+        }
+    }));
+
+    await table.wait();
+
+    const rejected = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+    if (rejected) {
+        throw rejected.reason;
+    }
 }
 
-function formatServiceTableRow(row: ServiceTableRow, frame: number): string[] {
-    if (row.status === ServiceTableRowStatus.Starting || row.status === ServiceTableRowStatus.Stopping) {
-        return [row.name, spinnerCell(row.status, frame), spinnerCell(row.detail, frame), row.login ?? '-'];
+function formatServiceTableRow(row: ServiceTableRow): TableCellInput[] {
+    if (row.status === ServiceTableRowStatus.Starting || row.status === ServiceTableRowStatus.Stopping || row.status === ServiceTableRowStatus.Checking) {
+        return [row.name, Table.cell(row.status, { indeterminate: true }), Table.cell(row.detail, { indeterminate: true }), row.login ?? '-'];
     }
 
     return [row.name, statusCell(row.status === ServiceTableRowStatus.Running ? CliStatus.Running : row.status === ServiceTableRowStatus.Stopped ? CliStatus.Stopped : CliStatus.Failed), row.detail, row.login ?? '-'];
 }
 
 async function runServicesInteractive<T, TOptions>(services: ReadonlyArray<ServiceDefinition<TOptions>>, initialStatus: ServiceTableRow['status'], task: (service: ServiceDefinition<TOptions>, context: ServiceTaskContext) => Promise<ServiceTaskResult<T>>): Promise<T[]> {
-    const rows: ServiceTableRow[] = services.map(service => ({
+    const rows = services.map(service => Table.row(formatServiceTableRow({
         name: service.name,
         status: initialStatus,
         detail: initialStatus,
         login: undefined,
-    }));
-    const table = liveTable(['Service', 'Status', 'Access', 'Login'], frame => formatServiceTableRows(rows, frame));
+    })));
+    const liveTable = Table.create({
+        headers: ['Service', 'Status', 'Access', 'Login'],
+        rows,
+        live: true,
+    });
 
     let rejectedReason: unknown;
 
@@ -142,19 +178,19 @@ async function runServicesInteractive<T, TOptions>(services: ReadonlyArray<Servi
         const results = await Promise.allSettled(services.map(async (service, index) => {
             try {
                 const result = await task(service, {
-                    setRow(row) {
-                        rows[index] = row;
+                    updateRow(row) {
+                        rows[index].update(formatServiceTableRows([row])[0]);
                     },
                 });
-                rows[index] = result.row;
+                rows[index].update(formatServiceTableRows([result.row])[0]);
                 return result.value;
             }
             catch (error) {
-                rows[index] = {
+                rows[index].update(formatServiceTableRows([{
                     name: service.name,
                     status: ServiceTableRowStatus.Failed,
                     detail: formatFailureDetail(error),
-                };
+                }])[0]);
                 throw error;
             }
         }));
@@ -174,7 +210,7 @@ async function runServicesInteractive<T, TOptions>(services: ReadonlyArray<Servi
         });
     }
     finally {
-        table.stop();
+        await liveTable.wait();
         printServiceFailureLogs(rejectedReason);
     }
 }
@@ -186,18 +222,18 @@ function formatFailureDetail(error: unknown): string {
     return (error instanceof Error ? error.message : String(error)).replace(/\s+/g, ' ').trim();
 }
 
-function formatServiceTableRows(rows: ServiceTableRow[], frame: number): string[][] {
-    const formattedRows = rows.map(row => formatServiceTableRow(row, frame));
+function formatServiceTableRows(rows: ServiceTableRow[]): TableCellInput[][] {
+    const formattedRows = rows.map(row => formatServiceTableRow(row));
     const accessWidth = maxAccessColumnWidth(formattedRows);
 
     return formattedRows.map(row => [row[0], row[1], ellipsize(row[2], accessWidth), row[3]]);
 }
 
-function maxAccessColumnWidth(rows: string[][]): number {
+function maxAccessColumnWidth(rows: TableCellInput[][]): number {
     const terminalWidth = process.stdout.columns ?? 120;
-    const serviceWidth = maxVisibleWidth('Service', rows.map(row => row[0]));
-    const statusWidth = maxVisibleWidth('Status', rows.map(row => row[1]));
-    const loginWidth = maxVisibleWidth('Login', rows.map(row => row[3]));
+    const serviceWidth = maxVisibleWidth('Service', rows.map(row => cellValue(row[0])));
+    const statusWidth = maxVisibleWidth('Status', rows.map(row => cellValue(row[1])));
+    const loginWidth = maxVisibleWidth('Login', rows.map(row => cellValue(row[3])));
     const borderAndPaddingWidth = 13;
     const available = terminalWidth - serviceWidth - statusWidth - loginWidth - borderAndPaddingWidth;
 
@@ -208,15 +244,20 @@ function maxVisibleWidth(header: string, cells: string[]): number {
     return Math.max(header.length, ...cells.map(visibleLength));
 }
 
-function ellipsize(value: string, maxLength: number): string {
-    if (visibleLength(value) <= maxLength) {
+function ellipsize(value: TableCellInput, maxLength: number): TableCellInput {
+    if (visibleLength(cellValue(value)) <= maxLength) {
         return value;
     }
-    return `${stripVTControlCharacters(value).slice(0, maxLength - 1)}…`;
+    const ellipsized = `${stripVTControlCharacters(cellValue(value)).slice(0, maxLength - 1)}…`;
+    return typeof value === 'string' ? ellipsized : { ...value, value: ellipsized };
 }
 
 function visibleLength(value: string): number {
     return stripVTControlCharacters(value).length;
+}
+
+function cellValue(value: TableCellInput): string {
+    return typeof value === 'string' ? value : value.value;
 }
 
 function serviceStatusToTableRow(status: ServiceStatus, fallbackDetail: string): ServiceTableRow {

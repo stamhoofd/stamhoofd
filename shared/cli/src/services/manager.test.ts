@@ -3,11 +3,40 @@ import type { CliContext } from '../context/create-context.js';
 import { ContainerStoppedError } from './docker-service.js';
 import { printServicesStatus, restartServicesInteractive, startServicesInteractive, stopServicesInteractive } from './manager.js';
 import type { ServiceDefinition, ServiceStartResult, ServiceStatus } from './service.js';
-import { liveTable, table } from '../runtime/ux.js';
+
+const tableMock = vi.hoisted(() => {
+    type MockRow = {
+        cells: any[];
+        update: ReturnType<typeof vi.fn>;
+        hasIndeterminateCells: () => boolean;
+    };
+    const createdTables: { rows: MockRow[]; wait: ReturnType<typeof vi.fn> }[] = [];
+
+    return {
+        createdTables,
+        Table: {
+            cell: vi.fn((value: string, options = {}) => ({ value, ...options })),
+            row: vi.fn((cells: any[]) => {
+                const row: MockRow = {
+                    cells,
+                    update: vi.fn((updatedCells: any[]) => {
+                        row.cells = updatedCells;
+                    }),
+                    hasIndeterminateCells: () => row.cells.some(cell => typeof cell !== 'string' && cell.indeterminate),
+                };
+                return row;
+            }),
+            create: vi.fn((options: { rows: MockRow[] }) => {
+                const created = { rows: options.rows, wait: vi.fn(async () => undefined) };
+                createdTables.push(created);
+                return created;
+            }),
+        },
+    };
+});
 
 vi.mock('../runtime/ux.js', () => ({
-    liveTable: vi.fn(() => ({ stop: vi.fn() })),
-    spinnerCell: vi.fn((message: string) => message),
+    Table: tableMock.Table,
     statusCell: vi.fn((status: string) => status),
     step: vi.fn(),
     table: vi.fn(),
@@ -18,6 +47,7 @@ const context = {} as CliContext;
 describe('service manager', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        tableMock.createdTables.length = 0;
     });
 
     it('prints service status with login details', async () => {
@@ -39,16 +69,17 @@ describe('service manager', () => {
 
         await printServicesStatus(context, services);
 
-        expect(table).toHaveBeenCalledWith(
-            ['Service', 'Status', 'Access', 'Login'],
-            [[
-                'MailDev',
-                expect.stringContaining('running'),
-                'https://mail.stamhoofd',
-                'username / password',
-            ]],
-            { title: 'Shared services' },
-        );
+        expect(tableMock.Table.create).toHaveBeenCalledWith(expect.objectContaining({
+            title: 'Shared services',
+            headers: ['Service', 'Status', 'Access', 'Login'],
+            live: true,
+        }));
+        expect(tableMock.createdTables.at(-1)?.rows[0].cells).toEqual([
+            'MailDev',
+            expect.stringContaining('running'),
+            'https://mail.stamhoofd',
+            'username / password',
+        ]);
     });
 
     it('starts services concurrently and returns env and started keys', async () => {
@@ -169,9 +200,7 @@ describe('service manager', () => {
                 },
             }])).rejects.toThrow(errorMessage);
 
-            const getRows = vi.mocked(liveTable).mock.calls.at(-1)?.[1];
-            expect(getRows).toBeDefined();
-            const rows = getRows?.(0) ?? [];
+            const rows = tableMock.createdTables.at(-1)?.rows.map(row => row.cells) ?? [];
 
             expect(rows[0][2]).toHaveLength(49);
             expect(rows[0][2]).toMatch(/…$/);
@@ -203,8 +232,7 @@ describe('service manager', () => {
                 },
             }])).rejects.toThrow('CoreDNS stopped immediately after start');
 
-            const getRows = vi.mocked(liveTable).mock.calls.at(-1)?.[1];
-            const rows = getRows?.(0) ?? [];
+            const rows = tableMock.createdTables.at(-1)?.rows.map(row => row.cells) ?? [];
             expect(rows[0][2]).toBe('last log line');
             expect(messages.join('\n')).toContain('Logs for CoreDNS:');
             expect(messages.join('\n')).toContain('first line\nlast log line');

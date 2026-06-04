@@ -10,7 +10,7 @@ import type { CliContext } from '../context/create-context.js';
 import { run } from '../runtime/command-runner.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { CliStatus } from '../runtime/status.js';
-import { command, confirm, statusCell, success, table, warning } from '../runtime/ux.js';
+import { command, confirm, statusCell, success, table, Table, type TableCellInput, type TableRow, warning } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import { runServices } from './start-services.js';
@@ -56,6 +56,47 @@ export async function checkSetup(context: CliContext): Promise<SetupReport> {
     };
 }
 
+export async function checkSetupWithTable(context: CliContext, options: { live: boolean }): Promise<SetupReport> {
+    const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
+    const rows = {
+        docker: Table.row(['Podman / Docker', Table.cell('checking', { indeterminate: true }), '']),
+        privilegedPorts: Table.row(['Privileged port redirects', Table.cell('checking', { indeterminate: true }), '']),
+        caddy: Table.row(['Caddy', Table.cell('checking', { indeterminate: true }), '']),
+        dns: Table.row([`DNS .${domain}`, Table.cell('checking', { indeterminate: true }), '']),
+        cert: Table.row(['Caddy local CA', Table.cell('checking', { indeterminate: true }), '']),
+    };
+    const liveTable = Table.create({
+        title: 'Checking Stamhoofd local development setup',
+        headers: ['Check', 'Status', 'Details'],
+        rows: [rows.docker, rows.privilegedPorts, rows.caddy, rows.dns, rows.cert],
+        live: options.live,
+    });
+
+    const profilePromise = currentSharedServiceProfile();
+    const results = await Promise.allSettled([
+        runSetupCheck(rows.docker, 'Podman / Docker', dockerCheck()),
+        profilePromise.then(profile => runSetupCheck(rows.privilegedPorts, 'Privileged port redirects', privilegedPortRedirectCheck(profile))),
+        runSetupCheck(rows.caddy, 'Caddy', caddyCheck()),
+        profilePromise.then(profile => runSetupCheck(rows.dns, `DNS .${domain}`, dnsCheck(context, profile))),
+        runSetupCheck(rows.cert, 'Caddy local CA', certCheck()),
+    ]);
+
+    await liveTable.wait();
+
+    const rejected = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+    if (rejected) {
+        throw rejected.reason;
+    }
+
+    return {
+        docker: results[0].status === 'fulfilled' ? results[0].value : neverRejected(results[0]),
+        privilegedPorts: results[1].status === 'fulfilled' ? results[1].value : neverRejected(results[1]),
+        caddy: results[2].status === 'fulfilled' ? results[2].value : neverRejected(results[2]),
+        dns: results[3].status === 'fulfilled' ? results[3].value : neverRejected(results[3]),
+        cert: results[4].status === 'fulfilled' ? results[4].value : neverRejected(results[4]),
+    };
+}
+
 export function printSetupReport(report: SetupReport): void {
     table(['Check', 'Status', 'Details'], [
         row('Podman / Docker', report.docker),
@@ -67,8 +108,7 @@ export function printSetupReport(report: SetupReport): void {
 }
 
 export async function runSetup(context: CliContext): Promise<void> {
-    const report = await checkSetup(context);
-    printSetupReport(report);
+    const report = await checkSetupWithTable(context, { live: true });
     const fixes = getRecommendedSetupFixes(report);
     if (fixes.length === 0) {
         if (setupChecks(report).some(check => !check.ok)) {
@@ -512,6 +552,30 @@ async function dockerCheck(): Promise<CheckResult> {
     }
 }
 
+async function runSetupCheck(row: TableRow, label: string, check: Promise<CheckResult>): Promise<CheckResult> {
+    try {
+        const result = await check;
+        row.update(setupRow(label, result));
+        return result;
+    }
+    catch (error) {
+        row.update([
+            label,
+            statusCell(CliStatus.Failed),
+            error instanceof Error ? error.message : String(error),
+        ]);
+        throw error;
+    }
+}
+
+function neverRejected(result: PromiseRejectedResult): never {
+    throw result.reason;
+}
+
 function row(label: string, result: CheckResult): string[] {
+    return setupRow(label, result) as string[];
+}
+
+function setupRow(label: string, result: CheckResult): TableCellInput[] {
     return [label, statusCell(result.ok ? CliStatus.Ready : CliStatus.Missing), result.manualFix ? `${result.details} (${result.manualFix})` : result.details];
 }
