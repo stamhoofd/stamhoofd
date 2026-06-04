@@ -32,7 +32,7 @@ test.describe('Onboarding', () => {
         // click signup
         await pages.dashboard.startSignup();
 
-        const name = 'Vereniging';
+        const name = 'Vereniging ' + Math.floor(Math.random() * 1000000);
 
         // step 1
         await (new SignupGeneralPage(page)).completeHappyFlow({
@@ -71,7 +71,7 @@ test.describe('Onboarding', () => {
         // click signup
         await pages.dashboard.startSignup();
 
-        const name = 'Vereniging 2';
+        const name = 'Vereniging ' + Math.floor(Math.random() * 1000000);
 
         const signupPage = new SignupGeneralPage(page);
         await signupPage.goto({});
@@ -196,7 +196,7 @@ test.describe('Onboarding', () => {
             // click signup
             await pages.dashboard.startSignup();
 
-            const name = 'Vereniging';
+            const name = 'Vereniging ' + Math.floor(Math.random() * 1000000);
 
             // step 1
             await (new SignupGeneralPage(page)).completeHappyFlow({
@@ -226,7 +226,7 @@ test.describe('Onboarding', () => {
             // click signup
             await pages.dashboard.startSignup();
 
-            const name = 'Vereniging';
+            const name = 'Vereniging ' + Math.floor(Math.random() * 1000000);
 
             // step 1
             await (new SignupGeneralPage(page)).completeHappyFlow({
@@ -252,7 +252,7 @@ test.describe('Onboarding', () => {
 
     test.describe('registerCode', () => {
         test('happy flow', async ({ page }) => {
-            const name = 'Vereniging2';
+            const name = 'Vereniging ' + Math.floor(Math.random() * 1000000);
             const referrer = await (new OrganizationFactory({ name: 'referrer' })).create();
             const registerCode = await (new RegisterCodeFactory({ organization: referrer })).create();
 

@@ -6,11 +6,11 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
     globalSetup: './src/setup/global-setup.js',
     globalTeardown: './src/setup/global-teardown.js',
-    testDir:'./src/tests',
+    testDir: './src/tests',
     /* Exclude tests tagged @extra unless explicitly requested via PLAYWRIGHT_INCLUDE_EXTRA env var */
     grepInvert: process.env.PLAYWRIGHT_INCLUDE_EXTRA ? undefined : /@extra/,
     /* Run tests in files in parallel */
-    fullyParallel: true,
+    fullyParallel: false, // Keeping this false decreases the difference between CI and local running
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 1 : 0,
@@ -21,10 +21,10 @@ export default defineConfig({
 
     build: {
         // Disable buggy transpilation we don't need
-        // this tries to transpile sources, 
+        // this tries to transpile sources,
         external: [import.meta.resolve('../../../').replace('file://', '/') + '/backend/**', import.meta.resolve('../../../').replace('file://', '/') + '/shared/**'],
     },
-    
+
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Base URL to use in actions like `await page.goto('')`. */
@@ -34,7 +34,7 @@ export default defineConfig({
         screenshot: 'only-on-failure',
 
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-        trace: 'on-first-retry',
+        trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
 
         // todo
         headless: true,

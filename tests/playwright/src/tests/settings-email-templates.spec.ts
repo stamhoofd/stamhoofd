@@ -69,8 +69,8 @@ test.describe('Settings email templates', () => {
         await pages.dashboard.login({
             organizationUri: organization.uri,
             email,
-            password
-        })
+            password,
+        });
     }
 
     function activePopup(page: Page) {
@@ -140,16 +140,13 @@ test.describe('Settings email templates', () => {
 
     async function openSettingsEmailTemplates(page: Page) {
         await selectTab(page, 'settings');
-        const route = appendEmailTemplatesRoute(page.url());
 
         const requestPromise = page.waitForRequest(request => request.method() === 'GET' && request.url().includes('/email-templates'));
         await Promise.all([
             requestPromise,
-            page.goto(route),
+            page.getByTestId('OpenEmailTemplatesSettingsButton').click(),
         ]);
-
         await expect(activePopup(page).getByTestId('save-view')).toBeVisible();
-
         return await requestPromise;
     }
 

@@ -1,5 +1,5 @@
 import { Factory } from '@simonbackx/simple-database';
-import type { BundleDiscount, GroupPriceDiscount, GroupType} from '@stamhoofd/structures';
+import type { BundleDiscount, GroupPriceDiscount, GroupType } from '@stamhoofd/structures';
 import { BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -42,15 +42,14 @@ export class GroupFactory extends Factory<Options, Group> {
                 });
             }
             group.periodId = this.options.period.id;
-        }
-        else {
+        } else {
             group.periodId = organization.periodId;
         }
 
         group.waitingListId = this.options.waitingListId ?? null;
 
         group.settings = GroupSettings.create({
-            name: this.options.name ?? new TranslatedString('Group name'),
+            name: this.options.name ?? new TranslatedString('Group ' + this.randomString(5)),
             startDate: new Date(new Date().getTime() - 10 * 1000),
             endDate: new Date(new Date().getTime() + 10 * 1000),
             registrationStartDate: new Date(new Date().getTime() - 10 * 1000),
@@ -80,8 +79,7 @@ export class GroupFactory extends Factory<Options, Group> {
                 for (const discount of this.options.bundleDiscounts) {
                     map.set(discount, null);
                 }
-            }
-            else {
+            } else {
                 map = this.options.bundleDiscounts;
             }
 

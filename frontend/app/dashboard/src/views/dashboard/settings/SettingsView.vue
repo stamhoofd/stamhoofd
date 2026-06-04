@@ -172,7 +172,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailTemplates)">
+                <STListItem :selectable="true" class="left-center" data-testid="OpenEmailTemplatesSettingsButton" @click="$navigate(Routes.EmailTemplates)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/email-template.svg">
                     </template>

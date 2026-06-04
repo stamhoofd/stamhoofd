@@ -132,7 +132,7 @@ test.describe('Webshops admin', () => {
         const ordersLink = page.getByRole('link', { name: 'Bestellingen beheren' });
         await ordersLink.waitFor({ timeout: 5000 });
         const href = await ordersLink.getAttribute('href');
-        expect(href).toMatch(/\/verkoop\/archief$/);
+        expect(href).toMatch(/\/verkoop\/archief\//);
 
         // The 'Webshop openen' link must NOT be present for archived webshops
         await expect(page.getByRole('link', { name: 'Webshop openen' })).toHaveCount(0);
