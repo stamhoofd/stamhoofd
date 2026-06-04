@@ -1,8 +1,8 @@
-import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
-import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
-import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '@stamhoofd/components/types/NavigationActions';
+import { runDisplayOptions, useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import type { Component } from 'vue';
 import { MemberAdministrationOnboardingViewModel } from './MemberAdministrationOnboardingViewModel';
 import OnboardingGroupPricesView from './OnboardingGroupPricesView.vue';
@@ -59,7 +59,7 @@ export function useMemberAdministrationOnboarding() {
     const organization = useRequiredOrganization();
     const navigationActions = useNavigationActions();
 
-    function buildStep(index: number, model: MemberAdministrationOnboardingViewModel, stepList: Component[]): ComponentWithProperties {
+    function buildStep(index: number, model: MemberAdministrationOnboardingViewModel, stepList: Component[], displayOptions: DisplayOptions, finishHandler: () => Promise<void> | void): ComponentWithProperties {
         return new ComponentWithProperties(BoxedController, {
             root: new ComponentWithProperties(stepList[index], {
                 viewModel: model,
@@ -68,13 +68,13 @@ export function useMemberAdministrationOnboarding() {
                 saveHandler: async (navigate: NavigationActions) => {
                     if (index + 1 < stepList.length) {
                         await navigate.show({
-                            components: [buildStep(index + 1, model, stepList)],
+                            components: [buildStep(index + 1, model, stepList, displayOptions, finishHandler)],
                         });
                         return;
                     }
 
                     // Last step: leave the flow (changes were already persisted per step).
-                    await finish(navigate, model);
+                    await finish(navigate, model, displayOptions, finishHandler);
                 },
             } satisfies OnboardingStepProps),
         });
@@ -83,7 +83,7 @@ export function useMemberAdministrationOnboarding() {
     const activatePackages = useActivatePackages();
     const user = useUser();
 
-    async function finish(navigate: NavigationActions, _model: MemberAdministrationOnboardingViewModel) {
+    async function finish(navigate: NavigationActions, _model: MemberAdministrationOnboardingViewModel, displayOptions: DisplayOptions, finishHandler: () => Promise<void> | void) {
         try {
             await activatePackages(
                 OrganizationCheckout.create({
@@ -100,22 +100,37 @@ export function useMemberAdministrationOnboarding() {
                 }),
             );
         } catch (e) {
+            console.error(e);
             Toast.fromError(e).show();
             return;
         }
         // Each step already persisted its own changes, so here we only have to leave the flow
         // and return to the onboarding start view (the root of this navigation controller).
         // TODO: decide where to send the user next (e.g. activate their first package).
-        if (navigate.navigationController) {
-            await navigate.navigationController.popToRoot({ force: true });
-        } else {
-            await navigate.pop({ force: true });
+        try {
+            if (displayOptions.action !== 'present') {
+                if (navigate.navigationController) {
+                    await navigate.navigationController.popToRoot({ force: true });
+                } else {
+                    await navigate.pop({ force: true });
+                }
+            } else {
+                await navigate.dismiss({ force: true });
+            }
+
+            await finishHandler();
+        } catch (e) {
+            console.error('Failed to dismiss', e);
         }
+
         await GlobalEventBus.sendEvent('selectTabById', 'members');
         Toast.success($t('Jullie ledenadministratie is klaar voor gebruik. Je kan nu meer instellingen aanvullen, leden importeren of het ledenportaal uitproberen.')).show();
     }
 
-    return async function startMemberAdministrationOnboarding() {
+    return async function startMemberAdministrationOnboarding({ displayOptions, finishHandler }: {
+        displayOptions: DisplayOptions;
+        finishHandler?: () => Promise<void> | void;
+    }) {
         const model = new MemberAdministrationOnboardingViewModel({
             organization: organization.value,
         });
@@ -123,8 +138,12 @@ export function useMemberAdministrationOnboarding() {
         // Skip the organization type details step when there is nothing extra to collect.
         const effectiveSteps = needsTypeDetailsStep(organization.value) ? steps : steps.slice(1);
 
-        await navigationActions.show({
-            components: [buildStep(0, model, effectiveSteps)],
-        });
+        await runDisplayOptions({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: buildStep(0, model, effectiveSteps, displayOptions, finishHandler ?? (() => {})),
+                }),
+            ],
+        }, displayOptions, navigationActions);
     };
 }

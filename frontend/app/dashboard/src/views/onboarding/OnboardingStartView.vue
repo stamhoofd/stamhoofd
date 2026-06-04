@@ -59,7 +59,11 @@ const user = useUser();
 const organization = useRequiredOrganization();
 
 async function startMemberAdministration() {
-    await startMemberAdministrationOnboarding();
+    await startMemberAdministrationOnboarding({
+        displayOptions: {
+            action: 'show',
+        },
+    });
 }
 
 async function activateWebshopsTrial() {

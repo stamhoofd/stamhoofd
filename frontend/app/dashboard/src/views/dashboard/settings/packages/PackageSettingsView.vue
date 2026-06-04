@@ -80,7 +80,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
@@ -92,13 +92,13 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import type { STPackage, STPackageType } from '@stamhoofd/structures';
 import { OrganizationCheckout, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
+import { useMemberAdministrationOnboarding } from '../../../onboarding/useMemberAdministrationOnboarding';
 import { useActivatePackages } from './hooks/useActivatePackages';
 import { useDeactivatePackage } from './hooks/useDeactivatePackage';
 import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { PayBalanceMode } from './OrganizationCheckoutViewModel';
 import PackagesDetailsView from './PackagesDetailsView.vue';
 import { useStartOrganizationCheckout } from './useStartOrganizationCheckout';
-import { useMemberAdministrationOnboarding } from '../../../onboarding/useMemberAdministrationOnboarding';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
@@ -426,6 +426,7 @@ async function viewPackages(pack: SelectablePackage) {
 }
 
 const startMemberAdministrationOnboarding = useMemberAdministrationOnboarding();
+const dismiss = useDismiss();
 
 async function checkout(pack: SelectablePackage) {
     switch (pack.status) {
@@ -433,7 +434,16 @@ async function checkout(pack: SelectablePackage) {
             // Start trial
             switch (pack.bundle) {
                 case STPackageBundle.Members: {
-                    await startMemberAdministrationOnboarding();
+                    await startMemberAdministrationOnboarding({
+                        displayOptions: {
+                            action: 'present',
+                            modalDisplayStyle: 'popup',
+                        },
+                        finishHandler: async () => {
+                            // Close package settings view
+                            await dismiss({ force: true });
+                        },
+                    });
                     break;
                 }
                 case STPackageBundle.Webshops: {

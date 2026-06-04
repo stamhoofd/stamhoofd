@@ -30,7 +30,7 @@ defineExpose({
 @use '@stamhoofd/scss/base/variables' as *;
 
 @media (min-width: 800px) {
-    .boxed-controller {
+    .boxed-controller:not(.popup .boxed-controller) {
         --tab-bar-header-height: 80px;
         height: calc(var(--vh, 1vh) * 100);
         max-height: 100vh;
