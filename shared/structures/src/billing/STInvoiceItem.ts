@@ -2,7 +2,6 @@ import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, String
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { STPackage, STPricingType } from './STPackage.js';
 
 export class STInvoiceItem extends AutoEncoder {
@@ -18,8 +17,10 @@ export class STInvoiceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     amount = 1;
 
+    /**
+     * this is still in legacy cent format
+     */
     @field({ decoder: IntegerDecoder })
-    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     unitPrice = 0;
 
     @field({ decoder: BooleanDecoder, version: 155 })
@@ -31,6 +32,9 @@ export class STInvoiceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder, optional: true })
     paymentFailedCount = 0;
 
+    /**
+     * this is still in legacy cent format
+     */
     get price(): number {
         return this.unitPrice * this.amount;
     }

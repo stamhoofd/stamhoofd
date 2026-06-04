@@ -9,6 +9,9 @@ process.env.TZ = 'UTC';
 
 // Polyfill require.resolve, since import.meta.resolve is not supported by vitest
 import { createRequire } from 'node:module';
+import { GlobalHelper } from './helpers/GlobalHelper.js';
+import { I18n } from '@stamhoofd/backend-i18n/I18n';
+import { QueryableModel } from '@stamhoofd/sql';
 const require = createRequire(import.meta.url);
 
 const emailPath = require.resolve('@stamhoofd/email');
@@ -33,6 +36,7 @@ const start = async () => {
         // Ignore
         console.error('Ignoring SIGTERM signal during migration');
         killSignalReceived = true;
+        QueryableModel.shutdownMigrations = true;
     };
 
     process.on('SIGTERM', handler);
@@ -57,6 +61,9 @@ const start = async () => {
     }
 
     // Internal
+    await I18n.load();
+    GlobalHelper.loadGlobalTranslateFunction();
+
     if (!await Migration.runAll(import.meta.dirname + '/migrations')) {
         throw new Error('Internal migrations failed');
     }
