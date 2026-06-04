@@ -98,6 +98,7 @@ import { useOrganizationPackages } from './hooks/useOrganizationPackages';
 import { PayBalanceMode } from './OrganizationCheckoutViewModel';
 import PackagesDetailsView from './PackagesDetailsView.vue';
 import { useStartOrganizationCheckout } from './useStartOrganizationCheckout';
+import { useMemberAdministrationOnboarding } from '../../../onboarding/useMemberAdministrationOnboarding';
 
 const errors = useErrors();
 const organization = useRequiredOrganization();
@@ -424,13 +425,15 @@ async function viewPackages(pack: SelectablePackage) {
     return;
 }
 
+const startMemberAdministrationOnboarding = useMemberAdministrationOnboarding();
+
 async function checkout(pack: SelectablePackage) {
     switch (pack.status) {
         case PackageStatus.Inactive: {
             // Start trial
             switch (pack.bundle) {
                 case STPackageBundle.Members: {
-                    await checkoutTrial(STPackageBundle.TrialMembers, 'wip');
+                    await startMemberAdministrationOnboarding();
                     break;
                 }
                 case STPackageBundle.Webshops: {
