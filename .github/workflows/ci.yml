@@ -8,7 +8,7 @@ permissions:
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, ci-test ]
   pull_request:
     branches: [ main ]
 
@@ -447,11 +447,12 @@ jobs:
           mode: report-failure
           job-label: 'Setup'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_build_shared:
     name: 'Notify · Build shared packages'
@@ -467,11 +468,12 @@ jobs:
           mode: report-failure
           job-label: 'Build shared packages'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_structures:
     name: 'Notify · Structures Tests'
@@ -487,11 +489,12 @@ jobs:
           mode: report-failure
           job-label: 'Structures Tests'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_sql:
     name: 'Notify · Backend SQL Tests'
@@ -507,11 +510,12 @@ jobs:
           mode: report-failure
           job-label: 'Backend SQL Tests'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_lint:
     name: 'Notify · Lint and Typecheck'
@@ -527,11 +531,12 @@ jobs:
           mode: report-failure
           job-label: 'Lint and Typecheck'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_models:
     name: 'Notify · Backend Models Tests'
@@ -547,11 +552,12 @@ jobs:
           mode: report-failure
           job-label: 'Backend Models Tests'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_backend:
     name: 'Notify · Backend API Tests'
@@ -567,11 +573,12 @@ jobs:
           mode: report-failure
           job-label: 'Backend API Tests'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_components:
     name: 'Notify · Components Browser Tests'
@@ -587,11 +594,12 @@ jobs:
           mode: report-failure
           job-label: 'Components Browser Tests'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_boot:
     name: 'Notify · API boot and shutdown'
@@ -607,11 +615,12 @@ jobs:
           mode: report-failure
           job-label: 'API boot and shutdown'
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   notify_playwright:
     name: 'Notify · Playwright Tests'
@@ -628,11 +637,12 @@ jobs:
           job-label: 'Playwright Tests'
           trace-links: ${{ needs.job_test_playwright.outputs.trace_links }}
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json
 
   # Recovery: runs after every job. When the run is fully green (no failures and
   # at least one job actually ran) and an incident is open, post ✅ and close it.
@@ -674,8 +684,9 @@ jobs:
         with:
           mode: report-recovery
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}
           spaces-secret: ${{ secrets.SPACES_CI_SECRET }}
           spaces-bucket: stamhoofd-ci-traces
           spaces-region: ams3
+          state-key: incidents/${{ github.ref_name }}.json

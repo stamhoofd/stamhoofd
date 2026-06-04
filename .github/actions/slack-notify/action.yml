@@ -31,6 +31,10 @@ inputs:
   spaces-region:
     description: 'Spaces region (e.g. ams3)'
     required: true
+  state-key:
+    description: 'Spaces object key for the incident state (per branch)'
+    required: false
+    default: 'incidents/main.json'
 
 runs:
   using: 'composite'
@@ -44,6 +48,7 @@ runs:
         AWS_SECRET_ACCESS_KEY: ${{ inputs.spaces-secret }}
         SPACES_CI_BUCKET: ${{ inputs.spaces-bucket }}
         SPACES_CI_REGION: ${{ inputs.spaces-region }}
+        STATE_KEY: ${{ inputs.state-key }}
         TRACE_LINKS: ${{ inputs.trace-links }}
         HEAD_SHA: ${{ github.sha }}
         COMMIT_MSG: ${{ github.event.head_commit.message }}
