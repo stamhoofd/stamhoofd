@@ -1,5 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { spawn } from 'node:child_process';
+import { stripVTControlCharacters } from 'node:util';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CliStatus, formatStatusLabel } from './status.js';
 import { formatTable, openUrl, Table } from './ux.js';
@@ -21,6 +22,26 @@ describe('ux helpers', () => {
         expect(output).toContain('│ Service');
         expect(output).toContain('│ MySQL');
         expect(output).toContain('└');
+    });
+
+    it('keeps table lines within the terminal width', () => {
+        const originalColumns = process.stdout.columns;
+        Object.defineProperty(process.stdout, 'columns', { configurable: true, value: 48 });
+
+        try {
+            const output = formatTable(
+                ['Service', 'Status', 'Access', 'Login'],
+                [['Caddy', formatStatusLabel(CliStatus.Running), 'https://dashboard.very-long-development-domain.stamhoofd', 'username / password']],
+                { title: 'Checking Stamhoofd local development setup with a very long title' },
+            );
+
+            for (const line of output.split('\n')) {
+                expect(stripVTControlCharacters(line).length).toBeLessThanOrEqual(47);
+            }
+        }
+        finally {
+            Object.defineProperty(process.stdout, 'columns', { configurable: true, value: originalColumns });
+        }
     });
 
     it('formats standard status labels', () => {

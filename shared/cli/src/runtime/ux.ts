@@ -218,18 +218,20 @@ export function table(headers: string[], rows: string[][], options: { title?: st
 }
 
 export function formatTable(headers: string[], rows: string[][], options: { title?: string } = {}): string {
-    const widths = headers.map((header, index) => Math.max(header.length, ...rows.map(row => stripVTControlCharacters(row[index] ?? '').length)));
+    const widths = constrainTableWidths(headers.map((header, index) => Math.max(visibleLength(header), ...rows.map(row => visibleLength(row[index] ?? '')))));
+    const formattedHeaders = headers.map((header, index) => chalk.bold(truncateVisible(header, widths[index])));
     const lines = [
         formatTableBorder(widths, TableBorderPosition.Top),
-        formatTableRow(headers.map(header => chalk.bold(header)), widths),
+        formatTableRow(formattedHeaders, widths),
         formatTableBorder(widths, TableBorderPosition.Middle),
     ];
     for (const row of rows) {
-        lines.push(formatTableRow(row, widths));
+        lines.push(formatTableRow(row.map((cell, index) => truncateVisible(cell, widths[index])), widths));
     }
     lines.push(formatTableBorder(widths, TableBorderPosition.Bottom));
 
-    return options.title ? `${chalk.bold(options.title)}\n${lines.join('\n')}` : lines.join('\n');
+    const terminalWidth = maxTerminalLineWidth();
+    return options.title ? `${chalk.bold(truncateVisible(options.title, terminalWidth))}\n${lines.join('\n')}` : lines.join('\n');
 }
 
 export function spinnerCell(message: string, frame: number): string {
@@ -246,6 +248,50 @@ function normalizeCell(cell: TableCellInput): Cell {
 
 function formatTableRow(row: string[], widths: number[]): string {
     return `│ ${row.map((cell, index) => cell.padEnd(widths[index] + ansiLength(cell))).join(' │ ')} │`;
+}
+
+function constrainTableWidths(widths: number[]): number[] {
+    const maxWidth = maxTerminalLineWidth();
+    if (!Number.isFinite(maxWidth)) {
+        return widths;
+    }
+
+    const constrained = widths.map(width => Math.max(1, width));
+    while (tableVisibleWidth(constrained) > maxWidth) {
+        let widestIndex = -1;
+        let widest = 1;
+        for (let index = 0; index < constrained.length; index++) {
+            if (constrained[index] > widest) {
+                widest = constrained[index];
+                widestIndex = index;
+            }
+        }
+
+        if (widestIndex === -1) {
+            break;
+        }
+        constrained[widestIndex]--;
+    }
+
+    return constrained;
+}
+
+function maxTerminalLineWidth(): number {
+    return process.stdout.columns ? Math.max(1, process.stdout.columns - 1) : Number.POSITIVE_INFINITY;
+}
+
+function tableVisibleWidth(widths: number[]): number {
+    return widths.reduce((sum, width) => sum + width, 0) + widths.length * 3 + 1;
+}
+
+function truncateVisible(value: string, maxLength: number): string {
+    if (visibleLength(value) <= maxLength) {
+        return value;
+    }
+    if (maxLength <= 1) {
+        return '…'.slice(0, maxLength);
+    }
+    return `${stripVTControlCharacters(value).slice(0, maxLength - 1)}…`;
 }
 
 enum TableBorderPosition {
@@ -265,4 +311,8 @@ function formatTableBorder(widths: number[], position: TableBorderPosition): str
 
 function ansiLength(value: string): number {
     return value.length - stripVTControlCharacters(value).length;
+}
+
+function visibleLength(value: string): number {
+    return stripVTControlCharacters(value).length;
 }
