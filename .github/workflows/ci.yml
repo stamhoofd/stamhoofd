@@ -506,7 +506,7 @@ jobs:
         path: ~/.cache/ms-playwright
         key: playwright-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Install Playwright Browsers
-      run: yarn playwright install --with-deps --no-shell
+      run: yarn playwright install --with-deps --no-shell chromium
     - name: Cache Caddy
       id: caddy-cache
       uses: actions/cache@v5
