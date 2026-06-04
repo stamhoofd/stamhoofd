@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :save-text="$t('Afronden')" :loading="saving" :prefer-large-button="true" @save="goNext">
+    <SaveView :title="title" :save-text="$t('Voltooien')" save-icon-right="success" :loading="saving" :prefer-large-button="true" @save="goNext">
         <aside class="style-title-prefix">
             {{ $t('Stap {current} van {total}', { current: props.stepNumber.toString(), total: props.stepCount.toString() }) }}
         </aside>
