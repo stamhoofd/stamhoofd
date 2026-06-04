@@ -388,7 +388,7 @@ test.describe('Settings email templates', () => {
 
         await openWebshopEmailTemplates(page, webshop.id);
         await clickTemplate(page, EmailTemplateType.OrderConfirmationOnline);
-        await expect(page.locator('#mail-subject')).toHaveValue('Updated webshop override');
+        await expect(page.locator('#mail-subject')).toHaveValue('Updatedd webshop override');
     });
 
     test('group new template inherits organization defaults', async ({ page, pages }) => {
