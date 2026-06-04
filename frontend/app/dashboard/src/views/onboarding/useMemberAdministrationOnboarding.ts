@@ -8,7 +8,7 @@ import { MemberAdministrationOnboardingViewModel } from './MemberAdministrationO
 import OnboardingGroupPricesView from './OnboardingGroupPricesView.vue';
 import OnboardingGroupsView from './OnboardingGroupsView.vue';
 import OnboardingMemberAdministrationView from './OnboardingMemberAdministrationView.vue';
-import OnboardingWorkYearView from './OnboardingWorkYearView.vue';
+import OnboardingRegistrationPeriodView from './OnboardingRegistrationPeriodView.vue';
 import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
 import type { Organization } from '@stamhoofd/structures';
 import { OrganizationCheckout, OrganizationType, OrganizationTypeHelper, PackagePurchases, PaymentCustomer, PaymentMethod, STPackageBundle } from '@stamhoofd/structures';
@@ -21,7 +21,7 @@ import { GlobalEventBus, useUser } from '@stamhoofd/components';
  */
 const steps: Component[] = [
     OnboardingMemberAdministrationView, // Step 1: organization type + umbrella organization
-    OnboardingWorkYearView, // Step 2: current work year
+    OnboardingRegistrationPeriodView, // Step 2: current work year
     OnboardingGroupsView, // Step 3: subdivisions / age groups
     OnboardingGroupPricesView, // Step 4: prices and advanced settings
 ];
