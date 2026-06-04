@@ -1,5 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
-import { Organization, Platform, STPackage } from '@stamhoofd/models';
+import { Organization, Platform } from '@stamhoofd/models';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { STPackageService } from '../services/STPackageService.js';
 import { BalanceItemStatus } from '@stamhoofd/structures';
@@ -28,11 +28,15 @@ async function chargeMembers() {
     const membershipOrganization = await Organization.getByID(membershipOrganizationId, true);
 
     for await (const organization of iterate()) {
-        await createItems(organization, membershipOrganization);
+        await chargeMemberFeesForOrganization(organization, membershipOrganization);
     }
 }
 
-async function createItems(organization: Organization, sellingOrganization: Organization) {
+/**
+ * Charge the (increase in) per-member fees for every active package of an organization.
+ * For per-member packages this only charges the members that aren't paid/pending yet.
+ */
+export async function chargeMemberFeesForOrganization(organization: Organization, sellingOrganization: Organization) {
     const packages = await STPackageService.getActivePackages(organization.id);
 
     for (const pack of packages) {
