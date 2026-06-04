@@ -630,13 +630,16 @@ export class PaymentService {
             let foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
 
             if (!foundCompany) {
-                if (payingOrganization.meta.companies.length) {
-                    console.log('existing expected', payingOrganization.meta.companies);
+                if (payingOrganization.meta.companies.length > 0) {
                     throw new SimpleError({
                         code: 'invalid_data',
-                        message: $t(`%w1`),
+                        message: 'Cannot set company data. Please save the company data to the paying organization meta data before using it.',
+                        human: $t(`%w1`),
                     });
                 }
+
+                // In case of no organizations, we ignore the id of the default, as this changes every time
+                // we'll only compare the contents
                 foundCompany = payingOrganization.defaultCompanies[0];
             }
 
@@ -644,6 +647,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.',
+                    human: $t(`%w1`),
                 });
             }
 

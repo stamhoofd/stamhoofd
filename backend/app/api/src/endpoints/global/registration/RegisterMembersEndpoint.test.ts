@@ -2315,6 +2315,12 @@ describe('Endpoint.RegisterMembers', () => {
         test('Should fail if company does not exist on organization', async () => {
             const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
 
+            const c = Company.create({
+                name: 'test company A',
+            });
+            organization2.meta.companies = [c];
+            await organization2.save();
+
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [
@@ -2337,7 +2343,7 @@ describe('Endpoint.RegisterMembers', () => {
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25_0000,
                 customer: PaymentCustomer.create({
-                    company: Company.create({
+                    company: Company.create({ // different id (important for the test)
                         name: 'test company',
                     }),
                 }),
@@ -2346,7 +2352,86 @@ describe('Endpoint.RegisterMembers', () => {
 
             await expect(post(body, organization, token))
                 .rejects
-                .toThrow('Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan.');
+                .toThrow(/Cannot set company data/);
+        });
+
+        test('Should not fail if using default company on organization', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            organization2.meta.companies = [];
+            await organization2.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_0000,
+                customer: PaymentCustomer.create({
+                    company: organization2.defaultCompanies[0],
+                }),
+                asOrganizationId: organization2.id,
+            });
+
+            const result = await post(body, organization, token);
+            expect(result.body.registrations.length).toEqual(1);
+        });
+
+        test('Should fail if company exists but is patched on organization', async () => {
+            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+
+            const c = Company.create({
+                name: 'test company A',
+            });
+            organization2.meta.companies = [c];
+            await organization2.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_0000,
+                customer: PaymentCustomer.create({
+                    company: c.patch({
+                        name: 'test company',
+                    }),
+                }),
+                asOrganizationId: organization2.id,
+            });
+
+            await expect(post(body, organization, token))
+                .rejects
+                .toThrow(/Cannot change company data/);
         });
     });
 
