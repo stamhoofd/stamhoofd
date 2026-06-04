@@ -1,17 +1,12 @@
 import { Migration } from '@simonbackx/simple-database';
 import { DocumentTemplate, Group } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
+import { LoggingTools } from '../helpers/LoggingTools.js';
 
 export async function migrateDocumentYears() {
-    let c = 0;
-    const totalDocuments = await DocumentTemplate.select().count();
+    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(DocumentTemplate.select());
 
     for await (const document of DocumentTemplate.select().all()) {
-        c++;
-        if (c % 1000 === 0) {
-            console.log('Processed', c, 'of', totalDocuments);
-        }
-
         // check
         if (!document.year) {
             // by default use the year before creation
@@ -52,8 +47,10 @@ export async function migrateDocumentYears() {
             }
 
             document.year = year;
-            await document.save();
+            await document.save(true);
         }
+
+        progressLogger.update();
     }
 };
 

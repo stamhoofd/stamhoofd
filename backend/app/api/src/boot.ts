@@ -10,7 +10,7 @@ import { sleep } from '@stamhoofd/utility';
 import { AutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StyledText } from '@simonbackx/simple-logging';
-import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
+import { markAllSeedsFinished, startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { resumeEmails } from './helpers/EmailResumer.js';
@@ -64,6 +64,8 @@ const seeds = async (options: { shutdown: () => Promise<void> }) => {
                 if (STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development') {
                     await options.shutdown();
                 }
+            } else {
+                markAllSeedsFinished();
             }
         });
     } catch (e) {

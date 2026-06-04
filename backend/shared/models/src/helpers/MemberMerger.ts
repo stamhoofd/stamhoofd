@@ -5,10 +5,11 @@ import type {
     MemberDetails,
     Parent,
     RecordAnswer,
-    UitpasNumberDetails} from '@stamhoofd/structures';
+    UitpasNumberDetails
+} from '@stamhoofd/structures';
 import {
     Gender,
-    ParentType
+    ParentType,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import {
@@ -179,8 +180,7 @@ async function mergeResponsibilities(base: Member, other: Member) {
                 responsibilityWithOldestStartDate.memberId = base.id;
                 await responsibilityWithOldestStartDate.save();
             }
-        }
-        else {
+        } else {
             otherResponsibility.memberId = base.id;
             await otherResponsibility.save();
         }
@@ -215,7 +215,11 @@ async function mergeModels<M extends typeof ModelWithMemberId>(
 
     for (const otherModel of otherModels) {
         otherModel.memberId = baseId;
-        await otherModel.save();
+        if (otherModel instanceof Document) {
+            await otherModel.save(true);
+        } else {
+            await otherModel.save();
+        }
     }
 }
 
@@ -341,11 +345,9 @@ function mergeAnswers(base: MemberDetails, other: MemberDetails) {
 
         if (!baseAnswer) {
             newAnswers.set(otherId, otherAnswer);
-        }
-        else if (otherAnswer.date >= baseAnswer.date) {
+        } else if (otherAnswer.date >= baseAnswer.date) {
             newAnswers.set(otherId, otherAnswer);
-        }
-        else {
+        } else {
             // keep existing, this one is more up-to-date, don't add the other answer
         }
     }
@@ -355,8 +357,7 @@ function mergeAnswers(base: MemberDetails, other: MemberDetails) {
 function mergeNotes(base: MemberDetails, other: MemberDetails) {
     if (base.notes && other.notes && base.notes !== other.notes) {
         base.notes = `${base.notes}\n${other.notes}`;
-    }
-    else if (other.notes) {
+    } else if (other.notes) {
         base.notes = other.notes;
         return;
     }

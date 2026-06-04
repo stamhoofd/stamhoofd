@@ -1,7 +1,7 @@
 import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
-import { loadLogger } from '@stamhoofd/logging';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
+import { loadLogger } from '@stamhoofd/logging';
 import { cleanBackups } from './helpers/backup.js';
 
 process.on('unhandledRejection', (error: Error) => {
@@ -67,8 +67,7 @@ const start = async () => {
         try {
             await routerServer.close();
             console.log('HTTP server stopped');
-        }
-        catch (err) {
+        } catch (err) {
             console.error('Failed to stop HTTP server:');
             console.error(err);
         }
@@ -97,7 +96,7 @@ const start = async () => {
 
     // Register crons
     await import('./crons.js');
-    startCrons({allowReadOnly: true});
+    startCrons({ allowReadOnly: true, allowBeforeSeeds: true });
 
     // Clean backups on boot (bit faster to retrieve the timestamp of the last backup for the health endpoint)
     await cleanBackups();
