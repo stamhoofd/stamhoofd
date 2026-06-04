@@ -271,8 +271,6 @@ jobs:
     env:
       SPACES_CI_BUCKET: stamhoofd-ci-traces
       SPACES_CI_REGION: ams3
-    outputs:
-      trace_links: ${{ steps.publish_traces.outputs.trace_links }}
     services:
       mysql:
         image: mysql:8.4
@@ -635,7 +633,7 @@ jobs:
         with:
           mode: report-failure
           job-label: 'Playwright Tests'
-          trace-links: ${{ needs.job_test_playwright.outputs.trace_links }}
+          trace-links-key: traces/${{ github.run_id }}/${{ github.run_attempt }}/slack-links.txt
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack-channel: ${{ github.ref_name == 'ci-test' && secrets.SLACK_CHANNEL_ID_TEST || secrets.SLACK_CHANNEL_ID }}
           spaces-key: ${{ secrets.SPACES_CI_KEY }}

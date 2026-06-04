@@ -4,8 +4,8 @@
 # DigitalOcean Spaces bucket, generates a presigned URL (7-day expiry) per trace,
 # and renders deep links into trace.playwright.dev. It produces:
 #   - "$RUNNER_TEMP/pr-comment.md"  -> posted as a PR comment (pull_request runs)
-#   - a "trace_links" step output   -> Slack-mrkdwn lines consumed by the incident
-#                                      notifier on pushes to main (capped at 10)
+#   - s3://<bucket>/traces/<run>/<attempt>/slack-links.txt -> rendered Slack-mrkdwn
+#       links fetched by the incident notifier on pushes to main (capped at 10)
 #
 # Intended to run from the tests/playwright directory in CI on a Playwright failure.
 # It ALWAYS writes pr-comment.md and exits 0, so notification still fires even when
@@ -13,7 +13,7 @@
 #
 # Required env (when traces exist): AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
 #   SPACES_CI_BUCKET, SPACES_CI_REGION.
-# Optional env: RUN_URL, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT, RUNNER_TEMP, GITHUB_OUTPUT.
+# Optional env: RUN_URL, GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT, RUNNER_TEMP.
 
 set -uo pipefail
 
@@ -99,11 +99,13 @@ fi
     fi
 } > "$PR_FILE"
 
-# --- Slack trace links (step output, consumed by the incident notifier) ---
-# Capped at SLACK_MAX so the job output stays small. Presigned URLs encode the
-# whole presigned URL after ?trace= so & / = don't break the query string.
+# --- Slack trace links ---
+# Render the Slack-mrkdwn links once and upload them to Spaces at a deterministic
+# key. The incident notifier is a SEPARATE job and fetches this object rather than
+# reading a GitHub job output, which does not reliably propagate from a failed job.
+# Capped at SLACK_MAX; presigned URLs are url-encoded after ?trace=.
+LINKS_FILE="${RUNNER_TEMP}/slack-links.txt"
 {
-    echo "trace_links<<__TRACE_EOF__"
     if [ -n "$fallback" ]; then
         echo "_${fallback}_"
     else
@@ -116,9 +118,15 @@ fi
             echo "_…and $(( ${#viewers[@]} - SLACK_MAX )) more — see the run artifacts._"
         fi
     fi
-    echo "__TRACE_EOF__"
-} >> "${GITHUB_OUTPUT:-/dev/null}"
+} > "$LINKS_FILE"
+
+if [ -n "$BUCKET" ] && [ -n "$REGION" ] && [ -n "${AWS_ACCESS_KEY_ID:-}" ] && [ -n "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+    aws s3 cp "$LINKS_FILE" "s3://${BUCKET}/traces/${RUN_ID}/${RUN_ATTEMPT}/slack-links.txt" \
+        --endpoint-url "$ENDPOINT" --content-type 'text/plain; charset=utf-8' --only-show-errors \
+        || echo "Warning: failed to upload slack-links.txt" >&2
+fi
 
 echo "Wrote PR comment to $PR_FILE"
+echo "Wrote Slack trace links to $LINKS_FILE"
 
 exit 0

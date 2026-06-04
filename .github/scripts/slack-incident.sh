@@ -24,6 +24,13 @@ STATE_KEY="${STATE_KEY:-incidents/main.json}"
 SLACK_API_BASE="${SLACK_API_BASE:-https://slack.com/api}"
 SHORT_SHA="${HEAD_SHA:0:7}"
 
+# Clickable commit reference (falls back to plain code if no URL is provided).
+if [ -n "${COMMIT_URL:-}" ]; then
+    COMMIT_REF="<${COMMIT_URL}|${SHORT_SHA}>"
+else
+    COMMIT_REF="\`${SHORT_SHA}\`"
+fi
+
 # --- Slack helpers ---------------------------------------------------------
 
 # slack_post_message <text> [thread_ts] -> prints the message ts on success.
@@ -86,10 +93,15 @@ mode="${1:-}"
 case "$mode" in
     report-failure)
         label="${2:?job label required}"
+        # Playwright trace links are stored in Spaces by publish-traces.sh and fetched
+        # here — GitHub job outputs don't reliably propagate from a failed job.
+        if [ -z "${TRACE_LINKS:-}" ] && [ -n "${TRACE_LINKS_KEY:-}" ]; then
+            TRACE_LINKS="$(aws s3 cp "s3://${SPACES_CI_BUCKET}/${TRACE_LINKS_KEY}" - --endpoint-url "$ENDPOINT" 2>/dev/null || true)"
+        fi
         state="$(state_read)"
         if state_is_open "$state"; then
             thread="$(printf '%s' "$state" | jq -r '.thread_ts')"
-            text=":x: *${label}* failed — \`${SHORT_SHA}\` (<${RUN_URL}|run>)"
+            text=":x: *${label}* failed — ${COMMIT_REF} (<${RUN_URL}|run>)"
             if [ -n "${TRACE_LINKS:-}" ]; then
                 text="${text}"$'\n'"${TRACE_LINKS}"
             fi
@@ -97,7 +109,7 @@ case "$mode" in
             echo "Posted failure reply for '${label}' in thread ${thread}."
         else
             msg_first="$(printf '%s' "${COMMIT_MSG:-}" | head -n1)"
-            text=":rotating_light: *CI failing on \`main\`* — *${label}* failed for \`${msg_first}\` by ${AUTHOR:-unknown}"$'\n'"<${RUN_URL}|View run>"
+            text=":rotating_light: *CI failing on \`main\`* — *${label}* failed for \`${msg_first}\` by ${AUTHOR:-unknown}"$'\n'"${COMMIT_REF} · <${RUN_URL}|View run>"
             if [ -n "${TRACE_LINKS:-}" ]; then
                 text="${text}"$'\n'"${TRACE_LINKS}"
             fi
@@ -118,7 +130,7 @@ case "$mode" in
         if state_is_open "$state"; then
             thread="$(printf '%s' "$state" | jq -r '.thread_ts')"
             msg_first="$(printf '%s' "${COMMIT_MSG:-}" | head -n1)"
-            text=":white_check_mark: *main is green again* on \`${SHORT_SHA}\` — \`${msg_first}\`"
+            text=":white_check_mark: *main is green again* on ${COMMIT_REF} — \`${msg_first}\`"
             slack_post_message "$text" "$thread" >/dev/null
             slack_add_reaction "$thread" "white_check_mark"
             state_write "$(printf '%s' "$state" | jq '.open=false')"
