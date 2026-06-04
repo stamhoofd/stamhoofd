@@ -84,7 +84,7 @@
                 </p>
             </template>
 
-            <template v-if="$isStamhoofd && (enableMandates || sortedPaymentMethods.find(p => PaymentMethodHelper.canCreateMandate(p))) && type === 'registration'">
+            <template v-if="$isStamhoofd && organization.id === platform.membershipOrganizationId && (enableMandates || sortedPaymentMethods.find(p => PaymentMethodHelper.canCreateMandate(p))) && type === 'registration'">
                 <hr>
                 <h2>{{ $t('%1SI') }}</h2>
                 <p>{{ $t('%1Ry') }}</p>
@@ -102,6 +102,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { usePlatform } from '@stamhoofd/components';
 import LoadingBoxTransition from '@stamhoofd/components/containers/LoadingBoxTransition.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
@@ -119,15 +120,15 @@ import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast.ts';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { AdministrationFeeSettings, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';
 import PaymentSettingsView from '../views/dashboard/settings/PaymentSettingsView.vue';
 import EditPaymentMethodSettingsView from './EditPaymentMethodSettingsView.vue';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 
 const props = withDefaults(defineProps<{
     type: 'registration' | 'webshop';
@@ -147,10 +148,11 @@ const stripeAccounts = ref<StripeAccount[]>([]);
 
 const context = useContext();
 const owner = useRequestOwner();
+const platform = usePlatform();
 const organization = useRequiredOrganization();
 const emit = defineEmits<{
-  'patch:privateConfig': [value: AutoEncoderPatchType<PrivatePaymentConfiguration>]
-  'patch:config': [value: AutoEncoderPatchType<PaymentConfiguration>] 
+    'patch:privateConfig': [value: AutoEncoderPatchType<PrivatePaymentConfiguration>];
+    'patch:config': [value: AutoEncoderPatchType<PaymentConfiguration>];
 }>();
 
 const country = useCountry();
@@ -234,8 +236,7 @@ async function loadStripeAccounts() {
         stripeAccounts.value = response.data;
         if (!hasMollieOrBuckaroo.value && !stripeAccountObject.value) {
             stripeAccountId.value = stripeAccounts.value[0]?.id ?? null;
-        }
-        else {
+        } else {
             if (stripeAccountId.value && stripeAccounts.value.length === 0) {
                 stripeAccountId.value = null;
             }
@@ -244,8 +245,7 @@ async function loadStripeAccounts() {
         nextTick().finally(() => {
             setDefaultSelection();
         }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         new Toast($t(`%JQ`), 'error red').show();
     }
@@ -274,8 +274,7 @@ function setDefaultSelection() {
             // Enable point of sale
             setPaymentMethod(PaymentMethod.PointOfSale, true);
         }
-    }
-    else {
+    } else {
         clean();
     }
 }
@@ -352,8 +351,7 @@ function getName(paymentMethod: PaymentMethod): string {
 function providerText(provider: PaymentProvider | null, map: { [key: string]: string }): string {
     if (provider === null) {
         return '';
-    }
-    else {
+    } else {
         return map[provider];
     }
 }
@@ -405,8 +403,7 @@ function getSettingsDescription(paymentMethod: PaymentMethod): string {
         if (settings.warningText) {
             if (settings.warningAmount !== null) {
                 texts.push($t(`%JS`) + ' ' + Formatter.price(settings.warningAmount));
-            }
-            else {
+            } else {
                 texts.push($t(`%JT`));
             }
         }
@@ -419,8 +416,7 @@ function getSettingsDescription(paymentMethod: PaymentMethod): string {
     if (paymentMethod === PaymentMethod.Transfer) {
         if (!props.config.transferSettings.iban) {
             texts.push($t(`%JV`));
-        }
-        else {
+        } else {
             texts.push($t(`%JW`) + ' ' + props.config.transferSettings.iban);
         }
 
@@ -457,8 +453,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
             return;
         }
         arr.addPut(method);
-    }
-    else {
+    } else {
         if (!force && props.choices === null && props.config.paymentMethods.length === 1) {
             new Toast($t(`%JZ`), 'error red').show();
             return;
@@ -530,7 +525,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
 
 const enableMandates = computed({
     get: () => {
-        return props.config.enableMandates
+        return props.config.enableMandates;
     },
     set: (enableMandates) => {
         if (enableMandates === props.config.enableMandates) {
@@ -542,18 +537,18 @@ const enableMandates = computed({
                 description: $t('%1Q8'),
                 requireCheckbox: $t('%1Sc'),
                 confirmText: $t('%1TV'),
-                destructive: true
+                destructive: true,
             }).then((confirmed) => {
                 if (confirmed) {
                     patchConfig(PaymentConfiguration.patch({
-                      enableMandates
-                    }))
+                        enableMandates,
+                    }));
                 }
-            }).catch(console.error)
+            }).catch(console.error);
             return;
         }
         patchConfig(PaymentConfiguration.patch({
-            enableMandates
+            enableMandates,
         }));
     },
 });
