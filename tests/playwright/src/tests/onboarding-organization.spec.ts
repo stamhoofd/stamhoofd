@@ -12,6 +12,7 @@ import {
 import { AcquisitionType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
+import { OnboardingScenario } from '../flows/OnboardingScenario.js';
 
 /**
  * Onboarding a new organization
@@ -59,6 +60,9 @@ test.describe('Onboarding', () => {
         await expect(page.getByTestId('app-name')).toContainText(
             name,
         );
+
+        const onboarding = new OnboardingScenario({ page });
+        await onboarding.assertStartOnboardingPage();
     });
 
     test('happy path via direct /aansluiten URL', async ({ page, pages }) => {
@@ -92,12 +96,15 @@ test.describe('Onboarding', () => {
         await (new ConfirmEmailPage(page)).fillCode('111111');
 
         // wait for data-testid element to appear (h1 with name of organization)
-        await page.getByTestId('organization-name').waitFor();
+        await page.locator('.account-switcher').waitFor();
 
         // check if page contains name of organization
-        await expect(page.getByTestId('organization-name')).toContainText(
+        await expect(page.getByTestId('app-name')).toContainText(
             name,
         );
+
+        const onboarding = new OnboardingScenario({ page });
+        await onboarding.assertStartOnboardingPage();
     });
 
     test.describe('organization name', () => {
@@ -245,13 +252,14 @@ test.describe('Onboarding', () => {
 
     test.describe('registerCode', () => {
         test('happy flow', async ({ page }) => {
+            const name = 'Vereniging2';
             const referrer = await (new OrganizationFactory({ name: 'referrer' })).create();
             const registerCode = await (new RegisterCodeFactory({ organization: referrer })).create();
 
             // step 1
             const step1 = new SignupGeneralPage(page);
             await step1.goto({ query: { code: registerCode.code, org: referrer.name } });
-            await step1.fillName('Vereniging2');
+            await step1.fillName(name);
             await step1.selectType('Jeugd');
             await step1.fillCity('Wetteren');
             await step1.selectCountry('BE');
@@ -275,10 +283,18 @@ test.describe('Onboarding', () => {
             await (new ConfirmEmailPage(page)).fillCode('111111');
 
             // wait for data-testid element to appear (h1 with name of organization)
-            await page.getByTestId('organization-name').waitFor();
+            await page.locator('.account-switcher').waitFor();
+
+            // check if page contains name of organization
+            await expect(page.getByTestId('app-name')).toContainText(
+                name,
+            );
+
+            const onboarding = new OnboardingScenario({ page });
+            await onboarding.assertStartOnboardingPage();
 
             // check if organization has acquisitionType Recommended
-            const newOrganization = await Organization.select().where('name', 'Vereniging2').first(true);
+            const newOrganization = await Organization.select().where('name', name).first(true);
             expect(newOrganization.privateMeta.acquisitionTypes).toHaveLength(1);
             expect(newOrganization.privateMeta.acquisitionTypes).toContain(AcquisitionType.Recommended);
 

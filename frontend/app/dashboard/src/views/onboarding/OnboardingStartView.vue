@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view onboarding-start-view shade">
+    <div class="st-view onboarding-start-view shade" data-testid="onboarding-start-view">
         <STNavigationBar :title="$t('Welkom bij Stamhoofd')" />
 
         <main class="center">
