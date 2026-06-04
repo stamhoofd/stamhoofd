@@ -31,6 +31,10 @@ else
     COMMIT_REF="\`${SHORT_SHA}\`"
 fi
 
+# GitHub run IDs increase with push order, so we use them to order runs: an older
+# (lower) run must never resolve an incident whose newest failure is from a newer run.
+RUN_ID_NUM="${GITHUB_RUN_ID:-0}"
+
 # --- Slack helpers ---------------------------------------------------------
 
 # slack_post_message <text> [thread_ts] -> prints the message ts on success.
@@ -106,6 +110,11 @@ case "$mode" in
                 text="${text}"$'\n'"${TRACE_LINKS}"
             fi
             slack_post_message "$text" "$thread" >/dev/null
+            # Record the newest failing run so an older green run can't falsely resolve us.
+            stored_lfr="$(printf '%s' "$state" | jq -r '.last_failure_run_id // 0')"
+            if [ "$RUN_ID_NUM" -gt "$stored_lfr" ]; then
+                state_write "$(printf '%s' "$state" | jq --argjson r "$RUN_ID_NUM" '.last_failure_run_id = $r')"
+            fi
             echo "Posted failure reply for '${label}' in thread ${thread}."
         else
             msg_first="$(printf '%s' "${COMMIT_MSG:-}" | head -n1)"
@@ -120,7 +129,8 @@ case "$mode" in
             new_state="$(jq -n \
                 --arg ch "$SLACK_CHANNEL_ID" --arg ts "$ts" --arg sha "${HEAD_SHA:-}" \
                 --arg run "${GITHUB_RUN_ID:-}" --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-                '{open:true, channel:$ch, thread_ts:$ts, head_sha:$sha, started_run_id:$run, started_at:$at}')"
+                --argjson lfr "$RUN_ID_NUM" \
+                '{open:true, channel:$ch, thread_ts:$ts, head_sha:$sha, started_run_id:$run, last_failure_run_id:$lfr, started_at:$at}')"
             state_write "$new_state"
             echo "Opened incident (root ts ${ts}) for '${label}'."
         fi
@@ -128,13 +138,18 @@ case "$mode" in
     report-recovery)
         state="$(state_read)"
         if state_is_open "$state"; then
-            thread="$(printf '%s' "$state" | jq -r '.thread_ts')"
-            msg_first="$(printf '%s' "${COMMIT_MSG:-}" | head -n1)"
-            text=":white_check_mark: *main is green again* on ${COMMIT_REF} — \`${msg_first}\`"
-            slack_post_message "$text" "$thread" >/dev/null
-            slack_add_reaction "$thread" "white_check_mark"
-            state_write "$(printf '%s' "$state" | jq '.open=false')"
-            echo "Resolved incident in thread ${thread}."
+            lfr="$(printf '%s' "$state" | jq -r '.last_failure_run_id // 0')"
+            if [ "$RUN_ID_NUM" -lt "$lfr" ]; then
+                echo "Recovery run ${RUN_ID_NUM} predates the latest failure (${lfr}); a newer commit is still failing. Leaving incident open."
+            else
+                thread="$(printf '%s' "$state" | jq -r '.thread_ts')"
+                msg_first="$(printf '%s' "${COMMIT_MSG:-}" | head -n1)"
+                text=":white_check_mark: *main is green again* on ${COMMIT_REF} — \`${msg_first}\`"
+                slack_post_message "$text" "$thread" >/dev/null
+                slack_add_reaction "$thread" "white_check_mark"
+                state_write "$(printf '%s' "$state" | jq '.open=false')"
+                echo "Resolved incident in thread ${thread}."
+            fi
         else
             echo "No open incident; nothing to recover."
         fi
