@@ -186,7 +186,16 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                     }
 
                     // Remove skipped keys
-                    log.patchList = log.patchList.filter(p => !this.skipKeys?.includes(p.key.toKey()));
+                    if (this.skipKeys) {
+                        log.patchList = log.patchList.filter((p) => {
+                            for (const s of this.skipKeys) {
+                                if (p.key.toKey().startsWith(s)) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        });
+                    }
 
                     if (log.patchList.length === 0 && !log.description) {
                         // No changes or all skipped

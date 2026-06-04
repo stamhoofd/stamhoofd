@@ -3,7 +3,7 @@ import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@sta
 import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 export const OrganizationLogger = new ModelLogger(Organization, {
-    skipKeys: ['searchIndex', 'serverMeta'],
+    skipKeys: ['searchIndex', 'serverMeta', 'meta.packages'],
     optionsGenerator: getDefaultGenerator<Organization>({
         created: AuditLogType.OrganizationAdded,
         updated: AuditLogType.OrganizationEdited,
