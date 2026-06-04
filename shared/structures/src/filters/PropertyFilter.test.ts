@@ -21,7 +21,7 @@ describe('PropertyFilter', () => {
             const mergedA = a.merge(b);
             const mergedB = b.merge(a);
 
-            expect(mergedA.enabledWhen).toEqual(false);
+            expect(mergedA.enabledWhen).toEqual(null);
             expect(mergedA.requiredWhen).toEqual({});
 
             // Check ordering does not matter
