@@ -17,6 +17,7 @@ function wrapWithModalStack(component: ComponentWithProperties) {
 }
 
 const root = context.value.organization ? getOrgScopedRoot(context.value.organization) : STAMHOOFD.userMode === 'platform' ? getUnscopedRootInPlatformMode() : getUnscopedRootInOrganizationMode();
+root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
 
 function getOrgScopedRoot(organization: Organization) {
     return new ComponentWithProperties(AuthenticatedView, {

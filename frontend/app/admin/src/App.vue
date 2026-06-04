@@ -34,6 +34,7 @@ const root = new ComponentWithProperties(AuthenticatedView, {
     root: wrapWithModalStack(getRoot()),
     loginRoot: wrapWithModalStack(getLoginRoot()),
 });
+root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
 
 function getNoPermissionsView() {
     return new ComponentWithProperties(TabBarController, {

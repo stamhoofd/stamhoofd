@@ -29,6 +29,7 @@ const root = new ComponentWithProperties(AuthenticatedView, {
     loginRoot: wrapWithModalStack(getLoginRoot()),
     root: wrapWithModalStack(getRoot()),
 });
+root.setCheckRoutes(); // DISCLAIMER waiting for upstream fix
 
 function getRoot() {
     const startView = new ComponentWithProperties(NavigationController, {
