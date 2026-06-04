@@ -1,5 +1,5 @@
 <template>
-    <form class="st-view login-view" data-submit-last-field novalidate @submit.prevent="submit">
+    <form ref="root" class="st-view login-view" data-submit-last-field novalidate @submit.prevent="submit">
         <STNavigationBar :large="true" class="transparent" :title="$t(`%Qg`)" />
 
         <main class="center small flex">
@@ -96,7 +96,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, onCheckRoutes, UrlHelper, useDismiss, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
 import { LoginHelper } from '@stamhoofd/networking/LoginHelper';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 
 import { LoginMethod, LoginProviderType } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
@@ -181,8 +181,7 @@ onCheckRoutes(() => {
             sessionStorage.setItem('triedLogin', 'true');
             startSSO(LoginProviderType.SSO, true).catch(console.error);
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
     }
 });
@@ -269,12 +268,10 @@ async function submit() {
                 ],
                 modalDisplayStyle: 'sheet',
             });
-        }
-        else {
+        } else {
             await dismiss({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -288,19 +285,19 @@ async function openSignup() {
     await $navigate(Routes.Signup);
 }
 
+const el = useTemplateRef('root');
+
 onMounted(() => {
     if (props.initialEmail.length === 0) {
         setTimeout(() => {
             animating.value = false;
-            // Needed the any here because typescript is getting mad only in production mode
-            if (emailInput.value) {
+            if (emailInput.value && (!document.activeElement || (!el.value || !el.value.contains(document.activeElement)))) {
+                // only focus if the user isn't typing already (causes flaky playwright tests)
                 emailInput.value.focus();
             }
         }, 300);
-    }
-    else {
+    } else {
         setTimeout(() => {
-            // Needed the any here because typescript is getting mad only in production mode
             animating.value = false;
         }, 300);
     }
