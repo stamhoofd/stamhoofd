@@ -5,7 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';
 import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';
@@ -142,6 +142,15 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         });
                     }
 
+                    if (webshop.domainUri && isReservedWebshopPathSegment(webshop.domainUri)) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'domainUri is reserved for internal webshop routes',
+                            human: $t("Deze link is gereserveerd voor interne webshoppagina's. Kies een andere link."),
+                            field: 'customUrl',
+                        });
+                    }
+
                     // Check exists
                     const existing = await Webshop.getByDomain(webshop.domain, webshop.domainUri);
                     if (existing !== undefined) {
@@ -177,6 +186,15 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         code: 'invalid_field',
                         message: 'Uri contains invalid characters',
                         human: $t(`%FO`),
+                        field: 'uri',
+                    });
+                }
+
+                if (isReservedWebshopPathSegment(request.body.uri)) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'Uri is reserved for internal webshop routes',
+                        human: $t("Deze link is gereserveerd voor interne webshoppagina's. Kies een andere link."),
                         field: 'uri',
                     });
                 }
