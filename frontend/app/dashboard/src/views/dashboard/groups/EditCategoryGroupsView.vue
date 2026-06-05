@@ -118,7 +118,7 @@ const props = defineProps<{
     saveHandler: ((patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void>);
 }>();
 
-if (!props.periods.find(p => p.id !== props.period.id)) {
+if (!props.periods.find(p => p.id === props.period.id)) {
     throw new Error('Cannot use EditCategoryGroupsView with a periods array not including period');
 }
 
