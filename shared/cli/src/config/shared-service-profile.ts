@@ -19,6 +19,7 @@ export type SharedServiceProfile = {
     caddyHttpsHostPort: number;
     caddyHttpListenPort: number;
     caddyHttpsListenPort: number;
+    caddyAdminListenHost: string;
     caddyProxyHost: string;
     caddyListenHost: string;
     caddyRunMode: SharedServiceCaddyRunMode;
@@ -36,6 +37,7 @@ export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: N
             caddyHttpsHostPort: caddyHttpsPort,
             caddyHttpListenPort: caddyHttpPort,
             caddyHttpsListenPort: caddyHttpsPort,
+            caddyAdminListenHost: '0.0.0.0',
             caddyProxyHost: dockerHostGateway,
             caddyListenHost: '0.0.0.0',
             caddyRunMode: SharedServiceCaddyRunMode.Bridge,
@@ -52,6 +54,7 @@ export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: N
         caddyHttpsHostPort: caddyUnprivilegedHttpsPort,
         caddyHttpListenPort: caddyUnprivilegedHttpPort,
         caddyHttpsListenPort: caddyUnprivilegedHttpsPort,
+        caddyAdminListenHost: localIpv4Host,
         caddyProxyHost: localIpv4Host,
         caddyListenHost: localIpv4Host,
         caddyRunMode: SharedServiceCaddyRunMode.HostNetwork,

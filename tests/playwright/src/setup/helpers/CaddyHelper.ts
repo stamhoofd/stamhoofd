@@ -1,5 +1,6 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
+import { buildSharedServiceProfile, caddyAdminPort, getContainerRuntime, localIpv4Host } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 
 const exec = promisify(execCallback);
@@ -9,13 +10,7 @@ type CaddyRuntime = {
     adminListen: string;
     httpListen: string;
     httpsListen: string;
-};
-
-const sharedCaddyRuntime: CaddyRuntime = {
-    adminUrl: 'http://127.0.0.1:2019',
-    adminListen: '127.0.0.1:2019',
-    httpListen: '127.0.0.1:8080',
-    httpsListen: '127.0.0.1:8443',
+    proxyHost: string;
 };
 
 export class CaddyHelper {
@@ -41,8 +36,10 @@ export class CaddyHelper {
         console.log('Start posting caddy config...');
         await this.postConfig(CaddyConfigHelper.createDefault({
             adminListen: this.caddyRuntime.adminListen,
+            adminOrigin: this.caddyRuntime.adminUrl,
             httpListen: this.caddyRuntime.httpListen,
             httpsListen: this.caddyRuntime.httpsListen,
+            proxyHost: this.caddyRuntime.proxyHost,
         }));
         console.log('Done posting caddy config.');
     }
@@ -165,10 +162,22 @@ export class CaddyHelper {
     }
 
     private async getRunningRuntime() {
+        const sharedCaddyRuntime = await this.createSharedCaddyRuntime();
         if (await this.canReachAdmin(sharedCaddyRuntime)) {
             return sharedCaddyRuntime;
         }
         return undefined;
+    }
+
+    private async createSharedCaddyRuntime(): Promise<CaddyRuntime> {
+        const profile = buildSharedServiceProfile(await getContainerRuntime());
+        return {
+            adminUrl: `http://${localIpv4Host}:${caddyAdminPort}`,
+            adminListen: `${profile.caddyAdminListenHost}:${caddyAdminPort}`,
+            httpListen: `${profile.caddyListenHost}:${profile.caddyHttpListenPort}`,
+            httpsListen: `${profile.caddyListenHost}:${profile.caddyHttpsListenPort}`,
+            proxyHost: profile.caddyProxyHost,
+        };
     }
 
     private async canReachAdmin(runtime: CaddyRuntime) {

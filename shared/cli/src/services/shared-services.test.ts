@@ -59,6 +59,7 @@ describe('shared service Docker args', () => {
 
         expect(args).toContain(localhostPortMapping(80, 80));
         expect(args).toContain(localhostPortMapping(443, 443));
+        expect(args).toContain(localhostPortMapping(caddyAdminPort, caddyAdminPort));
         expect(args).not.toContain('--network');
     });
 

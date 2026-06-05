@@ -7,7 +7,6 @@ import type { FrontendProjectName } from './FrontendService.js';
  * E.g. worker 32 will use same domains and ports as worker 2
  */
 const maximumRunners = 30;
-const proxyHost = process.platform === 'darwin' ? 'host.docker.internal' : '127.0.0.1';
 
 /**
  * Helper to create caddy configuration for playwright
@@ -61,7 +60,7 @@ export class CaddyConfigHelper {
     /**
      * Create a frontend route for the caddy config
      */
-    static createFrontendRoute(service: FrontendProjectName, workerId: string) {
+    static createFrontendRoute(service: FrontendProjectName, workerId: string, proxyHost: string) {
         const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
@@ -90,7 +89,7 @@ export class CaddyConfigHelper {
         };
     }
 
-    static createBackendRoute(service: 'api', workerId: string) {
+    static createBackendRoute(service: 'api', workerId: string, proxyHost: string) {
         const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
@@ -136,18 +135,18 @@ export class CaddyConfigHelper {
     /**
      * Create the default playwright caddy config
      */
-    static createDefault(options: { adminListen: string; httpListen: string; httpsListen: string }) {
+    static createDefault(options: { adminListen: string; adminOrigin: string; httpListen: string; httpsListen: string; proxyHost: string }) {
         const routes: { match: { host: string[] }[] }[] = [];
 
         for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
             routes.push(
-                this.createFrontendRoute('dashboard', workerId.toString()),
-                this.createFrontendRoute('webshop', workerId.toString()),
-                this.createFrontendRoute('registration', workerId.toString()),
+                this.createFrontendRoute('dashboard', workerId.toString(), options.proxyHost),
+                this.createFrontendRoute('webshop', workerId.toString(), options.proxyHost),
+                this.createFrontendRoute('registration', workerId.toString(), options.proxyHost),
             );
 
             routes.push(
-                this.createBackendRoute('api', workerId.toString()),
+                this.createBackendRoute('api', workerId.toString(), options.proxyHost),
             );
         }
 
@@ -156,6 +155,7 @@ export class CaddyConfigHelper {
         const config = {
             admin: {
                 listen: options.adminListen,
+                origins: [options.adminOrigin],
             },
             apps: {
                 http: {

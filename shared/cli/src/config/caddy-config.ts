@@ -13,7 +13,7 @@ type CaddyRoute = {
 };
 
 type CaddyConfig = {
-    admin: { listen: string };
+    admin: { listen: string; origins?: string[] };
     apps: {
         http: {
             servers: {
@@ -36,7 +36,7 @@ type CaddyConfig = {
     };
 };
 
-export async function writeCaddyConfig(context: CliContext, options: { httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string } = {}): Promise<string> {
+export async function writeCaddyConfig(context: CliContext, options: { httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<string> {
     const configPath = path.join(sharedDir(context), 'caddy.json');
     await writeReadableConfig(configPath, JSON.stringify(await buildCaddyConfig(context, options), null, 4));
     return configPath;
@@ -64,12 +64,13 @@ function route(hosts: string[], port: number, proxyHost: string): CaddyRoute {
     };
 }
 
-export async function buildCaddyConfig(context: CliContext, options: { setup?: boolean; httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string } = {}): Promise<CaddyConfig> {
+export async function buildCaddyConfig(context: CliContext, options: { setup?: boolean; httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<CaddyConfig> {
     const domains = buildDomains(context);
     const ports = buildPorts(context);
     const activeInstances = await listInstanceManifests(context);
     const proxyHost = options.proxyHost ?? localIpv4Host;
     const listenHost = options.listenHost ?? localIpv4Host;
+    const adminListenHost = options.adminListenHost ?? localIpv4Host;
     const listenPort = (port: number) => `${listenHost}:${port}`;
     const routes = [
         // Active instance manifests let the shared Caddy container keep routing
@@ -106,7 +107,10 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
     ])];
 
     return {
-        admin: { listen: localhostPort(options.setup ? caddySetupAdminPort : caddyAdminPort) },
+        admin: {
+            listen: options.setup ? localhostPort(caddySetupAdminPort) : `${adminListenHost}:${caddyAdminPort}`,
+            origins: options.setup ? undefined : [options.adminOrigin ?? `http://${localhostPort(caddyAdminPort)}`],
+        },
         apps: {
             http: {
                 servers: {
