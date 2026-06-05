@@ -24,10 +24,11 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
 
     async getDetail(): Promise<string> {
         const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
+        const admin = `admin ${localhostPort(caddyAdminPort)}`;
         if (profile.needsPrivilegedRedirects) {
-            return `${localhostPort(80)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(443)} -> ${localhostPort(profile.caddyHttpsHostPort)}`;
+            return `HTTP ${localhostPort(80)} -> ${localhostPort(profile.caddyHttpHostPort)}, HTTPS ${localhostPort(443)} -> ${localhostPort(profile.caddyHttpsHostPort)}, ${admin}`;
         }
-        return `${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(profile.caddyHttpsHostPort)}`;
+        return `HTTP ${localhostPort(profile.caddyHttpHostPort)}, HTTPS ${localhostPort(profile.caddyHttpsHostPort)}, ${admin}`;
     }
 
     async prepare(context: CliContext): Promise<CaddyPrepared> {

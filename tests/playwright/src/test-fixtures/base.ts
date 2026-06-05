@@ -32,22 +32,22 @@ export const test = base.extend<
             WorkerHelper.loadEnvironment();
 
             // Start services
-            console.log('Starting services for worker', workerInfo.workerIndex);
+            console.log('Starting services for worker', workerInfo.parallelIndex);
             const { teardown } = await WorkerHelper.startServices(workerInfo);
 
             // run all tests for worker
-            console.log('Running tests for worker ', workerInfo.workerIndex);
+            console.log('Running tests for worker ', workerInfo.parallelIndex);
 
             // Make sure we have a membership organization set
             await initMembershipOrganization()
 
             await use();
 
-            console.log('Tearing down worker', workerInfo.workerIndex);
+            console.log('Tearing down worker', workerInfo.parallelIndex);
             await teardown();
             console.log(
                 'Finished teardown for worker ',
-                workerInfo.workerIndex,
+                workerInfo.parallelIndex,
             );
         },
         {

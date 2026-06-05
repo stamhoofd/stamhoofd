@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { localFilesAccessKey, localFilesSecretKey, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
+import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, localFilesAccessKey, localFilesSecretKey, localhostPort, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
 import { buildSharedServiceProfile } from '../config/shared-service-profile.js';
 import { run } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
@@ -68,6 +68,14 @@ describe('shared service Docker args', () => {
         expect(args).toContain('--network');
         expect(args).toContain('host');
         expect(args).not.toContain(localhostPortMapping(80, 80));
+    });
+
+    it('shows Caddy redirects and admin port in service details', async () => {
+        const detail = await new CaddyService().getDetail();
+
+        expect(detail).toContain(`HTTP ${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyUnprivilegedHttpPort)}`);
+        expect(detail).toContain(`HTTPS ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyUnprivilegedHttpsPort)}`);
+        expect(detail).toContain(`admin ${localhostPort(caddyAdminPort)}`);
     });
 
     it('tails all shared service logs through concurrently', async () => {

@@ -7,6 +7,7 @@ export default class Test extends Command {
     static examples = [
         'stam test all --ci',
         'stam test unit',
+        'stam test e2e --clear',
         'stam test e2e --ui --verbose',
     ];
 

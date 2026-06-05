@@ -1,84 +1,54 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
-import { ProcessInfo } from './ProcessInfo.js';
-import { STChildProcess } from './STChildProcess.js';
 
 const exec = promisify(execCallback);
 
+type CaddyRuntime = {
+    adminUrl: string;
+    adminListen: string;
+    httpListen: string;
+    httpsListen: string;
+};
+
+const sharedCaddyRuntime: CaddyRuntime = {
+    adminUrl: 'http://127.0.0.1:2019',
+    adminListen: '127.0.0.1:2019',
+    httpListen: '127.0.0.1:8080',
+    httpsListen: '127.0.0.1:8443',
+};
+
 export class CaddyHelper {
-    private cadyUrl = 'http://localhost:2019';
+    private caddyRuntime: CaddyRuntime | undefined;
     private serverName = 'stamhoofd';
 
     async isRunning() {
-        const result = await exec(
-            'pgrep -x caddy > /dev/null && echo "true" || echo "false"',
-        );
-        return result.stdout.trim() === 'true';
+        const runtime = await this.getRunningRuntime();
+        if (runtime) {
+            this.caddyRuntime = runtime;
+            return true;
+        }
+        return false;
     }
 
     async configure() {
+        this.caddyRuntime ??= await this.getRunningRuntime();
+        if (!this.caddyRuntime) {
+            throw new Error('Shared Caddy admin endpoint is not reachable. Run `yarn stam services up` first.');
+        }
+
         // post the initial config
         console.log('Start posting caddy config...');
-        await this.postConfig(CaddyConfigHelper.createDefault());
+        await this.postConfig(CaddyConfigHelper.createDefault({
+            adminListen: this.caddyRuntime.adminListen,
+            httpListen: this.caddyRuntime.httpListen,
+            httpsListen: this.caddyRuntime.httpsListen,
+        }));
         console.log('Done posting caddy config.');
     }
 
-    async start() {
-        // Run caddy
-        const childProcess = new STChildProcess('caddy', [
-            'run',
-        ]);
-
-        ProcessInfo.flagCaddyStarted();
-
-        // wait until caddy is ready
-        await new Promise<void>((resolve) => {
-            let isStarted = false;
-            const onData = (data: any) => {
-                if (isStarted) {
-                    return;
-                }
-                const line = data.toString();
-                console.log('[Caddy]', line);
-
-                // Detect successful startup
-                if (line.includes('admin endpoint started')) {
-                    isStarted = true;
-                    resolve();
-
-                    // Remove listeners
-                    childProcess.offData(onData);
-                }
-            };
-
-            // log stderr until caddy is ready
-            childProcess.onData(onData);
-        });
-    }
-
-    async stop() {
-        // Make sure to kill any running caddy processes
-        try {
-            const cmd = 'brew services stop caddy';
-            await exec(cmd);
-        }
-        catch (error) {
-            // ignore
-        }
-
-        // Make sure to kill any running caddy processes
-        try {
-            const cmd = 'caddy stop';
-            await exec(cmd);
-        }
-        catch (error) {
-            // ignore
-        }
-    }
-
     private async putRoute(route: any, index: number) {
-        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes/${index}`;
+        const url = `${this.getAdminUrl()}/config/apps/http/servers/${this.serverName}/routes/${index}`;
 
         try {
             await exec(
@@ -92,11 +62,11 @@ export class CaddyHelper {
     }
 
     private async postConfig(caddyConfig: any) {
-        const url = `${this.cadyUrl}/load`;
+        const url = `${this.getAdminUrl()}/load`;
 
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.getAdminHeaders(),
             body: JSON.stringify(caddyConfig),
         });
 
@@ -109,7 +79,7 @@ export class CaddyHelper {
     }
 
     private async postPolicySubjects(policySubjects: string[]) {
-        const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects/...`;
+        const url = `${this.getAdminUrl()}/config/apps/tls/automation/policies/0/subjects/...`;
 
         try {
             await exec(
@@ -123,22 +93,22 @@ export class CaddyHelper {
     }
 
     private async getPolicySubjects() {
-        const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects`;
-        const result = await fetch(url);
+        const url = `${this.getAdminUrl()}/config/apps/tls/automation/policies/0/subjects`;
+        const result = await fetch(url, { headers: this.getAdminHeaders() });
         const policySubjects: string[] = await result.json();
         return policySubjects;
     }
 
     private async getRoutes() {
-        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
-        const result = await fetch(url);
+        const url = `${this.getAdminUrl()}/config/apps/http/servers/${this.serverName}/routes`;
+        const result = await fetch(url, { headers: this.getAdminHeaders() });
         const routes: { group?: string; match?: any[] }[] = await result.json();
         return routes;
     }
 
     private async getConfig() {
-        const url = `${this.cadyUrl}/config`;
-        const result = await fetch(url);
+        const url = `${this.getAdminUrl()}/config`;
+        const result = await fetch(url, { headers: this.getAdminHeaders() });
         return await result.json();
     }
 
@@ -151,11 +121,11 @@ export class CaddyHelper {
         const routes = await this.getRoutes();
         const routesToKeep = routes.filter(r => !predicate(r));
 
-        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
+        const url = `${this.getAdminUrl()}/config/apps/http/servers/${this.serverName}/routes`;
 
         const res = await fetch(url, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.getAdminHeaders(),
             body: JSON.stringify(routesToKeep),
         });
 
@@ -171,11 +141,11 @@ export class CaddyHelper {
         const subjects = await this.getPolicySubjects();
         const subjectsToKeep = subjects.filter(s => !predicate(s));
 
-        const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects`;
+        const url = `${this.getAdminUrl()}/config/apps/tls/automation/policies/0/subjects`;
 
         const res = await fetch(url, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.getAdminHeaders(),
             body: JSON.stringify(subjectsToKeep),
         });
 
@@ -186,4 +156,42 @@ export class CaddyHelper {
             );
         }
     }
+
+    private getAdminUrl() {
+        if (!this.caddyRuntime) {
+            throw new Error('Caddy admin endpoint is not configured.');
+        }
+        return this.caddyRuntime.adminUrl;
+    }
+
+    private async getRunningRuntime() {
+        if (await this.canReachAdmin(sharedCaddyRuntime)) {
+            return sharedCaddyRuntime;
+        }
+        return undefined;
+    }
+
+    private async canReachAdmin(runtime: CaddyRuntime) {
+        try {
+            const res = await fetch(`${runtime.adminUrl}/config`, {
+                headers: this.getAdminHeaders(runtime),
+                signal: AbortSignal.timeout(1_000),
+            });
+            return res.ok;
+        }
+        catch (error) {
+            return false;
+        }
+    }
+
+    private getAdminHeaders(runtime = this.caddyRuntime) {
+        if (!runtime) {
+            throw new Error('Caddy admin endpoint is not configured.');
+        }
+        return {
+            'Content-Type': 'application/json',
+            'Origin': runtime.adminUrl,
+        };
+    }
+
 }

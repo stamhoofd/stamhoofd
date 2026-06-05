@@ -148,6 +148,14 @@ Run Playwright tests with:
 yarn stam test e2e
 ```
 
+The e2e command keeps its MySQL container and data volume between runs so migrated worker databases can be reused. Reset that persistent e2e database with:
+
+```bash
+yarn stam test e2e --clear
+```
+
+Use `--workers <number>` to override Playwright's default worker count for a run.
+
 Run the full validation flow with:
 
 ```bash

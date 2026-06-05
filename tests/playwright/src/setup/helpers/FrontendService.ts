@@ -1,6 +1,8 @@
 import { getProjectPath } from '@stamhoofd/cli';
-import { cp, readFile, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { createReadStream } from 'node:fs';
+import { cp, readFile, stat, writeFile } from 'node:fs/promises';
+import { createServer, type Server } from 'node:http';
+import { extname, join, resolve } from 'node:path';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { NetworkHelper } from './NetworkHelper.js';
 import type { ServiceHelper, ServiceProcess } from './ServiceHelper.js';
@@ -19,21 +21,59 @@ export class FrontendService implements ServiceHelper {
      */
     async start(): Promise<ServiceProcess> {
         await this.build();
+        const server = await this.startStaticServer();
 
         return {
             wait: async () => {
                 await NetworkHelper.waitForUrl(
-                    'http://'
-                    + CaddyConfigHelper.getDomain(
-                        this.name,
-                        this.workerId,
-                    ),
+                    CaddyConfigHelper.getUrl(this.name, this.workerId),
                 );
             },
             kill: async () => {
-                // todo: clear dist folder?
+                await new Promise<void>((resolve, reject) => {
+                    server.close((error) => {
+                        if (error) {
+                            reject(error);
+                            return;
+                        }
+                        resolve();
+                    });
+                });
             },
         };
+    }
+
+    private async startStaticServer(): Promise<Server> {
+        const root = this.getDestinationDistPath(this.workerId);
+        const port = CaddyConfigHelper.getFrontendPort(this.name, this.workerId);
+        const server = createServer(async (request, response) => {
+            try {
+                const requestUrl = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
+                const requestedPath = decodeURIComponent(requestUrl.pathname);
+                const normalizedPath = requestedPath.includes('..') ? '/index.html' : requestedPath;
+                const relativePath = normalizedPath === '/' ? 'index.html' : normalizedPath.slice(1);
+                const filePath = join(root, relativePath);
+                const fileStat = await stat(filePath).catch(() => undefined);
+                const resolvedPath = fileStat?.isFile() ? filePath : join(root, 'index.html');
+
+                response.setHeader('Content-Type', contentType(resolvedPath));
+                createReadStream(resolvedPath).pipe(response);
+            }
+            catch (error) {
+                response.statusCode = 500;
+                response.end('Internal server error');
+            }
+        });
+
+        await new Promise<void>((resolveListen, rejectListen) => {
+            server.once('error', rejectListen);
+            server.listen(port, '127.0.0.1', () => {
+                server.off('error', rejectListen);
+                resolveListen();
+            });
+        });
+
+        return server;
     }
 
     private async build() {
@@ -99,5 +139,24 @@ export class FrontendService implements ServiceHelper {
 
         // Write the modified file back
         await writeFile(path, html, 'utf-8');
+    }
+}
+
+function contentType(filePath: string) {
+    switch (extname(filePath)) {
+        case '.css':
+            return 'text/css';
+        case '.html':
+            return 'text/html';
+        case '.js':
+            return 'application/javascript';
+        case '.json':
+            return 'application/json';
+        case '.svg':
+            return 'image/svg+xml';
+        case '.wasm':
+            return 'application/wasm';
+        default:
+            return 'application/octet-stream';
     }
 }

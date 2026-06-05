@@ -20,7 +20,7 @@ class WorkerHelperInstance {
      * @returns
      */
     async startServices(workerInfo: WorkerInfo) {
-        const workerId = workerInfo.workerIndex.toString();
+        const workerId = workerInfo.parallelIndex.toString();
 
         // start api
         console.log(`Start api for worker ${workerId}...`);

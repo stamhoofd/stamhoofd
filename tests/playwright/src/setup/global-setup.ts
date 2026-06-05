@@ -17,11 +17,9 @@ export default async function globalSetup() {
     const frontendBuilder = new FrontendBuilder();
     const caddyHelper = new CaddyHelper();
 
-    const startCaddy = async () => {
+    const configureCaddy = async () => {
         if (!await caddyHelper.isRunning()) {
-            console.log('Starting caddy...');
-            await caddyHelper.start();
-            console.log('Caddy started.');
+            throw new Error('Shared Caddy is not running. Run `yarn stam services up` first.');
         }
         await caddyHelper.configure();
     };
@@ -34,7 +32,7 @@ export default async function globalSetup() {
         await frontendBuilder.build();
     };
 
-    for (const promise of [startCaddy(), buildFrontend()]) {
+    for (const promise of [configureCaddy(), buildFrontend()]) {
         await promise;
     }
 }

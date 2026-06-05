@@ -17,7 +17,7 @@ export type StamhoofdUrls = {
  * to reset and clear the database in tests.
  */
 class WorkerDataInstance {
-    private _id: string | undefined = process.env.TEST_WORKER_INDEX;
+    private _id: string | undefined = process.env.TEST_PARALLEL_INDEX ?? process.env.TEST_WORKER_INDEX;
     private _urls: StamhoofdUrls = this.createUrls();
     private _user: User | null = null;
     private _initialUser: User | null = null;

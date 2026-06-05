@@ -15,6 +15,6 @@ export default class TestAll extends BaseCommand {
         const { flags } = await this.parse(TestAll);
         const context = await this.createContext(flags);
         await testUnit(context, flags.ci);
-        await testE2e(context, { ci: flags.ci, ui: false });
+        await testE2e(context, { ci: flags.ci, clear: false, ui: false });
     }
 }
