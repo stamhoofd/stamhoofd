@@ -85,7 +85,7 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         await startSharedServices(context);
         shouldRestoreCaddy = true;
         await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: { DB_PORT: dbPort }, verbose: context.verbose });
-        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath, PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined }, verbose: context.verbose });
+        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, NODE_EXTRA_CA_CERTS: caddyRootCaPath, PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined, PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers) }, verbose: context.verbose });
     }
     finally {
         if (shouldRestoreCaddy) {

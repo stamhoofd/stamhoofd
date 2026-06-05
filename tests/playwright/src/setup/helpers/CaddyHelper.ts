@@ -2,6 +2,8 @@ import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { buildSharedServiceProfile, caddyAdminPort, getContainerRuntime, localIpv4Host } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
+import { ProcessInfo } from './ProcessInfo.js';
+import { STChildProcess } from './STChildProcess.js';
 
 const exec = promisify(execCallback);
 
@@ -42,6 +44,36 @@ export class CaddyHelper {
             proxyHost: this.caddyRuntime.proxyHost,
         }));
         console.log('Done posting caddy config.');
+    }
+
+    async start() {
+        if (process.env.CI !== 'true') {
+            throw new Error('Shared Caddy is not running. Run `yarn stam services up` first.');
+        }
+
+        const runtime = this.createHostCaddyRuntime();
+        const childProcess = new STChildProcess('caddy', ['run']);
+        childProcess.enableLog();
+        ProcessInfo.flagCaddyStarted();
+
+        for (let i = 0; i < 60; i += 1) {
+            if (await this.canReachAdmin(runtime)) {
+                this.caddyRuntime = runtime;
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 250));
+        }
+
+        throw new Error('Timed out waiting for CI Caddy admin endpoint to start.');
+    }
+
+    async stop() {
+        try {
+            await exec('caddy stop');
+        }
+        catch (error) {
+            // Ignore stop failures: Caddy may already have exited with the parent process.
+        }
     }
 
     private async putRoute(route: any, index: number) {
@@ -166,6 +198,12 @@ export class CaddyHelper {
         if (await this.canReachAdmin(sharedCaddyRuntime)) {
             return sharedCaddyRuntime;
         }
+        if (process.env.CI === 'true') {
+            const hostCaddyRuntime = this.createHostCaddyRuntime();
+            if (await this.canReachAdmin(hostCaddyRuntime)) {
+                return hostCaddyRuntime;
+            }
+        }
         return undefined;
     }
 
@@ -177,6 +215,16 @@ export class CaddyHelper {
             httpListen: `${profile.caddyListenHost}:${profile.caddyHttpListenPort}`,
             httpsListen: `${profile.caddyListenHost}:${profile.caddyHttpsListenPort}`,
             proxyHost: profile.caddyProxyHost,
+        };
+    }
+
+    private createHostCaddyRuntime(): CaddyRuntime {
+        return {
+            adminUrl: `http://${localIpv4Host}:${caddyAdminPort}`,
+            adminListen: `${localIpv4Host}:${caddyAdminPort}`,
+            httpListen: ':80',
+            httpsListen: ':443',
+            proxyHost: localIpv4Host,
         };
     }
 

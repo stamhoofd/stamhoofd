@@ -1,5 +1,7 @@
+import os from 'node:os';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { CaddyHelper } from './helpers/CaddyHelper.js';
+import { DatabaseHelper } from './helpers/DatabaseHelper.js';
 import { FrontendBuilder } from './helpers/FrontendBuilder.js';
 import { PlaywrightHooks } from './helpers/PlaywrightHooks.js';
 
@@ -19,7 +21,9 @@ export default async function globalSetup() {
 
     const configureCaddy = async () => {
         if (!await caddyHelper.isRunning()) {
-            throw new Error('Shared Caddy is not running. Run `yarn stam services up` first.');
+            console.log('Starting CI Caddy...');
+            await caddyHelper.start();
+            console.log('CI Caddy started.');
         }
         await caddyHelper.configure();
     };
@@ -32,7 +36,32 @@ export default async function globalSetup() {
         await frontendBuilder.build();
     };
 
-    for (const promise of [configureCaddy(), buildFrontend()]) {
+    const migrateDatabases = async () => {
+        const workerCount = getExpectedWorkerCount();
+        const { run: runMigrations } = await import('@stamhoofd/backend/migrate');
+
+        for (let workerId = 0; workerId < workerCount; workerId += 1) {
+            const database = DatabaseHelper.getDatabaseName(workerId.toString());
+            console.log(`Migrating ${database}...`);
+            TestUtils.setEnvironment('DB_DATABASE', database);
+            await runMigrations();
+        }
+    };
+
+    for (const promise of [configureCaddy(), buildFrontend(), migrateDatabases()]) {
         await promise;
     }
+}
+
+function getExpectedWorkerCount() {
+    const explicitWorkerCount = process.env.PLAYWRIGHT_WORKER_COUNT ? parseInt(process.env.PLAYWRIGHT_WORKER_COUNT) : undefined;
+    if (explicitWorkerCount !== undefined && Number.isFinite(explicitWorkerCount) && explicitWorkerCount > 0) {
+        return explicitWorkerCount;
+    }
+
+    if (process.env.CI) {
+        return 2;
+    }
+
+    return Math.max(1, Math.floor(os.availableParallelism() / 2));
 }

@@ -1,3 +1,11 @@
+import { CaddyHelper } from './helpers/CaddyHelper.js';
+import { ProcessInfo } from './helpers/ProcessInfo.js';
+
 export default async function globalTeardown() {
-    // Shared services are owned by the CLI. Caddy config is restored by `stam test e2e` after Playwright exits.
+    if (!ProcessInfo.didStartCaddy) {
+        return;
+    }
+
+    console.log('Stopping CI Caddy...');
+    await new CaddyHelper().stop();
 }
