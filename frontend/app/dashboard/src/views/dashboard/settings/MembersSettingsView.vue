@@ -211,13 +211,13 @@ import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManage
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData, OrganizationRecordsConfiguration } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import { computed } from 'vue';
 
 enum Routes {
     RegistrationPaymentMethods = 'betaalmethodes',
