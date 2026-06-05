@@ -76,7 +76,7 @@ export async function testUnit(context: CliContext, ci: boolean): Promise<void> 
     }
 }
 
-export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; ui: boolean; workers?: number }): Promise<void> {
+export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number }): Promise<void> {
     const dbPort = await startE2eMysql(context, options.clear);
     let shouldRestoreCaddy = false;
     await buildShared(context);
@@ -84,7 +84,7 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         await startSharedServices(context);
         shouldRestoreCaddy = true;
         await run('yarn', ['--cwd', 'backend/app/api', '-s', 'build:playwright:pre'], { cwd: context.rootDir, env: { DB_PORT: dbPort }, verbose: context.verbose });
-        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbose: context.verbose });
+        await run('yarn', ['--cwd', 'tests/playwright', '-s', 'test', ...(options.ui ? ['--ui'] : []), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)])], { cwd: context.rootDir, env: { NX_DAEMON: 'false', CI: options.ci ? 'true' : undefined, DB_PORT: dbPort, PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined }, verbose: context.verbose });
     }
     finally {
         if (shouldRestoreCaddy) {

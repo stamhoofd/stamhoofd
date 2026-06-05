@@ -155,6 +155,7 @@ yarn stam test e2e --clear
 ```
 
 Use `--workers <number>` to override Playwright's default worker count for a run.
+Use `--extra` to include tests tagged `@extra`.
 
 Run the full validation flow with:
 

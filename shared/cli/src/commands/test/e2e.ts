@@ -10,6 +10,7 @@ export default class TestE2e extends BaseCommand {
         'stam test e2e',
         'stam test e2e --clear',
         'stam test e2e --ci',
+        'stam test e2e --extra',
         'stam test e2e --workers 2',
         'stam test e2e --ui --verbose',
     ];
@@ -18,6 +19,7 @@ export default class TestE2e extends BaseCommand {
         ...BaseCommand.verboseFlags,
         ci: ciFlag,
         clear: Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
+        extra: Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),
         ui: Flags.boolean({ default: false, description: 'Run Playwright in UI mode' }),
         workers: Flags.integer({ description: 'Number of Playwright workers' }),
     };
@@ -27,6 +29,6 @@ export default class TestE2e extends BaseCommand {
         if (flags.workers !== undefined && flags.workers < 1) {
             throw new Error('--workers must be at least 1');
         }
-        await testE2e(await this.createContext(flags), { ci: flags.ci, clear: flags.clear, ui: flags.ui, workers: flags.workers });
+        await testE2e(await this.createContext(flags), { ci: flags.ci, clear: flags.clear, extra: flags.extra, ui: flags.ui, workers: flags.workers });
     }
 }
