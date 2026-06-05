@@ -3,8 +3,8 @@ import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { buildDomains } from './build-config.js';
-import { listInstanceManifests, sharedDir } from '../runtime/manifest-store.js';
-import type { InstanceManifest } from '../runtime/manifest-store.js';
+import { listActiveRouteManifests, sharedDir } from '../runtime/manifest-store.js';
+import type { RouteManifestRoute } from '../runtime/manifest-store.js';
 import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, caddySetupHttpPort, caddySetupHttpsPort, localIpv4Host, localhostPort } from './shared-service-config.js';
 
 type CaddyRoute = {
@@ -67,15 +67,15 @@ function route(hosts: string[], port: number, proxyHost: string): CaddyRoute {
 export async function buildCaddyConfig(context: CliContext, options: { setup?: boolean; httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<CaddyConfig> {
     const domains = buildDomains(context);
     const ports = buildPorts(context);
-    const activeInstances = await listInstanceManifests(context);
+    const activeManifests = await listActiveRouteManifests(context);
     const proxyHost = options.proxyHost ?? localIpv4Host;
     const listenHost = options.listenHost ?? localIpv4Host;
     const adminListenHost = options.adminListenHost ?? localIpv4Host;
     const listenPort = (port: number) => `${listenHost}:${port}`;
     const routes = [
         // Active instance manifests let the shared Caddy container keep routing
-        // requests for other running workspaces, not just the current context.
-        ...activeInstances.flatMap(instance => instanceRoutes(instance, proxyHost)),
+        // requests for other running workspaces and test workers.
+        ...activeManifests.flatMap(manifest => manifest.routes.map(manifestRoute => routeFromManifest(manifestRoute, proxyHost))),
         route([domains.renderer], ports.renderer, proxyHost),
         route([domains.api, `*.${domains.api}`], ports.api, proxyHost),
         route([domains.dashboard], ports.dashboard, proxyHost),
@@ -98,12 +98,7 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
         domains.files,
         domains.filesConsole,
         domains.sso,
-        ...activeInstances.flatMap(instance => [
-            instance.domains.dashboard,
-            instance.domains.api,
-            `*.${instance.domains.api}`,
-            instance.domains.renderer,
-        ]),
+        ...activeManifests.flatMap(manifest => manifest.tlsSubjects),
     ])];
 
     return {
@@ -136,10 +131,6 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
     };
 }
 
-function instanceRoutes(instance: InstanceManifest, proxyHost: string) {
-    return [
-        route([instance.domains.renderer], instance.ports.renderer, proxyHost),
-        route([instance.domains.api, `*.${instance.domains.api}`], instance.ports.api, proxyHost),
-        route([instance.domains.dashboard], instance.ports.dashboard, proxyHost),
-    ];
+function routeFromManifest(manifestRoute: RouteManifestRoute, proxyHost: string) {
+    return route(manifestRoute.hosts, manifestRoute.port, proxyHost);
 }

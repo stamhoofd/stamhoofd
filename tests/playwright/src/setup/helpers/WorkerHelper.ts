@@ -46,9 +46,8 @@ class WorkerHelperInstance {
 
         console.log(`Frontend processes built for worker ${workerId}.`);
 
-        // configure caddy
         const allProcesses = [...frontendProcesses, apiProcess];
-        console.log(`Caddy configured for worker ${workerId}.`);
+        console.log(`Services started for worker ${workerId}.`);
 
         // wait until api is ready
         await apiProcess.wait();

@@ -20,12 +20,13 @@ export default async function globalSetup() {
     const caddyHelper = new CaddyHelper();
 
     const configureCaddy = async () => {
+        const workerCount = getExpectedWorkerCount();
         if (!await caddyHelper.isRunning()) {
             console.log('Starting CI Caddy...');
             await caddyHelper.start();
             console.log('CI Caddy started.');
         }
-        await caddyHelper.configure();
+        await caddyHelper.configure(workerCount);
     };
 
     const buildFrontend = async () => {

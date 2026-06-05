@@ -1,6 +1,6 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
-import { buildSharedServiceProfile, caddyAdminPort, getContainerRuntime, localIpv4Host } from '@stamhoofd/cli';
+import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, type RouteManifest, writeRouteManifest } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { ProcessInfo } from './ProcessInfo.js';
 import { STChildProcess } from './STChildProcess.js';
@@ -28,10 +28,15 @@ export class CaddyHelper {
         return false;
     }
 
-    async configure() {
+    async configure(workerCount: number) {
         this.caddyRuntime ??= await this.getRunningRuntime();
         if (!this.caddyRuntime) {
             throw new Error('Shared Caddy admin endpoint is not reachable. Run `yarn stam services up` first.');
+        }
+
+        if (!ProcessInfo.didStartCaddy) {
+            await this.configureSharedCaddy(workerCount);
+            return;
         }
 
         // post the initial config
@@ -44,6 +49,17 @@ export class CaddyHelper {
             proxyHost: this.caddyRuntime.proxyHost,
         }));
         console.log('Done posting caddy config.');
+    }
+
+    async cleanup() {
+        if (ProcessInfo.didStartCaddy) {
+            await this.stop();
+            return;
+        }
+
+        const context = await createContext({ env: 'stamhoofd', verbose: false });
+        await removeRouteManifestsByKind(context, 'playwright-worker');
+        await CaddyService.reload(context);
     }
 
     async start() {
@@ -74,6 +90,44 @@ export class CaddyHelper {
         catch (error) {
             // Ignore stop failures: Caddy may already have exited with the parent process.
         }
+    }
+
+    private async configureSharedCaddy(workerCount: number) {
+        const context = await createContext({ env: 'stamhoofd', verbose: false });
+        await pruneStaleRouteManifests(context);
+        await removeRouteManifestsByKind(context, 'playwright-worker');
+
+        for (let workerId = 0; workerId < workerCount; workerId += 1) {
+            await writeRouteManifest(context, this.createWorkerManifest(workerId));
+        }
+
+        await CaddyService.reload(context);
+    }
+
+    private createWorkerManifest(workerId: number): RouteManifest {
+        const id = workerId.toString();
+        const dashboard = CaddyConfigHelper.getDomain('dashboard', id);
+        const registration = CaddyConfigHelper.getDomain('registration', id);
+        const webshop = CaddyConfigHelper.getDomain('webshop', id);
+        const api = CaddyConfigHelper.getDomain('api', id);
+        const routes = [
+            { hosts: [dashboard], port: CaddyConfigHelper.getFrontendPort('dashboard', id) },
+            { hosts: [registration], port: CaddyConfigHelper.getFrontendPort('registration', id) },
+            { hosts: [webshop], port: CaddyConfigHelper.getFrontendPort('webshop', id) },
+            { hosts: [api, `*.${api}`], port: CaddyConfigHelper.getPort('api', id) },
+        ];
+
+        return {
+            name: `playwright-worker-${id}`,
+            kind: 'playwright-worker',
+            pid: process.pid,
+            startedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+            rootPath: process.cwd(),
+            workspace: 'playwright',
+            routes,
+            tlsSubjects: [...new Set(routes.flatMap(route => route.hosts))],
+        };
     }
 
     private async putRoute(route: any, index: number) {

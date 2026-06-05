@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Status from './status.js';
-import { listInstanceManifests } from '../runtime/manifest-store.js';
+import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
 
 vi.mock('../runtime/manifest-store.js', () => ({
-    listInstanceManifests: vi.fn(async () => []),
+    listActiveInstanceManifests: vi.fn(async () => []),
 }));
 
 vi.mock('../services/shared-services.js', () => ({
@@ -40,6 +40,6 @@ describe('Status command', () => {
 
         expect(createContext).toHaveBeenCalledWith({ verbose: true });
         expect(printSharedServicesStatus).toHaveBeenCalled();
-        expect(listInstanceManifests).toHaveBeenCalled();
+        expect(listActiveInstanceManifests).toHaveBeenCalled();
     });
 });

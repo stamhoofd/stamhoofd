@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
-import { listInstanceManifests } from './manifest-store.js';
+import { listActiveRouteManifests, listInstanceManifests, writeRouteManifest } from './manifest-store.js';
 
 describe('manifest store', () => {
     afterEach(() => {
@@ -47,6 +47,66 @@ describe('manifest store', () => {
         ]);
         expect(warnings).toHaveLength(1);
         expect(warnings[0]).toContain('broken.json');
+    });
+
+    it('returns active route manifests', async () => {
+        const context = await testContext();
+        await writeRouteManifest(context, {
+            name: 'playwright-worker-0',
+            kind: 'playwright-worker',
+            pid: process.pid,
+            startedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            rootPath: '/repo',
+            workspace: 'playwright',
+            routes: [{ hosts: ['playwright-dashboard-0.stamhoofd'], port: 6100 }],
+            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
+        });
+
+        await expect(listActiveRouteManifests(context)).resolves.toMatchObject([
+            { name: 'playwright-worker-0', kind: 'playwright-worker' },
+        ]);
+    });
+
+    it('ignores and removes expired route manifests', async () => {
+        const context = await testContext();
+        await writeRouteManifest(context, {
+            name: 'playwright-worker-0',
+            kind: 'playwright-worker',
+            startedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() - 60_000).toISOString(),
+            rootPath: '/repo',
+            workspace: 'playwright',
+            routes: [{ hosts: ['playwright-dashboard-0.stamhoofd'], port: 6100 }],
+            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
+        });
+
+        await expect(listActiveRouteManifests(context)).resolves.toEqual([]);
+        await expect(fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json'))).rejects.toMatchObject({ code: 'ENOENT' });
+    });
+
+    it('ignores and removes route manifests with a dead pid', async () => {
+        const context = await testContext();
+        vi.spyOn(process, 'kill').mockImplementation(((pid: number, signal?: NodeJS.Signals | number) => {
+            if (signal === 0 && pid === 123456) {
+                throw new Error('not alive');
+            }
+            return true;
+        }) as typeof process.kill);
+        await writeRouteManifest(context, {
+            name: 'playwright-worker-0',
+            kind: 'playwright-worker',
+            pid: 123456,
+            startedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+            rootPath: '/repo',
+            workspace: 'playwright',
+            routes: [{ hosts: ['playwright-dashboard-0.stamhoofd'], port: 6100 }],
+            tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
+        });
+
+        await expect(listActiveRouteManifests(context)).resolves.toEqual([]);
+        await expect(fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json'))).rejects.toMatchObject({ code: 'ENOENT' });
     });
 });
 
