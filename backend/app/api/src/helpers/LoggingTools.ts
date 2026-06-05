@@ -12,14 +12,18 @@ export class LoggingTools {
     }
 }
 
-class ProgressLogger {
+export class ProgressLogger {
     private progress = 0;
     private progressedLogged = 0;
     private readonly onePercent: number;
 
     constructor(readonly total: number) {
         this.onePercent = Math.floor(total / 100);
-        this.writeOutput(this.formatProgress(0), false);
+        if (total === 0) {
+            this.writeOutput(this.formatProgress(100), false);
+        } else {
+            this.writeOutput(this.formatProgress(0), false);
+        }
     }
 
     update(newProgress = 1) {
