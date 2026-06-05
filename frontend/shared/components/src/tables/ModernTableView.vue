@@ -1759,7 +1759,7 @@ function getExpectedSelectionLength(): number {
 }
 
 async function handleAction(action: TableAction<Value>, event: MouseEvent) {
-    if (action.needsSelection && getExpectedSelectionLength() === 0) {
+    if (action.needsSelection && !action.allowAutoSelectAll && getExpectedSelectionLength() === 0) {
         return;
     }
 
