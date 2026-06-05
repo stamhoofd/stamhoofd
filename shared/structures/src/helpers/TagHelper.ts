@@ -64,4 +64,26 @@ export class TagHelper {
 
         return false;
     }
+    
+    static getAllDescendants(tagId: string, tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> }): string[] {
+        const tagMap = 'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map(tag => [tag.id, tag]));
+
+        const tag = tagMap.get(tagId);
+        if (!tag) {
+            // should not happen
+            return [];
+        }
+
+        if (tag.childTags.length === 0) {
+            return [];
+        }
+
+        const descendants: string[] = [];
+        for (const childTagId of tag.childTags) {
+            descendants.push(childTagId);
+            descendants.push(...this.getAllDescendants(childTagId, { tagMap }));
+        }
+
+        return descendants;
+    }
 }
