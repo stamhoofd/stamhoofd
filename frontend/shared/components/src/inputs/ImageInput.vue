@@ -59,7 +59,7 @@ const isSquare = computed(() => {
     if (props.resolutions === null) {
         return false;
     }
-    return !!props.resolutions.find(r => r.width === r.height && r.width);
+    return !!props.resolutions.every(r => r.width === r.height && r.width);
 });
 
 const shownResolution = computed(() => modelValue.value?.getResolutionForSize(undefined, 220));
