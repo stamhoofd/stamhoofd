@@ -1,7 +1,7 @@
 import { Flags } from '@oclif/core';
 import { BaseCommand } from '../base-command.js';
 import { localFilesAccessKey, localFilesSecretKey, maildevPassword, maildevUsername, successSymbol } from '../config/shared-service-config.js';
-import { listInstanceManifests } from '../runtime/manifest-store.js';
+import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
 import { link } from '../runtime/ux.js';
 
@@ -31,7 +31,7 @@ export default class Status extends BaseCommand {
 
     private async printStatus(context: Awaited<ReturnType<Status['createContext']>>, current: boolean): Promise<void> {
         await printSharedServicesStatus(context);
-        const instances = await listInstanceManifests(context);
+        const instances = await listActiveInstanceManifests(context);
         const visible = current ? instances.filter(instance => instance.name === context.instance.name) : instances;
         this.log('\nActive instances:');
         if (visible.length === 0) {

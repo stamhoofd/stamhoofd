@@ -1,6 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { FrontendProjectName } from './FrontendService.js';
-import { FrontendService } from './FrontendService.js';
 
 /**
  * Old domains and ports will get reused
@@ -53,16 +52,21 @@ export class CaddyConfigHelper {
         return 6000 + this.cycledWorkerId(workerId);
     }
 
+    static getFrontendPort(service: FrontendProjectName, workerId: string) {
+        const offset = service === 'dashboard' ? 6100 : service === 'registration' ? 6200 : 6300;
+        return offset + this.cycledWorkerId(workerId);
+    }
+
     /**
      * Create a frontend route for the caddy config
      */
-    static createFrontendRoute(service: FrontendProjectName, workerId: string) {
-        const root = FrontendService.getDestinationDistPath(service, workerId);
+    static createFrontendRoute(service: FrontendProjectName, workerId: string, proxyHost: string) {
         const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
             workerId,
         );
+        const port = this.getFrontendPort(service, workerId);
 
         return {
             group,
@@ -72,26 +76,20 @@ export class CaddyConfigHelper {
                 },
             ],
             handle: [
-                // todo cache and compression headers
                 {
-                    handler: 'file_server',
-                    root,
-                    pass_thru: true,
-                },
-                {
-                    handler: 'rewrite',
-                    uri: '/index.html',
-                },
-                {
-                    handler: 'file_server',
-                    root,
+                    handler: 'reverse_proxy',
+                    upstreams: [
+                        {
+                            dial: `${proxyHost}:${port}`,
+                        },
+                    ],
                 },
             ],
             terminal: true,
         };
     }
 
-    static createBackendRoute(service: 'api', workerId: string) {
+    static createBackendRoute(service: 'api', workerId: string, proxyHost: string) {
         const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
@@ -111,7 +109,7 @@ export class CaddyConfigHelper {
                     handler: 'reverse_proxy',
                     upstreams: [
                         {
-                            dial: `127.0.0.1:${port}`,
+                            dial: `${proxyHost}:${port}`,
                         },
                     ],
                     headers: {
@@ -137,18 +135,18 @@ export class CaddyConfigHelper {
     /**
      * Create the default playwright caddy config
      */
-    static createDefault() {
+    static createDefault(options: { adminListen: string; adminOrigin: string; httpListen: string; httpsListen: string; proxyHost: string }) {
         const routes: { match: { host: string[] }[] }[] = [];
 
         for (let workerId = 0; workerId < maximumRunners; workerId += 1) {
             routes.push(
-                this.createFrontendRoute('dashboard', workerId.toString()),
-                this.createFrontendRoute('webshop', workerId.toString()),
-                this.createFrontendRoute('registration', workerId.toString()),
+                this.createFrontendRoute('dashboard', workerId.toString(), options.proxyHost),
+                this.createFrontendRoute('webshop', workerId.toString(), options.proxyHost),
+                this.createFrontendRoute('registration', workerId.toString(), options.proxyHost),
             );
 
             routes.push(
-                this.createBackendRoute('api', workerId.toString()),
+                this.createBackendRoute('api', workerId.toString(), options.proxyHost),
             );
         }
 
@@ -156,14 +154,18 @@ export class CaddyConfigHelper {
 
         const config = {
             admin: {
-                listen: '0.0.0.0:2019',
+                listen: options.adminListen,
+                origins: [options.adminOrigin],
             },
             apps: {
                 http: {
                     servers: {
                         stamhoofd: {
-                            listen: [':443', ':80'],
+                            listen: [options.httpsListen, options.httpListen],
                             routes,
+                            automatic_https: {
+                                disable_redirects: true,
+                            },
                         },
                     },
                 },

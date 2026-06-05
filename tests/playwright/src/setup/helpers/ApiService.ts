@@ -8,11 +8,6 @@ export class ApiService implements ServiceHelper {
     async start(): Promise<ServiceProcess> {
         const domain = CaddyConfigHelper.getDomain('api', this.workerId);
 
-        // Start api
-        const { run: runMigrations }
-            = await import('@stamhoofd/backend/migrate');
-        await runMigrations();
-
         // Clear database before we start
         const databaseHelper = new DatabaseHelper(this.workerId);
 

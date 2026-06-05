@@ -3,6 +3,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../../helpers/worker/WorkerData.js';
 import { ApiService } from './ApiService.js';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
+import { DatabaseHelper } from './DatabaseHelper.js';
 import type { FrontendProjectName} from './FrontendService.js';
 import { FrontendService } from './FrontendService.js';
 import type { ServiceProcess } from './ServiceHelper.js';
@@ -20,7 +21,7 @@ class WorkerHelperInstance {
      * @returns
      */
     async startServices(workerInfo: WorkerInfo) {
-        const workerId = workerInfo.workerIndex.toString();
+        const workerId = workerInfo.parallelIndex.toString();
 
         // start api
         console.log(`Start api for worker ${workerId}...`);
@@ -45,9 +46,8 @@ class WorkerHelperInstance {
 
         console.log(`Frontend processes built for worker ${workerId}.`);
 
-        // configure caddy
         const allProcesses = [...frontendProcesses, apiProcess];
-        console.log(`Caddy configured for worker ${workerId}.`);
+        console.log(`Services started for worker ${workerId}.`);
 
         // wait until api is ready
         await apiProcess.wait();
@@ -122,7 +122,7 @@ class WorkerHelperInstance {
             },
             translationNamespace: 'stamhoofd',
             platformName: 'stamhoofd',
-            DB_DATABASE: `stamhoofd-playwright-${WorkerData.id}`,
+            DB_DATABASE: DatabaseHelper.getDatabaseName(WorkerData.id),
             UITPAS_API_CLIENT_SECRET: 'sk_test_test',
             UITPAS_API_CLIENT_ID: 'sk_test_test',
             UITPAS_API_URL: 'https://api-test.uitpas.be',

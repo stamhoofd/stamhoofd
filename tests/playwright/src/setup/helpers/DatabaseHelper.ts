@@ -1,9 +1,14 @@
-import type {DatabaseInstance} from '@simonbackx/simple-database';
+import type { DatabaseInstance } from '@simonbackx/simple-database';
+import { TestUtils } from '@stamhoofd/test-utils';
 
 export class DatabaseHelper {
     private _database?: DatabaseInstance;
 
     constructor(private workerId: string) {}
+
+    static getDatabaseName(workerId: string) {
+        return `stamhoofd-playwright-${workerId}`;
+    }
 
     async clear() {
         const Database = await this.getDatabase();
@@ -132,8 +137,10 @@ export class DatabaseHelper {
             return this._database;
         }
 
-        process.env.DB_DATABASE = `stamhoofd-playwright-${this.workerId}`;
+        TestUtils.setEnvironment('DB_DATABASE', DatabaseHelper.getDatabaseName(this.workerId));
         const { Database } = await import('@simonbackx/simple-database');
-        return Database;
+        await Database.reload({});
+        this._database = Database;
+        return this._database;
     }
 }

@@ -24,10 +24,11 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
 
     async getDetail(): Promise<string> {
         const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
+        const admin = `admin ${localhostPort(caddyAdminPort)}`;
         if (profile.needsPrivilegedRedirects) {
-            return `${localhostPort(80)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(443)} -> ${localhostPort(profile.caddyHttpsHostPort)}`;
+            return `HTTP ${localhostPort(80)} -> ${localhostPort(profile.caddyHttpHostPort)}, HTTPS ${localhostPort(443)} -> ${localhostPort(profile.caddyHttpsHostPort)}, ${admin}`;
         }
-        return `${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(profile.caddyHttpsHostPort)}`;
+        return `HTTP ${localhostPort(profile.caddyHttpHostPort)}, HTTPS ${localhostPort(profile.caddyHttpsHostPort)}, ${admin}`;
     }
 
     async prepare(context: CliContext): Promise<CaddyPrepared> {
@@ -73,12 +74,14 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
             disableRedirects: profile.needsPrivilegedRedirects,
             proxyHost: profile.caddyProxyHost,
             listenHost: profile.caddyListenHost,
+            adminListenHost: profile.caddyAdminListenHost,
+            adminOrigin: `http://${localhostPort(caddyAdminPort)}`,
         });
     }
 
     static dockerArgs(config: string, dataDir: string, profile: SharedServiceProfile, options: { disableLabel?: boolean } = {}): string[] {
         if (profile.caddyRunMode === SharedServiceCaddyRunMode.Bridge) {
-            return ['run', '-d', '--name', CaddyService.container, '-p', localhostPortMapping(profile.caddyHttpHostPort, profile.caddyHttpListenPort), '-p', localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
+            return ['run', '-d', '--name', CaddyService.container, '-p', localhostPortMapping(profile.caddyHttpHostPort, profile.caddyHttpListenPort), '-p', localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort), '-p', localhostPortMapping(caddyAdminPort, caddyAdminPort), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
         }
         return ['run', '-d', '--name', CaddyService.container, '--network', 'host', ...(options.disableLabel ? ['--security-opt', 'label=disable'] : []), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
     }

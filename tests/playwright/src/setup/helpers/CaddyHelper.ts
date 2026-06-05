@@ -1,84 +1,137 @@
 import { exec as execCallback } from 'node:child_process';
 import { promisify } from 'node:util';
+import { buildSharedServiceProfile, CaddyService, caddyAdminPort, createContext, getContainerRuntime, localIpv4Host, pruneStaleRouteManifests, removeRouteManifestsByKind, type RouteManifest, writeRouteManifest } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 import { ProcessInfo } from './ProcessInfo.js';
 import { STChildProcess } from './STChildProcess.js';
 
 const exec = promisify(execCallback);
 
+type CaddyRuntime = {
+    adminUrl: string;
+    adminListen: string;
+    httpListen: string;
+    httpsListen: string;
+    proxyHost: string;
+};
+
 export class CaddyHelper {
-    private cadyUrl = 'http://localhost:2019';
+    private caddyRuntime: CaddyRuntime | undefined;
     private serverName = 'stamhoofd';
 
     async isRunning() {
-        const result = await exec(
-            'pgrep -x caddy > /dev/null && echo "true" || echo "false"',
-        );
-        return result.stdout.trim() === 'true';
+        const runtime = await this.getRunningRuntime();
+        if (runtime) {
+            this.caddyRuntime = runtime;
+            return true;
+        }
+        return false;
     }
 
-    async configure() {
+    async configure(workerCount: number) {
+        this.caddyRuntime ??= await this.getRunningRuntime();
+        if (!this.caddyRuntime) {
+            throw new Error('Shared Caddy admin endpoint is not reachable. Run `yarn stam services up` first.');
+        }
+
+        if (!ProcessInfo.didStartCaddy) {
+            await this.configureSharedCaddy(workerCount);
+            return;
+        }
+
         // post the initial config
         console.log('Start posting caddy config...');
-        await this.postConfig(CaddyConfigHelper.createDefault());
+        await this.postConfig(CaddyConfigHelper.createDefault({
+            adminListen: this.caddyRuntime.adminListen,
+            adminOrigin: this.caddyRuntime.adminUrl,
+            httpListen: this.caddyRuntime.httpListen,
+            httpsListen: this.caddyRuntime.httpsListen,
+            proxyHost: this.caddyRuntime.proxyHost,
+        }));
         console.log('Done posting caddy config.');
     }
 
-    async start() {
-        // Run caddy
-        const childProcess = new STChildProcess('caddy', [
-            'run',
-        ]);
+    async cleanup() {
+        if (ProcessInfo.didStartCaddy) {
+            await this.stop();
+            return;
+        }
 
+        const context = await createContext({ env: 'stamhoofd', verbose: false });
+        await removeRouteManifestsByKind(context, 'playwright-worker');
+        await CaddyService.reload(context);
+    }
+
+    async start() {
+        if (process.env.CI !== 'true') {
+            throw new Error('Shared Caddy is not running. Run `yarn stam services up` first.');
+        }
+
+        const runtime = this.createHostCaddyRuntime();
+        const childProcess = new STChildProcess('caddy', ['run']);
+        childProcess.enableLog();
         ProcessInfo.flagCaddyStarted();
 
-        // wait until caddy is ready
-        await new Promise<void>((resolve) => {
-            let isStarted = false;
-            const onData = (data: any) => {
-                if (isStarted) {
-                    return;
-                }
-                const line = data.toString();
-                console.log('[Caddy]', line);
+        for (let i = 0; i < 60; i += 1) {
+            if (await this.canReachAdmin(runtime)) {
+                this.caddyRuntime = runtime;
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 250));
+        }
 
-                // Detect successful startup
-                if (line.includes('admin endpoint started')) {
-                    isStarted = true;
-                    resolve();
-
-                    // Remove listeners
-                    childProcess.offData(onData);
-                }
-            };
-
-            // log stderr until caddy is ready
-            childProcess.onData(onData);
-        });
+        throw new Error('Timed out waiting for CI Caddy admin endpoint to start.');
     }
 
     async stop() {
-        // Make sure to kill any running caddy processes
         try {
-            const cmd = 'brew services stop caddy';
-            await exec(cmd);
+            await exec('caddy stop');
         }
         catch (error) {
-            // ignore
-        }
-
-        // Make sure to kill any running caddy processes
-        try {
-            const cmd = 'caddy stop';
-            await exec(cmd);
-        }
-        catch (error) {
-            // ignore
+            // Ignore stop failures: Caddy may already have exited with the parent process.
         }
     }
 
+    private async configureSharedCaddy(workerCount: number) {
+        const context = await createContext({ env: 'stamhoofd', verbose: false });
+        await pruneStaleRouteManifests(context);
+        await removeRouteManifestsByKind(context, 'playwright-worker');
+
+        for (let workerId = 0; workerId < workerCount; workerId += 1) {
+            await writeRouteManifest(context, this.createWorkerManifest(workerId));
+        }
+
+        await CaddyService.reload(context);
+    }
+
+    private createWorkerManifest(workerId: number): RouteManifest {
+        const id = workerId.toString();
+        const dashboard = CaddyConfigHelper.getDomain('dashboard', id);
+        const registration = CaddyConfigHelper.getDomain('registration', id);
+        const webshop = CaddyConfigHelper.getDomain('webshop', id);
+        const api = CaddyConfigHelper.getDomain('api', id);
+        const routes = [
+            { hosts: [dashboard], port: CaddyConfigHelper.getFrontendPort('dashboard', id) },
+            { hosts: [registration], port: CaddyConfigHelper.getFrontendPort('registration', id) },
+            { hosts: [webshop], port: CaddyConfigHelper.getFrontendPort('webshop', id) },
+            { hosts: [api, `*.${api}`], port: CaddyConfigHelper.getPort('api', id) },
+        ];
+
+        return {
+            name: `playwright-worker-${id}`,
+            kind: 'playwright-worker',
+            pid: process.pid,
+            startedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+            rootPath: process.cwd(),
+            workspace: 'playwright',
+            routes,
+            tlsSubjects: [...new Set(routes.flatMap(route => route.hosts))],
+        };
+    }
+
     private async putRoute(route: any, index: number) {
-        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes/${index}`;
+        const url = `${this.getAdminUrl()}/config/apps/http/servers/${this.serverName}/routes/${index}`;
 
         try {
             await exec(
@@ -92,11 +145,11 @@ export class CaddyHelper {
     }
 
     private async postConfig(caddyConfig: any) {
-        const url = `${this.cadyUrl}/load`;
+        const url = `${this.getAdminUrl()}/load`;
 
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.getAdminHeaders(),
             body: JSON.stringify(caddyConfig),
         });
 
@@ -109,7 +162,7 @@ export class CaddyHelper {
     }
 
     private async postPolicySubjects(policySubjects: string[]) {
-        const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects/...`;
+        const url = `${this.getAdminUrl()}/config/apps/tls/automation/policies/0/subjects/...`;
 
         try {
             await exec(
@@ -123,22 +176,22 @@ export class CaddyHelper {
     }
 
     private async getPolicySubjects() {
-        const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects`;
-        const result = await fetch(url);
+        const url = `${this.getAdminUrl()}/config/apps/tls/automation/policies/0/subjects`;
+        const result = await fetch(url, { headers: this.getAdminHeaders() });
         const policySubjects: string[] = await result.json();
         return policySubjects;
     }
 
     private async getRoutes() {
-        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
-        const result = await fetch(url);
+        const url = `${this.getAdminUrl()}/config/apps/http/servers/${this.serverName}/routes`;
+        const result = await fetch(url, { headers: this.getAdminHeaders() });
         const routes: { group?: string; match?: any[] }[] = await result.json();
         return routes;
     }
 
     private async getConfig() {
-        const url = `${this.cadyUrl}/config`;
-        const result = await fetch(url);
+        const url = `${this.getAdminUrl()}/config`;
+        const result = await fetch(url, { headers: this.getAdminHeaders() });
         return await result.json();
     }
 
@@ -151,11 +204,11 @@ export class CaddyHelper {
         const routes = await this.getRoutes();
         const routesToKeep = routes.filter(r => !predicate(r));
 
-        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
+        const url = `${this.getAdminUrl()}/config/apps/http/servers/${this.serverName}/routes`;
 
         const res = await fetch(url, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.getAdminHeaders(),
             body: JSON.stringify(routesToKeep),
         });
 
@@ -171,11 +224,11 @@ export class CaddyHelper {
         const subjects = await this.getPolicySubjects();
         const subjectsToKeep = subjects.filter(s => !predicate(s));
 
-        const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects`;
+        const url = `${this.getAdminUrl()}/config/apps/tls/automation/policies/0/subjects`;
 
         const res = await fetch(url, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.getAdminHeaders(),
             body: JSON.stringify(subjectsToKeep),
         });
 
@@ -186,4 +239,70 @@ export class CaddyHelper {
             );
         }
     }
+
+    private getAdminUrl() {
+        if (!this.caddyRuntime) {
+            throw new Error('Caddy admin endpoint is not configured.');
+        }
+        return this.caddyRuntime.adminUrl;
+    }
+
+    private async getRunningRuntime() {
+        const sharedCaddyRuntime = await this.createSharedCaddyRuntime();
+        if (await this.canReachAdmin(sharedCaddyRuntime)) {
+            return sharedCaddyRuntime;
+        }
+        if (process.env.CI === 'true') {
+            const hostCaddyRuntime = this.createHostCaddyRuntime();
+            if (await this.canReachAdmin(hostCaddyRuntime)) {
+                return hostCaddyRuntime;
+            }
+        }
+        return undefined;
+    }
+
+    private async createSharedCaddyRuntime(): Promise<CaddyRuntime> {
+        const profile = buildSharedServiceProfile(await getContainerRuntime());
+        return {
+            adminUrl: `http://${localIpv4Host}:${caddyAdminPort}`,
+            adminListen: `${profile.caddyAdminListenHost}:${caddyAdminPort}`,
+            httpListen: `${profile.caddyListenHost}:${profile.caddyHttpListenPort}`,
+            httpsListen: `${profile.caddyListenHost}:${profile.caddyHttpsListenPort}`,
+            proxyHost: profile.caddyProxyHost,
+        };
+    }
+
+    private createHostCaddyRuntime(): CaddyRuntime {
+        return {
+            adminUrl: `http://${localIpv4Host}:${caddyAdminPort}`,
+            adminListen: `${localIpv4Host}:${caddyAdminPort}`,
+            httpListen: ':80',
+            httpsListen: ':443',
+            proxyHost: localIpv4Host,
+        };
+    }
+
+    private async canReachAdmin(runtime: CaddyRuntime) {
+        try {
+            const res = await fetch(`${runtime.adminUrl}/config`, {
+                headers: this.getAdminHeaders(runtime),
+                signal: AbortSignal.timeout(1_000),
+            });
+            return res.ok;
+        }
+        catch (error) {
+            return false;
+        }
+    }
+
+    private getAdminHeaders(runtime = this.caddyRuntime) {
+        if (!runtime) {
+            throw new Error('Caddy admin endpoint is not configured.');
+        }
+        return {
+            'Content-Type': 'application/json',
+            'Origin': runtime.adminUrl,
+        };
+    }
+
 }
