@@ -2,6 +2,7 @@ import { Migration } from '@simonbackx/simple-database';
 import { Member, mergeMultipleMembers } from '@stamhoofd/models';
 import type { SQLExpression } from '@stamhoofd/sql';
 import { scalarToSQLExpression, SQL, SQLAlias, SQLSelectAs, SQLWhereEqual, SQLWhereSign } from '@stamhoofd/sql';
+import { LoggingTools } from '../helpers/LoggingTools.js';
 
 // should be run before any migration where a member is saved
 export default new Migration(async () => {
@@ -40,6 +41,8 @@ async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolea
 
     const duplicateMembers = new Map<string, Member[]>();
 
+    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(Member.select());
+
     // loop all members
     for await (const member of Member.select().all()) {
         const memberNumber = member.details.memberNumber;
@@ -58,6 +61,7 @@ async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolea
                 if (!dryRun) {
                     await member.save();
                 }
+                progressLogger.update();
                 continue;
             }
 
@@ -68,6 +72,8 @@ async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolea
                 duplicateMembers.set(memberNumber, duplicates);
             }
         }
+
+        progressLogger.update();
     }
 
     // merge duplicate members
