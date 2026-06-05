@@ -284,9 +284,13 @@ export const RegistrationService = {
      * + in combination with validation and reading the webshop
      */
     scheduleStockUpdate(id: string) {
+        this.scheduleStockUpdateAsync(id);
+    },
+
+    async scheduleStockUpdateAsync(id: string) {
         QueueHandler.cancel('registration-stock-update-' + id);
 
-        AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             await QueueHandler.schedule('registration-stock-update-' + id, async function (this: undefined) {
                 const updated = await Registration.getByID(id);
 
