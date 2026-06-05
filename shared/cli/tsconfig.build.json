@@ -1,0 +1,20 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "rootDir": "src",
+        "outDir": "dist"
+    },
+    "include": [
+        "./src",
+        "../stamhoofd.d.ts"
+    ],
+    "references": [
+        {
+            "path": "../types/tsconfig.build.json"
+        }
+    ],
+    "exclude": [
+        "./src/**/*.spec.ts",
+        "./src/**/*.test.ts"
+    ]
+}

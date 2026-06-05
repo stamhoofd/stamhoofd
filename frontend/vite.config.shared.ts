@@ -29,8 +29,8 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
         }
         else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
             console.log('Building env for development...', process.env.NODE_ENV);
-            const builder = await import('@stamhoofd/build-development-env');
-            const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
+            const builder = await import('@stamhoofd/cli');
+            const builtEnv = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
                 frontend: options.name,
             });
             console.log('Built env for development.', process.env.NODE_ENV);
@@ -114,8 +114,8 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     warmup: {
                         clientFiles: [
                             ...(options?.clientFiles ?? []),
-                            resolve(import.meta.dirname, './shared') + '/**/*.vue',
-                            resolve(import.meta.dirname, './shared') + '/**/*.ts',
+                            resolve(import.meta.dirname, './shared') + '/*/index.ts',
+                            resolve(import.meta.dirname, './shared') + '/*/src/**/*.vue',
                         ],
                     },
                 }

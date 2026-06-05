@@ -1,4 +1,4 @@
-import { getProjectPath } from '@stamhoofd/build-development-env';
+import { getProjectPath } from '@stamhoofd/cli';
 import { cp, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
@@ -61,7 +61,7 @@ export class FrontendService implements ServiceHelper {
     }
 
     private async getProjectDistPath() {
-        const thisDirectoryToRoot = await getProjectPath()
+        const thisDirectoryToRoot = getProjectPath();
         const pathFromRoot = 'frontend/app';
         const distFolder = 'dist-playwright';
         const sourcePath = `${thisDirectoryToRoot}${pathFromRoot}/${this.name}/${distFolder}`;

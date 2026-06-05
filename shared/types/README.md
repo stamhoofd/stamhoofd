@@ -4,7 +4,7 @@ Enums and constants that are shared across the entire monorepo, including the gl
 
 ## Why does this package exist?
 
-The global environment (`STAMHOOFD`) is typed using declarations in `stamhoofd.d.ts`. Those declarations sometimes reference enums — for example, `MEMBER_NUMBER_ALGORITHM` is typed as `MemberNumberAlgorithm`. That enum needs to be defined somewhere that produces real JavaScript at runtime, not just types.
+The global environment (`STAMHOOFD`) is typed using declarations in `stamhoofd.d.ts`. Those declarations sometimes reference enums — for example, `MEMBER_NUMBER_ALGORITHM` is typed as `MemberNumberAlgorithm`. That enum needs to be defined somewhere that produces real JavaScript at runtime, not only types.
 
 The natural place would be `@stamhoofd/structures`, but `stamhoofd.d.ts` is included by packages that `@stamhoofd/structures` itself depends on. Importing from `@stamhoofd/structures` there would create a circular dependency.
 

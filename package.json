@@ -19,18 +19,20 @@
   },
   "license": "AGPL-3.0-only",
   "scripts": {
+    "stam": "exec node shared/cli/bin/stam.js",
+    "stam-dev": "yarn --cwd shared/cli -s build && node shared/cli/bin/stam.js",
     "dev:build": "yarn -s build:shared && STAMHOOFD_ENV=stamhoofd lerna run dev:build",
-    "dev:watch-env": "npx nodemon --quiet --signal SIGTERM --watch shared/build-development-env --ignore './shared/build-development-env/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s dev || exit 0'",
-    "dev:watch-env:full": "npx nodemon --quiet --signal SIGTERM --watch shared/build-development-env --ignore './shared/build-development-env/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s dev:full || exit 0'",
-    "dev": "concurrently -r 'yarn -s dev:init' 'yarn -s build:shared:watch' 'wait-on shared/locales/dist/index.d.ts && lerna run dev --ignore @stamhoofd/calculator --stream --parallel'",
-    "dev:full": "concurrently -r 'yarn -s dev:init' 'yarn -s build:shared:watch' 'wait-on shared/locales/dist/index.d.ts && lerna run dev:full --stream --parallel'",
-    "dev:stamhoofd": "STAMHOOFD_ENV=stamhoofd yarn -s dev:watch-env",
-    "dev:stamhoofd:full": "STAMHOOFD_ENV=stamhoofd yarn -s dev:watch-env:full",
-    "dev:keeo": "STAMHOOFD_ENV=keeo yarn -s dev:watch-env",
-    "dev:keeo:full": "STAMHOOFD_ENV=keeo yarn -s dev:watch-env:full",
-    "dev:ravot": "STAMHOOFD_ENV=ravot yarn -s dev:watch-env",
-    "dev:jambo": "STAMHOOFD_ENV=jambo yarn -s dev:watch-env",
-    "dev:init": "wait-on shared/build-development-env/dist/init.js && node shared/build-development-env/dist/init.js",
+    "dev:watch-env": "yarn -s stam dev all",
+    "dev:watch-env:full": "yarn -s stam dev all",
+    "dev": "yarn -s stam dev all",
+    "dev:full": "yarn -s stam dev all",
+    "dev:stamhoofd": "yarn -s stam dev all --env stamhoofd",
+    "dev:stamhoofd:full": "yarn -s stam dev all --env stamhoofd",
+    "dev:keeo": "yarn -s stam dev all --env keeo",
+    "dev:keeo:full": "yarn -s stam dev all --env keeo",
+    "dev:ravot": "yarn -s stam dev all --env ravot",
+    "dev:jambo": "yarn -s stam dev all --env jambo",
+    "dev:init": "yarn -s stam setup check",
     "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
     "test": "lerna run test --ignore @stamhoofd/playwright",
     "test:playwright": "yarn -s build:shared && cd backend/app/api && yarn build:playwright:pre && cd ../../.. && cd tests/playwright && yarn -s test",
@@ -42,7 +44,7 @@
     "build:shared": "yarn -s build:global:shared && yarn -s build:backend:shared",
     "build:shared:watch": "npx nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s build:shared || exit 0'",
     "clear:global:shared": "bash -c 'shopt -s nullglob && rm -rf shared/*/dist && rm -rf shared/*/*.tsbuildinfo'",
-    "build:global:shared": "echo '\\033[35m[BUILD]\\033[0m Building globally shared dependencies...' && cd shared/types && yarn -s build && cd ../test-utils && yarn -s build && cd ../utility && yarn -s build && cd ../build-development-env && yarn -s build && cd ../excel-writer && yarn -s build && cd ../structures && yarn -s build && cd ../object-differ && yarn -s build && cd ../locales && yarn -s build && cd ../.. && echo '\\033[35m[BUILD]\\033[0m Done building globally shared dependencies.'",
+    "build:global:shared": "echo '\\033[35m[BUILD]\\033[0m Building globally shared dependencies...' && cd shared/types && yarn -s build && cd ../test-utils && yarn -s build && cd ../utility && yarn -s build && cd ../cli && yarn -s build && cd ../excel-writer && yarn -s build && cd ../structures && yarn -s build && cd ../object-differ && yarn -s build && cd ../locales && yarn -s build && cd ../.. && echo '\\033[35m[BUILD]\\033[0m Done building globally shared dependencies.'",
     "clear:backend:shared": "bash -c 'shopt -s nullglob && rm -rf backend/shared/*/dist && rm -rf backend/shared/*/*.tsbuildinfo'",
     "build:backend:shared": "echo '\\033[35m[BUILD]\\033[0m Building shared backend dependencies...' && cd backend/shared/queues && yarn -s build && cd ../env && yarn -s build && cd ../i18n && yarn -s build && cd ../sql && yarn -s build && cd ../email && yarn -s build && cd ../models && yarn -s build && cd ../logging && yarn -s build && cd ../crons && yarn -s build && cd ../middleware && yarn -s build  && cd ../.. && echo '\\033[35m[BUILD]\\033[0m Done building backend shared dependencies.'",
     "clear": "bash -c 'shopt -s nullglob && rm -rf tests/*/*.tsbuildinfo && rm -rf tests/*/dist && rm -rf shared/*/dist frontend/app/*/dist frontend/app/*/dist-playwright backend/shared/*/dist backend/app/*/dist && rm -rf shared/*/*.tsbuildinfo frontend/app/*/*.tsbuildinfo backend/shared/*/*.tsbuildinfo backend/app/*/*.tsbuildinfo'",
@@ -90,6 +92,8 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "@stylistic/eslint-plugin": "^2.8.0",
     "@testing-library/dom": "^10.4.0",
     "@types/eslint__js": "^8.42.3",
     "@types/file-saver": "^2.0.5",
@@ -111,7 +115,7 @@
     "terser": "^5.43.1",
     "typescript": "5.8.3",
     "vite": "^7.0.0",
-    "vite-svg-2-webfont": "^4.0.0",
+    "vite-svg-2-webfont": "^7.0.1",
     "vitest": "^3.2.4",
     "vitest-browser-vue": "^1.0.0",
     "vue-tsc": "2.2.10",
@@ -133,3 +137,4 @@
     "pacote": "^21.0.1"
   }
 }
+
