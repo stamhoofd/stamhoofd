@@ -2,23 +2,30 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import type { SQLSelect } from '@stamhoofd/sql';
 
 export class LoggingTools {
-    static createProgressLogger(total: number) {
-        return new ProgressLogger(total);
+    static createProgressLogger(total: number, options?: ProgressLoggerOptions) {
+        return new ProgressLogger(total, options);
     }
 
-    static async createProgressLoggerFromQuery<T extends object = SQLResultNamespacedRow>(query: SQLSelect<T>) {
+    static async createProgressLoggerFromQuery<T extends object = SQLResultNamespacedRow>(query: SQLSelect<T>, options?: ProgressLoggerOptions) {
         const total = await query.count();
-        return this.createProgressLogger(total);
+        return this.createProgressLogger(total, options);
     }
 }
+
+export type ProgressLoggerOptions = {
+    tag?: string;
+};
 
 export class ProgressLogger {
     private progress = 0;
     private progressedLogged = 0;
     private readonly onePercent: number;
+    private readonly prefix: string;
 
-    constructor(readonly total: number) {
+    constructor(readonly total: number, { tag }: ProgressLoggerOptions = {}) {
         this.onePercent = Math.floor(total / 100);
+        this.prefix = tag ? `[${tag}] progress` : 'Progress';
+
         if (total === 0) {
             this.writeOutput(this.formatProgress(100), false);
         } else {
@@ -43,7 +50,7 @@ export class ProgressLogger {
     }
 
     private formatProgress(progress: number) {
-        return `Progress: ${progress}%`;
+        return `${this.prefix}: ${progress}%`;
     }
 
     private writeOutput(text: string, replaceLine = false) {

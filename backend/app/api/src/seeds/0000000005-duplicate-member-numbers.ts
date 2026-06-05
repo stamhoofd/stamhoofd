@@ -3,6 +3,7 @@ import { Member, mergeMultipleMembers } from '@stamhoofd/models';
 import type { SQLExpression } from '@stamhoofd/sql';
 import { scalarToSQLExpression, SQL, SQLAlias, SQLSelectAs, SQLWhereEqual, SQLWhereSign } from '@stamhoofd/sql';
 import { LoggingTools } from '../helpers/LoggingTools.js';
+import { SeedTools } from '../helpers/SeedTools.js';
 
 // should be run before any migration where a member is saved
 export default new Migration(async () => {
@@ -40,63 +41,76 @@ async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolea
     const testRemoved = new Set<string>();
 
     const duplicateMembers = new Map<string, Member[]>();
+    const memberBatchProcessor = SeedTools.createBatchProcessor({
+        batchSize: 1000,
+        action: async (member: Member) => {
+            const memberNumber = member.details.memberNumber;
 
-    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(Member.select());
+            if (memberNumber !== null) {
+            // only remove if duplicate
+                if (invalidNumbers.has(memberNumber)) {
+                    if (doLog) {
+                        testRemoved.add(memberNumber);
+                    // console.log(`Remove invalid member number: ${memberNumber} (memberId: ${member.id})`);
+                    }
+
+                    // remove number
+                    member.details.memberNumber = null;
+                    member.memberNumber = null;
+                    if (!dryRun) {
+                        await member.save();
+                    }
+                    return;
+                }
+
+                if (validNumbers.has(memberNumber)) {
+                // add to duplicate members
+                    const duplicates = duplicateMembers.get(memberNumber) ?? [];
+                    duplicates.push(member);
+                    duplicateMembers.set(memberNumber, duplicates);
+                }
+            }
+        },
+    });
+
+    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(Member.select(), { tag: 'Remove' });
+    memberBatchProcessor.setProgressLogger(progressLogger);
 
     // loop all members
     for await (const member of Member.select().all()) {
-        const memberNumber = member.details.memberNumber;
-
-        if (memberNumber !== null) {
-            // only remove if duplicate
-            if (invalidNumbers.has(memberNumber)) {
-                if (doLog) {
-                    testRemoved.add(memberNumber);
-                    // console.log(`Remove invalid member number: ${memberNumber} (memberId: ${member.id})`);
-                }
-
-                // remove number
-                member.details.memberNumber = null;
-                member.memberNumber = null;
-                if (!dryRun) {
-                    await member.save();
-                }
-                progressLogger.update();
-                continue;
-            }
-
-            if (validNumbers.has(memberNumber)) {
-                // add to duplicate members
-                const duplicates = duplicateMembers.get(memberNumber) ?? [];
-                duplicates.push(member);
-                duplicateMembers.set(memberNumber, duplicates);
-            }
-        }
-
-        progressLogger.update();
+        await memberBatchProcessor.execute(member);
     }
 
+    const mergeBatchProcessor = SeedTools.createBatchProcessor({
+        batchSize: 100,
+        action: async ([number, members]: [string, Member[]]) => {
+            if (members.length < 2) {
+                return;
+            }
+
+            const areSame = areSameMembers(members);
+            if (areSame) {
+                if (doLog) {
+                    console.log(`Merge duplicate member number: ${number} (memberIds: ${members.map(m => m.id).join(', ')})`);
+                }
+                if (!dryRun) {
+                    await mergeMultipleMembers(members);
+                }
+            } else {
+                if (doLog) {
+                    console.log('Duplicate member numbers are not the same: ' + members.map(m => m.details.name).join(', '));
+                }
+
+                await removeMemberNumbersOfNotRecentUpdatedMembers(members, { doLog, dryRun });
+            }
+        },
+    });
+
+    mergeBatchProcessor.setProgressLogger(LoggingTools.createProgressLogger(duplicateMembers.size, { tag: 'Merge' }));
+
     // merge duplicate members
-    for (const [number, members] of duplicateMembers) {
-        if (members.length < 2) {
-            continue;
-        }
-
-        const areSame = areSameMembers(members);
-        if (areSame) {
-            if (doLog) {
-                console.log(`Merge duplicate member number: ${number} (memberIds: ${members.map(m => m.id).join(', ')})`);
-            }
-            if (!dryRun) {
-                await mergeMultipleMembers(members);
-            }
-        } else {
-            if (doLog) {
-                console.log('Duplicate member numbers are not the same: ' + members.map(m => m.details.name).join(', '));
-            }
-
-            await removeMemberNumbersOfNotRecentUpdatedMembers(members, { doLog, dryRun });
-        }
+    for (const entry of duplicateMembers) {
+        await mergeBatchProcessor.execute(entry);
     }
 
     // check if there are still duplicate member numbers
