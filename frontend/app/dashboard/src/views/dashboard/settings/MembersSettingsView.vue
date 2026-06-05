@@ -174,7 +174,7 @@
                 <h2>{{ $t('Acties') }}</h2>
 
                 <STList>
-                    <STListItem v-copyable="organization.registerUrl" :selectable="true" class="left-center" @click="$navigate(Routes.MembersImport)">
+                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.MembersImport)">
                         <template #left>
                             <IconContainer icon="upload" />
                         </template>
