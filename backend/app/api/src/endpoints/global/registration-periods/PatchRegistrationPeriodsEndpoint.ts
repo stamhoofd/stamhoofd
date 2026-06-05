@@ -5,7 +5,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Group, Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Context } from '../../../helpers/Context.js';
 import { PeriodHelper } from '../../../helpers/PeriodHelper.js';
 
@@ -171,6 +171,8 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             // Schedule patch of all groups in this period
             PeriodHelper.updateGroupsInPeriod(model).catch(console.error);
+
+            periods.push(model)
         }
 
         for (const id of request.body.getDeletes()) {
@@ -183,6 +185,13 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     message: 'Registration period not found',
                 });
             }
+
+            // Delete all groups in this period
+            const q = Group.delete().where('periodId', model.id);
+            if (organization) {
+                q.where('organizationId', organization.id);
+            }
+            await q;
 
             // Now delete the model
             await model.delete();
