@@ -15,6 +15,11 @@
     --st-hr-margin: 20px;
 
     --st-list-padding: 12px;
+    --st-grid-horizontal-gap: 12px;
+
+    @media (max-width: 500px) {
+        --st-grid-horizontal-gap: 8px;
+    }
 
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};

@@ -1,12 +1,16 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
+import { usePlatform } from '@stamhoofd/components/hooks/usePlatform';
 import { LimitedFilteredRequest, PaginatedResponseDecoder, RegistrationPeriod, SortItemDirection } from '@stamhoofd/structures';
 import { useRequestOwner } from './useRequestOwner';
 
 export function useFetchRegistrationPeriods() {
     const context = useContext();
     const owner = useRequestOwner();
+    const organization = useOrganization();
+    const platform = usePlatform();
 
     return async function ({ shouldRetry }: { shouldRetry?: boolean }) {
         // Load last 5 years
@@ -47,6 +51,22 @@ export function useFetchRegistrationPeriods() {
             owner,
             shouldRetry,
         });
+
+        if (organization.value) {
+            for (const period of periodsResponse.data.results) {
+                if (period.id === organization.value.period.period.id) {
+                    organization.value.period.period.deepSet(period);
+                }
+            }
+        }
+
+        if (platform.value) {
+            for (const period of periodsResponse.data.results) {
+                if (period.id === platform.value.period.id) {
+                    platform.value.period.deepSet(period);
+                }
+            }
+        }
 
         return periodsResponse.data.results;
     };

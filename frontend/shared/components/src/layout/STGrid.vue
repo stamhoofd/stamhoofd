@@ -32,5 +32,9 @@
         margin-top: 15px;
     }
 
+    &.split {
+        grid-template-columns: [start] var(--st-horizontal-padding, 40px) auto [line-start] 1fr auto 1fr var(--st-horizontal-padding, 40px) [end line-end];
+    }
+
 }
 </style>

@@ -47,52 +47,54 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
-import { Toast } from '#overlays/Toast.ts';
-import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
+import { useContext } from '#hooks/useContext.ts';
+import { useRequiredOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePatchArray } from '#hooks/usePatchArray.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { useRequiredOrganization } from '#hooks/useOrganization.ts';
-import { useOrganizationManager } from '@stamhoofd/networking/OrganizationManager';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
+import { Toast } from '#overlays/Toast.ts';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { usePlatformManager } from '@stamhoofd/networking/PlatformManager';
+import { clearOrganizationPeriodsCache } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods';
+import { useFetchRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchRegistrationPeriods';
 import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
 import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { useAppContext } from '../context';
 import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
 import RegistrationPeriodRow from './RegistrationPeriodRow.vue';
 
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
+const app = useAppContext();
 
-const isPlatform = STAMHOOFD.userMode === 'platform';
+const isPlatform = app === 'admin';
 
 const context = useContext();
 const platform = usePlatform();
 const platformManager = usePlatformManager();
 const organization = isPlatform ? ref(Organization.create({})) as unknown as Ref<Organization> : useRequiredOrganization();
-const organizationManager = useOrganizationManager();
 
 const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
 const loading = ref(true);
 const owner = useRequestOwner();
+const loadPeriods = useFetchRegistrationPeriods();
 
 loadData().catch(console.error);
 
 const { patched, patch, addArrayPatch, hasChanges: hasChangesPeriods } = usePatchArray(originalPeriods);
 const { patched: patchedPlatform, patch: platformPatch, addPatch: addPlatformPatch, hasChanges: hasChangesPlatform } = usePatch(platform);
-const { patched: patchedOrganization, patch: organizationPatch, addPatch: addOrganizationPatch, hasChanges: hasChangesOrganization } = usePatch(organization);
 
 const hasChanges = computed(() => {
-    return hasChangesPeriods.value || (isPlatform && hasChangesPlatform.value) || (!isPlatform && hasChangesOrganization.value);
+    return hasChangesPeriods.value || (isPlatform && hasChangesPlatform.value);
 });
 
 const saving = ref(false);
@@ -101,7 +103,7 @@ const sortedPeriods = computed(() => {
     return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime());
 });
 
-const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : patchedOrganization.value.period.period);
+const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : organization.value.period.period);
 
 const title = computed(() => $t('%3i'));
 
@@ -182,8 +184,10 @@ async function save() {
             return;
         }
 
+        let changedPeriods: RegistrationPeriod[] = [];
+
         if (hasChangesPeriods.value) {
-            await context.value.authenticatedServer.request({
+            const response = await context.value.authenticatedServer.request({
                 method: 'PATCH',
                 body: patch.value,
                 path: '/registration-periods',
@@ -191,6 +195,8 @@ async function save() {
                 owner,
                 shouldRetry: false,
             });
+            changedPeriods = response.data;
+            clearOrganizationPeriodsCache();
         }
 
         if (isPlatform) {
@@ -205,19 +211,20 @@ async function save() {
             if (changedPeriod) {
                 new Toast($t('%8P'), 'info').setHide(20 * 1000).show();
             }
-        }
-        else {
-            const changedPeriod = hasChangesOrganization.value;
-            if (changedPeriod) {
-                await organizationManager.value.patch(organizationPatch.value, { owner, shouldRetry: false });
+        } else {
+            console.error('Changed periods', changedPeriods);
+            for (const period of changedPeriods) {
+                if (period.id === organization.value!.period.period.id) {
+                    console.error('did set organization!!!!!!!!!!!!!!');
+                    organization.value.period.period.deepSet(period);
+                }
             }
 
             new Toast($t(`%HA`), 'success green').show();
         }
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -234,10 +241,9 @@ async function loadData() {
     loading.value = true;
 
     try {
-        originalPeriods.value = await platformManager.value.loadPeriods(true, true, owner);
+        originalPeriods.value = await loadPeriods({ shouldRetry: true });
         loading.value = false;
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
         await pop({ force: true });
         return;

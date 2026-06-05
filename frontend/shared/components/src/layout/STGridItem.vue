@@ -59,7 +59,7 @@ const hoverable = computed(() => dynamicElementName.value === 'button' || dynami
 const root = useTemplateRef<HTMLElement>('root');
 
 const rightClickable = computed(
-  () => !!getCurrentInstance()?.vnode.props?.onContextmenu
+    () => !!getCurrentInstance()?.vnode.props?.onContextmenu,
 );
 
 function onContext(event: MouseEvent) {
@@ -72,7 +72,7 @@ function onContext(event: MouseEvent) {
         }, 250);
     }
 
-    emit('contextmenu', event)
+    emit('contextmenu', event);
 }
 
 </script>
@@ -116,13 +116,13 @@ button.st-grid-item {
     > .left {
         grid-row: 1;
         grid-column: 2;
-        padding-right: 15px;
+        padding-right: var(--st-grid-horizontal-gap, 15px);
     }
 
     > .middle {
         grid-row: 1;
         grid-column: 3;
-        padding-right: 15px;
+        padding-right:  var(--st-grid-horizontal-gap, 15px);;
 
         > .option {
             margin-top: 7px
@@ -132,7 +132,7 @@ button.st-grid-item {
     > .middle-right {
         grid-row: 1;
         grid-column: 4;
-        padding-right: 15px;
+        padding-right:  var(--st-grid-horizontal-gap, 15px);;
 
         > .style-price-base {
             text-align: right;
@@ -185,7 +185,7 @@ button.st-grid-item {
         margin-bottom: calc(-1 * var(--st-list-padding, 15px));
     }
 
-    &:last-child {
+    &:last-child, &.no-border {
         > .line {
             display: none;
         }

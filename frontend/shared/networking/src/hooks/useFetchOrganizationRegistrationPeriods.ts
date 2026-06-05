@@ -10,10 +10,14 @@ import { reactive } from 'vue';
 
 const periodsCache = new Map<string, RegistrationPeriodList>();
 
+export function clearOrganizationPeriodsCache() {
+    periodsCache.clear();
+}
+
 export function useFetchOrganizationRegistrationPeriods() {
     const context = useContext();
     const owner = useRequestOwner();
-    const fetchPeriod = useFetchRegistrationPeriods();
+    const fetchPeriods = useFetchRegistrationPeriods();
     const organization = useRequiredOrganization();
 
     return async function ({ shouldRetry, force }: { shouldRetry?: boolean; force?: boolean }) {
@@ -23,7 +27,7 @@ export function useFetchOrganizationRegistrationPeriods() {
         }
 
         // Request data
-        const periods = await fetchPeriod({ shouldRetry });
+        const periods = await fetchPeriods({ shouldRetry });
 
         let organizationPeriods: OrganizationRegistrationPeriod[] = [];
 
@@ -53,6 +57,12 @@ export function useFetchOrganizationRegistrationPeriods() {
                 shouldRetry,
             });
             organizationPeriods = response.data.results;
+
+            for (const period of organizationPeriods) {
+                if (period.id === organization.value.period.id) {
+                    organization.value.period.deepSet(period);
+                }
+            }
         }
 
         organizationPeriods.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate));

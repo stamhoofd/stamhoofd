@@ -48,19 +48,17 @@
 
 <script setup lang="ts">
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, ContextMenu, ContextMenuItem, EditRegistrationPeriodsView, Toast, useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components';
-import CommunicationView from '@stamhoofd/components/communication/CommunicationView.vue';
+import { ComponentWithProperties, defineRoute, defineRoutes, SplitViewController, useCheckRoute, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent, ContextMenu, ContextMenuItem, EditRegistrationPeriodsView, StartNewRegistrationPeriodView, Toast, useFeatureFlag, useSetFeatureFlag } from '@stamhoofd/components';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import MembersTableView from '@stamhoofd/components/members/MembersTableView.vue';
 import { useFetchOrganizationRegistrationPeriods } from '@stamhoofd/networking/hooks/useFetchOrganizationRegistrationPeriods.ts';
-import type { OrganizationRegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
+import type { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from '@stamhoofd/structures/RegistrationPeriod.js';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import GroupTrashView from '../dashboard/groups/GroupTrashView.vue';
-import MembersChecklistView from '../dashboard/settings/MembersChecklistView.vue';
 import MembersSettingsView from '../dashboard/settings/MembersSettingsView.vue';
 import { useCreateCategoryView } from '../dashboard/settings/hooks/useCreateCategoryView';
 import { useCreateGroupView } from '../dashboard/settings/hooks/useCreateGroupView';
@@ -88,6 +86,12 @@ const tree = computed(() => {
 
 const organization = useRequiredOrganization();
 const navigationController = useNavigationController();
+const hasFeature = useFeatureFlag();
+const setFeature = useSetFeatureFlag();
+
+const createCategoryView = useCreateCategoryView();
+const createGroupView = useCreateGroupView();
+const rootCategory = computed(() => period.value.settings.rootCategory);
 
 const showAll = computed(() => {
     return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1;
@@ -180,7 +184,7 @@ defineRoutes([
                 period: props.period, // don't pass period.value here
             };
         },
-        isDefault: hasFullAccess.value
+        isDefault: hasFullAccess.value && !props.period && STAMHOOFD.userMode === 'organization' && !hasFeature('disabled-members-onboarding')
             ? { }
             : undefined,
     },
@@ -237,6 +241,30 @@ defineRoutes([
 
 const checkRoute = useCheckRoute();
 const fetchPeriods = useFetchOrganizationRegistrationPeriods();
+const present = usePresent();
+
+async function startPeriod(p: RegistrationPeriod) {
+    await present({
+        components: [
+            new ComponentWithProperties(StartNewRegistrationPeriodView, {
+                period: p,
+                callback: async () => {
+                    const newList = await fetchPeriods({ shouldRetry: false, force: true });
+                    const organizationPeriod = newList.organizationPeriods.find(o => o.period.id === p.id);
+
+                    if (organizationPeriod) {
+                        await $navigate(Routes.Period, {
+                            properties: {
+                                period: organizationPeriod,
+                            },
+                        });
+                    }
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 async function switchPeriod(event: MouseEvent) {
     let periods: RegistrationPeriodList;
@@ -248,23 +276,29 @@ async function switchPeriod(event: MouseEvent) {
     }
 
     const menu = new ContextMenu([
-        periods.organizationPeriods.map((p) => {
+        periods.periods.map((p) => {
             return new ContextMenuItem({
-                name: p.period.name,
-                disabled: p.period.id === period.value.id,
+                name: p.name,
+                disabled: p.id === period.value.period.id,
                 action: async () => {
-                    await $navigate(Routes.Period, {
-                        properties: {
-                            period: p,
-                        },
-                    });
+                    const existing = periods.organizationPeriods.find(pp => pp.period.id === p.id);
+                    if (existing) {
+                        await $navigate(Routes.Period, {
+                            properties: {
+                                period: existing,
+                            },
+                        });
+                        return true;
+                    }
+                    await startPeriod(p);
                     return true;
                 },
             });
         }),
+
         [
             new ContextMenuItem({
-                name: 'Werkjaren beheren',
+                name: $t('Werkjaren beheren'),
                 icon: 'settings',
                 action: async () => {
                     await $navigate(Routes.OrganizationRegistrationPeriods);
@@ -325,48 +359,38 @@ type Action = {
     }
 );
 
-const hasFeature = useFeatureFlag();
-const setFeature = useSetFeatureFlag();
-
-const createCategoryView = useCreateCategoryView();
-const createGroupView = useCreateGroupView();
-const rootCategory = computed(() => period.value.settings.rootCategory);
-
 const allActions = computed(() => {
     const list: Action[] = [];
 
-    // Default period
-
-    // Checklist
-    if (STAMHOOFD.userMode === 'organization') {
-        list.push({
-            icon: 'success',
-            title: $t('Aan de slag'),
-            route: Routes.Settings,
-            rightText: '1 / 5',
-            hidden: !!props.period || hasFeature('disabled-members-onboarding'),
-            buttons: props.period && !hasFeature('disabled-members-onboarding')
-                ? [
-                        new ActionButton({
-                            icon: 'close',
-                            title: $t('Verbergen'),
-                            action: async () => {
-                                await setFeature('disabled-members-onboarding', true);
-                            },
-                        }),
-                    ]
-                : [],
-        });
-    }
-
-    list.push({
-        icon: 'settings',
-        title: $t('Ledenadministratie instellingen'),
-        route: Routes.Settings,
-        hidden: true,
-    });
-
     if (auth.hasFullAccess()) {
+        // Checklist
+        if (STAMHOOFD.userMode === 'organization' && !props.period) {
+            list.push({
+                icon: 'success',
+                title: $t('Aan de slag'),
+                route: Routes.Settings,
+                rightText: '1 / 5',
+                hidden: hasFeature('disabled-members-onboarding'),
+                buttons: !hasFeature('disabled-members-onboarding')
+                    ? [
+                            new ActionButton({
+                                icon: 'close',
+                                title: $t('Verbergen'),
+                                action: async () => {
+                                    await setFeature('disabled-members-onboarding', true);
+                                },
+                            }),
+                        ]
+                    : [],
+            });
+        }
+
+        list.push({
+            icon: 'settings',
+            title: $t('Ledenadministratie instellingen'),
+            route: Routes.Settings,
+            hidden: true,
+        });
         list.push({
             icon: 'team',
             title: $t('Alle leden'),
