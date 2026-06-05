@@ -220,6 +220,10 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
     );
 
     return {
+        admin: {
+            listen: '0.0.0.0:2019',
+            enforce_origin: false,
+        },
         apps: {
             http: {
                 servers: {

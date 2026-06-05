@@ -96,7 +96,7 @@ export class CaddyHelper {
 
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Origin': 'http://0.0.0.0:2019' },
             body: JSON.stringify(caddyConfig),
         });
 
