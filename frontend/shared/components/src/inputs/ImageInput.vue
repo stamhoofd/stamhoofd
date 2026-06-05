@@ -7,154 +7,135 @@
             <Spinner v-if="uploading" />
             <img v-else-if="modelValue === null && placeholder" :src="placeholderSrc" :width="placeholderShownResolution.width" :height="placeholderShownResolution.height">
             <span v-else-if="modelValue === null" class="icon upload" />
-            <img v-else :src="src" :width="shownResolution.width" :height="shownResolution.height">
+            <img v-else :src="src" :width="shownResolution!.width" :height="shownResolution!.height">
             <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
         </label>
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import type { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
+import { useRequestOwner } from '@stamhoofd/networking/hooks/useRequestOwner';
+import { computed, ref } from 'vue';
 
+import { useContext } from '#hooks/useContext.ts';
 import { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
 import Spinner from '../Spinner.vue';
 import STInputBox from './STInputBox.vue';
 
-@Component({
-    components: {
-        Spinner,
-        STInputBox,
+const props = withDefaults(
+    defineProps<{
+        title?: string;
+        validator?: Validator | null;
+        resolutions?: ResolutionRequest[] | null;
+        placeholder?: Image | null;
+        required?: boolean;
+        dark?: boolean;
+        isPrivate?: boolean;
+    }>(), {
+        title: '',
+        validator: null,
+        resolutions: null,
+        placeholder: null,
+        required: true,
+        dark: false,
+        isPrivate: false,
     },
-    emits: ['update:modelValue'],
-})
-export default class ImageInput extends Mixins(NavigationMixin) {
-    @Prop({ default: '' })
-    title: string;
+);
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const modelValue = defineModel<Image | null>({ default: null });
 
-    @Prop({ default: null })
-    resolutions: ResolutionRequest[] | null;
+const context = useContext();
+const owner = useRequestOwner();
 
-    @Prop({ default: null })
-    modelValue: Image | null;
+const errorBox = ref<ErrorBox | null>(null);
+const uploading = ref(false);
 
-    @Prop({ default: null })
-    placeholder: Image | null;
+const isSquare = computed(() => {
+    if (props.resolutions === null) {
+        return false;
+    }
+    return !!props.resolutions.find(r => r.width === r.height && r.width);
+});
 
-    @Prop({ default: true })
-    required!: boolean;
+const shownResolution = computed(() => modelValue.value?.getResolutionForSize(undefined, 220));
 
-    @Prop({ default: false })
-    dark!: boolean;
+const src = computed(() => shownResolution.value!.file.getPublicPath());
 
-    @Prop({ default: false })
-    isPrivate: boolean;
+const placeholderShownResolution = computed(() => props.placeholder!.getResolutionForSize(undefined, 220));
 
-    errorBox: ErrorBox | null = null;
+const placeholderSrc = computed(() => placeholderShownResolution.value.file.getPublicPath());
 
-    uploading = false;
+function onClick(event: Event) {
+    if (!props.required && modelValue.value) {
+        event.preventDefault();
+        modelValue.value = null;
+    }
+}
 
-    get isSquare() {
-        if (this.resolutions === null) {
-            return false;
-        }
-        return !!this.resolutions.find(r => r.width === r.height && r.width);
+function changedFile(event: Event) {
+    if (!(event.target instanceof HTMLInputElement)) {
+        return;
+    }
+    const target = event.target;
+
+    if (!target.files || target.files.length !== 1) {
+        return;
+    }
+    if (uploading.value) {
+        return;
     }
 
-    get src() {
-        return this.shownResolution.file.getPublicPath();
+    const file = target.files[0];
+
+    if (file.size > 5 * 1024 * 1024) {
+        errorBox.value = new ErrorBox(new SimpleError({
+            code: 'file_too_large',
+            message: $t(`%z3`),
+        }));
+        return;
     }
 
-    get shownResolution() {
-        return this.modelValue!.getResolutionForSize(undefined, 220);
-    }
+    const resolutions = props.resolutions ?? [ResolutionRequest.create({ height: 720 })];
 
-    get placeholderSrc() {
-        return this.placeholder!.getResolutionForSize(undefined, 220).file.getPublicPath();
-    }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('resolutions', JSON.stringify(resolutions.map(r => r.encode({ version: Version }))));
 
-    get placeholderShownResolution() {
-        return this.placeholder!.getResolutionForSize(undefined, 220);
-    }
+    uploading.value = true;
+    errorBox.value = null;
 
-    onClick(event: Event) {
-        if (!this.required && this.modelValue) {
-            event.preventDefault();
-            this.$emit('update:modelValue', null);
-        }
-    }
+    Request.cancelAll(owner);
+    context.value.authenticatedServer
+        .request({
+            method: 'POST',
+            path: '/upload-image',
+            body: formData,
+            decoder: Image as Decoder<Image>,
+            timeout: 60 * 1000,
+            shouldRetry: false,
+            owner,
+            query: {
+                private: props.isPrivate ? true : undefined,
+            },
+        })
+        .then((response) => {
+            modelValue.value = response.data;
+        })
+        .catch((e) => {
+            console.error(e);
+            errorBox.value = new ErrorBox(e);
+        })
+        .finally(() => {
+            uploading.value = false;
 
-    beforeUnmount() {
-        Request.cancelAll(this);
-    }
-
-    changedFile(event: Event) {
-        if (!(event.target instanceof HTMLInputElement)) {
-            return;
-        }
-        const target = event.target
-
-        if (!event.target.files || event.target.files.length !== 1) {
-            return;
-        }
-        if (this.uploading) {
-            return;
-        }
-
-        const file = event.target.files[0];
-
-        if (file.size > 5 * 1024 * 1024) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: 'file_too_large',
-                message: $t(`%z3`),
-            }));
-            return;
-        }
-
-        const resolutions = this.resolutions ?? [ResolutionRequest.create({ height: 720 })];
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('resolutions', JSON.stringify(resolutions.map(r => r.encode({ version: Version }))));
-
-        this.uploading = true;
-        this.errorBox = null;
-
-        Request.cancelAll(this);
-        this.$context.authenticatedServer
-            .request({
-                method: 'POST',
-                path: '/upload-image',
-                body: formData,
-                decoder: Image,
-                timeout: 60 * 1000,
-                shouldRetry: false,
-                owner: this,
-                query: {
-                    private: this.isPrivate ? true : undefined,
-                },
-            })
-            .then((response) => {
-                this.$emit('update:modelValue', response.data);
-            })
-            .catch((e) => {
-                console.error(e);
-                this.errorBox = new ErrorBox(e);
-            })
-            .finally(() => {
-                this.uploading = false;
-
-                // Clear selection
-                target.value = '';
-            });
-    }
+            // Clear selection
+            target.value = '';
+        });
 }
 </script>
 
