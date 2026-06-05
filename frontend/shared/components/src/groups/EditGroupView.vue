@@ -20,7 +20,7 @@
                 </p>
 
                 <div class="split-inputs">
-                    <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
+                    <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :autofocus="isNew ? true : undefined" />
 
                     <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('%2')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                         <Dropdown v-model="defaultAgeGroupId">
@@ -603,7 +603,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import type { DefaultAgeGroup, MemberProperty, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RegisterItem, TranslatedString, WaitingListType } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -741,8 +741,7 @@ useValidation(errors.validator, () => {
         if (group.id === props.groupId) {
             try {
                 group.settings.throwIfInvalidPrices();
-            }
-            catch (e) {
+            } catch (e) {
                 errors.errorBox = new ErrorBox(e);
                 return false;
             }
@@ -809,8 +808,7 @@ const name = computed({
             if (match) {
                 defaultAgeGroupId.value = match.id;
                 didSetAutomaticGroup.value = true;
-            }
-            else {
+            } else {
                 defaultAgeGroupId.value = null;
                 didSetAutomaticGroup.value = true;
             }
@@ -1018,8 +1016,7 @@ const waitingListType = computed({
                 d.setMonth(d.getMonth() - 1);
                 preRegistrationsDate.value = d;
             }
-        }
-        else {
+        } else {
             preRegistrationsDate.value = null;
         }
     },
@@ -1045,8 +1042,7 @@ const enableMaxMembers = computed({
                     maxMembers: null,
                 }),
             });
-        }
-        else {
+        } else {
             addGroupPatch({
                 settings: GroupSettings.patch({
                     maxMembers: patchedGroup.value.settings.maxMembers ?? 200,
@@ -1133,8 +1129,7 @@ const useRegistrationStartDate = computed({
                     registrationStartDate: null,
                 }),
             });
-        }
-        else {
+        } else {
             addGroupPatch({
                 settings: GroupSettings.patch({
                     registrationStartDate: patchedGroup.value.settings.registrationStartDate && patchedGroup.value.settings.registrationStartDate > new Date() ? patchedGroup.value.settings.registrationStartDate : new Date(Date.now() + 1000 * 60 * 60 * 24),
@@ -1153,8 +1148,7 @@ const useRegistrationEndDate = computed({
                     registrationEndDate: null,
                 }),
             });
-        }
-        else {
+        } else {
             addGroupPatch({
                 settings: GroupSettings.patch({
                     registrationEndDate: patchedGroup.value.settings.registrationEndDate ?? new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
@@ -1201,11 +1195,9 @@ async function save() {
             Toast.success($t('%54')).show();
         }
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }
@@ -1233,11 +1225,9 @@ async function deleteMe() {
             Toast.success($t('%1FX')).show();
         }
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         deleting.value = false;
     }
 }

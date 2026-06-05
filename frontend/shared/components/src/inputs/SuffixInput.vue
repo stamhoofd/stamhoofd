@@ -3,6 +3,7 @@
         <input
             ref="input"
             v-model="internalValue"
+            v-autofocus="autofocus"
             type="text"
             :spellcheck="false"
             autocorrect="off"
@@ -34,6 +35,9 @@ export default class SuffixInput extends VueComponent {
     /** Price in cents */
     @Prop({ default: '' })
     modelValue!: string;
+
+    @Prop({ default: false })
+    autofocus!: boolean;
 
     @Prop({ default: '' })
     suffix!: string;

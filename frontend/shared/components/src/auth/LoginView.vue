@@ -1,5 +1,5 @@
 <template>
-    <form ref="root" class="st-view login-view" data-submit-last-field novalidate @submit.prevent="submit">
+    <form class="st-view login-view" data-submit-last-field novalidate @submit.prevent="submit">
         <STNavigationBar :large="true" class="transparent" :title="$t(`%Qg`)" />
 
         <main class="center small flex">
@@ -285,21 +285,4 @@ async function openSignup() {
     await $navigate(Routes.Signup);
 }
 
-const el = useTemplateRef('root');
-
-onMounted(() => {
-    if (props.initialEmail.length === 0) {
-        setTimeout(() => {
-            animating.value = false;
-            if (emailInput.value && (!document.activeElement || (!el.value || !el.value.contains(document.activeElement)))) {
-                // only focus if the user isn't typing already (causes flaky playwright tests)
-                emailInput.value.focus();
-            }
-        }, 300);
-    } else {
-        setTimeout(() => {
-            animating.value = false;
-        }, 300);
-    }
-});
 </script>

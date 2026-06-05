@@ -1,7 +1,6 @@
 import { Request } from '@simonbackx/simple-networking';
 import { injectHooks, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/networking/AppManager';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking/hooks/usePatchOrganizationPeriod';
 import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { App, ComponentPublicInstance } from 'vue';
@@ -10,6 +9,7 @@ import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { Checkbox, CopyableDirective, GlobalEventBus, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext, ViewportHelper } from '..';
 import PromiseView from './containers/PromiseView.vue';
+import { AutofocusDirective } from './directives/AutofocusDirective';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
 import STErrorsDefault from './errors/STErrorsDefault.vue';
@@ -18,8 +18,8 @@ import STInputBox from './inputs/STInputBox.vue';
 import TInput from './inputs/TInput.vue';
 import TTextarea from './inputs/TTextarea.vue';
 import STListItem from './layout/STListItem.vue';
-import STNavigationBar from './navigation/STNavigationBar.vue';
 import LoadingButton from './navigation/LoadingButton.vue';
+import STNavigationBar from './navigation/STNavigationBar.vue';
 
 export type ComponentExposed<T> =
 	T extends new (...args: any[]) => infer E ? E :
@@ -183,6 +183,7 @@ export class VueGlobalHelper {
                 LongPress: LongPressDirective,
                 color: ColorDirective,
                 formatInput: FormatInputDirective,
+                autofocus: AutofocusDirective,
             },
             filters: {
                 price: Formatter.price.bind(Formatter),

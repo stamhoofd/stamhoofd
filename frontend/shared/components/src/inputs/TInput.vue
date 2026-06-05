@@ -2,7 +2,7 @@
     <STInputBox :title="title">
         <div class="style-input-list">
             <SuffixInput
-                v-for="language of listedLanguages"
+                v-for="(language, index) of listedLanguages"
                 :key="language"
                 type="text"
                 autocomplete="off"
@@ -10,6 +10,7 @@
                 :placeholder="typeof placeholder === 'string' ? placeholder : (language ? placeholder.get(language) : placeholder.toString()) ?? ''"
                 :model-value="getForLanguage(language)"
                 :suffix="language ? language.toUpperCase() : ''"
+                :autofocus="autofocus && index === 0 ? true: undefined"
                 @update:model-value="setForLanguage($event, language)"
             />
         </div>
@@ -23,7 +24,7 @@
 <script setup lang="ts">
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { TranslatedString } from '@stamhoofd/structures';
-import { Language } from "@stamhoofd/types/Language";
+import { Language } from '@stamhoofd/types/Language';
 import { computed } from 'vue';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 import { registerTranslateableComponent } from './hooks/useEditorContext';
@@ -44,9 +45,11 @@ withDefaults(
     defineProps<{
         title: string;
         placeholder?: string | TranslatedString;
+        autofocus?: boolean;
     }>(), {
         title: '',
         placeholder: '',
+        autofocus: false,
     },
 );
 

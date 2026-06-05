@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox" :class="this.class">
-        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" data-testid="email-input" @change="validate(false)" @input="(event: any) => {emailRaw = event.currentTarget.value; onTyping();}">
+        <input ref="input" v-model="emailRaw" v-autofocus="autofocus" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" data-testid="email-input" @change="validate(false)" @input="(event: any) => {emailRaw = event.currentTarget.value; onTyping();}">
         <template #right>
             <slot name="right" />
         </template>
@@ -12,6 +12,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { DataValidator } from '@stamhoofd/utility';
 
+import { AutofocusDirective } from '../directives/AutofocusDirective';
 import { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
 import STInputBox from './STInputBox.vue';
@@ -53,6 +54,9 @@ export default class EmailInput extends VueComponent {
 
     @Prop({ default: false })
     disabled!: boolean;
+
+    @Prop({ default: false })
+    autofocus!: boolean;
 
     errorBox: ErrorBox | null = null;
 
@@ -107,8 +111,7 @@ export default class EmailInput extends VueComponent {
 
             if (this.nullable && this.modelValue !== null) {
                 this.$emit('update:modelValue', null);
-            }
-            else if (this.modelValue !== '') {
+            } else if (this.modelValue !== '') {
                 this.$emit('update:modelValue', '');
             }
             return false;
@@ -123,8 +126,7 @@ export default class EmailInput extends VueComponent {
                 }));
             }
             return false;
-        }
-        else {
+        } else {
             if (this.emailRaw !== this.modelValue) {
                 this.$emit('update:modelValue', this.emailRaw);
             }

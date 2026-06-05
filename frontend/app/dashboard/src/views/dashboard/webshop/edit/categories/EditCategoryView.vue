@@ -9,7 +9,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%LT`)">
+            <input ref="firstInput" v-model="name" v-autofocus="isNew" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%LT`)">
         </STInputBox>
 
         <STInputBox error-fields="description" :error-box="errors.errorBox" class="max" :title="$t(`%Rx`)">
@@ -115,7 +115,7 @@ const description = computed({
 function addProduct() {
     const product = Product.create({
         type: props.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
-        showStockBelow: null
+        showStockBelow: null,
     });
     const p = PrivateWebshop.patch({});
     p.products.addPut(product);

@@ -30,7 +30,7 @@
 
         <div class="split-inputs">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`%1Os`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
+                <input ref="firstInput" v-model="name" v-autofocus="isNew" class="input" type="text" :placeholder="$t(`%1Os`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
                 <p v-if="nameWarning" class="warning-box">
                     {{ nameWarning }}
                 </p>
@@ -523,8 +523,7 @@ async function onPaste(event: Event) {
                 // Sanitize the blob if you need to, then process it in your app.
             }
         }
-    }
-    catch (err: any) {
+    } catch (err: any) {
         console.error(err.name, err.message);
     }
 }
@@ -605,7 +604,7 @@ const seatingWarning = computed(() => {
 
     for (const p of patchedWebshop.value.products) {
         if (p.id !== props.product.id && p.seatingPlanId === patchedProduct.value.seatingPlanId && p.dateRange && p.dateRange.toString() === patchedProduct.value.dateRange.toString()) {
-            return $t("%1Od");
+            return $t('%1Od');
         }
     }
 
@@ -712,8 +711,7 @@ const useDisableAfter = computed({
         }
         if (use) {
             addProductPatch({ disableAfter: patchedProduct.value.disableAfter ?? props.product.disableAfter ?? new Date() });
-        }
-        else {
+        } else {
             addProductPatch({ disableAfter: null });
         }
     },
@@ -734,8 +732,7 @@ const useEnableAfter = computed({
         }
         if (use) {
             addProductPatch({ enableAfter: patchedProduct.value.enableAfter ?? props.product.enableAfter ?? new Date() });
-        }
-        else {
+        } else {
             addProductPatch({ enableAfter: null });
         }
     },
@@ -811,8 +808,7 @@ const resetStock = computed({
         }
         if (value) {
             usedStockPatch.value = usedStock.value;
-        }
-        else {
+        } else {
             usedStockPatch.value = null;
         }
     },
