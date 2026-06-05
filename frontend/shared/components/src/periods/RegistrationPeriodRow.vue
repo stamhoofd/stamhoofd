@@ -8,7 +8,7 @@
         </p>
 
         <template #right>
-            <span v-if="isCurrent" class="style-tag">{{ $t('%1H0') }}</span>
+            <span v-if="isCurrent" class="style-tag success">{{ $t('%1H0') }}</span>
             <span v-if="period.locked" class="icon lock gray" />
             <span class="icon arrow-right-small gray" />
         </template>
