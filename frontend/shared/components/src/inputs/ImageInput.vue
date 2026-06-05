@@ -5,9 +5,9 @@
             <span v-if="!required && !modelValue && placeholder" class="icon sync" />
 
             <Spinner v-if="uploading" />
-            <img v-else-if="modelValue === null && placeholder" :src="placeholderSrc" :width="placeholderShownResolution.width" :height="placeholderShownResolution.height">
+            <ImageComponent v-else-if="modelValue === null && placeholder" :image="placeholder" />
             <span v-else-if="modelValue === null" class="icon upload" />
-            <img v-else :src="src" :width="shownResolution!.width" :height="shownResolution!.height">
+            <ImageComponent v-else :image="modelValue" />
             <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
         </label>
     </STInputBox>
@@ -25,6 +25,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { ErrorBox } from '../errors/ErrorBox';
 import type { Validator } from '../errors/Validator';
 import Spinner from '../Spinner.vue';
+import ImageComponent from '../views/ImageComponent.vue';
 import STInputBox from './STInputBox.vue';
 
 const props = withDefaults(
@@ -61,14 +62,6 @@ const isSquare = computed(() => {
     }
     return !!props.resolutions.every(r => r.width === r.height && r.width);
 });
-
-const shownResolution = computed(() => modelValue.value?.getResolutionForSize(undefined, 220));
-
-const src = computed(() => shownResolution.value!.file.getPublicPath());
-
-const placeholderShownResolution = computed(() => props.placeholder!.getResolutionForSize(undefined, 220));
-
-const placeholderSrc = computed(() => placeholderShownResolution.value.file.getPublicPath());
 
 function onClick(event: Event) {
     if (!props.required && modelValue.value) {
@@ -186,12 +179,11 @@ function changedFile(event: Event) {
         display: none;
     }
 
-    img {
-        position: absolute; // fix max width
-        max-height: 110px;
-        max-width: calc(100% - 10px);
-        height: auto;
-        width: auto;
+    .image-component {
+        // Fill the available space inside the box (with a small inset), the
+        // image itself is scaled down to fit by ImageComponent.
+        position: absolute;
+        inset: 5px;
     }
 
     .icon.trash, .icon.sync {

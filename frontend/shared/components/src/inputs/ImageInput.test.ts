@@ -52,27 +52,29 @@ test('Shows the upload icon when there is no value and no placeholder', () => {
     expect(document.querySelector('img')).toBeNull();
 });
 
-test('Shows the placeholder image when there is no value but a placeholder', () => {
+test('Shows the placeholder image when there is no value but a placeholder', async () => {
     renderComponent({
         modelValue: null,
         placeholder: createImage('placeholder.png'),
         required: false,
     });
 
-    const img = document.querySelector('img')!;
-    expect(img).not.toBeNull();
-    expect(img.getAttribute('src')).toBe('https://cdn.example.com/placeholder.png');
+    // ImageComponent renders the <img> once it has measured its size
+    await vi.waitFor(() => {
+        expect(document.querySelector('img')?.getAttribute('src')).toBe('https://cdn.example.com/placeholder.png');
+    });
 
     // The sync icon is shown for an optional input with a placeholder
     expect(document.querySelector('.icon.sync')).not.toBeNull();
 });
 
-test('Shows the uploaded image when there is a value', () => {
+test('Shows the uploaded image when there is a value', async () => {
     renderComponent({ modelValue: createImage('logo.png') });
 
-    const img = document.querySelector('img')!;
-    expect(img).not.toBeNull();
-    expect(img.getAttribute('src')).toBe('https://cdn.example.com/logo.png');
+    // ImageComponent renders the <img> once it has measured its size
+    await vi.waitFor(() => {
+        expect(document.querySelector('img')?.getAttribute('src')).toBe('https://cdn.example.com/logo.png');
+    });
 });
 
 test('Shows the trash icon for an optional input with a value', () => {
