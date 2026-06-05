@@ -3,6 +3,7 @@ import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Address } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
+import { STPackageService } from '../services/STPackageService.js';
 
 export default new Migration(async () => {
     const platform = await Platform.getForEditing();
@@ -54,6 +55,9 @@ export default new Migration(async () => {
     // Set as platform organization
     platform.membershipOrganizationId = organization.id;
     await platform.save();
+
+    // Make sure default packages are active for this organization
+    await STPackageService.updateOrganizationPackages(organization.id);
 
     // Do something here
     return Promise.resolve();
