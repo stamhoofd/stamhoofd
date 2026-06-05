@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { Address } from '@stamhoofd/structures';
+import { Address, Company, File, Image, PaymentMethod, Resolution } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { STPackageService } from '../services/STPackageService.js';
@@ -49,6 +49,74 @@ export default new Migration(async () => {
         city: 'Gent',
         country: STAMHOOFD.fixedCountry ?? Country.Belgium,
     });
+
+    // Setup Codawood credentials if running Stamhoofd
+    if (STAMHOOFD.platformName === 'stamhoofd' && STAMHOOFD.userMode === 'organization') {
+        organization.id = '57aa0001-0000-4000-8000-000000000001';
+        organization.name = 'Stamhoofd';
+        organization.meta.companies = [
+            Company.create({
+                name: 'Codawood BV',
+                VATNumber: 'BE0747832683',
+                companyNumber: '0747832683',
+                address: Address.create({
+                    street: 'Collegiebaan',
+                    number: '54',
+                    postalCode: '9230',
+                    city: 'Wetteren',
+                    country: Country.Belgium,
+                }),
+                administrationEmail: 'hallo@stamhoofd.be',
+            }),
+        ];
+
+        organization.address = organization.meta.companies[0].address!;
+        organization.meta.registrationPaymentConfiguration.enableMandates = true;
+        organization.meta.registrationPaymentConfiguration.paymentMethods = [
+            PaymentMethod.Bancontact,
+            PaymentMethod.iDEAL,
+            PaymentMethod.CreditCard,
+        ];
+
+        // Logo for invoices + normal icon
+        const horizontalLogo = new File({
+            id: 'logo',
+            size: 0,
+            server: 'https://files.stamhoofd.be',
+            path: 'fixtures/logo.svg',
+        });
+
+        organization.meta.horizontalLogo = Image.create({
+            source: horizontalLogo,
+            resolutions: [
+                new Resolution({
+                    file: horizontalLogo,
+                    width: 1650,
+                    height: 340,
+                }),
+            ],
+        });
+
+        const squareLogo = new File({
+            id: 'square',
+            size: 0,
+            server: 'https://files.stamhoofd.be',
+            path: 'fixtures/logo-small.svg',
+        });
+
+        organization.meta.squareLogo = Image.create({
+            source: squareLogo,
+            resolutions: [
+                new Resolution({
+                    file: squareLogo,
+                    width: 1000,
+                    height: 1000,
+                }),
+            ],
+        });
+
+        // Link a mollie token
+    }
 
     await organization.save();
 
