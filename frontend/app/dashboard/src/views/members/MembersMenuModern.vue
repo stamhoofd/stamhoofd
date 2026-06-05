@@ -154,7 +154,7 @@ defineRoute({
 });
 
 defineRoutes([
-    {
+    /* {
         url: 'checklist',
         name: Routes.Checklist,
         show: 'detail',
@@ -162,14 +162,14 @@ defineRoutes([
         isDefault: hasFullAccess.value
             ? { }
             : undefined,
-    },
+    }, */
 
-    {
+    /* {
         url: 'berichten',
         name: Routes.Communication,
         show: 'detail',
         component: CommunicationView,
-    },
+    }, */
 
     {
         url: Routes.Settings,
@@ -375,7 +375,7 @@ const allActions = computed(() => {
     }
 
     if (!props.period) {
-        list.push({
+        /* list.push({
             icon: 'email-filled',
             title: $t('Berichten'),
             route: Routes.Communication,
@@ -408,7 +408,7 @@ const allActions = computed(() => {
             title: $t('Synchroniseren met groepsadmin'),
             route: Routes.Settings,
             hidden: true,
-        });
+        }); */
     }
 
     if (rootCategory.value && auth.canCreateGroupInCategory(rootCategory.value)) {
