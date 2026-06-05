@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
 
-        <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <hr><h2 class="style-with-button">
             <div>{{ $t('%7M') }}</div>
@@ -42,127 +42,129 @@
     </SaveView>
 </template>
 
-<script lang="ts">
-import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+<script lang="ts" setup>
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import STList from '@stamhoofd/components/layout/STList.vue';
-import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
+import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
-import type { Image} from '@stamhoofd/structures';
-import { GroupSettings, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
-import { Component, Mixins } from '@simonbackx/vue-app-navigation/classes';
+import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import type { Image, Organization } from '@stamhoofd/structures';
+import { Group, GroupPrivateSettings, GroupSettings, OrganizationRegistrationPeriod, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
 
-import EditGroupMixin from './EditGroupMixin';
+const props = defineProps<{
+    group: Group;
+    organization: Organization;
+    period: OrganizationRegistrationPeriod;
+    isNew: boolean;
+    saveHandler: ((patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>);
+}>();
 
-@Component({
-    components: {
-        SaveView,
-        STInputBox,
-        STErrorsDefault,
-        STList,
-        UploadButton,
-        STListItem,
-    },
-})
-export default class EditGroupPageView extends Mixins(EditGroupMixin) {
-    get title() {
-        return 'Bijkomende informatie';
-    }
+const saving = ref(false);
+const pop = usePop();
+const errors = useErrors();
 
-    get location() {
-        return this.patchedGroup.settings.location;
-    }
+const { patch: patchPeriod, patched: patchedPeriod, addPatch: addPeriodPatch, hasChanges } = usePatch(props.period);
 
-    set location(location: string) {
-        this.addSettingsPatch({ location });
-    }
+const patchedGroup = computed(() => {
+    return patchedPeriod.value.groups.find(c => c.id === props.group.id) ?? props.group;
+});
 
-    get description() {
-        return this.patchedGroup.settings.description.toString();
-    }
-
-    set description(description: string) {
-        this.addSettingsPatch({ description });
-    }
-
-    get coverPhoto() {
-        return this.patchedGroup.settings.coverPhoto;
-    }
-
-    set coverPhoto(coverPhoto: Image | null) {
-        this.addSettingsPatch(GroupSettings.patch({
-            coverPhoto,
-        }));
-    }
-
-    get hs() {
-        return [
-            ResolutionRequest.create({
-                width: 1600,
-            }),
-            ResolutionRequest.create({
-                width: 800,
-            }),
-            ResolutionRequest.create({
-                height: 250,
-                width: 250,
-                fit: ResolutionFit.Cover,
-            }),
-        ];
-    }
-
-    get coverPhotoResolution() {
-        const image = this.coverPhoto;
-        if (!image) {
-            return null;
-        }
-        return image.getResolutionForSize(800, 200);
-    }
-
-    get coverPhotoSrc() {
-        const image = this.coverPhoto;
-        if (!image) {
-            return null;
-        }
-        return this.coverPhotoResolution?.file.getPublicPath();
-    }
-
-    get coverImageWidth() {
-        return this.coverPhotoResolution?.width;
-    }
-
-    get coverImageHeight() {
-        return this.coverPhotoResolution?.height;
-    }
-
-    // Cover picture
-    get squarePhoto() {
-        return this.patchedGroup.settings.squarePhoto;
-    }
-
-    set squarePhoto(squarePhoto: Image | null) {
-        this.addSettingsPatch(GroupSettings.patch({
-            squarePhoto,
-        }));
-    }
-
-    get hsSquare() {
-        return [
-            ResolutionRequest.create({
-                width: 250,
-            }),
-        ];
-    }
-
-    get squarePhotoSrc() {
-        const image = this.squarePhoto;
-        if (!image) {
-            return null;
-        }
-        return image.getResolutionForSize(250, 250).file.getPublicPath();
-    }
+function addPatch(patch: AutoEncoderPatchType<Group>) {
+    patch.id = props.group.id;
+    const p = OrganizationRegistrationPeriod.patch({ id: props.period.id });
+    p.groups.addPatch(patch);
+    addPeriodPatch(p);
 }
+
+function addSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupSettings>>) {
+    addPatch(Group.patch({
+        id: props.group.id,
+        settings: GroupSettings.patch(patch),
+    }));
+}
+
+function addPrivateSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<GroupPrivateSettings>>) {
+    addPatch(Group.patch({
+        id: props.group.id,
+        privateSettings: GroupPrivateSettings.patch(patch),
+    }));
+}
+
+const title = 'Bijkomende informatie';
+
+const coverPhoto = computed({
+    get: () => patchedGroup.value.settings.coverPhoto,
+    set: (coverPhoto: Image | null) => {
+        addSettingsPatch(GroupSettings.patch({ coverPhoto }));
+    },
+});
+
+const hs = [
+    ResolutionRequest.create({ width: 1600 }),
+    ResolutionRequest.create({ width: 800 }),
+    ResolutionRequest.create({ height: 250, width: 250, fit: ResolutionFit.Cover }),
+];
+
+const coverPhotoResolution = computed(() => {
+    const image = coverPhoto.value;
+    if (!image) return null;
+    return image.getResolutionForSize(800, 200);
+});
+
+const coverPhotoSrc = computed(() => coverPhotoResolution.value?.file.getPublicPath() ?? null);
+const coverImageWidth = computed(() => coverPhotoResolution.value?.width);
+const coverImageHeight = computed(() => coverPhotoResolution.value?.height);
+
+const squarePhoto = computed({
+    get: () => patchedGroup.value.settings.squarePhoto,
+    set: (squarePhoto: Image | null) => {
+        addSettingsPatch(GroupSettings.patch({ squarePhoto }));
+    },
+});
+
+const hsSquare = [
+    ResolutionRequest.create({ width: 250 }),
+];
+
+const squarePhotoSrc = computed(() => {
+    const image = squarePhoto.value;
+    if (!image) return null;
+    return image.getResolutionForSize(250, 250).file.getPublicPath();
+});
+
+async function save() {
+    if (saving.value) return;
+    saving.value = true;
+
+    try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
+
+        await props.saveHandler(patchPeriod.value);
+        await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+
+    saving.value = false;
+}
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) return true;
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
+};
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
 
 <style lang="scss">
