@@ -6,39 +6,15 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr><h2 class="style-with-button">
-            <div>{{ $t('%7M') }}</div>
-            <div>
-                <button v-if="coverPhoto" class="button text only-icon-smartphone" type="button" @click="coverPhoto = null">
-                    <span class="icon trash" />
-                    <span>{{ $t('%CJ') }}</span>
-                </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? $t(`%He`) : $t(`%Hf`)" :resolutions="hs" />
-            </div>
-        </h2>
+        <ImageInput v-model="squarePhoto" :title="$t('%Ls')" :resolutions="hsSquare" :required="false" />
+        <p class="style-description-small">
+            {{ $t('%Lt') }}
+        </p>
 
-        <p>{{ $t('%Lr') }}</p>
-
-        <figure v-if="coverPhotoSrc" class="cover-photo">
-            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
-        </figure>
-
-        <hr><h2 class="style-with-button">
-            <div>{{ $t('%Ls') }}</div>
-            <div>
-                <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
-                    <span class="icon trash" />
-                    <span>{{ $t('%CJ') }}</span>
-                </button>
-                <UploadButton v-model="squarePhoto" :text="squarePhoto ? $t(`%He`) : $t(`%Hf`)" :resolutions="hsSquare" />
-            </div>
-        </h2>
-
-        <p>{{ $t('%Lt') }}</p>
-
-        <figure v-if="squarePhotoSrc" class="square-photo">
-            <img :src="squarePhotoSrc">
-        </figure>
+        <ImageInput v-model="coverPhoto" :title="$t('%7M')" :resolutions="hs" :required="false" class="max" :max-height="null" />
+        <p class="style-description-small">
+            {{ $t('%Lr') }}
+        </p>
     </SaveView>
 </template>
 
@@ -49,7 +25,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
+import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { Image, Organization } from '@stamhoofd/structures';
@@ -95,7 +71,7 @@ function addPrivateSettingsPatch(patch: PartialWithoutMethods<AutoEncoderPatchTy
     }));
 }
 
-const title = 'Bijkomende informatie';
+const title = $t(`Omslagsfoto en icoontje`);
 
 const coverPhoto = computed({
     get: () => patchedGroup.value.settings.coverPhoto,
@@ -110,16 +86,6 @@ const hs = [
     ResolutionRequest.create({ height: 250, width: 250, fit: ResolutionFit.Cover }),
 ];
 
-const coverPhotoResolution = computed(() => {
-    const image = coverPhoto.value;
-    if (!image) return null;
-    return image.getResolutionForSize(800, 200);
-});
-
-const coverPhotoSrc = computed(() => coverPhotoResolution.value?.file.getPublicPath() ?? null);
-const coverImageWidth = computed(() => coverPhotoResolution.value?.width);
-const coverImageHeight = computed(() => coverPhotoResolution.value?.height);
-
 const squarePhoto = computed({
     get: () => patchedGroup.value.settings.squarePhoto,
     set: (squarePhoto: Image | null) => {
@@ -128,14 +94,8 @@ const squarePhoto = computed({
 });
 
 const hsSquare = [
-    ResolutionRequest.create({ width: 250 }),
+    ResolutionRequest.create({ width: 250, height: 250, fit: ResolutionFit.Inside }),
 ];
-
-const squarePhotoSrc = computed(() => {
-    const image = squarePhoto.value;
-    if (!image) return null;
-    return image.getResolutionForSize(250, 250).file.getPublicPath();
-});
 
 async function save() {
     if (saving.value) return;
@@ -149,8 +109,7 @@ async function save() {
 
         await props.saveHandler(patchPeriod.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -166,38 +125,3 @@ defineExpose({
     shouldNavigateAway,
 });
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-.group-edit-page-view {
-    .cover-photo {
-        height: 0;
-        position: relative;
-        padding-bottom: calc(750 / 1800 * 100%);
-        background: $color-gray-3;
-        border-radius: $border-radius;
-        margin-top: 20px;
-
-        img {
-            border-radius: $border-radius;
-            height: 100%;
-            width: 100%;
-            object-fit: cover;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-    }
-
-    .square-photo {
-        img {
-            height: 200px;
-            width: 200px;
-            border-radius: $border-radius;
-            object-fit: contain;
-        }
-    }
-
-}
-</style>
