@@ -46,7 +46,7 @@
             <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
         <PriceInputBox v-else-if="answer.settings.type === RecordType.Price" v-model="priceValue" :title="label.toString()" error-fields="input" :error-box="errors.errorBox" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
-        <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
+        <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label.toString()" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
         <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
         <NumberInputBox v-else-if="answer.settings.type === RecordType.Integer" v-model="integerValue" :title="label.toString()" error-fields="input" :error-box="errors.errorBox" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
 
@@ -318,8 +318,7 @@ function setChoiceSelected(choice: RecordChoice, selected: boolean) {
         patchAnswer(RecordMultipleChoiceAnswer.patch({
             selectedChoices: [...choices, choice] as any,
         }));
-    }
-    else {
+    } else {
         patchAnswer(RecordMultipleChoiceAnswer.patch({
             selectedChoices: choices as any,
         }));
@@ -354,8 +353,7 @@ async function isValid() {
 
     try {
         answer.value.validate();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
         return false;
     }

@@ -17,7 +17,7 @@
 
             <aside v-if="sponsors.length" class="stamhoofd-rosnops-box">
                 <component :is="sponsor.url ? 'a' : 'div'" v-for="(sponsor, index) of sponsors" :key="sponsor.id" class="rosnops" :class="{visible: visibleSponsor === index, isLogo: !sponsor.banner}" :href="sponsor.url" target="_blank">
-                    <ImageComponent v-if="sponsor.banner || sponsor.logo" :image="sponsor.banner || sponsor.logo" :auto-height="true" />
+                    <ImageComponent v-if="sponsor.banner ?? sponsor.logo" :image="sponsor.banner ?? sponsor.logo!" :auto-height="true" />
                 </component>
             </aside>
 
@@ -104,7 +104,7 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import type { Order, Organization, ProductDateRange, TicketPublic, Webshop} from '@stamhoofd/structures';
+import type { Order, Organization, ProductDateRange, TicketPublic, Webshop } from '@stamhoofd/structures';
 import { WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -177,8 +177,7 @@ onMounted(() => {
         console.log('tick');
         if (visibleSponsor.value + 1 >= sponsors.value.length) {
             visibleSponsor.value = 0;
-        }
-        else {
+        } else {
             visibleSponsor.value = visibleSponsor.value + 1;
         }
     }, 3000);

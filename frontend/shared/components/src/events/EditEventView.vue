@@ -164,7 +164,7 @@
                 </div>
             </h2>
 
-            <ImageComponent :image="coverPhoto" :auto-height="true" />
+            <ImageComponent v-if="coverPhoto" :image="coverPhoto" :auto-height="true" />
         </JumpToContainer>
 
         <JumpToContainer :visible="forceShowAge || minAge !== null || maxAge !== null">
@@ -274,9 +274,9 @@ import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-enco
 import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import type { Organization} from '@stamhoofd/structures';
+import type { Organization } from '@stamhoofd/structures';
 import { AccessRight, Event, EventLocation, EventMeta, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -352,8 +352,7 @@ const multipleDays = computed({
             const d = new Date(endDate.value);
             d.setDate(startDate.value.getDate() + (Math.max(2, type.value?.minimumDays || 2) - 1));
             endDate.value = d;
-        }
-        else {
+        } else {
             const d = new Date(endDate.value);
             d.setFullYear(startDate.value.getFullYear());
             d.setMonth(startDate.value.getMonth());
@@ -521,8 +520,7 @@ const isNationalActivity = computed({
             addPatch({
                 organizationId: null,
             });
-        }
-        else {
+        } else {
             const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
@@ -568,8 +566,7 @@ watch(hasTagRestrictions, (hasTagRestrictions) => {
         if (organizationTagIds.value === null) {
             addTagRestriction();
         }
-    }
-    else if (organizationTagIds.value?.length === 0) {
+    } else if (organizationTagIds.value?.length === 0) {
         deleteTagRestriction();
     }
 }, { immediate: true });
@@ -696,8 +693,7 @@ async function save() {
 
         if (props.isNew) {
             arr.addPut(patched.value);
-        }
-        else {
+        } else {
             arr.addPatch(patch.value);
         }
 
@@ -716,8 +712,7 @@ async function save() {
         props.callback?.();
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -759,8 +754,7 @@ async function deleteMe() {
                         Toast.success($t('%4G')).show();
                         props.callback?.();
                         await pop({ force: true });
-                    }
-                    catch (e) {
+                    } catch (e) {
                         errors.errorBox = new ErrorBox(e);
                     }
 
