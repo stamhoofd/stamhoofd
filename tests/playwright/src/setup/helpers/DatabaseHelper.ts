@@ -139,6 +139,7 @@ export class DatabaseHelper {
 
         TestUtils.setEnvironment('DB_DATABASE', DatabaseHelper.getDatabaseName(this.workerId));
         const { Database } = await import('@simonbackx/simple-database');
+        await Database.reload({});
         this._database = Database;
         return this._database;
     }
