@@ -129,6 +129,44 @@ test('Adds the dark class when the dark prop is set', () => {
     expect(document.querySelector('.image-input-box.dark')).not.toBeNull();
 });
 
+test('Displays the image full width with auto height when there is a value', () => {
+    renderComponent({ modelValue: createImage('logo.png') });
+
+    expect(document.querySelector('.image-input-box.has-image')).not.toBeNull();
+    // ImageComponent only renders the sizer when auto-height is enabled
+    expect(document.querySelector('.image-component .sizer')).not.toBeNull();
+});
+
+test('Does not grow the box when there is no image', () => {
+    renderComponent({ modelValue: null });
+
+    expect(document.querySelector('.image-input-box.has-image')).toBeNull();
+});
+
+test('Caps the image height when maxHeight is provided', () => {
+    renderComponent({ modelValue: createImage('logo.png'), maxHeight: 200 });
+
+    const imageComponent = document.querySelector<HTMLElement>('.image-component')!;
+    expect(imageComponent.style.maxHeight).toBe('200px');
+    // The default cap is not applied when an explicit value is given
+    expect(document.querySelector('.image-input-box.default-max-height')).toBeNull();
+});
+
+test('Caps the image height to the default input height when maxHeight is omitted', () => {
+    renderComponent({ modelValue: createImage('logo.png') });
+
+    // The default cap is applied via CSS, not an inline max-height
+    expect(document.querySelector('.image-input-box.default-max-height')).not.toBeNull();
+    expect(document.querySelector<HTMLElement>('.image-component')!.style.maxHeight).toBe('');
+});
+
+test('Does not cap the image height when maxHeight is explicitly null', () => {
+    renderComponent({ modelValue: createImage('logo.png'), maxHeight: null });
+
+    expect(document.querySelector('.image-input-box.default-max-height')).toBeNull();
+    expect(document.querySelector<HTMLElement>('.image-component')!.style.maxHeight).toBe('');
+});
+
 test('Shows an error and does not upload when the file is too large', async () => {
     const request = vi.fn();
     renderComponent({ modelValue: null }, { authenticatedServer: { request } });

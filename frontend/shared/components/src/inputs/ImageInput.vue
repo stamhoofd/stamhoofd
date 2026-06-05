@@ -1,13 +1,13 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
-        <label class="image-input-box" :class="{square: isSquare, dark}" @click="onClick">
+        <label class="image-input-box" :class="{square: isSquare, dark, 'auto-height': defaultMaxHeight ? false : showImage}" @click="onClick">
             <span v-if="!required && modelValue" class="icon trash" />
             <span v-if="!required && !modelValue && placeholder" class="icon sync" />
 
             <Spinner v-if="uploading" />
-            <ImageComponent v-else-if="modelValue === null && placeholder" :image="placeholder" />
+            <ImageComponent v-else-if="modelValue === null && placeholder" :image="placeholder" :auto-height="true" :max-height="imageMaxHeight" />
             <span v-else-if="modelValue === null" class="icon upload" />
-            <ImageComponent v-else :image="modelValue" />
+            <ImageComponent v-else :image="modelValue" :auto-height="true" :max-height="defaultMaxHeight ? 110 : imageMaxHeight" />
             <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
         </label>
     </STInputBox>
@@ -37,6 +37,15 @@ const props = withDefaults(
         required?: boolean;
         dark?: boolean;
         isPrivate?: boolean;
+        /**
+         * Maximum height (in pixels) for the displayed image. The image is
+         * always shown full width, capped to this height.
+         *
+         * - Omitted (undefined): defaults to the standard input height.
+         * - null: no height cap.
+         * - number: caps at that amount of pixels.
+         */
+        maxHeight?: number | null;
     }>(), {
         title: '',
         validator: null,
@@ -45,6 +54,8 @@ const props = withDefaults(
         required: true,
         dark: false,
         isPrivate: false,
+        // Keep undefined as a distinct value (see maxHeight docs above).
+        maxHeight: undefined,
     },
 );
 
@@ -62,6 +73,15 @@ const isSquare = computed(() => {
     }
     return !!props.resolutions.every(r => r.width === r.height && r.width);
 });
+
+// Whether we are currently displaying an image (the uploaded value or the
+// placeholder). In that case the box grows to fit the full-width image.
+const showImage = computed(() => !uploading.value && (modelValue.value !== null || props.placeholder !== null));
+
+// When maxHeight is omitted (undefined), we cap the image at the default input
+// height via CSS. An explicit null removes the cap; a number caps at that value.
+const defaultMaxHeight = computed(() => props.maxHeight === undefined);
+const imageMaxHeight = computed(() => (typeof props.maxHeight === 'number' ? props.maxHeight : null));
 
 function onClick(event: Event) {
     if (!props.required && modelValue.value) {
@@ -171,8 +191,18 @@ function changedFile(event: Event) {
         color: $color-primary;
     }
 
+    // Square only applies to the empty (placeholder) box. As soon as an image
+    // is shown, the box grows to fit the full-width image.
     &.square {
         width: 120px;
+    }
+
+    // When an image is displayed, let the box grow to match the full-width
+    // image (height follows the image's aspect ratio, capped by maxHeight).
+    &.auto-height {
+        height: auto;
+        min-height: 120px;
+        padding: 5px;
     }
 
     .file-upload {
@@ -180,10 +210,8 @@ function changedFile(event: Event) {
     }
 
     .image-component {
-        // Fill the available space inside the box (with a small inset), the
-        // image itself is scaled down to fit by ImageComponent.
-        position: absolute;
-        inset: 5px;
+        width: 100%;
+        border-radius: $border-radius;
     }
 
     .icon.trash, .icon.sync {
