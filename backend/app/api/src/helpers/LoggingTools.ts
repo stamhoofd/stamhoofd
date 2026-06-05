@@ -17,7 +17,7 @@ class ProgressLogger {
     private progressedLogged = 0;
     private readonly onePercent: number;
 
-    constructor(private readonly total: number) {
+    constructor(readonly total: number) {
         this.onePercent = Math.floor(total / 100);
         this.writeOutput(this.formatProgress(0), false);
     }
