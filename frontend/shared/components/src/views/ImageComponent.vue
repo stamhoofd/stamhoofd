@@ -1,5 +1,5 @@
 <template>
-    <div class="image-component" :style="{maxHeight: maxHeight ? maxHeight+'px' : undefined}">
+    <div ref="el" class="image-component" :style="{maxHeight: maxHeight ? maxHeight+'px' : undefined}">
         <div v-if="autoHeight" class="sizer" :style="sizerStyle">
             <div :style="sizerChildStyle" />
         </div>
@@ -22,107 +22,71 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import type { Image } from '@stamhoofd/structures';
 import { DarkMode } from '@stamhoofd/structures';
 
-@Component({})
-export default class ImageComponent extends VueComponent {
-    @Prop({ default: '' })
-    alt: string;
-
-    @Prop({ required: true })
+const props = withDefaults(defineProps<{
+    alt?: string;
     image: Image;
+    imageDark?: Image | null;
+    darkMode?: DarkMode;
+    autoHeight?: boolean;
+    maxHeight?: number | null;
+}>(), {
+    alt: '',
+    imageDark: null,
+    darkMode: DarkMode.Auto,
+    autoHeight: false,
+    maxHeight: null,
+});
 
-    @Prop({ default: null })
-    imageDark: Image | null;
+const el = useTemplateRef<HTMLElement>('el');
+const elWidth = ref<number | null>(null);
+const elHeight = ref<number | null>(null);
 
-    @Prop({ default: DarkMode.Auto })
-    darkMode: DarkMode;
+const resolution = computed(() => props.image.getResolutionForSize(elWidth.value ?? undefined, elHeight.value ?? undefined));
+const darkResolution = computed(() => (props.imageDark ?? props.image).getResolutionForSize(elWidth.value ?? undefined, elHeight.value ?? undefined));
 
-    /**
-     * Update the height to match the image resolution.
-     * Width will take the available space (can style this with css)
-     */
-    @Prop({ default: false })
-    autoHeight: boolean;
+const imgWidth = computed(() => resolution.value.width);
+const imgHeight = computed(() => resolution.value.height);
+const src = computed(() => resolution.value.file.getPublicPath());
 
-    @Prop({ default: null })
-    maxHeight: number | null;
+const imgWidthDark = computed(() => darkResolution.value.width);
+const imgHeightDark = computed(() => darkResolution.value.height);
+const srcDark = computed(() => darkResolution.value.file.getPublicPath());
 
-    elWidth: number | null = null;
-    elHeight: number | null = null;
+const sizerChildStyle = computed(() => {
+    if (!props.autoHeight) return;
+    const percentage = (imgHeight.value / imgWidth.value * 100).toFixed(2);
+    return `padding-bottom: ${percentage}%;`;
+});
 
-    get resolution() {
-        return this.image.getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined);
-    }
+const sizerStyle = computed(() => {
+    if (!props.autoHeight) return;
+    return `max-height: ${imgHeight.value}px;`;
+});
 
-    get darkResolution() {
-        return (this.imageDark ?? this.image).getResolutionForSize(this.elWidth ?? undefined, this.elHeight ?? undefined);
-    }
-
-    get imgWidth() {
-        return this.resolution.width;
-    }
-
-    get imgHeight() {
-        return this.resolution.height;
-    }
-
-    get src() {
-        return this.resolution.file.getPublicPath();
-    }
-
-    get imgWidthDark() {
-        return this.darkResolution.width;
-    }
-
-    get imgHeightDark() {
-        return this.darkResolution.height;
-    }
-
-    get srcDark() {
-        return this.darkResolution.file.getPublicPath();
-    }
-
-    updateSize() {
-        this.elWidth = this.$el.offsetWidth;
-        this.elHeight = this.autoHeight ? null : this.$el.offsetHeight;
-    }
-
-    get sizerChildStyle() {
-        if (!this.autoHeight) {
-            return;
-        }
-        const percentage = (this.imgHeight / this.imgWidth * 100).toFixed(2);
-        return `padding-bottom: ${percentage}%;`;
-    }
-
-    get sizerStyle() {
-        if (!this.autoHeight) {
-            return;
-        }
-        return `max-height: ${this.imgHeight}px;`;
-    }
-
-    // Observe the size of the element and update the used resolution accordingly
-    mounted() {
-        // Create a size observer
-        try {
-            const resizeObserver = new ResizeObserver(() => {
-                this.updateSize();
-            });
-            resizeObserver.observe(this.$el);
-        }
-        catch (e) {
-            // Not supported
-            this.$nextTick(() => {
-                this.updateSize();
-            });
-        }
-    }
+function updateSize() {
+    if (!el.value) return;
+    elWidth.value = el.value.offsetWidth;
+    elHeight.value = props.autoHeight ? null : el.value.offsetHeight;
 }
+
+onMounted(() => {
+    if (!el.value) return;
+
+    try {
+        const resizeObserver = new ResizeObserver(() => {
+            updateSize();
+        });
+        resizeObserver.observe(el.value);
+    }
+    catch (e) {
+        updateSize();
+    }
+});
 </script>
 
 <style lang="scss">
