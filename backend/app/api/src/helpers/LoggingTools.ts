@@ -2,9 +2,13 @@ import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import type { SQLSelect } from '@stamhoofd/sql';
 
 export class LoggingTools {
+    static createProgressLogger(total: number) {
+        return new ProgressLogger(total);
+    }
+
     static async createProgressLoggerFromQuery<T extends object = SQLResultNamespacedRow>(query: SQLSelect<T>) {
         const total = await query.count();
-        return new ProgressLogger(total);
+        return this.createProgressLogger(total);
     }
 }
 
@@ -15,15 +19,33 @@ class ProgressLogger {
 
     constructor(private readonly total: number) {
         this.onePercent = Math.floor(total / 100);
+        this.writeOutput(this.formatProgress(0), false);
     }
 
     update(newProgress = 1) {
         this.progress += newProgress;
 
+        if (this.progress === this.total) {
+            this.progressedLogged = this.total;
+            this.writeOutput(this.formatProgress(100), true);
+            return;
+        }
+
         if ((this.progress - this.progressedLogged) > this.onePercent) {
             this.progressedLogged = this.progress;
-            process.stdout.write(`Progress: ${Math.floor(this.progressedLogged / this.total * 100)}%\r`);
-            // console.log(`progress: ${Math.floor(this.progressedLogged / this.total * 100)}%\r`);
+            const progress = Math.floor(this.progressedLogged / this.total * 100);
+            this.writeOutput(this.formatProgress(progress), true);
         }
+    }
+
+    private formatProgress(progress: number) {
+        return `Progress: ${progress}%`;
+    }
+
+    private writeOutput(text: string, replaceLine = false) {
+        if (replaceLine) {
+            text = '\r' + text;
+        }
+        process.stdout.write(text);
     }
 }
