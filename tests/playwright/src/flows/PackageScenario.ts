@@ -58,7 +58,7 @@ export class PackageScenario {
     // ---- Navigation -------------------------------------------------------
 
     private get dashboardUrl() {
-        return `${WorkerData.urls.dashboard}/dashboard/${this.organization.uri}`;
+        return `${WorkerData.urls.dashboard}/beheerders/${this.organization.uri}`;
     }
 
     async gotoPackages() {

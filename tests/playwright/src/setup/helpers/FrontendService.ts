@@ -7,6 +7,15 @@ import type { ServiceHelper, ServiceProcess } from './ServiceHelper.js';
 
 export type FrontendProjectName = 'dashboard' | 'registration' | 'webshop';
 
+/**
+ * The unified web-app now serves both the dashboard and registration apps.
+ * Map caddy service names to the actual frontend project directory.
+ */
+const projectNameMap: Partial<Record<FrontendProjectName, string>> = {
+    dashboard: 'web-app',
+    registration: 'web-app',
+};
+
 export class FrontendService implements ServiceHelper {
     constructor(
         private name: FrontendProjectName,
@@ -64,7 +73,8 @@ export class FrontendService implements ServiceHelper {
         const thisDirectoryToRoot = await getProjectPath()
         const pathFromRoot = 'frontend/app';
         const distFolder = 'dist-playwright';
-        const sourcePath = `${thisDirectoryToRoot}${pathFromRoot}/${this.name}/${distFolder}`;
+        const projectName = projectNameMap[this.name] ?? this.name;
+        const sourcePath = `${thisDirectoryToRoot}${pathFromRoot}/${projectName}/${distFolder}`;
         return resolve(import.meta.dirname, sourcePath);
     }
 
