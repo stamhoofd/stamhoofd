@@ -394,7 +394,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             name: $t(`%1Of`),
             allowSorting: false,
             getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
+                const registrations = v.filterRegistrations({ groups: groups.length ? groups : null, periodId: filterPeriodId });
 
                 if (registrations.length === 0) {
                     return null;
@@ -420,7 +420,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             name: $t(`%1P8`),
             allowSorting: false,
             getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
+                const registrations = v.filterRegistrations({ groups: groups.length ? groups : null, periodId: filterPeriodId });
 
                 if (registrations.length === 0) {
                     return null;
@@ -472,7 +472,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             name: waitingList ? $t(`%zf`) : $t(`%zg`),
             allowSorting: false,
             getValue: (v) => {
-                const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
+                const registrations = v.filterRegistrations({ groups: groups.length ? groups : null, periodId: filterPeriodId });
 
                 if (registrations.length === 0) {
                     return null;

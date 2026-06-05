@@ -144,7 +144,7 @@ export class MemberActionBuilder {
         }
 
         const groupOrganization = this.organizations[0];
-        const registrations = members.flatMap(m => m.filterRegistrations({ groups: this.groups, organizationId: groupOrganization.id }));
+        const registrations = members.flatMap(m => m.filterRegistrations({ groups: this.groups.length ? this.groups : null, organizationId: groupOrganization.id }));
 
         return new RegistrationsActionBuilder({
             context: this.context,
