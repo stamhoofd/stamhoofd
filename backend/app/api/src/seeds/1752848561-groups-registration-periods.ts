@@ -2,6 +2,7 @@ import { Migration } from '@simonbackx/simple-database';
 import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
 import type { CycleInformation } from '@stamhoofd/structures';
 import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import { LoggingTools } from '../helpers/LoggingTools.js';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -25,15 +26,19 @@ export default new Migration(async () => {
 const cycleIfMigrated = -99;
 
 async function start(dryRun: boolean) {
+    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(Organization.select());
+
     for await (const organization of Organization.select().all()) {
         const groups: Group[] = await Group.select().where('organizationId', organization.id).fetch();
 
         if (groups.length === 0) {
             await createDefaultRegistrationPeriod(organization, dryRun);
+            progressLogger.update();
             continue;
         }
 
         if (groups.some(g => g.cycle === cycleIfMigrated)) {
+            progressLogger.update();
             continue;
         }
 
@@ -50,6 +55,8 @@ async function start(dryRun: boolean) {
         for (const group of allGroups) {
             await cleanupGroup(group, dryRun);
         }
+
+        progressLogger.update();
     }
 }
 
