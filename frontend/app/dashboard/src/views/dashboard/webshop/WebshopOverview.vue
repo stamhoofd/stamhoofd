@@ -926,7 +926,7 @@ async function deleteWebshop() {
             await splitViewController.value.showDetail({
                 components: [
                     new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(AccountSettingsView, {}),
+                        root: new ComponentWithProperties({}, {}), // empty component
                     }),
                 ],
                 animated: false,

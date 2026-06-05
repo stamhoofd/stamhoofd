@@ -6,7 +6,7 @@
             </template>
         </STNavigationBar>
 
-        <main>
+        <main class="center">
             <h1>{{ $t('%1EH') }}</h1>
 
             <template v-if="auth.hasFullAccess()">
