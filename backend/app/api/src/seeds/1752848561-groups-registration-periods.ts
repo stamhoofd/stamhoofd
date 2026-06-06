@@ -2,7 +2,7 @@ import { Migration } from '@simonbackx/simple-database';
 import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
 import type { CycleInformation } from '@stamhoofd/structures';
 import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
-import { LoggingTools } from '../helpers/LoggingTools.js';
+import { LoggingTools } from '@stamhoofd/utility';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {

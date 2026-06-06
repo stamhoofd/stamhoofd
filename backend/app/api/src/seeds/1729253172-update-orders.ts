@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Order } from '@stamhoofd/models';
-import { LoggingTools } from '../helpers/LoggingTools.js';
+import { LoggingTools } from '@stamhoofd/utility';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {

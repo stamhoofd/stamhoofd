@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Member, Registration } from '@stamhoofd/models';
-import { LoggingTools } from '../helpers/LoggingTools.js';
+import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {

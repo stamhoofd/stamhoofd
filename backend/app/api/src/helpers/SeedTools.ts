@@ -1,4 +1,4 @@
-import type { ProgressLogger } from './LoggingTools.js';
+import type { ProgressLogger } from '@stamhoofd/utility';
 
 export class SeedTools {
     static createBatchProcessor<T>(options: BatchProcessorArgs<T>) {

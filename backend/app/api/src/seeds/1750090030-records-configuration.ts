@@ -3,8 +3,8 @@ import { AutoEncoder, field } from '@simonbackx/simple-encoding';
 import { Organization, Webshop } from '@stamhoofd/models';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { DataPermissionsSettings, FinancialSupportSettings, Version } from '@stamhoofd/structures';
+import { LoggingTools } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { LoggingTools } from '../helpers/LoggingTools.js';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 class OldOrganizationRecordsConfiguration extends AutoEncoder {

@@ -2,7 +2,7 @@ import { Migration } from '@simonbackx/simple-database';
 import { Member, mergeMultipleMembers } from '@stamhoofd/models';
 import type { SQLExpression } from '@stamhoofd/sql';
 import { scalarToSQLExpression, SQL, SQLAlias, SQLSelectAs, SQLWhereEqual, SQLWhereSign } from '@stamhoofd/sql';
-import { LoggingTools } from '../helpers/LoggingTools.js';
+import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 
 // should be run before any migration where a member is saved

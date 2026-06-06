@@ -1,7 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { DocumentTemplate, Group } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { LoggingTools } from '../helpers/LoggingTools.js';
+import { LoggingTools } from '@stamhoofd/utility';
 
 export async function migrateDocumentYears() {
     const progressLogger = await LoggingTools.createProgressLoggerFromQuery(DocumentTemplate.select());

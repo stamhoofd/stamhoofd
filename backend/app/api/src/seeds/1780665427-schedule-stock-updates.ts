@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Registration } from '@stamhoofd/models';
-import { LoggingTools } from '../helpers/LoggingTools.js';
+import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 import { RegistrationService } from '../services/RegistrationService.js';
 
