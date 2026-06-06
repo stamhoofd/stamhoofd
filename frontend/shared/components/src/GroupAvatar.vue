@@ -96,7 +96,6 @@ const logoSrcSet = computed(() => {
         line-height: var(--block-width, 40px);
         font-weight: $font-weight-bold;
         position: relative;
-        text-box-trim: trim-both;
 
         font-size: min(calc(var(--block-width, 40px) / 2.5), 14px);
 
