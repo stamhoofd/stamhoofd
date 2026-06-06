@@ -59,7 +59,7 @@
     "translate": "yarn translate:keys && yarn translate:compress && yarn translate:machine",
     "frontend:types": "wait-on shared/locales/dist/index.d.ts && cd frontend/app/dashboard && yarn -s typecheck",
     "prepare": "husky",
-    "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
+    "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
   },
   "dependencies": {
     "@simonbackx/simple-encoding": "2.26.6",
