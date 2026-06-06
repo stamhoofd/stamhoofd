@@ -28,6 +28,30 @@ export const localFilesAccessKey = 'stamhoofd-local';
 export const localFilesSecretKey = 'stamhoofd-local-secret';
 export const localPrimaryBucket = 'stamhoofd-local';
 
+export const defaultMysqlInnodbBufferPoolSize = '4G';
+export const defaultInnodbBufferPoolInstances = '4';
+export const defaultMysqlSortBufferSize = '2M';
+
+/**
+ * Build the MySQL server arguments passed to the Docker container.
+ *
+ * The InnoDB buffer pool and sort buffer sizes can be tuned through the
+ * STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE and STAMHOOFD_MYSQL_SORT_BUFFER_SIZE
+ * environment variables (e.g. "512M", "1G"), falling back to safe defaults.
+ */
+export function mysqlServerArgs(): string[] {
+    const innodbBufferPoolSize = process.env.STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE ?? defaultMysqlInnodbBufferPoolSize;
+    const bufferPoolInstances = process.env.STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES ?? defaultInnodbBufferPoolInstances;
+    const sortBufferSize = process.env.STAMHOOFD_MYSQL_SORT_BUFFER_SIZE ?? defaultMysqlSortBufferSize;
+
+    return [
+        '--mysql-native-password=ON',
+        `--innodb-buffer-pool-size=${innodbBufferPoolSize}`,
+        `--innodb-buffer-pool-instances=${bufferPoolInstances}`,
+        `--sort-buffer-size=${sortBufferSize}`,
+    ];
+}
+
 export const mysqlInternalPort = 3306;
 export const maildevInternalSmtpPort = 1025;
 export const maildevInternalHttpPort = 1080;

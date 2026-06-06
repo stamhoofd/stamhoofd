@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { caddyDataDir, localIpv4Host, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
+import { caddyDataDir, localIpv4Host, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
 import { buildBackendEnv } from '../config/build-config.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
@@ -161,7 +161,7 @@ async function removeTsBuildInfo(packagePath: string): Promise<void> {
 async function startTestMysql(context: CliContext): Promise<string> {
     console.log('Starting isolated test MySQL...');
     await docker.removeContainer(testMysqlContainer, context.verbose);
-    await docker.run(['run', '-d', '--name', testMysqlContainer, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), mysqlImage, '--mysql-native-password=ON', '--sort-buffer-size=2M'], { quiet: true, verbose: context.verbose });
+    await docker.run(['run', '-d', '--name', testMysqlContainer, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), mysqlImage, ...mysqlServerArgs()], { quiet: true, verbose: context.verbose });
     await docker.waitForMysql(testMysqlContainer);
     await docker.run(['exec', testMysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], { quiet: true, verbose: context.verbose });
 
@@ -184,7 +184,7 @@ async function startE2eMysql(context: CliContext, clear: boolean): Promise<strin
     if (!await docker.containerIsRunning(e2eMysqlContainer)) {
         await docker.removeContainer(e2eMysqlContainer, context.verbose);
         await docker.createVolume(e2eMysqlDataVolume, context.verbose);
-        await docker.run(['run', '-d', '--name', e2eMysqlContainer, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${e2eMysqlDataVolume}:/var/lib/mysql`, mysqlImage, '--mysql-native-password=ON', '--sort-buffer-size=2M'], { quiet: true, verbose: context.verbose });
+        await docker.run(['run', '-d', '--name', e2eMysqlContainer, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${e2eMysqlDataVolume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()], { quiet: true, verbose: context.verbose });
     }
 
     await docker.waitForMysql(e2eMysqlContainer);

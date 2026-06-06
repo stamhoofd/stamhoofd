@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, localFilesAccessKey, localFilesSecretKey, localhostPort, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
+import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, defaultMysqlInnodbBufferPoolSize, defaultMysqlSortBufferSize, localFilesAccessKey, localFilesSecretKey, localhostPort, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
 import { buildSharedServiceProfile } from '../config/shared-service-profile.js';
 import { run } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
@@ -27,6 +27,25 @@ describe('shared service Docker args', () => {
     it('builds MySQL args with local port binding and volume', () => {
         expect(MysqlService.dockerArgs(3307)).toContain(localhostPortMapping(3307, mysqlInternalPort));
         expect(MysqlService.dockerArgs(3307)).toContain(`${mysqlDataVolume}:/var/lib/mysql`);
+    });
+
+    it('uses default MySQL buffer sizes', () => {
+        const args = MysqlService.dockerArgs(3307);
+
+        expect(args).toContain(`--innodb-buffer-pool-size=${defaultMysqlInnodbBufferPoolSize}`);
+        expect(args).toContain(`--sort-buffer-size=${defaultMysqlSortBufferSize}`);
+    });
+
+    it('allows tuning MySQL buffer sizes through environment variables', () => {
+        vi.stubEnv('STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE', '1G');
+        vi.stubEnv('STAMHOOFD_MYSQL_SORT_BUFFER_SIZE', '8M');
+
+        const args = MysqlService.dockerArgs(3307);
+
+        expect(args).toContain('--innodb-buffer-pool-size=1G');
+        expect(args).toContain('--sort-buffer-size=8M');
+
+        vi.unstubAllEnvs();
     });
 
     it('builds MailDev args with credentials', () => {

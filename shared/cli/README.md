@@ -87,8 +87,19 @@ Useful environment variables:
 - `STAMHOOFD_PORT_OFFSET` overrides the deterministic port offset.
 - `STAMHOOFD_DOMAIN` overrides the shared local domain, defaulting to `stamhoofd`.
 - `MYSQL_PORT` overrides the local MySQL host port, defaulting to `3307`.
+- `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE` tunes the MySQL container InnoDB buffer pool size (e.g. `512M`, `1G`), defaulting to `4G`.
+- `STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES` tunes the MySQL container  InnoDB buffer pool instances defaulting to `4`.
+- `STAMHOOFD_MYSQL_SORT_BUFFER_SIZE` tunes the MySQL container sort buffer size (e.g. `8M`), defaulting to `2M`.
 
 The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the first workspace in `jj workspace list`. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
+
+When needing a heavy duty MySQL instance to test migrations, you can restart MySQL using:
+```
+STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES=10 \
+STAMHOOFD_MYSQL_SORT_BUFFER_SIZE=64M \
+STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE=16G \
+stam services restart
+```
 
 ### Shared Services
 
