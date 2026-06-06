@@ -1,12 +1,9 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import type { SQLSelect } from '@stamhoofd/sql';
-
 export class LoggingTools {
     static createProgressLogger(total: number, options?: ProgressLoggerOptions) {
         return new ProgressLogger(total, options);
     }
 
-    static async createProgressLoggerFromQuery<T extends object = SQLResultNamespacedRow>(query: SQLSelect<T>, options?: ProgressLoggerOptions) {
+    static async createProgressLoggerFromQuery(query: { count: () => Promise<number> }, options?: ProgressLoggerOptions) {
         const total = await query.count();
         return this.createProgressLogger(total, options);
     }
