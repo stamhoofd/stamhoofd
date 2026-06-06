@@ -3,12 +3,11 @@ import { logger, StyledText } from '@simonbackx/simple-logging';
 import chalk from 'chalk';
 
 const UNIQUE_KEY_PLATFORM = 'memberNumber';
-const UNIQUE_KEY_ORGANIZATION = 'memberNumber_organizationId';
 
 /**
  * This service is responsible for creating MySQL unique constraints on boot depending on the environment configuration.
  * If STAMHOOFD.userMode = 'platform' then we'll create a unique constraint on the memberNumber column of the member table.
- * If 'organization' we will create a unique constraint on memberNumber and organizationId.
+ * If not, we'll delete the constraint if it exists.
  */
 export class UniqueMemberNumberService {
     static async check() {
@@ -19,11 +18,6 @@ export class UniqueMemberNumberService {
             tags: ['unique-member-number-service'],
         }, async () => {
             if (STAMHOOFD.userMode === 'platform') {
-                if (await this.hasUniqueConstraint(UNIQUE_KEY_ORGANIZATION)) {
-                    console.warn('Unique constraint for userMode organization exists but should be removed. Deleting it now...');
-                    await this.dropConstraint(UNIQUE_KEY_ORGANIZATION);
-                }
-
                 if (!(await this.hasUniqueConstraint(UNIQUE_KEY_PLATFORM))) {
                     console.warn('Unique constraint for userMode platform is missing. Creating it now...');
                     await this.createConstraintForPlatform();
@@ -32,11 +26,6 @@ export class UniqueMemberNumberService {
                 if (await this.hasUniqueConstraint(UNIQUE_KEY_PLATFORM)) {
                     console.warn('Unique constraint for userMode platform exists but should be removed. Deleting it now...');
                     await this.dropConstraint(UNIQUE_KEY_PLATFORM);
-                }
-
-                if (!(await this.hasUniqueConstraint(UNIQUE_KEY_ORGANIZATION))) {
-                    console.warn('Unique constraint for userMode organization is missing. Creating it now...');
-                    await this.createConstraintForOrganization();
                 }
             }
         });
@@ -53,16 +42,6 @@ export class UniqueMemberNumberService {
             console.log('Unique constraint dropped.');
         } catch (e) {
             console.error(chalk.red(`Failed to drop unique constraint "${key}" of members table:`));
-            console.error(e);
-        }
-    }
-
-    private static async createConstraintForOrganization() {
-        try {
-            await Database.statement('ALTER TABLE `members` ADD UNIQUE INDEX `' + UNIQUE_KEY_ORGANIZATION + '` (`memberNumber`, `organizationId`) USING BTREE;');
-            console.log('Unique constraint created.');
-        } catch (e) {
-            console.error(chalk.red('Failed to create unique constraint on memberNumber and organizationId column of members table:'));
             console.error(e);
         }
     }
