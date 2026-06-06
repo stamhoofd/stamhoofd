@@ -10,3 +10,4 @@ export * from './WebshopRoutes.js';
 export * from './deepFreeze.js';
 export * from './FiscalDocumentYearHelper.js';
 export * from './STMath.js';
+export * from './LoggingTools.js';

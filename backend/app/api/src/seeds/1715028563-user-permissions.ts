@@ -1,6 +1,8 @@
 import { Migration } from '@simonbackx/simple-database';
 import { User } from '@stamhoofd/models';
 import { UserPermissions } from '@stamhoofd/structures';
+import { LoggingTools } from '@stamhoofd/utility';
+import { SeedTools } from '../helpers/SeedTools.js';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == 'test') {
@@ -8,41 +10,28 @@ export default new Migration(async () => {
         return;
     }
     process.stdout.write('\n');
-    let c = 0;
-    while (true) {
-        const admins = await User.where({
-            organizationPermissions: {
-                value: null,
-                sign: '!=',
-            },
-            organizationId: {
-                value: null,
-                sign: '!=',
-            },
-        }, { limit: 100 });
 
-        for (const admin of admins) {
+    const getQuery = () => User.select().whereNot('organizationPermissions', null).whereNot('organizationId', null);
+
+    const batchProcessor = SeedTools.createBatchProcessor({
+        batchSize: 100,
+        action: async (admin: User) => {
             if (!admin.organizationPermissions || !admin.organizationId) {
-                continue;
+                return;
             }
             const p = UserPermissions.create({});
             p.organizationPermissions.set(admin.organizationId, admin.organizationPermissions);
             admin.permissions = UserPermissions.limitedAdd(admin.permissions, p, admin.organizationId);
             admin.organizationPermissions = null;
             await admin.save();
-            c++;
+        },
+    });
 
-            if (c % 1000 === 0) {
-                process.stdout.write('.');
-            }
-            if (c % 10000 === 0) {
-                process.stdout.write('\n');
-            }
-        }
+    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(getQuery());
+    batchProcessor.setProgressLogger(progressLogger);
 
-        if (admins.length === 0) {
-            break;
-        }
+    for await (const admin of getQuery().limit(100).all()) {
+        await batchProcessor.execute(admin);
     }
 
     // Do something here

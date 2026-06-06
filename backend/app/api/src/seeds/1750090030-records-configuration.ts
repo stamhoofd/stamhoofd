@@ -3,7 +3,9 @@ import { AutoEncoder, field } from '@simonbackx/simple-encoding';
 import { Organization, Webshop } from '@stamhoofd/models';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { DataPermissionsSettings, FinancialSupportSettings, Version } from '@stamhoofd/structures';
+import { LoggingTools } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
+import { SeedTools } from '../helpers/SeedTools.js';
 
 class OldOrganizationRecordsConfiguration extends AutoEncoder {
     /**
@@ -47,31 +49,45 @@ export class OldOrganization extends QueryableModel {
 }
 
 export async function startRecordsConfigurationMigration() {
-    // migrate recordsConfiguration of organizations
-    for await (const oldOrganization of OldOrganization.select()
-        // prevent migrating same organizations twice if something goes wrong
-        .where(SQL.jsonValue(SQL.column('meta'), '$.version'), '<', Version)
-        .all()) {
-        const oldFinancialSupport = oldOrganization.meta.recordsConfiguration.financialSupport;
-        const oldDataPermission = oldOrganization.meta.recordsConfiguration.dataPermission;
+    const batchProcessor = SeedTools.createBatchProcessor({
+        batchSize: 100,
+        action: async (oldOrganization: OldOrganization) => {
+            const oldFinancialSupport = oldOrganization.meta.recordsConfiguration.financialSupport;
+            const oldDataPermission = oldOrganization.meta.recordsConfiguration.dataPermission;
 
-        if (oldFinancialSupport || oldDataPermission) {
-            const newOrganization = await Organization.getByID(oldOrganization.id);
+            if (oldFinancialSupport || oldDataPermission) {
+                const newOrganization = await Organization.getByID(oldOrganization.id);
 
-            if (!newOrganization) {
-                throw new Error('Organization with id ' + oldOrganization.id + ' not found');
+                if (!newOrganization) {
+                    throw new Error('Organization with id ' + oldOrganization.id + ' not found');
+                }
+
+                newOrganization.meta.financialSupport = oldFinancialSupport;
+                newOrganization.meta.dataPermission = oldDataPermission;
+
+                await newOrganization.save();
             }
+        },
+    });
 
-            newOrganization.meta.financialSupport = oldFinancialSupport;
-            newOrganization.meta.dataPermission = oldDataPermission;
+    const createOldOrganizationsQuery = () => OldOrganization.select()
+    // prevent migrating same organizations twice if something goes wrong
+        .where(SQL.jsonValue(SQL.column('meta'), '$.version'), '<', Version);
 
-            await newOrganization.save();
-        }
+    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(createOldOrganizationsQuery());
+    batchProcessor.setProgressLogger(progressLogger);
+
+    // migrate recordsConfiguration of organizations
+    for await (const oldOrganization of createOldOrganizationsQuery().all()) {
+        await batchProcessor.execute(oldOrganization);
     }
 
+    const webshopProgressLogger = await LoggingTools.createProgressLoggerFromQuery(Webshop.select());
+
     // migrate recordsConfiguration of webshops
-    for await (const webshop of Webshop.select().all()) {
+    for await (const webshop of Webshop.select().limit(100).all()) {
         await webshop.save();
+        webshopProgressLogger.update();
     }
 }
 

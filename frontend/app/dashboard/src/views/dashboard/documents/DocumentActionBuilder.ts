@@ -1,14 +1,14 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
+import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
+import EmailView from '@stamhoofd/components/email/EmailView.vue';
+import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { TableAction, TableActionSelection } from '@stamhoofd/components/tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction } from '@stamhoofd/components/tables/classes/TableAction.ts';
-import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
-import EmailView from '@stamhoofd/components/email/EmailView.vue';
-import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
-import { LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { downloadDocuments } from '@stamhoofd/document-helper';
 import type { SessionContext } from '@stamhoofd/networking/SessionContext';
 import type { DocumentTemplatePrivate } from '@stamhoofd/structures';
@@ -34,7 +34,9 @@ export class DocumentActionBuilder {
     }
 
     getActions(): TableAction<DocumentStruct>[] {
-        return [
+        const actions: TableAction<DocumentStruct>[] = [];
+
+        actions.push(
             new InMemoryTableAction({
                 name: $t(`%1B7`),
                 icon: 'download',
@@ -68,21 +70,27 @@ export class DocumentActionBuilder {
                     await this.editDocument(documents[0]);
                 },
             }),
+        );
 
-            new InMemoryTableAction({
-                name: $t(`%KK`),
-                icon: 'copy',
-                priority: 1,
-                groupIndex: 2,
-                needsSelection: true,
-                singleSelection: true,
-                allowAutoSelectAll: false,
-                handler: async (documents: DocumentStruct[]) => {
-                    await this.duplicateDocument(documents[0]);
-                },
-            }),
+        if (!this.template.isLocked) {
+            actions.push(
+                new InMemoryTableAction({
+                    name: $t(`%KK`),
+                    icon: 'copy',
+                    priority: 1,
+                    groupIndex: 2,
+                    needsSelection: true,
+                    singleSelection: true,
+                    allowAutoSelectAll: false,
+                    handler: async (documents: DocumentStruct[]) => {
+                        await this.duplicateDocument(documents[0]);
+                    },
+                }),
+            );
+        }
 
-            new InMemoryTableAction({
+        if (!this.template.isLocked) {
+            actions.push(new InMemoryTableAction({
                 name: $t(`%CJ`),
                 icon: 'trash',
                 destructive: true,
@@ -93,9 +101,9 @@ export class DocumentActionBuilder {
                 handler: async (documents: DocumentStruct[]) => {
                     await this.deleteDocuments(documents);
                 },
-            }),
+            }));
 
-            new InMemoryTableAction({
+            actions.push(new InMemoryTableAction({
                 name: $t(`%KL`),
                 icon: 'undo',
                 priority: 1,
@@ -105,8 +113,10 @@ export class DocumentActionBuilder {
                 handler: async (documents: DocumentStruct[]) => {
                     await this.undoDocuments(documents);
                 },
-            }),
-        ];
+            }));
+        }
+
+        return actions;
     }
 
     async openMail(selection: TableActionSelection<DocumentStruct>) {
@@ -148,6 +158,10 @@ export class DocumentActionBuilder {
     }
 
     async editDocument(document: DocumentStruct) {
+        if (document.isLocked) {
+            Toast.error($t('Dit document is vergrendeld en kan niet meer gewijzigd worden.')).show();
+            return;
+        }
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditDocumentView" */ './EditDocumentView.vue'), {
             document,
             template: this.template,
@@ -221,6 +235,11 @@ export class DocumentActionBuilder {
     }
 
     async duplicateDocument(document: DocumentStruct) {
+        if (document.isLocked) {
+            Toast.error($t('Dit document is vergrendeld en kan niet gedupliceerd worden.')).show();
+            return;
+        }
+
         if (!(await CenteredMessage.confirm($t(`%KQ`), $t(`%KK`), $t(`%KR`)))) {
             return;
         }

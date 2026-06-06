@@ -1,5 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Order } from '@stamhoofd/models';
+import { LoggingTools } from '@stamhoofd/utility';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -10,12 +11,13 @@ export default new Migration(async () => {
     console.log('Start saving orders.');
 
     const batchSize = 100;
-    let count = 0;
+
+    const ordersProgressLogger = await LoggingTools.createProgressLoggerFromQuery(Order.select(), { tag: 'Update-orders' });
 
     for await (const order of Order.select().limit(batchSize).all()) {
         await order.save();
-        count += 1;
+        ordersProgressLogger.update();
     }
 
-    console.log('Finished saving ' + count + ' orders.');
+    console.log('Finished saving ' + ordersProgressLogger.total + ' orders.');
 });
