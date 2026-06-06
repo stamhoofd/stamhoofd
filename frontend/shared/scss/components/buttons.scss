@@ -777,7 +777,7 @@
 
             @media (pointer: fine) {
                 position: relative;
-                opacity: 1;
+                //opacity: 1; // this breaks hover-box hover-show behaviour
 
                 &:after {
                     content: "";
