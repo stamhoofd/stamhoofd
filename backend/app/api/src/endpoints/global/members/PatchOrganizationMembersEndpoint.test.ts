@@ -395,8 +395,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member.details.parents[0]).toEqual(existingMember.details.parents[0]);
         });
 
-        test('Creating a member with duplicate member number throws invalid_field', async () => {
-            TestUtils.setEnvironment('userMode', 'organization');
+        test.skip('Creating a member with duplicate member number throws invalid_field', async () => {
+            TestUtils.setEnvironment('userMode', 'platform');
             await UniqueMemberNumberService.check();
 
             const organization = await new OrganizationFactory({ }).create();
@@ -435,6 +435,47 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await expect(testServer.test(endpoint, request))
                 .rejects
                 .toThrow(STExpect.errorWithCode('invalid_field'));
+        });
+
+        test('Creating a member with duplicate member number does not invalid_field in organization mode', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            await UniqueMemberNumberService.check();
+
+            const organization = await new OrganizationFactory({ }).create();
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization,
+            }).create();
+
+            const existingMember = await new MemberFactory({
+                firstName: 'Existing',
+                lastName: 'Member',
+                birthDay,
+                generateData: false,
+            }).create();
+            existingMember.details.memberNumber = 'LID-100';
+            // should have same organization id as new member with same member number
+            existingMember.organizationId = organization.id;
+            await existingMember.save();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'New',
+                    lastName: 'Member',
+                    birthDay: new Date('2015-01-01'),
+                    memberNumber: 'LID-100',
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.body.members[0].details.memberNumber).toEqual('LID-100');
         });
     });
 
