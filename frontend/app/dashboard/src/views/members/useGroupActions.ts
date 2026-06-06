@@ -110,12 +110,12 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             await save([OrganizationRegistrationPeriod.patch({ id: props.period.id, settings })], [props.period]);
         }
 
-        async function moveTo(category: GroupCategory) {
+        async function moveTo(category: GroupCategory, period: OrganizationRegistrationPeriod) {
             // Only confirm when saving directly to the API, otherwise the change is collected in memory
             if (!saveHandler && !await CenteredMessage.confirm({
                 title: $t('Ben je zeker dat je de groep ‘{groupName}’ wilt verplaatsen naar ‘{categoryName}’?', {
                     groupName: props.group.settings.name.toString(),
-                    categoryName: category.getName(),
+                    categoryName: category.getName(period),
                 }),
                 confirmText: $t('Ja, verplaatsen'),
             })) {
@@ -141,7 +141,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
 
             showSuccessToast($t('‘{groupName}’ is verplaatst naar ‘{categoryName}’', {
                 groupName: props.group.settings.name.toString(),
-                categoryName: category.getName(),
+                categoryName: category.getName(period),
             }));
         }
 
@@ -150,7 +150,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             if (!saveHandler && !await CenteredMessage.confirm({
                 title: $t('Ben je zeker dat je de groep ‘{groupName}’ wilt verplaatsen naar ‘{categoryName}’ in {periodName}?', {
                     groupName: props.group.settings.name.toString(),
-                    categoryName: category.getName(),
+                    categoryName: category.getName(otherPeriod),
                     periodName: otherPeriod.period.name,
                 }),
                 confirmText: $t('Ja, verplaatsen'),
@@ -189,7 +189,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
 
             showSuccessToast($t('‘{groupName}’ is verplaatst naar ‘{categoryName}’ in {periodName}', {
                 groupName: props.group.settings.name.toString(),
-                categoryName: category.getName(),
+                categoryName: category.getName(otherPeriod),
                 periodName: otherPeriod.period.name,
             }));
         }
@@ -356,7 +356,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                     });
                 }
                 const menuItems = p.availableCategories.filter(c => c.categories.length === 0).map(c => new ContextMenuItem({
-                    name: c.getName(),
+                    name: c.getName(props.period),
                     rightText: c.groupIds.length + '',
                     action: () => {
                         moveToOtherPeriod(p, c).catch(console.error);
@@ -409,10 +409,10 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
                         childMenu: new ContextMenu([
                             allCategories.map(cat =>
                                 new ContextMenuItem({
-                                    name: cat.getName(),
+                                    name: cat.getName(props.period),
                                     rightText: cat.groupIds.length + '',
                                     action: async () => {
-                                        await moveTo(cat);
+                                        await moveTo(cat, props.period);
                                         return true;
                                     },
                                 }),

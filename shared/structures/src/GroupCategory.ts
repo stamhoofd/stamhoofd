@@ -141,16 +141,16 @@ export class GroupCategory extends AutoEncoder {
         return this.settings.name;
     }
 
-    get isRoot() {
-        return this.id === 'root';
+    isRoot(period: { settings: { rootCategoryId: string } }) {
+        return this.id === period.settings.rootCategoryId;
     }
 
     /**
      * Returns the display name of this category. The root category has no name of its own,
      * so we return a sensible default based on whether it holds subcategories or only groups.
      */
-    getName(): string {
-        if (this.isRoot && !this.settings.name) {
+    getName(period: { settings: { rootCategoryId: string } }): string {
+        if (this.isRoot(period) && !this.settings.name) {
             return this.categoryIds.length > 0 ? $t('Hoofdcategorie') : $t('Leeftijdsgroepen');
         }
         return this.settings.name || $t('Naamloos');

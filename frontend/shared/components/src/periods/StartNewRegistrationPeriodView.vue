@@ -127,11 +127,11 @@ type Row =
 const loading = ref(false);
 const organization = useOrganization();
 
-function buildRows(tree: GroupCategoryTree, depth: number): Row[] {
+function buildRows(period: OrganizationRegistrationPeriod, tree: GroupCategoryTree, depth: number): Row[] {
     const rows: Row[] = [];
 
     for (const category of tree.categories) {
-        const c = buildRows(category, depth + 1);
+        const c = buildRows(period, category, depth + 1);
         if (c.length === 0) {
             continue;
         }
@@ -139,7 +139,7 @@ function buildRows(tree: GroupCategoryTree, depth: number): Row[] {
             type: 'category',
             key: 'category-' + category.id,
             depth,
-            name: category.getName(),
+            name: category.getName(period),
         });
         rows.push(...c);
     }
@@ -164,7 +164,7 @@ const rows = computed(() => {
         return [];
     }
 
-    const result = buildRows(period.adminCategoryTree, 0);
+    const result = buildRows(period, period.adminCategoryTree, 0);
 
     // Waiting lists are stored separately from the category tree, so append them at the bottom
     for (const waitingList of period.waitingLists) {

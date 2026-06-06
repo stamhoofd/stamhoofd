@@ -1,9 +1,9 @@
 <template>
     <STMenuCategory
         v-for="category in tree.categories"
-        :id="category.isRoot ? null : category.id"
+        :id="category.isRoot(period) ? null : category.id"
         :key="category.id"
-        :title="category.isRoot ? null : category.settings.name"
+        :title="category.isRoot(period) ? null : category.settings.name"
         type="members"
         :selected="checkRoute(Routes.Category, {properties: {category, period}})"
         @open="$navigate(Routes.Category, {properties: {category, period}})"

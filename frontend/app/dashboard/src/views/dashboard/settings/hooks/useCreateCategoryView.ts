@@ -29,7 +29,7 @@ export function useCreateCategoryView(saveHandler?: (patch: PatchableArrayAutoEn
         if (parentCategory.groupIds.length > 0) {
             const groupsCategory = GroupCategory.create({
                 settings: GroupCategorySettings.create({
-                    name: parentCategory.getName(),
+                    name: parentCategory.getName(period),
                 }),
                 groupIds: [...parentCategory.groupIds],
             });
