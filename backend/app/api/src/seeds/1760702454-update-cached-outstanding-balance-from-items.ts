@@ -11,7 +11,7 @@ export default new Migration(async () => {
     }
 
     process.stdout.write('\n');
-    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(BalanceItem.select());
+    const progressLogger = await LoggingTools.createProgressLoggerFromQuery(BalanceItem.select(), { tag: 'Update-outstanding-balance' });
 
     await logger.setContext({ tags: ['silent-seed', 'seed'] }, async () => {
         for await (const items of BalanceItem.select().limit(1000).allBatched()) {
