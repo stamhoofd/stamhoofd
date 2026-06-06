@@ -19,7 +19,7 @@ export async function setup() {
 
     const { Database } = await import('@simonbackx/simple-database');
 
-    const { run } = await import('../src/migrate.js');
+    const { run } = await import('../dist/src/migrate.js');
     await run();
 
     await Database.end();
