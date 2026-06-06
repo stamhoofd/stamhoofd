@@ -55,11 +55,11 @@ export async function buildAll(context: CliContext): Promise<void> {
 }
 
 export async function lint(context: CliContext): Promise<void> {
-    await run('yarn', ['-s', 'lerna', 'run', 'lint', '--', '--quiet'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
+    await run('yarn', ['-s', 'lerna', 'run', 'lint', '--', '--', '--quiet'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
 }
 
 export async function typecheck(context: CliContext): Promise<void> {
-    await run('yarn', ['-s', 'lerna', 'run', 'typecheck', '--'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
+    await run('yarn', ['-s', 'lerna', 'run', 'typecheck'], { cwd: context.rootDir, env: { NX_DAEMON: 'false' }, verbose: context.verbose });
 }
 
 export async function migrate(context: CliContext): Promise<void> {
