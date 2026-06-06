@@ -79,8 +79,10 @@
         }
         &:after {
             color: $color-background;
+            color: var(--color-current-background, #{$color-background});
             -webkit-text-stroke: 5px $color-background;
-            z-index: -1;
+            -webkit-text-stroke: 5px var(--color-current-background, #{$color-background});
+            z-index: -1;            
         }
     }
 
