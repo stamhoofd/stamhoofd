@@ -32,12 +32,20 @@ class BatchProcessor<T> {
 
     async execute(item: T): Promise<void> {
         if (this.currentBatch.length === this.batchSize) {
-            await Promise.all(this.currentBatch);
-            this.currentBatch = [];
+            await this.finishCurrentBatch();
         }
 
         if (this.currentBatch.length < this.batchSize) {
             this.currentBatch.push(this.action(item));
         }
+    }
+
+    private async finishCurrentBatch() {
+        await Promise.all(this.currentBatch);
+        this.currentBatch = [];
+    }
+
+    async finish(): Promise<void> {
+        await this.finishCurrentBatch();
     }
 }

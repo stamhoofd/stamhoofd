@@ -82,6 +82,8 @@ export async function startRecordsConfigurationMigration() {
         await batchProcessor.execute(oldOrganization);
     }
 
+    await batchProcessor.finish();
+
     const webshopProgressLogger = await LoggingTools.createProgressLoggerFromQuery(Webshop.select());
 
     // migrate recordsConfiguration of webshops

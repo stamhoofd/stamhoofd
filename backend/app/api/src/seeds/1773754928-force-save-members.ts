@@ -27,6 +27,8 @@ async function migrateMembers() {
     for await (const member of Member.select().all()) {
         await batchProcessor.execute(member);
     }
+
+    await batchProcessor.finish();
 }
 
 async function migrateRegistrations() {
@@ -46,4 +48,6 @@ async function migrateRegistrations() {
     for await (const registration of Registration.select().all()) {
         await batchProcessor.execute(registration);
     }
+
+    await batchProcessor.finish();
 }

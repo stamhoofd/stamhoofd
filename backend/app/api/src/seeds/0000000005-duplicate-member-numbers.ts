@@ -81,6 +81,8 @@ async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolea
         await memberBatchProcessor.execute(member);
     }
 
+    await memberBatchProcessor.finish();
+
     const mergeBatchProcessor = SeedTools.createBatchProcessor({
         batchSize: 100,
         action: async ([number, members]: [string, Member[]]) => {
@@ -112,6 +114,8 @@ async function migrateDuplicateMemberNumbers({ dryRun, doLog }: { dryRun: boolea
     for (const entry of duplicateMembers) {
         await mergeBatchProcessor.execute(entry);
     }
+
+    await mergeBatchProcessor.finish();
 
     // check if there are still duplicate member numbers
     const remainingDuplicateMemberNumbers = await getDuplicateMemberNumbers();

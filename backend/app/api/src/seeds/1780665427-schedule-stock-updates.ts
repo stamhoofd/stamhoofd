@@ -28,4 +28,6 @@ export default new Migration(async () => {
     for await (const registration of Registration.select().all()) {
         await batchProcessor.execute(registration);
     }
+
+    await batchProcessor.finish();
 });

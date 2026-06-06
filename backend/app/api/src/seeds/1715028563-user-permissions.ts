@@ -34,6 +34,8 @@ export default new Migration(async () => {
         await batchProcessor.execute(admin);
     }
 
+    await batchProcessor.finish();
+
     // Do something here
     return Promise.resolve();
 });
