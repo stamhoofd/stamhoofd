@@ -50,6 +50,20 @@ export async function removeVolume(name: string, verbose = false): Promise<void>
     await run(['volume', 'rm', '-f', name], { quiet: true, allowFailure: true, verbose });
 }
 
+export async function copyVolumeToDirectory(volume: string, hostDir: string, image: string, verbose = false): Promise<void> {
+    await run(['run', '--rm', '--entrypoint', 'sh',
+        '-v', `${volume}:/source:ro`,
+        '-v', `${hostDir}:/dest`,
+        image, '-c', 'cp -a /source/. /dest/'], { quiet: !verbose, verbose });
+}
+
+export async function copyDirectoryToVolume(hostDir: string, volume: string, image: string, verbose = false): Promise<void> {
+    await run(['run', '--rm', '--entrypoint', 'sh',
+        '-v', `${hostDir}:/source:ro`,
+        '-v', `${volume}:/dest`,
+        image, '-c', 'cp -a /source/. /dest/'], { quiet: !verbose, verbose });
+}
+
 export async function waitForMysql(container: string, verbose = false): Promise<void> {
     if (verbose) {
         console.log('Waiting for MySQL to accept connections...');

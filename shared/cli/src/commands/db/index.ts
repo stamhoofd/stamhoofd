@@ -10,6 +10,9 @@ export default class Db extends Command {
         'stam db copy --from stamhoofd-development --to stamhoofd-development-backup',
         'stam db move --from stamhoofd-development-backup --to stamhoofd-development-old',
         'stam db remove --from stamhoofd-development-old',
+        'stam db backup --name before-migration',
+        'stam db backup list',
+        'stam db restore --name before-migration',
     ];
 
     async run(): Promise<void> {
