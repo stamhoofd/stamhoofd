@@ -60,7 +60,6 @@
     "frontend:types": "wait-on shared/locales/dist/index.d.ts && cd frontend/app/dashboard && yarn -s typecheck",
     "prepare": "husky",
     "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns",
-    "install-vscode-extensions": "code --install-extension ./.vscode/extensions/vue.volar-2.2.10.vsix --force"
   },
   "dependencies": {
     "@simonbackx/simple-encoding": "2.26.6",
