@@ -1252,8 +1252,6 @@ button.style-price-big {
 
 .style-image-with-icon {
     position: relative;
-    margin-right: 5px;
-
     // Default color primary for icon
     color: $color-primary-dark;
     
@@ -1351,6 +1349,12 @@ button.style-price-big {
             color: $color-dark;
         }
     }
+    
+    &.transparent {
+        figure {
+            background: transparent;
+        }
+    }
 
     .image-component {
         width: var(--block-width, 40px);
@@ -1433,9 +1437,17 @@ button.style-price-big {
         position: absolute;
         right: 0;
         bottom: 0;
+        transform-origin: bottom right;
         background: $color-background;
         border-radius: 40px;
-        transform: translate(40%, 40%);
+        transform: translate(50%, 50%);
+
+        // The following does not work in Firefox because it does not support typed arithmetic (10px / 10px should equal 1, but is invalid in firefox)
+        @supports (transform: scale(calc(10px / 15px), calc(10px / 15px))) {
+            --block-aside-scale: min(1, calc(var(--block-width, 40px) / 36px));
+        }
+        transform: scale(var(--block-aside-scale, 1), var(--block-aside-scale, 1)) translate(50%, 50%);
+
         line-height: 1;
         display: block;
 
