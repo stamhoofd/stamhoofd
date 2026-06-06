@@ -1,11 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Setup, { SetupAction } from './index.js';
 import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js';
+import { setupShellShortcut } from '../../workflows/setup-shell.js';
 
 vi.mock('../../workflows/setup-machine.js', () => ({
     runSetup: vi.fn(),
     setupCert: vi.fn(),
     setupDns: vi.fn(),
+}));
+
+vi.mock('../../workflows/setup-shell.js', () => ({
+    setupShellShortcut: vi.fn(),
 }));
 
 describe('Setup command', () => {
@@ -47,6 +52,18 @@ describe('Setup command', () => {
         await command.run();
 
         expect(setupCert).toHaveBeenCalledWith({ context: 'setup', verbose: false }, { yes: true, dryRun: true });
+        expect(runSetup).not.toHaveBeenCalled();
+    });
+
+    it('installs the shell shortcut directly', async () => {
+        const command = createCommand({
+            args: { action: SetupAction.Shell },
+            flags: { yes: false, 'dry-run': true, verbose: false },
+        });
+
+        await command.run();
+
+        expect(setupShellShortcut).toHaveBeenCalledWith({ dryRun: true });
         expect(runSetup).not.toHaveBeenCalled();
     });
 });
